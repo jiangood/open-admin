@@ -1,0 +1,53 @@
+.login-page {
+  background-size: cover;
+  background-image: url("../asserts/login_bg.jpg");
+  background-repeat: no-repeat;
+  background-position: bottom;
+
+  width: 100vw;
+  height: 100vh;
+
+
+  .login-content {
+    padding: 40px;
+    background: #15184b44;
+    width: 350px;
+    position: fixed;
+    right: 15%;
+    top: 20%;
+
+    .ant-form-item-label > label{
+      color: white !important;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .login-page {
+    padding-top: 30%;
+
+    .login-content {
+      width: calc(100% - 100px);
+      padding: 24px;
+      position: static;
+      margin: 0 auto;
+    }
+  }
+}
+
+
+.login-form {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+
+
+
+.login-page h1 {
+  margin-bottom: 50px;
+  text-align: center;
+  color: white !important;
+  font-size: x-large;
+}
+

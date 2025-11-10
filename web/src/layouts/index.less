@@ -1,0 +1,45 @@
+html,body{
+  margin: 0;
+  padding: 0;
+}
+
+@media print {
+  .no-print {
+    display: none;
+  }
+}
+
+.hide-on-mobile{        //电脑端css
+}
+
+@media (max-width: 767px) {        //移动端css
+
+  .hide-on-mobile{
+    display: none !important;
+  }
+
+}
+
+.ant-modal-content {
+  padding: 0 !important;
+  .ant-modal-header{
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(0,0,0,.06) !important;
+    margin-bottom: 0 !important;
+
+    .ant-modal-title {
+      font-weight: 500 !important;
+
+    }
+  }
+
+  .ant-modal-body {
+    padding: 24px !important;
+  }
+  .ant-modal-footer {
+    padding: 10px 16px;
+    border-top: 1px solid rgba(0,0,0,.06) !important;
+  }
+
+}
+
