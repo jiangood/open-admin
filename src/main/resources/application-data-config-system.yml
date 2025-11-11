@@ -10,4 +10,10 @@ data:
     - id: sys.default.password
       label: 默认密码
       group-name: 登录配置
+    - id: sys.rsa.publicKey
+      label: RSA公钥
+      group-name: 登录配置
+    - id: sys.rsa.privateKey
+      label: RSA私钥
+      group-name: 登录配置
 

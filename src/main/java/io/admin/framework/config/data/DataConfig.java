@@ -27,7 +27,7 @@ public class DataConfig {
         DataProp prop = new DataProp();
         Map<String, MenuDefinition> menuMap = new HashMap<>();
         for (Resource configFile : configFiles) {
-            DataRoot menuRoot = this.parseOne(configFile);
+            DataRoot menuRoot = this.parseResource(configFile);
             configFile.getInputStream().close();
 
             DataProp data = menuRoot.getData();
@@ -100,10 +100,8 @@ public class DataConfig {
     }
 
     @SneakyThrows
-    private DataRoot parseOne(Resource resource) {
+    private DataRoot parseResource(Resource resource) {
         ObjectMapper om = new ObjectMapper(new YAMLFactory());
-        // 设置属性命名策略为 KEBAB_CASE (横线命名，如 groupName -> group-name)
-        // 这样在进行 JSON 序列化和反序列化时，就能支持横线命名
         om.setPropertyNamingStrategy(PropertyNamingStrategies.KEBAB_CASE);
 
         InputStream is = resource.getInputStream();

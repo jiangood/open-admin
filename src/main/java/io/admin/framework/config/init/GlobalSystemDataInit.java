@@ -80,11 +80,9 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     public void run(String... args) throws Exception {
         systemHookService.trigger(SystemHookEventType.BEFORE_DATA_INIT);
 
-        log.info("框架版本 {}", Build.getFrameworkVersion());
-        log.info("框架构建时间 {}", Build.getFrameworkBuildTime());
 
-        String cacheVersion = dbCacheDao.get(CACHE_KEY_FRAMEWORK_VERSION);
-        log.info("上次启动的框架版本号:{}", cacheVersion);
+
+
 
 
         log.info("执行初始化程序： {}", getClass().getName());
@@ -98,12 +96,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
         initUser(adminRole);
 
         initSysConfigDefaultValue();
-
-
-
-
-        log.info("数据初始化完成，缓存框架版本号");
-        dbCacheDao.set(CACHE_KEY_FRAMEWORK_VERSION, Build.getFrameworkVersion());
 
         log.info("系统初始化耗时：{}", System.currentTimeMillis() - time);
 
