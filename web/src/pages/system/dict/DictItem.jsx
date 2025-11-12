@@ -2,7 +2,7 @@ import {PlusOutlined} from '@ant-design/icons'
 import {Button, Col, Form, Input, InputNumber, Modal, Popconfirm, Row, Tag} from 'antd'
 import React from 'react'
 
-import {ButtonList, FieldRadioBoolean, HttpUtil, ProTable} from '@jian41/admin-framework'
+import {ButtonList, FieldRadioBoolean, HttpUtil, ProTable} from '@/framework'
 
 
 export default class extends React.Component {

@@ -11,7 +11,7 @@ import {
     ProTable
 } from "@/framework";
 import UserPerm from "./UserPerm";
-import {RoleTree} from "@jian41/admin-framework/src/components/RoleTree";
+import {RoleTree} from "@/framework";
 
 const baseTitle = "用户"
 const baseApi = 'sysUser/';

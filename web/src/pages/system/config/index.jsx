@@ -1,8 +1,7 @@
 import {Button, Form, Modal, Popconfirm} from 'antd'
 import React from 'react'
 
-import {ButtonList, HttpUtil, ProTable} from '@jian41/admin-framework'
-import {ValueType} from "@jian41/admin-framework/src/components/ValueType";
+import {ButtonList, HttpUtil, ProTable,ValueType} from '@/framework'
 
 
 export default class extends React.Component {
