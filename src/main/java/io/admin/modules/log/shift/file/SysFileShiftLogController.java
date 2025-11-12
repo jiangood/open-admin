@@ -12,7 +12,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.PrintWriter;
 
-
+/**
+ * 将日志文件显示出来
+ */
 @RestController
 @RequestMapping("admin/sys/log")
 public class SysFileShiftLogController {
@@ -41,11 +43,6 @@ public class SysFileShiftLogController {
         IOUtils.copy(is, out);
         is.close();
     }
-
-
-
-
-
 
 
 }

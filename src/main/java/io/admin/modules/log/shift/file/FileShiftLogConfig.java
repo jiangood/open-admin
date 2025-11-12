@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.File;
 
+@Getter
 @Configuration
 public class FileShiftLogConfig {
 
@@ -29,7 +30,6 @@ public class FileShiftLogConfig {
     public static final String DISCRIMINATOR_KEY = "FILE_LOG_ID";
     public static final String DEFAULT_PATH = "/data/logs";
 
-    @Getter
     @Value("${logging.file.path:" + DEFAULT_PATH + "}")
     private String logPath;
 
