@@ -1,19 +1,16 @@
 package io.admin.framework.data.domain;
 
 import com.fasterxml.jackson.annotation.*;
-import io.admin.common.utils.IdTool;
 import io.admin.common.utils.ann.Remark;
 import io.admin.framework.data.DBConstants;
 import io.admin.framework.data.id.CustomGenerateIdProperties;
-import io.admin.framework.data.id.CustomId;
-import io.admin.framework.data.id.GenerateUuid7;
+import io.admin.framework.data.id.ann.GenerateUuid7;
 import io.admin.framework.perm.SecurityUtils;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.io.Serializable;
 import java.util.Date;

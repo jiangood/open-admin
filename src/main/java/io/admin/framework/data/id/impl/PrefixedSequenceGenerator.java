@@ -17,7 +17,7 @@ import java.util.Properties;
  * 基于 SequenceStyleGenerator (TableGenerator的Hibernate增强版) 的自定义生成器。
  * 格式为: [自定义前缀] + [序列值]
  */
-public class PrefixedSequenceIdGenerator extends TableGenerator {
+public class PrefixedSequenceGenerator extends TableGenerator {
 
     public static final String TABLE_NAME = "sys_sequence_ids";
 

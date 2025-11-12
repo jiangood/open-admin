@@ -8,7 +8,7 @@ import org.hibernate.id.IdentifierGenerator;
  * 按时间排序的uuid
  * 使用了uuidv7
  */
-public class Uuid7Generator implements IdentifierGenerator {
+public class Uuid7IdGenerator implements IdentifierGenerator {
 
     @Override
     public Object generate(SharedSessionContractImplementor sharedSessionContractImplementor, Object o) {
