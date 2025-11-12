@@ -137,16 +137,15 @@ data:
               name: 账户管理
               path: /api
               icon: ApiOutlined
-            - id: apiAccountResource
-              name: 账户授权
-              icon: ApiOutlined
               perms:
-                - name: 列表
-                  perm: apiAccountResource:page
+                - name: 查看
+                  perm: apiAccount:view
                 - name: 保存
-                  perm: apiAccountResource:save
+                  perm: apiAccount:save
                 - name: 删除
-                  perm: apiAccountResource:delete
+                  perm: apiAccount:delete
+
+
             - id: apiResource
               name: 接口管理
               path: /api/resource
