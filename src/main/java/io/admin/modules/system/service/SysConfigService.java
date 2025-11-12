@@ -54,7 +54,7 @@ public class SysConfigService {
 
 
     public String get(String key) {
-        SysConfig sysConfig = sysConfigDao.findOne(key);
+        SysConfig sysConfig = sysConfigDao.findByCode(key);
         if (sysConfig == null) {
             return null;
         }
