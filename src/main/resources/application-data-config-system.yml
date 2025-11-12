@@ -1,19 +1,53 @@
 data:
   configs:
-    - id: email.from
-      label: 邮件发送地址
-      group-name: 邮件配置
-    - id: email.password
-      label: 邮件密码
-      group-name: 邮件配置
+    - group-name: 邮件配置
+      children:
+        - id: email.from
+          name: 邮件发送账号
+        - id: email.pass
+          name: 邮件发送密码
+    - group-name: 网站配置
+      children:
+        - id: sys.siteInfo.captcha
+          name: 开启验证码
+          value-type: boolean
+        - id: sys.siteInfo.captchaType
+          name: 验证码类型
+          description: random,math
+        - id: sys.siteInfo.copyright
+          name: 版权信息
+        - id: sys.siteInfo.loginBackground
+          name: 登录背景图
+        - id: sys.siteInfo.loginBoxBottomTi
+          name: 登录框下面的提示
+          description: 当前非涉密网络，严禁传输处理涉密信息
+        - id: sys.siteInfo.logo
+          name: 站点logo
+          value-type: img
+        - id: sys.siteInfo.title
+          name: 站点标题
+        - id: sys.siteInfo.waterMark
+          name: 开启水印
+          value-type: boolean
+          description: 在所有页面增加水印
 
-    - id: sys.default.password
-      label: 默认密码
-      group-name: 登录配置
-    - id: sys.rsa.publicKey
-      label: RSA公钥
-      group-name: 登录配置
-    - id: sys.rsa.privateKey
-      label: RSA私钥
-      group-name: 登录配置
+    - group-name: 系统配置
+      children:
+        - id: sys.baseUrl
+          name: 请求基础地址
+          description: 非必填，可用于拼接完整请求地址
+        - id: sys.default.password
+          name: 默认密码
+        - id: sys.jwtSecret
+          name: jwt密码
+        - id: sys.printAssertException
+          name: 是否打印Assert方法抛出的异常
+          value-type: boolean
+        - id: sys.rsa.privateKey
+          name: RSA私钥
+          value-type: boolean
+        - id: sys.rsa.publicKey
+          name: RSA公钥
+          value-type: boolean
+
 

@@ -1,6 +1,7 @@
 package io.admin.framework.config.data;
 
 import io.admin.framework.config.data.sysconfig.ConfigDefinition;
+import io.admin.framework.config.data.sysconfig.ConfigGroupDefinition;
 import io.admin.framework.config.data.sysmenu.MenuBadge;
 import io.admin.framework.config.data.sysmenu.MenuDefinition;
 import lombok.Data;
@@ -19,5 +20,5 @@ public class DataProp {
 
     private List<MenuBadge> badges = new ArrayList<>();
 
-    private List<ConfigDefinition> configs = new ArrayList<>();
+    private List<ConfigGroupDefinition> configs = new ArrayList<>();
 }

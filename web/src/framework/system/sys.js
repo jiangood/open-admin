@@ -11,8 +11,7 @@ export const SysUtil = {
      * @returns {string}
      */
     getServerUrl() {
-        const serverUrl = process.env.API_BASE_URL
-        return serverUrl
+        return "/admin/"
     },
 
     /**

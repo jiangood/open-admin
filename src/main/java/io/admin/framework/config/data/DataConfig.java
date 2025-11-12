@@ -71,6 +71,10 @@ public class DataConfig {
         // 存储扁平菜单
         Collection<MenuDefinition> values = menuMap.values();
         prop.setMenus(new ArrayList<>(values));
+
+        // 系统配置
+
+
         return prop;
     }
 
