@@ -3,16 +3,14 @@ package io.admin.framework.config.init;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
-import io.admin.Build;
 import io.admin.common.utils.PasswordUtils;
 import io.admin.framework.config.SysProp;
 import io.admin.framework.dict.DictAnnHandler;
 import io.admin.framework.dict.DictFieldAnnHandler;
-import io.admin.modules.system.ConfigTool;
+import io.admin.modules.system.ConfigConsts;
 import io.admin.modules.system.dao.SysConfigDao;
 import io.admin.modules.system.dao.SysUserDao;
 import io.admin.modules.system.entity.DataPermType;
-import io.admin.modules.system.entity.SysConfig;
 import io.admin.modules.system.entity.SysRole;
 import io.admin.modules.system.entity.SysUser;
 import io.admin.modules.system.service.SysRoleService;
@@ -23,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 /**
  * 系统数据初始化
@@ -105,8 +102,8 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     private void initSysConfigDefaultValue() {
         log.info("初始化系统配置的默认值");
         RSA rsa = SecureUtil.rsa();
-        sysConfigDao.setDefaultValue(ConfigTool.RSA_PUBLIC_KEY, rsa.getPublicKeyBase64()); // 放到siteInfo, 前端可获取
-        sysConfigDao.setDefaultValue( ConfigTool.RSA_PRIVATE_KEY, rsa.getPrivateKeyBase64());
+        sysConfigDao.setDefaultValue(ConfigConsts.RSA_PUBLIC_KEY, rsa.getPublicKeyBase64()); // 放到siteInfo, 前端可获取
+        sysConfigDao.setDefaultValue( ConfigConsts.RSA_PRIVATE_KEY, rsa.getPrivateKeyBase64());
         sysConfigDao.setDefaultValue("sys.default.password", PasswordUtils.random());
     }
 

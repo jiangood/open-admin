@@ -9,7 +9,7 @@ import cn.hutool.crypto.asymmetric.RSA;
 import io.admin.common.utils.JsonUtils;
 import io.admin.common.utils.PasswordUtils;
 import io.admin.modules.common.dto.LoginRequest;
-import io.admin.modules.system.ConfigTool;
+import io.admin.modules.system.ConfigConsts;
 import io.admin.framework.config.SysProp;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,8 +68,8 @@ public class AuthService {
 
 
         // 解密前端密码
-        String rsaPrivateKey = ConfigTool.get(ConfigTool.RSA_PRIVATE_KEY);
-        String rsaPublicKey = ConfigTool.get(ConfigTool.RSA_PUBLIC_KEY);
+        String rsaPrivateKey = ConfigConsts.get(ConfigConsts.RSA_PRIVATE_KEY);
+        String rsaPublicKey = ConfigConsts.get(ConfigConsts.RSA_PUBLIC_KEY);
         RSA rsa = SecureUtil.rsa(rsaPrivateKey, rsaPublicKey);
         password = rsa.decryptStr(password, KeyType.PrivateKey);
 

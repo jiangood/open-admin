@@ -2,20 +2,20 @@
 package io.admin.modules.system.controller;
 
 
-import io.admin.framework.config.argument.RequestBodyKeys;
 import io.admin.framework.data.query.JpaQuery;
+import io.admin.framework.log.Log;
+import io.admin.modules.system.dto.response.SysConfigResponse;
 import io.admin.modules.system.service.SysConfigService;
 import io.admin.framework.config.security.HasPermission;
 import io.admin.common.dto.AjaxResult;
 import io.admin.modules.system.entity.SysConfig;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.util.Assert;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.Resource;
 
+import java.util.List;
 
 
 /**
@@ -32,27 +32,21 @@ public class SysConfigController  {
 
   @HasPermission("sysConfig:page")
   @RequestMapping("page")
-  public AjaxResult page(@PageableDefault(sort = {"id"}) Pageable pageable) throws Exception {
-    JpaQuery<SysConfig> q= new JpaQuery<>();
-    Page<SysConfig> page = service.findAllByRequest(q, pageable);
+  public AjaxResult page(String searchText) throws Exception {
+    List<SysConfigResponse> list = service.findAllByRequest(searchText);
 
-    return AjaxResult.ok().data(page);
+    return AjaxResult.ok().data(new PageImpl<>(list));
   }
 
+  @Log("修改系统配置")
   @HasPermission("sysConfig:save")
   @PostMapping("save")
-  public AjaxResult save(@RequestBody SysConfig param, RequestBodyKeys updateFields) throws Exception {
-    Assert.state(!param.isNew(), "仅限修改");
-    SysConfig result = service.saveOrUpdateByRequest(param,updateFields);
-    return AjaxResult.ok().data( result.getId()).msg("保存成功");
+  public AjaxResult save(@RequestBody SysConfig param) throws Exception {
+    service.save(param);
+    return AjaxResult.ok().msg("保存成功");
   }
 
-  @HasPermission("sysConfig:delete")
-  @RequestMapping("delete")
-  public AjaxResult delete(String id) {
-    service.deleteByRequest(id);
-    return AjaxResult.ok();
-  }
+
 
 
 }

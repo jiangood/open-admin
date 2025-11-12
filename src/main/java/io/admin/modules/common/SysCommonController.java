@@ -5,7 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import io.admin.modules.common.dto.response.CheckLoginResponse;
-import io.admin.modules.system.ConfigTool;
+import io.admin.modules.system.ConfigConsts;
 import io.admin.modules.system.dto.mapper.MenuMapper;
 import io.admin.modules.system.dto.response.MenuResponse;
 import io.admin.modules.system.dto.response.UserResponse;
@@ -70,7 +70,7 @@ public class SysCommonController {
             siteInfo.remove("loginBackground");
         }
 
-        String publicKey = sysConfigService.getStr(ConfigTool.RSA_PUBLIC_KEY);
+        String publicKey = sysConfigService.get(ConfigConsts.RSA_PUBLIC_KEY);
         Assert.notNull(publicKey, "服务未初始化密钥信息，无法登录");
 
         siteInfo.put("rsaPublicKey", publicKey);

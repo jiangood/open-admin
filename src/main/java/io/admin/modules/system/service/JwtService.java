@@ -111,7 +111,7 @@ public class JwtService {
 
     public byte[] getJwtSecret() {
         if (jwtSecretBytes == null) {
-            String jwtSecret = sysConfigService.getStr(CONFIG_KEY);
+            String jwtSecret = sysConfigService.get(CONFIG_KEY);
             Assert.hasText(jwtSecret, "未配置系统参数" + CONFIG_KEY);
             jwtSecretBytes = jwtSecret.trim().getBytes();
 

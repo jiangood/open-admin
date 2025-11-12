@@ -20,8 +20,8 @@ public class EmailService  {
 
 
     public void send(String to,String title, String content, File... files) {
-        String from = sysConfigService.getStr("email.from");
-        String pass = sysConfigService.getStr("email.pass");
+        String from = sysConfigService.get("email.from");
+        String pass = sysConfigService.get("email.pass");
 
 
         MailAccount account = new MailAccount();

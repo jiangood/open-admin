@@ -1,18 +1,22 @@
 
 package io.admin.modules.system.service;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import io.admin.common.utils.RequestTool;
-import io.admin.framework.data.service.BaseService;
+import io.admin.framework.config.data.DataProp;
+import io.admin.framework.config.data.sysconfig.ConfigDefinition;
+import io.admin.framework.config.data.sysconfig.ConfigGroupDefinition;
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.modules.system.dao.SysConfigDao;
+import io.admin.modules.system.dto.response.SysConfigResponse;
 import io.admin.modules.system.entity.SysConfig;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,112 +24,49 @@ import java.util.Map;
 
 @Service
 @Slf4j
-public class SysConfigService extends BaseService<SysConfig> {
+public class SysConfigService {
 
     @Resource
     private SysConfigDao sysConfigDao;
 
+    @Resource
+    private DataProp dataProp;
+
 
     public String getBaseUrl() {
-        return this.getStr("sys.baseUrl");
-    }
-
-    /**
-     * 获取基础路径，如果系统配置没有，则从request解析
-     * @param request
-     * @return
-     */
-    public String getOrParseBaseUrl(HttpServletRequest request) {
-        String baseUrl = getBaseUrl();
-        if (StrUtil.isBlank(baseUrl)) {
-            baseUrl = RequestTool.getBaseUrl(request);
+        String url = this.get("sys.baseUrl");
+        if (StrUtil.isEmpty(url)) {
+            url = RequestTool.getBaseUrl(RequestTool.currentRequest());
         }
-        return baseUrl;
+        return url;
     }
-
-
 
 
     public boolean getBoolean(String key) {
-        validateKey(key);
-        Object value = this.getValue(key);
-        return (boolean) value;
+        Object value = this.get(key);
+        return Convert.toBool(value);
     }
+
     public int getInt(String key) {
-        validateKey(key);
-        Object value = this.getValue(key);
-     return   Integer.parseInt(value.toString());
+        Object value = this.get(key);
+        return Convert.toInt(value);
     }
 
 
-
-    public Object getValue(String key) {
-        validateKey(key);
+    public String get(String key) {
         SysConfig sysConfig = sysConfigDao.findOne(key);
-        Assert.notNull(sysConfig, "系统配置不存在" + key);
-        return parseFinalValue(sysConfig);
-    }
-
-    public Object getValueQuietly(String key) {
-        validateKey(key);
-        SysConfig sysConfig = sysConfigDao.findOne(key);
-        if(sysConfig == null){
+        if (sysConfig == null) {
             return null;
         }
-        return parseFinalValue(sysConfig);
+        return sysConfig.getValue();
     }
 
-
-
-    public String getStr(String key) {
-        validateKey(key);
-        SysConfig sysConfig = sysConfigDao.findOne(key);
-        if (sysConfig != null) {
-            return (String) parseFinalValue(sysConfig);
-        }
-        return null;
-    }
-    public void setBoolean(String key, boolean b) {
-        SysConfig sysConfig = sysConfigDao.findOne(key);
-        Assert.notNull(sysConfig, "配置不存在" + key);
-        sysConfig.setValue(String.valueOf(b));
-        sysConfigDao.save(sysConfig);
-    }
-
-
-    public void setStr(String key, String value) {
-        SysConfig sysConfig = sysConfigDao.findOne(key);
-        if(sysConfig == null){
-            sysConfig = new SysConfig();
-            sysConfig.setId(key);
-        }
-        sysConfig.setValue(value);
-        sysConfigDao.save(sysConfig);
-    }
-
-    /**
-     * 判断某个key是否有已经配置了值（默认值不算）
-     * @return
-     */
-    public boolean isValueSet(String... keys) {
-        JpaQuery<SysConfig> q = new JpaQuery<>();
-        q.in("id", keys);
-        q.isNotNull(SysConfig.Fields.value);
-        long count = sysConfigDao.count(q);
-        return count == keys.length;
-    }
-
-
-
-    private static void validateKey(String key) {
-       // Assert.state(Validator.isLetter(key) , "键必须已sys.开头");
-    }
 
     /**
      * 获取默认密码
      */
     public String getDefaultPassWord() {
-        return getStr("sys.default.password");
+        return get("sys.default.password");
     }
 
 
@@ -153,19 +94,50 @@ public class SysConfigService extends BaseService<SysConfig> {
         for (SysConfig sysConfig : list) {
             String k = sysConfig.getId();
             k = k.replace(prefix, "");
-            Object v = parseFinalValue(sysConfig);
+            Object v = sysConfig.getValue();
             map.put(k, v);
         }
 
         return map;
     }
 
-    // 解析最终的值， 优先级 数据库value >  默认值
-    private static Object parseFinalValue(SysConfig sysConfig) {
-        String v = sysConfig.getValue();
 
-        return v;
+    @Transactional
+    public void save(SysConfig cfg) {
+        SysConfig db = sysConfigDao.findOne(cfg.getId());
+        db.setValue(cfg.getValue());
+
     }
 
+    public List<SysConfigResponse> findAllByRequest(String searchText) {
+        List<SysConfigResponse> responseList = new ArrayList<>();
 
+        List<SysConfig> configList = sysConfigDao.findAll();
+        for (ConfigGroupDefinition config : dataProp.getConfigs()) {
+            SysConfigResponse response = new SysConfigResponse();
+            response.setId(config.getGroupName());
+            response.setName(config.getGroupName());
+            response.setChildren(new ArrayList<>());
+
+            for (ConfigDefinition child : config.getChildren()) {
+                if(!StrUtil.containsAll(searchText, child.getName(), child.getDescription(), child.getId())) {
+                    continue;
+                }
+                SysConfigResponse r = new SysConfigResponse();
+                r.setId(child.getId());
+                r.setName(child.getName());
+                r.setDescription(child.getDescription());
+                response.getChildren().add(r);
+
+                for (SysConfig c : configList) {
+                    if (c.getId().equals(child.getId())) {
+                        r.setValue(c.getValue());
+                        break;
+                    }
+                }
+            }
+        }
+
+        return responseList;
+    }
 }

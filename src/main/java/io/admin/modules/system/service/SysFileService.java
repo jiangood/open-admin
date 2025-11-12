@@ -70,7 +70,7 @@ public class SysFileService {
     }
 
     public String getPreviewUrl(String id, HttpServletRequest request) {
-        String baseUrl = sysConfigService.getOrParseBaseUrl(request);
+        String baseUrl = sysConfigService.getBaseUrl();
 
         return baseUrl + getPreviewUrl(id);
     }
@@ -86,7 +86,7 @@ public class SysFileService {
     }
 
     public String getDownloadUrl(String fileId, HttpServletRequest request) {
-        String baseUrl = sysConfigService.getOrParseBaseUrl(request);
+        String baseUrl = sysConfigService.getBaseUrl();
 
         return baseUrl + DOWNLOAD_URL_PATTERN.replace("{id}", fileId);
     }
