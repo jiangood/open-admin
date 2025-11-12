@@ -22,4 +22,9 @@ public class TestEntity1  extends BaseNoIdEntity {
     private String id;
 
     private String name;
+
+    @Override
+    public boolean isNew() {
+        return getId() == null;
+    }
 }

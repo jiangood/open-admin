@@ -2,7 +2,7 @@
 package io.admin.modules.system.entity;
 
 import io.admin.framework.data.DBConstants;
-import io.admin.framework.data.domain.BaseIdEntity;
+import io.admin.framework.data.domain.BaseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +20,7 @@ import java.util.Date;
 @Entity
 @FieldNameConstants
 @Table(name = "sys_log",indexes = {@Index(columnList = "operation" )})
-public class SysLog extends BaseIdEntity {
+public class SysLog extends BaseEntity {
 
     @Column(nullable = false, length = 100)
     private String operation;

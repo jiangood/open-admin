@@ -1,31 +1,19 @@
 package io.admin.framework.data.service;
 
 
-import io.admin.framework.data.domain.PersistEntity;
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.repository.BaseDao;
-import io.admin.common.dto.Option;
-import jakarta.persistence.Transient;
-import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Persistable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
-public abstract class BaseService<T extends PersistEntity> {
+public abstract class BaseService<T extends Persistable<String>> {
 
 
     @Autowired

@@ -1,6 +1,5 @@
 package io.admin.framework.persistence;
 
-import io.admin.framework.data.domain.PersistEntity;
 import io.admin.framework.data.service.BaseService;
 import io.admin.common.dto.AjaxResult;
 import io.admin.framework.config.argument.RequestBodyKeys;
@@ -8,6 +7,7 @@ import io.admin.framework.data.query.JpaQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
  * @deprecated 无法处理复杂情况下的参数解析
  **/
 @Deprecated
-public abstract class BaseController<T extends PersistEntity> {
+public abstract class BaseController<T extends Persistable<String>> {
 
     @Autowired
     private BaseService<T> service;

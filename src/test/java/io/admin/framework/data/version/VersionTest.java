@@ -15,12 +15,12 @@ public class VersionTest {
 
     @Test
     public void test() {
-        SysUser user = sysUserDao.findOne("admin");
+       /* SysUser user = sysUserDao.findOne("admin");
         System.out.println("当前版本："+user.getLockVersion());
         user.setExtra3(RandomUtil.randomString(12));
         sysUserDao.save(user);
         System.out.println("修改后版本："+user.getLockVersion());
-
+*/
 
     }
 

@@ -3,7 +3,6 @@ package io.admin.framework.data.domain;
 import com.fasterxml.jackson.annotation.*;
 import io.admin.common.utils.ann.Remark;
 import io.admin.framework.data.DBConstants;
-import io.admin.framework.data.id.CustomGenerateIdProperties;
 import io.admin.framework.data.id.ann.GenerateUuid7;
 import io.admin.framework.perm.SecurityUtils;
 import jakarta.persistence.*;
@@ -11,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.domain.Persistable;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -22,7 +23,8 @@ import java.util.Map;
 @MappedSuperclass
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"}, ignoreUnknown = true)
 @EqualsAndHashCode(of = "id")
-public abstract class BaseEntity implements PersistEntity, Serializable {
+@EntityListeners(AuditingEntityListener.class)
+public abstract class BaseEntity implements Persistable<String>, Serializable {
 
     public static final String FIELD_ID = "id";
     public static final String FIELD_CREATE_TIME = "createTime";
@@ -67,9 +69,9 @@ public abstract class BaseEntity implements PersistEntity, Serializable {
     private String updateUser;
 
     /// ===== 乐观锁字段 =====
-    @Version
+/*    @Version
     @Column(columnDefinition = "bigint default 0") // 建议：仅用于提示数据库建表时设置默认值
-    private Integer lockVersion;
+    private Integer lockVersion;*/
 
 
     /**
@@ -114,9 +116,9 @@ public abstract class BaseEntity implements PersistEntity, Serializable {
             String userId = SecurityUtils.getSubject().getId();
             this.updateUser = this.createUser = userId;
         }
-        if (this.lockVersion == null) {
-            this.lockVersion = 0;
-        }
+//        if (this.lockVersion == null) {
+//            this.lockVersion = 0;
+//        }
     }
 
     /**
@@ -144,20 +146,7 @@ public abstract class BaseEntity implements PersistEntity, Serializable {
     }
 
 
-    /**
-     * 新增时，自定义ID。
-     */
-    @JsonIgnore
-    @Transient
-    private String _tempId;
 
 
-    // 动态生成的自定义Id
-    @Transient
-    @JsonIgnore
-    @Override
-    public String customGenerateId(CustomGenerateIdProperties properties) {
-        return null;
-    }
 
 }

@@ -1,21 +1,17 @@
 package io.admin.framework.data.id.impl;
 
 import cn.hutool.core.util.StrUtil;
-import io.admin.common.utils.IdTool;
-import io.admin.framework.data.id.CustomId;
 import io.admin.framework.data.id.ann.GeneratePrefixedSequence;
 import org.hibernate.MappingException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.OptimizableGenerator;
 import org.hibernate.id.enhanced.TableGenerator;
-import org.hibernate.id.factory.spi.CustomIdGeneratorCreationContext;
 import org.hibernate.service.ServiceRegistry;
 import org.hibernate.type.StandardBasicTypeTemplate;
 import org.hibernate.type.Type;
 import org.hibernate.type.descriptor.java.LongJavaType;
 import org.hibernate.type.descriptor.jdbc.IntegerJdbcType;
 
-import java.lang.reflect.Member;
 import java.util.Properties;
 
 /**

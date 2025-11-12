@@ -1,7 +1,6 @@
 package io.admin.framework.data.repository;
 
 import cn.hutool.core.bean.BeanUtil;
-import io.admin.framework.data.domain.PersistEntity;
 import io.admin.framework.data.query.ExpressionTool;
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.query.StatField;
@@ -33,7 +32,7 @@ import java.util.function.Function;
  * 基础dao
  * BaseDao的查询条件不依赖JpaQuery
  */
-public class BaseDao<T extends PersistEntity> {
+public class BaseDao<T extends Persistable<String>> {
 
     @Getter
     @PersistenceContext
@@ -282,16 +281,6 @@ public class BaseDao<T extends PersistEntity> {
         // 新增
         if (this.entityInformation.isNew(entity)) {
             this.entityManager.persist(entity);
-            return entity;
-        }
-
-        // 有id时也有可能时新增，即新增时指定id
-        // 例如json文件初始化到数据库时
-        String id = entity.getId();
-        if (findById(id) == null) {
-            entity.set_tempId(id);
-            entity.setId(null);
-            entityManager.persist(entity);
             return entity;
         }
 
