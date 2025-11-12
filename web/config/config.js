@@ -1,5 +1,5 @@
 import {defineConfig} from 'umi';
-import {defaultConfig,frameworkConfig} from "./defaultConfig";
+import {defaultConfig} from "./defaultConfig";
 
 
 
@@ -7,5 +7,4 @@ import {defaultConfig,frameworkConfig} from "./defaultConfig";
 
 export default defineConfig({
     ...defaultConfig,
-    ...frameworkConfig
 });

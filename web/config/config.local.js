@@ -3,11 +3,8 @@
 
 
 import {defineConfig} from 'umi';
-import {frameworkConfig, defaultConfigLocal} from "./defaultConfig";
+import { defaultConfigLocal} from "./defaultConfig";
 
 
-let config = {
-    ...defaultConfigLocal,
-    ...frameworkConfig,
-};
-export default defineConfig(config);
+
+export default defineConfig(defaultConfigLocal);
