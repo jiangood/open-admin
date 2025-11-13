@@ -26,8 +26,8 @@ export default class extends React.Component {
                     {title: "-", dataIndex: 'option',
                         render(_,record){
                             return <ButtonList >
-                                <a href={record.previewUrl} target='_blank'>预览</a>
-                                <a href={record.designerUrl} target='_blank'>设计</a>
+                                <Button size='small' perm='ureport:view' href={record.previewUrl} target='_blank'>预览</Button>
+                                <Button size='small' perm='ureport:design' href={record.designerUrl} target='_blank'>设计</Button>
                             </ButtonList>
                         }},
                 ]}></ProTable>

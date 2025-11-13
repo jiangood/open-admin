@@ -8,5 +8,7 @@ data:
           seq: 101
           path: /ureport
           perms:
-            - perm: ureport
-              name: 报表管理
+            - perm: ureport:view
+              name: 查看
+            - perm: ureport:design
+              name: 设计
