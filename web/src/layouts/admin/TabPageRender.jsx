@@ -66,7 +66,7 @@ class TabPageRender extends React.Component {
         if (!label) {
             const menu = this.props.pathMenuMap[path]
             if (menu) {
-                return menu.label
+                return menu.name
             }
         }
 

@@ -58,7 +58,7 @@ export default class extends React.Component {
             let pathname = PageUtil.currentPathname();
 
             TreeUtil.walk(menuTree, (item) => {
-                item.icon = <NamedIcon name={item.icon} style={{fontSize: 12}}/>
+                item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 12}}/>
             })
 
             if (pathname !== "" && pathname !== "/") {
@@ -142,6 +142,7 @@ export default class extends React.Component {
                               history.push(path)
                           }}
                           selectedKeys={[this.state.currentMenuKey]}
+                          inlineIndent={16}
                     >
                     </Menu>
 
