@@ -1,4 +1,4 @@
-package io.admin.modules.report.controller;
+package io.admin.modules.ureport.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 简单示例
  */
-@RequestMapping("ureport")
+@RequestMapping("admin/ureport")
 @RestController
 public class UReportController {
 

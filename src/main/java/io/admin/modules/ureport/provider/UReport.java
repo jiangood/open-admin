@@ -1,4 +1,4 @@
-package io.admin.modules.report.provider;
+package io.admin.modules.ureport.provider;
 
 import io.admin.framework.data.DBConstants;
 import io.admin.framework.data.domain.BaseEntity;

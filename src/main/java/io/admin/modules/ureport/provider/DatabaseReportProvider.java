@@ -1,4 +1,4 @@
-package io.admin.modules.report.provider;
+package io.admin.modules.ureport.provider;
 
 import cn.hutool.core.util.StrUtil;
 import com.bstek.ureport.provider.report.ReportFile;

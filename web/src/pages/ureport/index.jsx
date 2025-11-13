@@ -19,9 +19,9 @@ export default class extends React.Component {
 
                 request={(params) => HttpUtil.pageData('admin/ureport/page', params)}
                 columns={[
+                    {title: "文件名称", dataIndex: 'name'},
                     {title: "存储器", dataIndex: 'providerName'},
                     {title: "存储器前缀", dataIndex: 'providerPrefix'},
-                    {title: "文件名称", dataIndex: 'name'},
                     {title: "更新时间", dataIndex: 'updateDate'},
                     {title: "-", dataIndex: 'option',
                         render(_,record){

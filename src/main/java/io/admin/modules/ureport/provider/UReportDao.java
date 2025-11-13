@@ -1,4 +1,4 @@
-package io.admin.modules.report.provider;
+package io.admin.modules.ureport.provider;
 
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.repository.BaseDao;
