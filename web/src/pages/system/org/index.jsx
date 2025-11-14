@@ -24,7 +24,7 @@ export default class extends React.Component {
 
         params: {
             onlyShowEnabled: true,
-            onlyShowUnit: true,
+            onlyShowUnit: false,
             searchText: null
         },
 
@@ -43,7 +43,7 @@ export default class extends React.Component {
             this.setState({treeLoading: true})
 
         const {params} = this.state
-        HttpUtil.get('admin/sysOrg/leftTree', params).then(rs => {
+        HttpUtil.get('admin/sysOrg/tree', params).then(rs => {
             let treeData = rs;
             this.setState({treeData})
         }).finally(() => {
@@ -199,7 +199,7 @@ export default class extends React.Component {
                             <Form.Item noStyle name='id'>
                             </Form.Item>
                             <Form.Item label='父节点' name='pid'>
-                                <FieldRemoteTreeSelect url='admin/sysOrg/allTree'/>
+                                <FieldRemoteTreeSelect url='admin/sysOrg/tree'/>
                             </Form.Item>
                             <Form.Item label='名称' name='name' rules={[{required: true}]}>
                                 <Input />

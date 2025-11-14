@@ -39,7 +39,7 @@ public class SysOrgController {
      * @return
      */
     @HasPermission("sysOrg:view")
-    @RequestMapping("leftTree")
+    @RequestMapping("tree")
     public AjaxResult leftTree(boolean onlyShowEnabled, boolean onlyShowUnit, String searchText) {
         JpaQuery<SysOrg> q = new JpaQuery<>();
 
@@ -57,6 +57,8 @@ public class SysOrgController {
 
         return AjaxResult.ok().data(list2Tree(list));
     }
+
+
 
 
     @Log("机构-保存")
@@ -115,17 +117,6 @@ public class SysOrgController {
         return AjaxResult.ok().msg("排序成功");
     }
 
-    /***
-     * 机构表单请求的树
-     * @return
-     */
-    @HasPermission("sysOrg:save")
-    @GetMapping("tree4Form")
-    public AjaxResult tree4Form() {
-        List<SysOrg> list = this.sysOrgService.findAll();
-
-        return AjaxResult.ok().data(list2Tree(list));
-    }
 
 
     @GetMapping("allTree")
