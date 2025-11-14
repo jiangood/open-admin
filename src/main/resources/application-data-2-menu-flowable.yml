@@ -10,14 +10,16 @@ data:
             - id: flowableModel
               name: 模型管理
               path: /flowable
-              refresh-on-tab-click: true
+
             - id: flowableMonitor
               name: 流程监控
+              path: /flowable/monitor
 
     - name: 我的任务
       id: flowableTask
       path: /flowable/task
       seq: -1
+      refresh-on-tab-click: true
       perms:
         - perm: flowableTask
           name: 任务管理
