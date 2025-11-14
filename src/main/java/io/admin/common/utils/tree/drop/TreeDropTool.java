@@ -30,6 +30,12 @@ public class TreeDropTool {
         DropResult result = new DropResult();
         result.parentKey = e.isDropToGap() ? dropNode.getParentKey() : dropNode.getKey();
 
+        if(!e.isDropToGap() && e.getDropPositionEnum() == DropEvent.DropPositionEnum.INSIDE){
+            return result;
+        }
+
+
+
         TreeNodeItem parentNode = keyMap.get(result.getParentKey());
         List<TreeNodeItem> siblings = parentNode != null ? parentNode.getChildren() : tree; // 如果父节点为空，说明拖拽到了根节点平级了
 
