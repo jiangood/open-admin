@@ -30,7 +30,7 @@ public class TreeDropTool {
         result.parentKey = e.isDropToGap() ? dropNode.getParentKey() : dropNode.getKey();
 
         TreeNodeItem parentNode = keyMap.get(result.getParentKey());
-        List<TreeNodeItem> siblings = keyMap != null ? parentNode.getChildren() : tree; // 如果父节点为空，说明拖拽到了根节点平级了
+        List<TreeNodeItem> siblings = parentNode != null ? parentNode.getChildren() : tree; // 如果父节点为空，说明拖拽到了根节点平级了
 
 
         List<String> keys = new ArrayList<>();
@@ -43,17 +43,20 @@ public class TreeDropTool {
 
 
     public static List<String> resort(List<String> list, DropEvent e) {
-        int dropPosition = e.getDropPosition();
-        String key = e.getDragKey();
-        if (dropPosition == -1) {
-            list.remove(key);
-            list.add(0, key);
+        String k = e.getDragKey();
+        if (e.getDropPosition() == DropEvent.DropPosition.INSIDE) {
             return list;
         }
 
+        list.remove(k);
+        int index = list.indexOf(e.getDropKey());
+        if (e.getDropPosition() == DropEvent.DropPosition.BOTTOM) {
+            index++;
+        }
+        list.add(index, k);
+
         return list;
     }
-
 
 
 }

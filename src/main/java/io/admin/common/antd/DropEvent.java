@@ -25,8 +25,14 @@ public class DropEvent {
 
     boolean dropToGap; // 两个节点的关系，true表示平级
 
-    // 放置的顺序， -1 表示最前面
-    int dropPosition;
+    //  the drop position relative to the drop node, inside 0, top -1, bottom 1
+    // 前端转换后的相对位置
+    DropPosition dropPosition;
 
 
+    public enum DropPosition {
+        INSIDE,
+        TOP,
+        BOTTOM
+    }
 }

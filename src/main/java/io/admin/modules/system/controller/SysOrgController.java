@@ -125,7 +125,7 @@ public class SysOrgController {
 
         DropResult dropResult = TreeDropTool.onDrop(e, tree);
 
-       // sysOrgService.sort(e.getDragKey(),dropResult);
+        sysOrgService.sort(e.getDragKey(),dropResult);
 
 
         return AjaxResult.ok().msg("排序成功");

@@ -247,11 +247,15 @@ export default class extends React.Component {
         </Page>
     }
 
-    onDrop = ({dragNode, dropPosition, dropToGap, node}) => {
+    onDrop = (e) => {
+        const {dragNode,  dropToGap, node} = e;
         const dropKey = node.key;
         const dragKey = dragNode.key;
+
+        const dropPos = e.node.pos.split('-');
+        const dropPosition = e.dropPosition - Number(dropPos[dropPos.length - 1]); // the drop position relative to the drop node, inside 0, top -1, bottom 1
+
         console.log(dragNode.title, '->', node.title, 'dropToGap:', dropToGap, "dropPosition:" ,dropPosition)
-        console.log('"%s","%s",%s,%s', dragNode.title, node.title,dropToGap,dropPosition);
         HttpUtil.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}).then(this.loadTree)
     };
 }
