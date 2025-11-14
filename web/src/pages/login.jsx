@@ -17,9 +17,17 @@ export default class login extends React.Component {
         siteInfo: {},
         random:Math.random()
     }
+    redirect ='/';
 
     async componentDidMount() {
         console.log('渲染登录页面')
+        const redirect = PageUtil.currentParams()['redirect']
+        if(redirect){
+            console.log('重定向参数',redirect)
+           this.redirect = decodeURIComponent(redirect)
+        }
+
+
         {
             // 内部系统登录
             let token = PageUtil.currentParams().token
@@ -56,8 +64,7 @@ export default class login extends React.Component {
 
         HttpUtil.postForm('admin/auth/login', values).then(rs => {
             console.log('登录结果', rs)
-            const redirect = PageUtil.currentParams()['redirect']
-            history.push(redirect || '/')
+            history.push(this.redirect)
         }).catch(e=>{
             console.log('登录错误', e)
         })

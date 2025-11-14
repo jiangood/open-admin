@@ -14,6 +14,7 @@ export class PageUtil {
     static currentParams(){
         let url = window.location.href
 
+        debugger
 
         let hasQuery = url.indexOf('?') > 0
         if (!hasQuery) {

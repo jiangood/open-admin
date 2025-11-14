@@ -8,7 +8,9 @@ const DICT_INFO_KEY = "dictInfo"
 export const SysUtil = {
 
     redirectToLogin(){
-        history.push('/login?redirect='+ PageUtil.currentUrl())
+        let url = PageUtil.currentUrl();
+        url =encodeURIComponent(url)
+        history.push('/login?redirect='+ url)
     },
 
 
