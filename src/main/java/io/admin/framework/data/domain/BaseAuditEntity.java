@@ -41,7 +41,5 @@ public abstract class BaseAuditEntity implements Persistable<String> {
 
 
 
-    // 乐观锁, 防止并发更新错误
-    @Version
-    private Long lockVersion;
+
 }

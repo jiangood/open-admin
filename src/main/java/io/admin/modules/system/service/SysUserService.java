@@ -187,8 +187,7 @@ public class SysUserService extends BaseService<SysUser> {
             input.setPassword(PasswordUtils.encode(password));
         }
 
-        super.saveOrUpdateByRequest(input, updateKeys);
-        return null;
+      return   super.saveOrUpdateByRequest(input, updateKeys);
     }
 
 

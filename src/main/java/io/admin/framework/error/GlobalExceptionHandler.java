@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import io.admin.common.utils.ExceptionToMessageUtils;
 import io.admin.common.utils.HttpServletTool;
 import io.admin.common.dto.AjaxResult;
+import io.admin.framework.config.SysProp;
 import io.admin.modules.system.service.SysConfigService;
 import io.admin.framework.CodeException;
 import io.admin.framework.consts.AopSortConstant;
@@ -46,8 +47,9 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
 
+    @Resource
+    SysProp sysProp;
 
-    private Boolean isPrintExceptionForAssert;
 
     @Resource
     private SysConfigService sysConfigService;
@@ -126,14 +128,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public AjaxResult assertError(RuntimeException e) {
         log.error(">>> 业务异常，具体信息为：{}", e.getMessage());
-        if(isPrintExceptionForAssert == null){
-            isPrintExceptionForAssert = sysConfigService.getBoolean("sys.printAssertException");
-        }
-        if (isPrintExceptionForAssert) {
+        if(sysProp.isPrintException()){
             log.error("打印异常已开启,以下是异常详细信息", e);
         }
 
-        return AjaxResult.err().code(500).msg(e.getMessage());
+        return AjaxResult.err().msg(e.getMessage());
     }
 
 

@@ -16,4 +16,5 @@ logging:
 sys:
   reset-admin-pwd: okjt123_
   captcha: false
+  admin-pwd: okjt123_
 

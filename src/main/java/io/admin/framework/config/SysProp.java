@@ -89,4 +89,6 @@ public class SysProp {
      * 重置管理员密码
      */
     private String resetAdminPwd;
+
+    private boolean printException;
 }
