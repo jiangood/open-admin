@@ -38,7 +38,7 @@ public class DropEvent {
         TOP(-1),
         BOTTOM(1);
 
-        private final Integer code;
+        private final int code;
 
         public static DropPositionEnum valueOf(int dropPosition) {
             for (DropPositionEnum value : DropPositionEnum.values()) {
