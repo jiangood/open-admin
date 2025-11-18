@@ -26,12 +26,4 @@ public class ConditionVariable implements Serializable {
     }
 
 
-    public  ConditionVariable(String name, String label,ValueType valueType){
-        this.name = name;
-        this.label = label;
-        this.valueType= valueType;
-    }
-
-
-
 }
