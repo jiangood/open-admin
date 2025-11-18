@@ -11,7 +11,6 @@ import io.admin.modules.common.LoginUtils;
 import io.admin.modules.flowable.admin.entity.ConditionVariable;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import io.admin.modules.flowable.admin.service.SysFlowableModelService;
-import io.admin.modules.flowable.core.FlowableMasterDataProvider;
 import io.admin.modules.flowable.core.FlowableService;
 import io.admin.modules.flowable.core.dto.request.HandleTaskRequest;
 import io.admin.modules.flowable.core.dto.response.CommentResponse;
@@ -61,9 +60,6 @@ public class MyFlowableController {
     private SysFlowableModelService myFlowModelService;
 
 
-
-
-    private FlowableMasterDataProvider masterDataProvider;
 
 
 
@@ -120,7 +116,7 @@ public class MyFlowableController {
         for (Map<String, Object> map : mapList) {
             String startUserId = (String) map.get("startUserId");
             if (startUserId != null) {
-                map.put("startUserName", masterDataProvider.getUserNameById(startUserId));
+                map.put("startUserName", flowableService.getUserName(startUserId));
             }
         }
 

@@ -1,22 +1,15 @@
 package io.admin.modules.flowable.core.assignment.impl;
 
 
-
-import io.admin.modules.flowable.core.FlowableMasterDataProvider;
 import io.admin.modules.flowable.core.assignment.AssignmentTypeProvider;
-import io.admin.modules.flowable.core.assignment.Identity;
+import io.admin.modules.system.service.SysUserService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 @Component
-public class AssigneeUserProvider implements AssignmentTypeProvider {
-    @Resource
-    FlowableMasterDataProvider masterDataProvider;
+public class AssigneeUserProvider extends BaseUserProvider  {
+
+
 
     @Override
     public int getOrder() {
@@ -27,7 +20,6 @@ public class AssigneeUserProvider implements AssignmentTypeProvider {
     public boolean isMultiple() {
         return false;
     }
-
 
 
     @Override
@@ -42,31 +34,11 @@ public class AssigneeUserProvider implements AssignmentTypeProvider {
 
 
 
-    @Override
-    public Collection<Identity> findAll() {
-        Map<String, String> userMap = masterDataProvider.getUserMap();
-
-        List<Identity> result = new ArrayList<>();
-        for (Map.Entry<String, String> entry : userMap.entrySet()) {
-            String k = entry.getKey();
-            String v = entry.getValue();
-            Identity identity = new Identity(k, null, v, true, true);
-            result.add(identity);
-        }
-
-        return result;
-    }
-
-    @Override
-    public String getLabelById(String userId) {
-        return masterDataProvider.getUserNameById(userId);
-    }
 
     @Override
     public XmlAttribute getXmlAttribute() {
         return XmlAttribute.assignee;
     }
-
 
 
 }

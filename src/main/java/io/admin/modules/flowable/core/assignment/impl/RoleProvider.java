@@ -1,4 +1,4 @@
-package io.admin.modules.flowable.system;
+package io.admin.modules.flowable.core.assignment.impl;
 
 
 import io.admin.framework.data.domain.BaseEntity;
