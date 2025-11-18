@@ -3,6 +3,7 @@ package io.admin.framework.data.service;
 
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.repository.BaseDao;
+import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import java.util.List;
 public abstract class BaseService<T extends Persistable<String>> {
 
 
+    @Delegate
     @Autowired
     protected BaseDao<T> baseDao;
 
