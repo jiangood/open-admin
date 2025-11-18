@@ -10,7 +10,6 @@ import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 import io.admin.common.utils.tree.TreeTool;
 import io.admin.framework.config.data.sysconfig.ConfigGroupDefinition;
-import io.admin.framework.config.data.sysmenu.MenuBadge;
 import io.admin.framework.config.data.sysmenu.MenuDefinition;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -36,7 +35,6 @@ public class ConfigDataDao {
 
     private List<MenuDefinition> menus = new ArrayList<>();
 
-    private List<MenuBadge> badges = new ArrayList<>();
 
     private List<ConfigGroupDefinition> configs = new ArrayList<>();
 
@@ -46,7 +44,6 @@ public class ConfigDataDao {
         for (Resource configFile : configFiles) {
             log.info("处理数据文件 {}",configFile.getFilename());
             DataPropConfig cur = this.parseResource(configFile);
-            badges.addAll(cur.getBadges());
             configs.addAll(cur.getConfigs());
 
 

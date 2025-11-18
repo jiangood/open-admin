@@ -1,7 +1,6 @@
 package io.admin.framework.config.data;
 
 import io.admin.framework.config.data.sysconfig.ConfigGroupDefinition;
-import io.admin.framework.config.data.sysmenu.MenuBadge;
 import io.admin.framework.config.data.sysmenu.MenuDefinition;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -17,7 +16,6 @@ import java.util.List;
 
     private List<MenuDefinition> menus = new ArrayList<>();
 
-    private List<MenuBadge> badges = new ArrayList<>();
 
     private List<ConfigGroupDefinition> configs = new ArrayList<>();
 }
