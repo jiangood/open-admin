@@ -23,7 +23,8 @@
     "react-amap": "^1.2.8",
     "react-dom": "^19.0.0",
     "react-lazylog": "^4.5.3",
-    "umi": "^4.0.0"
+    "umi": "^4.0.0",
+    "axios": "^1.13.2"
   },
   "name": "@edge/admin-framework",
   "description": "admin-framework",
@@ -36,8 +37,6 @@
     "dev": "umi dev",
     "build": "umi build"
   },
-  "version": "0.0.1",
-  "dependencies": {
-    "axios": "^1.13.2"
-  }
+  "version": "0.0.1"
+
 }
