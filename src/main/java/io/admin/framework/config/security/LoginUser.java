@@ -18,7 +18,7 @@ public class LoginUser extends User {
     private String deptId;
     private String deptName;
 
-
+    private  String deptLeaderId;
 
     public LoginUser(String username, String password, Collection<? extends GrantedAuthority> authorities) {
         super(username, password, authorities);

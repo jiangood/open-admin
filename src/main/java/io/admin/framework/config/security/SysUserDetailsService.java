@@ -2,8 +2,9 @@ package io.admin.framework.config.security;
 
 import io.admin.modules.system.dto.response.UserResponse;
 import io.admin.modules.system.entity.SysUser;
+import io.admin.modules.system.service.SysOrgService;
 import io.admin.modules.system.service.SysUserService;
-import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,11 +20,11 @@ import java.util.Set;
 
 @Slf4j
 @Service
+@AllArgsConstructor
 public class SysUserDetailsService implements UserDetailsService {
 
-    @Resource
     private SysUserService userService;
-
+    private SysOrgService sysOrgService;
 
 
     @Override
@@ -54,6 +55,13 @@ public class SysUserDetailsService implements UserDetailsService {
         loginUser.setUnitId(dto.getUnitId());
         loginUser.setUnitName(dto.getUnitLabel());
         loginUser.setName(dto.getName());
+
+
+        SysUser deptLeader = sysOrgService.getDeptLeader(user.getId());
+        if(deptLeader != null){
+            loginUser.setDeptLeaderId(deptLeader.getId());
+        }
+
 
         return loginUser;
     }

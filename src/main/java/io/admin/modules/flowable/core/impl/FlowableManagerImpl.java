@@ -1,37 +1,27 @@
 package io.admin.modules.flowable.core.impl;
 
 import io.admin.common.utils.DateFormatTool;
+import io.admin.framework.config.security.LoginUser;
+import io.admin.modules.common.LoginUtils;
 import io.admin.modules.flowable.admin.entity.ConditionVariable;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
-import io.admin.modules.flowable.admin.service.MyTaskService;
 import io.admin.modules.flowable.admin.service.SysFlowableModelService;
-import io.admin.modules.flowable.core.FlowableLoginUser;
-import io.admin.modules.flowable.core.FlowableLoginUserProvider;
 import io.admin.modules.flowable.core.FlowableManager;
-import io.admin.modules.flowable.core.dto.response.TaskResponse;
-import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.engine.HistoryService;
 import org.flowable.engine.IdentityService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
-import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.ProcessDefinition;
-import org.flowable.task.api.history.HistoricTaskInstance;
-import org.flowable.task.api.history.HistoricTaskInstanceQuery;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class FlowableManagerImpl implements FlowableManager {
 
     // 变量KEY
@@ -47,26 +37,10 @@ public class FlowableManagerImpl implements FlowableManager {
 
 
 
-    @Resource
-    @Lazy
+
     private SysFlowableModelService modelService;
-
-    @Resource
-    private FlowableLoginUserProvider flowableLoginUserProvider;
-
-    @Resource
-    private MyTaskService myTaskService;
-
-    @Resource
     private RuntimeService runtimeService;
-
-    @Resource
-    private HistoryService historyService;
-
-    @Resource
     private  RepositoryService repositoryService;
-
-    @Resource
     private IdentityService identityService;
 
     @Override
@@ -80,8 +54,8 @@ public class FlowableManagerImpl implements FlowableManager {
             variables = new HashMap<>();
         }
 
+        LoginUser loginUser = LoginUtils.getUser();
 
-        FlowableLoginUser loginUser = flowableLoginUserProvider.currentLoginUser();
 
 
         // 添加一些发起人的相关信息
@@ -146,7 +120,7 @@ public class FlowableManagerImpl implements FlowableManager {
     /***
      * 初始化变量
      */
-    private String initVariable(String bizKey, Map<String, Object> variables, FlowableLoginUser user) {
+    private String initVariable(String bizKey, Map<String, Object> variables, LoginUser user) {
         String startUserId = user.getId();
         Assert.hasText(startUserId, "当前登录人员ID不能为空");
         variables.put(VAR_USER_ID, startUserId);

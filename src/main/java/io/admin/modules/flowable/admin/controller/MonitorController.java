@@ -4,11 +4,11 @@ package io.admin.modules.flowable.admin.controller;
 import io.admin.common.dto.AjaxResult;
 import io.admin.common.utils.BeanTool;
 import io.admin.framework.config.security.HasPermission;
-import io.admin.modules.flowable.core.FlowableLoginUserProvider;
+import io.admin.modules.common.LoginUtils;
 import io.admin.modules.flowable.core.dto.request.SetAssigneeRequest;
 import io.admin.modules.flowable.core.dto.response.MonitorTaskResponse;
 import io.admin.modules.system.service.SysUserService;
-import jakarta.annotation.Resource;
+import lombok.AllArgsConstructor;
 import org.flowable.common.engine.api.query.Query;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
@@ -35,23 +35,13 @@ import java.util.Map;
  */
 @RequestMapping("admin/flowable/monitor")
 @RestController
+@AllArgsConstructor
 public class MonitorController {
 
-    @Resource
     private RepositoryService repositoryService;
-
-    @Resource
     private RuntimeService runtimeService;
-
-    @Resource
-    private FlowableLoginUserProvider flowableLoginUserProvider;
-
-
-    @Resource
     private TaskService taskService;
-
-    @Resource
-    SysUserService sysUserService;
+    private  SysUserService sysUserService;
 
     @GetMapping("processDefinition")
     public AjaxResult processDefinition(Pageable pageable) {
@@ -73,7 +63,7 @@ public class MonitorController {
 
     @GetMapping("processInstance/close")
     public AjaxResult processInstanceClose(String id) {
-        String name = flowableLoginUserProvider.currentLoginUser().getName();
+        String name = LoginUtils.getUser().getName();
         runtimeService.deleteProcessInstance(id, name + "手动关闭");
 
         return AjaxResult.ok();

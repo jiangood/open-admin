@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 
 
 @Configuration
-@ConfigurationProperties(prefix = "crec.flowable")
+@ConfigurationProperties(prefix = "flowable")
 @Data
 @ComponentScan(basePackageClasses = FlowableProperties.class)
 public class FlowableProperties {

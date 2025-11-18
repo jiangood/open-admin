@@ -6,17 +6,15 @@ import io.admin.common.dto.AjaxResult;
 import io.admin.common.utils.BeanTool;
 import io.admin.common.utils.DateFormatTool;
 import io.admin.common.utils.ImgTool;
+import io.admin.framework.config.security.LoginUser;
 import io.admin.modules.common.LoginUtils;
 import io.admin.modules.flowable.admin.entity.ConditionVariable;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
-import io.admin.modules.flowable.admin.service.MyTaskService;
 import io.admin.modules.flowable.admin.service.SysFlowableModelService;
-import io.admin.modules.flowable.core.FlowableLoginUser;
-import io.admin.modules.flowable.core.FlowableLoginUserProvider;
 import io.admin.modules.flowable.core.FlowableMasterDataProvider;
 import io.admin.modules.flowable.core.FlowableService;
 import io.admin.modules.flowable.core.dto.request.HandleTaskRequest;
-import io.admin.modules.flowable.core.dto.response.CommentResult;
+import io.admin.modules.flowable.core.dto.response.CommentResponse;
 import io.admin.modules.flowable.core.dto.response.TaskResponse;
 import io.admin.modules.system.service.SysUserService;
 import lombok.AllArgsConstructor;
@@ -52,7 +50,6 @@ import java.util.stream.Collectors;
 public class MyFlowableController {
 
 
-    private MyTaskService myTaskService;
 
 
     private TaskService taskService;
@@ -64,7 +61,6 @@ public class MyFlowableController {
     private SysFlowableModelService myFlowModelService;
 
 
-    private FlowableLoginUserProvider flowableLoginUserProvider;
 
 
     private FlowableMasterDataProvider masterDataProvider;
@@ -104,13 +100,11 @@ public class MyFlowableController {
     // 我发起的
     @GetMapping("myInstance")
     public AjaxResult myInstance(Pageable pageable) {
-        FlowableLoginUser loginUser = flowableLoginUserProvider.currentLoginUser();
+        LoginUser loginUser = LoginUtils.getUser();
 
 
         HistoricProcessInstanceQuery query = historyService.createHistoricProcessInstanceQuery();
-        if (!loginUser.isSuperAdmin()) {
             query.startedBy(loginUser.getId());
-        }
 
 
         query.orderByProcessInstanceStartTime().desc();
@@ -137,8 +131,8 @@ public class MyFlowableController {
 
     @PostMapping("handleTask")
     public AjaxResult handle(@RequestBody HandleTaskRequest param) {
-        FlowableLoginUser subject = flowableLoginUserProvider.currentLoginUser();
-        myTaskService.handle(subject.getId(), param.getResult(), param.getTaskId(), param.getComment());
+        String user = LoginUtils.getUserId();
+        flowableService.handle(user, param.getResult(), param.getTaskId(), param.getComment());
         return AjaxResult.ok().msg("处理成功");
     }
 
@@ -199,14 +193,14 @@ public class MyFlowableController {
         // 处理意见
         {
             List<Comment> processInstanceComments = taskService.getProcessInstanceComments(instance.getId());
-            List<CommentResult> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(c -> new CommentResult(c)).collect(Collectors.toList());
+            List<CommentResponse> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(c -> new CommentResponse(c)).collect(Collectors.toList());
             data.put("commentList", commentResults);
         }
 
 
         // 图片
         {
-            BufferedImage image = myTaskService.drawImage(instance.getId());
+            BufferedImage image = flowableService.drawImage(instance.getId());
 
             String base64 = ImgTool.toBase64DataUri(image);
 
@@ -220,13 +214,13 @@ public class MyFlowableController {
                 instanceName = instance.getProcessDefinitionName();
             }
             data.put("startTime", DateFormatTool.format(instance.getStartTime()));
-            data.put("starter", myTaskService.getUserName(instance.getStartUserId()));
+            data.put("starter", flowableService.getUserName(instance.getStartUserId()));
             data.put("name", instanceName);
             data.put("id", instance.getId());
 
 
             List<Comment> processInstanceComments = taskService.getProcessInstanceComments(id);
-            List<CommentResult> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(c -> new CommentResult(c)).collect(Collectors.toList());
+            List<CommentResponse> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(c -> new CommentResponse(c)).collect(Collectors.toList());
 
 
             data.put("instanceCommentList", commentResults);
