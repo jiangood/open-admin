@@ -88,8 +88,7 @@ public class FlowableManagerImpl implements FlowableManager {
     }
 
 
-    @Override
-    public void validate(String processDefinitionKey, String bizKey, Map<String, Object> variables) {
+    private void validate(String processDefinitionKey, String bizKey, Map<String, Object> variables) {
         long count = repositoryService.createDeploymentQuery().deploymentKey(processDefinitionKey).count();
         Assert.state(count > 0, "流程未配置，请联系管理配置流程" + processDefinitionKey);
 

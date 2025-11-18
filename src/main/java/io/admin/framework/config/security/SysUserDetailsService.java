@@ -59,7 +59,10 @@ public class SysUserDetailsService implements UserDetailsService {
 
         SysUser deptLeader = sysOrgService.getDeptLeader(user.getId());
         if(deptLeader != null){
+            log.debug("登录用户 {} 的部门领导为：{}", user.getName(), deptLeader.getId());
             loginUser.setDeptLeaderId(deptLeader.getId());
+        }else {
+            log.debug("登录用户 {} 无部门领导",user.getName());
         }
 
 
