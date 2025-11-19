@@ -1,7 +1,7 @@
 data:
   menus:
     - id: sys
-      name: 系统管理
+      name: 系统
       seq: 10000 # 系统管理排在后面
       children:
         - id: sysOrg
