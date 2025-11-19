@@ -6,7 +6,6 @@ import {Badge, Layout, Menu, Watermark} from 'antd';
 import {history, Link} from 'umi';
 import "./index.less"
 import {MenuFoldOutlined, MenuUnfoldOutlined} from '@ant-design/icons';
-import defaultLogo from '../../asserts/logo.png'
 import {HttpUtil, isMobileDevice, NamedIcon, PageUtil, SysUtil, theme, TreeUtil} from "../../framework";
 
 import HeaderRight from "./HeaderRight";
@@ -104,17 +103,12 @@ export default class extends React.Component {
 
     render() {
         const {siteInfo, loginInfo} = this.state
-        let logo = defaultLogo
-        if (siteInfo.logoUrl) {
-            logo = SysUtil.wrapServerUrl('admin/sysFile/preview/' + siteInfo.logoUrl)
-        }
-
 
         return <Layout className='main-layout'>
             <Header className='header'>
                 <div className='header-left'>
 
-                    <img className='logo-img' src={logo} onClick={() => history.push('/')}/>
+                    <img className='logo-img' src={siteInfo.logoUrl} onClick={() => history.push('/')}/>
                     <h3 className='hide-on-mobile'>
                         <Link to="/" style={{color: theme["primary-color"]}}>{siteInfo.title} </Link>
                     </h3>
