@@ -56,4 +56,3 @@ const formRegistry = new ReactFormRegistry();
 // 导出单例（项目里直接 import { reactFormRegistry } 使用）
 export { formRegistry };
 
-export default formRegistry

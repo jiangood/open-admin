@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 // 自动注册src/forms下的表单
+const pkgName = '@jiangood/springboot-admin-starter';
 export default (api: IApi) => {
     api.logger.info('plugin starting... ')
     api.logger.info('info', JSON.stringify(api.env))
@@ -10,21 +11,36 @@ export default (api: IApi) => {
     api.describe({
         key: 'form-register-by-dir',
     });
+    const isFramework = api.pkg.name === pkgName;
+    api.logger.info('current pkgName', api.pkg.name)
+    api.logger.info('is framework ?', isFramework)
 
+    let formRegistryPath = path.join(api.paths.absSrcPath, 'framework')
+    if (!isFramework) {
+        formRegistryPath = path.join(api.paths.absNodeModulesPath, pkgName)
+    }
+    api.logger.info('formRegistryPath', formRegistryPath)
     api.addEntryImports(() => ({
-        source: path.join( api.paths.absSrcPath , 'framework/system/formRegistry'),
-        specifier: 'formRegistry'
+        source: formRegistryPath,
+        specifier: '{formRegistry}'
     }))
 
-    const dir = path.join(api.paths.absSrcPath , 'forms')
-    api.logger.info('scan dir is',dir)
+    parseDir(api, path.join(api.paths.absSrcPath, 'forms'))
+    if (!isFramework) {
+        parseDir(api, path.join(api.paths.absNodeModulesPath, pkgName, 'src', 'forms'))
+    }
+
+};
+
+function parseDir(api: IApi, dir: string) {
+    api.logger.info('scan dir... ', dir)
     fs.readdirSync(dir).forEach(file => {
         if (!file.endsWith(".jsx")) {
             return;
         }
-        let source = path.join(dir,file) ;
+        let source = path.join(dir, file);
         let name = file.replace(".jsx", "");
-        console.log('form info: ' , name,source)
+
 
         // import form
         api.addEntryImports(() => ({
@@ -34,6 +50,6 @@ export default (api: IApi) => {
 
         // register form
         api.addEntryCodeAhead(() => `formRegistry.register("${name}",${name} );`)
+        api.logger.info('formRegistry.register: ', name, source)
     });
-
-};
+}
