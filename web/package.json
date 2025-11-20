@@ -35,7 +35,7 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "umi dev",
-    "build": "tsc --outDir config/dist config/index.ts"
+    "build": "tsc --outDir config/dist --skipLibCheck --noEmitOnError false config/index.ts"
   },
   "version": "0.0.1-beta.15"
 }
