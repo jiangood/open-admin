@@ -55,6 +55,7 @@ jobs:
           cd web
           pnpm install 
           pnpm version ${{ steps.tag.outputs.tag }}
+          pnpm run build
           pnpm publish -r --access public --no-git-checks
 
         env:
