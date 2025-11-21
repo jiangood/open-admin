@@ -4,14 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.admin.common.utils.ann.Remark;
 import io.admin.common.utils.field.FieldDescription;
 import io.admin.modules.api.ApiMapping;
-import io.admin.modules.api.dao.ApiResourceDao;
 import io.admin.modules.api.entity.ApiResource;
 import io.admin.modules.api.entity.ApiResourceArgument;
 import io.admin.modules.api.entity.ApiResourceArgumentReturn;
-import io.admin.framework.data.service.BaseService;
 import jakarta.annotation.Resource;
 import org.springframework.core.StandardReflectionParameterNameDiscoverer;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -24,46 +21,27 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 @Service
-public class ApiResourceService extends BaseService<ApiResource> {
+public class ApiResourceService {
 
-    @Resource
-    private ApiResourceDao dao;
-
-    @Resource
-    private ApiAccountResourceService accountResourceService;
+    private Map<String, ApiResource> actionMap = new LinkedHashMap<>();
 
 
-    private final Map<String, Method> pathBindings = new HashMap<>();
 
-    public Method findMethodByAction(String action) {
-        return pathBindings.get(action);
-    }
+
+
 
     public List<ApiResource> findAll() {
-        return dao.findAll(Sort.by(ApiResource.Fields.action));
+        return actionMap.values().stream().toList();
     }
 
 
     @Transactional
     public void add(ApiResource r) {
-        ApiResource old = dao.findByName(r.getName());
-        if (old != null) {
-            if (old.getAction() == null || !old.getAction().equals(r.getAction())) {
-                accountResourceService.deleteByResource(old);
-                dao.delete(old);
-                dao.flush();
-            }
-        }
-
-
-        dao.save(r);
-        pathBindings.put(r.getAction(), r.getMethod());
+        actionMap.put(r.getAction(), r);
     }
 
 
-    public List<ApiResource> removeNotExist(List<ApiResource> list) {
-        return list.stream().filter(t -> pathBindings.containsKey(t.getAction())).toList();
-    }
+
 
     @Transactional
     public void saveOrUpdate(String beanName, Object bean) {
@@ -76,10 +54,9 @@ public class ApiResourceService extends BaseService<ApiResource> {
             }
 
 
-
             String action = api.action();
             ApiResource r = this.findAction(action);
-            if(r == null){
+            if (r == null) {
                 r = new ApiResource();
             }
 
@@ -187,6 +164,6 @@ public class ApiResourceService extends BaseService<ApiResource> {
     }
 
     public ApiResource findAction(String action) {
-        return dao.findByAction(action);
+        return actionMap.get(action);
     }
 }

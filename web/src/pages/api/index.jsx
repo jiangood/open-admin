@@ -57,7 +57,7 @@ export default class extends React.Component {
             dataIndex: 'option',
             render: (_, record) => (
                 <ButtonList>
-                    <Button size='small' onClick={()=>PageUtil.open('/api/accountResource?accountId=' + record.id, '账户权限')} type='primary'>权限</Button>
+                    <Button size='small' onClick={()=>PageUtil.open('/api/perm?accountId=' + record.id, '账户权限')} type='primary'>权限</Button>
                     <Button size='small' perm='apiAccount:save' onClick={() => this.handleEdit(record)}>编辑</Button>
                     <Popconfirm perm='apiAccount:delete' title='是否确定删除接口访客'  onConfirm={() => this.handleDelete(record)}>
                         <Button size='small'>删除</Button>
@@ -110,7 +110,7 @@ export default class extends React.Component {
                             {dataIndex: 'desc', title: '描述'},
 
                         ]}
-                        request={(params,) => HttpUtil.pageData('admin/apiResource/page', params)}
+                        request={(params,) => HttpUtil.pageData('admin/api/resource/page', params)}
                     />
                 },
 

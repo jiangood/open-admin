@@ -12,44 +12,30 @@ import lombok.experimental.FieldNameConstants;
 import java.lang.reflect.Method;
 import java.util.List;
 
-@Entity
 @Getter
 @Setter
 @FieldNameConstants
-@Table(name = "sys_api_resource")
-public class ApiResource extends BaseEntity {
+public class ApiResource  {
 
-    @Column(length = DBConstants.LEN_NAME,unique = true)
     String name;
 
-    @Column(length = 62,unique = true)
     String action;
 
-    @Column(name = "_desc")
     String desc;
 
-    @Column(length = DBConstants.LEN_NAME)
     String beanName;
 
-    @Lob
-    @JsonIgnore
-    @Convert(converter = C1.class)
     List<ApiResourceArgument> parameterList;
 
-    @Lob
-    @JsonIgnore
-    @Convert(converter = C2.class)
     List<ApiResourceArgumentReturn> returnList;
 
 
     String returnType;
 
 
-    @Transient
     @JsonIgnore
     Object bean;
 
-    @Transient
     @JsonIgnore
     Method method;
 

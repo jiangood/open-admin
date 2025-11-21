@@ -10,7 +10,6 @@ import io.admin.modules.api.entity.ApiAccount;
 import io.admin.modules.api.entity.ApiResource;
 import io.admin.modules.api.entity.ApiResourceArgument;
 import io.admin.modules.api.entity.ApiResourceArgumentReturn;
-import io.admin.modules.api.service.ApiAccountResourceService;
 import io.admin.modules.api.service.ApiResourceService;
 import io.admin.modules.api.ApiErrorCode;
 import io.admin.common.dto.AjaxResult;
@@ -32,8 +31,6 @@ public class ApiAccountController  {
     @Resource
     private ApiAccountService service;
 
-    @Resource
-    private ApiAccountResourceService accountResourceService;
 
 
     @Resource
@@ -47,7 +44,6 @@ public class ApiAccountController  {
         List<ApiResource> list = apiResourceService.findAll();
 
 
-        list = apiResourceService.removeNotExist(list);
 
         for (ApiResource r : list) {
             List<ApiResourceArgument> parameterList = r.getParameterList();

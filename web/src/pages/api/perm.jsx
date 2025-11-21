@@ -10,7 +10,7 @@ import {
     PageUtil,
     ProTable,
     ViewBoolean
-} from "../../../framework";
+} from "../../framework";
 
 
 export default class extends React.Component {
@@ -99,47 +99,9 @@ export default class extends React.Component {
     render() {
         return <Page>
 
-            <ProTable
-                actionRef={this.tableRef}
-                toolBarRender={() => {
-                    return <ButtonList>
-                        <Button perm='apiAccountResource:save' type='primary' onClick={this.handleAdd}>
-                            <PlusOutlined/> 新增
-                        </Button>
-                    </ButtonList>
-                }}
-                request={(params) => {
-                    params.accountId =PageUtil.currentParams().accountId
-                    return HttpUtil.pageData('admin/apiAccountResource/page', params);
-                }}
-                columns={this.columns}
-            />
-
-            <Modal title='账号权限'
-                   open={this.state.formOpen}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-                   destroyOnHidden
-                   maskClosable={false}
-            >
-
-                <Form ref={this.formRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.formValues}
-                      onFinish={this.onFinish}
-                >
-                    <Form.Item name='id' noStyle></Form.Item>
-
-                    <Form.Item label='接口' name={['resource', 'id']} rules={[{required: true}]}>
-                        <FieldTableSelect url='admin/apiResource/tableSelect' labelKey='name'/>
-                    </Form.Item>
 
 
-                    <Form.Item label='启用' name='enable' rules={[{required: true}]}>
-                        <FieldRadioBoolean/>
-                    </Form.Item>
 
-                </Form>
-            </Modal>
         </Page>
 
 

@@ -6,9 +6,8 @@ import cn.hutool.extra.servlet.JakartaServletUtil;
 import io.admin.modules.api.ApiErrorCode;
 import io.admin.modules.api.ApiSignTool;
 import io.admin.modules.api.entity.ApiAccount;
-import io.admin.modules.api.entity.ApiAccountResource;
+import io.admin.modules.api.entity.ApiResource;
 import io.admin.modules.api.service.ApiAccessLogService;
-import io.admin.modules.api.service.ApiAccountResourceService;
 import io.admin.modules.api.service.ApiResourceService;
 import io.admin.common.utils.SpringTool;
 import io.admin.common.dto.AjaxResult;
@@ -22,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -33,8 +33,6 @@ public class ApiGatewayController {
     public static final int TIME_DIFF_LIMIT = 5;
 
 
-    @Resource
-    private ApiAccountResourceService accountResourceService;
 
 
     @Resource
@@ -69,7 +67,8 @@ public class ApiGatewayController {
             this.check(DateUtil.current() < account.getEndTime().getTime(), ApiErrorCode.ACC_EXPIRE);
         }
 
-        Method method = apiResourceService.findMethodByAction(action);
+        ApiResource apiResource = apiResourceService.findAction(action);
+        Method method = apiResource.getMethod();
         this.check(method != null, ApiErrorCode.RES_NOT_FOUND, "接口：" + action);
 
 
@@ -80,10 +79,8 @@ public class ApiGatewayController {
 
 
         // 校验权限
-        ApiAccountResource ar = accountResourceService.findByAccountAndAction(account, action);
-        this.check(ar != null, ApiErrorCode.PERM_NOT_FOUND);
-        this.check(ar.getEnable(), ApiErrorCode.PERM_DISABLE);
-
+        List<String> perms = account.getPerms();
+        this.check(perms != null && perms.contains(action), ApiErrorCode.PERM_NOT_FOUND);
 
         String clientIP = JakartaServletUtil.getClientIP(request);
 
@@ -96,7 +93,7 @@ public class ApiGatewayController {
         // 保存日志
         String ip = JakartaServletUtil.getClientIP(request);
         long time = System.currentTimeMillis() - startTime;
-        accessLogService.add(timestamp, account, ar.getResource(), params, retValue, ip, time);
+        accessLogService.add(timestamp, account, apiResource, params, retValue, ip, time);
 
         return AjaxResult.ok().data(retValue);
     }
