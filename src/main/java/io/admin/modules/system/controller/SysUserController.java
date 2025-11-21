@@ -77,7 +77,7 @@ public class SysUserController {
     public AjaxResult save(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
         boolean isNew = input.isNew();
         String inputOrgId = input.getDeptId();
-        SysOrg org = sysOrgService.findOneByRequest(inputOrgId);
+        SysOrg org = sysOrgService.findByRequest(inputOrgId);
         if (org.getType() == OrgType.UNIT) {
             input.setUnitId(inputOrgId);
             input.setDeptId(null);

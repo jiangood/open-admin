@@ -18,7 +18,6 @@ import io.admin.modules.system.service.SysRoleService;
 import io.admin.modules.system.service.SysUserService;
 import io.admin.framework.config.security.HasPermission;
 import io.admin.framework.config.argument.RequestBodyKeys;
-import io.admin.framework.persistence.BaseController;
 import io.admin.framework.data.domain.BaseEntity;
 import io.admin.common.dto.DropdownRequest;
 import jakarta.annotation.Resource;
@@ -105,7 +104,7 @@ public class SysRoleController  {
     @HasPermission("sysRole:save")
     @RequestMapping("ownPerms")
     public AjaxResult ownPerms(String id) {
-        SysRole role = sysRoleService.findOneByRequest(id);
+        SysRole role = sysRoleService.findByRequest(id);
         List<String> rolePerms = role.getPerms();
 
         List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
@@ -169,7 +168,7 @@ public class SysRoleController  {
     @HasPermission("sysRole:view")
     @GetMapping("get")
     public AjaxResult get(String id) {
-        SysRole role = sysRoleService.findOneByRequest(id);
+        SysRole role = sysRoleService.findByRequest(id);
         return AjaxResult.ok().data(role);
     }
 

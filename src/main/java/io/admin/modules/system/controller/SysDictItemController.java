@@ -48,7 +48,7 @@ public class SysDictItemController  {
     @HasPermission("sysDict:save")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysDictItem param, RequestBodyKeys updateFields) throws Exception {
-        SysDict dict = sysDictService.findOneByRequest(param.getSysDict().getId());
+        SysDict dict = sysDictService.findByRequest(param.getSysDict().getId());
 
         param.setBuiltin(false);
         SysDictItem result = service.saveOrUpdateByRequest(param,updateFields);

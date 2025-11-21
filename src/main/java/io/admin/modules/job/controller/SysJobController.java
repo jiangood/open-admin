@@ -106,7 +106,7 @@ public class SysJobController {
     @HasPermission("job:triggerJob")
     @GetMapping("triggerJob")
     public AjaxResult triggerJob(String id) throws SchedulerException, ClassNotFoundException {
-        SysJob job = service.findOneByRequest(id);
+        SysJob job = service.findByRequest(id);
         quartzService.triggerJob(job);
 
         return AjaxResult.ok().msg("执行一次命令已发送");

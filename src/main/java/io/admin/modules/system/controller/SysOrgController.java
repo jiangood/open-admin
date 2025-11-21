@@ -98,7 +98,7 @@ public class SysOrgController {
     @HasPermission("sysOrg:view")
     @GetMapping("detail")
     public AjaxResult detail(String id) {
-        SysOrg org = sysOrgService.findOneByRequest(id);
+        SysOrg org = sysOrgService.findByRequest(id);
         return AjaxResult.ok().data(org);
     }
 

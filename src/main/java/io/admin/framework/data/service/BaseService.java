@@ -45,7 +45,7 @@ public abstract class BaseService<T extends Persistable<String>> {
         return baseDao.findAll(q, pageable);
     }
 
-    public T findOneByRequest(String id) {
+    public T findByRequest(String id) {
         return baseDao.findOne(id);
     }
 
