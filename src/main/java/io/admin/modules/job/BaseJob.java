@@ -24,7 +24,7 @@ public abstract class BaseJob implements Job {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getMergedJobDataMap();
-        Logger logger = FileLogUtils.getLogger();
+
 
 
         String jobName = context.getJobDetail().getKey().getName();
@@ -40,7 +40,7 @@ public abstract class BaseJob implements Job {
 
 
         // 2. 设置日志
-        FileLogUtils.start(jobLog.getId());
+        Logger logger = FileLogUtils.getLogger(jobLog.getId());
         logger.info("开始执行作物");
 
         String result;
@@ -57,7 +57,7 @@ public abstract class BaseJob implements Job {
         jobLog.setEndTime(new Date());
         sysJobLogDao.save(jobLog);
         logger.info("执行结束 返回值{}", result);
-        FileLogUtils.stop();
+        FileLogUtils.clear();
     }
 
     public abstract String execute(JobDataMap data, Logger logger) throws Exception;
