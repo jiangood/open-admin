@@ -1,6 +1,7 @@
 package io.admin.modules.api.controller;
 
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.StrUtil;
 import io.admin.Build;
 import io.admin.common.dto.antd.Option;
 import io.admin.framework.config.argument.RequestBodyKeys;
@@ -42,20 +43,13 @@ public class ApiAccountController {
     @GetMapping("docInfo")
     public AjaxResult docInfo(String id) {
         List<ApiResource> list = apiResourceService.findAll();
-
-
-        for (ApiResource r : list) {
-            List<ApiResourceArgument> parameterList = r.getParameterList();
-            List<ApiResourceArgumentReturn> returnList = r.getReturnList();
-            // TODO
-            // r.putExtData("parameterList", parameterList);
-            // r.putExtData("returnList", returnList);
+        if(StrUtil.isNotEmpty(id)){
+            ApiAccount acc = service.findOne(id);
+            list = list.stream().filter(t->acc.getPerms().contains(t.getAction())).toList();
         }
-
 
         Dict resultData = new Dict();
         resultData.put("apiList", list);
-        resultData.put("frameworkVersion", Build.getFrameworkVersion());
 
         List<Dict> errorList = new ArrayList<>();
         for (ApiErrorCode value : ApiErrorCode.values()) {
