@@ -6,7 +6,7 @@ import {Badge, Layout, Menu, Watermark} from 'antd';
 import {history, Link} from 'umi';
 import "./index.less"
 import {MenuFoldOutlined, MenuUnfoldOutlined} from '@ant-design/icons';
-import {HttpUtil, isMobileDevice, NamedIcon, PageUtil, SysUtil, theme, TreeUtil} from "../../framework";
+import {Gap, HttpUtil, isMobileDevice, NamedIcon, PageUtil, SysUtil, theme, TreeUtil} from "../../framework";
 
 import HeaderRight from "./HeaderRight";
 import TabPageRender from "./TabPageRender";
@@ -99,7 +99,6 @@ export default class extends React.Component {
         return <Layout className='main-layout'>
             <Header className='header'>
                 <div className='header-left'>
-
                     {siteInfo.logoUrl &&
                         <img className='logo-img' src={siteInfo.logoUrl} onClick={() => history.push('/')} alt='logo'/>}
                     <h3 className='hide-on-mobile'>
@@ -115,6 +114,7 @@ export default class extends React.Component {
                        collapsible
                        breakpoint={'md'}
                 >
+                    <Gap/>
 
 
                     <Menu items={this.state.menuTree}
