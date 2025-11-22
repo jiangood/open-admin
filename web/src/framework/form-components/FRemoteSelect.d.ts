@@ -1,7 +1,7 @@
 import React from 'react';
 import { SelectProps } from 'antd/es/select';
 
-export interface RemoteSelectProps extends Omit<SelectProps, 'options' | 'children'> {
+export interface FRemoteSelectProps extends Omit<SelectProps, 'options' | 'children'> {
 
     /**
      * 请求地址
@@ -9,6 +9,6 @@ export interface RemoteSelectProps extends Omit<SelectProps, 'options' | 'childr
     url: string ;
 }
 
-declare class RemoteSelect extends React.Component<RemoteSelectProps, any> {}
+declare class FRemoteSelect extends React.Component<FRemoteSelectProps, any> {}
 
-export default RemoteSelect;
+export default FRemoteSelect;

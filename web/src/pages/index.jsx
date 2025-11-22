@@ -1,20 +1,20 @@
 import React from "react";
-import {Button, Card, Space} from "antd";
+import {Button, Card, Form, Space} from "antd";
 
 
 export default class extends React.Component {
 
-  state = {
-  }
+    state = {}
 
-  render() {
+    render() {
 
-    return <Card>
-      欢迎使用本系统
-
+        return <Card>
+            欢迎使用本系统
 
 
-    </Card>
-  }
+
+
+        </Card>
+    }
 
 }

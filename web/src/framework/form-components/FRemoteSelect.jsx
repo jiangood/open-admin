@@ -13,22 +13,29 @@ export class FRemoteSelect extends React.Component {
         };
 
         this.fetchIdRef = 0;
-        this.debounceLoadOptions = debounce(this.loadData, 800);
+        this.loadDataDebounce = debounce(this.loadData, 800);
     }
 
+    static defaultProps = {
+        placeholder:'请搜索选择'
+    };
+
+    componentDidMount() {
+        this.loadData('')
+    }
 
     componentWillUnmount() {
-        this.debounceLoadOptions.cancel();
+        this.loadDataDebounce.cancel();
     }
 
     loadData = async (searchText) => {
-        const { url } = this.props;
+        const { url,value } = this.props;
         const fetchId = ++this.fetchIdRef;
 
         this.setState({ loading: true });
 
         try {
-            const data = await HttpUtil.get(url, {searchText});
+            const data = await HttpUtil.get(url, {searchText,selected:value});
 
             if (fetchId === this.fetchIdRef) {
                 this.setState({ options: data || [] });
@@ -45,27 +52,16 @@ export class FRemoteSelect extends React.Component {
     };
 
     handleSearch = (value) => {
-        this.setState({ searchValue: value });
-
         if (value.trim() === '') {
             this.setState({ options: [] });
             return;
         }
-
-        this.debounceLoadOptions(value);
-    };
-
-    handleChange = (value, option) => {
-        const { onChange } = this.props;
-
-        if (onChange) {
-            onChange(value, option);
-        }
+        this.loadDataDebounce(value.trim());
     };
 
     render() {
         const { options, loading } = this.state;
-        const { url, ...selectProps } = this.props;
+        const {value,onChange, url,...selectProps } = this.props;
 
         return (
             <Select
@@ -75,10 +71,13 @@ export class FRemoteSelect extends React.Component {
                         onSearch: this.handleSearch,
                     }
                 }
-                allowClear
-                onChange={this.handleChange}
-                notFoundContent={loading ? <Spin size="small" /> : '数据为空'}
+                value={value}
+                onChange={onChange}
                 options={options}
+                notFoundContent={loading ? <Spin size="small" /> : '数据为空'}
+                style={{width: '100%', minWidth: 200}}
+                allowClear
+
                 {...selectProps}
             >
             </Select>
@@ -86,4 +85,3 @@ export class FRemoteSelect extends React.Component {
     }
 }
 
-export default FRemoteSelect;

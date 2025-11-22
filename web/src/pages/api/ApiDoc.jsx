@@ -1,5 +1,5 @@
 import React from "react";
-import {FieldSelect, HttpUtil, PageUtil} from "../../framework";
+import {FRemoteSelect, HttpUtil, PageUtil} from "../../framework";
 import {Button, Descriptions, message, Space, Table, Typography} from "antd";
 
 const {Title, Paragraph, Text, Link} = Typography;
@@ -50,7 +50,7 @@ export  class ApiDoc extends React.Component {
         return <div>
 
             <Space>
-                <FieldSelect url='admin/apiAccount/accountOptions' placeholder='请选择账号' onChange={v=>this.loadData(v)}/>
+                <FRemoteSelect url='admin/apiAccount/accountOptions' placeholder='请选择账号' onChange={v=>this.loadData(v)}/>
                 <Button type='primary' >导出PDF</Button>
             </Space>
             <div id='doc-content'>
