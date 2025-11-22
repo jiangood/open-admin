@@ -28,23 +28,18 @@ export default class extends React.Component {
         currentMenuKey: null,
 
 
-        collapsed: false,
         siteInfo: {},
-        isMobileDevice: false,
     }
-
 
 
     componentDidMount() {
         console.log('Admin Layout didMount')
         // 判断是否手机端，自动收起菜单
-        if (isMobileDevice()) {
-            this.setState({collapsed: true, isMobileDevice: true})
-        }
+
 
         let siteInfo = SysUtil.getSiteInfo();
         const loginInfo = SysUtil.getLoginInfo()
-        this.setState({siteInfo,loginInfo})
+        this.setState({siteInfo, loginInfo})
 
         this.initMenu()
     }
@@ -63,12 +58,12 @@ export default class extends React.Component {
 
             if (pathname !== "" && pathname !== "/") {
                 let menu = pathMenuMap[pathname]
-                if(menu){
+                if (menu) {
                     this.setState({currentMenuKey: menu.key})
                 }
             }
 
-            this.setState({menuTree,pathMenuMap})
+            this.setState({menuTree, pathMenuMap})
 
             this.loadBadge(menuMap)
         })
@@ -77,19 +72,17 @@ export default class extends React.Component {
     }
     actionRef = React.createRef()
 
-    toggleCollapsed = (v) => {
-        this.setState({collapsed: v})
-    }
+
     loadBadge = menuMap => {
         for (let id in menuMap) {
             const item = menuMap[id]
             const {messageCountUrl} = item;
-            if(!messageCountUrl){
+            if (!messageCountUrl) {
                 continue
             }
             HttpUtil.get(messageCountUrl).then(rs => {
                 const {menuTree} = this.state
-                const menu = TreeUtil.findByKey(id, menuTree,'key')
+                const menu = TreeUtil.findByKey(id, menuTree, 'key')
                 if (menu) {
                     menu.icon = <Badge dot count={rs} size={"small"}>{menu.icon}</Badge>
                     this.setState({menuTree: [...menuTree]})
@@ -100,8 +93,6 @@ export default class extends React.Component {
     };
 
 
-
-
     render() {
         const {siteInfo, loginInfo} = this.state
 
@@ -109,7 +100,8 @@ export default class extends React.Component {
             <Header className='header'>
                 <div className='header-left'>
 
-                    {siteInfo.logoUrl &&   <img className='logo-img' src={siteInfo.logoUrl} onClick={() => history.push('/')} alt='logo'/>}
+                    {siteInfo.logoUrl &&
+                        <img className='logo-img' src={siteInfo.logoUrl} onClick={() => history.push('/')} alt='logo'/>}
                     <h3 className='hide-on-mobile'>
                         <Link to="/" style={{color: theme["primary-color"]}}>{siteInfo.title} </Link>
                     </h3>
@@ -121,22 +113,16 @@ export default class extends React.Component {
             <Layout style={{height: '100%'}}>
                 <Sider id='left-sider'
                        collapsible
-                       collapsed={this.state.collapsed}
-                       onCollapse={(value) => this.toggleCollapsed(value)}
-                       trigger={null}>
+                       breakpoint={'md'}
+                >
 
-                    <div style={{
-                        color: 'white', fontSize: 16, cursor: "pointer", margin: 12
-                    }} title='收起/展开' onClick={() => this.toggleCollapsed(!this.state.collapsed)}>
-                        {this.state.collapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>}
-                    </div>
 
                     <Menu items={this.state.menuTree}
                           theme='dark'
                           mode="inline"
                           className='left-menu'
                           onClick={({key}) => {
-                              const menu =this.state.menuMap[key]
+                              const menu = this.state.menuMap[key]
                               let {path} = menu;
                               this.setState({currentMenuKey: key})
                               history.push(path)
@@ -162,7 +148,7 @@ export default class extends React.Component {
         if (this.state.menuTree.length === 0) { // 加载菜单中
             return <></>
         }
-        let tabPageRenderNode = <TabPageRender  pathMenuMap={this.state.pathMenuMap}/>;
+        let tabPageRenderNode = <TabPageRender pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {
             return <Watermark content={[loginInfo.name, loginInfo.account]}>
                 {tabPageRenderNode}
