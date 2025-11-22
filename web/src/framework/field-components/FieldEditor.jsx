@@ -30,10 +30,21 @@ export class FieldEditor extends React.Component {
                     plugins: [
                         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                         'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount'
+                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
+                        'emoticons'
                     ],
+                    image_description:false,
 
-                    image_description:false
+                    // 设置图片上传对话框默认选中上传Tab
+                    setup: function (editor) {
+                        editor.on('OpenWindow', function(e) {
+                            var dialog = e.dialog;
+                            // 包含 dimensions 属性应该就是 上传图片的对话框
+                            if (dialog && dialog.getData().dimensions) {
+                                dialog.showTab("upload")
+                            }
+                        });
+                    },
 
                 }}
                 onChange={e => {
