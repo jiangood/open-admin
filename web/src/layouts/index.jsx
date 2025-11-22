@@ -14,7 +14,6 @@ import './index.less'
 
 dayjs.locale('zh-cn');
 
-
 // 不需要登录的页面
 const SIMPLE_URLS = ['/login', '/test']
 

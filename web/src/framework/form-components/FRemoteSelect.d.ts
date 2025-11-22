@@ -9,6 +9,5 @@ export interface FRemoteSelectProps extends Omit<SelectProps, 'options' | 'child
     url: string ;
 }
 
-declare class FRemoteSelect extends React.Component<FRemoteSelectProps, any> {}
+export class FRemoteSelect extends React.Component<FRemoteSelectProps, any> {}
 
-export default FRemoteSelect;

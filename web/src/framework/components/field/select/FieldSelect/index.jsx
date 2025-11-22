@@ -5,11 +5,14 @@ import {HttpUtil} from "../../../../system";
 import {ReloadOutlined} from "@ant-design/icons";
 import {ObjUtil} from "../../../../utils";
 
+/**
+ * @deprecated
+ */
 export class FieldSelect extends React.Component {
 
     constructor(props) {
         super(props);
-
+        console.error('FieldSelect即将弃用，请使用FRemoteSelect')
         ObjUtil.copyPropertyIfPresent(props, this.state)
         this.state.componentValue = this.convertInputToComponentValue(this.state.value)
 
