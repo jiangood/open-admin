@@ -20,7 +20,7 @@ export  class PageLoading extends React.Component {
                     <Spin size={"large"}></Spin>
                 </div>
                 <div style={{marginTop:'1rem'}}>
-                    <Alert message={msg}></Alert>
+                    <Alert title={msg}></Alert>
                 </div>
 
 
