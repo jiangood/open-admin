@@ -1,6 +1,4 @@
 import React from 'react';
-import { SelectProps } from 'antd/es/select';
-import {TreeProps} from "antd";
 
 export interface FieldEditProps  {
     value ?: string;

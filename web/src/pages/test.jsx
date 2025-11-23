@@ -1,10 +1,10 @@
 import React from "react";
-import {Button, Card, Divider, Form, Space, Splitter} from "antd";
+import {Button, Card, Divider, Form, Space} from "antd";
 import {
     FieldBoolean,
     FieldDate,
     FieldDateRange,
-    FieldEditor,
+    FieldEditor, FieldPercent,
     FieldRemoteSelect,
     FieldRemoteSelectMultiple,
     FieldRemoteTree,
@@ -57,7 +57,9 @@ export default class extends React.Component {
                     labelCol={{flex: '400px',}}
                     layout='horizontal'
                 >
-
+                    <Form.Item label='百分数'   name='number'>
+                        <FieldPercent />
+                    </Form.Item>
                     <Form.Item label='机构树选择 （部门） FieldSysOrgTree'   name='org'>
                         <FieldSysOrgTree />
                     </Form.Item>
