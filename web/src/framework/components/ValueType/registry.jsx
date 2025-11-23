@@ -1,9 +1,4 @@
-import {
-    FieldDateTimePickerString,
-    FieldImageBase64,
-    FieldRadioBoolean,
-    FieldUploadImage
-} from "../field";
+
 import {ViewImage,  ViewText} from "../view";
 import {ViewPassword,ViewBoolean} from "../../view-components";
 import {FieldDictSelect, FieldRemoteSelect} from "../../field-components";
@@ -15,10 +10,6 @@ export const fieldRegistry = {
 
     'dict':FieldDictSelect,
     'password':Input.Password,
-    'datetime':FieldDateTimePickerString,
-    'boolean':FieldRadioBoolean,
-    imageBase64:FieldImageBase64,
-    image:FieldUploadImage,
 
     select: FieldRemoteSelect
 }

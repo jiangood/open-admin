@@ -1,6 +1,5 @@
 import React from 'react';
-import {FieldRemoteTreeSelect} from './field';
-import {FieldRemoteSelect, FieldRemoteSelectMultiple} from "../field-components";
+import {FieldRemoteSelect, FieldRemoteSelectMultiple, FieldRemoteTreeSelect} from "../field-components";
 
 
 export function FieldUserSelect(props) {
