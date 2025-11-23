@@ -3,7 +3,7 @@ import { SelectProps } from 'antd/es/select';
 
 export interface FieldBooleanProps  {
 
-    type?: 'radio' | 'checkbox' | 'select' | 'switch'; // 默认 select
+    type?:'select' | 'radio' | 'checkbox' |  'switch'; // 默认 select
     value?: boolean;
     onChange?: (value: boolean) => void;
 

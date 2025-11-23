@@ -16,7 +16,7 @@ export class FieldDate extends React.Component {
         switch (type) {
             case 'YYYY':
                 return <DatePicker
-                    value={this.strToDate(value, 'YYYY')}
+                    value={this.strToDate(value, type)}
                     onChange={v => onChange(this.dateToStr(v,'YYYY'))}
                     picker="year"
                     {...rest}

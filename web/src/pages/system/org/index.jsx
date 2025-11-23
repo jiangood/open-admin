@@ -2,8 +2,8 @@ import {DeleteOutlined, EditOutlined, PlusOutlined, SyncOutlined} from '@ant-des
 import {Button, Card, Checkbox, Empty, Form, Input, Popconfirm, Space, Splitter, Switch, Tree} from 'antd';
 import React from 'react';
 import {
-    FieldDictRadio,
-    FieldRadioBoolean,
+    FieldBoolean,
+    FieldDictSelect,
     FieldRemoteTreeSelect,
     FieldUserSelect,
     Gap,
@@ -205,14 +205,14 @@ export default class extends React.Component {
 
 
                             <Form.Item label='类型' name='type' rules={[{required: true}]}>
-                                <FieldDictRadio typeCode='orgType'/>
+                                <FieldDictSelect typeCode='orgType'/>
                             </Form.Item>
 
                             <Form.Item label='部门领导' name={['leader','id']} >
                                 <FieldUserSelect />
                             </Form.Item>
                             <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
-                                <FieldRadioBoolean/>
+                                <FieldBoolean/>
                             </Form.Item>
                             <Form.Item label='扩展字段1' name='extra1'>
                                 <Input />

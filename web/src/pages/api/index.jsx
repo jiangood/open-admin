@@ -2,15 +2,13 @@ import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, Modal, Popconfirm, Tabs} from 'antd'
 import React from 'react'
 import {
-    ButtonList,
-    FieldDateTimePickerString,
-    FieldRadioBoolean,
+    ButtonList, FieldBoolean, FieldDate,
     HttpUtil, Page,
     PageUtil,
     ProTable,
     StrUtil, ViewPassword
 } from "../../framework";
-import {ApiDoc} from "@/pages/api/ApiDoc";
+import {ApiDoc} from "./ApiDoc";
 
 
 export default class extends React.Component {
@@ -143,7 +141,7 @@ export default class extends React.Component {
                     label: '访问记录',
                     key: '4',
                     children: <ProTable
-                        request={(params) => HttpUtil.pageData('admin/apiAccessLog/page', params)}
+                        request={(params) => HttpUtil.get('admin/apiAccessLog/page', params)}
                         columns={[
 
                             {
@@ -251,10 +249,10 @@ export default class extends React.Component {
                         <Input placeholder='多个用逗号分隔'/>
                     </Form.Item>
                     <Form.Item label='有效期' name='endTime' style={{marginTop: 32}}>
-                        <FieldDateTimePickerString/>
+                        <FieldDate type='YYYY-MM-DD'/>
                     </Form.Item>
                     <Form.Item label='启用' name='enable' rules={[{required: true}]}>
-                        <FieldRadioBoolean/>
+                        <FieldBoolean/>
                     </Form.Item>
 
                 </Form>

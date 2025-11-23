@@ -1,22 +1,9 @@
-import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, message, Modal, Popconfirm, Switch} from 'antd'
+import {message, Switch} from 'antd'
 import React from 'react'
-import {
-    ArrUtil,
-    ButtonList,
-    FieldRadioBoolean,
-    FieldTableSelect,
-    HttpUtil,
-    Page,
-    PageUtil,
-    ProTable,
-    ViewBoolean
-} from "../../framework";
+import {ArrUtil, HttpUtil, Page, PageUtil, ProTable} from "../../framework";
 
 
 export default class extends React.Component {
-
-
 
 
     constructor(props) {
@@ -27,6 +14,7 @@ export default class extends React.Component {
     state = {
         perms: []
     }
+
     async componentDidMount() {
         const rs = await HttpUtil.get('admin/apiAccount/get', {id: this.accountId})
         this.setState({perms: rs.perms})
@@ -37,10 +25,10 @@ export default class extends React.Component {
         await HttpUtil.post('admin/apiAccount/grant', {accountId: this.accountId, action, checked});
 
         const perms = this.state.perms
-        if(checked){
-            ArrUtil.add(perms,action)
-        }else {
-            ArrUtil.remove(perms,action)
+        if (checked) {
+            ArrUtil.add(perms, action)
+        } else {
+            ArrUtil.remove(perms, action)
         }
         this.setState({perms})
         hide();
@@ -61,14 +49,15 @@ export default class extends React.Component {
                         dataIndex: 'option', title: '操作',
                         render: (_, record) => {
                             let action = record.action;
-                            return <Switch checked={this.state.perms.includes(action)} onChange={(checked) => {
-                                this.onChange(action,checked)
+                            return <Switch checked={this.state.perms.includes(action)}
+                                           onChange={(checked) => {
+                                               this.onChange(action, checked)
 
-                            }}> </Switch>
+                                           }}> </Switch>
                         }
                     }
                 ]}
-                request={(params,) => HttpUtil.pageData('admin/api/resource/page', params)}
+                request={(params,) => HttpUtil.get('admin/api/resource/page', params)}
             />
 
         </Page>

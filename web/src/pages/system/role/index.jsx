@@ -1,7 +1,7 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Transfer, Tree} from 'antd'
 import React from 'react'
-import {ButtonList, Ellipsis, FieldRadioBoolean, HttpUtil, Page, PageUtil, ProTable} from "../../../framework";
+import {ButtonList, Ellipsis, FieldBoolean, HttpUtil, Page, PageUtil, ProTable} from "../../../framework";
 
 
 export default class extends React.Component {
@@ -233,7 +233,7 @@ export default class extends React.Component {
                     </Form.Item>
 
                     <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
-                        <FieldRadioBoolean/>
+                        <FieldBoolean/>
                     </Form.Item>
 
 
