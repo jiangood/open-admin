@@ -4,7 +4,6 @@ export * from './input-number-percent';
 
 
 
-export * from './time';
 export * from './text';
 export * from './FieldProps'
 export * from './FieldOrgTree'

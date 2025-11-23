@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Card, Divider, Form, Space, Splitter} from "antd";
 import {
-    FieldBoolean, FieldDate,
+    FieldBoolean, FieldDate, FieldDateRange,
     FieldEditor,
     FieldRemoteSelect,
     FieldRemoteSelectMultiple,
@@ -30,7 +30,7 @@ export default class extends React.Component {
     render() {
 
         return <>
-            <Card title='表单组件'>
+            <Card title='表单组件-自定义封装'>
                 {JSON.stringify(this.state.formValues)}
                 <Divider></Divider>
                 <Form
@@ -50,7 +50,35 @@ export default class extends React.Component {
                     labelCol={{flex: '400px',}}
                     layout='horizontal'
                 >
-                    <Form.Item label='FieldDate YEAR_MONTH_DAY_HOUR_MINUTE_SECOND' name='date'>
+                    <Divider>日期区间 FieldDateRange</Divider>
+                    <Form.Item label=' YEAR_MONTH_DAY_HOUR_MINUTE_SECOND' name='dateRange'>
+                        <FieldDateRange type='YEAR_MONTH_DAY_HOUR_MINUTE_SECOND'></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='YEAR_MONTH_DAY_HOUR_MINUTE' name='dateRange'>
+                        <FieldDateRange type='YEAR_MONTH_DAY_HOUR_MINUTE'></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='日期' name='dateRange'>
+                        <FieldDateRange ></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='YEAR_QUARTER 季度' name='dateRange'>
+                        <FieldDateRange type='YEAR_QUARTER'></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='YEAR_MONTH' name='dateRange'>
+                        <FieldDateRange type='YEAR_MONTH'></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='YEAR' name='dateRange'>
+                        <FieldDateRange type='YEAR'></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='HOUR_MINUTE' name='dateRange'>
+                        <FieldDateRange type='HOUR_MINUTE'></FieldDateRange>
+                    </Form.Item>
+                    <Form.Item label='HOUR_MINUTE_SECOND' name='dateRange'>
+                        <FieldDateRange type='HOUR_MINUTE_SECOND'></FieldDateRange>
+                    </Form.Item>
+
+
+                    <Divider>日期</Divider>
+                    <Form.Item label='YEAR_MONTH_DAY_HOUR_MINUTE_SECOND' name='date'>
                         <FieldDate type='YEAR_MONTH_DAY_HOUR_MINUTE_SECOND'></FieldDate>
                     </Form.Item>
                     <Form.Item label='FieldDate YEAR_MONTH_DAY_HOUR_MINUTE' name='date'>
@@ -74,6 +102,7 @@ export default class extends React.Component {
                     <Form.Item label='FieldDate HOUR_MINUTE_SECOND' name='date'>
                         <FieldDate type='HOUR_MINUTE_SECOND'></FieldDate>
                     </Form.Item>
+                    <Divider>布尔</Divider>
                     <Form.Item label='FieldBoolean 布尔 (switch)' name='boolean'>
                         <FieldBoolean type='switch'></FieldBoolean>
                     </Form.Item>
@@ -89,6 +118,8 @@ export default class extends React.Component {
                     <Form.Item label='FieldRemoteTreeSelectMultiple 远程树选择(多选)' name='users'>
                         <FieldRemoteTreeSelectMultiple url='admin/sysUser/tree'/>
                     </Form.Item>
+
+                    <Divider>选择</Divider>
                     <Form.Item label='远程树选择' name='user'>
                         <FieldRemoteTreeSelect url='admin/sysUser/tree'/>
                     </Form.Item>
