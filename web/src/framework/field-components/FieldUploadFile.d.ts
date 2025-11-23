@@ -1,6 +1,5 @@
 // @ts-ignore
 import React from "react";
-// @ts-ignore
 import {CropperProps} from "react-easy-crop/Cropper";
 import {UploadListType} from "antd/es/upload/interface";
 

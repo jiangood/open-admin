@@ -2,9 +2,8 @@ import React from "react";
 import ImgCrop from "antd-img-crop";
 import {Modal, Upload} from "antd";
 import UploadOutlined from "@ant-design/icons/lib/icons/UploadOutlined";
-import {SysUtil} from "../../../system";
-import {ViewFile} from "../../view";
-import {ObjUtil} from "../../../utils";
+import {ObjUtil} from "../utils";
+import {ViewFile} from "../components";
 
 
 export class FieldUploadFile extends React.Component {
@@ -13,7 +12,6 @@ export class FieldUploadFile extends React.Component {
         // 传入的参数
         maxCount: 1,
         cropImage: false,
-        accept: ".jpg,.png",
 
         // 内部参数
         fileList: [],
