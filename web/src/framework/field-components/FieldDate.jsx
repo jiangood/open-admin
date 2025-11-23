@@ -7,7 +7,7 @@ import {DatePicker, TimePicker} from "antd";
 
 
 export class FieldDate extends React.Component {
-    defaultProps = {
+    static defaultProps = {
         type: 'YEAR_MONTH_DAY'
     }
 
@@ -45,6 +45,7 @@ export class FieldDate extends React.Component {
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-MM-DD HH:mm')}
                     onChange={v => onChange(this.dateToStr(v,'YYYY-MM-DD HH:mm'))}
+                    format='YYYY-MM-DD HH:mm'
                     showTime
                     {...rest}
                 ></DatePicker>;
