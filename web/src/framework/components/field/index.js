@@ -8,7 +8,6 @@ export * from './FieldRemoteTreeSelect';
 
 export * from './time';
 export * from './dict';
-export * from './FieldRemoteTreeCascader';
 export * from './FieldRemoteTreeMultipleSelect';
 export * from './text';
 export * from './FieldProps'

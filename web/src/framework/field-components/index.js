@@ -4,3 +4,4 @@ export * from './FieldRemoteSelectMultiple';
 export * from './FieldRemoteTree';
 export * from './FieldDictSelect';
 export * from './FieldEditor'
+export * from './FieldRemoteTreeCascader'

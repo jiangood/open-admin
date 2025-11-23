@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, Card, Divider, Form, Space, Splitter} from "antd";
-import {FieldEditor, FieldRemoteSelect, FieldRemoteSelectMultiple} from "../framework";
+import {FieldEditor, FieldRemoteSelect, FieldRemoteSelectMultiple, FieldRemoteTreeCascader} from "../framework";
 
 export default class extends React.Component {
 
@@ -47,6 +47,9 @@ export default class extends React.Component {
                             </Form.Item>
                             <Form.Item label='富文本' name='富文本'>
                                 <FieldEditor height={100} />
+                            </Form.Item>
+                            <Form.Item label='级联数选择' name='级联数选择'>
+                                <FieldRemoteTreeCascader url='admin/sysUser/tree' />
                             </Form.Item>
 
                             <Space>

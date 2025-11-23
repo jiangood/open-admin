@@ -20,11 +20,6 @@ export class FieldRemoteTreeCascader extends React.Component {
     this.fetchData();
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    this.setState({ url: this.props.url }, () => {
-      this.fetchData();
-    });
-  }
 
 
 
