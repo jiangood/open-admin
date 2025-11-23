@@ -234,34 +234,7 @@ public class SysUserController {
     }
 
 
-    /**
-     * 下拉表格
-     *
-     * @param dropdownRequest
-     * @param pageable
-     * @return
-     */
-    @RequestMapping("tableSelect")
-    public AjaxResult tableSelect(DropdownRequest dropdownRequest, Pageable pageable) {
-        JpaQuery<SysUser> q = new JpaQuery<>();
-        q.searchText(dropdownRequest.getSearchText(), SysUser.Fields.name, SysUser.Fields.account);
 
-        List<String> selected = dropdownRequest.getSelected();
-        if (CollUtil.isNotEmpty(selected)) {
-            q.in("id", selected);
-        }
-
-        Page<SysUser> page = sysUserService.findPageByRequest(q, pageable);
-
-
-        Table<SysUser> tb = new Table<>(page);
-        tb.addColumn("标识", "id");
-        tb.addColumn("账号", SysUser.Fields.account).setSorter(true);
-        tb.addColumn("名称", SysUser.Fields.name).setSorter(true);
-
-
-        return AjaxResult.ok().data(tb);
-    }
 
 
 }

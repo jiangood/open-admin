@@ -11,6 +11,5 @@ export * from './FieldOrgTree'
 export * from './FieldFileBase64'
 
 export  * from './upload'
-export  * from './select'
 
 export * from './FieldImageBase64'

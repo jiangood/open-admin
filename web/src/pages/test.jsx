@@ -6,7 +6,7 @@ import {
     FieldRemoteSelect,
     FieldRemoteSelectMultiple,
     FieldRemoteTree,
-    FieldRemoteTreeCascader, FieldRemoteTreeSelect, FieldRemoteTreeSelectMultiple, FieldTable
+    FieldRemoteTreeCascader, FieldRemoteTreeSelect, FieldRemoteTreeSelectMultiple, FieldTable, FieldTableSelect
 } from "../framework";
 
 export default class extends React.Component {
@@ -50,6 +50,13 @@ export default class extends React.Component {
                     labelCol={{flex: '400px',}}
                     layout='horizontal'
                 >
+                    <Form.Item label='选择表格 FieldTableSelect' name='user'>
+                        <FieldTableSelect url='admin/sysUser/page'  columns={[
+                            {title: '姓名', dataIndex: 'name'},
+                            {title: '账号', dataIndex: 'account'},
+                        ]}/>
+                    </Form.Item>
+
                     <Form.Item label='可编辑表格' name='tableData'>
                         <FieldTable columns={[
                             {title: '名称', dataIndex: 'name'},

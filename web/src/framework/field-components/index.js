@@ -11,3 +11,4 @@ export * from './FieldBoolean';
 export * from './FieldDate';
 export * from './FieldDateRange';
 export * from './FieldTable'
+export * from './FieldTableSelect'
