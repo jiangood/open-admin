@@ -10,3 +10,4 @@ export * from './FieldRemoteTreeSelectMultiple'
 export * from './FieldBoolean';
 export * from './FieldDate';
 export * from './FieldDateRange';
+export * from './FieldTable'

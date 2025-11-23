@@ -6,7 +6,7 @@ import {
     FieldRemoteSelect,
     FieldRemoteSelectMultiple,
     FieldRemoteTree,
-    FieldRemoteTreeCascader, FieldRemoteTreeSelect, FieldRemoteTreeSelectMultiple
+    FieldRemoteTreeCascader, FieldRemoteTreeSelect, FieldRemoteTreeSelectMultiple, FieldTable
 } from "../framework";
 
 export default class extends React.Component {
@@ -50,6 +50,16 @@ export default class extends React.Component {
                     labelCol={{flex: '400px',}}
                     layout='horizontal'
                 >
+                    <Form.Item label='可编辑表格' name='tableData'>
+                        <FieldTable columns={[
+                            {title: '名称', dataIndex: 'name'},
+                            {title: '年龄', dataIndex: 'age'},
+                            {title: '婚否', dataIndex: 'marry',render(){
+                                return <FieldBoolean type='select'></FieldBoolean>
+                                }},
+                        ]}></FieldTable>
+                    </Form.Item>
+
                     <Divider>日期区间 FieldDateRange</Divider>
                     <Form.Item label=' YEAR_MONTH_DAY_HOUR_MINUTE_SECOND' name='dateRange'>
                         <FieldDateRange type='YEAR_MONTH_DAY_HOUR_MINUTE_SECOND'></FieldDateRange>
