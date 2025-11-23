@@ -5,7 +5,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import io.admin.common.utils.PasswordUtils;
 import io.admin.framework.config.SysProp;
-import io.admin.framework.db.DbCacheDao;
 import io.admin.framework.dict.DictAnnHandler;
 import io.admin.modules.system.ConfigConsts;
 import io.admin.modules.system.dao.SysConfigDao;
@@ -56,8 +55,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
 
 
 
-    @Resource
-    private DbCacheDao dbCacheDao;
 
     @Resource
     SysProp sysProp;
@@ -121,8 +118,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
             admin.setPassword(PasswordUtils.encode(pwd));
             admin = sysUserDao.save(admin);
             log.info("创建默认管理员 {}", admin.getAccount());
-            dbCacheDao.set("admin_default_pwd", pwd);
-            log.info("默认密码为： {}", pwd);
         }
         log.info("管理员登录账号:{}", admin.getAccount());
 
