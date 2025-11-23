@@ -1,10 +1,11 @@
 import {Spin, TreeSelect} from 'antd';
 
 import React from 'react';
-import {HttpUtil} from "../../system";
-import {TreeUtil} from "../../utils";
+import {StrUtil, TreeUtil} from "../utils";
+import {HttpUtil} from "../system";
 
 export class FieldRemoteTreeSelect extends React.Component {
+
   state = {
     data: [],
     value: [],
@@ -69,7 +70,7 @@ export class FieldRemoteTreeSelect extends React.Component {
 
         filterTreeNode={(inputValue, treeNode)=>{
           const {title} = treeNode
-          return str.contains(title,inputValue)
+          return StrUtil.contains(title,inputValue)
         }}
         treeLine={{showLeafIcon:true}}
 

@@ -15,9 +15,10 @@ export class FieldRemoteTree extends React.Component {
 
 
     loadData = async () => {
+        this.setState({treeLoading: true})
+        let url = this.props.url;
         try {
-            this.setState({treeLoading: true})
-            const treeData = await HttpUtil.get('admin/sysOrg/unitTree')
+            const treeData = await HttpUtil.get(url)
             this.setState({treeData})
         } catch (e) {
             console.log(e)

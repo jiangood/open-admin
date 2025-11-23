@@ -1,6 +1,12 @@
 import React from "react";
 import {Button, Card, Divider, Form, Space, Splitter} from "antd";
-import {FieldEditor, FieldRemoteSelect, FieldRemoteSelectMultiple, FieldRemoteTreeCascader} from "../framework";
+import {
+    FieldEditor,
+    FieldRemoteSelect,
+    FieldRemoteSelectMultiple,
+    FieldRemoteTree,
+    FieldRemoteTreeCascader, FieldRemoteTreeSelect
+} from "../framework";
 
 export default class extends React.Component {
 
@@ -39,9 +45,16 @@ export default class extends React.Component {
                                 localStorage.setItem("_test", JSON.stringify(values))
                             }}
 
-                            layout='vertical'
+                            labelCol={{flex:'200px'}}
+                            layout='horizontal'
                         >
-                            <Form.Item label='级联数选择' name='级联数选择'>
+                            <Form.Item label='远程树选择' name='远程树选择'>
+                                <FieldRemoteTreeSelect url='admin/sysUser/tree' />
+                            </Form.Item>
+                            <Form.Item label='远程树' name='远程树'>
+                                <FieldRemoteTree url='admin/sysUser/tree' />
+                            </Form.Item>
+                            <Form.Item label='远程树级联选择' name='级联数选择'>
                                 <FieldRemoteTreeCascader url='admin/sysUser/tree' />
                             </Form.Item>
 
