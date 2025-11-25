@@ -1,7 +1,7 @@
 import {Button, Card, Form, Modal, Table} from 'antd'
 import React from 'react'
 
-import {ButtonList, ValueType} from '../../../framework'
+import {ButtonList, HttpUtils, ValueType} from '../../../framework'
 
 
 export default class extends React.Component {
