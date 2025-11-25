@@ -1,4 +1,4 @@
-import { DateUtil } from "./date";
+import { DateUtils } from "./DateUtils";
 
 // 如果 ENCRYPT 仅在当前文件内使用，且不需要作为公共属性，可以保持为局部常量
 const ENCRYPT = false;
@@ -53,7 +53,7 @@ export class StorageUtils {
 
         // 构造包含时间戳的对象
         const item = {
-            createTime: DateUtil.now(), // 假设 DateUtil.now() 返回 number 类型的时间戳
+            createTime: DateUtils.now(), // 假设 DateUtil.now() 返回 number 类型的时间戳
             data: value
         };
 

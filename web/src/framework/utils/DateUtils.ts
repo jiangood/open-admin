@@ -1,4 +1,4 @@
-import { StrUtil } from './str';
+import { StringUtils } from './StringUtils';
 
 export class DateUtils  {
   public static year(date: Date): number {
@@ -12,7 +12,7 @@ export class DateUtils  {
      */
     public static month(date: Date): string {
         const n = date.getMonth() + 1; // （注意月份从0开始，所以要加1）
-        return StrUtil.pad(n, 2);
+        return StringUtils.pad(n, 2);
     }
 
     /**
@@ -20,7 +20,7 @@ export class DateUtils  {
      * @param date
      */
     public static date(date: Date): string {
-        return StrUtil.pad(date.getDate(), 2);
+        return StringUtils.pad(date.getDate(), 2);
     }
 
     /**
@@ -29,15 +29,15 @@ export class DateUtils  {
      * @returns {string}
      */
     public static  hour(date: Date): string {
-        return StrUtil.pad(date.getHours(), 2);
+        return StringUtils.pad(date.getHours(), 2);
     }
 
     public static  minute(date: Date): string {
-        return StrUtil.pad(date.getMinutes(), 2);
+        return StringUtils.pad(date.getMinutes(), 2);
     }
 
     public static  second(date: Date): string {
-        return StrUtil.pad(date.getSeconds(), 2);
+        return StringUtils.pad(date.getSeconds(), 2);
     }
 
     public static  formatDate(d: Date): string {
