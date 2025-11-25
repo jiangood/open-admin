@@ -1,7 +1,7 @@
 import React from 'react';
 import {Modal} from 'antd';
 import './Ellipsis.less'
-import {StringUtils, StringUtils} from "../utils";
+import {StringUtils} from "../utils";
 
 export class Ellipsis extends React.Component {
   static defaultProps = {length: 15}

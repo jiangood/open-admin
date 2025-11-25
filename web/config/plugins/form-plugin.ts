@@ -4,6 +4,8 @@ import * as path from "path";
 
 // 自动注册src/forms下的表单
 const pkgName = '@jiangood/springboot-admin-starter';
+
+
 export default (api: IApi) => {
     api.logger.info('plugin starting... ')
     api.logger.info('info', JSON.stringify(api.env))
@@ -22,7 +24,7 @@ export default (api: IApi) => {
     api.logger.info('formRegistryPath', formRegistryPath)
     api.addEntryImports(() => ({
         source: formRegistryPath,
-        specifier: '{formRegistry}'
+        specifier: '{FormRegistryUtils}'
     }))
 
     parseDir(api, path.join(api.paths.absSrcPath, 'forms'))
@@ -53,7 +55,7 @@ function parseDir(api: IApi, dir: string) {
         }))
 
         // register form
-        api.addEntryCodeAhead(() => `formRegistry.register("${name}",${name} );`)
+        api.addEntryCodeAhead(() => `FormRegistryUtils.register("${name}",${name} );`)
         api.logger.info('formRegistry.register: ', name, source)
     });
 }
