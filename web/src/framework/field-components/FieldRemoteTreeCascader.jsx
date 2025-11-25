@@ -1,8 +1,7 @@
 import {Cascader, message, Spin} from 'antd';
 
 import React from 'react';
-import {TreeUtil} from "../utils";
-import {HttpUtil} from "../system";
+import {HttpUtils, TreeUtils} from "../utils";
 
 
 export class FieldRemoteTreeCascader extends React.Component {
@@ -23,7 +22,7 @@ export class FieldRemoteTreeCascader extends React.Component {
         this.setState({loading: true});
 
         try {
-            const list = await HttpUtil.get(url);
+            const list = await HttpUtils.get(url);
             this.setState({data: list});
         } catch (e) {
             console.log(e)
@@ -44,7 +43,7 @@ export class FieldRemoteTreeCascader extends React.Component {
 
         let arr = [];
         if (value != null) {
-            arr = TreeUtil.getKeyList(data, value);
+            arr = TreeUtils.getKeyList(data, value);
         }
 
         return (

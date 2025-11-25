@@ -1,8 +1,8 @@
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
 import { message as messageUtil, Modal } from "antd";
 import qs from 'qs';
-import { MsgBox } from "../components"; // 假设路径正确
-import { PageUtil } from "./page"; // 假设路径正确
+import { MsgBox } from "../components";
+import {PageUtils} from "./PageUtils"; // 假设路径正确
 
 /**
  * @description 请求配置接口，继承AxiosConfig并添加自定义选项
@@ -108,7 +108,7 @@ export class HttpUtils {
                 if (status === 401) {
                     // 登录过期处理
                     MsgBox.confirm('登录已过期，请重新登录').then(() => {
-                        PageUtil.redirectToLogin();
+                        PageUtils.redirectToLogin();
                     });
                     // 阻止后续的错误提示，返回一个特殊 Promise.reject
                     return Promise.reject('登录过期');

@@ -1,6 +1,5 @@
-// 假设的导入，你需要确保这些文件和类型定义存在
-import { SysUtil } from "./sys"; // 假设 SysUtil 存在
-import { ArrUtils } from "../utils"; // 假设 ArrUtils 存在
+import {SysUtils} from "./SysUtils";
+import {ArrUtils} from "../ArrUtils";
 
 /**
  * 登录用户信息接口，假设 SysUtil.getLoginInfo() 返回这个结构
@@ -22,7 +21,7 @@ export class PermUtils {
    */
   private static getPermissions(): string[] {
     // 假设 SysUtil.getLoginInfo() 返回 LoginInfo 类型的对象
-    const info: LoginInfo = SysUtil.getLoginInfo();
+    const info: LoginInfo = SysUtils.getLoginInfo();
     const { permissions } = info;
 
     if (permissions == null || permissions.length === 0) {

@@ -1,6 +1,7 @@
-import { StorageUtil } from "../utils";
 
 // --- 常量定义 ---
+import {StorageUtils} from "../StorageUtils";
+
 const SITE_INFO_KEY = "siteInfo";
 const LOGIN_INFO_KEY = "loginInfo";
 const DICT_INFO_KEY = "dictInfo";
@@ -45,7 +46,7 @@ export class SysUtils {
     public static setSiteInfo(data: SiteInfo): void {
         // 假设 StorageUtil.set 返回 void
         // 请根据实际 StorageUtil 的实现调整返回值类型
-        StorageUtil.set(SITE_INFO_KEY, data);
+        StorageUtils.set(SITE_INFO_KEY, data);
     }
 
     /**
@@ -54,7 +55,7 @@ export class SysUtils {
      */
     public static getSiteInfo(): SiteInfo {
         // 假设 StorageUtil.get 内部处理了 JSON.parse，并返回对应类型或 null
-        return StorageUtil.get(SITE_INFO_KEY) || {} as SiteInfo;
+        return StorageUtils.get(SITE_INFO_KEY) || {} as SiteInfo;
     }
 
     /**
@@ -62,7 +63,7 @@ export class SysUtils {
      * @param data 要存储的登录信息数据。
      */
     public static setLoginInfo(data: LoginInfo): void {
-        StorageUtil.set(LOGIN_INFO_KEY, data);
+        StorageUtils.set(LOGIN_INFO_KEY, data);
     }
 
     /**
@@ -70,7 +71,7 @@ export class SysUtils {
      * @returns 登录信息对象，如果不存在则返回一个空对象。
      */
     public static getLoginInfo(): LoginInfo {
-        return StorageUtil.get(LOGIN_INFO_KEY) || {} as LoginInfo;
+        return StorageUtils.get(LOGIN_INFO_KEY) || {} as LoginInfo;
     }
 
     /**
@@ -78,7 +79,7 @@ export class SysUtils {
      * @param data 要存储的字典信息数据。
      */
     public static setDictInfo(data: DictInfo): void {
-        StorageUtil.set(DICT_INFO_KEY, data);
+        StorageUtils.set(DICT_INFO_KEY, data);
     }
 
     /**
@@ -86,7 +87,7 @@ export class SysUtils {
      * @returns 字典信息对象，如果不存在则返回 null。
      */
     public static getDictInfo(): DictInfo {
-        return StorageUtil.get(DICT_INFO_KEY);
+        return StorageUtils.get(DICT_INFO_KEY);
     }
 }
 
