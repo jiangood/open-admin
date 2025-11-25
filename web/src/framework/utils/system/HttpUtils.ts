@@ -1,82 +1,59 @@
-import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
-import { message as messageUtil, Modal } from "antd";
+import axios, {AxiosRequestConfig, AxiosResponse, Method} from "axios";
+import {message as messageUtil, Modal} from "antd";
 import qs from 'qs';
 import {PageUtils} from "./PageUtils";
 import {MsgBox} from "../../components"; // 假设路径正确
 
-/**
- * @description 请求配置接口，继承AxiosConfig并添加自定义选项
- */
-interface RequestOptions extends AxiosRequestConfig {
-    // 是否在请求成功后只返回body.data（默认：true）
-    transformData?: boolean;
-    // 是否自动显示成功/失败消息（默认：true）
-    showMessage?: boolean;
-}
+
+const axiosInstance = axios.create({
+    withCredentials: true,
+    headers:{
+        'Content-Type': 'application/json'
+    },
+    // 解决get请求时，数组参数的问题
+    paramsSerializer: (params) => {
+        return qs.stringify(params, {indices: false});
+    }
+})
+
+
 
 /**
  * @description HTTP请求工具类
  */
 export class HttpUtils {
 
-    // 默认配置
-    private static readonly DEFAULT_OPTIONS: Partial<RequestOptions> = {
-        transformData: true,
-        showMessage: true,
-        withCredentials: true,
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        paramsSerializer: (params) => {
-            return qs.stringify(params, { indices: false });
-        }
-    };
+
 
     /**
      * 核心请求函数，处理请求发送、加载状态、响应解析和错误捕获
      * @param config AxiosRequestConfig & RequestOptions
+     * @param transformData 是否返回最总的data字段
      * @returns Promise<any>
      */
-    private static async coreRequest(config: RequestOptions): Promise<any> {
-        // 合并配置
-        const finalConfig: RequestOptions = { ...HttpUtils.DEFAULT_OPTIONS, ...config };
-
-        const { url,  transformData, showMessage, ...axiosConfig } = finalConfig;
-
-        axiosConfig.url = url.startsWith('admin') ? '/' + url: url;
+    private static async coreRequest(config: AxiosRequestConfig, transformData:boolean=true): Promise<any> {
+        const url = config.url;
+        config.url = url.startsWith('admin') ? '/' + url : url;
 
         try {
-            const response: AxiosResponse = await axios(axiosConfig);
+            const response: AxiosResponse = await axios(config);
             const body = response.data;
             // 假设后端响应结构为 { success: boolean | null, message: string, data: any, code: number }
-            const { success, message, data } = body;
-
-            // 自动消息提示
-            if (showMessage && success !== null && message) {
-                if (success) {
-                    messageUtil.success(message);
-                } else {
-                    messageUtil.error(message);
-                }
-            }
-
-            // 不转换数据，直接返回完整的响应
-            if (!transformData) {
+            let {success, message, data} = body;
+            if (success == undefined) { // 如果没有success字段，说明非标准接口
                 return response;
             }
-
-            // 后端返回结果没有success标志，则原样返回
-            if (success == null) {
-                return body;
+            if (!success) {
+                messageUtil.success(message || '操作失败');
+                return
             }
 
-            // 成功则返回data，失败则抛出错误信息
-            if (success) {
-                return data;
+            // 自动消息提示
+            if (message) {
+                messageUtil.success(message);
             }
-            // 抛出后端定义的错误信息
-            throw new Error(message || '操作失败');
 
+            return transformData ? data : response;
         } catch (e: unknown) {
             // 统一异常处理
             let msg = '操作失败';
@@ -104,14 +81,10 @@ export class HttpUtils {
                 msg = e.message;
             }
 
-            if (showMessage && msg !== '登录过期') {
-                messageUtil.error(msg);
-            }
+            messageUtil.error(msg);
 
             // 将原始错误或处理后的错误信息向外抛出
-            return throw e;
-
-        } finally {
+             throw e;
 
         }
     }
@@ -123,7 +96,7 @@ export class HttpUtils {
      */
     private static handleDownloadBlob(res: AxiosResponse): Promise<void> {
         return new Promise((resolve, reject) => {
-            const { data: blob, headers } = res;
+            const {data: blob, headers} = res;
 
             // 1. 检查是否为错误JSON
             if (blob.type === 'application/json') {
@@ -138,7 +111,7 @@ export class HttpUtils {
                         });
                         reject(new Error(rs.message || '下载错误'));
                     } catch (e) {
-                        Modal.error({ title: '下载文件失败', content: '解析错误响应失败' });
+                        Modal.error({title: '下载文件失败', content: '解析错误响应失败'});
                         reject(e);
                     }
                 };
@@ -148,7 +121,7 @@ export class HttpUtils {
             // 2. 获取文件名称
             const contentDisposition = headers['content-disposition'] || headers['Content-Disposition'];
             if (!contentDisposition) {
-                Modal.error({ title: '获取文件名称失败', content: "缺少Content-Disposition响应头" });
+                Modal.error({title: '获取文件名称失败', content: "缺少Content-Disposition响应头"});
                 reject(new Error("缺少Content-Disposition响应头"));
                 return;
             }
@@ -182,16 +155,15 @@ export class HttpUtils {
     }
 
 
-    // --- 暴露给外部调用的公共静态方法 ---
 
     /**
      * 发送GET请求
      * @param url 请求地址
      * @param params URL参数
-     * @param options 自定义配置 (showMessage, transformData等)
+     * @param options 自定义配置 (transformData等)
      * @returns Promise<any> 后端返回的 data 字段
      */
-    public static get(url: string, params: any = null, options: Partial<RequestOptions> = {}): Promise<any> {
+    public static get(url: string, params: any = null, options: Partial<AxiosRequestConfig> = {}): Promise<any> {
         return HttpUtils.coreRequest({
             ...options,
             url,
@@ -225,14 +197,13 @@ export class HttpUtils {
      * @param options 自定义配置
      * @returns Promise<any> 后端返回的 data 字段
      */
-    public static postForm(url: string, data: any, options: Partial<RequestOptions> = {}): Promise<any> {
+    public static postForm(url: string, data: any, options: Partial<AxiosRequestConfig> = {}): Promise<any> {
         return HttpUtils.coreRequest({
             ...options,
             url,
             method: 'POST',
             data: qs.stringify(data), // 转换为表单格式
             headers: {
-                ...HttpUtils.DEFAULT_OPTIONS.headers,
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
         });
@@ -247,12 +218,10 @@ export class HttpUtils {
      * @param options 自定义配置
      * @returns Promise<void>
      */
-    public static async downloadFile(url: string, data: any = null, params: any = null, method: Method = 'GET', options: Partial<RequestOptions> = {}): Promise<void> {
+    public static async downloadFile(url: string, data: any = null, params: any = null, method: Method = 'GET', options: Partial<AxiosRequestConfig> = {}): Promise<void> {
 
         // 下载请求默认设置：不转换数据，响应类型为 blob
-        const downloadConfig: RequestOptions = {
-            transformData: false,
-            showMessage: true,
+        const downloadConfig: AxiosRequestConfig = {
             responseType: 'blob', // 关键设置
             ...options,
             url,
@@ -263,7 +232,7 @@ export class HttpUtils {
 
         try {
             // coreRequest返回的是完整的 AxiosResponse，因此需要类型断言
-            const response = await HttpUtils.coreRequest(downloadConfig) as AxiosResponse;
+            const response = await HttpUtils.coreRequest(downloadConfig,false) as AxiosResponse;
             await HttpUtils.handleDownloadBlob(response);
         } catch (error) {
             // coreRequest已经处理了401、504和通用的错误提示
@@ -271,29 +240,5 @@ export class HttpUtils {
         }
     }
 
-    // --- 兼容/弃用方法 ---
 
-    /**
-     * @deprecated 请使用 HttpUtils.get 代替
-     */
-    public static pageData(url: string, params: any): Promise<any> {
-        console.warn("pageData is deprecated, please use HttpUtils.get instead.");
-        return HttpUtils.get(url, params);
-    }
-
-    /**
-     * @deprecated 请使用 HttpUtils.downloadFile 代替
-     */
-    public static downloadFileGet(url: string, params: any, headers?: any): Promise<void> {
-        console.warn("downloadFileGet is deprecated, please use HttpUtils.downloadFile instead.");
-        return HttpUtils.downloadFile(url, null, params, 'GET', { headers });
-    }
-
-    /**
-     * @deprecated 请使用 HttpUtils.downloadFile 代替
-     */
-    public static downloadFilePost(url: string, data: any, params: any, headers?: any): Promise<void> {
-        console.warn("downloadFilePost is deprecated, please use HttpUtils.downloadFile instead.");
-        return HttpUtils.downloadFile(url, data, params, 'POST', { headers });
-    }
 }
