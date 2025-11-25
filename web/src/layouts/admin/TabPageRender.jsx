@@ -2,7 +2,7 @@ import React from "react";
 import {withRouter} from "umi";
 import {Tabs} from "antd";
 import {PageRender} from "../PageRender";
-import {PageUtil} from "../../framework";
+import {PageUtils} from "../../framework";
 
 class TabPageRender extends React.Component {
 

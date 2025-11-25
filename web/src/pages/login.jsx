@@ -3,7 +3,7 @@ import {Button, Form, Input, message, Space} from 'antd';
 import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
 import "./login.less"
 import {history} from 'umi';
-import {MsgBox} from "../framework";
+import {HttpUtils, MsgBox, PageUtils, SysUtils} from "../framework";
 import {JSEncrypt} from "jsencrypt";
 
 
@@ -78,7 +78,7 @@ export default class login extends React.Component {
 
         const pageStyle = {}
         if(siteInfo.loginBackground){
-            let url = SysUtils.wrapServerUrl('admin/sysFile/preview/' + siteInfo.loginBackground);
+            let url = 'admin/sysFile/preview/' + siteInfo.loginBackground;
             pageStyle.backgroundImage = 'url("'+url+'")'
         }
 
