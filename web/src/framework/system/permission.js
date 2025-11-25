@@ -2,7 +2,7 @@
  * 控制按钮是否显示
  */
 import {SysUtil} from "./sys";
-import {ArrUtil} from "../utils";
+import {ArrUtils} from "../utils";
 
 
 export const PermUtil = {
@@ -22,7 +22,7 @@ export const PermUtil = {
       return false
     }
 
-    if (ArrUtil.contains(permissions,"*")) {
+    if (ArrUtils.contains(permissions,"*")) {
       return true;
     }
 

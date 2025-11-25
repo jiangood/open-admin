@@ -5,7 +5,7 @@ import {ConfigProvider} from "antd";
 
 import {history, Outlet, withRouter} from "umi";
 import zhCN from 'antd/locale/zh_CN';
-import {ArrUtil, HttpUtil, MsgBoxComponent, PageLoading, PageUtil, SysUtil, theme} from "../framework";
+import {ArrUtils, HttpUtil, MsgBoxComponent, PageLoading, PageUtil, SysUtil, theme} from "../framework";
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 
@@ -46,7 +46,7 @@ class _Layouts extends React.Component {
 
     isSimplePage() {
         let {pathname} = this.props.location;
-        return ArrUtil.contains(SIMPLE_URLS, pathname)
+        return ArrUtils.contains(SIMPLE_URLS, pathname)
     }
 
     loadLoginInfo = () => {

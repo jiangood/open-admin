@@ -1,108 +1,105 @@
-import {StrUtil} from "./str";
+import { StrUtil } from './str';
 
-
-export const DateUtil = {
-
-     year(date) {
+export class DateUtils  {
+  public static year(date: Date): number {
         return date.getFullYear();
-    },
+    }
 
     /**
-     *  获取月份， 自动补0
+     * 获取月份，自动补0
      * @param date
-     * @returns {*}
+     * @returns {string}
      */
-     month(date) {
+    public static month(date: Date): string {
         const n = date.getMonth() + 1; // （注意月份从0开始，所以要加1）
-        return StrUtil.pad(n, 2)
-    },
+        return StrUtil.pad(n, 2);
+    }
 
     /**
      * 获取日期，
      * @param date
      */
-     date(date) {
-        return StrUtil.pad(date.getDate(), 2)
-    },
+    public static date(date: Date): string {
+        return StrUtil.pad(date.getDate(), 2);
+    }
 
     /**
-     * 小时， 24进制
+     * 小时，24进制
      * @param date
      * @returns {string}
      */
-     hour(date) {
+    public static  hour(date: Date): string {
         return StrUtil.pad(date.getHours(), 2);
-    },
+    }
 
-     minute(date) {
+    public static  minute(date: Date): string {
         return StrUtil.pad(date.getMinutes(), 2);
-    },
+    }
 
-     second(date) {
+    public static  second(date: Date): string {
         return StrUtil.pad(date.getSeconds(), 2);
-    },
+    }
 
-     formatDate(d) {
-        return this.year(d) + '-' + this.month(d) + "-" + this.date(d)
-    },
+    public static  formatDate(d: Date): string {
+        return this.year(d) + '-' + this.month(d) + '-' + this.date(d);
+    }
 
-     formatTime(d) {
-        return this.hour(d) + ':' + this.minute(d) + ":" + this.second(d)
-    },
+    public static formatTime(d: Date): string {
+        return this.hour(d) + ':' + this.minute(d) + ':' + this.second(d);
+    }
 
-     formatDateTime(d) {
-        return this.formatDate(d) + " " + this.formatTime(d)
-    },
+    public static formatDateTime(d: Date): string {
+        return this.formatDate(d) + ' ' + this.formatTime(d);
+    }
 
     /**
      *
      * @param d
      * @returns {string} 2020年1月30日
      */
-     formatDateCn(d) {
-        return this.year(d) + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日'
-    },
+    public static  formatDateCn(d: Date): string {
+        return this.year(d) + '年' + (d.getMonth() + 1) + '月' + d.getDate() + '日';
+    }
 
     /***
      当前时间, 如 2022-01-23 11:59:59
      */
-     now() {
+    public static now(): string {
         return this.formatDateTime(new Date());
-    },
+    }
 
     /**
      * 当前日期 ，如 2022-01-23
      *
      */
-     today() {
+    public static today(): string {
         return this.formatDate(new Date());
-    },
+    }
 
-     thisYear() {
-        return this.year(new Date())
-    },
+    public static  thisYear(): number {
+        return this.year(new Date());
+    }
 
-     thisMonth() {
-        return this.month(new Date())
-    },
-
+    public static  thisMonth(): string {
+        return this.month(new Date());
+    }
 
     /**
-     * 显示友好时间， 如 2小时前， 1周前
-     * @param pastDate 日期, 支持Date， String， Number
+     * 显示友好时间，如 2小时前，1周前
+     * @param pastDate 日期, 支持Date，String，Number
      */
-     friendlyTime(pastDate) {
+    public static  friendlyTime(pastDate: Date | string | number): string | undefined {
         if (pastDate == null) {
-            return
+            return undefined;
         }
         if (!(pastDate instanceof Date)) {
-            pastDate = new Date(pastDate)
+            pastDate = new Date(pastDate);
         }
 
         const currentDate = new Date();
-        let elapsedMilliseconds = currentDate - pastDate;
-        const suffix = elapsedMilliseconds > 0 ? "前" : "后";
-        elapsedMilliseconds = Math.abs(elapsedMilliseconds)
+        let elapsedMilliseconds = currentDate.getTime() - pastDate.getTime();
+        const suffix = elapsedMilliseconds > 0 ? '前' : '后';
+        elapsedMilliseconds = Math.abs(elapsedMilliseconds);
 
         // 计算年、月、日、小时、分钟和秒的差值
         const elapsedYears = Math.floor(elapsedMilliseconds / (1000 * 60 * 60 * 24 * 365));
@@ -134,20 +131,26 @@ export const DateUtil = {
             return `${elapsedMinutes} 分钟${suffix}`;
         }
         return `${elapsedSeconds} 秒${suffix}`;
-    },
+    }
 
     /**
      * 总共耗时, 如 3分5秒
      * @param time 数字 （Date.getTime）
      * @returns {string|null}
      */
-     friendlyTotalTime(time) {
+    public static friendlyTotalTime(time: number | string | null): string | null {
         if (time == null || time === '-') {
-            return null
+            return null;
         }
-        let seconds = time / 1000;
 
-        seconds = Math.floor(seconds)
+        let seconds: number;
+        if (typeof time === 'string') {
+            seconds = parseInt(time, 10) / 1000;
+        } else {
+            seconds = time / 1000;
+        }
+
+        seconds = Math.floor(seconds);
 
         if (seconds < 60) {
             return seconds + '秒';
@@ -157,17 +160,14 @@ export const DateUtil = {
         seconds = seconds % 60;
 
         min = Math.floor(min);
-        seconds = Math.floor(seconds)
+        seconds = Math.floor(seconds);
 
-        return min + '分' + seconds + '秒'
-    },
-
-    beginOfMonth(){
-        const d = new Date();
-        d.setMonth(0)
-        d.setDate(1)
-        return this.formatDate(d)
+        return min + '分' + seconds + '秒';
     }
 
-
+    public static  beginOfMonth(): string {
+        const d = new Date();
+        d.setDate(1);
+        return this.formatDate(d);
+    }
 }

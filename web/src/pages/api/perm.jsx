@@ -1,6 +1,6 @@
 import {message, Switch} from 'antd'
 import React from 'react'
-import {ArrUtil, HttpUtil, Page, PageUtil, ProTable} from "../../framework";
+import {ArrUtils, HttpUtil, Page, PageUtil, ProTable} from "../../framework";
 
 
 export default class extends React.Component {
@@ -26,9 +26,9 @@ export default class extends React.Component {
 
         const perms = this.state.perms
         if (checked) {
-            ArrUtil.add(perms, action)
+            ArrUtils.add(perms, action)
         } else {
-            ArrUtil.remove(perms, action)
+            ArrUtils.remove(perms, action)
         }
         this.setState({perms})
         hide();

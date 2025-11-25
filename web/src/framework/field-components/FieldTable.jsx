@@ -2,7 +2,7 @@ import {Button, Input, Table} from 'antd'
 import React from 'react'
 import {DeleteOutlined, PlusOutlined} from "@ant-design/icons";
 import './FieldTable.less'
-import {ArrUtil} from "../utils";
+import {ArrUtils} from "../utils";
 
 export class FieldTable extends React.Component {
 
@@ -72,7 +72,7 @@ export class FieldTable extends React.Component {
     };
     remove = (record) => {
         let {dataSource} = this.state
-        ArrUtil.remove(dataSource, record)
+        ArrUtils.remove(dataSource, record)
         this.setState({dataSource:[...dataSource]},this.notifyParent)
     };
 

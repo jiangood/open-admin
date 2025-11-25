@@ -1,7 +1,7 @@
 import React from "react";
 import {Alert, Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
-import {ArrUtil, HttpUtil, PageUtil} from "../../../framework";
+import {ArrUtils, HttpUtil, PageUtil} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -84,7 +84,7 @@ export default class extends React.Component {
                 continue;
             }
             menus.push(menuId)
-            ArrUtil.addAll(perms, ks)
+            ArrUtils.addAll(perms, ks)
         }
         HttpUtil.post('admin/sysRole/savePerms', {id: this.roleId, perms, menus}).then(rs => {
             //  Page.open(PageUtil.currentPathname(), PageUtil.currentLabel())

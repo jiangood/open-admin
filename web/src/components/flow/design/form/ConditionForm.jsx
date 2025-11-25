@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, Form, Input, InputNumber, message, Radio, Table} from 'antd';
 import {DeleteOutlined, PlusOutlined} from '@ant-design/icons';
-import {ArrUtil, ProModal} from "../../../../framework";
+import {ArrUtils, ProModal} from "../../../../framework";
 
 /**
  * 条件表单
@@ -109,7 +109,7 @@ constructor(props) {
   handleDelete = (item) => {
     let { conditionList } = this.state;
 
-    ArrUtil.remove(conditionList, item)
+    ArrUtils.remove(conditionList, item)
     this.save(conditionList);
   };
 
