@@ -1,7 +1,7 @@
 import React from 'react';
 import {Dropdown, Menu, Space} from 'antd';
 import {DownSquareTwoTone} from '@ant-design/icons';
-import {PermUtil} from "../system";
+import {PermUtils} from "../../utils";
 
 
 /**
@@ -23,7 +23,7 @@ export class ButtonList extends React.Component {
 
       const perm = node.props == null ? null : node.props.perm;
 
-      if (perm == null || PermUtil.hasPermission(perm)) {
+      if (perm == null || PermUtils.hasPermission(perm)) {
         return  node
       }
       return  null
@@ -43,7 +43,7 @@ export class ButtonList extends React.Component {
         // @ts-ignore
 
         if (child ) {
-          if(  child.props == null || child.props.perm == null || PermUtil.hasPermission(child.props.perm)){
+          if(  child.props == null || child.props.perm == null || PermUtils.hasPermission(child.props.perm)){
             menus.push(child);
           }
 
