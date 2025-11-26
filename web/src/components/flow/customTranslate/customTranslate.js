@@ -1,19 +1,16 @@
+// i18n demo https://github.com/bpmn-io/bpmn-js-examples/blob/main/i18n/src/customTranslate/customTranslate.js
+
 import translations from './translations';
+
 
 export default function customTranslate(template, replacements) {
   replacements = replacements || {};
 
   // Translate
-  let result = translations[template];
-  if (result == null) {
-    console.log('没有翻译', template);
-    return template;
-  }
+  template = translations[template] || template;
 
-  // 替换变量
-  result = result.replace(/{([^}]+)}/g, function (_, key) {
+  // Replace
+  return template.replace(/{([^}]+)}/g, function(_, key) {
     return replacements[key] || '{' + key + '}';
   });
-
-  return result;
 }
