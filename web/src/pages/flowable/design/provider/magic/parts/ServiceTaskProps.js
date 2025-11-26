@@ -7,7 +7,7 @@ export default function(element) {
 
   return [
     {
-      id: 'spell',
+      id: 'delegateExpression',
       element,
       component: ServiceTaskComponent,
       isEdited: isTextFieldEntryEdited,
@@ -23,20 +23,20 @@ function ServiceTaskComponent(props) {
   const debounce = useService('debounceInput');
 
   const getValue = () => {
-    return element.businessObject.spell || '';
+    return element.businessObject.delegateExpression || '';
   };
 
   const setValue = value => {
     return modeling.updateProperties(element, {
-      spell: value
+      delegateExpression: value
     });
   };
 
   return html`<${TextFieldEntry}
     id=${ id }
     element=${ element }
-    description='支持表达式'
-    label='监听类'
+    label='服务类'
+    description='实现了JavaDelegate的Bean名称表达式， 如 \${demoDelegate}'
     getValue=${ getValue }
     setValue=${ setValue }
     debounce=${ debounce }

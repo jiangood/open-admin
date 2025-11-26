@@ -1,20 +1,24 @@
 {
-  "name": "Magic",
-  "prefix": "magic",
-  "uri": "http://magic",
+  "name": "Flowable",
+  "prefix": "flowable",
+  "uri": "http://flowable.org/bpmn",
   "xml": {
     "tagAlias": "lowerCase"
   },
   "associations": [],
   "types": [
     {
-      "name": "BewitchedStartEvent",
+      "name": "ServiceTaskLike",
       "extends": [
-        "bpmn:StartEvent"
+        "bpmn:ServiceTask",
+        "bpmn:ServiceTask",
+        "bpmn:BusinessRuleTask",
+        "bpmn:SendTask",
+        "bpmn:MessageEventDefinition"
       ],
       "properties": [
         {
-          "name": "spell",
+          "name": "delegateExpression",
           "isAttr": true,
           "type": "String"
         }
