@@ -1,6 +1,6 @@
 
 import {is} from 'bpmn-js/lib/util/ModelUtil';
-import ServiceTaskProps from "./parts/ServiceTaskProps";
+import {createServiceTaskEntries} from "./parts/CreateServiceTaskEntries";
 
 const LOW_PRIORITY = 10001;
 
@@ -18,7 +18,7 @@ export default function MagicPropertiesProvider(propertiesPanel) {
                 groups.push({
                     id: 'magic',
                     label: "服务任务",
-                    entries: ServiceTaskProps(element),
+                    entries: createServiceTaskEntries(element),
                 });
             }
             return groups;

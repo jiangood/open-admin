@@ -3,7 +3,7 @@ import { html } from 'htm/preact';
 import { TextFieldEntry, isTextFieldEntryEdited } from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
 
-export default function(element) {
+export  function createServiceTaskEntries (element) {
 
   return [
     {
