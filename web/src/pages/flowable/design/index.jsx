@@ -20,6 +20,8 @@ import 'bpmn-js/dist/assets/bpmn-js.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import {BpmnPropertiesPanelModule, BpmnPropertiesProviderModule} from 'bpmn-js-properties-panel';
 
+import magicModdleDescriptor from './flowable';
+console.log('magic', magicModdleDescriptor)
 
 export default class extends React.Component {
 
@@ -63,7 +65,10 @@ export default class extends React.Component {
 
                 BpmnPropertiesPanelModule,
                 BpmnPropertiesProviderModule
-            ]
+            ],
+            moddleExtensions: {
+                magic: magicModdleDescriptor
+            }
         });
 
         this.modeling = this.bpmnModeler.get('modeling'); // 建模， 包含很多方法
