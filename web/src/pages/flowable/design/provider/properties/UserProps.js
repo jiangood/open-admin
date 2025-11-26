@@ -17,7 +17,7 @@ export  function UserProps () {
         },
         {
             id: 'candidateUsers',
-            component: Component3,
+            component: CandidateUsersComponent,
             isEdited: isTextFieldEntryEdited,
         },
 
@@ -66,16 +66,13 @@ function CandidateGroupsComponent(props) {
 
     const modeling = useService('modeling');
     const debounce = useService('debounceInput');
-    const canvas = useService('canvas');
-    const rootElement = canvas.getRootElement();
-    const processId = rootElement.id;
     const getValue = (element) => {
-        return element.businessObject.formKey || '';
+        return element.businessObject.candidateGroups || '';
     };
 
     const setValue = value => {
         return modeling.updateProperties(element, {
-            formKey: value
+            candidateGroups: value
         });
     };
 
@@ -100,28 +97,25 @@ function CandidateGroupsComponent(props) {
     })
 
 }
-function Component3(props) {
+function CandidateUsersComponent(props) {
     const { element, id } = props;
 
     const modeling = useService('modeling');
     const debounce = useService('debounceInput');
-    const canvas = useService('canvas');
-    const rootElement = canvas.getRootElement();
-    const processId = rootElement.id;
     const getValue = (element) => {
-        return element.businessObject.formKey || '';
+        return element.businessObject.candidateUsers || '';
     };
 
     const setValue = value => {
         return modeling.updateProperties(element, {
-            formKey: value
+            candidateUsers: value
         });
     };
 
     const [ options, setOptions ] = useState([]);
 
     useEffect(async () => {
-        const rs = await HttpUtils.get('admin/flowable/model/formOptions',{code:processId})
+        const rs = await HttpUtils.get('admin/flowable/model/candidateUsersOptions')
         setOptions(rs)
     }, [ setOptions ]);
 
@@ -132,6 +126,7 @@ function Component3(props) {
         getValue,
         setValue,
         debounce,
+        multi: true,
 
         getOptions: () => {
             return [{ value: '', label: '<留空>'},...options]

@@ -13,7 +13,6 @@ import palette from "./palette";
 import contextPad from "./contextPad";
 import {CloudUploadOutlined, SaveOutlined} from "@ant-design/icons";
 import {HttpUtils, MessageUtils, PageUtils} from "../../../framework";
-import UserTaskForm from "./components/UserTaskForm";
 import 'bpmn-js/dist/assets/bpmn-js.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import {BpmnPropertiesPanelModule, BpmnPropertiesProviderModule} from 'bpmn-js-properties-panel';
@@ -205,8 +204,6 @@ export default class extends React.Component {
                                       node={this.curNode}
                                       modeling={this.modeling}
                 />
-            case 'UserTask':
-                return <UserTaskForm bo={curBo} node={this.curNode} modeling={this.modeling} model={this.state.model}/>
 
         }
         return <></>

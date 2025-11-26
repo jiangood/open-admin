@@ -16,6 +16,7 @@ export default function MagicPropertiesProvider(propertiesPanel) {
                     id: 'processBean',
                     label: "处理器",
                     entries: DelegateExpressionProps(element),
+                    shouldOpen:true
                 })
             }
 
@@ -24,6 +25,7 @@ export default function MagicPropertiesProvider(propertiesPanel) {
                     id: 'user',
                     label: "用户",
                     entries: UserProps(element),
+                    shouldOpen:true
                 })
                 groups.push({
                     id: 'form',

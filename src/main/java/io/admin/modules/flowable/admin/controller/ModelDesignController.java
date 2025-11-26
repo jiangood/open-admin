@@ -199,4 +199,18 @@ public class ModelDesignController {
 
         return AjaxResult.ok().data(list);
     }
+
+    @GetMapping("candidateUsersOptions")
+    public AjaxResult candidateUsersOptions() {
+        List<Option> list = new ArrayList<>();
+
+        List<SysUser> userList = sysUserService.findAll(Sort.by("name"));
+
+        for (SysUser sysUser : userList) {
+            list.add(Option.of(sysUser.getId(), sysUser.getName()));
+        }
+
+        return AjaxResult.ok().data(list);
+    }
+
 }
