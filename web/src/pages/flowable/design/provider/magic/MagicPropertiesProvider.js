@@ -2,7 +2,7 @@
 import {is} from 'bpmn-js/lib/util/ModelUtil';
 import ServiceTaskProps from "./parts/ServiceTaskProps";
 
-const LOW_PRIORITY = 500;
+const LOW_PRIORITY = 10001;
 
 
 export default function MagicPropertiesProvider(propertiesPanel) {
