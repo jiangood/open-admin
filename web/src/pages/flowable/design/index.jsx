@@ -7,10 +7,10 @@ import {getBusinessObject} from "bpmn-js/lib/util/ModelUtil";
 import BpmnModeler from 'bpmn-js/lib/Modeler'
 
 import './index.css'
-import customTranslate from "../../../components/flow/customTranslate/customTranslate";
+import customTranslate from "./customTranslate/customTranslate";
 import ConditionForm from "../../../components/flow/design/form/ConditionForm";
-import palette from "../../../components/flow/design/palette";
-import contextPad from "../../../components/flow/design/contextPad";
+import palette from "./palette";
+import contextPad from "./contextPad";
 import {CloudUploadOutlined, SaveOutlined} from "@ant-design/icons";
 import {HttpUtils, MessageUtils, PageUtils} from "../../../framework";
 import UserTaskForm from "./components/UserTaskForm";
@@ -18,7 +18,7 @@ import 'bpmn-js/dist/assets/bpmn-js.css';
 import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import {BpmnPropertiesPanelModule, BpmnPropertiesProviderModule} from 'bpmn-js-properties-panel';
 
-import magicPropertiesProviderModule from './provider/magic';
+import magicPropertiesProviderModule from './provider';
 import flowableModdleDescriptor from './descriptors/flowable';
 
 export default class extends React.Component {

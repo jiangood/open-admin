@@ -9,6 +9,7 @@ import io.admin.common.utils.ann.RemarkTool;
 import io.admin.framework.config.argument.RequestBodyKeys;
 import io.admin.framework.config.security.HasPermission;
 import io.admin.modules.flowable.admin.entity.ConditionVariable;
+import io.admin.modules.flowable.admin.entity.FormKey;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import io.admin.modules.flowable.admin.service.SysFlowableModelService;
 import io.admin.modules.flowable.core.assignment.AssignmentTypeProvider;
@@ -149,7 +150,14 @@ public class ModelDesignController {
 
         return AjaxResult.ok().data(options);
     }
+    @GetMapping("formOptions")
+    public AjaxResult formOptions(String id) {
+        SysFlowableModel model = service.findOne(id);
+        List<FormKey> formKeyList = model.getFormKeyList();
 
+
+        return AjaxResult.ok().data(formKeyList);
+    }
 
 
 }

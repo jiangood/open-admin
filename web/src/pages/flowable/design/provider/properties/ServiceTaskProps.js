@@ -1,20 +1,20 @@
 import {isTextFieldEntryEdited, SelectEntry} from '@bpmn-io/properties-panel';
 import { useService } from 'bpmn-js-properties-panel';
 import { useEffect, useState } from '@bpmn-io/properties-panel/preact/hooks';
-import {HttpUtils} from "../../../../../../framework";
+import {HttpUtils} from "../../../../../framework";
 export  function ServiceTaskProps () {
 
   return [
     {
       id: 'delegateExpression',
-      component: ServiceTaskComponent,
+      component: Component,
       isEdited: isTextFieldEntryEdited,
     }
 
   ];
 }
 
-function ServiceTaskComponent(props) {
+function Component(props) {
   const { element, id } = props;
 
   const modeling = useService('modeling');
@@ -40,7 +40,7 @@ function ServiceTaskComponent(props) {
   return SelectEntry({
     element,
     id: id,
-    label: '代理表达式',
+    label: 'delegateExpression',
     description: '实现JavaDelegate接口的Bean名称， 如 ${demoDelegate}',
     getValue,
     setValue,
