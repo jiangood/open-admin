@@ -163,7 +163,6 @@ export class MsgBoxComponent extends React.Component {
                 onCancel={this.handleCancel}
                 okText='确定'
                 cancelText='取消'
-                width={400}
                 transitionName=""
                 maskTransitionName=""
                 footer={(node, {OkBtn, CancelBtn}) => {
@@ -173,7 +172,10 @@ export class MsgBoxComponent extends React.Component {
                     return node;
                 }}
             >
-                {this.renderContent()}
+                <div style={{overflowX:'auto'}}>
+                    {this.renderContent()}
+                </div>
+
             </Modal>
         );
     }

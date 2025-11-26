@@ -105,6 +105,10 @@ class _Layouts extends React.Component {
 
     render() {
         return <ConfigProvider
+            modal={
+                {
+                }
+            }
             input={{autoComplete: 'off'}}
             form={{
                 validateMessages: {
@@ -138,6 +142,7 @@ class _Layouts extends React.Component {
                         headerBg: 'white',
                         triggerHeight: 32
                     },
+
                 }
             }}>
 

@@ -1,18 +1,12 @@
-import {Button, Modal, Popconfirm, Space} from 'antd';
+import {Alert, Button, Card, Divider, Modal, Popconfirm, Space, Typography} from 'antd';
 import React from 'react';
 import {PlusOutlined, QuestionCircleOutlined, QuestionCircleTwoTone, QuestionOutlined} from "@ant-design/icons";
-import {HttpUtils, MsgBox, PageUtils, ProTable} from "../../framework";
+import {HttpUtils, MsgBox, MessageUtils, PageUtils, ProTable, Gap} from "../../framework";
 
 export default class extends React.Component {
 
 
-    state = {
-        formValues: {},
-        formOpen: false
-    }
-
     actionRef = React.createRef();
-    formRef = React.createRef();
 
 
     columns = [
@@ -43,7 +37,7 @@ export default class extends React.Component {
                     <Button size='small' type='primary'
                             onClick={() => PageUtils.open('/flowable/design?id=' + record.id, '流程设计' + record.name)}> 设计 </Button>
                     <Button size='small' onClick={() => this.handleEdit(record)}> 编辑 </Button>
-                    <Popconfirm perm='flowable/model:delete' title={'是否确定删除流程模型' }
+                    <Popconfirm perm='flowable/model:delete' title={'是否确定删除流程模型'}
                                 onConfirm={() => this.handleDelete(record)}>
                         <Button size='small' danger>删除</Button>
                     </Popconfirm>
@@ -54,34 +48,8 @@ export default class extends React.Component {
 
 
     handleAdd = () => {
-        this.setState({
-            formOpen: true,
-            formValues: {}
-        })
-    }
-
-    handleEdit = record => {
-        this.setState({
-            formOpen: true,
-            formValues: record
-        })
-    }
-    onFinish = values => {
-        HttpUtils.post('admin/flowable/model/save', values).then(rs => {
-            this.actionRef.current.reload()
-            this.setState({formOpen: false})
-        })
-    }
-
-    handleDelete = row => {
-        HttpUtils.get('admin/flowable/model/delete', {id: row.id}).then(rs => {
-            this.actionRef.current.reload();
-        })
-    }
-
-
-    render() {
-        const demo = `@Component
+        let demo = `
+@Component
 @ProcessDefinitionDescription(key = "demo",name = "demo-派车流程", formKeys = @FormKeyDescription(value = "driverForm",label = "司机表单"))
 public class DemoProcess implements ProcessDefinition {
 
@@ -91,33 +59,35 @@ public class DemoProcess implements ProcessDefinition {
     }
 }
 `
+        demo = <div style={{overflowX: "auto"}}>
+            <Divider/>
+            <Typography.Text>不支持页面创建， 请参考Java代码</Typography.Text>
+            <pre>{demo}</pre>
+        </div>
+        MessageUtils.alert(demo, '流程模型创建说明', {width: 800})
+    }
+
+
+    handleDelete = row => {
+        HttpUtils.get('admin/flowable/model/delete', {id: row.id}).then(rs => {
+            this.actionRef.current.reload();
+        })
+    }
+
+
+    render() {
 
         return <>
             <ProTable
-                search={false}
                 actionRef={this.actionRef}
                 toolBarRender={() => <Button icon={<QuestionCircleOutlined/>} type='primary'
-                                             onClick={()=>MsgBox.alert(demo, '流程模型创建示例', {width:1024})} >如何创建模型</Button>}
+                                             onClick={this.handleAdd}>如何创建模型</Button>}
                 request={(params) => HttpUtils.get('admin/flowable/model/page', params)}
                 columns={this.columns}
-                rowSelection={false}
-                rowKey="id"
-                options={{search: true}}
+                showToolbarSearch={true}
             />
 
-            <Modal title='模型基本信息'
-                   open={this.state.formOpen}
-                   onCancel={() => this.setState({formOpen: false})}
-                   width={1024}
-                   footer={null}
-            >
 
-                不支持页面创建， 请参考Java代码
-                <pre>
-{demo}
-        </pre>
-
-            </Modal>
         </>
     }
 
