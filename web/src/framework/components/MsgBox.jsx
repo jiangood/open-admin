@@ -15,7 +15,7 @@ export class MsgBox {
 
     }
 
-    static alert(msg, title = '提示') {
+    static alert(msg, title = '提示',modalProps = {}) {
         let instance = this._ref.current;
         if (instance) {
             return new Promise((resolve) => {
@@ -134,7 +134,7 @@ export class MsgBoxComponent extends React.Component {
         switch (type) {
             case 'alert':
             case 'confirm':
-                return <Typography.Text>{msg}</Typography.Text>;
+                return <pre>{msg}</pre>;
             case 'prompt':
                 return (
                     <>

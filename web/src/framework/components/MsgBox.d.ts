@@ -23,10 +23,12 @@ export declare class MsgBox {
     /**
      * 显示一个警告框 (Alert)，并等待用户确认。
      * * @param msg 警告消息的内容。
+     * @param msg
      * @param title 警告框的标题。默认为 '提示'。
+     * @param modalProps
      * @returns 一个 Promise，在警告框关闭时 resolve (通常是 true 或 void，取决于组件实现)。
      */
-    static alert(msg: string, title?: string): Promise<boolean | void>;
+    static alert(msg: string, title?: string, modalProps?:any): Promise<boolean | void>;
 
     /**
      * 显示一个确认框 (Confirm)，并等待用户操作。

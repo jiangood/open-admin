@@ -1,7 +1,7 @@
 import {Button, Modal, Popconfirm, Space} from 'antd';
 import React from 'react';
 import {PlusOutlined, QuestionCircleOutlined, QuestionCircleTwoTone, QuestionOutlined} from "@ant-design/icons";
-import {HttpUtils, PageUtils, ProTable} from "../../framework";
+import {HttpUtils, MsgBox, PageUtils, ProTable} from "../../framework";
 
 export default class extends React.Component {
 
@@ -97,7 +97,7 @@ public class DemoProcess implements ProcessDefinition {
                 search={false}
                 actionRef={this.actionRef}
                 toolBarRender={() => <Button icon={<QuestionCircleOutlined/>} type='primary'
-                                             onClick={this.handleAdd} >如何创建模型</Button>}
+                                             onClick={()=>MsgBox.alert(demo, '流程模型创建示例', {width:1024})} >如何创建模型</Button>}
                 request={(params) => HttpUtils.get('admin/flowable/model/page', params)}
                 columns={this.columns}
                 rowSelection={false}
