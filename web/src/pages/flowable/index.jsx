@@ -60,7 +60,6 @@ public class DemoProcess implements ProcessDefinition {
 }
 `
         demo = <div style={{overflowX: "auto"}}>
-            <Divider/>
             <Typography.Text>不支持页面创建， 请参考Java代码</Typography.Text>
             <pre>{demo}</pre>
         </div>

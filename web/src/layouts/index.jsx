@@ -126,7 +126,6 @@ class _Layouts extends React.Component {
                     colorWarning: ThemeUtils.getColor("warning-color"),
                     colorError: ThemeUtils.getColor("error-color"),
                     borderRadius: 4,
-
                 },
                 components: {
                     Menu: {

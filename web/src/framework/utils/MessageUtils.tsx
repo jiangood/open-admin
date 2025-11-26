@@ -3,6 +3,7 @@ import type {ModalFuncProps} from 'antd/es/modal/interface';
 import type {MessageType} from 'antd/es/message/index';
 import type {ArgsProps, NotificationPlacement} from 'antd/es/notification/interface';
 import React, {Component} from 'react';
+import {ThemeUtils} from "./system";
 
 // --- 辅助组件：Prompt 输入组件 (Class Component 模式) ---
 interface PromptContentProps {
@@ -53,6 +54,13 @@ class PromptContent extends Component<PromptContentProps, PromptContentState> {
 
 // --- MsgUtils 类 (包含静态方法的工具类) ---
 
+
+const buttonStyles = {
+    root: {
+        backgroundColor: ThemeUtils.getColor('primary-color')
+    }
+}
+
 /**
  * 消息工具类 (MsgUtils)
  * 封装了 Ant Design 的 Modal, message, 和 notification 静态方法
@@ -72,7 +80,12 @@ export class MessageUtils {
             title: title || '提示',
             content,
             okText: '确定',
+            icon: null,
+            okButtonProps: {
+                styles: buttonStyles
+            },
             ...config,
+
         });
     }
 
@@ -93,6 +106,9 @@ export class MessageUtils {
             cancelText: '取消',
             onOk,
             onCancel,
+            okButtonProps: {
+                styles: buttonStyles
+            },
             ...config,
         });
     }
@@ -136,7 +152,11 @@ export class MessageUtils {
             okText: '确定',
             cancelText: '取消',
             onOk: handleOk, // 绑定包含输入值传递的函数
+
             onCancel,
+            okButtonProps: {
+                styles: buttonStyles
+            },
             ...config,
         });
     }
