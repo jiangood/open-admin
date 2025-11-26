@@ -9,19 +9,14 @@ export default function(element) {
     {
       id: 'spell',
       element,
-      component: Spell,
-      isEdited: isTextFieldEntryEdited
-    },
-    {
-      id: 'spell2',
-      element,
-      component: Spell,
+      component: ServiceTaskProps,
       isEdited: isTextFieldEntryEdited
     }
+
   ];
 }
 
-function Spell(props) {
+function ServiceTaskProps(props) {
   const { element, id } = props;
 
   const modeling = useService('modeling');
