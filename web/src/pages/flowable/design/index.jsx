@@ -165,9 +165,8 @@ export default class extends React.Component {
 
 
     render() {
-        console.log('this.bpmRef', this.bpmRef)
 
-        return <Card title={'流程设计 - ' + this.state.model?.name}
+        return <Card title={'流程设计  ' + this.state.model?.name}
                      extra={<Space>
                          <Button type='primary' icon={<SaveOutlined/>} onClick={this.handleSubmit}>暂存</Button>
                          <Button type='primary' danger icon={<CloudUploadOutlined/>}
