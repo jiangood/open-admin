@@ -62,7 +62,7 @@ public class DemoProcess implements ProcessDefinition {
         demo = <div style={{overflowX: "auto"}}>
             <Gap/><Gap/>
             <Typography.Text>不支持页面创建， 请参考Java代码</Typography.Text>
-            <pre>{demo}</pre>
+            <pre>{demo.trim()}</pre>
         </div>
         MessageUtils.alert(demo, {width: 800})
 
