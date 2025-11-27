@@ -4,6 +4,7 @@ import {DelegateExpressionProps} from "./properties/DelegateExpressionProps";
 import {FormProps} from "./properties/FormProps";
 import {PreactUserTaskForm, renderReact, UserTaskForm} from "./properties/UserTaskForm";
 import {isTextFieldEntryEdited} from "@bpmn-io/properties-panel";
+import {ConditionProps} from "./properties/ConditionForm";
 
 const LOW_PRIORITY = 10001;
 
@@ -39,6 +40,14 @@ export default function FlowablePropertiesProvider(propertiesPanel) {
                     id: 'form',
                     label: "表单",
                     entries: FormProps(element),
+                })
+            }
+            if(is(element,'bpmn:SequenceFlow')){
+                groups.push({
+                    id: 'condition',
+                    label: "条件",
+                    entries: ConditionProps(element),
+                    // 默认打开（看源码 Discover
                 })
             }
 
