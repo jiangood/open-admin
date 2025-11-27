@@ -15,15 +15,22 @@ export class FieldTable extends React.Component {
 
         this.columns = this.props.columns.map(col => {
             if (col.render == null) {
-                col.render = (v, record,index) => {
-                    return  <Input value={v} onChange={(e)=>this.onCellChange(index,col.dataIndex,e)}/>
+                col.render = (v, record, index) => {
+                    return <Input value={v} onChange={(e) => this.onCellChange(index, col.dataIndex, e)}/>
                 }
-            }else {
-                if(!col._oldRender){
+            } else {
+                if (!col._oldRender) {
                     col._oldRender = col.render
-                    col.render = (v, record,index) => {
-                        const cmp =col._oldRender()
-                        return React.createElement(cmp.type,{...cmp.props, value:v, onChange: (e)=>this.onCellChange(index, col.dataIndex, e)})
+                    col.render = (v, record, index) => {
+                        const cmp = col._oldRender()
+                        return React.createElement(cmp.type,
+                            {
+                                ...cmp.props,
+                                value: v,
+                                onChange: (e) => {
+                                    this.onCellChange(index, col.dataIndex, e);
+                                }
+                            })
                     }
                 }
             }
@@ -32,7 +39,7 @@ export class FieldTable extends React.Component {
 
         this.columns.push({
             title: '操作',
-            render:(v, record) =>{
+            render: (v, record) => {
                 return <Button icon={<DeleteOutlined/>} title='删除' size='small' shape={'circle'}
                                onClick={() => this.remove(record)}></Button>
             }
@@ -49,12 +56,12 @@ export class FieldTable extends React.Component {
     }
 
 
-    onCellChange=(index,dataIndex,e)=>{
+    onCellChange = (index, dataIndex, e) => {
         let {dataSource} = this.state
-        let row =dataSource[index]
+        let row = dataSource[index]
 
         let v = e;
-        if(e.hasOwnProperty('target')){
+        if (e != null &&e.hasOwnProperty('target')) {
             v = e.target.value;
         }
 
@@ -62,21 +69,21 @@ export class FieldTable extends React.Component {
         row[dataIndex] = v
 
         dataSource = [...dataSource]
-        this.setState({dataSource},this.notifyParent)
+        this.setState({dataSource}, this.notifyParent)
     }
 
     add = () => {
         let {dataSource} = this.state
         dataSource = [...dataSource, {}];
-        this.setState({dataSource},this.notifyParent)
+        this.setState({dataSource}, this.notifyParent)
     };
     remove = (record) => {
         let {dataSource} = this.state
         ArrUtils.remove(dataSource, record)
-        this.setState({dataSource:[...dataSource]},this.notifyParent)
+        this.setState({dataSource: [...dataSource]}, this.notifyParent)
     };
 
-    notifyParent(){
+    notifyParent() {
         let {dataSource} = this.state
         this.props.onChange(dataSource)
     }

@@ -34,7 +34,7 @@ function Component(props) {
         return condition ? condition.body : '';
     };
 
-    const setValue = value => {
+    const setValue =( value) => {
         const businessObject = element.businessObject;
         let conditionExpression = businessObject.conditionExpression;
 

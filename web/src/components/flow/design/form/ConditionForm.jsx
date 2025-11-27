@@ -131,7 +131,6 @@ export default class extends React.Component {
      */
     createExpressionByCondition(condition) {
         const {key, op, value, valueType} = condition;
-        debugger
         switch (valueType) {
             case 'NUMBER':
                 return key + op + value;
