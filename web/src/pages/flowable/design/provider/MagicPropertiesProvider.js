@@ -32,6 +32,7 @@ export default function MagicPropertiesProvider(propertiesPanel) {
                             isEdited: isTextFieldEntryEdited,
                         }
                     ],
+                    // 默认打开（看源码发现的）
                     shouldOpen:true
                 })
                 groups.push({

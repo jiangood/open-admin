@@ -10,7 +10,8 @@ import {h} from "preact";
 import {createRoot} from "react-dom/client";
 import {useEffect, useRef} from "@bpmn-io/properties-panel/preact/hooks";
 
-export function UserTaskForm(props) {
+// react 组件，方便使用antd
+function UserTaskForm(props) {
     const {element, modeling} = props
     let initialValues = {
         assignee: element.businessObject.assignee,
@@ -36,6 +37,9 @@ export function UserTaskForm(props) {
     </div>
     )
 }
+
+
+// preact 组件， bpmn properties-panel 渲染组件
 export function PreactUserTaskForm(props) {
     const {element, id} = props;
     const modeling = useService('modeling');
