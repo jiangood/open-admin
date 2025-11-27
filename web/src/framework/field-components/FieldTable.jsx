@@ -22,7 +22,7 @@ export class FieldTable extends React.Component {
                 if (!col._oldRender) {
                     col._oldRender = col.render
                     col.render = (v, record, index) => {
-                        const cmp = col._oldRender()
+                        const cmp = col._oldRender(v, record, index)
                         return React.createElement(cmp.type,
                             {
                                 ...cmp.props,

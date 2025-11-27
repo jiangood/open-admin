@@ -218,7 +218,6 @@ public class ModelDesignController {
     @GetMapping("varList")
     public AjaxResult varOptions(String code) {
         ProcessDefinitionInfo info = registry.getInfo(code);
-
         List<ConditionVariable> list = info.getConditionVariableList();
         return AjaxResult.ok().data(list);
     }

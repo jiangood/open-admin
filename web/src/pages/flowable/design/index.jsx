@@ -8,7 +8,6 @@ import BpmnModeler from 'bpmn-js/lib/Modeler'
 
 import './index.css'
 import customTranslate from "./customTranslate/customTranslate";
-import ConditionForm from "../../../components/flow/design/form/ConditionForm";
 import contextPad from "./contextPad";
 import {CloudUploadOutlined, SaveOutlined} from "@ant-design/icons";
 import {HttpUtils, MessageUtils, PageUtils} from "../../../framework";
@@ -176,7 +175,6 @@ export default class extends React.Component {
 
                 <Splitter.Panel defaultSize={300}>
                     <div id={'js-properties-panel'} ></div>
-                    {this.renderForm()}
                     {this.renderMultiInstanceLoopCharacteristics()}
                 </Splitter.Panel>
             </Splitter>
@@ -187,25 +185,7 @@ export default class extends React.Component {
     }
 
 
-    renderForm = () => {
-        if (!this.state.showForm) {
-            return <Empty description='请选择节点'/>
-        }
-        const {elementType, conditionVariable} = this.state;
-        const {curBo} = this
 
-        switch (elementType) {
-            case 'SequenceFlow':
-                return <ConditionForm conditionVariable={conditionVariable}
-                                      moddle={this.moddle}
-                                      bo={curBo}
-                                      node={this.curNode}
-                                      modeling={this.modeling}
-                />
-
-        }
-        return <></>
-    };
 
     // 多实例,支持任务和子流程
     renderMultiInstanceLoopCharacteristics = () => {
