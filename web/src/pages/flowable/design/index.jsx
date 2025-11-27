@@ -171,7 +171,7 @@ export default class extends React.Component {
                      </Space>}>
 
 
-            <Splitter style={{minHeight: 'calc(100vh - 200px)'}}>
+            <Splitter >
                 <Splitter.Panel>
                     <div ref={this.bpmRef} style={{width: '100%', height: '100%'}}></div>
                 </Splitter.Panel>

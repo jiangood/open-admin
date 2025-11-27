@@ -126,8 +126,8 @@ export default class extends React.Component {
      * opLabel: "等于"
      * value: 34
      *
-     * @param i
      * @returns {*}
+     * @param condition
      */
     createExpressionByCondition(condition) {
         const {key, op, value, valueType} = condition;
