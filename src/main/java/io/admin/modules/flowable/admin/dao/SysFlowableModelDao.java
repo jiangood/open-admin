@@ -2,15 +2,10 @@ package io.admin.modules.flowable.admin.dao;
 
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.repository.BaseDao;
-import io.admin.modules.flowable.admin.entity.ConditionVariable;
-import io.admin.modules.flowable.admin.entity.FormKey;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Repository
 @Slf4j
@@ -24,22 +19,16 @@ public class SysFlowableModelDao extends BaseDao<SysFlowableModel> {
 
 
     @Transactional
-    public void init(String key, String name, List<ConditionVariable> vars, List<FormKey> formKeyList) {
-        log.info("初始化流程定义 {} {} {} ", key, name,  vars);
+    public SysFlowableModel init(String key, String name) {
+        log.info("初始化流程定义 {} {}  ", key, name);
         SysFlowableModel model = this.findByCode(key);
         if (model == null) {
             model = new SysFlowableModel();
         }
 
-        if(vars == null){
-            vars = new ArrayList<>();
-        }
-
         model.setCode(key);
         model.setName(name);
-        model.setConditionVariableList(vars);
-        model.setFormKeyList(formKeyList);
-        this.save(model);
+       return this.save(model);
     }
 
 }

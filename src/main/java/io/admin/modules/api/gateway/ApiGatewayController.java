@@ -9,7 +9,7 @@ import io.admin.modules.api.entity.ApiAccount;
 import io.admin.modules.api.entity.ApiResource;
 import io.admin.modules.api.service.ApiAccessLogService;
 import io.admin.modules.api.service.ApiResourceService;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.common.dto.AjaxResult;
 import io.admin.modules.api.service.ApiAccountService;
 import io.admin.framework.CodeException;
@@ -102,7 +102,7 @@ public class ApiGatewayController {
         Object[] paramValues = ArgumentResolver.resolve(method, params, request, response);
 
         Class<?> declaringClass = method.getDeclaringClass();
-        Object bean = SpringTool.getBean(declaringClass);
+        Object bean = SpringUtils.getBean(declaringClass);
 
         Object retValue = method.invoke(bean, paramValues);
 

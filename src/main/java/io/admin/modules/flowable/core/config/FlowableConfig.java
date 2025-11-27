@@ -2,19 +2,20 @@
 package io.admin.modules.flowable.core.config;
 
 import io.admin.common.utils.IdTool;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.common.utils.field.FieldDescription;
-import io.admin.common.utils.field.ValueType;
 import io.admin.framework.config.init.SystemHookEventType;
 import io.admin.framework.config.init.SystemHookService;
 import io.admin.modules.flowable.admin.dao.SysFlowableModelDao;
 import io.admin.modules.flowable.admin.entity.ConditionVariable;
 import io.admin.modules.flowable.admin.entity.FormKey;
+import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import io.admin.modules.flowable.core.definition.FormKeyDescription;
 import io.admin.modules.flowable.core.definition.ProcessDefinition;
 import io.admin.modules.flowable.core.definition.ProcessDefinitionDescription;
 import io.admin.modules.flowable.core.definition.ProcessDefinitionRegistry;
 
+import io.admin.modules.flowable.dto.ProcessDefinitionInfo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.spring.SpringProcessEngineConfiguration;
@@ -59,14 +60,13 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
     }
 
     private void initDefinition() {
-        List<ProcessDefinition> definitions = SpringTool.getBeans(ProcessDefinition.class);
+        List<ProcessDefinition> definitions = SpringUtils.getBeans(ProcessDefinition.class);
         for (ProcessDefinition definition : definitions) {
             ProcessDefinitionDescription ann = definition.getClass().getAnnotation(ProcessDefinitionDescription.class);
             Assert.notNull(ann, "监听器必须使用注解" + ProcessDefinitionRegistry.class.getSimpleName() + "描述");
 
             String key = ann.key();
-            registry.add(key, definition);
-            log.info("注册流程定义类 {} {}", key, definition.getClass().getName());
+
 
 
             // 持久化到数据库
@@ -76,7 +76,7 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
                 ConditionVariable v = new ConditionVariable();
                 v.setName(f.name());
                 v.setLabel(f.label());
-                v.setValueType(f.type() == ValueType.DIGIT ? ConditionVariable.ValueType.digit : ConditionVariable.ValueType.text);
+                v.setValueType(f.type());
                 vars.add(v);
             }
 
@@ -89,7 +89,15 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
                 formKeyList.add(fk);
             }
 
-            sysFlowableModelDao.init(key, ann.name(), vars, formKeyList);
+            SysFlowableModel sysFlowableModel = sysFlowableModelDao.init(key, ann.name());
+            ProcessDefinitionInfo info = new ProcessDefinitionInfo();
+            info.setId(sysFlowableModel.getId());
+            info.setName(ann.name());
+            info.setCode(key);
+            info.setFormKeyList(formKeyList);
+            info.setConditionVariableList(vars);
+            registry.register(key, definition, info);
+            log.info("注册流程定义类 {} {}", key, definition.getClass().getName());
         }
         systemHookService.trigger(SystemHookEventType.AFTER_FLOWABLE_DEFINITION_INIT);
     }

@@ -28,7 +28,7 @@ public @interface FieldDescription {
 	 * 字段类型
 	 * @return
 	 */
-	ValueType type() default ValueType.TEXT;
+	ValueType type() default ValueType.STRING;
 
 
 

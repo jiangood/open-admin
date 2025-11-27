@@ -52,13 +52,11 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
     @Lazy
     protected ProcessEngineConfigurationImpl processEngineConfiguration;
 
-
-
-
-
     public SysFlowableModel findByCode(String code) {
         return sysFlowableModelDao.findByCode(code);
     }
+
+
 
     @Transactional
     public SysFlowableModel saveContent(SysFlowableModel param) {
@@ -234,12 +232,6 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
         Assert.hasText(code, "编码不能为空");
         Assert.state(!isNumeric(code), "编码不能是纯数字");
 
-        List<ConditionVariable> vars = model.getConditionVariableList();
-        for (ConditionVariable var : vars) {
-            Assert.hasText(var.getName(), "参数不能为空");
-            Assert.hasText(var.getLabel(), "参数显示文本不能为空");
-            Assert.notNull(var.getValueType(), "参数类型不能为空");
-        }
         return  sysFlowableModelDao.save(model);
     }
 

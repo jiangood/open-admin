@@ -47,28 +47,6 @@ export default class extends React.Component {
     ];
 
 
-    handleAdd = () => {
-        let demo = `
-@Component
-@ProcessDefinitionDescription(key = "demo",name = "demo-派车流程", formKeys = @FormKeyDescription(value = "driverForm",label = "司机表单"))
-public class DemoProcess implements ProcessDefinition {
-
-    @Override
-    public void onProcessEvent(FlowableEventType type, String initiator, String businessKey, Map<String, Object> variables) {
-
-    }
-}
-`
-        demo = <div style={{overflowX: "auto"}}>
-            <Gap/>
-            <Gap/>
-            <Typography.Text>不支持页面创建， 请参考Java代码</Typography.Text>
-            <pre>{demo.trim()}</pre>
-        </div>
-        MessageUtils.alert(demo, {width: 800})
-
-
-    }
 
 
     handleDelete = row => {
@@ -83,8 +61,6 @@ public class DemoProcess implements ProcessDefinition {
         return <>
             <ProTable
                 actionRef={this.actionRef}
-                toolBarRender={() => <Button icon={<QuestionCircleOutlined/>} type='primary'
-                                             onClick={this.handleAdd}>如何创建模型</Button>}
                 request={(params) => HttpUtils.get('admin/flowable/model/page', params)}
                 columns={this.columns}
                 showToolbarSearch={true}

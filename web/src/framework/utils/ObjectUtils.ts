@@ -5,7 +5,7 @@ export class ObjectUtils {
 
     /**
      * 🎯 安全地获取深度嵌套的对象属性的值。
-     * 如果属性链中的任何一级为 undefined 或 null，get 函数会返回一个默认值，而不是抛出错误。
+     * 如果属性链中的任何一级为 undefined 或 null，getDefinition 函数会返回一个默认值，而不是抛出错误。
      *
      * @template TObj 目标对象的类型。
      * @template TDefault 默认值的类型。
@@ -16,8 +16,8 @@ export class ObjectUtils {
      *
      * @example
      * const obj = { 'a': [{ 'b': { 'c': 3 } }] };
-     * const value = ObjectUtils.get(obj, 'a[0].b.c', 0); // 3
-     * const missing = ObjectUtils.get(obj, 'a[1].d', 'default'); // 'default'
+     * const value = ObjectUtils.getDefinition(obj, 'a[0].b.c', 0); // 3
+     * const missing = ObjectUtils.getDefinition(obj, 'a[1].d', 'default'); // 'default'
      */
     static get<TObj extends object, TDefault = unknown>(
         obj: TObj | null | undefined,
@@ -26,7 +26,7 @@ export class ObjectUtils {
 ): unknown | TDefault {
 
     // 路径处理：将 'a[0].b.c' 转换为 ['a', '0', 'b', 'c'] 以支持数组索引
-    // 注意：这里简化处理，只处理点分隔符，如果需要完整的 lodash get 行为，需要更复杂的正则解析。
+    // 注意：这里简化处理，只处理点分隔符，如果需要完整的 lodash getDefinition 行为，需要更复杂的正则解析。
     const pathArray: string[] = Array.isArray(path)
         ? path.map(String) // 确保路径段都是字符串
         : path.split('.');

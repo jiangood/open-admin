@@ -54,7 +54,7 @@ export class SysUtils {
      * @returns 站点信息对象，如果不存在则返回一个空对象。
      */
     public static getSiteInfo(): SiteInfo {
-        // 假设 StorageUtil.get 内部处理了 JSON.parse，并返回对应类型或 null
+        // 假设 StorageUtil.getDefinition 内部处理了 JSON.parse，并返回对应类型或 null
         return StorageUtils.get(SITE_INFO_KEY) || {} as SiteInfo;
     }
 

@@ -1,5 +1,6 @@
 package io.admin.modules.flowable.admin.entity;
 
+import io.admin.common.utils.field.ValueType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,9 +22,6 @@ public class ConditionVariable implements Serializable {
     boolean disabled;
     boolean visible = true;
 
-    public enum ValueType {
-        text,  digit
-    }
 
 
 }

@@ -9,7 +9,7 @@ import io.admin.modules.job.quartz.QuartzManager;
 import io.admin.modules.job.service.SysJobService;
 import io.admin.framework.log.Log;
 import io.admin.common.utils.field.Field;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.framework.config.argument.RequestBodyKeys;
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.common.utils.field.FieldDescription;
@@ -82,7 +82,7 @@ public class SysJobController {
 
     @GetMapping("jobClassOptions")
     public AjaxResult jobClassList() {
-        Collection<String> basePackages = SpringTool.getBasePackageClasses().stream().map(Class::getPackageName).toList();
+        Collection<String> basePackages = SpringUtils.getBasePackageClasses().stream().map(Class::getPackageName).toList();
 
         Set<Class<?>> list = new HashSet<>();
         for (String basePackage : basePackages) {
@@ -143,7 +143,7 @@ public class SysJobController {
                 int mod = provider.getModifiers();
                 boolean isInterface = Modifier.isInterface(mod);
                 if (!isInterface) {
-                    JobParamFieldProvider bean = SpringTool.getBean(provider);
+                    JobParamFieldProvider bean = SpringUtils.getBean(provider);
                     List<Field> fields = bean.getFields(jobDesc, jobData);
                     result.addAll(fields);
                 }

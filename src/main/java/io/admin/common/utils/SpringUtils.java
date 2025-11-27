@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public class SpringTool extends SpringUtil implements ApplicationContextAware {
+public class SpringUtils extends SpringUtil implements ApplicationContextAware {
 
 
     /**
@@ -26,7 +26,7 @@ public class SpringTool extends SpringUtil implements ApplicationContextAware {
     @SuppressWarnings("NullableProblems")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringTool.applicationContext = applicationContext;
+        SpringUtils.applicationContext = applicationContext;
     }
 
     /**

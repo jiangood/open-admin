@@ -4,9 +4,10 @@ import io.admin.common.utils.DateFormatTool;
 import io.admin.framework.config.security.LoginUser;
 import io.admin.modules.common.LoginUtils;
 import io.admin.modules.flowable.admin.entity.ConditionVariable;
-import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import io.admin.modules.flowable.admin.service.SysFlowableModelService;
 import io.admin.modules.flowable.core.FlowableManager;
+import io.admin.modules.flowable.core.definition.ProcessDefinitionRegistry;
+import io.admin.modules.flowable.dto.ProcessDefinitionInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.engine.IdentityService;
@@ -39,7 +40,7 @@ public class FlowableManagerImpl implements FlowableManager {
     private RuntimeService runtimeService;
     private RepositoryService repositoryService;
     private IdentityService identityService;
-
+    private ProcessDefinitionRegistry registry;
     @Override
     public void start(String processDefinitionKey, String bizKey, Map<String, Object> variables) {
         start(processDefinitionKey, bizKey, null, variables);
@@ -93,8 +94,8 @@ public class FlowableManagerImpl implements FlowableManager {
 
 
         // 判断必填流程变量
-        SysFlowableModel model = modelService.findByCode(processDefinitionKey);
-        List<ConditionVariable> conditionVariable = model.getConditionVariableList();
+        ProcessDefinitionInfo info = registry.getInfo(processDefinitionKey);
+        List<ConditionVariable> conditionVariable = info.getConditionVariableList();
         if (!CollectionUtils.isEmpty(conditionVariable)) {
             for (ConditionVariable formItem : conditionVariable) {
                 String name = formItem.getName();
@@ -104,7 +105,6 @@ public class FlowableManagerImpl implements FlowableManager {
             }
         }
 
-        // 判断相对角色
 
 
     }

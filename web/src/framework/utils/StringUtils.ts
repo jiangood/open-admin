@@ -381,8 +381,8 @@ export class StringUtils {
      * @param sp
      */
     static split(str: any, sp: string):null|string[] {
-        if(str == null){
-            return str
+        if(str == null || str.length === 0){
+            return undefined
         }
         if(Array.isArray(str)){
             return str;

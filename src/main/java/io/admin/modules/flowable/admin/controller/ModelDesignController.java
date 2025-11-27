@@ -4,7 +4,7 @@ package io.admin.modules.flowable.admin.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.admin.common.dto.AjaxResult;
 import io.admin.common.dto.antd.Option;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.common.utils.ann.RemarkTool;
 import io.admin.framework.config.argument.RequestBodyKeys;
 import io.admin.framework.config.security.HasPermission;
@@ -14,11 +14,12 @@ import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import io.admin.modules.flowable.admin.service.SysFlowableModelService;
 import io.admin.modules.flowable.core.assignment.AssignmentTypeProvider;
 import io.admin.modules.flowable.core.assignment.Identity;
+import io.admin.modules.flowable.core.definition.ProcessDefinitionRegistry;
+import io.admin.modules.flowable.dto.ProcessDefinitionInfo;
 import io.admin.modules.system.entity.SysRole;
 import io.admin.modules.system.entity.SysUser;
 import io.admin.modules.system.service.SysRoleService;
 import io.admin.modules.system.service.SysUserService;
-import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +46,8 @@ public class ModelDesignController {
     private SysFlowableModelService service;
     private SysUserService sysUserService;
     private SysRoleService roleService;
+
+    private ProcessDefinitionRegistry registry;
 
     @HasPermission("flowableModel:design")
     @RequestMapping("page")
@@ -94,22 +97,21 @@ public class ModelDesignController {
             model.setContent(xml);
         }
 
+        ProcessDefinitionInfo info = registry.getInfo(model.getCode());
 
-        List<ConditionVariable> conditionVariable = model.getConditionVariableList();
+        List<ConditionVariable> conditionVariable = info.getConditionVariableList();
 
         Map<String, Object> data = new HashMap<>();
         data.put("model", model);
         data.put("conditionVariable", conditionVariable);
 
-        AjaxResult result = AjaxResult.ok().data(data);
-
-        return result;
+        return AjaxResult.ok().data(data);
     }
 
 
     @GetMapping("assignmentTypeList")
     public AjaxResult assignmentTypeList() {
-        Map<String, AssignmentTypeProvider> beans = SpringTool.getBeansOfType(AssignmentTypeProvider.class);
+        Map<String, AssignmentTypeProvider> beans = SpringUtils.getBeansOfType(AssignmentTypeProvider.class);
 
         Collection<AssignmentTypeProvider> values = beans.values().stream().sorted(Comparator.comparing(AssignmentTypeProvider::getOrder)).collect(Collectors.toList());
 
@@ -121,7 +123,7 @@ public class ModelDesignController {
         if (StringUtils.isEmpty(code) || code.equals("undefined")) {
             return AjaxResult.err().msg("请输入code");
         }
-        Map<String, AssignmentTypeProvider> providerMap = SpringTool.getBeansOfType(AssignmentTypeProvider.class);
+        Map<String, AssignmentTypeProvider> providerMap = SpringUtils.getBeansOfType(AssignmentTypeProvider.class);
 
         AssignmentTypeProvider handler = null;
         for (AssignmentTypeProvider provider : providerMap.values()) {
@@ -140,7 +142,7 @@ public class ModelDesignController {
 
     @GetMapping("javaDelegateOptions")
     public AjaxResult javaDelegateOptions() {
-        Map<String, JavaDelegate> beans = SpringTool.getBeansOfType(JavaDelegate.class);
+        Map<String, JavaDelegate> beans = SpringUtils.getBeansOfType(JavaDelegate.class);
         List<Option> options = new ArrayList<>();
         for (Map.Entry<String, JavaDelegate> e : beans.entrySet()) {
             String beanName = e.getKey();
@@ -159,9 +161,8 @@ public class ModelDesignController {
 
     @GetMapping("formOptions")
     public AjaxResult formOptions(String code) {
-        SysFlowableModel model = service.findByCode(code);
-        List<FormKey> formKeyList = model.getFormKeyList();
-
+        ProcessDefinitionInfo info = registry.getInfo(code);
+        List<FormKey> formKeyList = info.getFormKeyList();
 
         return AjaxResult.ok().data(formKeyList);
     }

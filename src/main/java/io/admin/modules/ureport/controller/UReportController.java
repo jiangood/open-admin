@@ -5,7 +5,7 @@ import cn.hutool.core.lang.Dict;
 import com.bstek.ureport.provider.report.ReportFile;
 import com.bstek.ureport.provider.report.ReportProvider;
 import io.admin.common.dto.AjaxResult;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.framework.config.security.HasPermission;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,7 +26,7 @@ public class UReportController {
     @HasPermission("ureport:view")
     @RequestMapping("page")
     public AjaxResult page() {
-        Collection<ReportProvider> list = SpringTool.getBeans(ReportProvider.class);
+        Collection<ReportProvider> list = SpringUtils.getBeans(ReportProvider.class);
 
         list = list.stream().filter(t -> !t.disabled()).toList();
 

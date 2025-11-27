@@ -192,27 +192,10 @@ public class MyFlowableController {
             data.put("name", instanceName);
             data.put("id", instance.getId());
 
-
             List<Comment> processInstanceComments = taskService.getProcessInstanceComments(id);
-            List<CommentResponse> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(c -> new CommentResponse(c)).collect(Collectors.toList());
-
+            List<CommentResponse> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(CommentResponse::new).collect(Collectors.toList());
 
             data.put("instanceCommentList", commentResults);
-
-            SysFlowableModel model = myFlowModelService.findByCode(instance.getProcessDefinitionKey());
-
-
-            List<ConditionVariable> conditionVariableList = model.getConditionVariableList();
-            if (conditionVariableList != null) {
-                Map<String, Object> pv = instance.getProcessVariables();
-                Map<String, Object> variables = new HashMap<>();
-                for (ConditionVariable con : conditionVariableList) {
-                    String name = con.getName();
-                    String label = con.getLabel();
-                    variables.put(label, pv.get(name));
-                }
-                data.put("variables", variables);
-            }
         }
 
         return AjaxResult.ok().data(data);

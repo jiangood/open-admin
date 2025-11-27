@@ -25,7 +25,6 @@ import java.util.List;
 @FieldNameConstants
 public class SysFlowableModel extends BaseEntity {
 
-
     /**
      * 编码, 流程的key
      */
@@ -38,26 +37,9 @@ public class SysFlowableModel extends BaseEntity {
     private String name;
 
 
-    @Column(length = 10000)
-    @Convert(converter = ConditionVariableConverter.class)
-    private List<ConditionVariable> conditionVariableList = new ArrayList<>();
-
-
     @Column(columnDefinition = "blob")
     private String content;
 
-    /**
-     * 关联的白哦但
-     */
-    @Convert(converter = FormKeyConverter.class)
-    private List<FormKey> formKeyList = new ArrayList<>();
-
-
-    public static class ConditionVariableConverter extends BaseToListConverter<ConditionVariable> {
-    }
-
-    public static class FormKeyConverter extends BaseToListConverter<FormKey> {
-    }
 
 
 }

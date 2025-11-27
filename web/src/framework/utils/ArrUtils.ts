@@ -218,7 +218,7 @@ const uniqueNumbers = ArrUtil.unique(numbers);
 console.log(uniqueNumbers); // [1, 2, 3, 4]
 
 let list = [10, 20];
-ArrUtil.add(list, 30);
+ArrUtil.register(list, 30);
 console.log(list); // [10, 20, 30]
 
 ArrUtil.remove(list, 20);

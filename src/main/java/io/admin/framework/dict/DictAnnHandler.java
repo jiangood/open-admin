@@ -2,13 +2,11 @@ package io.admin.framework.dict;
 
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.SecureUtil;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.common.utils.ann.Remark;
 import io.admin.modules.system.dao.SysDictDao;
 import io.admin.modules.system.dao.SysDictItemDao;
 import io.admin.modules.system.entity.SysDict;
-import io.admin.modules.system.entity.SysDictItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -67,7 +65,7 @@ public class DictAnnHandler {
 
     private static Set<Class<?>> scanEnum() {
         Set<Class<?>> result = new HashSet<>();
-        Set<Class<?>> all = SpringTool.getBasePackageClasses();
+        Set<Class<?>> all = SpringUtils.getBasePackageClasses();
 
         for (Class<?> superClass : all) {
             Set<Class<?>> set = ClassUtil.scanPackageByAnnotation(superClass.getPackageName(), Remark.class);

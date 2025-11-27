@@ -3,7 +3,7 @@ package io.admin.modules.flowable.core.service;
 
 import cn.hutool.core.util.StrUtil;
 import io.admin.common.utils.FriendlyUtils;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import io.admin.modules.flowable.core.FlowableProperties;
 import io.admin.modules.flowable.core.assignment.AssignmentTypeProvider;
 import io.admin.modules.flowable.core.dto.TaskHandleType;
@@ -217,7 +217,7 @@ public class FlowableService {
         query.taskCandidateUser(userId);
 
         // 人员及 分组
-        Collection<AssignmentTypeProvider> providerList = SpringTool.getBeans(AssignmentTypeProvider.class);
+        Collection<AssignmentTypeProvider> providerList = SpringUtils.getBeans(AssignmentTypeProvider.class);
         Set<String> groupIds = new HashSet<>();
         for (AssignmentTypeProvider provider : providerList) {
             List<String> groups = provider.findGroupsByUser(userId);

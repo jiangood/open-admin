@@ -32,7 +32,7 @@ public class ReportTool {
         for (Object t : list) {
             Method[] methods = t.getClass().getMethods();
             for (Method m : methods) {
-                if (!m.getName().startsWith("get")) {
+                if (!m.getName().startsWith("getDefinition")) {
                     continue;
                 }
                 Class<?> returnType = m.getReturnType();
@@ -42,7 +42,7 @@ public class ReportTool {
 
                 Object v = m.invoke(t);
 
-                String name = StrUtil.removePreAndLowerFirst(m.getName(), "get");
+                String name = StrUtil.removePreAndLowerFirst(m.getName(), "getDefinition");
 
 
                 if(v != null){

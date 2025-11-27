@@ -3,7 +3,7 @@ package io.admin.modules.api.init;
 import cn.hutool.core.util.StrUtil;
 import io.admin.modules.api.defaults.MathApi;
 import io.admin.modules.api.service.ApiResourceService;
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -31,8 +31,8 @@ public class ApiInit implements CommandLineRunner {
 
 
     private void init() {
-        Map<String, Object> beans = SpringTool.getBeansOfType(Object.class);
-        String[] basePackageNames = SpringTool.getBasePackageNames();
+        Map<String, Object> beans = SpringUtils.getBeansOfType(Object.class);
+        String[] basePackageNames = SpringUtils.getBasePackageNames();
         for (Map.Entry<String, Object> entry : beans.entrySet()) {
             String beanName = entry.getKey();
             Object bean = entry.getValue();

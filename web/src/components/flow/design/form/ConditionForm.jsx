@@ -27,7 +27,7 @@ const metaInfo = {
       return <Input />;
     },
   },
-  digit: {
+  number: {
     ops: {
       '==': '等于',
       '!=': '不等于',
@@ -139,7 +139,6 @@ constructor(props) {
    * op: "=="
    * opLabel: "等于"
    * value: 34
-   * valueType: "digit", "text"
    *
    * @param i
    * @returns {*}
@@ -147,7 +146,7 @@ constructor(props) {
   createExpressionByCondition(condition) {
     const { key, op, value, valueType } = condition;
     switch (valueType) {
-      case 'digit':
+      case 'number':
         return key + op + value;
       case 'text':
         if (op === 'contains') {

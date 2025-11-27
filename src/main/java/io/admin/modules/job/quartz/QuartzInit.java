@@ -2,7 +2,6 @@ package io.admin.modules.job.quartz;
 
 import io.admin.modules.job.entity.SysJob;
 import io.admin.framework.config.SysProp;
-import io.admin.common.utils.SpringTool;
 import io.admin.modules.job.dao.SysJobDao;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

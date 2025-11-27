@@ -1,6 +1,6 @@
 package io.admin.framework.config.init;
 
-import io.admin.common.utils.SpringTool;
+import io.admin.common.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -11,12 +11,12 @@ import java.util.Collection;
 public class SystemHookService {
 
     public void trigger(SystemHookEventType type){
-        for (SystemHook hook : SpringTool.getBeans(SystemHook.class)) {
+        for (SystemHook hook : SpringUtils.getBeans(SystemHook.class)) {
             hook.onEvent(type);
         }
 
         if(type == SystemHookEventType.BEFORE_DATA_INIT){
-            Collection<SystemHook> interceptors = SpringTool.getBeans(SystemHook.class);
+            Collection<SystemHook> interceptors = SpringUtils.getBeans(SystemHook.class);
             for (SystemHook it : interceptors) {
                 log.warn("已弃用beforeDataInit: {}", it.getClass().getName());
                 it.beforeDataInit();
@@ -24,7 +24,7 @@ public class SystemHookService {
         }
 
         if(type == SystemHookEventType.AFTER_DATA_INIT){
-            Collection<SystemHook> interceptors = SpringTool.getBeans(SystemHook.class);
+            Collection<SystemHook> interceptors = SpringUtils.getBeans(SystemHook.class);
             for (SystemHook it : interceptors) {
                 log.warn("已弃用afterDataInit: {}", it.getClass().getName());
                 it.afterDataInit();

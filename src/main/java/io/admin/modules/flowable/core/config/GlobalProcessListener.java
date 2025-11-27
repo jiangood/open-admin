@@ -50,7 +50,7 @@ public class GlobalProcessListener implements FlowableEventListener {
         String definitionKey = execution.getProcessDefinitionKey();
 
 
-        ProcessDefinition listener = registry.get(definitionKey);
+        ProcessDefinition listener = registry.getDefinition(definitionKey);
         if (listener == null) {
             return;
         }
