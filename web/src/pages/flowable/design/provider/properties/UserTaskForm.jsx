@@ -45,7 +45,6 @@ export function PreactUserTaskForm(props) {
         const dom = document.getElementById(elementId)
         const root = createRoot(dom);
         root.render(<UserTaskForm element={element} modeling={modeling} />);
-
     }, []);
 
     return h('div', {id: elementId})

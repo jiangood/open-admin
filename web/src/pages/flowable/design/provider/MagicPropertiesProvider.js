@@ -28,7 +28,7 @@ export default function MagicPropertiesProvider(propertiesPanel) {
                     entries: [
                         {
                             id: 'user',
-                            component: (props)=>PreactUserTaskForm(props),
+                            component: PreactUserTaskForm,
                             isEdited: isTextFieldEntryEdited,
                         }
                     ],
