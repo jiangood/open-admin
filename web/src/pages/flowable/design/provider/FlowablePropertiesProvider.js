@@ -2,7 +2,7 @@
 import {is} from 'bpmn-js/lib/util/ModelUtil';
 import {DelegateExpressionProps} from "./properties/DelegateExpressionProps";
 import {FormProps} from "./properties/FormProps";
-import {PreactUserTaskForm} from "./properties/UserTaskForm";
+import {PreactUserTaskForm, renderReact, UserTaskForm} from "./properties/UserTaskForm";
 import {isTextFieldEntryEdited} from "@bpmn-io/properties-panel";
 
 const LOW_PRIORITY = 10001;
