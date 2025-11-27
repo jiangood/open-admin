@@ -33,7 +33,6 @@ export default function FlowablePropertiesProvider(propertiesPanel) {
                             isEdited: isTextFieldEntryEdited,
                         }
                     ],
-                    // 默认打开（看源码发现的）
                     shouldOpen:true
                 })
                 groups.push({
@@ -47,7 +46,7 @@ export default function FlowablePropertiesProvider(propertiesPanel) {
                     id: 'condition',
                     label: "条件",
                     entries: ConditionProps(element),
-                    // 默认打开（看源码 Discover
+                    shouldOpen:true
                 })
             }
 
