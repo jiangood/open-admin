@@ -22,7 +22,7 @@ function UserTaskForm(props) {
         candidateGroups: element.businessObject.candidateGroups,
         candidateUsers: StringUtils.split(element.businessObject.candidateUsers, ',')
     };
-    return (<div style={{padding: 16}}>
+    return (<div style={{padding: 8}}>
             <Form layout='vertical'
                   initialValues={initialValues}
                   onValuesChange={(changedValues) => {
