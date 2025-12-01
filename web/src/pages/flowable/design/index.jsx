@@ -76,7 +76,6 @@ export default class extends React.Component {
         try {
             const res = await this.bpmnModeler.saveXML();
             await HttpUtils.post('admin/flowable/model/saveContent', {id, content: res.xml});
-            message.success('服务端保存成功')
         } finally {
             hide()
         }
