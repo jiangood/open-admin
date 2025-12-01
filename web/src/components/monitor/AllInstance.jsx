@@ -1,6 +1,6 @@
 import React from "react";
 import {Popconfirm} from "antd";
-import {HttpUtil, ProTable} from "../../framework";
+import {HttpUtils, ProTable} from "../../framework";
 
 export default class extends React.Component {
 
@@ -65,10 +65,6 @@ export default class extends React.Component {
       actionRef={this.tableRef}
       columns={this.columns}
       request={(params) => HttpUtils.get('admin/flowable/monitor/processInstance', params)}
-      rowKey='id'
-      scroll={{
-        x: 'max-content'
-      }}
     >
 
     </ProTable>

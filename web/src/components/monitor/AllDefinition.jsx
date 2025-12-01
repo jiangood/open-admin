@@ -1,46 +1,45 @@
 import React from "react";
-import {HttpUtil, ProTable} from "../../framework";
+import {HttpUtils, ProTable} from "../../framework";
 
 export default class extends React.Component {
 
-  columns = [
-    {
-      dataIndex: 'id',
-      title:'流程定义标识',
-    },
-    {
-      dataIndex: 'key',
-      title: '流程定义键（key）'
-    },
-    {
-      dataIndex: 'name',
-      title:'名称'
-    },
+    columns = [
+        {
+            dataIndex: 'id',
+            title: '流程定义标识',
+        },
+        {
+            dataIndex: 'key',
+            title: '流程定义键（key）'
+        },
+        {
+            dataIndex: 'name',
+            title: '名称'
+        },
 
-    {
-      dataIndex: 'deploymentId',
-      title: '部署标识'
-    },
-    {
-      dataIndex: 'version',
-      title: '版本'
-    },
-    {
-      dataIndex: 'tenantId',
-      title: '租户标识'
-    },
+        {
+            dataIndex: 'deploymentId',
+            title: '部署标识'
+        },
+        {
+            dataIndex: 'version',
+            title: '版本'
+        },
+        {
+            dataIndex: 'tenantId',
+            title: '租户标识'
+        },
 
 
-  ]
+    ]
 
-  render() {
-    return <ProTable
-      search={false}
-      columns={this.columns}
-                     request={(params) => HttpUtils.get('admin/flowable/monitor/processDefinition', params)}
-                     rowKey='id'
-    >
+    render() {
+        return <ProTable
+            search={false}
+            columns={this.columns}
+            request={(params) => HttpUtils.get('admin/flowable/monitor/processDefinition', params)}
+        >
 
-    </ProTable>
-  }
+        </ProTable>
+    }
 }
