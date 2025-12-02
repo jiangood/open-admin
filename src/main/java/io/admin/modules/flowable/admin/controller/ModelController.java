@@ -26,6 +26,7 @@ import org.flowable.engine.delegate.JavaDelegate;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.Model;
 import org.flowable.engine.repository.ModelQuery;
+import org.flowable.engine.repository.ProcessDefinition;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -137,7 +138,8 @@ public class ModelController {
 
         Process mainProcess = bpmnModel.getMainProcess();
         mainProcess.setExecutable(true);
-        mainProcess.setId(m.getKey());
+        String key = m.getKey();
+        mainProcess.setId(key);
         mainProcess.setName(m.getName());
 
         // 校验模型
@@ -145,13 +147,16 @@ public class ModelController {
 
         String resourceName = m.getName() + ".bpmn20.xml";
 
-        RepositoryService repositoryService = SpringUtils.getBean(RepositoryService.class);
-        Deployment deploy = repositoryService.createDeployment()
+        repositoryService.createDeployment()
                 .addBpmnModel(resourceName, bpmnModel)
                 .name(m.getName())
-                .key(m.getKey())
+                .key(key)
+
                 .deploy();
 
+        ProcessDefinition def = repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).latestVersion().singleResult();
+        int version = def.getVersion();
+        log.info("流程最新版本 {}", version);
 
         return AjaxResult.ok().msg("部署成功");
     }
