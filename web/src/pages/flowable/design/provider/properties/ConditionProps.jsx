@@ -13,7 +13,7 @@ const getValue = (element) => {
     return condition ? condition.body : '';
 };
 
-const setValue =( value, element, modeling,bpmnFactory) => {
+const setValue =( value, element, modeling,moddle) => {
     const businessObject = element.businessObject;
     let conditionExpression = businessObject.conditionExpression;
 
@@ -26,10 +26,7 @@ const setValue =( value, element, modeling,bpmnFactory) => {
     }
 
     if (!conditionExpression) {
-        // 创建一个新的 tFormalExpression 元素
-
-        conditionExpression = bpmnFactory.create('bpmn:tFormalExpression');
-
+        conditionExpression = moddle.create('bpmn:FormalExpression');
         modeling.updateProperties(element, {
             conditionExpression: conditionExpression
         });
@@ -61,7 +58,7 @@ function Component(props) {
 
     const modeling = useService('modeling');
     const debounce = useService('debounceInput');
-    const bpmnFactory = useService('moddle');
+    const moddle = useService('moddle');
 
 
     return TextFieldEntry({
@@ -69,7 +66,7 @@ function Component(props) {
         id: id,
         label: '条件表达式',
         getValue,
-        setValue: value=>setValue(value,element,modeling,bpmnFactory),
+        setValue: value=>setValue(value,element,modeling,moddle),
         debounce,
     })
 

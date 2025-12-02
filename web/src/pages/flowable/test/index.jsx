@@ -15,7 +15,6 @@ export default class extends React.Component {
 
     HttpUtils.get('admin/flowable/test/get', {id}).then(rs=>{
         this.setState({model: rs})
-
     })
 
   }

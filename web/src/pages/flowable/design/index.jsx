@@ -52,7 +52,7 @@ export default class extends React.Component {
                 flowablePropertiesProviderModule
             ],
             moddleExtensions: {
-                flowable: flowableJson
+             //  flowable: flowableJson
             }
         });
 
