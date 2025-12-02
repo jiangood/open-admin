@@ -47,11 +47,14 @@ public class FlowableMonitorController {
 
     private FlowableService flowableService;
 
-    @GetMapping("processDefinition")
+    @GetMapping("processDefinitionPage")
     public AjaxResult processDefinition(Pageable pageable) {
         ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery();
 
-        Page page = this.findAll(ProcessDefinition.class, query, pageable);
+        long count = query.count();
+        List<ProcessDefinition> list = query.listPage((int) pageable.getOffset(), pageable.getPageSize());
+
+        PageImpl<ProcessDefinition> page = new PageImpl<>(list, pageable, count);
 
         return AjaxResult.ok().data(page);
     }
@@ -60,7 +63,10 @@ public class FlowableMonitorController {
     public AjaxResult processInstance(Pageable pageable) {
         ProcessInstanceQuery query = runtimeService.createProcessInstanceQuery();
 
-        Page page = this.findAll(ProcessInstance.class, query, pageable);
+        long count = query.count();
+        List<ProcessInstance> list = query.listPage((int) pageable.getOffset(), pageable.getPageSize());
+
+        PageImpl<ProcessInstance> page = new PageImpl<>(list, pageable, count);
 
         return AjaxResult.ok().data(page);
     }
@@ -111,12 +117,5 @@ public class FlowableMonitorController {
         return AjaxResult.ok().msg("设置任务处理人成功");
     }
 
-    private <T extends Query<?, ?>, U extends Object> Page findAll(Class cls, Query<T, U> query, Pageable pageable) {
-        long count = query.count();
-        List<U> list = query.listPage((int) pageable.getOffset(), pageable.getPageSize());
 
-        List<Map<String, Object>> mapList = BeanTool.copyToListMap(list, cls, "resources", "isNew", "currentFlowElement");
-
-        return new PageImpl<>(mapList, pageable, count);
-    }
 }

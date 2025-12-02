@@ -37,7 +37,7 @@ export default class  extends React.Component {
         return <ProTable
             search={false}
             columns={this.columns}
-            request={(params) => HttpUtils.get('admin/flowable/monitor/processDefinition', params)}
+            request={(params) => HttpUtils.get('admin/flowable/monitor/processDefinitionPage', params)}
         >
 
         </ProTable>
