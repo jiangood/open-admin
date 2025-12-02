@@ -1,6 +1,6 @@
 import {Button, Popconfirm, Space} from 'antd';
 import React from 'react';
-import {ButtonList, HttpUtils, PageUtils, ProTable} from "../../framework";
+import {ButtonList, HttpUtils, Page, PageUtils, ProTable} from "../../framework";
 
 export default class extends React.Component {
 
@@ -51,7 +51,7 @@ export default class extends React.Component {
 
     render() {
 
-        return <>
+        return <Page padding>
             <ProTable
                 actionRef={this.actionRef}
                 request={(params) => HttpUtils.get('admin/flowable/model/page', params)}
@@ -73,7 +73,7 @@ export default class extends React.Component {
             />
 
 
-        </>
+        </Page>
     }
 
 

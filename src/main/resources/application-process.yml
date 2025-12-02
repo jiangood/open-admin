@@ -1,6 +1,6 @@
 # 流程定义列表
 process:
-  definitions:
+  list:
     - key: "leave_request"
       name: "请假流程"
       listener: io.admin.modules.flowable.demo.LeaveProcessListener

@@ -3,11 +3,9 @@ package io.admin.modules.flowable.core.impl;
 import io.admin.common.utils.DateFormatTool;
 import io.admin.framework.config.security.LoginUser;
 import io.admin.modules.common.LoginUtils;
-import io.admin.modules.flowable.admin.service.SysFlowableModelService;
+import io.admin.modules.flowable.core.config.ProcessMetaCfg;
 import io.admin.modules.flowable.core.FlowableManager;
-import io.admin.modules.flowable.core.definition.ProcessDefinitionRegistry;
 import io.admin.modules.flowable.core.definition.ProcessVariable;
-import io.admin.modules.flowable.core.dto.ProcessDefinitionInfo;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -30,13 +28,12 @@ import static io.admin.modules.flowable.FlowableConsts.*;
 public class FlowableManagerImpl implements FlowableManager {
 
 
-
-
-    private SysFlowableModelService modelService;
     private RuntimeService runtimeService;
     private RepositoryService repositoryService;
     private IdentityService identityService;
-    private ProcessDefinitionRegistry registry;
+
+    private ProcessMetaCfg metaCfg;
+
     @Override
     public void start(String processDefinitionKey, String bizKey, Map<String, Object> variables) {
         start(processDefinitionKey, bizKey, null, variables);
@@ -89,8 +86,7 @@ public class FlowableManagerImpl implements FlowableManager {
 
 
         // 判断必填流程变量
-        ProcessDefinitionInfo info = registry.getInfo(definition.getKey());
-        List<ProcessVariable> variableList = info.getConditionVariableList();
+        List<ProcessVariable> variableList = metaCfg.getMeta(definition.getKey()).getVariables();
         if (!CollectionUtils.isEmpty(variableList)) {
             for (ProcessVariable formItem : variableList) {
                 String name = formItem.getName();

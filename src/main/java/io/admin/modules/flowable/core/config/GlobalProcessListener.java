@@ -1,8 +1,9 @@
 package io.admin.modules.flowable.core.config;
 
+import io.admin.common.utils.SpringUtils;
 import io.admin.modules.flowable.core.FlowableEventType;
 import io.admin.modules.flowable.core.definition.ProcessListener;
-import io.admin.modules.flowable.core.definition.ProcessDefinitionRegistry;
+import io.admin.modules.flowable.core.definition.ProcessMeta;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.common.engine.api.delegate.event.FlowableEvent;
@@ -26,7 +27,7 @@ public class GlobalProcessListener implements FlowableEventListener {
     HistoryService historyService;
 
     @Resource
-    ProcessDefinitionRegistry registry;
+    ProcessMetaCfg metaCfg;
 
 
     @Override
@@ -50,7 +51,8 @@ public class GlobalProcessListener implements FlowableEventListener {
         String definitionKey = execution.getProcessDefinitionKey();
 
 
-        ProcessListener listener = registry.getDefinition(definitionKey);
+        ProcessMeta meta = metaCfg.getMeta(definitionKey);
+        Class<? extends ProcessListener> listener = meta.getListener();
         if (listener == null) {
             return;
         }
@@ -73,7 +75,10 @@ public class GlobalProcessListener implements FlowableEventListener {
 
 
         // 触发
-        listener.onProcessEvent(eventType, initiator, businessKey, variables);
+        ProcessListener bean = SpringUtils.getBean(listener);
+        if(bean != null){
+            bean.onProcessEvent(eventType, initiator, businessKey, variables);
+        }
     }
 
 

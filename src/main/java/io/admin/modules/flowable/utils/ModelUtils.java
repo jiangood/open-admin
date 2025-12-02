@@ -1,29 +1,18 @@
 
-package io.admin.modules.flowable.admin.service;
+package io.admin.modules.flowable.utils;
 
 import cn.hutool.core.util.StrUtil;
 import io.admin.common.utils.SpringUtils;
-import io.admin.framework.data.query.JpaQuery;
-import io.admin.framework.data.service.BaseService;
-import io.admin.modules.flowable.admin.dao.SysFlowableModelDao;
-import io.admin.modules.flowable.admin.entity.SysFlowableModel;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.flowable.bpmn.converter.BpmnXMLConverter;
 import org.flowable.bpmn.model.Process;
 import org.flowable.bpmn.model.*;
 import org.flowable.common.engine.impl.util.io.BytesStreamSource;
-import org.flowable.engine.RepositoryService;
 import org.flowable.engine.impl.cfg.ProcessEngineConfigurationImpl;
 import org.flowable.validation.ProcessValidator;
 import org.flowable.validation.ProcessValidatorFactory;
 import org.flowable.validation.ValidationError;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
@@ -35,86 +24,15 @@ import java.util.Map;
 /**
  * 流程模型service接口实现类
  */
-@Service
 @Slf4j
-public class SysFlowableModelService extends BaseService<SysFlowableModel> {
-
-
-    @Resource
-    SysFlowableModelDao sysFlowableModelDao;
+public class ModelUtils {
 
 
 
 
 
 
-
-    public SysFlowableModel findByCode(String code) {
-        return sysFlowableModelDao.findByCode(code);
-    }
-
-
-    @Transactional
-    public SysFlowableModel init(String key, String name) {
-        log.info("初始化流程定义 {} {}  ", key, name);
-        SysFlowableModel model = this.findByCode(key);
-        if (model == null) {
-            model = new SysFlowableModel();
-        }
-
-        model.setCode(key);
-        model.setName(name);
-        if (StringUtils.isBlank(model.getContent())) {
-            String xml = this.createDefaultModel(model.getCode(), model.getName());
-            model.setContent(xml);
-        }
-
-        return this.save(model);
-    }
-    @Transactional
-    public SysFlowableModel saveContent(SysFlowableModel param) {
-        String xml = param.getContent();
-        String id = param.getId();
-
-        SysFlowableModel db = sysFlowableModelDao.findOne(id);
-
-
-        db.setContent(xml);
-        db = sysFlowableModelDao.save(db);
-
-        return db;
-    }
-
-
-    public String deploy(String key, String name, String xml) {
-        BpmnModel bpmnModel = xmlToModel(xml);
-
-
-        Process mainProcess = bpmnModel.getMainProcess();
-        mainProcess.setExecutable(true);
-        mainProcess.setId(key);
-        mainProcess.setName(name);
-
-        // 校验模型
-        this.validateModel(bpmnModel);
-
-
-
-
-        String resourceName = name + ".bpmn20.xml";
-
-        RepositoryService repositoryService = SpringUtils.getBean(RepositoryService.class);
-        repositoryService.createDeployment()
-                .addBpmnModel(resourceName, bpmnModel)
-                .name(name)
-                .key(key)
-                .deploy();
-
-
-        return modelToXml(bpmnModel);
-    }
-
-    public BpmnModel xmlToModel(String xml) {
+    public static BpmnModel xmlToModel(String xml) {
         BpmnXMLConverter converter = new BpmnXMLConverter();
         byte[] xmlBytes = xml.getBytes(StandardCharsets.UTF_8);
         BytesStreamSource streamSource = new BytesStreamSource(xmlBytes);
@@ -122,14 +40,14 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
         return converter.convertToBpmnModel(streamSource, true, true);
     }
 
-    public String modelToXml(BpmnModel model) {
+    public static String modelToXml(BpmnModel model) {
         BpmnXMLConverter converter = new BpmnXMLConverter();
         byte[] bytes = converter.convertToXML(model, StandardCharsets.UTF_8.name());
         return new String(bytes, StandardCharsets.UTF_8);
     }
 
 
-    private void validateModel(BpmnModel model) {
+    public static void validateModel(BpmnModel model) {
         ProcessValidator validator = new ProcessValidatorFactory().createDefaultProcessValidator();
 
         // 默认校验
@@ -197,25 +115,7 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
 
     }
 
-    public String createDefaultModel(String key, String name) {
-        BpmnModel model = new BpmnModel();
 
-        Process proc = new Process();
-
-        proc.setExecutable(true);
-        proc.setId(key);
-        proc.setName(name);
-
-        model.addProcess(proc);
-
-        StartEvent startEvent = new StartEvent();
-        startEvent.setId("StartEvent_1");
-        proc.addFlowElement(startEvent);
-
-        model.addGraphicInfo(startEvent.getId(), new GraphicInfo(200, 200, 30, 30));
-
-        return this.modelToXml(model);
-    }
 
 
     /**
@@ -223,7 +123,7 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
      *
      * @return
      */
-    private String getAttr(FlowElement el, String name) {
+    private static String getAttr(FlowElement el, String name) {
         Map<String, List<ExtensionAttribute>> attrs = el.getAttributes();
         if (attrs.isEmpty()) {
             return null;
@@ -243,40 +143,6 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
         return null;
     }
 
-    public SysFlowableModel save(SysFlowableModel model) {
-        String code = model.getCode();
-        Assert.hasText(code, "编码不能为空");
-        Assert.state(!isNumeric(code), "编码不能是纯数字");
-
-        return  sysFlowableModelDao.save(model);
-    }
-
-    private static boolean isNumeric(String str) {
-        if (str == null || str.equals("")) {
-            return false;
-        }
-
-        try {
-            Long.parseLong(str);
-            return true;
-        } catch (NumberFormatException e) {
-        }
-        return false;
-    }
 
 
-    public void deleteById(String id) {
-        sysFlowableModelDao.deleteById(id);
-    }
-
-    public Page<SysFlowableModel> findAll(final String searchText, Pageable pageable) {
-        JpaQuery<SysFlowableModel> q = new JpaQuery<>();
-        q.searchText(searchText, "name","code");
-
-        return sysFlowableModelDao.findAll(q, pageable);
-    }
-
-    public SysFlowableModel findOne(String id) {
-        return sysFlowableModelDao.findOne(id);
-    }
 }
