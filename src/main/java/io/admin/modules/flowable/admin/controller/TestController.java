@@ -20,7 +20,7 @@ public class TestController {
 
 
     @Resource
-    private FlowableManager fm;
+    private FlowableManager flowableManager;
 
     @Resource
     private ProcessMetaCfg metaCfg;
@@ -44,7 +44,7 @@ public class TestController {
         String bizKey = params.get("id").toString();
         String key = (String) params.get("key");
 
-        fm.start(key,bizKey, params);
+        flowableManager.start(key,bizKey, params);
 
         return AjaxResult.ok().msg("提交测试流程成功");
     }
