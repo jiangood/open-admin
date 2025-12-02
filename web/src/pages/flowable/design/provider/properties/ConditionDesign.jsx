@@ -73,7 +73,7 @@ export class ConditionDesignButton extends Component {
 
     onChange = arr => {
         const str = this.convertArrToStr(arr)
-        this.props.setValue(str, this.props.element, this.props.modeling)
+        this.props.setValue(str, this.props.element, this.props.modeling, this.props.bpmnFactory)
     };
 
     columns = [

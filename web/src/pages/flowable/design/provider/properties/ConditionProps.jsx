@@ -13,7 +13,7 @@ const getValue = (element) => {
     return condition ? condition.body : '';
 };
 
-const setValue =( value, element, modeling) => {
+const setValue =( value, element, modeling,bpmnFactory) => {
     const businessObject = element.businessObject;
     let conditionExpression = businessObject.conditionExpression;
 
@@ -27,7 +27,7 @@ const setValue =( value, element, modeling) => {
 
     if (!conditionExpression) {
         // 创建一个新的 tFormalExpression 元素
-        const bpmnFactory = useService('bpmnFactory');
+
         conditionExpression = bpmnFactory.create('bpmn:tFormalExpression');
 
         modeling.updateProperties(element, {
@@ -61,7 +61,7 @@ function Component(props) {
 
     const modeling = useService('modeling');
     const debounce = useService('debounceInput');
-
+    const bpmnFactory = useService('bpmnFactory');
 
 
     return TextFieldEntry({
@@ -69,7 +69,7 @@ function Component(props) {
         id: id,
         label: '条件表达式',
         getValue,
-        setValue: value=>setValue(value,element,modeling),
+        setValue: value=>setValue(value,element,modeling,bpmnFactory),
         debounce,
     })
 

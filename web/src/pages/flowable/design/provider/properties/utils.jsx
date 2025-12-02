@@ -10,8 +10,10 @@ import {ThemeUtils} from "../../../../../framework";
 export function renderReact(props, ReactComponent, moreProps) {
     const {element, id} = props;
     const modeling = useService('modeling');
-    const domRef = useRef(null);
+    const bpmnFactory = useService('bpmnFactory');
     const canvas = useService('canvas');
+
+    const domRef = useRef(null);
     const rootElement = canvas.getRootElement();
     const processId = rootElement.id;
 
@@ -24,7 +26,7 @@ export function renderReact(props, ReactComponent, moreProps) {
                 colorError: ThemeUtils.getColor("error-color"),
                 borderRadius: 4,
             },}}>
-            <ReactComponent element={element} modeling={modeling}
+            <ReactComponent element={element} modeling={modeling} bpmnFactory={bpmnFactory}
                             processId={processId} {...moreProps}/></ConfigProvider>
         );
     }, []);
