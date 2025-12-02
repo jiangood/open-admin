@@ -5,8 +5,8 @@ import io.admin.common.utils.IdTool;
 import io.admin.common.utils.SpringUtils;
 import io.admin.framework.config.init.SystemHookEventType;
 import io.admin.framework.config.init.SystemHookService;
-import io.admin.modules.flowable.admin.dao.SysFlowableModelDao;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
+import io.admin.modules.flowable.admin.service.SysFlowableModelService;
 import io.admin.modules.flowable.core.definition.ProcessDefinition;
 import io.admin.modules.flowable.core.definition.ProcessDefinitionRegistry;
 
@@ -38,7 +38,7 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
 
     @Resource
     @Lazy
-    private SysFlowableModelDao sysFlowableModelDao;
+    private SysFlowableModelService sysFlowableModelService;
 
     @Resource
     private SystemHookService systemHookService;
@@ -65,7 +65,7 @@ public class FlowableConfig implements EngineConfigurationConfigurer<SpringProce
             String key = definition.getKey();
             String name = definition.getName();
 
-            SysFlowableModel sysFlowableModel = sysFlowableModelDao.init(key, name);
+            SysFlowableModel sysFlowableModel = sysFlowableModelService.init(key, name);
 
             ProcessDefinitionInfo info = new ProcessDefinitionInfo();
             info.setId(sysFlowableModel.getId());

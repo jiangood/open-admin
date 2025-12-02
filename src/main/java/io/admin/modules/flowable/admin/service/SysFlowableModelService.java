@@ -56,7 +56,23 @@ public class SysFlowableModelService extends BaseService<SysFlowableModel> {
     }
 
 
+    @Transactional
+    public SysFlowableModel init(String key, String name) {
+        log.info("初始化流程定义 {} {}  ", key, name);
+        SysFlowableModel model = this.findByCode(key);
+        if (model == null) {
+            model = new SysFlowableModel();
+        }
 
+        model.setCode(key);
+        model.setName(name);
+        if (StringUtils.isBlank(model.getContent())) {
+            String xml = this.createDefaultModel(model.getCode(), model.getName());
+            model.setContent(xml);
+        }
+
+        return this.save(model);
+    }
     @Transactional
     public SysFlowableModel saveContent(SysFlowableModel param) {
         String xml = param.getContent();

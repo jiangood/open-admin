@@ -4,6 +4,7 @@ import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.repository.BaseDao;
 import io.admin.modules.flowable.admin.entity.SysFlowableModel;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,17 +19,6 @@ public class SysFlowableModelDao extends BaseDao<SysFlowableModel> {
     }
 
 
-    @Transactional
-    public SysFlowableModel init(String key, String name) {
-        log.info("初始化流程定义 {} {}  ", key, name);
-        SysFlowableModel model = this.findByCode(key);
-        if (model == null) {
-            model = new SysFlowableModel();
-        }
 
-        model.setCode(key);
-        model.setName(name);
-       return this.save(model);
-    }
 
 }

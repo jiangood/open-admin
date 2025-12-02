@@ -19,10 +19,7 @@ export default class extends React.Component {
             title: '唯一编码',
             dataIndex: 'code'
         },
-        {
-            title: '表单链接',
-            dataIndex: 'formUrl'
-        },
+
         {
             title: '更新时间',
             dataIndex: 'updateTime',
