@@ -2,15 +2,20 @@ package io.admin.modules.flowable.core.config;
 
 // ... imports
 
+import cn.hutool.core.io.resource.ResourceUtil;
 import io.admin.common.utils.YmlUtils;
 import io.admin.modules.flowable.core.config.meta.ProcessMeta;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
+import org.apache.commons.lang3.ClassPathUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @Data
@@ -24,7 +29,8 @@ public class ProcessMetaCfg {
 
     @PostConstruct
     void init() throws IOException {
-        ProcessMetaCfg cfg = YmlUtils.parseYml("classpath:application-process.yml", ProcessMetaCfg.class,"process");
+        InputStream is = ResourceUtil.getStream("application-process.yml");
+        ProcessMetaCfg cfg = YmlUtils.parseYml(is, ProcessMetaCfg.class,"process");
         this.list = cfg.getList();
     }
 

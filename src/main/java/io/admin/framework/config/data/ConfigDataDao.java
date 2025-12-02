@@ -128,7 +128,7 @@ public class ConfigDataDao {
 
     @SneakyThrows
     private DataPropConfig parseResource(Resource resource) {
-      return YmlUtils.parseYml(resource, DataRoot.class).getData();
+      return YmlUtils.parseYml(resource.getInputStream(), DataPropConfig.class,"data");
     }
 
 
