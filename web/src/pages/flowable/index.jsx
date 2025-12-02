@@ -62,8 +62,14 @@ export default class extends React.Component {
                 showToolbarSearch={true}
                 toolBarRender={() => {
                     return <ButtonList>
-                        <Button type='primary'     onClick={() => PageUtils.open('/flowable/monitor', "流程监控")}>
-                            监控
+                        <Button    onClick={() => PageUtils.open('/flowable/monitor/task', "运行中的任务")}>
+                            运行中的任务
+                        </Button>
+                        <Button    onClick={() => PageUtils.open('/flowable/monitor/instance', "运行中的流程实例")}>
+                            运行中的流程实例
+                        </Button>
+                        <Button    onClick={() => PageUtils.open('/flowable/monitor/definition', "已部署的流程定义")}>
+                            已部署的流程定义
                         </Button>
                     </ButtonList>
                 }}

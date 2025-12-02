@@ -1,7 +1,7 @@
 import React from "react";
-import {HttpUtils, ProTable} from "../../framework";
+import {HttpUtils, ProTable} from "../../../framework";
 
-export default class extends React.Component {
+export default class  extends React.Component {
 
     columns = [
         {
