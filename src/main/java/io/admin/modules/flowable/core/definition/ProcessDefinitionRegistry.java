@@ -28,43 +28,9 @@ public class ProcessDefinitionRegistry {
 
     private final Map<String, ProcessDefinitionInfo> dtoMap = new HashMap<>();
 
-    @Resource
-    private ProcessConfiguration processConfiguration;
 
-    @Resource
-    @Lazy
-    private ProcessDefinitionRegistry registry;
 
-    @Resource
-    @Lazy
-    private SysFlowableModelDao sysFlowableModelDao;
 
-    @Resource
-    private SystemHookService systemHookService;
-
-    @PostConstruct
-    void init(){
-        for (ProcessDefinition definition : processConfiguration.getDefinitions()) {
-            Class<? extends ProcessListener> listener = definition.getListener();
-            ProcessListener bean = SpringUtils.getBean(listener);
-
-            String key = definition.getKey();
-            String name = definition.getName();
-
-            SysFlowableModel sysFlowableModel = sysFlowableModelDao.init(key, name);
-
-            ProcessDefinitionInfo info = new ProcessDefinitionInfo();
-            info.setId(sysFlowableModel.getId());
-            info.setName(name);
-            info.setCode(key);
-            info.setFormList(definition.getForms());
-            info.setConditionVariableList(definition.getVariables());
-            registry.register(key, bean, info);
-
-            log.info("注册流程定义类 {} {}", key, definition.getClass().getName());
-            systemHookService.trigger(SystemHookEventType.AFTER_FLOWABLE_DEFINITION_INIT);
-        }
-    }
 
 
     public void register(String key, ProcessListener definition, ProcessDefinitionInfo dto) {
