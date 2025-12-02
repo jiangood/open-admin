@@ -1,7 +1,5 @@
-import {isTextFieldEntryEdited, SelectEntry, TextFieldEntry} from '@bpmn-io/properties-panel';
+import {isTextFieldEntryEdited, TextFieldEntry} from '@bpmn-io/properties-panel';
 import {useService} from 'bpmn-js-properties-panel';
-import {useEffect, useState} from '@bpmn-io/properties-panel/preact/hooks';
-import {HttpUtils} from "../../../../../framework";
 import {renderReact} from "./utils";
 import {ConditionDesignButton} from "./ConditionDesign";
 

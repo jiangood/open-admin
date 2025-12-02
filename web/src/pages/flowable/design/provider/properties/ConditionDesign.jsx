@@ -76,6 +76,36 @@ export class ConditionDesignButton extends Component {
         this.props.setValue(str, this.props.element, this.props.modeling)
     };
 
+    columns = [
+        {
+            dataIndex: 'key', title: '变量名称',
+            render: () => {
+                return <Select options={this.state.varOptions} style={{width: 200}}></Select>
+            }
+        },
+        {
+            dataIndex: 'op', title: '操作符', render: (v, record) => {
+                let options = []
+                let {varList} = this.state;
+                let varItem = varList.find(t => t.name === record.key)
+
+                if (varItem) {
+                    const {valueType} = varItem;
+                    const ops = metaInfo[valueType].ops;
+                    options = Object.keys(ops).map(key => {
+                        return {
+                            label: ops[key],
+                            value: key
+                        }
+                    })
+                }
+
+                return <Select options={options} style={{width: 100}}></Select>
+            }
+        },
+        {dataIndex: 'value', title: '值'},
+    ];
+
     render() {
         let value = this.props.getValue(this.props.element);
         let arrValue = this.convertStrToArr(value);
@@ -95,37 +125,7 @@ export class ConditionDesignButton extends Component {
                    mask={{blur: false}}
                    destroyOnHidden
             >
-                <FieldTable columns={
-                    [
-                        {
-                            dataIndex: 'key', title: '变量名称',
-                            render: () => {
-                                return <Select options={this.state.varOptions} style={{width: 200}}></Select>
-                            }
-                        },
-                        {
-                            dataIndex: 'op', title: '操作符', render: (v, record) => {
-                                let options = []
-                                let {varList} = this.state;
-                                let varItem = varList.find(t => t.name === record.key)
-
-                                if (varItem) {
-                                    const {valueType} = varItem;
-                                    const ops = metaInfo[valueType].ops;
-                                    options = Object.keys(ops).map(key => {
-                                        return {
-                                            label: ops[key],
-                                            value: key
-                                        }
-                                    })
-                                }
-
-                                return <Select options={options} style={{width: 100}}></Select>
-                            }
-                        },
-                        {dataIndex: 'value', title: '值'},
-                    ]
-                }
+                <FieldTable columns={this.columns}
                             value={arrValue}
                             onChange={this.onChange}
                 ></FieldTable>
@@ -173,10 +173,3 @@ export class ConditionDesignButton extends Component {
 }
 
 
-export class ConditionDesign extends Component {
-
-    render() {
-
-    }
-
-}
