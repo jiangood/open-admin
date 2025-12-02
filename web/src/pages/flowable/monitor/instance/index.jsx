@@ -150,7 +150,7 @@ export default class extends React.Component {
                     <Button size='small' onClick={() => PageUtils.open(`/flowable/monitor/instance/view?id=${r.id}`, '查看流程')}>查看</Button>
                     <Popconfirm title={'关闭流程'}
                                 onConfirm={() => this.close(r.id)}>
-                        <a>关闭流程</a>
+                        <Button size='small' >终止</Button>
                     </Popconfirm></Space>
             }
         }
