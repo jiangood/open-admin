@@ -15,7 +15,7 @@ import '@bpmn-io/properties-panel/assets/properties-panel.css';
 import {BpmnPropertiesPanelModule, BpmnPropertiesProviderModule} from 'bpmn-js-properties-panel';
 
 import flowablePropertiesProviderModule from './provider';
-import flowableModdleDescriptor from './descriptors/flowable';
+import flowableJson from './descriptors/flowable';
 import Loading from "../../../loading";
 
 export default class extends React.Component {
@@ -52,7 +52,7 @@ export default class extends React.Component {
                 flowablePropertiesProviderModule
             ],
             moddleExtensions: {
-                magic: flowableModdleDescriptor
+                flowable: flowableJson
             }
         });
 

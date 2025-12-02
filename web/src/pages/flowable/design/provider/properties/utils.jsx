@@ -10,7 +10,7 @@ import {ThemeUtils} from "../../../../../framework";
 export function renderReact(props, ReactComponent, moreProps) {
     const {element, id} = props;
     const modeling = useService('modeling');
-    const bpmnFactory = useService('bpmnFactory');
+    const bpmnFactory = useService('moddle');
     const canvas = useService('canvas');
 
     const domRef = useRef(null);

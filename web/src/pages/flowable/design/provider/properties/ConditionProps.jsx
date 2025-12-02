@@ -61,7 +61,7 @@ function Component(props) {
 
     const modeling = useService('modeling');
     const debounce = useService('debounceInput');
-    const bpmnFactory = useService('bpmnFactory');
+    const bpmnFactory = useService('moddle');
 
 
     return TextFieldEntry({
