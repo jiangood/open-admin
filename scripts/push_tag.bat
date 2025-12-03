@@ -1,5 +1,5 @@
 cd ../
-set  "tag_name=v0.0.3"
+set  "tag_name=v0.0.4"
 
 
 git tag -d %tag_name%
