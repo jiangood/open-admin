@@ -1,19 +1,18 @@
 import React from 'react'
-import {Page} from "../../framework";
-import {Button} from "antd";
+import {Button, Flex} from "antd";
 
 export default class extends React.Component {
 
 
 
     render() {
-        return <Page padding>
+        return <div style={{display:'flex',alignItems:'center',justifyContent:'center'}}>
 
 
             <Button type='primary' href='/ureport/designer'>打开设计器</Button>
 
 
-        </Page>
+        </div>
     }
 
 

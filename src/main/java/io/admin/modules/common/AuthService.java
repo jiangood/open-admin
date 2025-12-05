@@ -61,7 +61,6 @@ public class AuthService {
             Assert.hasText(captchaCode, "请输入验证码");
             String sessionCode = (String) session.getAttribute(CAPTCHA_CODE);
             Assert.state(codeGenerator.verify(sessionCode, captchaCode), "验证码错误");
-            session.removeAttribute(CAPTCHA_CODE);
         }
 
 

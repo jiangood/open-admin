@@ -52,6 +52,7 @@ public class LoginFilter extends OncePerRequestFilter {
 
             ReplaceParameterRequestWrapper newRequest = new ReplaceParameterRequestWrapper(request);
             newRequest.replace("password", password);
+            request = newRequest;
         } catch (Exception e) {
             log.error("用户[{}]认证失败： {}", username, e.getMessage());
             ResponseUtils.response(response, AjaxResult.err(e.getMessage()));
