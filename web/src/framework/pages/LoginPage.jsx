@@ -57,9 +57,9 @@ export class LoginPage extends React.Component {
         }).catch(e => {
             console.log('登录错误', e)
         })
-            .finally(() => {
-                this.setState({logging: false})
-            })
+        .finally(() => {
+            this.setState({logging: false})
+        })
     }
 
 

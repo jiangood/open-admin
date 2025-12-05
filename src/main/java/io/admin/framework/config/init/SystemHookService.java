@@ -2,6 +2,7 @@ package io.admin.framework.config.init;
 
 import io.admin.common.utils.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -29,6 +30,12 @@ public class SystemHookService {
                 log.warn("已弃用afterDataInit: {}", it.getClass().getName());
                 it.afterDataInit();
             }
+        }
+    }
+
+    public void beforeConfigSecurity(HttpSecurity http) {
+        for (SystemHook hook : SpringUtils.getBeans(SystemHook.class)) {
+            hook.beforeConfigSecurity(http);
         }
     }
 }

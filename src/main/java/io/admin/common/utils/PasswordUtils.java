@@ -23,15 +23,14 @@ public class PasswordUtils {
      *
      */
     public static String encode(String plainText) {
-        return PASSWORD_ENCODER.encode(plainText);
+        return getPasswordEncoder().encode(plainText);
     }
 
 
-    @Getter
     private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
 
-    public static boolean checkpw(String password, String passwordBcrypt) {
-        return BCrypt.checkpw(password, passwordBcrypt);
+    public static PasswordEncoder getPasswordEncoder() {
+        return PASSWORD_ENCODER;
     }
 
 

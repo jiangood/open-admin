@@ -5,6 +5,8 @@ import io.admin.common.utils.ArrayUtils;
 import io.admin.common.utils.PasswordUtils;
 import io.admin.common.utils.ResponseUtils;
 import io.admin.framework.config.SysProp;
+import io.admin.framework.config.init.SystemHook;
+import io.admin.framework.config.init.SystemHookService;
 import io.admin.framework.config.security.refresh.PermissionRefreshFilter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
+import java.util.List;
+
 @Slf4j
 @Configuration
 @AllArgsConstructor
@@ -31,62 +35,59 @@ public class SecurityConfig {
 
     private final SysProp sysProp;
 
+    private SystemHookService systemHookService;
+
     // 配置 HTTP 安全
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, LoginFilter loginFilter, PermissionRefreshFilter permissionRefreshFilter) throws Exception {
         String[] loginExclude = ArrayUtils.toStrArr(sysProp.getXssExcludePathList());
 
+        systemHookService.beforeConfigSecurity(http);
         // 前后端分离项目，关闭csrf
-        http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authz -> {
-                    if (loginExclude.length > 0) {
-                        authz.requestMatchers(loginExclude).permitAll();
-                    }
-                    authz.requestMatchers("/admin/auth/**", "/admin/public/**").permitAll()
-                            .requestMatchers("/admin/**","/ureport/**").authenticated()
-                            .anyRequest().permitAll();
+        http.csrf(AbstractHttpConfigurer::disable);
+        http.authorizeHttpRequests(authz -> {
+            if (loginExclude.length > 0) {
+                authz.requestMatchers(loginExclude).permitAll();
+            }
+            authz.requestMatchers("/admin/auth/**", "/admin/public/**").permitAll();
+            authz.requestMatchers("/admin/**", "/ureport/**").authenticated();
+            authz.anyRequest().permitAll();
+        });
 
-                })
-                .formLogin(cfg -> {
-                    cfg.loginProcessingUrl("/admin/auth/login")
-                            .defaultSuccessUrl("/admin/auth/success")
-                            .successHandler((request, response, authentication) -> {
-                                AjaxResult rs = AjaxResult.ok("登录成功");
-                                ResponseUtils.response(response, rs);
-                            }).failureHandler((request, response, exception) -> {
-                                AjaxResult rs = AjaxResult.err("登录失败" + exception.getMessage());
-                                ResponseUtils.response(response, rs);
-                            })
-                    ;
-                })
+        http.formLogin(cfg -> {
+            cfg.loginProcessingUrl("/admin/auth/login").defaultSuccessUrl("/admin/auth/success").successHandler((request, response, authentication) -> {
+                AjaxResult rs = AjaxResult.ok("登录成功");
+                ResponseUtils.response(response, rs);
+            }).failureHandler((request, response, exception) -> {
+                AjaxResult rs = AjaxResult.err("登录失败" + exception.getMessage());
+                ResponseUtils.response(response, rs);
+            });
+        });
 
-                .sessionManagement(cfg -> {
-                    int maximumSessions = sysProp.getMaximumSessions();
-                    log.info("设置最大并发会话数为 {}", maximumSessions);
+        http.sessionManagement(cfg -> {
+            int maximumSessions = sysProp.getMaximumSessions();
+            log.info("设置最大并发会话数为 {}", maximumSessions);
 
-                    cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-                    cfg.sessionConcurrency(conCfg -> {
-                        conCfg.maximumSessions(maximumSessions)
-                                //达到限制时，新登录失败
-                                //.maxSessionsPreventsLogin(true)
-                                .sessionRegistry(sessionRegistry());
-                    });
-                })
-                .addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class
-                )
-        ;
+            cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
+            cfg.sessionConcurrency(conCfg -> {
+                conCfg.maximumSessions(maximumSessions)
+                        //达到限制时，新登录失败
+                        //.maxSessionsPreventsLogin(true)
+                        .sessionRegistry(sessionRegistry());
+            });
+        });
+        http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling(cfg -> {
             cfg.accessDeniedHandler((request, response, e) -> {
-                        AjaxResult err = AjaxResult.err(e.getMessage());
-                        ResponseUtils.response(response, err);
-                    })
-                    .authenticationEntryPoint((request, response, e) -> {
-                        AjaxResult err = AjaxResult.err(401, "认证信息已失效或未登录，请重新登录。" + e.getMessage());
-                        response.setStatus(401);
-                        ResponseUtils.response(response, err);
-                    });
+                AjaxResult err = AjaxResult.err(e.getMessage());
+                ResponseUtils.response(response, err);
+            }).authenticationEntryPoint((request, response, e) -> {
+                AjaxResult err = AjaxResult.err(401, "认证信息已失效或未登录，请重新登录。" + e.getMessage());
+                response.setStatus(401);
+                ResponseUtils.response(response, err);
+            });
 
         });
 
@@ -99,14 +100,13 @@ public class SecurityConfig {
     // 密码编码器
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordUtils.getPASSWORD_ENCODER();
+        return PasswordUtils.getPasswordEncoder();
     }
 
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .build();
+        return http.getSharedObject(AuthenticationManagerBuilder.class).build();
     }
 
     @Bean
