@@ -1,5 +1,42 @@
 data:
+  configs:
+    - group-name: 邮件配置
+      children:
+        - code: email.from
+          name: 邮件发送账号
+        - code: email.pass
+          name: 邮件发送密码
+    - group-name: 网站配置
+      children:
+        - code: sys.copyright
+          name: 版权信息
+        - code: sys.loginBackground
+          name: 登录背景图
+        - code: sys.loginBoxBottomTip
+          name: 登录框下面的提示
+        - code: sys.title
+          name: 站点标题
+        - code: sys.waterMark
+          name: 开启水印
+          value-type: boolean
+          description: 在所有页面增加水印
+    - group-name: 系统配置
+      children:
+        - code: sys.baseUrl
+          name: 请求基础地址
+          description: 非必填，可用于拼接完整请求地址
+        - code: sys.jwtSecret
+          name: jwt密码
   menus:
+    - name: 我的任务
+      id: myFlowableTask
+      path: /flowable/task
+      seq: -1
+      refresh-on-tab-click: true
+      message-count-url: /admin/flowable/my/todoCount
+      perms:
+        - perm: myFlowableTask:manage
+          name: 任务管理
     - id: sys
       name: 系统管理
       seq: 10000 # 系统管理排在后面
@@ -72,7 +109,7 @@ data:
             - name: 删除
               perm: sysDict:delete
         - id: sysFile
-          name: 文件管理
+          name: 存储文件
           path: /system/file
           icon: FolderOpenOutlined
           perms:
@@ -80,22 +117,6 @@ data:
               name: 查看
             - perm: sysFile:delete
               name: 删除
-
-
-        - id: sysLog
-          name: 操作日志
-          path: /system/log
-          icon: FileSearchOutlined
-          perms:
-            - name: 查看
-              perm: sysLog:view
-        - id: api
-          name: 接口管理
-          icon: ApiOutlined
-          path: /system/api
-          perms:
-            - name: 管理
-              perm: api
 
         - id: job
           name: 作业调度
@@ -110,3 +131,39 @@ data:
               perm: job:triggerJob
             - name: 清理日志
               perm: job:jobLogClean
+        - id: sysLog
+          name: 操作日志
+          path: /system/log
+          icon: FileSearchOutlined
+          perms:
+            - name: 查看
+              perm: sysLog:view
+        - id: api
+          name: 接口管理
+          icon: ApiOutlined
+          path: /system/api
+          perms:
+            - name: 管理
+              perm: api
+        - id: flowableModel
+          name: 流程引擎
+          path: /flowable
+          perms:
+            - perm: flowableModel:design
+              name: 设计
+            - perm: flowableModel:deploy
+              name: 部署
+            - perm: flowableTask:setAssignee
+              name: 动态修改受理人
+            - perm: flowableInstance:close
+              name: 终止流程
+        - id: ureport
+          name: 报表管理
+          icon: TableOutlined
+          seq: 101
+          path: /ureport
+          perms:
+            - perm: ureport:view
+              name: 查看
+            - perm: ureport:design
+              name: 设计
