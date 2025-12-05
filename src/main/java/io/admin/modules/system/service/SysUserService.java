@@ -41,8 +41,6 @@ import java.util.stream.Collectors;
 @Service
 public class SysUserService extends BaseService<SysUser> {
 
-    public static final int CODE_PWD_ERR = 4011;
-
 
     @Resource
     private SysUserDao sysUserDao;
@@ -54,9 +52,6 @@ public class SysUserService extends BaseService<SysUser> {
 
     @Resource
     private SysOrgDao sysOrgDao;
-
-    @Resource
-    private SysConfigService sysConfigService;
 
 
     @Resource
@@ -74,33 +69,6 @@ public class SysUserService extends BaseService<SysUser> {
     public UserResponse findOneDto(String id){
         SysUser user = sysUserDao.findOne(id);
         return userMapper.toResponse(user);
-    }
-
-
-    public SysUser checkLogin(String account, String password) {
-        SysUser sysUser = sysUserDao.findByAccount(account);
-
-        Assert.hasText(account, "账号不能为空");
-        Assert.hasText(password, "密码不能为空");
-        Assert.notNull(sysUser, "账号不存在");
-
-        Assert.state(sysUser.getEnabled(), "账号已禁用");
-        String passwordBcrypt = sysUser.getPassword();
-        Assert.hasText(passwordBcrypt, "账号未设置密码");
-
-
-
-        boolean checkpw = PasswordUtils.checkpw(password, passwordBcrypt);
-        if (!checkpw) {
-            log.info("登录密码错误,记录错误");
-        }
-        CodeAssert.state(checkpw, CODE_PWD_ERR,"账号或密码错误");
-
-
-
-
-
-        return sysUser;
     }
 
 

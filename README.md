@@ -1,12 +1,28 @@
 # springboot-admin-starter
-
+![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
 ## 简介
 
 `springboot-admin-starter` 是一个功能强大的企业级应用快速开发入门套件，旨在提供一个现成的、集成了常用后台管理功能的基础平台。
 
-它采用前后端分离的架构，后端基于 Spring Boot，前端基于 UmiJS (React)，帮助开发者快速启动新项目，并专注于业务逻辑的实现。
+它采用前后端分离的架构，后端基于 Spring Boot，前端基于 Ant Design，帮助开发者快速启动新项目，并专注于业务逻辑的实现。
 
 ---
+
+## 功能列表
+- 系统管理 
+- 机构管理 
+- 用户管理
+- 角色管理 
+- 操作手册 
+- 系统配置
+- 数据字典 
+- 文件管理 
+
+- 操作日志 
+- 接口管理 
+- 作业调度
+- 流程引擎 
+- 报表管理
 
 ## 前端框架 `web/src/framework`
 

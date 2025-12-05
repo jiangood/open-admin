@@ -6,7 +6,6 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import io.admin.common.utils.PasswordUtils;
-import io.admin.modules.common.dto.LoginRequest;
 import io.admin.modules.system.ConfigConsts;
 import io.admin.framework.config.SysProp;
 import jakarta.annotation.Resource;
@@ -41,18 +40,14 @@ public class AuthService {
      * @param request
      * @return 解密后的密码
      */
-    public String validate(HttpServletRequest request) {
+    public void validate(HttpServletRequest request) {
         // 0. 随眠 1秒，对用户无感知，但等防止爆破攻击
         ThreadUtil.sleep(1000);
 
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(request.getParameter("username"));
-        loginRequest.setPassword(request.getParameter("password"));
-        loginRequest.setCaptchaCode(request.getParameter("captchaCode"));
-        loginRequest.setToken(request.getParameter("token"));
+        String username = request.getParameter("username");
+        String captchaCode = request.getParameter("captchaCode");
 
-        String username = loginRequest.getUsername();
-        String password = loginRequest.getPassword();
+
 
         boolean locked = loginAttemptService.isAccountLocked(username);
         Assert.state(!locked, "账户已被锁定，请" + prop.getLoginLockMinutes() + "分钟后再试");
@@ -63,14 +58,17 @@ public class AuthService {
             HttpSession session = request.getSession(false);
             Assert.notNull(session, "页面已失效，请刷新页面");
 
-            Assert.hasText(loginRequest.getCaptchaCode(), "请输入验证码");
+            Assert.hasText(captchaCode, "请输入验证码");
             String sessionCode = (String) session.getAttribute(CAPTCHA_CODE);
-            Assert.state(codeGenerator.verify(sessionCode, loginRequest.getCaptchaCode()), "验证码错误");
+            Assert.state(codeGenerator.verify(sessionCode, captchaCode), "验证码错误");
             session.removeAttribute(CAPTCHA_CODE);
         }
 
 
-        // 解密前端密码
+
+    }
+
+    public  String decodeWebPassword(String password) {
         String rsaPrivateKey = ConfigConsts.get(ConfigConsts.RSA_PRIVATE_KEY);
         String rsaPublicKey = ConfigConsts.get(ConfigConsts.RSA_PUBLIC_KEY);
         RSA rsa = SecureUtil.rsa(rsaPrivateKey, rsaPublicKey);

@@ -28,7 +28,6 @@ public class UReportController {
     public AjaxResult page() {
         Collection<ReportProvider> list = SpringUtils.getBeans(ReportProvider.class);
 
-        list = list.stream().filter(t -> !t.disabled()).toList();
 
 
         List<Dict> voList = new ArrayList<>();

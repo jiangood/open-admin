@@ -228,9 +228,9 @@
 
 
         <dependency>
-            <groupId>io.github.tmgg</groupId>
+            <groupId>io.github.jiangood</groupId>
             <artifactId>ureport-console</artifactId>
-            <version>1.0.3</version>
+            <version>1.0.4</version>
         </dependency>
         <dependency>
             <groupId>org.flowable</groupId>
@@ -269,6 +269,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
+                            <autoPublish>true</autoPublish>
                         </configuration>
                     </plugin>
                     <!-- Javadoc -->

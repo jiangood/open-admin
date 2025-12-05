@@ -4,7 +4,8 @@ import {ColumnsType} from "antd/es/table";
 declare type FieldTableProps = {
     columns:  ColumnsType,
     value?: any[]
-    onChange?: (list:any[])=>{}
+    onChange?: (list:any[])=>{},
+    style?: React.CSSProperties
 };
 
 /***

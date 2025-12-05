@@ -32,7 +32,7 @@ public class LocalFileOperator implements FileOperator {
 
     @Override
     public void save(String key, InputStream inputStream) {
-        // 存储文件
+        // 文件管理
         String absoluteFile = getAbsoluteFile(key);
         FileUtil.writeFromStream(inputStream, absoluteFile);
     }

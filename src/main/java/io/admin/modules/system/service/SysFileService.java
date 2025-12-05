@@ -186,7 +186,7 @@ public class SysFileService {
         // 生成文件的最终名称
         String objectName = genObjectName(id, suffix, null);
 
-        // 存储文件信息
+        // 文件管理信息
         SysFile sysFile = new SysFile();
         sysFile.setOriginName(originalFilename);
         sysFile.setSuffix(suffix);
@@ -205,7 +205,7 @@ public class SysFileService {
         FileUtils.copyInputStreamToFile(is, tempFile);
 
 
-        // 存储文件
+        // 文件管理
         fileOperator.saveFile(objectName, tempFile);
         if (sysFile.getType() == MaterialType.IMAGE) {
             for (int i = 0; i < IMAGE_SIZE.length; i++) {

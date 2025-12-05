@@ -61,7 +61,7 @@ export class FieldTable extends React.Component {
         let row = dataSource[index]
 
         let v = e;
-        if (e != null &&e.hasOwnProperty('target')) {
+        if (e != null && e.hasOwnProperty('target')) {
             v = e.target.value;
         }
 
@@ -89,17 +89,14 @@ export class FieldTable extends React.Component {
     }
 
     render() {
-        return <div className='edit-table'>
-
+        return <div className='edit-table' style={this.props.style}>
             <Table columns={this.columns}
                    dataSource={this.state.dataSource}
                    size='small'
-
-
-                   footer={() => <Button type='dashed' icon={<PlusOutlined/>}
+                   footer={() => <Button type='dashed'
+                                         icon={<PlusOutlined/>}
                                          onClick={this.add}>增加一行
                    </Button>}
-
                    pagination={false}
             >
 

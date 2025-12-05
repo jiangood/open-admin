@@ -99,7 +99,7 @@ export default class extends React.Component {
             <Header className='header'>
                 <div className='header-left'>
                     {siteInfo.logoUrl &&
-                        <img className='logo-img' src={siteInfo.logoUrl} onClick={() => history.push('/')} alt='logo'/>}
+                        <img className='logo-img' src='/admin/public/logo.jpg' onClick={() => history.push('/')} alt='logo'/>}
                     <h3 className='hide-on-mobile'>
                         <Link to="/" style={{color: ThemeUtils.getColor("primary-color")}}>{siteInfo.title} </Link>
                     </h3>

@@ -22,7 +22,7 @@ jobs:
 
       - name: Extract Tag
         id: tag
-        uses: aaronbarnaby/getDefinition-tag@v1.0.0
+        uses: aaronbarnaby/get-tag@v1.0.0
         with:
           without_prefix_v: true # Remove prefix `v` from tag
 
@@ -45,7 +45,7 @@ jobs:
 
       - name: Extract Tag
         id: tag
-        uses: aaronbarnaby/getDefinition-tag@v1.0.0
+        uses: aaronbarnaby/get-tag@v1.0.0
         with:
           without_prefix_v: true # Remove prefix `v` from tag
 

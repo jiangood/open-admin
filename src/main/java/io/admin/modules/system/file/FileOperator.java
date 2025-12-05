@@ -14,7 +14,7 @@ public interface FileOperator {
 
 
     /**
-     * 存储文件 ,流式
+     * 文件管理 ,流式
      *
      * @param key         唯一标示id，例如a.txt, doc/a.txt
      * @param inputStream 文件流
