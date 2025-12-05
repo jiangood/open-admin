@@ -20,6 +20,7 @@ import java.util.function.Consumer;
  * <p>
  * 注意：如果键值对查询，值为空的情况下，会忽略
  */
+@Deprecated
 public class JpaQuery<T> implements Specification<T> {
 
     private final List<Specification<T>> specificationList = new ArrayList<>();
