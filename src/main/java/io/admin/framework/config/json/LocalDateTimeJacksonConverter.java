@@ -1,4 +1,4 @@
-package io.admin.framework.json.converter;
+package io.admin.framework.config.json;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;

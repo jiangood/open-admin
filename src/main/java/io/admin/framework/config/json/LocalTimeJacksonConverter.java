@@ -1,4 +1,4 @@
-package io.admin.framework.json.converter;
+package io.admin.framework.config.json;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
@@ -8,8 +8,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 
 /**
@@ -17,21 +17,21 @@ import java.time.ZoneId;
  *
  * @author jiangtao
  */
-public class LocalDateJacksonConverter extends JsonDeserializer<LocalDate> {
+public class LocalTimeJacksonConverter extends JsonDeserializer<LocalTime> {
 
     @Override
-    public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
+    public LocalTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JsonProcessingException {
         String originDate = p.getText();
         DateTime dateTime = DateUtil.parse(originDate);
-
         LocalDateTime localTime = LocalDateTime.ofInstant(dateTime.toInstant(), ZoneId.systemDefault());
 
-        return localTime.toLocalDate();
+
+        return localTime.toLocalTime();
     }
 
 
     @Override
     public Class<?> handledType() {
-        return LocalDate.class;
+        return LocalTime.class;
     }
 }
