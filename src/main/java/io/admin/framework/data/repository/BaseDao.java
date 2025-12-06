@@ -390,97 +390,37 @@ public abstract class BaseDao<T extends Persistable<String>> {
 
     // --- 6. 统计与聚合 (Statistics and Aggregation) ---
 
-    public List<Map> groupStats(Specification<T> spec, String[] groupFields, StatField... statFields) {
+    public List<Object[]> stats(Specification<T> spec, StatField... statFields) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Map> query = builder.createQuery(Map.class);
+        CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
         Root<T> root = query.from(domainClass);
+
+        Predicate predicate = spec.toPredicate(root, query, builder);
+
+
         List<Selection<?>> selections = new ArrayList<>();
-
-
-        Expression[] groups = new Expression[groupFields.length];
-        for (int i = 0; i < groupFields.length; i++) {
-            String groupField = groupFields[i];
-            Expression group = ExpressionTool.getPath(root, groupField); //分组字段
-            groups[i] = group;
-            group.alias(groupField);
-            selections.add(group);
+        List<Expression<?>> groupList = query.getGroupList();
+        for (Expression<?> expression : groupList) {
+            selections.add(expression);
         }
 
         for (StatField statField : statFields) {
             String fieldName = statField.getName();
             Path<Number> f = root.get(fieldName);
-            Expression<?> statExpr = null;
-            switch (statField.getType()) {
-                case SUM:
-                    statExpr = builder.sum(f);
-                    break;
-                case COUNT:
-                    statExpr = builder.count(f);
-                    break;
-                case AVG:
-                    statExpr = builder.avg(f);
-                    break;
-                case MIN:
-                    statExpr = (builder.min(f));
-                    break;
-                case MAX:
-                    statExpr = (builder.max(f));
-                    break;
-                default:
-                    throw new IllegalStateException("not support stat type " + statField.getType());
-
-            }
-            selections.add(statExpr.alias(fieldName));
+            Expression<?> statExpr = switch (statField.getType()) {
+                case SUM -> builder.sum(f);
+                case COUNT -> builder.count(f);
+                case AVG -> builder.avg(f);
+                case MIN -> builder.min(f);
+                case MAX -> builder.max(f);
+                default -> throw new IllegalStateException("not support stat type " + statField.getType());
+            };
+            selections.add(statExpr);
         }
 
-        Predicate predicate = spec.toPredicate(root, query, builder);
-        query.multiselect(selections).where(predicate).groupBy(groups);
-
-        return entityManager.createQuery(query).getResultList();
-    }
-
-    public List<Map> groupStats(Specification<T> spec, String groupFields, StatField... statFields) {
-        return this.groupStats(spec, new String[]{groupFields}, statFields);
-    }
-
-    public Map stats(Specification<T> spec, StatField... statFields) {
-        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Map> query = builder.createQuery(Map.class);
-        Root<T> root = query.from(domainClass);
-        List<Selection<?>> selections = new ArrayList<>();
-
-
-        for (StatField statField : statFields) {
-            String fieldName = statField.getName();
-            Path<Number> f = root.get(fieldName);
-            Expression<?> statExpr = null;
-            switch (statField.getType()) {
-                case SUM:
-                    statExpr = builder.sum(f);
-                    break;
-                case COUNT:
-                    statExpr = builder.count(f);
-                    break;
-                case AVG:
-                    statExpr = builder.avg(f);
-                    break;
-                case MIN:
-                    statExpr = (builder.min(f));
-                    break;
-                case MAX:
-                    statExpr = (builder.max(f));
-                    break;
-                default:
-                    throw new IllegalStateException("not support stat type " + statField.getType());
-
-            }
-            selections.add(statExpr.alias(fieldName));
-        }
-
-        Predicate predicate = spec.toPredicate(root, query, builder);
         query.multiselect(selections).where(predicate);
 
-        return entityManager.createQuery(query).getSingleResult();
+        return entityManager.createQuery(query).getResultList();
     }
 
     /**
