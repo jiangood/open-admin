@@ -7,13 +7,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// 假设的 Department 实体
+// 假设的 Role 实体
 @Entity
-@Table(name = "t_department")
+@Table(name = "t_role")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Department {
+public class Role {
     @Id
     private Long id;
     private String name;

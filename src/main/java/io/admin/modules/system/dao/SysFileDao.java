@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 public class SysFileDao extends BaseDao<SysFile> {
 
     public SysFile findByTradeNo(String tradeNo) {
-        return this.findOne(SysFile.Fields.tradeNo, tradeNo);
+        return this.findByField(SysFile.Fields.tradeNo, tradeNo);
     }
 }
