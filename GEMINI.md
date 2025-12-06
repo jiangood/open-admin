@@ -13,7 +13,7 @@
 包含以下几个部分
 
 ### 介绍
-解析pom.xml和 web/package.json
+解析pom.xml和 web/package.json文件得到主要信息
 说明开发环境
 说明maven版本号，![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
 说明npm版本号，![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
