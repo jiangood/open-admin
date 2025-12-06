@@ -7,7 +7,7 @@
 - 文档语言使用中文简体, 除了代码请勿使用英文
 - 文档尽量简洁，示例代码尽量简洁，最好只显示片段即可
 - 不要使用git相关的命令
-
+- 文档要正式
 
 ## 文档结构
 包含以下几个部分
@@ -19,8 +19,8 @@
 说明后端最新版本为： ![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
 说明前端最新版本为： ![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
 
-描述后端依赖，描述使用中文
-描述前端依赖（不含开发依赖）,描述使用中文
+描述后端依赖，包含版本号，描述使用中文
+描述前端依赖（不含开发依赖）,包含版本号，描述使用中文
 
 
 读取 src/main/resources/application-data-framework.yml
@@ -36,19 +36,30 @@
 
 
 ### 后端
-主要解析文件如下
-- pom.xml
-- src/main/java/io/admin/common/utils/tree
+主要解析文件如下, 生成文档
 - src/main/java/io/admin/framework/data/specification/Spec.java
-
+- src/main/java/io/admin/common/utils/tree/TreeUtils.java
+- src/main/java/io/admin/common/utils/annotation/RemarkUtils.java
+- src/main/java/io/admin/common/utils/excel/ExcelUtils.java
+- src/main/java/io/admin/framework/data/JdbcUtils.java
+- src/main/java/io/admin/framework/data/id
+- src/main/java/io/admin/framework/data/converter
+- src/main/java/io/admin/framework/validator
+- src/main/java/io/admin/modules/common/LoginUtils.java
+- src/main/java/io/admin/modules/job/BaseJob.java
+- src/main/java/io/admin/modules/job/JobDescription.java
+- src/main/java/io/admin/modules/job/example/HelloWorldJob.java
+- src/main/resources/application-process.yml
+- src/main/java/io/admin/modules/flowable/example/LeaveProcessListener.java
 ### 模板代码
 生成业务代码模板，以学生为例
+
 参考src/main/java/io/admin/modules/system/entity/SysManual.java生成entity
 参考src/main/java/io/admin/modules/system/dao/SysManualDao.java生成dao
 参考src/main/java/io/admin/modules/system/service/SysManualService.java生成service
 参考src/main/java/io/admin/modules/system/controller/SysManualController.java生成controller
 参考src/main/resources/application-data-framework.yml，生成菜单配置
-参考web/src/pages/system/sysManual/index.jsx 生成页面模板，主要是让业务项目使用，所以前端引用时，使用模块名@jiangood/springboot-admin-starter即可
+参考web/src/pages/system/sysManual/index.jsx 生成页面模板，主要是让业务项目使用，所以前端引用时，使用模块名@jiangood/springboot-admin-starter即可,注意antd使用最新版6.x
 
 
 # 整理

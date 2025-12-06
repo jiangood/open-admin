@@ -3,7 +3,7 @@ process:
   list:
     - key: "leave_request"
       name: "请假流程"
-      listener: io.admin.modules.flowable.demo.LeaveProcessListener
+      listener: io.admin.modules.flowable.example.LeaveProcessListener
 
       variables:
         - name: "days"

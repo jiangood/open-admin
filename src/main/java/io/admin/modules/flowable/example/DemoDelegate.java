@@ -1,4 +1,4 @@
-package io.admin.modules.flowable.demo;
+package io.admin.modules.flowable.example;
 
 import io.admin.common.utils.annotation.Remark;
 import org.flowable.engine.delegate.DelegateExecution;

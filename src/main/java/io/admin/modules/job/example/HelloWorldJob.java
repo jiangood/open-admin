@@ -1,4 +1,4 @@
-package io.admin.modules.job.service;
+package io.admin.modules.job.example;
 
 import io.admin.common.utils.field.FieldDescription;
 import io.admin.modules.job.BaseJob;

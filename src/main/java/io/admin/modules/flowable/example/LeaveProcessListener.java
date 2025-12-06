@@ -1,4 +1,4 @@
-package io.admin.modules.flowable.demo;
+package io.admin.modules.flowable.example;
 
 import io.admin.modules.flowable.core.FlowableEventType;
 import io.admin.modules.flowable.core.config.meta.ProcessListener;

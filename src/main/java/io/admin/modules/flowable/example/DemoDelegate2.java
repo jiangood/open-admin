@@ -1,4 +1,4 @@
-package io.admin.modules.flowable.demo;
+package io.admin.modules.flowable.example;
 
 import org.flowable.engine.delegate.DelegateExecution;
 import org.flowable.engine.delegate.JavaDelegate;
