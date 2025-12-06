@@ -1,4 +1,4 @@
-package io.admin.framework.data.query;
+package io.admin.framework.data.specification;
 
 import jakarta.persistence.criteria.*;
 import jakarta.persistence.metamodel.Attribute;

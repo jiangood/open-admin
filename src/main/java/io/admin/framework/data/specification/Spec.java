@@ -1,6 +1,5 @@
 package io.admin.framework.data.specification;
 
-import io.admin.framework.data.query.ExpressionTool;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;

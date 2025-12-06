@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
-import io.admin.common.utils.ArrayUtils;
+import io.admin.framework.data.specification.ExpressionTool;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
