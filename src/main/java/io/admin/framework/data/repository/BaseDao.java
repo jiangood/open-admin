@@ -389,17 +389,18 @@ public abstract class BaseDao<T extends Persistable<String>> {
 
     /**
      * 分组统计
-     *
+     * <p>
      * 例子
-     *              Spec<User> spec = Spec.<User>of()
-     *                 .select("username")
-     *                 .selectFnc(Spec.Fuc.SUM, "age")
-     *                 .selectFnc(Spec.Fuc.COUNT, "age").
-     *                 groupBy("username");
+     * Spec<User> spec = Spec.<User>of()
+     * .select("username")
+     * .selectFnc(Spec.Fuc.SUM, "age")
+     * .selectFnc(Spec.Fuc.COUNT, "age").
+     * groupBy("username");
+     *
      * @param spec
      * @return 列表，
      */
-    public List<Object[]> stats(Specification<T> spec) {
+    public List<Map<String, Object>> stats(Specification<T> spec) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
         Root<T> root = query.from(domainClass);
@@ -409,7 +410,22 @@ public abstract class BaseDao<T extends Persistable<String>> {
 
         query.where(predicate);
 
-        return entityManager.createQuery(query).getResultList();
+
+        List<Selection<?>> selections = query.getSelection().getCompoundSelectionItems();
+        List<Object[]> resultList = entityManager.createQuery(query).getResultList();
+
+        // 转换为map
+        List<Map<String, Object>> list = resultList.stream().map(record -> {
+            Map<String, Object> map = new LinkedHashMap<>();
+            for (int i = 0; i < selections.size(); i++) {
+                Selection<?> selection = selections.get(i);
+                map.put(selection.getAlias(), record[i]);
+            }
+            return map;
+        }).toList();
+
+
+        return list;
     }
 
     /**
