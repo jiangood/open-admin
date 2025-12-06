@@ -16,6 +16,7 @@
     "axios": "^1.13.2",
     "bpmn-js": "^18.7.0",
     "bpmn-js-properties-panel": "^5.43.0",
+    "preact": "^10.27.2",
     "dayjs": "^1.11.13",
     "jsencrypt": "^3.5.4",
     "lodash": "^4.17.21",
@@ -35,9 +36,5 @@
     "dev": "umi dev",
     "build": "tsc --outDir config/dist --skipLibCheck --noEmitOnError false config/index.ts"
   },
-  "version": "0.0.1-beta.30",
-  "dependencies": {
-    "preact": "^10.27.2",
-    "preact-hooks": "0.0.0-0.0.0"
-  }
+  "version": "0.0.1-beta.30"
 }
