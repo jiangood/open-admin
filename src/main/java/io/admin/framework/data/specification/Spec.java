@@ -19,10 +19,6 @@ public class Spec<T> implements Specification<T> {
     // 存储所有查询条件
     private final List<Specification<T>> specifications = new ArrayList<>();
 
-    // 缓存已创建的 Join，避免多次重复 Join。
-    // 注意：这里的缓存主要用于显式调用的 joinEqual/joinLike 方法。
-    // 对于 ConditionSpec 内部的点操作路径导航，为简化逻辑，其 Join 不会通过此缓存。
-    private final Map<String, Join<?, ?>> joinCache = new HashMap<>();
 
     /**
      * 定义支持的操作符，消除魔术字符串，提高可读性和类型安全。
@@ -216,12 +212,12 @@ public class Spec<T> implements Specification<T> {
     /**
      * 统一的条件实现类，处理所有基本操作符，支持点操作 (e.g., "dept.name")。
      */
-    private static class ConditionSpec<T, C> implements Specification<T> {
+    private static class ConditionSpec<T, V> implements Specification<T> {
         private final Operator op;
         private final String field;
-        private final C value;
+        private final V value;
 
-        public ConditionSpec(Operator op, String field, C value) {
+        public ConditionSpec(Operator op, String field, V value) {
             this.op = op;
             this.field = field;
             this.value = value;
