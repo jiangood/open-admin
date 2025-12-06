@@ -29,8 +29,7 @@
 
 
 解析 src/main/resources/application-data-framework.yml
-描述功能列表
-描述配置信息
+描述菜单列表
 描述业务项目如何配置
 
 增加其他文档的链接
