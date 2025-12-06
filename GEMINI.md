@@ -18,8 +18,8 @@
 描述maven如何引用，版本号使用占位符号，并说明最新版本为： ![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
 描述npm如何引用，版本号使用占位符号，并说明最新版本为： ![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
 
-描述后端依赖
-描述前端依赖（只解析peerDependencies部分）
+描述后端依赖，描述使用中文
+描述前端依赖（不含开发依赖）,描述使用中文
 
 
 
