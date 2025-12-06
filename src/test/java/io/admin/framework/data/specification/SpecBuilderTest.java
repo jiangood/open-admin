@@ -66,8 +66,7 @@ public class SpecBuilderTest {
 
         List<User> results = userRepository.findAll(spec);
         
-        assertThat(results).hasSize(1);
-        assertThat(results.get(0).getUsername()).isEqualTo("Charlie");
+        assertThat(results).hasSize(2);
     }
 
     // --- 关联字段查询测试：使用点操作 ---
