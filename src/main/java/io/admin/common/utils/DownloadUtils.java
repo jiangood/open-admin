@@ -32,13 +32,9 @@ public class DownloadUtils {
     }
 
     public static void download(String fileName, InputStream inputStream, long fileSize, HttpServletResponse response) {
-        try {
+        try (InputStream in = inputStream) {
             setDownloadParam(fileName, fileSize, response);
-
-            IOUtils.copy(inputStream, response.getOutputStream());
-
-            IOUtils.closeQuietly(response.getOutputStream(),inputStream);
-
+            IOUtils.copy(in, response.getOutputStream());
         } catch (IOException e) {
             log.error(">>> 下载文件异常，具体信息为：{}", e.getMessage());
             throw new IllegalStateException("下载文件错误");
