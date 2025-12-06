@@ -14,6 +14,7 @@
 - 首页 文件名:index.md
 - 前端模块 文件名:front.md
 - 后端模块 文件名:back.md
+- 功能模块 文件名:template.md
 
 
 每个文件的生成规则如下
@@ -45,3 +46,9 @@
 - pom.xml
 - src/main/java/io/admin/common/utils/tree
 - src/main/java/io/admin/framework/data/specification/Spec.java
+
+### template.md
+生成业务代码模板，
+参考src/main/java/io/admin/modules/system目录，生成entity，dao,service,controller,
+参考src/main/resources/application-data-framework.yml，生成菜单配置
+参考web/src/pages/system/sysManual/index.jsx 生成页面模板
