@@ -42,7 +42,7 @@
 - src/main/java/io/admin/framework/data/specification/Spec.java
 
 ### 模板代码
-生成业务代码模板，以学生为例
+生成业务代码模板，该模板主要是让业务项目使用，所以前端引用时，使用模块名即可，以学生为例
 参考src/main/java/io/admin/modules/system目录下的SysManual相关文件，生成entity，dao,service,controller,
 参考src/main/resources/application-data-framework.yml，生成菜单配置
 参考web/src/pages/system/sysManual/index.jsx 生成页面模板
