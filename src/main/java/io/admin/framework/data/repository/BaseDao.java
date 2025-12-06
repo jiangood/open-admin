@@ -391,11 +391,13 @@ public abstract class BaseDao<T extends Persistable<String>> {
      * 分组统计
      *
      * 例子
-     *      Spec<User> spec = Spec.<User>of().groupBy("dept");
-     *      List<Object[]> records = userDao.stats(spec,  StatField.count("age"));
-     *
+     *              Spec<User> spec = Spec.<User>of()
+     *                 .select("username")
+     *                 .selectFnc(Spec.Fuc.SUM, "age")
+     *                 .selectFnc(Spec.Fuc.COUNT, "age").
+     *                 groupBy("username");
      * @param spec
-     * @return 列表， 每一行数据分别为group字段， 聚合字段
+     * @return 列表，
      */
     public List<Object[]> stats(Specification<T> spec) {
         CriteriaBuilder builder = entityManager.getCriteriaBuilder();

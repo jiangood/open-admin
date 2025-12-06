@@ -45,11 +45,10 @@ public class SpecBuilderTest {
     @Test
     void testGroup() {
         Spec<User> spec = Spec.<User>of()
-                .select("username")
-                .selectFnc(Spec.Fuc.SUM, "age")
-                .selectFnc(Spec.Fuc.COUNT, "age").
 
-                groupBy("username");
+                .selectFnc(Spec.Fuc.SUM, "age")
+                .selectFnc(Spec.Fuc.COUNT, "age")
+                ;
         List<Object[]> age = userDao.stats(spec);
 
 
