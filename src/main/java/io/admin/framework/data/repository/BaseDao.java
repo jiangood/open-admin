@@ -82,9 +82,7 @@ public abstract class BaseDao<T extends Persistable<String>> {
 
     @Transactional
     public T saveAndFlush(T entity) {
-        T result = save(entity);
-        flush();
-        return result;
+        return rep.saveAndFlush(entity);
     }
 
     /**
