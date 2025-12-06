@@ -42,7 +42,7 @@
 - src/main/java/io/admin/framework/data/specification/Spec.java
 
 ### 模板代码
-生成业务代码模板，，以学生为例
+生成业务代码模板，以学生为例
 参考src/main/java/io/admin/modules/system/entity/SysManual.java生成entity
 参考src/main/java/io/admin/modules/system/dao/SysManualDao.java生成dao
 参考src/main/java/io/admin/modules/system/service/SysManualService.java生成service
