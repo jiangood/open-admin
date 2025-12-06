@@ -31,4 +31,6 @@
 - src/main/java/io/admin/framework/data/specification/Spec.java
 - src/main/resources/application-data-framework.yml
 
+除此之外，根据src目录下所有代码的使用频率，将使用率高的代码生成文档，并添加示例
+
 ### 首页文档最后增加每个文档的链接
