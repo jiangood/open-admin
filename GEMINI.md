@@ -15,12 +15,12 @@
 ### 介绍
 读取pom.xml和 web/package.json文件得到主要信息
 描述开发环境
-描述maven如何引用，版本号使用占位符号，并说明最新版本为： ![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
-描述npm如何引用，版本号使用占位符号，并说明最新版本为： ![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
+
+说明后端最新版本为： ![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
+说明前端最新版本为： ![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
 
 描述后端依赖，描述使用中文
 描述前端依赖（不含开发依赖）,描述使用中文
-
 
 
 读取 src/main/resources/application-data-framework.yml
