@@ -3,12 +3,14 @@ package io.admin.modules.system.dao;
 
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
+import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.entity.SysRole;
 import io.admin.modules.system.entity.SysUser;
 import io.admin.framework.data.repository.BaseDao;
 import io.admin.framework.data.query.JpaQuery;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 
 
@@ -17,9 +19,7 @@ public class SysUserDao extends BaseDao<SysUser> {
 
 
     public SysUser findByAccount(String account) {
-        JpaQuery<SysUser> q = new JpaQuery<>();
-        q.eq(SysUser.Fields.account, account);
-        return this.findOne(q);
+        return this.findByField(SysUser.Fields.account, account);
     }
 
     /**
@@ -27,13 +27,8 @@ public class SysUserDao extends BaseDao<SysUser> {
      *
      * @param ids
      */
-    public List<SysUser> findValid(Iterable<String> ids) {
-
-        JpaQuery<SysUser> jpaQuery = new JpaQuery<>();
-        jpaQuery.eq(SysUser.Fields.enabled, true);
-        jpaQuery.in("id", ids);
-
-        return this.findAll(jpaQuery);
+    public List<SysUser> findValid(Collection<String> ids) {
+        return this.findAll(Spec.<SysUser>of().equal(SysUser.Fields.enabled, true).in("id", ids));
     }
 
     /**

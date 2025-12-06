@@ -2,6 +2,7 @@ package io.admin.modules.job.service;
 
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.service.BaseService;
+import io.admin.framework.data.specification.Spec;
 import io.admin.modules.job.dao.SysJobExecuteRecordDao;
 import io.admin.modules.job.entity.SysJob;
 import io.admin.modules.job.entity.SysJobExecuteRecord;
@@ -14,6 +15,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -65,14 +67,11 @@ public class SysJobService extends BaseService<SysJob> {
 
 
 
-    public Page<SysJobExecuteRecord> findAllExecuteRecord(JpaQuery<SysJobExecuteRecord> q, Pageable pageable) {
+    public Page<SysJobExecuteRecord> findAllExecuteRecord(Specification<SysJobExecuteRecord> q, Pageable pageable) {
       return   sysJobExecuteRecordDao.findAll(q, pageable);
     }
 
     public Page<SysJob> page(String searchText, Pageable pageable) throws SchedulerException {
-        JpaQuery<SysJob> q = new JpaQuery<>();
-        q.searchText(searchText, SysJob.Fields.name, SysJob.Fields.jobClass);
-
-        return baseDao.findAll(q, pageable);
+        return baseDao.findAll(Spec.<SysJob>of().orLike(searchText, SysJob.Fields.name, SysJob.Fields.jobClass), pageable);
     }
 }
