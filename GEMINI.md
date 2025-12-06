@@ -48,7 +48,7 @@
 - src/main/java/io/admin/framework/data/specification/Spec.java
 
 ### template.md
-生成业务代码模板，
+生成业务代码模板，以学生为例
 参考src/main/java/io/admin/modules/system目录，生成entity，dao,service,controller,
 参考src/main/resources/application-data-framework.yml，生成菜单配置
 参考web/src/pages/system/sysManual/index.jsx 生成页面模板
