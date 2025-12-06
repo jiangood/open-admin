@@ -10,7 +10,24 @@
 
 
 ## 文档结构
-- 首页文档，文档名称为index.md，主要解析pom.xml，web/package.json, src/main/resources/application-data-framework.yml 生成项目说明
-- 前端文档，文档名称为front-framework.md,需要解析web/src/framework目录下组件和工具类，并生成文档，文档包括组件名称，描述，参数,示例
-- 后端文档，文档名称为back-framework.md,需要解析pom.xml 以及src目录下的代码，但排除业务代码，并生成文档，文档包括工具类名称，描述，参数,示例
-- 首页文档最后增加每个文档的链接
+### 首页文档，文档名称为index.md
+主要解析文件如下
+- pom.xml
+- web/package.json
+
+
+
+### 前端文档，文档名称为front-framework.md
+表格形式
+主要解析文件如下
+- web/src/framework 目录下组件和工具类，并生成文档，文档包括组件名称，描述，主要参数
+
+### 后端文档，文档名称为back-framework.md
+文档包括工具类名称，描述，参数,示例
+主要解析文件如下
+- pom.xml
+- src/main/java/io/admin/common/utils/tree
+- src/main/java/io/admin/framework/data/specification/Spec.java
+- src/main/resources/application-data-framework.yml
+
+### 首页文档最后增加每个文档的链接
