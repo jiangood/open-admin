@@ -23,16 +23,15 @@
 
 
 
-解析 src/main/resources/application-data-framework.yml
+读取 src/main/resources/application-data-framework.yml
 描述菜单列表
 描述业务项目如何配置
 
-增加其他文档的链接
 
 
 ### 前端
 
-解析 web/src/framework 目录下组件和工具类，不要有该目录相关的描述
+读取 web/src/framework 目录下组件和工具类
 描述组件和工具类，表格形式，包含名称，参数，说明
 
 
@@ -42,8 +41,8 @@
 - src/main/java/io/admin/common/utils/tree
 - src/main/java/io/admin/framework/data/specification/Spec.java
 
-### 模板
+### 模板代码
 生成业务代码模板，以学生为例
-参考src/main/java/io/admin/modules/system目录，生成entity，dao,service,controller,
+参考src/main/java/io/admin/modules/system目录下的SysManual相关文件，生成entity，dao,service,controller,
 参考src/main/resources/application-data-framework.yml，生成菜单配置
 参考web/src/pages/system/sysManual/index.jsx 生成页面模板
