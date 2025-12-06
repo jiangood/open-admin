@@ -438,7 +438,7 @@ public abstract class BaseDao<T extends Persistable<String>> {
         Expression[] groups = new Expression[groupFields.length];
         for (int i = 0; i < groupFields.length; i++) {
             String groupField = groupFields[i];
-            Expression group = ExpressionTool.getExpression(groupField, root); //分组字段
+            Expression group = ExpressionTool.getPath(root, groupField); //分组字段
             groups[i] = group;
             group.alias(groupField);
             selections.add(group);
@@ -533,7 +533,7 @@ public abstract class BaseDao<T extends Persistable<String>> {
         CriteriaQuery<Object> query = builder.createQuery(Object.class);
         Root<T> root = query.from(domainClass);
 
-        Expression group = ExpressionTool.getExpression(groupField, root); // 支持 . 分割， 如 user.id
+        Expression group = ExpressionTool.getPath(root, groupField); // 支持 . 分割， 如 user.id
 
         Predicate predicate = q.toPredicate(root, query, builder);
         query.multiselect(group, builder.count(root)).where(predicate).groupBy(group);

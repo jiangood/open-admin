@@ -1,5 +1,6 @@
 package io.admin.framework.data.specification;
 
+import io.admin.framework.data.query.ExpressionTool;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.Assert;
@@ -227,45 +228,13 @@ public class Spec<T> implements Specification<T> {
             this(op, field, null);
         }
 
-        /**
-         * 辅助方法：获取字段的表达式路径，支持点操作符路径导航。
-         * 如果是关联字段，会执行隐式的 INNER JOIN。
-         */
-        private Expression<?> getPath(Root<T> root) {
-            // 如果字段名中没有点号，直接返回一级路径
-            if (!this.field.contains(".")) {
-                return root.get(this.field);
-            }
 
-            // 处理点操作符路径 (e.g., "dept.name")
-            String[] parts = this.field.split("\\.");
-            Path<?> path = root;
-
-            // 遍历所有路径部分，除了最后一个字段
-            for (int i = 0; i < parts.length - 1; i++) {
-                String joinProperty = parts[i];
-
-                // 如果当前路径是 Root，则执行 Join。默认使用 INNER JOIN。
-                if (path instanceof Root) {
-                    path = ((Root<?>) path).join(joinProperty, JoinType.INNER);
-                } else if (path instanceof Join) {
-                    // 如果当前路径是 Join，则在其上继续 Join（对于多层关联）或 Get（对于嵌入对象）
-                    path = ((Join<?, ?>) path).join(joinProperty, JoinType.INNER);
-                } else {
-                    // 对于嵌入式对象或其它 Path 类型，直接 Get
-                    path = path.get(joinProperty);
-                }
-            }
-
-            // 最后一个部分是实际的字段名
-            return path.get(parts[parts.length - 1]);
-        }
 
         @Override
         @SuppressWarnings({"unchecked", "rawtypes"})
         public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
             // 使用更新后的 getPath 方法，支持点操作
-            Expression path = getPath(root);
+            Expression path = ExpressionTool.getPath(root,field);
 
             return switch (op) {
                 case EQUAL -> cb.equal(path, value);

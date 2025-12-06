@@ -5,43 +5,35 @@ import jakarta.persistence.metamodel.Attribute;
 
 public class ExpressionTool {
 
-    // 获得字段路径， 字段包含小数点 .
-    public static Path getExpression(String fieldName, Root<?> root) {
-        // 普通字段
-        if (!fieldName.contains(".")) {
-            Attribute.PersistentAttributeType type = root.getModel().getAttribute(fieldName).getPersistentAttributeType();
-            boolean isMany = type == Attribute.PersistentAttributeType.ONE_TO_MANY
-                             || type == Attribute.PersistentAttributeType.MANY_TO_MANY;
+    public static Expression<?> getPath(Root<?> root, String field) {
+        // 如果字段名中没有点号，直接返回一级路径
+        if (!field.contains(".")) {
+            return root.get(field);
+        }
 
-            // boolean member = operator == Operator.IS_MEMBER || operator == Operator.IS_NOT_MEMBER;
+        // 处理点操作符路径 (e.g., "dept.name")
+        String[] parts = field.split("\\.");
+        Path<?> path = root;
 
-            if (isMany /*&& !member*/) {
-                return getOrCreateJoin(root, fieldName);
+        // 遍历所有路径部分，除了最后一个字段
+        for (int i = 0; i < parts.length - 1; i++) {
+            String joinProperty = parts[i];
+
+            // 如果当前路径是 Root，则执行 Join。默认使用 INNER JOIN。
+            if (path instanceof Root) {
+                path = ((Root<?>) path).join(joinProperty, JoinType.INNER);
+            } else if (path instanceof Join) {
+                // 如果当前路径是 Join，则在其上继续 Join（对于多层关联）或 Get（对于嵌入对象）
+                path = ((Join<?, ?>) path).join(joinProperty, JoinType.INNER);
             } else {
-                return root.get(fieldName);
-            }
-        }
-        Path expression = root;
-        String[] names = fieldName.split("\\.");
-
-        for (String name : names) {
-            expression = ((Path<?>) expression).get(name);
-        }
-
-        return expression;
-
-    }
-
-
-    private static Join<?, ?> getOrCreateJoin(From<?, ?> from, String attribute) {
-        for (Join<?, ?> join : from.getJoins()) {
-            boolean sameName = join.getAttribute().getName().equals(attribute);
-
-            if (sameName && join.getJoinType().equals(JoinType.LEFT)) {
-                return join;
+                // 对于嵌入式对象或其它 Path 类型，直接 Get
+                path = path.get(joinProperty);
             }
         }
 
-        return from.join(attribute, JoinType.LEFT);
+        // 最后一个部分是实际的字段名
+        return path.get(parts[parts.length - 1]);
     }
+
+
 }

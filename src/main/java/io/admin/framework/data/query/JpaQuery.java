@@ -302,7 +302,7 @@ public class JpaQuery<T> implements Specification<T> {
         }
 
         this.add((Specification<T>) (root, query, builder) -> {
-            Expression expression = ExpressionTool.getExpression(column, root);
+            Expression expression = ExpressionTool.getPath(root, column);
 
 
             List<?> list = valueList.stream().filter(Objects::nonNull).toList();
@@ -339,7 +339,7 @@ public class JpaQuery<T> implements Specification<T> {
         }
 
         this.add((Specification<T>) (root, query, builder) -> {
-            Expression expression = ExpressionTool.getExpression(column, root);
+            Expression expression = ExpressionTool.getPath(root, column);
 
             List<?> list = valueList.stream().filter(Objects::nonNull).toList();
             boolean hasNull = CollUtil.hasNull(valueList);
@@ -431,6 +431,6 @@ public class JpaQuery<T> implements Specification<T> {
 
 
     private Expression getExpression(String column, Root<T> root) {
-        return ExpressionTool.getExpression(column, root);
+        return ExpressionTool.getPath(root, column);
     }
 }
