@@ -39,7 +39,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     @Override
     public void deleteByRequest(String id) {
-        long count = sysOrgDao.count(Spec.<SysOrg>of().equal(SysOrg.Fields.pid, id));
+        long count = sysOrgDao.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
 
         sysOrgDao.deleteById(id);
@@ -60,10 +60,10 @@ public class SysOrgService extends BaseService<SysOrg> {
 
         // 如果不显示全部，则只显示启用的
         if (!showDisabled) {
-            q.equal(SysOrg.Fields.enabled, true);
+            q.eq(SysOrg.Fields.enabled, true);
         }
         if (!showDept) {
-            q.notEqual(SysOrg.Fields.type, OrgType.TYPE_DEPT.getCode());
+            q.ne(SysOrg.Fields.type, OrgType.TYPE_DEPT.getCode());
         }
 
 
@@ -143,12 +143,12 @@ public class SysOrgService extends BaseService<SysOrg> {
 
 
     public List<SysOrg> findByType(OrgType type) {
-        return sysOrgDao.findAll(spec().equal(SysOrg.Fields.type, type).equal(SysOrg.Fields.enabled, true), Sort.by(SysOrg.Fields.seq));
+        return sysOrgDao.findAll(spec().eq(SysOrg.Fields.type, type).eq(SysOrg.Fields.enabled, true), Sort.by(SysOrg.Fields.seq));
     }
 
 
     public List<SysOrg> findByTypeAndLevel(OrgType orgType, int orgLevel) {
-        List<SysOrg> all = sysOrgDao.findAll(spec().equal(SysOrg.Fields.enabled, true).equal(SysOrg.Fields.type, orgType), Sort.by(SysOrg.Fields.seq));
+        List<SysOrg> all = sysOrgDao.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, orgType), Sort.by(SysOrg.Fields.seq));
 
         return all.stream().filter(o -> sysOrgDao.findLevelById(o.getId()) == orgLevel).collect(Collectors.toList());
     }

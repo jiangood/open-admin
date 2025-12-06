@@ -11,6 +11,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -66,7 +67,7 @@ public abstract class BaseDao<T extends Persistable<String>> {
      */
     @Transactional
     public T save(T entity) {
-       return rep.save(entity);
+        return rep.save(entity);
     }
 
 
@@ -321,28 +322,32 @@ public abstract class BaseDao<T extends Persistable<String>> {
     // --- 5.1 JpaQuery/字段等值查询 (Custom Query Helpers) ---
 
     public T findByField(String key, Object value) {
-        return this.findOne(Spec.<T>of().equal(key, value));
+        return this.findOne(Spec.<T>of().eq(key, value));
     }
 
     public T findByField(String key, Object value, String key2, Object value2) {
-        return this.findOne(Spec.<T>of().equal(key, value).equal(key2, value2));
-    }
-    public T findByField(String key, Object value, String key2, Object value2, String key3, Object value3) {
-        return this.findOne(Spec.<T>of().equal(key, value).equal(key2, value2).equal(key3, value3));
+        return this.findOne(Spec.<T>of().eq(key, value).eq(key2, value2));
     }
 
+    public T findByField(String key, Object value, String key2, Object value2, String key3, Object value3) {
+        return this.findOne(Spec.<T>of().eq(key, value).eq(key2, value2).eq(key3, value3));
+    }
 
 
     public List<T> findAllByField(String key, Object value) {
-        return this.findAll(Spec.<T>of().equal(key, value));
+        return this.findAll(spec().eq(key, value));
+    }
+
+    public Spec<T> spec() {
+        return Spec.of();
     }
 
     public List<T> findAllByField(String key, Object value, String key2, Object value2) {
-        return this.findAll(Spec.<T>of().equal(key, value).equal(key2, value2));
+        return this.findAll(Spec.<T>of().eq(key, value).eq(key2, value2));
     }
 
     public boolean isFieldUnique(String id, String fieldName, Object value) {
-        return rep.exists(Spec.<T>of().notEqual("id", id).equal(fieldName, value));
+        return rep.exists(Spec.<T>of().ne("id", id).eq(fieldName, value));
     }
 
     public List<T> findByExampleLike(T t, Sort sort) {
@@ -360,7 +365,7 @@ public abstract class BaseDao<T extends Persistable<String>> {
 
 
     /**
-     *  查询前几
+     * 查询前几
      */
     public List<T> findTop(int size, Specification<T> c, Sort sort) {
         Page<T> page = this.findAll(c, PageRequest.of(0, size, sort));
@@ -421,8 +426,6 @@ public abstract class BaseDao<T extends Persistable<String>> {
             return map;
         }).toList();
     }
-
-
 
 
     // --- 7. 结果集映射 (Dictionary Mapping) ---

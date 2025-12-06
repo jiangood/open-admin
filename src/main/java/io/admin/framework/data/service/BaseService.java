@@ -23,9 +23,7 @@ public abstract class BaseService<T extends Persistable<String>> {
     protected BaseDao<T> baseDao;
 
 
-    public Spec<T> spec(){
-        return Spec.of();
-    }
+
 
     /**
      * 更新时，指定字段更新

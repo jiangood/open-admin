@@ -57,9 +57,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
 
     public List<SysRole> findValid() {
-        JpaQuery<SysRole> q = new JpaQuery<>();
-        q.eq(SysRole.Fields.enabled, true);
-        return roleDao.findAll(q);
+        return roleDao.findAllByField(SysRole.Fields.enabled, true);
     }
 
     @Transactional
@@ -100,9 +98,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
 
     public List<SysRole> findAllByCode(Collection<String> roles) {
-        JpaQuery<SysRole> q = new JpaQuery<>();
-        q.in(SysRole.Fields.code, roles);
-        return roleDao.findAll(q);
+        return roleDao.findAll(spec().in(SysRole.Fields.code, roles));
     }
 
 

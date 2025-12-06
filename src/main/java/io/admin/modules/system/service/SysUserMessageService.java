@@ -22,16 +22,16 @@ public class SysUserMessageService extends BaseService<SysUserMessage> {
     SysUserMessageDao sysUserMsgDao;
 
     public Page<SysUserMessage> findByUser(String id, Boolean read, Pageable pageable) {
-        Spec<SysUserMessage> spec = Spec.<SysUserMessage>of().equal(SysUserMessage.Fields.user + ".id", id);
+        Spec<SysUserMessage> spec = Spec.<SysUserMessage>of().eq(SysUserMessage.Fields.user + ".id", id);
         if(read != null){
-            spec.equal(SysUserMessage.Fields.isRead , read);
+            spec.eq(SysUserMessage.Fields.isRead , read);
         }
 
         return sysUserMsgDao.findAll(spec, pageable);
     }
 
     public long countUnReadByUser(String id) {
-       return sysUserMsgDao.count(Spec.<SysUserMessage>of().equal(SysUserMessage.Fields.user + ".id", id).equal(SysUserMessage.Fields.isRead , false));
+       return sysUserMsgDao.count(Spec.<SysUserMessage>of().eq(SysUserMessage.Fields.user + ".id", id).eq(SysUserMessage.Fields.isRead , false));
     }
 
     @Transactional

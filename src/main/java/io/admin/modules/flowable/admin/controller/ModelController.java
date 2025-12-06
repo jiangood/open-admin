@@ -8,6 +8,7 @@ import io.admin.common.utils.SpringUtils;
 import io.admin.common.utils.ann.RemarkUtils;
 import io.admin.framework.config.security.HasPermission;
 
+import io.admin.framework.data.specification.Spec;
 import io.admin.framework.log.Log;
 import io.admin.modules.flowable.core.config.ProcessMetaCfg;
 import io.admin.modules.flowable.core.config.meta.FormDefinition;
@@ -186,9 +187,8 @@ public class ModelController {
 
     @GetMapping("assigneeOptions")
     public AjaxResult assigneeOptions(String searchText) {
-        JpaQuery<SysUser> q = new JpaQuery<>();
-        q.searchText(searchText, "name", "account", "phone");
-        List<SysUser> userList = sysUserService.findAll(q, Sort.by("name"));
+        Spec<SysUser> spec = Spec.of();
+        List<SysUser> userList = sysUserService.findAll(spec.orLike(searchText, "name", "account", "phone"), Sort.by("name"));
 
 
         List<Option> list = new ArrayList<>();
@@ -222,10 +222,10 @@ public class ModelController {
     @GetMapping("candidateUsersOptions")
     public AjaxResult candidateUsersOptions(String searchText) {
         List<Option> list = new ArrayList<>();
+        Spec<SysUser> spec = Spec.of();
 
-        JpaQuery<SysUser> q = new JpaQuery<>();
-        q.searchText(searchText, "name", "account", "phone");
-        List<SysUser> userList = sysUserService.findAll(q, Sort.by("name"));
+        spec.orLike(searchText, "name", "account", "phone");
+        List<SysUser> userList = sysUserService.findAll(spec, Sort.by("name"));
 
         for (SysUser sysUser : userList) {
             list.add(Option.of(sysUser.getId(), sysUser.getName()));

@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.admin.common.utils.PasswordUtils;
 import io.admin.framework.config.SysProp;
+import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.entity.DataPermType;
 import io.admin.modules.system.entity.SysOrg;
 import io.admin.modules.system.entity.SysRole;
@@ -58,7 +59,6 @@ public class SysUserService extends BaseService<SysUser> {
     private SysMenuDao sysMenuDao;
 
 
-
     @Resource
     private UserMapper userMapper;
 
@@ -66,31 +66,24 @@ public class SysUserService extends BaseService<SysUser> {
     private SysProp sysProp;
 
 
-    public UserResponse findOneDto(String id){
+    public UserResponse findOneDto(String id) {
         SysUser user = sysUserDao.findOne(id);
         return userMapper.toResponse(user);
     }
 
 
     public List<SysUser> findByUnit(Collection<String> org) {
-        JpaQuery<SysUser> query = new JpaQuery<>();
-        query.in(SysUser.Fields.unitId, org);
-        return sysUserDao.findAll(query, Sort.by(SysUser.Fields.name));
+        Spec<SysUser> s = spec().in(SysUser.Fields.unitId, org);
+        return sysUserDao.findAll(s, Sort.by(SysUser.Fields.name));
     }
 
     public SysUser findByAccount(String account) {
-        JpaQuery<SysUser> query = new JpaQuery<>();
-        query.eq(SysUser.Fields.account, account);
-        SysUser user = sysUserDao.findOne(query);
-        return user;
+        return sysUserDao.findByAccount(account);
     }
 
 
     public SysUser findByPhone(String phoneNumber) {
-        JpaQuery<SysUser> query = new JpaQuery<>();
-        query.eq(SysUser.Fields.phone, phoneNumber);
-        SysUser user = sysUserDao.findOne(query);
-        return user;
+        return sysUserDao.findByField(SysUser.Fields.phone, phoneNumber);
     }
 
 
@@ -137,9 +130,8 @@ public class SysUserService extends BaseService<SysUser> {
             input.setPassword(PasswordUtils.encode(password));
         }
 
-      return   super.saveOrUpdateByRequest(input, updateKeys);
+        return super.saveOrUpdateByRequest(input, updateKeys);
     }
-
 
 
     @Transactional
@@ -225,7 +217,7 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
     @Transactional
-    public Set<String> getAllPermissions(String id){
+    public Set<String> getAllPermissions(String id) {
         SysUser user = sysUserDao.findOne(id);
 
         Set<String> list = new HashSet<>();
@@ -234,12 +226,12 @@ public class SysUserService extends BaseService<SysUser> {
             list.add("ROLE_" + role.getName());
 
             // 如果权限表是细粒度权限，如 user:read，也可以加上
-            List<MenuDefinition> menus = role.isAdmin()? sysMenuDao.findAll(): sysMenuDao.findAllById(role.getMenus());
+            List<MenuDefinition> menus = role.isAdmin() ? sysMenuDao.findAll() : sysMenuDao.findAllById(role.getMenus());
             for (MenuDefinition menu : menus) {
                 List<MenuPermission> perms = menu.getPerms();
-                if(CollUtil.isNotEmpty(perms)){
+                if (CollUtil.isNotEmpty(perms)) {
                     for (MenuPermission perm : perms) {
-                        Assert.hasText(perm.getPerm(), "菜单有未设置perm的情况：" + menu.getName() );
+                        Assert.hasText(perm.getPerm(), "菜单有未设置perm的情况：" + menu.getName());
                         list.add(perm.getPerm());
                     }
                 }
@@ -283,8 +275,7 @@ public class SysUserService extends BaseService<SysUser> {
 
 
     public List<SysUser> findByRole(SysRole role) {
-        JpaQuery<SysUser> q = new JpaQuery<>();
-        q.isMember(SysUser.Fields.roles, role);
+        Spec<SysUser> q = spec().isMember(SysUser.Fields.roles, role);
 
         return sysUserDao.findAll(q);
     }

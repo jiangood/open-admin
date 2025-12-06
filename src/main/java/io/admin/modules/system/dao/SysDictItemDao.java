@@ -35,43 +35,15 @@ public class SysDictItemDao extends BaseDao<SysDictItem> {
 
     @Transactional
     public void deleteByPid(String typeId) {
-        JpaQuery<SysDictItem> q = new JpaQuery<>();
 
-        q.eq(SysDictItem.Fields.sysDict + ".id", typeId);
-
-        List<SysDictItem> list = this.findAll(q);
+        List<SysDictItem> list = this.findAllByField(SysDictItem.Fields.sysDict + ".id", typeId);
 
         this.deleteAll(list);
     }
 
-    public String findText(String typeCode, String itemCode) {
-        JpaQuery<SysDictItem> q = new JpaQuery<>();
-        q.eq(SysDictItem.Fields.sysDict + "." + SysDict.Fields.code, typeCode);
-        q.eq(SysDictItem.Fields.code, itemCode);
-
-        SysDictItem item = this.findOne(q);
-        String rs = null;
-        if (item != null) {
-            rs = item.getText();
-        }
-        log.trace("获取数据字典 typeCode:{} itemCode:{} 结果:{}", typeCode, itemCode, rs);
-        return rs;
-    }
-
-
-
-
-    public List<SysDictItem> findAllByDictCode(String code) {
-        JpaQuery<SysDictItem> q = new JpaQuery<>();
-        q.eq(SysDictItem.Fields.sysDict + "." + SysDict.Fields.code, code);
-        return this.findAll(q);
-    }
 
     public SysDictItem findByDictAndCode(SysDict dict ,String code) {
-        JpaQuery<SysDictItem> q = new JpaQuery<>();
-        q.eq(SysDictItem.Fields.code, code);
-        q.eq(SysDictItem.Fields.sysDict , dict);
-        return this.findOne(q);
+        return this.findByField(SysDictItem.Fields.code, code,SysDictItem.Fields.sysDict , dict);
     }
 
 

@@ -108,27 +108,27 @@ public class Spec<T> implements Specification<T> {
         this.add((Specification<T>) (root, query, builder) -> QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
         return this;
     }
-    public Spec<T> equal(String field, Object value) {
+    public Spec<T> eq(String field, Object value) {
         return this.addIfValuePresent(Operator.EQUAL, field, value);
     }
 
-    public Spec<T> notEqual(String field, Object value) {
+    public Spec<T> ne(String field, Object value) {
         return this.addIfValuePresent(Operator.NOT_EQUAL, field, value);
     }
 
-    public <C extends Comparable<C>> Spec<T> greaterThan(String field, C value) {
+    public <C extends Comparable<C>> Spec<T> gt(String field, C value) {
         return this.addIfValuePresent(Operator.GREATER_THAN, field, value);
     }
 
-    public <C extends Comparable<C>> Spec<T> lessThan(String field, C value) {
+    public <C extends Comparable<C>> Spec<T> lt(String field, C value) {
         return this.addIfValuePresent(Operator.LESS_THAN, field, value);
     }
 
-    public <C extends Comparable<C>> Spec<T> greaterThanOrEqual(String field, C value) {
+    public <C extends Comparable<C>> Spec<T> ge(String field, C value) {
         return this.addIfValuePresent(Operator.GREATER_THAN_OR_EQUAL, field, value);
     }
 
-    public <C extends Comparable<C>> Spec<T> lessThanOrEqual(String field, C value) {
+    public <C extends Comparable<C>> Spec<T> le(String field, C value) {
         return this.addIfValuePresent(Operator.LESS_THAN_OR_EQUAL, field, value);
     }
 

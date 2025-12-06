@@ -1,7 +1,7 @@
 
 package io.admin.modules.system.dao;
 
-import io.admin.common.utils.field.ValueType;
+import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.entity.SysDict;
 import io.admin.framework.data.repository.BaseDao;
 
@@ -14,10 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class SysDictDao extends BaseDao<SysDict> {
 
 
-
     @Transactional
-    public SysDict add(String code,String text){
-        SysDict  dict = new SysDict();
+    public SysDict add(String code, String text) {
+        SysDict dict = new SysDict();
         dict.setCode(code);
         dict.setText(text);
         dict = this.save(dict);
@@ -25,36 +24,32 @@ public class SysDictDao extends BaseDao<SysDict> {
     }
 
     public SysDict findByCode(String code) {
-        JpaQuery<SysDict> q = new JpaQuery<>();
-        q.eq(SysDict.Fields.code, code);
-        return this.findOne(q);
+        return this.findByField(SysDict.Fields.code, code);
     }
+
     public boolean existsByCode(String code) {
-        JpaQuery<SysDict> q = new JpaQuery<>();
-        q.eq("code",code);
-        return this.exists(q);
+        Spec<SysDict> spec = Spec.of();
+        return this.exists(spec.eq("code", code));
     }
 
     public SysDict findByIdOrCode(String code) {
-        JpaQuery<SysDict> q = new JpaQuery<>();
-        q.addSubOr(qq->{
-            qq.eq(SysDict.Fields.code, code);
-            qq.eq("id", code);
-        });
+        Spec<SysDict> spec = Spec.of();
+        spec.or(Spec.<SysDict>of().eq(SysDict.Fields.code, code),
+                Spec.<SysDict>of().eq("id", code));
 
-        return this.findOne(q);
+        return this.findOne(spec);
     }
 
 
     @Transactional
     public SysDict saveOrUpdate(String code, String label, boolean isNumber) {
         SysDict dict = this.findByCode(code);
-        if(dict == null){
+        if (dict == null) {
             dict = new SysDict();
             dict.setCode(code);
         }
         dict.setText(label);
         dict.setIsNumber(isNumber);
-      return  this.save(dict);
+        return this.save(dict);
     }
 }

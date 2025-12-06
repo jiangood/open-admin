@@ -1,6 +1,7 @@
 
 package io.admin.modules.system.dao;
 
+import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.enums.OrgType;
 import io.admin.modules.system.entity.SysOrg;
 import io.admin.common.utils.tree.TreeManager;
@@ -21,8 +22,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Repository
 public class SysOrgDao extends BaseDao<SysOrg> {
-
-    private TreeManager<SysOrg> _treeManager;
 
     @Override
     public SysOrg save(SysOrg entity) {
@@ -45,7 +44,6 @@ public class SysOrgDao extends BaseDao<SysOrg> {
      * 友元函数，供aop调用
      */
     public void cleanCache() {
-        _treeManager = null;
     }
 
     /**
@@ -65,14 +63,12 @@ public class SysOrgDao extends BaseDao<SysOrg> {
      *
      */
     public List<SysOrg> findDirectChildUnit(String id, Boolean enabled) {
-        JpaQuery<SysOrg> query = new JpaQuery<>();
-        query.eq(SysOrg.Fields.type, OrgType.TYPE_UNIT.getCode());
-        query.eq(SysOrg.Fields.pid, id);
+        Spec<SysOrg> q = spec().eq(SysOrg.Fields.type, OrgType.TYPE_UNIT.getCode()).eq(SysOrg.Fields.pid, id);
         if (enabled != null) {
-            query.eq(SysOrg.Fields.enabled, enabled);
+            q.eq(SysOrg.Fields.enabled, enabled);
         }
 
-        return this.findAll(query);
+        return this.findAll(q);
     }
 
 
@@ -163,8 +159,7 @@ public class SysOrgDao extends BaseDao<SysOrg> {
      *
      */
     public List<SysOrg> findAllValid() {
-        JpaQuery<SysOrg> q = new JpaQuery<>();
-        q.eq(SysOrg.Fields.enabled, true);
+        Spec<SysOrg> q = spec().eq(SysOrg.Fields.enabled, true);
 
         return this.findAll(q, Sort.by(SysOrg.Fields.seq));
     }
@@ -206,7 +201,7 @@ public class SysOrgDao extends BaseDao<SysOrg> {
 
 
     public List<SysOrg> findByPid(String pid) {
-        JpaQuery<SysOrg> q = new JpaQuery<>();
+        Spec<SysOrg> q = spec();
         if(pid == null){
             q.isNull("pid");
         }else {

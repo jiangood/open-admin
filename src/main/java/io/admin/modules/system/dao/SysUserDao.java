@@ -27,7 +27,7 @@ public class SysUserDao extends BaseDao<SysUser> {
      * @param ids
      */
     public List<SysUser> findValid(Collection<String> ids) {
-        return this.findAll(Spec.<SysUser>of().equal(SysUser.Fields.enabled, true).in("id", ids));
+        return this.findAll(Spec.<SysUser>of().eq(SysUser.Fields.enabled, true).in("id", ids));
     }
 
     /**
