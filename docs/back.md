@@ -1,122 +1,97 @@
 # 后端模块
 
-## 后端依赖
+## `pom.xml` 解析
 
-| 依赖名称 | GroupId | ArtifactId |
-|---|---|---|
-| spring-boot-starter-web | org.springframework.boot | spring-boot-starter-web |
-| spring-boot-starter-quartz | org.springframework.boot | spring-boot-starter-quartz |
-| spring-boot-starter-validation | org.springframework.boot | spring-boot-starter-validation |
-| spring-boot-starter-aop | org.springframework.boot | spring-boot-starter-aop |
-| spring-boot-starter-data-jpa | org.springframework.boot | spring-boot-starter-data-jpa |
-| spring-boot-starter-cache | org.springframework.boot | spring-boot-starter-cache |
-| spring-boot-starter-security | org.springframework.boot | spring-boot-starter-security |
-| spring-boot-configuration-processor | org.springframework.boot | spring-boot-configuration-processor |
-| mapstruct | org.mapstruct | mapstruct |
-| mapstruct-processor | org.mapstruct | mapstruct-processor |
-| filters | com.jhlabs | filters |
-| minio | io.minio | minio |
-| okhttp-jvm | com.squareup.okhttp3 | okhttp-jvm |
-| mail | javax.mail | mail |
-| poi-ooxml | org.apache.poi | poi-ooxml |
-| poi-scratchpad | org.apache.poi | poi-scratchpad |
-| itextpdf | com.itextpdf | itextpdf |
-| uuid-creator | com.github.f4b6a3 | uuid-creator |
-| commons-dbutils | commons-dbutils | commons-dbutils |
-| hutool-all | cn.hutool | hutool-all |
-| commons-lang3 | org.apache.commons | commons-lang3 |
-| guava | com.google.guava | guava |
-| commons-io | commons-io | commons-io |
-| jackson-dataformat-yaml | com.fasterxml.jackson.dataformat | jackson-dataformat-yaml |
-| commons-beanutils | commons-beanutils | commons-beanutils |
-| pinyin4j | com.belerweb | pinyin4j |
-| jsoup | org.jsoup | jsoup |
-| lombok | org.projectlombok | lombok |
-| mysql-connector-j | com.mysql | mysql-connector-j |
-| ureport-console | io.github.jiangood | ureport-console |
-| flowable-spring-boot-starter-process | org.flowable | flowable-spring-boot-starter-process |
-| spring-boot-starter-test | org.springframework.boot | spring-boot-starter-test |
-| spring-security-test | org.springframework.security | spring-security-test |
-| h2 | com.h2database | h2 |
+后端模块主要基于 Spring Boot 构建，核心依赖已在 `index.md` 中详细列出。
+主要包含以下特性与技术栈：
 
-## 树工具类
+-   **Web 开发**: `spring-boot-starter-web`
+-   **任务调度**: `spring-boot-starter-quartz`
+-   **数据验证**: `spring-boot-starter-validation`
+-   **AOP**: `spring-boot-starter-aop`
+-   **数据持久化**: `spring-boot-starter-data-jpa`
+-   **安全性**: `spring-boot-starter-security`
+-   **Bean 映射**: MapStruct
+-   **工具库**: Hutool, Google Guava, Apache Commons
+-   **文件存储**: MinIO 客户端
+-   **报表**: UReport
+-   **流程引擎**: Flowable
 
-### TreeManager
-- **说明:** 树形管理，内部包含很多数据和方法，用于构建、遍历和操作树形结构。
-- **方法:**
-    - `of(List<X> dataList)`: 静态工厂方法，创建 TreeManager 实例。
-    - `traverseTree(Collection<X> treeList, Function<X, List<X>> getChildrenFn, TraverseAction<X> traverseAction)`: 遍历树。
-    - `traverseTree(List<T> treeList, TraverseAction<T> traverseAction)`: 遍历树。
-    - `traverseTreeFromLeaf(TraverseAction<T> traverseAction)`: 从叶子节点开始遍历树。
-    - `getSortedList()`: 获取排序后的扁平列表。
-    - `getParentById(String id)`: 根据ID获取父节点。
-    - `getAllChildren(String id)`: 获取所有子节点（扁平列表）。
-    - `getParent(T t)`: 获取父节点。
-    - `getParent(T t, Function<T, Boolean> util)`: 根据条件获取父节点。
-    - `isLeaf(String id)`: 判断是否为叶子节点。
-    - `isLeaf(T t)`: 判断是否为叶子节点。
-    - `getLeafCount(T t)`: 获取叶子节点数量。
-    - `getLeafList()`: 获取所有叶子节点列表。
-    - `getLeafIdList()`: 获取所有叶子节点ID列表。
-    - `getParentIdListById(String id)`: 根据ID获取所有父节点ID列表。
-    - `getIdsByLevel(int level)`: 根据层级获取节点ID列表。
-    - `getLevelById(String id)`: 根据ID获取节点层级。
-    - `buildLevelMap()`: 构建层级映射。
+## 树形结构工具 (`io.admin.common.utils.tree`)
 
-### TreeNode
-- **说明:** 树节点的接口，定义了树节点的基本属性（ID, Parent ID, Children）。
-- **方法:**
-    - `getId()`: 获取节点ID。
-    - `setId(String id)`: 设置节点ID。
-    - `getPid()`: 获取父节点ID。
-    - `setPid(String pid)`: 设置父节点ID。
-    - `getChildren()`: 获取子节点列表。
-    - `setChildren(List<T> list)`: 设置子节点列表。
-    - `setIsLeaf(Boolean b)`: 设置是否为叶子节点（默认实现）。
+`io.admin.common.utils.tree` 包提供了 Java 后端处理树形数据结构的工具类和接口，方便将扁平数据转换为树形结构，并进行遍历、查找等操作。
 
-### TreeUtils
-- **说明:** 提供了将列表转换为树、遍历树、清空空子节点以及获取叶子节点等静态方法。
-- **方法:**
-    - `buildTree(List<TreeOption> list)`: 构建树结构。
-    - `treeToMap(List<TreeOption> tree)`: 将树转换为Map。
-    - `treeToMap(List<E> tree, Function<E, String> keyFn, Function<E, List<E>> getChildren)`: 将树转换为Map。
-    - `buildTreeByDict(List<Dict> list)`: 根据字典构建树。
-    - `buildTree(List<E> list, Function<E, String> keyFn, Function<E, String> pkeyFn, Function<E, List<E>> getChildren, BiConsumer<E, List<E>> setChildren)`: 构建通用树结构。
-    - `cleanEmptyChildren(List<E> list, Function<E, List<E>> getChildren, BiConsumer<E, List<E>> setChildrenFn)`: 清除空子节点。
-    - `walk(List<E> list, Function<E, List<E>> getChildren, Consumer<E> consumer)`: 深度优先遍历树节点。
-    - `walk(List<E> list, Function<E, List<E>> getChildren, BiConsumer<E, E> consumer)`: 深度优先遍历树节点（带父节点）。
-    - `getLeafs(List<E> list, Function<E, List<E>> getChildren)`: 获取树的叶子节点。
-    - `treeToList(List<E> tree, Function<E, List<E>> getChildren)`: 将树转换为扁平列表。
-    - `getPids(String nodeId, List<E> list, Function<E, String> keyFn, Function<E, String> pkeyFn)`: 获取节点的父节点列表。
+### `TreeNode` 接口
 
-## JPA Specification 构建器 (Spec.java)
+-   **名称:** `TreeNode` (接口)
+-   **说明:** 定义了树形结构中节点的基本行为和属性。所有需要构建树形结构的实体类应实现此接口。
+-   **核心方法:**
+    *   `getId()` / `setId(String id)`: 获取/设置节点唯一标识。
+    *   `getPid()` / `setPid(String pid)`: 获取/设置父节点标识。
+    *   `getChildren()` / `setChildren(List<T> list)`: 获取/设置子节点列表。
+    *   `setIsLeaf(Boolean b)`: 设置是否为叶子节点 (默认方法)。
 
-- **类名:** `Spec<T>`
-- **说明:** 简洁、动态、支持关联字段查询 (e.g., "dept.name") 的 JPA Specification 构建器。通过链式调用收集 Specification，最终使用 AND 逻辑连接所有条件。
-- **公共方法:**
-    - `of()`: 静态工厂方法，创建 `Spec` 实例。
-    - `addExample(T t, String... ignores)`: 添加基于 Example 的查询条件。
-    - `eq(String field, Object value)`: 等于查询。
-    - `ne(String field, Object value)`: 不等于查询。
-    - `gt(String field, C value)`: 大于查询。
-    - `lt(String field, C value)`: 小于查询。
-    - `ge(String field, C value)`: 大于等于查询。
-    - `le(String field, C value)`: 小于等于查询。
-    - `like(String field, String value)`: 模糊查询 (前后带 %)。
-    - `leftLike(String field, String value)`: 左模糊查询 (前带 %)。
-    - `rightLike(String field, String value)`: 右模糊查询 (后带 %)。
-    - `notLike(String field, String value)`: 不模糊查询。
-    - `in(String field, Collection<?> values)`: IN 查询。
-    - `between(String field, C value1, C value2)`: BETWEEN 查询。
-    - `isNotNull(String field)`: IS NOT NULL 查询。
-    - `isNull(String field)`: IS NULL 查询。
-    - `distinct(boolean distinct)`: 设置 DISTINCT 查询。
-    - `or(Specification<T>... orSpecifications)`: 将多个 Specification 用 OR 连接。
-    - `not(Specification<T> spec)`: 对 Specification 进行 NOT 操作。
-    - `orLike(String value, String... fields)`: 多个字段的 OR 模糊查询。
-    - `isMember(String field, Object element)`: 检查元素是否属于集合成员。
-    - `isNotMember(String field, Object element)`: 检查元素是否不属于集合成员。
-    - `groupBy(String... fields)`: 设置 GROUP BY 字段。
-    - `having(Specification<T> havingSpec)`: 设置 HAVING 过滤条件。
-    - `selectFnc(AggregateFunction fn, String field)`: 选择聚合函数字段。
-    - `select(String... fields)`: 选择字段。
+### `TreeManager` 类
+
+-   **名称:** `TreeManager`
+-   **说明:** 树形结构管理类，用于对实现了 `TreeNode` 接口的节点列表进行树形构建、遍历、查找、层级管理等操作。它在内部维护了原始列表、构建后的树形结构和 ID 到节点的映射。
+-   **主要功能:**
+    *   **构建树**: 将扁平列表转换为带层级关系的树形结构。
+    *   **遍历**: 支持深度优先遍历、从叶子节点向上遍历。
+    *   **查找**: 根据 ID 查找节点、获取父节点、获取所有子节点、获取叶子节点等。
+    *   **层级管理**: 构建节点层级映射，根据层级查询节点。
+-   **示例 (创建 `TreeManager` 实例):**
+    ```java
+    List<MyTreeNode> dataList = ...; // 假设 MyTreeNode 实现了 TreeNode 接口
+    TreeManager<MyTreeNode> treeManager = TreeManager.of(dataList);
+    List<MyTreeNode> tree = treeManager.getTree(); // 获取构建好的树
+    ```
+
+### `TreeUtils` 类
+
+-   **名称:** `TreeUtils`
+-   **说明:** 树结构工具类，提供了将列表转换为树、树到 Map 的转换、树的遍历、清理空子节点、获取叶子节点和获取父节点列表等功能。该类主要使用泛型 `E` 和 `Function` 接口进行灵活的数据处理，适用于各种自定义节点类型。
+-   **主要功能:**
+    *   **泛型树构建**: `buildTree` 方法支持使用函数式接口定义 ID、PID、获取/设置子节点的方式，实现高度可配置的树构建。
+    *   **树到 Map**: 方便通过节点键快速查找节点。
+    *   **遍历**: 通用 `walk` 方法支持对树进行深度优先遍历，可自定义处理逻辑。
+    *   **叶子节点**: `getLeafs` 方法获取树中的所有叶子节点。
+    *   **父节点路径**: `getPids` 方法获取从根节点到指定节点的父节点 ID 列表。
+
+## JPA `Specification` 构建器 (`io.admin.framework.data.specification.Spec.java`)
+
+### `Spec` 类
+
+-   **名称:** `Spec` (JPA `Specification` 构建器)
+-   **说明:** 简洁、动态、支持关联字段查询 (e.g., "dept.name") 的 JPA `Specification` 构建器。它通过链式调用收集查询条件，最终使用 `AND` 逻辑连接所有条件，生成一个可用于 Spring Data JPA 查询的 `Predicate`。
+-   **核心功能:**
+    *   **链式构建**: 提供丰富的链式方法来添加各种查询条件，提高代码可读性和开发效率。
+    *   **动态查询**: 能够根据业务逻辑动态组合查询条件。
+    *   **支持关联字段**: `field` 参数支持点操作符，例如 `user.department.name`，可以直接查询关联对象的属性。
+    *   **多样化操作符**: 支持等于、不等于、大于、小于、模糊匹配 (`LIKE`, `LEFT LIKE`, `RIGHT LIKE`, `NOT LIKE`)、in 范围查询、null/not null 判断、between 范围查询等。
+    *   **复杂逻辑**: 支持 `OR` 逻辑组合多个条件，以及对条件进行 `NOT` 操作。
+    *   **集合成员查询**: `isMember` 和 `isNotMember` 方法支持 JPA `IS MEMBER OF` 语义，用于查询实体集合字段中的成员。
+    *   **分组与过滤**: 支持 `groupBy` 设置分组字段和 `having` 设置分组后的过滤条件。
+-   **常用方法示例:**
+    ```java
+    // 创建 Spec 实例
+    Spec<User> userSpec = Spec.of();
+
+    // 添加等于条件
+    userSpec.eq("username", "admin");
+
+    // 添加模糊匹配条件 (不区分大小写)
+    userSpec.like("email", "example");
+
+    // 添加范围查询
+    userSpec.between("age", 18, 60);
+
+    // 添加 OR 逻辑 (例如：name 包含 'test' 或 description 包含 'test')
+    userSpec.orLike("test", "name", "description");
+
+    // 添加 IS MEMBER OF 条件
+    // userSpec.isMember("roles", adminRole);
+    //
+    // 结合 Spring Data JPA Repository 使用
+    // List<User> users = userRepository.findAll(userSpec);
+    ```
