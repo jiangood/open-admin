@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import io.admin.framework.data.query.ExpressionTool;
 import io.admin.framework.data.query.JpaQuery;
 import io.admin.framework.data.query.StatField;
+import io.admin.framework.data.specification.Spec;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityManager;
@@ -16,6 +17,7 @@ import lombok.Getter;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaEntityInformationSupport;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -323,90 +325,50 @@ public abstract class BaseDao<T extends Persistable<String>> {
     // --- 5.1 JpaQuery/字段等值查询 (Custom Query Helpers) ---
 
     public T findByField(String key, Object value) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        return this.findOne(q);
+        return this.findOne(Spec.<T>of().equal(key, value));
     }
 
     public T findByField(String key, Object value, String key2, Object value2) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        q.eq(key2, value2);
-        return this.findOne(q);
+        return this.findOne(Spec.<T>of().equal(key, value).equal(key2, value2));
+    }
+    public T findByField(String key, Object value, String key2, Object value2, String key3, Object value3) {
+        return this.findOne(Spec.<T>of().equal(key, value).equal(key2, value2).equal(key3, value3));
     }
 
-    public T findOne(String key, Object value) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        return this.findOne(q);
-    }
 
-    public T findOne(String key, Object value, String key2, Object value2) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        q.eq(key2, value2);
-        return this.findOne(q);
-    }
-
-    public T findOne(String key, Object value, String key2, Object value2, String key3, Object value3) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        q.eq(key2, value2);
-        q.eq(key3, value3);
-        return this.findOne(q);
-    }
 
     public List<T> findAllByField(String key, Object value) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        return this.findAll(q);
+        return this.findAll(Spec.<T>of().equal(key, value));
     }
 
     public List<T> findAllByField(String key, Object value, String key2, Object value2) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.eq(key, value);
-        q.eq(key2, value2);
-        return this.findAll(q);
+        return this.findAll(Spec.<T>of().equal(key, value).equal(key2, value2));
     }
 
     public boolean isFieldUnique(String id, String fieldName, Object value) {
-        JpaQuery<T> q = new JpaQuery<>();
-        q.ne("id", id);
-        q.eq(fieldName, value);
-        return rep.exists(q);
+        return rep.exists(Spec.<T>of().notEqual("id", id).equal(fieldName, value));
     }
 
     public List<T> findByExampleLike(T t, Sort sort) {
-        JpaQuery<T> c = new JpaQuery<>();
-        c.likeExample(t);
-        return this.rep.findAll(c, sort);
+        return this.rep.findAll(Spec.<T>of().addExample(t), sort);
     }
 
-    public Page<T> findByExampleLike(T example, Pageable pageable) {
-        JpaQuery<T> query = new JpaQuery<>();
-        query.likeExample(example);
-        return this.rep.findAll(query, pageable);
+    public Page<T> findByExampleLike(T t, Pageable pageable) {
+        return this.rep.findAll(Spec.<T>of().addExample(t), pageable);
     }
 
     public T findTop1(Specification<T> c, Sort sort) {
-        PageRequest pageRequest = PageRequest.of(0, 1, sort);
-
-        Page<T> all = this.findAll(c, pageRequest);
-        if (all.getTotalElements() > 0) {
-            return all.getContent().get(0);
-        }
-        return null;
+        List<T> result = this.findTop(1, c, sort);
+        return result.isEmpty() ? null : result.get(0);
     }
 
 
-    public List<T> findTop(int topSize, Specification<T> c, Sort sort) {
-        PageRequest pageRequest = PageRequest.of(0, topSize, sort);
-
-        Page<T> all = this.findAll(c, pageRequest);
-        if (all.getTotalElements() > 0) {
-            return all.getContent();
-        }
-        return Collections.emptyList();
+    /**
+     *  查询前几
+     */
+    public List<T> findTop(int size, Specification<T> c, Sort sort) {
+        Page<T> page = this.findAll(c, PageRequest.of(0, size, sort));
+        return page.hasContent() ? page.getContent() : Collections.emptyList();
     }
 
     /***

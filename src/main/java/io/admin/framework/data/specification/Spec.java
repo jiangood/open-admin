@@ -2,6 +2,9 @@ package io.admin.framework.data.specification;
 
 import io.admin.framework.data.query.ExpressionTool;
 import jakarta.persistence.criteria.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
+import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -34,8 +37,28 @@ public class Spec<T> implements Specification<T> {
         // ... 其他操作符，如 IS_MEMBER, DISTINCT 等已通过 Lambdas 或专用方法处理
     }
 
+    public static <T> Spec<T> of(){
+        return new Spec<>();
+    }
+    private Spec(){
+    }
+
     // ---------------------- 核心构建方法 ----------------------
 
+    public Spec<T> addExample(T t, String... ignores) {
+        ExampleMatcher exampleMatcher = ExampleMatcher.matching()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING) // 遇到string，模糊匹配
+                .withIgnoreCase()
+                .withIgnoreNullValues();
+
+        if (ignores.length > 0) {
+            exampleMatcher.withIgnorePaths(ignores);
+        }
+        Example<T> example = Example.of(t, exampleMatcher);
+
+        this.add((Specification<T>) (root, query, builder) -> QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
+        return this;
+    }
     public Spec<T> equal(String field, Object value) {
         return this.addIfValuePresent(Operator.EQUAL, field, value);
     }
