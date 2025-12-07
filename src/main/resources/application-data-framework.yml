@@ -1,4 +1,4 @@
-## 框架的核心配置项和菜单结构。 业务项目需在 application-data-biz.yml 中进行配置。
+## 框架的核心配置项和菜单结构。 业务项目需在 application-data.yml 中进行配置。
 data:
   # 数据库配置元数据
   configs:
