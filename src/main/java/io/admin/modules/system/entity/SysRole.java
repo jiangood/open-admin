@@ -17,13 +17,11 @@ import java.util.List;
 import java.util.Set;
 
 
-/**
- * 系统角色表
- */
+
 @Remark("系统角色")
 @Entity
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @FieldNameConstants
 public class SysRole extends BaseEntity {
 
