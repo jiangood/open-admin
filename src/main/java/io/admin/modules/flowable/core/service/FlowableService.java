@@ -201,11 +201,7 @@ public class FlowableService {
     }
 
 
-    /**
-     * @param instanceId
-     * @return
-     * @deprecated 替换MyBpmnModelService
-     */
+
     public BufferedImage drawImage(String instanceId) {
         return myBpmnModelService.drawImage(instanceId);
     }

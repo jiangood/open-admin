@@ -411,7 +411,7 @@ public class JdbcUtils {
 
         // 移除 ID 字段，剩下的用于 SET 语句
         Map<String, Object> updateFields = data.entrySet().stream()
-                .filter(entry -> !entry.getKey().equalsIgnoreCase("id") && entry.getValue() != null)
+                .filter(entry -> !"id".equalsIgnoreCase(entry.getKey()) && entry.getValue() != null)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         if (updateFields.isEmpty()) {

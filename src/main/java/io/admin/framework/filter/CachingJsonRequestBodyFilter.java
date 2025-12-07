@@ -28,7 +28,7 @@ public class CachingJsonRequestBodyFilter extends OncePerRequestFilter {
         String contentType = request.getContentType();
 
         boolean isJson = contentType != null && contentType.toLowerCase().contains("json");
-        boolean isPost = method.equalsIgnoreCase("POST");
+        boolean isPost = "POST".equalsIgnoreCase(method);
         boolean isMe = request instanceof ContentCachingRequestWrapper;
 
         if (isJson && isPost && !isMe) {

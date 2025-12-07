@@ -386,7 +386,7 @@ public class DbUtils {
 
         List<Object> params = new ArrayList<>();
         for (String key : keys) {
-            if (key.equals("id")) {
+            if ("id".equals(key)) {
                 continue;
             }
             sb.append(StrUtil.toUnderlineCase(key)).append("=?,");

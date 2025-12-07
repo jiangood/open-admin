@@ -46,7 +46,7 @@ public class LoginFilter extends OncePerRequestFilter {
 
             String passwordType = (String) request.getAttribute("passwordType");
             passwordType = StrUtil.nullToDefault(passwordType, "WEB");
-            if (passwordType.equals("WEB")) {
+            if ("WEB".equals(passwordType)) {
                 password = authService.decodeWebPassword(password);
             }
 
