@@ -11,14 +11,15 @@ import java.util.UUID;
 public class StrUtils {
 
 
-    /**
-     * 最后一个大写字母
-     * @param str
-     * @return -1 表示没有
+        /**
+     * 查找字符串中最后一个大写字母的位置
+     * @param str 待查找的字符串
+     * @return 最后一个大写字母的下标位置，从0开始计数；如果未找到大写字母则返回-1
      */
     public static int lastUpperLetter(String str){
         int len = str.length();
 
+        // 从字符串末尾开始向前遍历查找大写字母
         for(int i = len-1; i>=0; i--){
             char c = str.charAt(i);
             if(CharUtil.isLetterUpper(c)){
@@ -27,6 +28,7 @@ public class StrUtils {
         }
         return -1;
     }
+
 
 
 

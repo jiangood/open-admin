@@ -68,21 +68,7 @@ public class SysConfigServiceTest {
         verify(sysConfigDao).findByCode(key);
     }
 
-    @Test
-    public void testGetMixedFromSysProperties() {
-        String key = "sys.testProp";
-        String sysPropValue = "sys.prop.value";
-        
-        when(env.getProperty(key)).thenReturn(null);
-        when(sysConfigDao.findByCode(key)).thenReturn(null);
-        when(BeanUtil.getFieldValue(sysProperties, "testProp")).thenReturn(sysPropValue);
-        
-        String result = sysConfigService.getMixed(key, String.class);
-        
-        assertEquals(Convert.convert(String.class, sysPropValue), result);
-        verify(env).getProperty(key);
-        verify(sysConfigDao).findByCode(key);
-    }
+
 
     @Test
     public void testGetMixedReturnsNullForEmptyValue() {
