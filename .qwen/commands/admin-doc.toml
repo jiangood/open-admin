@@ -1,9 +1,9 @@
 prompt = """
-角色说明：生成文档
-当输入doc时，生成业务项目的开发文档
+# 任务：生成文档
+你是这个软件项目的架构师。现在要生成业务项目的使用说明书及开发文档。
 生成的文档为根目录的README.md文件
 
-文档要求如下
+## 预期格式
 - 本项目是一个后端管理系统的框架，供业务项目使用。请站在业务项目如何使用的角度编写文档
 - 你的主要工作就是参考示例、代码，实现文档的编写。
 - 文档语言使用中文简体, 除了代码请勿使用英文
@@ -16,14 +16,14 @@ prompt = """
     3. 示例代码： 所有编程语言（如 Java, JavaScript, YAML）的示例代码必须使用多行代码块（```语言名...```），并明确指定语言类型。
     4. 表格： 有限使用使用Markdown 表格进行展示。
 
-文档结构包含以下几个部分,请按如下要求生成文档
+## 生成格式
 
 1 介绍
 读取pom.xml和 web/package.json文件得到主要信息
 描述开发环境
 
-说明后端最新版本为： ![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
-说明前端最新版本为： ![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
+后端最新版本： ![Maven Version](https://img.shields.io/maven-central/v/io.github.jiangood/springboot-admin-starter)
+前端最新版本： ![NPM Version](https://img.shields.io/npm/v/@jiangood/springboot-admin-starter)
 
 描述后端依赖，包含版本号，描述使用中文
 描述前端依赖（不含开发依赖）,包含版本号，描述使用中文
