@@ -89,7 +89,7 @@ public class BeanUtils {
                 }
 
                 String k = StrUtils.removePreAndLowerFirst(name, "getDefinition");
-                if (k.equals("class")) {
+                if ("class".equals(k)) {
                     continue;
                 }
 
