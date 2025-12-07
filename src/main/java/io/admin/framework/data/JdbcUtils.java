@@ -1,9 +1,9 @@
 package io.admin.framework.data;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.map.CaseInsensitiveLinkedMap;
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.core.bean.BeanUtil; // 引入 Hutool BeanUtil
 import jakarta.persistence.EntityManagerFactory;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

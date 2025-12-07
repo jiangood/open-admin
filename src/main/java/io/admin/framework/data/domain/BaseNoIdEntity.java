@@ -2,7 +2,9 @@ package io.admin.framework.data.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.admin.framework.data.DBConstants;
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.EntityListeners;
+import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;

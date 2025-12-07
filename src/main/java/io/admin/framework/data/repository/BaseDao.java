@@ -11,7 +11,6 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.Getter;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -226,6 +225,7 @@ public abstract class BaseDao<T extends Persistable<String>> {
     public List<T> findAll(Sort sort) {
         return rep.findAll(sort);
     }
+
 
     public List<T> findAllById(Iterable<String> ids) {
         return rep.findAllById(ids);

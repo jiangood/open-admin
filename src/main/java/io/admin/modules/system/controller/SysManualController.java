@@ -3,7 +3,6 @@ package io.admin.modules.system.controller;
 import io.admin.common.dto.AjaxResult;
 import io.admin.framework.config.argument.RequestBodyKeys;
 import io.admin.framework.config.security.HasPermission;
-
 import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.entity.SysManual;
 import io.admin.modules.system.service.SysManualService;
@@ -66,25 +65,18 @@ public class SysManualController  {
      * @return
      */
     @RequestMapping("pageForUser")
-    public AjaxResult pageForUser(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = {"name", "version"}) Pageable pageable) {
-        Spec<SysManual> q = Spec.of();
+    public AjaxResult pageForUser(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = {}) Pageable pageable) {
+        Spec<SysManual> s = Spec.<SysManual>of().orLike(searchText, "name");
 
-        q.orLike(searchText, "name");
-
-
-
-        List<SysManual> list = service.findPageByRequest(q, Pageable.unpaged(pageable.getSort())).getContent();
-        // 数据量不大，直接内存过滤吧
-
+        // 查询并保留最大版本记录
+        List<SysManual> list = service.findAll(s,Sort.by("name", "version"));
         Map<String,SysManual> rs = new HashMap<>();
         for (SysManual e : list) {
             if(!rs.containsKey(e.getName())){
                 rs.put(e.getName(),e);
             }
         }
-
         Collection<SysManual> values = rs.values();
-
 
         return AjaxResult.ok().data(new PageImpl<>(new ArrayList<>(values)));
     }

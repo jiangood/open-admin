@@ -1,16 +1,16 @@
 
 package io.admin.modules.system.entity;
 
-import io.admin.common.utils.tree.TreeNode;
 import io.admin.common.utils.annotation.Remark;
+import io.admin.common.utils.tree.TreeNode;
 import io.admin.framework.data.domain.BaseEntity;
 import io.admin.modules.system.enums.OrgType;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**

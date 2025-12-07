@@ -3,10 +3,10 @@ package io.admin.modules.system.dao;
 
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
+import io.admin.framework.data.repository.BaseDao;
 import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.entity.SysRole;
 import io.admin.modules.system.entity.SysUser;
-import io.admin.framework.data.repository.BaseDao;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;

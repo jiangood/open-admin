@@ -2,8 +2,8 @@ package io.admin.modules.api.entity;
 
 import io.admin.common.utils.annotation.Remark;
 import io.admin.framework.data.converter.ToListConverter;
-import io.admin.framework.validator.ValidateIpv4;
 import io.admin.framework.data.domain.BaseEntity;
+import io.admin.framework.validator.ValidateIpv4;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

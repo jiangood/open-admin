@@ -1,13 +1,13 @@
 
 package io.admin.modules.system.dao;
 
-import io.admin.framework.data.specification.Spec;
-import io.admin.modules.system.enums.OrgType;
-import io.admin.modules.system.entity.SysOrg;
-import io.admin.common.utils.tree.TreeManager;
-import io.admin.framework.data.repository.BaseDao;
-import io.admin.framework.data.domain.BaseEntity;
 import cn.hutool.core.collection.CollectionUtil;
+import io.admin.common.utils.tree.TreeManager;
+import io.admin.framework.data.domain.BaseEntity;
+import io.admin.framework.data.repository.BaseDao;
+import io.admin.framework.data.specification.Spec;
+import io.admin.modules.system.entity.SysOrg;
+import io.admin.modules.system.enums.OrgType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;

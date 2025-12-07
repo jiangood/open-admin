@@ -1,8 +1,8 @@
 package io.admin.modules.system.service;
 
+import io.admin.framework.data.service.BaseService;
 import io.admin.modules.system.dao.SysManualDao;
 import io.admin.modules.system.entity.SysManual;
-import io.admin.framework.data.service.BaseService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

@@ -2,8 +2,8 @@
 package io.admin.modules.system.dao;
 
 
-import io.admin.modules.system.entity.SysConfig;
 import io.admin.framework.data.repository.BaseDao;
+import io.admin.modules.system.entity.SysConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

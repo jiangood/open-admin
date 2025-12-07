@@ -1,15 +1,14 @@
 package io.admin.modules.job.quartz;
 
-import io.admin.modules.job.entity.SysJob;
 import io.admin.framework.config.SysProperties;
 import io.admin.modules.job.dao.SysJobDao;
+import io.admin.modules.job.entity.SysJob;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Component;
-
-import jakarta.annotation.Resource;
 
 import java.util.List;
 

@@ -1,22 +1,14 @@
 package io.admin.modules.api.controller;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import io.admin.framework.config.argument.RequestBodyKeys;
-import io.admin.framework.config.security.HasPermission;
-import io.admin.modules.api.service.ApiResourceService;
-import io.admin.common.dto.table.Table;
-
 import io.admin.common.dto.AjaxResult;
+import io.admin.framework.config.security.HasPermission;
 import io.admin.modules.api.entity.ApiResource;
-import io.admin.common.dto.DropdownRequest;
+import io.admin.modules.api.service.ApiResourceService;
 import jakarta.annotation.Resource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

@@ -4,7 +4,6 @@ import io.admin.modules.system.service.SysDictService;
 import lombok.Data;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 @Data

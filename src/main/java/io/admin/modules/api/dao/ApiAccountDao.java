@@ -1,7 +1,7 @@
 package io.admin.modules.api.dao;
 
-import io.admin.modules.api.entity.ApiAccount;
 import io.admin.framework.data.repository.BaseDao;
+import io.admin.modules.api.entity.ApiAccount;
 import org.springframework.stereotype.Repository;
 
 @Repository

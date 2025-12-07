@@ -2,21 +2,20 @@
 package io.admin.modules.system.controller;
 
 import cn.hutool.core.util.StrUtil;
-import io.admin.common.dto.antd.TreeOption;
 import io.admin.common.dto.AjaxResult;
-import io.admin.common.utils.tree.TreeUtils;
 import io.admin.common.dto.antd.DropEvent;
+import io.admin.common.dto.antd.TreeOption;
+import io.admin.common.utils.tree.TreeUtils;
 import io.admin.common.utils.tree.drop.DropResult;
 import io.admin.common.utils.tree.drop.TreeDropUtils;
 import io.admin.framework.config.argument.RequestBodyKeys;
 import io.admin.framework.config.security.HasPermission;
 import io.admin.framework.config.security.refresh.PermissionStaleService;
-
 import io.admin.framework.data.specification.Spec;
 import io.admin.framework.log.Log;
 import io.admin.modules.common.LoginUtils;
-import io.admin.modules.system.enums.OrgType;
 import io.admin.modules.system.entity.SysOrg;
+import io.admin.modules.system.enums.OrgType;
 import io.admin.modules.system.service.SysOrgService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

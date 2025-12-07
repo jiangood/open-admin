@@ -1,16 +1,16 @@
 package io.admin.modules.api.init;
 
 import cn.hutool.core.util.StrUtil;
+import io.admin.common.utils.SpringUtils;
 import io.admin.modules.api.defaults.MathApi;
 import io.admin.modules.api.service.ApiResourceService;
-import io.admin.common.utils.SpringUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.Map;
 
 /***
  *

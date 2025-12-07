@@ -2,7 +2,6 @@
 package io.admin.modules.flowable.core.config;
 
 import io.admin.common.utils.IdUtils;
-
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.spring.SpringProcessEngineConfiguration;

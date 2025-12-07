@@ -1,10 +1,8 @@
 package io.admin.modules.job.dao;
 
+import io.admin.framework.data.repository.BaseDao;
 import io.admin.modules.job.entity.SysJob;
 import io.admin.modules.job.entity.SysJobExecuteRecord;
-import io.admin.framework.data.repository.BaseDao;
-
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

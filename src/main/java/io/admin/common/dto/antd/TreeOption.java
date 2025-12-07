@@ -2,7 +2,6 @@ package io.admin.common.dto.antd;
 
 // https://ant.design/components/tree-cn#treenode-props
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

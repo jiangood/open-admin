@@ -1,15 +1,14 @@
 
 package io.admin.modules.system.service;
 
-import io.admin.framework.config.data.sysmenu.MenuDefinition;
 import io.admin.common.utils.tree.TreeUtils;
+import io.admin.framework.config.data.sysmenu.MenuDefinition;
+import io.admin.framework.data.service.BaseService;
 import io.admin.modules.system.dao.SysMenuDao;
 import io.admin.modules.system.dao.SysRoleDao;
 import io.admin.modules.system.dao.SysUserDao;
 import io.admin.modules.system.entity.SysRole;
 import io.admin.modules.system.entity.SysUser;
-import io.admin.framework.data.service.BaseService;
-
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 系统角色service接口实现类

@@ -2,9 +2,6 @@ package io.admin.common.utils;
 
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.RandomUtil;
-import lombok.Getter;
-import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;

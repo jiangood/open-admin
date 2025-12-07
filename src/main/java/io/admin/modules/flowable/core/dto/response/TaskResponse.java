@@ -2,8 +2,6 @@ package io.admin.modules.flowable.core.dto.response;
 
 import lombok.Data;
 
-import java.util.Date;
-
 
 @Data
 public class TaskResponse {

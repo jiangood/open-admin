@@ -3,12 +3,11 @@ package io.admin.modules.system.entity;
 
 import io.admin.common.utils.annotation.Remark;
 import io.admin.framework.data.domain.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 
 
 @Remark("数据字典")

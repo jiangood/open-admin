@@ -1,6 +1,5 @@
 package io.admin.modules.system.dto.response;
 
-import io.admin.modules.system.entity.SysConfig;
 import lombok.Data;
 
 import java.util.ArrayList;

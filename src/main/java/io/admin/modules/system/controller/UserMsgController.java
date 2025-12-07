@@ -1,16 +1,19 @@
 package io.admin.modules.system.controller;
 
 
-import io.admin.modules.common.LoginUtils;
-import io.admin.modules.system.service.SysUserMessageService;
 import io.admin.common.dto.AjaxResult;
+import io.admin.modules.common.LoginUtils;
 import io.admin.modules.system.entity.SysUserMessage;
+import io.admin.modules.system.service.SysUserMessageService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.sql.SQLException;
 

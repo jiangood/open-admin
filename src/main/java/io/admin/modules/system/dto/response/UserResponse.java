@@ -1,7 +1,7 @@
 package io.admin.modules.system.dto.response;
 
-import io.admin.framework.data.domain.BaseDto;
 import io.admin.common.utils.annotation.Remark;
+import io.admin.framework.data.domain.BaseDto;
 import lombok.Data;
 
 import java.util.List;

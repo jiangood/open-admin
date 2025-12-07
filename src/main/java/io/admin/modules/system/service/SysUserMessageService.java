@@ -1,7 +1,6 @@
 package io.admin.modules.system.service;
 
 import io.admin.framework.data.service.BaseService;
-
 import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.dao.SysUserMessageDao;
 import io.admin.modules.system.entity.SysUser;

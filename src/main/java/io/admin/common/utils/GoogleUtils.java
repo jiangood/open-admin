@@ -3,8 +3,6 @@ package io.admin.common.utils;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
 
-import java.util.Map;
-
 public class GoogleUtils {
 
     // 使用谷歌工具类创建map,其中值为列表

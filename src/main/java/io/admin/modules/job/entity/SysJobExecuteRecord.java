@@ -1,14 +1,14 @@
 package io.admin.modules.job.entity;
 
-import io.admin.framework.data.domain.BaseEntity;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
+import io.admin.framework.data.domain.BaseEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import java.util.Date;
 
 @Entity

@@ -1,9 +1,8 @@
 package io.admin.modules.job.dao;
 
+import io.admin.framework.data.repository.BaseDao;
 import io.admin.framework.data.specification.Spec;
 import io.admin.modules.job.entity.SysJob;
-import io.admin.framework.data.repository.BaseDao;
-
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;

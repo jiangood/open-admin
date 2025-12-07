@@ -2,18 +2,17 @@
 package io.admin.modules.system.controller;
 
 
-
+import io.admin.common.dto.AjaxResult;
+import io.admin.framework.config.security.HasPermission;
 import io.admin.framework.log.Log;
 import io.admin.modules.system.dto.response.SysConfigResponse;
-import io.admin.modules.system.service.SysConfigService;
-import io.admin.framework.config.security.HasPermission;
-import io.admin.common.dto.AjaxResult;
 import io.admin.modules.system.entity.SysConfig;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.web.bind.annotation.*;
-
+import io.admin.modules.system.service.SysConfigService;
 import jakarta.annotation.Resource;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 

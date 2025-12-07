@@ -1,18 +1,19 @@
 package io.admin.modules.job.entity;
 
-import io.admin.common.utils.annotation.Remark;
-import io.admin.framework.data.domain.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.admin.common.utils.annotation.Remark;
 import io.admin.framework.data.DBConstants;
 import io.admin.framework.data.converter.ToMapConverter;
+import io.admin.framework.data.domain.BaseEntity;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.util.Assert;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
 
 @Remark("作业")
 @Getter

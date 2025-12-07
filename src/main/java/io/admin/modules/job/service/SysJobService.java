@@ -8,8 +8,6 @@ import io.admin.modules.job.entity.SysJobExecuteRecord;
 import io.admin.modules.job.quartz.QuartzManager;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
@@ -20,8 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service

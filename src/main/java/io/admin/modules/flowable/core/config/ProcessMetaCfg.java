@@ -7,12 +7,9 @@ import io.admin.common.utils.YmlUtils;
 import io.admin.modules.flowable.core.config.meta.ProcessMeta;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
-import org.apache.commons.lang3.ClassPathUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ResourceUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

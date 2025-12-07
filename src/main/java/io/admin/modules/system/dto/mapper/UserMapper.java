@@ -1,9 +1,9 @@
 package io.admin.modules.system.dto.mapper;
 
-import io.admin.modules.system.entity.SysRole;
-import io.admin.modules.system.entity.SysUser;
 import io.admin.modules.system.dao.SysOrgDao;
 import io.admin.modules.system.dto.response.UserResponse;
+import io.admin.modules.system.entity.SysRole;
+import io.admin.modules.system.entity.SysUser;
 import jakarta.annotation.Resource;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

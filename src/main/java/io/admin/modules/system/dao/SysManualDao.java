@@ -1,9 +1,8 @@
 package io.admin.modules.system.dao;
 
+import io.admin.framework.data.repository.BaseDao;
 import io.admin.framework.data.specification.Spec;
 import io.admin.modules.system.entity.SysManual;
-import io.admin.framework.data.repository.BaseDao;
-
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 

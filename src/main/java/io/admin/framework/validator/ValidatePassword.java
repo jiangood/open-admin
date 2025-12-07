@@ -2,11 +2,11 @@ package io.admin.framework.validator;
 
 import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.PasswdStrength;
-
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import jakarta.validation.Payload;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

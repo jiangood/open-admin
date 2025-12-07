@@ -3,13 +3,12 @@ package io.admin.modules.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.admin.framework.data.domain.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import lombok.experimental.FieldNameConstants;
 
 import java.util.Date;

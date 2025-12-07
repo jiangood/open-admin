@@ -4,7 +4,6 @@ package io.admin.modules.flowable.core.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.admin.common.utils.FriendlyUtils;
-import io.admin.common.utils.SpringUtils;
 import io.admin.modules.flowable.core.FlowableProperties;
 import io.admin.modules.flowable.core.dto.TaskHandleType;
 import io.admin.modules.flowable.core.dto.response.TaskResponse;
@@ -31,10 +30,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import java.awt.image.BufferedImage;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
