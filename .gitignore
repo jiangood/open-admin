@@ -310,3 +310,4 @@ build/
 /node_modules/.pnpm-workspace-state.json
 /.env
 .aider*
+/TODO.md
