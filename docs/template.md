@@ -1,6 +1,7 @@
 # 模板代码
 
 ## 实体类模板 (SysManual.java)
+存储路径：`src/main/java/io/admin/modules/system/entity/SysManual.java`
 
 ```java
 package io.admin.modules.system.entity;
@@ -47,6 +48,7 @@ public class SysManual extends BaseEntity {
 ```
 
 ## DAO类模板 (SysManualDao.java)
+存储路径：`src/main/java/io/admin/modules/system/dao/SysManualDao.java`
 
 ```java
 package io.admin.modules.system.dao;
@@ -71,6 +73,7 @@ public class SysManualDao extends BaseDao<SysManual> {
 ```
 
 ## Service类模板 (SysManualService.java)
+存储路径：`src/main/java/io/admin/modules/system/service/SysManualService.java`
 
 ```java
 package io.admin.modules.system.service;
@@ -102,6 +105,7 @@ public class SysManualService extends BaseService<SysManual> {
 ```
 
 ## Controller类模板 (SysManualController.java)
+存储路径：`src/main/java/io/admin/modules/system/controller/SysManualController.java`
 
 ```java
 package io.admin.modules.system.controller;
@@ -157,6 +161,7 @@ public class SysManualController {
 ```
 
 ## 前端页面模板 (index.jsx)
+存储路径：`web/src/pages/system/sysManual/index.jsx`
 
 ```jsx
 import {PlusOutlined} from '@ant-design/icons'
@@ -273,6 +278,7 @@ export default class extends React.Component {
 ```
 
 ## 菜单配置模板 (application-data.yml)
+存储路径：`src/main/resources/application-data.yml`
 
 ```yaml
 data:
@@ -288,5 +294,34 @@ data:
           name: 删除
         - perm: sysManual:save
           name: 保存
+```
+
+## 完整目录结构示例
+```
+项目根目录/
+├── src/
+│   └── main/
+│       ├── java/
+│       │   └── io/
+│       │       └── admin/
+│       │           └── modules/
+│       │               └── system/
+│       │                   ├── entity/
+│       │                   │   └── SysManual.java
+│       │                   ├── dao/
+│       │                   │   └── SysManualDao.java
+│       │                   ├── service/
+│       │                   │   └── SysManualService.java
+│       │                   └── controller/
+│       │                       └── SysManualController.java
+│       └── resources/
+│           ├── application-data.yml
+│           └── application.yml
+└── web/
+    └── src/
+        └── pages/
+            └── system/
+                └── sysManual/
+                    └── index.jsx
 ```
 
