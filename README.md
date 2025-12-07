@@ -646,17 +646,7 @@ export default class extends React.Component {
 
 ```yaml
 data:
-  configs:
-    - group-name: 学生管理配置
-      children:
-        - code: student.maxAge
-          name: 学生最大年龄
-          value-type: number
-          description: 系统中允许录入的最大学生年龄
-        - code: student.allowEdit
-          name: 允许编辑学生信息
-          value-type: boolean
-          description: 是否允许用户编辑学生信息
+ 
   menus:
     - id: student
       name: 学生管理
