@@ -253,7 +253,9 @@ public class JdbcUtils {
      */
     public <K, V> Map<K, V> findBeanMap(Class<V> cls, String sql, Object... params) {
         List<V> list = this.findAll(cls, sql, params);
-        if (list.isEmpty()) return Collections.emptyMap();
+        if (list.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
         Map<K, V> map = new LinkedHashMap<>();
         try {
@@ -281,7 +283,9 @@ public class JdbcUtils {
      */
     public <K> Map<K, Map<String, Object>> findMapKeyed(String sql, Object... params) {
         List<Map<String, Object>> list = this.findAllMap(sql, params);
-        if (list.isEmpty()) return Collections.emptyMap();
+        if (list.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
         return list.stream()
                 .filter(row -> !row.isEmpty())
