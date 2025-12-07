@@ -29,7 +29,6 @@ import java.util.function.Function;
 /**
  * 基础dao
  */
-@Transactional(readOnly = true)
 public abstract class BaseDao<T extends Persistable<String>> {
 
     // --- 1. 字段和资源注入 ---
