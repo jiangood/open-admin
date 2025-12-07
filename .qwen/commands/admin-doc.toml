@@ -63,7 +63,7 @@ prompt = """
 
 
 3 模板代码
-读取如下文件，生成代码模板，代码去掉注释，使用占位符替换实体，只保留通用部分
+读取如下文件，以学生为例生成通用代码模板，代码去掉注释，去掉多余空格、换行
 - src/main/java/io/admin/modules/system/entity/SysManual.java
 - src/main/java/io/admin/modules/system/dao/SysManualDao.java
 - src/main/java/io/admin/modules/system/service/SysManualService.java
