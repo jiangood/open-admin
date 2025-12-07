@@ -111,7 +111,7 @@ public class UserController {
     @HasPermission("user:view")
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
-        Spec<User> q = Spec.<User>of().orLike(searchText, User.Fields.name);
+        Spec<User> q = Spec.<User>of().orLike(searchText,"name");
 
         Page<User> page = service.findPageByRequest(q, pageable);
 
