@@ -7,6 +7,8 @@ import {StringUtils} from "../../utils";
 
 
 export class ProTable extends React.Component {
+
+
     state = {
         selectedRowKeys: [],
         selectedRows: [],
@@ -173,7 +175,7 @@ export class ProTable extends React.Component {
         if (!this.props.children) {
             return
         }
-        if (this.props.searchFormItemsRender) {
+        if (this.props["searchFormItemsRender"]) {
             throw new Error('不再支持 searchFormItemsRender，请直接放到ProTable的子节点')
         }
 
@@ -188,7 +190,9 @@ export class ProTable extends React.Component {
                         }
                     }}
                     style={{gap: '8px 0px'}}
-                    labelCol={{flex: '70px'}}
+                    labelCol={{flex: '80px'}}
+                    wrapperCol={{flex: '200px'}}
+                    className='search-form'
                 >
 
                     {this.props.children}
