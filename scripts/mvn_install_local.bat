@@ -1,7 +1,7 @@
 cd ../
 
 
-call mvnw clean install -DskipTests   -Drevision=0.0.6
+call mvnw clean install -DskipTests   -Drevision=0.0.7
 
 
 
