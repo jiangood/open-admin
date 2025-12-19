@@ -34,6 +34,7 @@ data:
     - name: 我的任务
       id: myFlowableTask
       path: /flowable/task
+      icon: scheduleoutlined
       seq: -1
       refresh-on-tab-click: true
       message-count-url: /admin/flowable/my/todoCount
