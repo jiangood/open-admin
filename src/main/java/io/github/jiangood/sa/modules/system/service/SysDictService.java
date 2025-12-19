@@ -28,6 +28,15 @@ public class SysDictService extends BaseService<SysDict> {
     @Resource
     private SysDictDao sysDictDao;
 
+    public String findText(String typeCode, String itemCode) {
+        SysDict dict = sysDictDao.findByCode(typeCode);
+        SysDictItem item = sysDictItemDao.findByDictAndCode(dict, itemCode);
+        if (item == null) {
+            return null;
+        }
+        return item.getText();
+    }
+
     /**
      * 初始一个数据字典
      * 先判断是否存在
