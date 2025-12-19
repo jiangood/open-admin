@@ -1,39 +1,33 @@
 package io.github.jiangood.sa.modules.system.dto.mapper;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.github.jiangood.sa.modules.system.dao.SysOrgDao;
 import io.github.jiangood.sa.modules.system.dto.response.UserResponse;
 import io.github.jiangood.sa.modules.system.entity.SysRole;
 import io.github.jiangood.sa.modules.system.entity.SysUser;
 import jakarta.annotation.Resource;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Set;
 
-@Mapper(componentModel = "spring")
-public abstract class UserMapper {
+@Component
+public class UserMapper {
 
     @Resource
     SysOrgDao orgDao;
 
 
-    @Mapping(target = "unitLabel", source = "unitId", qualifiedByName = "getOrgName")
-    @Mapping(target = "deptLabel", source = "deptId", qualifiedByName = "getOrgName")
-    @Mapping(target = "roleNames", source = "roles", qualifiedByName = "getRoleNames")
-    public abstract UserResponse toResponse(SysUser input);
-
-    public abstract List<UserResponse> toResponse(List<SysUser> input);
-
-    @Named("getOrgName")
-    protected String getOrgName(String orgId) {
-        return orgDao.getNameById(orgId);
+    public UserResponse toResponse(SysUser input) {
+        UserResponse r = new UserResponse();
+        BeanUtil.copyProperties(input, r);
+        r.setUnitLabel(orgDao.getNameById(input.getUnitId()));
+        r.setDeptLabel(orgDao.getNameById(input.getDeptId()));
+        r.setRoleNames(input.getRoles().stream().map(SysRole::getName).toList());
+        return r;
     }
 
-    @Named("getRoleNames")
-    protected List<String> getRoleNames(Set<SysRole> roles) {
-        return roles.stream().map(SysRole::getName).toList();
+    public List<UserResponse> toResponse(List<SysUser> list) {
+        return list.stream().map(this::toResponse).toList();
     }
 
 

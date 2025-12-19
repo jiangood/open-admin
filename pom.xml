@@ -46,7 +46,6 @@
         <doclint>none</doclint>
         <hutool.version>5.8.41</hutool.version>
         <poi.version>5.5.0</poi.version>
-        <mapstruct.version>1.6.3</mapstruct.version>
         <guava.version>33.5.0-jre</guava.version>
         <commons-io.version>2.21.0</commons-io.version>
     </properties>
@@ -91,20 +90,7 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
 
-        <!-- MapStruct -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct</artifactId>
-            <version>${mapstruct.version}</version> <!-- 使用最新版本 -->
-        </dependency>
 
-        <!-- MapStruct 注解处理器 -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>${mapstruct.version}</version> <!-- 与上面版本一致 -->
-            <scope>provided</scope>
-        </dependency>
 
         <!--验证码-->
         <!-- 图像处理滤镜 -->
@@ -385,25 +371,6 @@
                     <target>${compile.version}</target>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                     <encoding>UTF-8</encoding>
-
-
-                    <!-- 调整lombok和mapstruct的顺序，两者都会处理注解 -->
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.mapstruct</groupId>
-                            <artifactId>mapstruct-processor</artifactId>
-                            <version>${mapstruct.version}</version>
-                        </path>
-                        <path>
-                            <groupId>org.springframework.boot</groupId>
-                            <artifactId>spring-boot-configuration-processor</artifactId>
-                        </path>
-                    </annotationProcessorPaths>
                 </configuration>
             </plugin>
 
