@@ -184,6 +184,10 @@ public class DbTool {
         return list == null ? Collections.emptyList() : list;
     }
 
+    public <T> List<T> findAll(Class<T> cls, String sql, List<Object> params) {
+        return this.findAll(cls, sql, params.toArray());
+    }
+
     public List<Map<String, Object>> findAll(String sql, Object... params) {
         params = checkParam(params);
 
@@ -340,7 +344,7 @@ public class DbTool {
     }
 
     @SuppressWarnings("rawtypes")
-    private Object[] checkParam(Object... params) {
+    private Object[] checkParam(Object[] params) {
         if (params != null && params.length == 1) {
             Object object = params[0];
             if (object instanceof Collection col) {
