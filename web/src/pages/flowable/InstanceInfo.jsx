@@ -117,16 +117,18 @@ export default class InstanceInfo extends React.Component {
     renderForm = () => {
         const {data} = this.state
         const {processDefinitionKey, businessKey} = data
+        const formKey = this.props.formKey || processDefinitionKey;
+        const formName = formKey + 'Form'
 
-        let formKey = this.props.formKey || processDefinitionKey + 'Form';
-        let ExForm = FormRegistryUtils.get(formKey);
+        // let formKey = this.props.formKey || processDefinitionKey + 'Form';
+        let ExForm = FormRegistryUtils.get(formName);
         if (!ExForm) {
             return <div>
                 <p>
-                未注册表单，请注册表单 {formKey}。
+                    未注册表单，请注册表单 {formName}。
                 </p>
                 <Typography.Text>
-                    表单路径：src/forms/{formKey}.jsx
+                    表单路径：src/forms/{formName}.jsx
                 </Typography.Text>
                 </div>
         }

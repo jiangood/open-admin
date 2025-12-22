@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -158,7 +159,7 @@ public class MyFlowableController {
         HistoricProcessInstance instance = list.get(0);
 
 
-        Map<String, Object> data = BeanTool.copyToMap(HistoricProcessInstance.class, instance);
+        Map<String, Object> data = new HashMap<>();
 
         // 处理意见
         {
@@ -167,16 +168,12 @@ public class MyFlowableController {
             data.put("commentList", commentResults);
         }
 
-
         // 图片
         {
             BufferedImage image = flowableService.drawImage(instance.getId());
-
             String base64 = ImgTool.toBase64DataUri(image);
-
             data.put("img", base64);
         }
-
 
         {
             String instanceName = instance.getName();
@@ -192,6 +189,8 @@ public class MyFlowableController {
             List<CommentResponse> commentResults = processInstanceComments.stream().sorted(Comparator.comparing(Comment::getTime)).map(CommentResponse::new).collect(Collectors.toList());
 
             data.put("instanceCommentList", commentResults);
+            data.put("processDefinitionKey", instance.getProcessDefinitionKey());
+            data.put("businessKey", instance.getBusinessKey());
         }
 
         return AjaxResult.ok().data(data);
