@@ -60,7 +60,7 @@ public class FlowableManagerImpl implements FlowableManager {
                 .processDefinitionKey(key).active()
                 .latestVersion()
                 .singleResult();
-        Assert.notNull(def, "流程部署");
+        Assert.notNull(def, "流程尚未部署，请设计后部署");
 
 
         if (title == null) {
