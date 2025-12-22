@@ -173,8 +173,13 @@ public class ModelController {
     public AjaxResult formOptions(String code) {
         ProcessMeta meta = metaCfg.getMeta(code);
         List<FormDefinition> formList = meta.getForms();
+        if (formList == null) {
+            formList = new ArrayList<>();
+        }
 
-        return AjaxResult.ok().data(formList);
+        List<Option> options = Option.convertList(formList, FormDefinition::getKey, FormDefinition::getLabel);
+
+        return AjaxResult.ok().data(options);
     }
 
     @GetMapping("assigneeOptions")
