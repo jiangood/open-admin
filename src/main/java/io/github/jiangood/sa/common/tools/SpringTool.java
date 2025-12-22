@@ -3,6 +3,7 @@ package io.github.jiangood.sa.common.tools;
 
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.extra.spring.SpringUtil;
+import io.github.jiangood.sa.BasePackage;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -46,21 +47,22 @@ public class SpringTool extends SpringUtil implements ApplicationContextAware {
      * @return
      */
     public static Set<Class<?>> getBasePackageClasses() {
-        Set<Class<?>> clss = new HashSet<>();
+        Set<Class<?>> list = new HashSet<>();
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
             Class<?> beanType = applicationContext.getType(beanName);
             SpringBootApplication springBootAnnotation = beanType.getAnnotation(SpringBootApplication.class);
             if (springBootAnnotation != null) {
-                clss.add(beanType);
+                list.add(beanType);
             }
             ComponentScan componentScanAnnotation = beanType.getAnnotation(ComponentScan.class);
             if (componentScanAnnotation != null) {
                 Class<?>[] basePackageClasses = componentScanAnnotation.basePackageClasses();
-                clss.addAll(Arrays.asList(basePackageClasses));
+                list.addAll(Arrays.asList(basePackageClasses));
             }
         }
-        return clss;
+        list.add(BasePackage.class);
+        return list;
     }
 
 

@@ -196,11 +196,11 @@ export class ProTable extends React.Component {
                 >
 
                     {this.props.children}
-
-                    <Form.Item style={{marginLeft: this.props.children.length > 2 ? 'auto' : 'inherit'}}>
+                    <div style={{marginLeft: '16px'}}>
                         <Button type='primary' htmlType="submit" icon={<SearchOutlined/>}> 查询
                         </Button>
-                    </Form.Item>
+                    </div>
+
                 </Form>
         </div>;
     };
