@@ -6,6 +6,9 @@ export default class extends React.Component {
 
     state = {}
 
+    componentDidMount() {
+    }
+
     render() {
 
         return <Card>

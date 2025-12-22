@@ -5,12 +5,7 @@ import {ConfigProvider} from "antd";
 
 import {Outlet, withRouter} from "umi";
 import zhCN from 'antd/locale/zh_CN';
-import {
-    ArrUtils,
-    HttpUtils,
-    PageLoading, PageUtils,
-    SysUtils, ThemeUtils,
-} from "../framework";
+import {ArrUtils, HttpUtils, PageLoading, PageUtils, SysUtils, ThemeUtils,} from "../framework";
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 
@@ -82,24 +77,6 @@ class _Layouts extends React.Component {
 
 
 
-    renderContent = () => {
-        if (this.state.siteInfoLoading) {
-            return <PageLoading message='加载站点信息...'/>
-        }
-        let {params = {}} = this.props.location;
-        console.log('layout: params', params)
-        let simple = this.isSimplePage();
-        if (simple || params.hasOwnProperty('_noLayout')) {
-            return <Outlet/>
-        }
-
-        if (!this.state.loginInfoFinish) {
-            return <PageLoading message='加载登录信息...'/>
-        }
-
-
-        return <AdminLayout path={this.state.path} logo={this.props.logo}/>
-    };
 
 
     render() {
@@ -146,7 +123,28 @@ class _Layouts extends React.Component {
         </ConfigProvider>
     }
 
+    renderContent = () => {
+        if (this.state.siteInfoLoading) {
+            return <PageLoading message='加载站点信息...'/>
+        }
+        let {params = {}} = this.props.location;
+        console.log('layout: params', params)
+        let simple = this.isSimplePage();
+        if (simple || params.hasOwnProperty('_noLayout')) {
+            return <Outlet/>
+        }
 
+        if (!this.state.loginInfoFinish) {
+            return <PageLoading message='加载登录信息...'/>
+        }
+
+
+        return <AdminLayout path={this.state.path} logo={this.props.logo}/>
+    };
+
+    renderMessages = () => {
+
+    };
 
 }
 
