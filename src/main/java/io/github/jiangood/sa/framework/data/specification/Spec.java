@@ -395,12 +395,5 @@ public class Spec<T> implements Specification<T> {
         return cb.and(predicates);
     }
 
-    // ---------------------- 最终构建 (AND 连接) ----------------------
-
-    /**
-     * 定义支持的操作符，消除魔术字符串，提高可读性和类型安全。
-     */
-
-
 
 }
