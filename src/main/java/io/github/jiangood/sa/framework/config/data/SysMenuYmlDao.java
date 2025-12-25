@@ -10,10 +10,8 @@ import io.github.jiangood.sa.common.tools.YmlTool;
 import io.github.jiangood.sa.common.tools.tree.TreeTool;
 import io.github.jiangood.sa.framework.config.data.dto.MenuDefinition;
 import jakarta.annotation.PostConstruct;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,19 +21,22 @@ import java.util.*;
 public class SysMenuYmlDao {
     private static final String MENU_CONFIG_PATTERN = "config/application-data*.yml";
 
-    private List<MenuDefinition> menus = new ArrayList<>();
 
+    // 缓存解析结果json，节省空间的同时，方便反序列化
+    private String menuJson = null;
 
     public List<MenuDefinition> findAll() {
-        return JsonTool.clone(menus);
+        return JsonTool.jsonToBeanListQuietly(menuJson, MenuDefinition.class);
     }
 
 
     @PostConstruct
     public void init() throws IOException {
         String[] resources = ResourceTool.readAll(MENU_CONFIG_PATTERN);
+        List<MenuDefinition> menus = new ArrayList<>();
         for (String configFile : resources) {
-            DataProperties cur =YmlTool.parseYml(configFile, DataProperties.class, "data");;
+            DataProperties cur = YmlTool.parseYml(configFile, DataProperties.class, "data");
+            ;
 
 
             // 菜单打平，方便后续合并
@@ -49,13 +50,14 @@ public class SysMenuYmlDao {
             menus.addAll(flatList);
         }
 
-        this.mergeMenu();
+        List<MenuDefinition> result = this.mergeMenu(menus);
+        this.menuJson = JsonTool.toJson(result);
     }
 
     // 多个文件中同时定义，进行合并
-    private void mergeMenu() {
+    private List<MenuDefinition> mergeMenu(List<MenuDefinition> menus) {
         Multimap<String, MenuDefinition> multimap = LinkedHashMultimap.create();
-        for (MenuDefinition menuDefinition : this.menus) {
+        for (MenuDefinition menuDefinition : menus) {
             menuDefinition.setChildren(null);
             multimap.put(menuDefinition.getId(), menuDefinition);
         }
@@ -85,7 +87,7 @@ public class SysMenuYmlDao {
             }
         }
 
-        this.menus = Collections.unmodifiableList(targetList);
+        return targetList;
     }
 
 }
