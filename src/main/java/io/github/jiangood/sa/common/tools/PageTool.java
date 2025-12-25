@@ -21,6 +21,17 @@ public class PageTool {
     }
 
     /**
+     * 增加合计数据
+     * @param page
+     * @param summary
+     * @return
+     * @param <T>
+     */
+    public static <T> Page<T> addSummary(Page<T> page, String summary) {
+        return addExtraData(page,"summary", summary);
+    }
+
+    /**
      * 添加额外的数据
      *
      * @param page
@@ -38,6 +49,8 @@ public class PageTool {
         ext.putExtData(key, value);
         return ext;
     }
+
+
 
     public static <T>  PageExt<T> getExt(Page<T> page) {
         return page instanceof PageExt<T> pageExt ? pageExt : PageExt.of(page);
