@@ -31,6 +31,23 @@ public class ResourceTool {
         return resources;
     }
 
+    @SneakyThrows
+    public static String[] readAll(String path)  {
+        Resource[] resources = findAll(path);
+        sort(resources);
+        String[] arr = new String[resources.length];
+        for (int i = 0; i < resources.length; i++) {
+            Resource r = resources[i];
+            InputStream is = r.getInputStream();
+
+            String body = IOUtils.toString(is, StandardCharsets.UTF_8);
+            arr[i] = body;
+            IOUtils.closeQuietly(is);
+        }
+
+        return arr;
+    }
+
     /**
      * 按依赖程度排序， 本框架排前，因为项目排后
      *
@@ -96,14 +113,4 @@ public class ResourceTool {
         return new ClassPathResource(path);
     }
 
-    public static String readString(String path) throws IOException {
-        Resource r = findOne(path);
-        InputStream is = r.getInputStream();
-
-        String body = IOUtils.toString(is, StandardCharsets.UTF_8);
-
-        IOUtils.closeQuietly(is);
-
-        return body;
-    }
 }

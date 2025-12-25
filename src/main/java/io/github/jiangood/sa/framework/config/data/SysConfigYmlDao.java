@@ -4,14 +4,11 @@ import io.github.jiangood.sa.common.tools.ResourceTool;
 import io.github.jiangood.sa.common.tools.YmlTool;
 import io.github.jiangood.sa.framework.config.data.dto.ConfigGroupDefinition;
 import jakarta.annotation.PostConstruct;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,24 +27,15 @@ public class SysConfigYmlDao {
 
     @PostConstruct
     public void init() throws IOException {
-        Resource[] resources = ResourceTool.findAll(MENU_CONFIG_PATTERN);
-        ResourceTool.sort(resources);
-
-        log.info("找到 {} 个数据文件", resources.length);
-        log.info("数据文件列表: {}", Arrays.toString(resources));
-
-        for (Resource configFile : resources) {
-            log.info("处理数据文件 {}", configFile.getFilename());
-            DataProperties cur = this.parseResource(configFile);
+        String[] ymls = ResourceTool.readAll(MENU_CONFIG_PATTERN);
+        for (String yml : ymls) {
+            DataProperties cur = YmlTool.parseYml(yml, DataProperties.class, "data");
             configs.addAll(cur.getConfigs());
         }
     }
 
 
-    @SneakyThrows
-    private DataProperties parseResource(Resource resource) {
-        return YmlTool.parseYml(resource.getInputStream(), DataProperties.class, "data");
-    }
+
 
 
 }

@@ -33,11 +33,9 @@ public class SysMenuYmlDao {
 
     @PostConstruct
     public void init() throws IOException {
-        Resource[] resources = ResourceTool.findAll(MENU_CONFIG_PATTERN);
-        ResourceTool.sort(resources);
-        for (Resource configFile : resources) {
-            log.info("处理数据文件 {}", configFile.getFilename());
-            DataProperties cur = this.parseResource(configFile);
+        String[] resources = ResourceTool.readAll(MENU_CONFIG_PATTERN);
+        for (String configFile : resources) {
+            DataProperties cur =YmlTool.parseYml(configFile, DataProperties.class, "data");;
 
 
             // 菜单打平，方便后续合并
@@ -85,18 +83,9 @@ public class SysMenuYmlDao {
             if (menuDefinition.getSeq() == null) {
                 menuDefinition.setSeq(i);
             }
-
         }
-
 
         this.menus = Collections.unmodifiableList(targetList);
     }
-
-
-    @SneakyThrows
-    private DataProperties parseResource(Resource resource) {
-        return YmlTool.parseYml(resource.getInputStream(), DataProperties.class, "data");
-    }
-
 
 }
