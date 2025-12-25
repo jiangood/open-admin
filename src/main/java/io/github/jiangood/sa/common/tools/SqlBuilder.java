@@ -20,6 +20,9 @@ public class SqlBuilder {
         sb.append(sql);
         Collections.addAll(params, sqlParams);
     }
+    public void addParams(Object... sqlParams) {
+        Collections.addAll(params, sqlParams);
+    }
 
     public String getSql() {
         return sb.toString();
