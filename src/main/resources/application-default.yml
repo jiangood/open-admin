@@ -32,8 +32,6 @@ spring:
   cache:
     type: simple
 logging:
-  charset:
-    console: UTF-8
   pattern:
     dateformat: yyyy-MM-dd HH:mm:ss
   file:

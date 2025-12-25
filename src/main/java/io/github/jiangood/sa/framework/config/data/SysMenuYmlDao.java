@@ -37,6 +37,7 @@ public class SysMenuYmlDao {
         ResourceTool.sort(resources);
         for (Resource configFile : resources) {
             log.info("处理数据文件 {}", configFile.getFilename());
+            System.out.println("测试中文");
             DataProperties cur = this.parseResource(configFile);
 
 
