@@ -1,4 +1,4 @@
-package io.github.jiangood.sa.common.tools;
+package io.github.jiangood.sa.common.tools.db;
 
 
 import cn.hutool.core.map.CaseInsensitiveLinkedMap;

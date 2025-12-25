@@ -1,7 +1,7 @@
 package io.github.jiangood.sa.framework.config;
 
 
-import io.github.jiangood.sa.common.tools.DbTool;
+import io.github.jiangood.sa.common.tools.db.DbTool;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
