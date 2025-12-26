@@ -15,6 +15,6 @@ export class ViewBooleanEnableDisable extends React.Component<ViewBooleanEnableD
             return null;
         }
 
-        return value ? <Tag color={"green"}>启动</Tag> : <Tag color={"red"}>禁用</Tag>;
+        return value ? <Tag color={"green"}>启用</Tag> : <Tag color={"red"}>禁用</Tag>;
     }
 }
