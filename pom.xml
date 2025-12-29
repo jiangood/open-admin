@@ -214,7 +214,7 @@
         <dependency>
             <groupId>io.github.jiangood</groupId>
             <artifactId>ureport-console</artifactId>
-            <version>1.0.4</version>
+            <version>1.0.5</version>
         </dependency>
         <dependency>
             <groupId>org.flowable</groupId>
