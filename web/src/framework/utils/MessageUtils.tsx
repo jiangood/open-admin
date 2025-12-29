@@ -1,4 +1,4 @@
-import {Input, message, Modal} from 'antd';
+import {Input, InputNumber, message, Modal} from 'antd';
 import type {ModalFuncProps} from 'antd/es/modal/interface';
 import React from 'react';
 import {MessageInstance} from "antd/lib/message/interface";
@@ -44,9 +44,10 @@ export class MessageUtils {
     }
 
     /**
-     * 弹出 Prompt 输入框对话框
+     * 弹出 Prompt 输入框对话框, 如果默认值是数字, 则使用 InputNumber 输入框
      */
-    static prompt(message: React.ReactNode, initialValue?: string, placeholder?: string, config?: Omit<ModalFuncProps, 'content' | 'title' | 'icon' | 'onOk'>) {
+    static prompt(message: React.ReactNode, initialValue?: string|number, placeholder?: string, config?: Omit<ModalFuncProps, 'content' | 'title' | 'icon' | 'onOk'>) {
+        const isNumber = typeof initialValue === 'number';
         return new Promise((resolve) => {
             const ref = React.createRef()
             this.modalApi.confirm({
@@ -54,7 +55,7 @@ export class MessageUtils {
                 title: '提示',
                 content: <div>
                     <div style={{marginBottom: 4}}>{message}</div>
-                    <Input ref={ref} placeholder={placeholder}/>
+                    {isNumber ? <InputNumber value={initialValue} placeholder={placeholder}/> : <Input ref={ref} placeholder={placeholder}/>}
                 </div>,
                 okText: '确定',
                 cancelText: '取消',
