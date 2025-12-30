@@ -1,8 +1,10 @@
 package io.github.jiangood.sa.modules.flowable.admin.controller;
 
+import cn.hutool.core.lang.Dict;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.github.jiangood.sa.common.dto.AjaxResult;
 import io.github.jiangood.sa.common.dto.antd.Option;
+import io.github.jiangood.sa.common.tools.PageTool;
 import io.github.jiangood.sa.common.tools.SpringTool;
 import io.github.jiangood.sa.common.tools.annotation.RemarkTool;
 import io.github.jiangood.sa.framework.config.security.HasPermission;
@@ -17,6 +19,7 @@ import io.github.jiangood.sa.modules.system.entity.SysRole;
 import io.github.jiangood.sa.modules.system.entity.SysUser;
 import io.github.jiangood.sa.modules.system.service.SysRoleService;
 import io.github.jiangood.sa.modules.system.service.SysUserService;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.flowable.bpmn.model.BpmnModel;
@@ -97,6 +100,7 @@ public class ModelController {
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);
         data.put("name", model.getName());
+        data.put("key",model.getKey());
         data.put("content", new String(source, StandardCharsets.UTF_8));
 
         return AjaxResult.ok().data(data);
@@ -240,13 +244,21 @@ public class ModelController {
         ProcessMeta meta = metaCfg.getMeta(code);
         return AjaxResult.ok().data(meta.getVariables());
     }
-    @GetMapping("definationPage")
-    public AjaxResult definationPage(String code,Pageable pageable) {
-        ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery().processDefinitionKey(code).orderByProcessDefinitionVersion();
+    @GetMapping("definitionPage")
+    public AjaxResult definitionPage( String key, Pageable pageable) {
+        Assert.notNull(key,"编码不能为空");
+        ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery().processDefinitionKey(key)
+                .orderByProcessDefinitionVersion().desc();
 
         Page<ProcessDefinition> page = FlowablePageTool.page(query, pageable);
+        Page<Dict> page2 = PageTool.convert(page, d -> Dict.create()
+                .set("key", d.getKey())
+                .set("name", d.getName())
+                .set("version",d.getVersion())
+        );
 
-        return AjaxResult.ok().data(page);
+
+        return AjaxResult.ok().data(page2);
     }
 
 

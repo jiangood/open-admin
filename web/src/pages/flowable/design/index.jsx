@@ -105,7 +105,9 @@ export default class extends React.Component {
                          <Button
                              onClick={() => PageUtils.open('/flowable/test?id=' + this.state.id, "流程测试")}> 测试 </Button>
 
-                         <Button title='查看已部署的历史版本'>当前版本</Button>
+                         <Button title='查看已部署的历史版本' onClick={()=>{
+                             this.setState({deployedModal:true})
+                         }}>当前版本</Button>
                      </Space>}>
 
 
@@ -120,15 +122,27 @@ export default class extends React.Component {
             </Splitter>
 
 
-            <Modal title='已部署版本' width={800} footer={null} onCancel={() => this.setState({deployedModal: false})}>
+            <Modal title='已部署版本' width={800} footer={null}
+                   open={this.state.deployedModal}
+                   destroyOnHidden
+                   onCancel={() => this.setState({deployedModal: false})}>
 
                 <ProTable columns={[
+                    {
+                        dataIndex: 'key',
+                        title: '编码'
+                    },
+                    {
+                        dataIndex: 'name',
+                        title: '名称'
+                    },
                     {
                         dataIndex: 'version',
                         title: '版本号'
                     }
                 ]} request={params => {
-                    HttpUtils.get('admin/flowable/model/definationPage')
+                    params.key = this.state.model.key
+                   return  HttpUtils.get('admin/flowable/model/definitionPage',params)
                 }}>
 
                 </ProTable>
