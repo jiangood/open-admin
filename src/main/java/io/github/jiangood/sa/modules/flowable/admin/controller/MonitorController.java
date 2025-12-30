@@ -15,9 +15,11 @@ import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.repository.ProcessDefinitionQuery;
+import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.runtime.ProcessInstanceQuery;
 import org.flowable.task.api.Task;
+import org.flowable.task.api.TaskInfo;
 import org.flowable.task.api.TaskQuery;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -26,10 +28,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 流程监控
@@ -159,6 +159,11 @@ public class MonitorController {
         query.orderByTaskCreateTime().desc();
         List<Task> list = query.list();
 
+        Set<String> instanceIds = list.stream().map(TaskInfo::getProcessInstanceId).collect(Collectors.toSet());
+        List<ProcessInstance> processInstanceList = runtimeService.createProcessInstanceQuery().active().processInstanceIds(instanceIds).list();
+        Map<String, String> idName = processInstanceList.stream().collect(Collectors.toMap(Execution::getId, ProcessInstance::getName));
+
+
         List<MonitorTaskResponse> responseList = list.stream().map(t -> {
             MonitorTaskResponse r = new MonitorTaskResponse();
             r.setId(t.getId());
@@ -166,11 +171,13 @@ public class MonitorController {
             r.setTaskDefinitionKey(t.getTaskDefinitionKey());
             r.setProcessDefinitionId(t.getProcessDefinitionId());
             r.setProcessInstanceId(t.getProcessInstanceId());
+            r.setProcessInstanceName(idName.get(t.getProcessInstanceId()));
             r.setAssignee(t.getAssignee());
             r.setAssigneeLabel(sysUserService.getNameById(t.getAssignee()));
             r.setExecutionId(t.getExecutionId());
             r.setStartTime(t.getCreateTime());
             r.setTenantId(t.getTenantId());
+
 
             return r;
         }).toList();

@@ -45,7 +45,10 @@ export default class extends React.Component {
                         dataIndex: 'processInstanceId',
                         title: '实例'
                     },
-
+                    {
+                        dataIndex: 'processInstanceName',
+                        title: '实例名称'
+                    },
 
                     {
                         dataIndex: 'assigneeLabel',

@@ -16,6 +16,7 @@ public class MonitorTaskResponse {
     private String taskDefinitionKey;
     private String processDefinitionId;
     private String processInstanceId;
+    private String processInstanceName;
 
     private String assignee;
     private String assigneeLabel;
