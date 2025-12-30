@@ -70,7 +70,7 @@ public class Spec<T> implements Specification<T> {
     }
 
     public Spec<T> selectFnc(AggregateFunctionType type, String field) {
-        String alias = type.name().toLowerCase() + "_" + field;
+        String alias =  field;
         return this.selectFnc(type, field, alias);
     }
 
