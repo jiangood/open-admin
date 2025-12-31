@@ -1,5 +1,6 @@
 import {DictUtils} from "../utils";
 import {Tag} from "antd";
+import {ViewStringProps} from "./ViewProps";
 
 interface ViewProps {
     value: String;
@@ -10,7 +11,7 @@ interface ViewProps {
  * @param props
  * @constructor
  */
-export function ViewApproveStatus(props:ViewProps) {
+export function ViewApproveStatus(props:ViewStringProps) {
     let {value} = props;
     let txt=   DictUtils.dictLabel('approveStatus', value)
 
