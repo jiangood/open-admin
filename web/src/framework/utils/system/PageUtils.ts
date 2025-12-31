@@ -1,6 +1,7 @@
 import {history} from "umi";
 import {StringUtils} from "../StringUtils";
 import {UrlUtils} from "../UrlUtils";
+import {MessageUtils} from "@/framework";
 
 /**
  * 页面相关的工具类，主要用于路由、URL参数和页面跳转操作。
@@ -152,10 +153,11 @@ export class PageUtils {
         document.dispatchEvent(event);
     }
 
-    static closeCurrentAndOpenMenu(path:string,label:string){
-        this.closeCurrent()
-        this.open(path,label)
+    static closeCurrentAndOpenPage(alertMessage:string,path:string,label:string){
+        MessageUtils.alert(alertMessage).then(()=>{
+            this.closeCurrent()
+            this.open(path,label)
+        })
     }
-
 
 }
