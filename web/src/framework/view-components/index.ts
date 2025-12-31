@@ -2,3 +2,4 @@
 export * from './ViewPassword';
 export * from './ViewBoolean';
 export * from './ViewApproveStatus'
+export * from './ViewFlowableInstanceProgress'
