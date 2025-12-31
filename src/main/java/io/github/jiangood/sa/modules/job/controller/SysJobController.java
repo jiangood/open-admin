@@ -23,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -44,13 +45,13 @@ public class SysJobController {
     private QuartzManager quartzService;
 
 
-    @PreAuthorize("hasAuthority('job:view")
+    @PreAuthorize("hasAuthority('job:view')")
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws SchedulerException {
         return AjaxResult.ok().data(service.page(searchText, pageable));
     }
 
-    @PreAuthorize("hasAuthority('job:save")
+    @PreAuthorize("hasAuthority('job:save')")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysJob param, RequestBodyKeys updateFields) throws Exception {
         Class.forName(param.getJobClass());
@@ -67,7 +68,7 @@ public class SysJobController {
 
 
     @Log("作业-执行一次")
-    @PreAuthorize("hasAuthority('job:triggerJob")
+    @PreAuthorize("hasAuthority('job:triggerJob')")
     @GetMapping("triggerJob")
     public AjaxResult triggerJob(String id) throws SchedulerException, ClassNotFoundException {
         SysJob job = service.findByRequest(id);
@@ -161,7 +162,7 @@ public class SysJobController {
     }
 
 
-    @PreAuthorize("hasAuthority('job:view")
+    @PreAuthorize("hasAuthority('job:view')")
     @RequestMapping("status")
     public AjaxResult info() throws SchedulerException {
         SchedulerMetaData meta = scheduler.getMetaData();
