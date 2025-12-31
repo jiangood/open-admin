@@ -212,10 +212,13 @@ public class SysUserService extends BaseService<SysUser> {
     public Set<String> getUserPerms(String id) {
         SysUser user = sysUserDao.findOne(id);
 
+        log.info("获取用户权限:{}", user.getName());
         Set<String> result = new TreeSet<>();
         for (SysRole role : user.getRoles()) {
             // 添加角色，格式必须以 ROLE_ 开头，如 ROLE_ADMIN
-            result.add("ROLE_" + role.getCode());
+            String rolePerm = "ROLE_" + role.getCode();
+            result.add(rolePerm);
+            log.info("角色权限 {}", rolePerm);
 
             if(role.isAdmin()){
                 List<MenuDefinition> menus = sysMenuDao.findAll();
@@ -223,10 +226,13 @@ public class SysUserService extends BaseService<SysUser> {
                     List<String> perms = menu.getPermCodes();
                     CollUtil.addAll(result, perms);
                 }
+                log.info("超级管理员，具备所有角色功能权限");
             }else {
                 List<String> rolePerms = role.getPerms();
                 CollUtil.addAll(result, rolePerms);
+                log.info("角色功能权限 {}", rolePerms);
             }
+
         }
 
         // 机构权限
