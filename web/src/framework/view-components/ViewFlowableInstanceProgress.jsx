@@ -2,12 +2,19 @@ import React from "react";
 import {Button, Card, Empty, Modal, Skeleton, Table, Tabs, Typography} from "antd";
 
 import {FormOutlined, ShareAltOutlined} from "@ant-design/icons";
-import {FormRegistryUtils, Gap, HttpUtils, MessageUtils, ViewInstanceProgress} from "../../framework";
+import {
+    FormRegistryUtils,
+    Gap,
+    HttpUtils,
+    MessageUtils,
+    ViewFlowableInstanceProgress,
+    ViewInstanceProgress
+} from "../../framework";
 
 /**
  * 查看流程处理情况（不含表单）
  */
-export class ViewFlowableInstanceProgress extends React.Component {
+export class ViewFlowableInstanceProgressProgress extends React.Component {
 
     state = {
         instanceCommentList: [],
@@ -97,7 +104,7 @@ export class ViewFlowableInstanceProgress extends React.Component {
 
 }
 
-export class ViewInstanceProgressButton extends React.Component{
+export class ViewFlowableInstanceProgressButton extends React.Component{
     state = {
         open:false,
     }

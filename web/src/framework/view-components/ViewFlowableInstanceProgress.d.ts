@@ -1,16 +1,14 @@
 // @ts-ignore
 import React from "react";
+import {ViewProps, ViewStringProps} from "./ViewProps";
 
 
-declare type ViewInstanceProgressProps = {
-    /**
-     * 业务标识businessKey
-     */
-    value: String;
+
+/**
+ * 业务标识businessKey
+ */
+export class ViewFlowableInstanceProgress extends React.Component<ViewStringProps, any> {
 }
 
-export class ViewInstanceProgress extends React.Component<ViewInstanceProgressProps, any> {
-}
-
-export class ViewInstanceProgressButton extends React.Component<ViewInstanceProgressProps, any> {
+export class ViewFlowableInstanceProgressButton extends React.Component<ViewStringProps, any> {
 }
