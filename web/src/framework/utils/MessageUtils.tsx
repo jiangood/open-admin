@@ -17,11 +17,14 @@ export class MessageUtils {
      */
     static alert(content: any, config?: Omit<ModalFuncProps, 'content' | 'icon' | 'onOk' | 'onCancel'>) {
         return new Promise(resolve => {
-            this.modalApi.info({
+           this.modalApi.info({
                 title: '提示',
                 content,
                 okText: '确定',
-                onOk: resolve,
+                onOk: (close)=>{
+                    close()
+                    resolve()
+                },
                 icon: null,
                 ...config,
             });
