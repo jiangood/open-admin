@@ -60,8 +60,8 @@ data:
           name: 角色管理
           path: /system/role
           icon: IdcardOutlined
-          perm-names: [ 保存 ]
-          perm-codes: [ sysRole:save ]
+          perm-names: [ 管理 ]
+          perm-codes: [ sysRole:manage ]
         - id: sysManual
           name: 操作手册
           path: /system/sysManual

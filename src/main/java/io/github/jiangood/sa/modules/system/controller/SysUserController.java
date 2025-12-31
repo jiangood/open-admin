@@ -205,7 +205,7 @@ public class SysUserController {
 
         permissionStaleService.markUserStale(sysUser.getAccount());
 
-        return AjaxResult.ok();
+        return AjaxResult.ok().msg("授权成功");
     }
 
     /**

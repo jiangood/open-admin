@@ -48,7 +48,7 @@ public class SysRoleController {
     @Resource
     private PermissionStaleService permissionStaleService;
 
-    @PreAuthorize("hasAuthority('role:view')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("page")
     public AjaxResult page(@PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysRole> q = Spec.of();
@@ -57,7 +57,7 @@ public class SysRoleController {
     }
 
 
-    @PreAuthorize("hasAuthority('role:delete')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("delete")
     public AjaxResult delete(String id) {
         sysRoleService.deleteByRequest(id);
@@ -68,7 +68,7 @@ public class SysRoleController {
     /**
      * 添加系统角色
      */
-    @PreAuthorize("hasAuthority('sysRole:save')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysRole role, RequestBodyKeys updateFields) throws Exception {
         role.setBuiltin(false);
@@ -98,7 +98,7 @@ public class SysRoleController {
         return AjaxResult.ok().data(treeList);
     }
 
-    @PreAuthorize("hasAuthority('sysRole:save')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("ownPerms")
     public AjaxResult ownPerms(String id) {
         SysRole role = sysRoleService.findByRequest(id);
@@ -127,7 +127,7 @@ public class SysRoleController {
      *
      * @return
      */
-    @PreAuthorize("hasAuthority('sysRole:save')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("permTreeTable")
     public AjaxResult menuTree() {
         List<MenuDefinition> tree = sysMenuService.menuTree();
@@ -135,7 +135,7 @@ public class SysRoleController {
         return AjaxResult.ok().data(tree);
     }
 
-    @PreAuthorize("hasAuthority('sysRole:save')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("savePerms")
     public AjaxResult savePerms(@RequestBody SaveRolePermRequest request) {
         SysRole sysRole = sysRoleService.savePerms(request.getId(), request.getPerms(), request.getMenus());
@@ -146,7 +146,7 @@ public class SysRoleController {
     }
 
 
-    @PreAuthorize("hasAuthority('sysRole:save')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("userList")
     public AjaxResult userList(String id) {
         List<SysUser> users = sysUserService.findAll();
@@ -162,7 +162,7 @@ public class SysRoleController {
         return AjaxResult.ok().data(data);
     }
 
-    @PreAuthorize("hasAuthority('sysRole:view')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @GetMapping("get")
     public AjaxResult get(String id) {
         SysRole role = sysRoleService.findByRequest(id);
@@ -170,7 +170,7 @@ public class SysRoleController {
     }
 
 
-    @PreAuthorize("hasAuthority('sysRole:save')")
+    @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("grantUsers")
     public AjaxResult saveUserList(@RequestBody GrantUserToRoleRequest request) {
         SysRole sysRole = sysRoleService.grantUsers(request.getId(), request.getUserIdList());
