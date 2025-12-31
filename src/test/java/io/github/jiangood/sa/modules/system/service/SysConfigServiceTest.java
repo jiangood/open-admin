@@ -27,9 +27,6 @@ public class SysConfigServiceTest {
     @Mock
     private Environment env;
 
-    @Mock
-    private SysProperties sysProperties;
-
     @InjectMocks
     private SysConfigService sysConfigService;
 
