@@ -1,5 +1,5 @@
 cd ../
-set  "tag_name=v0.0.9"
+set  "tag_name=v0.1.0"
 
 :: 测试
 call mvnw clean test -DskipTests
