@@ -99,7 +99,7 @@ public class ModelController {
         Map<String, Object> data = new HashMap<>();
         data.put("id", id);
         data.put("name", model.getName());
-        data.put("key",model.getKey());
+        data.put("key", model.getKey());
         data.put("content", new String(source, StandardCharsets.UTF_8));
 
         return AjaxResult.ok().data(data);
@@ -243,26 +243,27 @@ public class ModelController {
         ProcessMeta meta = metaCfg.getMeta(code);
         return AjaxResult.ok().data(meta.getVariables());
     }
+
     @GetMapping("definitionPage")
-    public AjaxResult definitionPage( String key, Pageable pageable) {
-        Assert.notNull(key,"编码不能为空");
+    public AjaxResult definitionPage(String key, Pageable pageable) {
+        Assert.notNull(key, "编码不能为空");
         ProcessDefinitionQuery query = repositoryService.createProcessDefinitionQuery().processDefinitionKey(key)
                 .orderByProcessDefinitionVersion().desc();
 
         Page<ProcessDefinition> page = FlowablePageTool.page(query, pageable);
         Page<Dict> page2 = PageTool.convert(page, d -> Dict.create()
-                .set("id",d.getId())
+                .set("id", d.getId())
                 .set("key", d.getKey())
                 .set("name", d.getName())
-                .set("version",d.getVersion())
+                .set("version", d.getVersion())
         );
 
         return AjaxResult.ok().data(page2);
     }
 
     @GetMapping("getDefinitionContent")
-    public AjaxResult getDefinitionContent( String id) {
-        Assert.notNull(id,"id不能为空");
+    public AjaxResult getDefinitionContent(String id) {
+        Assert.notNull(id, "id不能为空");
         ProcessDefinition definition = repositoryService.createProcessDefinitionQuery().processDefinitionId(id).singleResult();
 
         BpmnModel bpmnModel = repositoryService.getBpmnModel(definition.getId());

@@ -22,7 +22,7 @@ public class ResourceTool {
      * @throws IOException IO异常
      */
     @SneakyThrows
-    public static Resource[] findAll(String path)  {
+    public static Resource[] findAll(String path) {
         String classPath = "classpath*:" + path;
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
@@ -32,7 +32,7 @@ public class ResourceTool {
     }
 
     @SneakyThrows
-    public static String[] readAll(String path)  {
+    public static String[] readAll(String path) {
         Resource[] resources = findAll(path);
         sort(resources);
         String[] arr = new String[resources.length];
@@ -50,7 +50,7 @@ public class ResourceTool {
 
     /**
      * 按依赖程度排序， 本框架排前，因为项目排后
-     *
+     * <p>
      * 如业务项目依赖本框架，则业务项目排最后
      *
      * @param resources
@@ -81,13 +81,13 @@ public class ResourceTool {
         return resources;
     }
 
-    private static int getTypeOrder(Resource r){
+    private static int getTypeOrder(Resource r) {
         // 如果是文件，初步判断为开发情况，即当前项目
-        if(r instanceof FileSystemResource){
-            return  9;
+        if (r instanceof FileSystemResource) {
+            return 9;
         }
 
-        if(r instanceof UrlResource ur){
+        if (r instanceof UrlResource ur) {
             String[] orders = {
                     "/org/springframework/",
                     BasePackage.class.getPackageName().replaceAll("\\.", "/"),
@@ -100,7 +100,7 @@ public class ResourceTool {
             }
         }
 
-        return  -1;
+        return -1;
     }
 
     public static void main(String[] args) throws IOException {

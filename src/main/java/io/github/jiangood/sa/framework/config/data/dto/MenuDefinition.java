@@ -48,7 +48,6 @@ public class MenuDefinition {
     private List<String> permCodes = new ArrayList<>();
 
 
-
     /**
      * 菜单的消息数量接口
      */

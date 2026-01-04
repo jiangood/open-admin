@@ -33,10 +33,10 @@ public class ArrayTool {
 
 
     public static <T> List<T> toList(T[] arr) {
-        if(arr == null || arr.length == 0){
+        if (arr == null || arr.length == 0) {
             return new ArrayList<>();
         }
-       List<T> list = new ArrayList<>();
+        List<T> list = new ArrayList<>();
         for (T t : arr) {
             list.add(t);
         }

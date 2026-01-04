@@ -63,6 +63,7 @@ public class SysFile extends BaseEntity {
     private String extra3;
     @Transient
     private InputStream inputStream;
+
     public SysFile() {
     }
 

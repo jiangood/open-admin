@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 
 
-
 @Remark("系统角色")
 @Entity
 @Getter

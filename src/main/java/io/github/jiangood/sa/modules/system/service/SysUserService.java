@@ -220,14 +220,14 @@ public class SysUserService extends BaseService<SysUser> {
             result.add(rolePerm);
             log.info("角色权限 {}", rolePerm);
 
-            if(role.isAdmin()){
+            if (role.isAdmin()) {
                 List<MenuDefinition> menus = sysMenuDao.findAll();
                 for (MenuDefinition menu : menus) {
                     List<String> perms = menu.getPermCodes();
                     CollUtil.addAll(result, perms);
                 }
                 log.info("超级管理员，具备所有角色功能权限");
-            }else {
+            } else {
                 List<String> rolePerms = role.getPerms();
                 CollUtil.addAll(result, rolePerms);
                 log.info("角色功能权限 {}", rolePerms);

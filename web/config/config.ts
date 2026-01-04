@@ -20,6 +20,7 @@ export default defineConfig({
     history: {type: 'hash'},
     // 复杂，还得设置忽略、编译等，先关掉
     mfsu: false,
+    esbuildMinifyIIFE: true,
 
     plugins: [
         pluginDir +'/form-plugin',
@@ -41,7 +42,7 @@ export default defineConfig({
             changeOrigin: true,
             pathRewrite: {'^/ureport': '/ureport'},
         },
-        '/ws-log-view': {
+        '/admin/ws': {
             target: 'http://127.0.0.1:8002',
             changeOrigin: true,
             ws: true,

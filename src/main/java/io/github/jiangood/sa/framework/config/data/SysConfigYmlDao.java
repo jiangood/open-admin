@@ -19,7 +19,6 @@ public class SysConfigYmlDao {
     private final List<ConfigGroupDefinition> configs = new ArrayList<>();
 
 
-
     public List<ConfigGroupDefinition> findAll() {
         return Collections.unmodifiableList(configs);
     }
@@ -33,9 +32,6 @@ public class SysConfigYmlDao {
             configs.addAll(cur.getConfigs());
         }
     }
-
-
-
 
 
 }

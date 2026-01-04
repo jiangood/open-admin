@@ -21,7 +21,7 @@ public class MyRowProcessor extends BasicRowProcessor {
     public Map<String, Object> toMap(ResultSet resultSet) throws SQLException {
         Map<String, Object> map = super.toMap(resultSet);
 
-        if(namingStrategyImproved){
+        if (namingStrategyImproved) {
             Map<String, Object> result = BasicRowProcessor.createCaseInsensitiveHashMap(map.size());
             for (Map.Entry<String, Object> e : map.entrySet()) {
                 String key = e.getKey();

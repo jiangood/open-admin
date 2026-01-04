@@ -32,7 +32,7 @@ public class MyBeanProcessor extends GenerousBeanProcessor {
         Type firstGeneric = ReflectionTool.getFirstGeneric(prop);
 
         try {
-            Object value2 = ConvertTool.convert(type, value,firstGeneric);
+            Object value2 = ConvertTool.convert(type, value, firstGeneric);
             return value2;
         } catch (Exception e) {
             log.warn("数据类型不匹配: {}无法转换为{}, 请修改字段类型", value.getClass().getSimpleName(), type.getSimpleName());

@@ -61,10 +61,9 @@ public class FlowableService {
         TaskQuery query = buildUserTodoTaskQuery(userId);
 
         Page<Task> page = FlowablePageTool.page(query, pageable);
-        if(page.isEmpty()){
+        if (page.isEmpty()) {
             return Page.empty();
         }
-
 
 
         // 填充流程信息
@@ -93,7 +92,7 @@ public class FlowableService {
 
 
         Page<HistoricTaskInstance> page = FlowablePageTool.page(query, pageable);
-        if(page.isEmpty()){
+        if (page.isEmpty()) {
             return Page.empty();
         }
 
@@ -199,7 +198,6 @@ public class FlowableService {
         addComment.setUserId(taskAssignee);
         taskService.saveComment(addComment);
     }
-
 
 
     public BufferedImage drawImage(String instanceId) {

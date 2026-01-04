@@ -25,7 +25,7 @@ public class AjaxResult {
 
     public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), "您没有权限访问此资源");
 
-    public static final AjaxResult UNAUTHORIZED =  AjaxResult.err(HttpStatus.UNAUTHORIZED.value(), "身份验证失败，请重新登录");
+    public static final AjaxResult UNAUTHORIZED = AjaxResult.err(HttpStatus.UNAUTHORIZED.value(), "身份验证失败，请重新登录");
 
 
     boolean success;

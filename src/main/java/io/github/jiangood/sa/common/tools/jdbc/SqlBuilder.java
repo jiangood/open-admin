@@ -23,10 +23,12 @@ public class SqlBuilder {
     public void append(String sql) {
         sb.append(sql);
     }
+
     public void append(String sql, Object... sqlParams) {
         sb.append(sql);
         Collections.addAll(params, sqlParams);
     }
+
     public void addParams(Object... sqlParams) {
         Collections.addAll(params, sqlParams);
     }

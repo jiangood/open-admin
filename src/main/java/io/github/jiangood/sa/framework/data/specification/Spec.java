@@ -69,7 +69,7 @@ public class Spec<T> implements Specification<T> {
     }
 
     public Spec<T> selectFnc(AggregateFunctionType type, String field) {
-        String alias =  field;
+        String alias = field;
         return this.selectFnc(type, field, alias);
     }
 
@@ -204,8 +204,6 @@ public class Spec<T> implements Specification<T> {
     }
 
 
-
-
     // ---------------------- 逻辑 OR 条件 ----------------------
 
     /**
@@ -229,7 +227,6 @@ public class Spec<T> implements Specification<T> {
     }
 
     /**
-     *
      * @param consumer
      */
     public void or(Consumer<Spec<T>> consumer) {
@@ -240,7 +237,7 @@ public class Spec<T> implements Specification<T> {
     }
 
     public Spec<T> or(List<Specification<T>> specList) {
-        if(CollUtil.isEmpty(specList)){
+        if (CollUtil.isEmpty(specList)) {
             return this;
         }
 
@@ -250,9 +247,6 @@ public class Spec<T> implements Specification<T> {
         }
         return this.add(orSpec);
     }
-
-
-
 
 
     /**
