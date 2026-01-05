@@ -41,7 +41,7 @@ export default class extends React.Component {
             }
 
             value.taskId = this.state.taskId
-            await HttpUtils.post("admin//flowable/my/handleTask", value)
+            await HttpUtils.post("admin/flowable/my/handleTask", value)
             history.replace('/flowable/task')
         } catch (error) {
             message.error(error)
