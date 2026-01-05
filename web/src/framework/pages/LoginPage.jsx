@@ -3,7 +3,7 @@ import {Button, Form, Input, message, Space} from 'antd';
 import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
 import "./LoginPage.less"
 import {history} from 'umi';
-import {HttpUtils, MessageUtils, PageUtils, SysUtils} from "../utils";
+import {EventBusUtils, HttpUtils, MessageUtils, PageUtils, SysUtils} from "../utils";
 import {JSEncrypt} from "jsencrypt";
 
 
@@ -53,6 +53,7 @@ export class LoginPage extends React.Component {
 
         HttpUtils.postForm('/admin/auth/login', values).then(rs => {
             console.log('登录结果', rs)
+            EventBusUtils.emit('loginSuccess')
             history.push(this.redirect)
         }).catch(e => {
             console.log('登录错误', e)

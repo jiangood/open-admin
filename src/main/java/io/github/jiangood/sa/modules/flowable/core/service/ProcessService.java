@@ -25,6 +25,7 @@ import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.Model;
+import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.task.Comment;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 @AllArgsConstructor
-public class FlowableService {
+public class ProcessService {
 
     private TaskService taskService;
     private RuntimeService runtimeService;
@@ -57,6 +58,11 @@ public class FlowableService {
     private FlowableModelService myBpmnModelService;
     private FlowableProperties flowableProperties;
     private RepositoryService repositoryService;
+
+
+    public List<ProcessDefinition> findAllProcessDefinition(){
+        return repositoryService.createProcessDefinitionQuery().active().orderByProcessDefinitionKey().asc().list();
+    }
 
 
     public void createProcessDefinition(ProcessMeta meta){

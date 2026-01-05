@@ -1,7 +1,7 @@
 package io.github.jiangood.sa.modules.flowable.core.dto.response;
 
 import io.github.jiangood.sa.common.tools.SpringTool;
-import io.github.jiangood.sa.modules.flowable.core.service.FlowableService;
+import io.github.jiangood.sa.modules.flowable.core.service.ProcessService;
 import lombok.Data;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.flowable.engine.task.Comment;
@@ -20,6 +20,6 @@ public class CommentResponse {
         this.id = comment.getId();
         this.content = comment.getFullMessage();
         this.time = DateFormatUtils.format(comment.getTime(), "yyyy-MM-dd HH:mm:ss");
-        this.user = SpringTool.getBean(FlowableService.class).getUserName(comment.getUserId());
+        this.user = SpringTool.getBean(ProcessService.class).getUserName(comment.getUserId());
     }
 }

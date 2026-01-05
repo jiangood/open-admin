@@ -1,7 +1,7 @@
 package io.github.jiangood.sa.modules.flowable.admin.controller;
 
 
-import io.github.jiangood.sa.modules.flowable.core.service.FlowableService;
+import io.github.jiangood.sa.modules.flowable.core.service.ProcessService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -24,7 +24,7 @@ import java.util.List;
 public class InstanceController {
 
 
-    private FlowableService flowableService;
+    private ProcessService processService;
 
     private HistoryService historyService;
 
@@ -44,7 +44,7 @@ public class InstanceController {
             id = instance.getId();
         }
 
-        BufferedImage image = flowableService.drawImage(id);
+        BufferedImage image = processService.drawImage(id);
         ImageIO.write(image, "jpg", response.getOutputStream());
     }
 

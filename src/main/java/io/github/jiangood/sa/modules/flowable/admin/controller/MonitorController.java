@@ -7,7 +7,7 @@ import io.github.jiangood.sa.common.tools.PageTool;
 import io.github.jiangood.sa.framework.log.Log;
 import io.github.jiangood.sa.modules.common.LoginTool;
 import io.github.jiangood.sa.modules.flowable.core.dto.response.MonitorTaskResponse;
-import io.github.jiangood.sa.modules.flowable.core.service.FlowableService;
+import io.github.jiangood.sa.modules.flowable.core.service.ProcessService;
 import io.github.jiangood.sa.modules.flowable.utils.FlowablePageTool;
 import io.github.jiangood.sa.modules.system.service.SysUserService;
 import lombok.AllArgsConstructor;
@@ -46,7 +46,7 @@ public class MonitorController {
     private RuntimeService runtimeService;
     private TaskService taskService;
     private SysUserService sysUserService;
-    private FlowableService flowableService;
+    private ProcessService processService;
 
     @GetMapping("definitionPage")
     public AjaxResult processDefinition(Pageable pageable) {
@@ -155,7 +155,7 @@ public class MonitorController {
         TaskQuery query = taskService.createTaskQuery();
 
         if (StrUtil.isNotEmpty(assignee)) {
-            query = flowableService.buildUserTodoTaskQuery(assignee);
+            query = processService.buildUserTodoTaskQuery(assignee);
         }
         query.orderByTaskCreateTime().desc();
         List<Task> list = query.list();

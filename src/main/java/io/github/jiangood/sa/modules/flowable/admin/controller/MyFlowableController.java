@@ -11,7 +11,7 @@ import io.github.jiangood.sa.modules.common.LoginTool;
 import io.github.jiangood.sa.modules.flowable.core.dto.request.HandleTaskRequest;
 import io.github.jiangood.sa.modules.flowable.core.dto.response.CommentResponse;
 import io.github.jiangood.sa.modules.flowable.core.dto.response.TaskResponse;
-import io.github.jiangood.sa.modules.flowable.core.service.FlowableService;
+import io.github.jiangood.sa.modules.flowable.core.service.ProcessService;
 import io.github.jiangood.sa.modules.flowable.utils.FlowablePageTool;
 import lombok.AllArgsConstructor;
 import org.flowable.engine.HistoryService;
@@ -46,19 +46,19 @@ public class MyFlowableController {
 
     private TaskService taskService;
     private HistoryService historyService;
-    private FlowableService flowableService;
+    private ProcessService processService;
 
     @GetMapping("todoCount")
     public AjaxResult todo() {
         String userId = LoginTool.getUserId();
-        long userTaskCount = flowableService.findUserTaskCount(userId);
+        long userTaskCount = processService.findUserTaskCount(userId);
         return AjaxResult.ok().data(userTaskCount);
     }
 
     @RequestMapping("todoTaskPage")
     public AjaxResult todo(Pageable pageable) {
         String userId = LoginTool.getUserId();
-        Page<TaskResponse> page = flowableService.findUserTaskList(pageable, userId);
+        Page<TaskResponse> page = processService.findUserTaskList(pageable, userId);
 
         return AjaxResult.ok().data(page);
     }
@@ -67,7 +67,7 @@ public class MyFlowableController {
     public AjaxResult doneTaskPage(Pageable pageable) {
         String userId = LoginTool.getUserId();
 
-        Page<TaskResponse> page = flowableService.findUserTaskDoneList(pageable, userId);
+        Page<TaskResponse> page = processService.findUserTaskDoneList(pageable, userId);
         return AjaxResult.ok().data(page);
     }
 
@@ -96,7 +96,7 @@ public class MyFlowableController {
             map.put("deleteReason", instance.getDeleteReason());
             String startUserId = instance.getStartUserId();
             if (startUserId != null) {
-                map.put("startUserName", flowableService.getUserName(startUserId));
+                map.put("startUserName", processService.getUserName(startUserId));
             }
             return map;
         });
@@ -108,7 +108,7 @@ public class MyFlowableController {
     @PostMapping("handleTask")
     public AjaxResult handle(@RequestBody HandleTaskRequest param) {
         String user = LoginTool.getUserId();
-        flowableService.handle(user, param.getResult(), param.getTaskId(), param.getComment());
+        processService.handle(user, param.getResult(), param.getTaskId(), param.getComment());
         return AjaxResult.ok().msg("处理成功");
     }
 
@@ -175,7 +175,7 @@ public class MyFlowableController {
 
         // 图片
         {
-            BufferedImage image = flowableService.drawImage(instance.getId());
+            BufferedImage image = processService.drawImage(instance.getId());
             String base64 = ImgTool.toBase64DataUri(image);
             data.put("img", base64);
         }
@@ -186,7 +186,7 @@ public class MyFlowableController {
                 instanceName = instance.getProcessDefinitionName();
             }
             data.put("startTime", DateFormatTool.format(instance.getStartTime()));
-            data.put("starter", flowableService.getUserName(instance.getStartUserId()));
+            data.put("starter", processService.getUserName(instance.getStartUserId()));
             data.put("name", instanceName);
             data.put("id", instance.getId());
 
