@@ -2,6 +2,7 @@ package io.github.jiangood.sa.modules.flowable.core.config.meta;
 
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -11,6 +12,6 @@ public class ProcessMeta {
 
     private Class<? extends ProcessListener> listener;
 
-    private List<ProcessVariable> variables;
-    private List<FormDefinition> forms;
+    private List<ProcessVariable> variables = new ArrayList<>();
+    private List<FormDefinition> forms = new ArrayList<>();
 }

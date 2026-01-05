@@ -68,6 +68,12 @@ public class SysOrg extends BaseEntity implements TreeNode<SysOrg> {
     @Column(length = DBConstants.LEN_NAME)
     private String thirdAccount;
 
+
+    public SysOrg(){}
+    public SysOrg(String id){
+        this.setId(id);
+    }
+
     @Transient
     public boolean isDept() {
         if (type == null) {

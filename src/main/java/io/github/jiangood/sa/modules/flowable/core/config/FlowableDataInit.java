@@ -3,6 +3,7 @@ package io.github.jiangood.sa.modules.flowable.core.config;
 import io.github.jiangood.sa.framework.config.init.SystemHookEventType;
 import io.github.jiangood.sa.framework.config.init.SystemHookService;
 import io.github.jiangood.sa.modules.flowable.core.config.meta.ProcessMeta;
+import io.github.jiangood.sa.modules.flowable.core.service.FlowableService;
 import io.github.jiangood.sa.modules.flowable.utils.ModelTool;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,56 +28,24 @@ public class FlowableDataInit implements CommandLineRunner {
     private ProcessMetaCfg processConfiguration;
 
     private SystemHookService systemHookService;
-    private RepositoryService repositoryService;
+    private FlowableService flowableService;
 
 
     @Override
     public void run(String... args) throws Exception {
-        for (ProcessMeta definition : processConfiguration.getList()) {
+        for (ProcessMeta meta : processConfiguration.getList()) {
 
-            String key = definition.getKey();
-            String name = definition.getName();
+            String key = meta.getKey();
 
-            this.init(key, name);
+            flowableService.createProcessDefinition(meta);
 
 
-            log.info("注册流程定义类 {} {}", key, definition.getClass().getName());
+            log.info("注册流程定义类 {} {}", key, meta.getClass().getName());
             systemHookService.trigger(SystemHookEventType.AFTER_FLOWABLE_DEFINITION_INIT);
         }
     }
 
-    public void init(String key, String name) {
-        log.info("初始化流程定义 {} {}  ", key, name);
 
-        long count = repositoryService.createModelQuery().modelKey(key).count();
-        if (count > 0) {
-            return;
-        }
-
-        Model m = repositoryService.newModel();
-        m.setName(name);
-        m.setKey(key);
-        repositoryService.saveModel(m);
-
-
-        // create default model xml
-        BpmnModel model = new BpmnModel();
-        Process proc = new Process();
-        proc.setExecutable(true);
-        proc.setId(key);
-        proc.setName(name);
-        model.addProcess(proc);
-
-        StartEvent startEvent = new StartEvent();
-        startEvent.setId("StartEvent_1");
-        proc.addFlowElement(startEvent);
-
-        model.addGraphicInfo(startEvent.getId(), new GraphicInfo(200, 200, 30, 30));
-
-        String xml = ModelTool.modelToXml(model);
-
-        repositoryService.addModelEditorSource(m.getId(), xml.getBytes(StandardCharsets.UTF_8));
-    }
 
 
 }

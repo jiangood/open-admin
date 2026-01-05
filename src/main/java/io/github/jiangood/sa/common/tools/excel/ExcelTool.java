@@ -2,11 +2,15 @@ package io.github.jiangood.sa.common.tools.excel;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.sa.common.tools.ResponseTool;
 import io.github.jiangood.sa.common.tools.annotation.Remark;
 import io.github.jiangood.sa.common.tools.annotation.RemarkTool;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -15,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.net.http.HttpResponse;
 import java.util.*;
 
 /***
@@ -111,4 +116,11 @@ public class ExcelTool {
         workbook.close();
     }
 
+    public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws Exception {
+        ResponseTool.setDownloadExcelHeader(filename,response);
+
+        workbook.write(response.getOutputStream());
+
+        workbook.close();
+    }
 }

@@ -6,19 +6,25 @@ import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.sa.common.tools.FriendlyTool;
 import io.github.jiangood.sa.common.tools.PageTool;
 import io.github.jiangood.sa.modules.flowable.core.FlowableProperties;
+import io.github.jiangood.sa.modules.flowable.core.config.meta.ProcessMeta;
 import io.github.jiangood.sa.modules.flowable.core.dto.TaskHandleType;
 import io.github.jiangood.sa.modules.flowable.core.dto.response.TaskResponse;
 import io.github.jiangood.sa.modules.flowable.utils.FlowablePageTool;
+import io.github.jiangood.sa.modules.flowable.utils.ModelTool;
 import io.github.jiangood.sa.modules.system.entity.SysRole;
 import io.github.jiangood.sa.modules.system.entity.SysUser;
 import io.github.jiangood.sa.modules.system.service.SysUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.bpmn.model.UserTask;
+import org.flowable.bpmn.model.*;
+import org.flowable.bpmn.model.Process;
 import org.flowable.engine.HistoryService;
+import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
 import org.flowable.engine.history.HistoricProcessInstance;
+import org.flowable.engine.repository.Deployment;
+import org.flowable.engine.repository.Model;
 import org.flowable.engine.runtime.Execution;
 import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.task.Comment;
@@ -33,6 +39,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.awt.image.BufferedImage;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,8 +55,51 @@ public class FlowableService {
     private SysUserService sysUserService;
     private HistoryService historyService;
     private FlowableModelService myBpmnModelService;
-
     private FlowableProperties flowableProperties;
+    private RepositoryService repositoryService;
+
+
+    public void createProcessDefinition(ProcessMeta meta){
+            String key = meta.getKey();
+            String name = meta.getName();
+            log.info("初始化流程定义 {} {}  ", key, name);
+
+            long count = repositoryService.createModelQuery().modelKey(key).count();
+            if (count > 0) {
+                return;
+            }
+
+            Model m = repositoryService.newModel();
+            m.setName(name);
+            m.setKey(key);
+            repositoryService.saveModel(m);
+
+
+            // create default model xml
+            BpmnModel model = new BpmnModel();
+            Process proc = new Process();
+            proc.setExecutable(true);
+            proc.setId(key);
+            proc.setName(name);
+            model.addProcess(proc);
+
+            StartEvent startEvent = new StartEvent();
+            startEvent.setId("StartEvent_1");
+            proc.addFlowElement(startEvent);
+
+            model.addGraphicInfo(startEvent.getId(), new GraphicInfo(200, 200, 30, 30));
+
+            String xml = ModelTool.modelToXml(model);
+
+            repositoryService.addModelEditorSource(m.getId(), xml.getBytes(StandardCharsets.UTF_8));
+    }
+
+    public void deleteProcessDefinition(String id){
+        List<Deployment> list = repositoryService.createDeploymentQuery().processDefinitionKey(id).list();
+        for (Deployment d : list) {
+            repositoryService.deleteDeployment(d.getId(), true);
+        }
+    }
 
 
     public long findUserTaskCount(String userId) {

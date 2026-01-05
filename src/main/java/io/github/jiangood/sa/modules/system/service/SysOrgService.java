@@ -45,11 +45,14 @@ public class SysOrgService extends BaseService<SysOrg> {
         sysOrgDao.deleteById(id);
     }
 
+    public List<SysOrg> findByLoginUser(boolean containsDept) {
+        return this.findByLoginUser(containsDept, false);
+    }
 
     /**
-     * @param showDisabled 是否显示禁用
+     * @param containsDisabled 是否显示禁用
      */
-    public List<SysOrg> findByLoginUser(boolean showDept, boolean showDisabled) {
+    public List<SysOrg> findByLoginUser(boolean containsDept, boolean containsDisabled) {
         List<String> orgPermissions = LoginTool.getOrgPermissions();
         if (CollUtil.isEmpty(orgPermissions)) {
             return Collections.emptyList();
@@ -59,16 +62,16 @@ public class SysOrgService extends BaseService<SysOrg> {
         Spec<SysOrg> q = spec().in("id", orgPermissions);
 
         // 如果不显示全部，则只显示启用的
-        if (!showDisabled) {
+        if (!containsDisabled) {
             q.eq(SysOrg.Fields.enabled, true);
         }
-        if (!showDept) {
+        if (!containsDept) {
             q.ne(SysOrg.Fields.type, OrgType.TYPE_DEPT.getCode());
         }
 
-
         return sysOrgDao.findAll(q, Sort.by(SysOrg.Fields.type, SysOrg.Fields.seq));
     }
+
 
     public Map<String, SysOrg> dict() {
         return sysOrgDao.dict();

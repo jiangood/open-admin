@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -41,5 +42,12 @@ public class Option {
         return result;
     }
 
+    public static <T> List<Option> convertList(Iterable<String> list) {
+        List<Option> result = new ArrayList<>();
+        for (String t : list) {
+            result.add(Option.of(t, t));
+        }
+        return result;
+    }
 
 }
