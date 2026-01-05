@@ -80,32 +80,8 @@ data:
           icon: FileSearchOutlined
           perm-names: [ 查看,保存,删除 ]
           perm-codes: [ sysDict:view,sysDict:save,sysDict:delete ]
-        - id: sysFile
-          name: 存储文件
-          path: /system/file
-          icon: FolderOpenOutlined
-          perm-names: [ 查看,删除 ]
-          perm-codes: [ sysFile:view,sysFile:delete ]
-        - id: job
-          name: 作业调度
-          path: /system/job
-          icon: OrderedListOutlined
-          perm-names: [ 查看,保存,执行一次,清理日志 ]
-          perm-codes: [ job:view,job:save, job:triggerJob,job:jobLogClean ]
-        - id: sysLog
-          name: 操作日志
-          path: /system/log
-          icon: FileSearchOutlined
-          perm-names: [ 查看 ]
-          perm-codes: [ sysLog:view ]
-        - id: api
-          name: 接口管理
-          icon: ApiOutlined
-          path: /system/api
-          perm-names: [ 管理 ]
-          perm-codes: [ api ]
-        - id: flowableModel
-          name: 流程引擎
+        - id: flowable
+          name: 流程管理
           path: /flowable
           perm-names: [ 设计,部署,动态修改受理人,终止流程 ]
           perm-codes: [ flowableModel:design,flowableModel:deploy,flowableTask:setAssignee,flowableInstance:close ]
@@ -116,3 +92,29 @@ data:
           path: /ureport
           perm-names: [ 查看,设计 ]
           perm-codes: [ ureport:view,ureport:design ]
+        - id: job
+          name: 作业管理
+          path: /system/job
+          icon: OrderedListOutlined
+          perm-names: [ 查看,保存,执行一次,清理日志 ]
+          perm-codes: [ job:view,job:save, job:triggerJob,job:jobLogClean ]
+        - id: sysLog
+          name: 操作日志
+          path: /system/log
+          icon: FileSearchOutlined
+          perm-names: [ 查看 ]
+          perm-codes: [ sysLog:view ]
+        - id: sysFile
+          name: 存储文件
+          path: /system/file
+          icon: FolderOpenOutlined
+          perm-names: [ 查看,删除 ]
+          perm-codes: [ sysFile:view,sysFile:delete ]
+        - id: api
+          name: 接口管理
+          icon: ApiOutlined
+          path: /system/api
+          perm-names: [ 管理 ]
+          perm-codes: [ api ]
+
+
