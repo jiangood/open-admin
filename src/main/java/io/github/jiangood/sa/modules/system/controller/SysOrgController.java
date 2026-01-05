@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.sa.common.dto.AjaxResult;
 import io.github.jiangood.sa.common.dto.antd.DropEvent;
 import io.github.jiangood.sa.common.dto.antd.TreeOption;
+import io.github.jiangood.sa.common.tools.BeanTool;
 import io.github.jiangood.sa.common.tools.tree.TreeTool;
 import io.github.jiangood.sa.common.tools.tree.drop.DropResult;
 import io.github.jiangood.sa.common.tools.tree.drop.TreeDropTool;
@@ -12,10 +13,16 @@ import io.github.jiangood.sa.framework.config.security.refresh.PermissionStaleSe
 import io.github.jiangood.sa.framework.data.specification.Spec;
 import io.github.jiangood.sa.framework.log.Log;
 import io.github.jiangood.sa.modules.common.LoginTool;
+import io.github.jiangood.sa.modules.system.dto.request.OrgRequest;
 import io.github.jiangood.sa.modules.system.entity.SysOrg;
+import io.github.jiangood.sa.modules.system.entity.SysUser;
 import io.github.jiangood.sa.modules.system.enums.OrgType;
 import io.github.jiangood.sa.modules.system.service.SysOrgService;
 import jakarta.annotation.Resource;
+import jakarta.persistence.Column;
+import jakarta.persistence.ManyToOne;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -66,16 +73,20 @@ public class SysOrgController {
     }
 
 
+
     @Log("机构-保存")
     @PreAuthorize("hasAuthority('sysOrg:save')")
     @PostMapping("save")
-    public AjaxResult saveOrUpdate(@RequestBody SysOrg input, RequestBodyKeys requestBodyKeys) throws Exception {
+    public AjaxResult saveOrUpdate(@RequestBody OrgRequest input, RequestBodyKeys requestBodyKeys) throws Exception {
         if (input.getLeader() != null) {
             if (StrUtil.isEmpty(input.getLeader().getId())) {
                 input.setLeader(null);
             }
         }
-        sysOrgService.saveOrUpdateByRequest(input, requestBodyKeys);
+        SysOrg input2 = BeanTool.copy(input, new SysOrg());
+        input2.setType(input.getType().getCode());
+
+        sysOrgService.saveOrUpdateByRequest(input2, requestBodyKeys);
 
         permissionStaleService.markUserStale(LoginTool.getUser().getUsername());
 

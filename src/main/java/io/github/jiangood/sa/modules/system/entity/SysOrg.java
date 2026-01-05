@@ -42,6 +42,9 @@ public class SysOrg extends BaseEntity implements TreeNode<SysOrg> {
     private Integer seq;
     @Column(nullable = false)
     private Boolean enabled;
+    /***
+     * 为了扩展OrgType,这里就不用枚举了，需要扩展时，覆盖OrgType枚举类即可
+     */
     @NotNull
     private Integer type;
     // 部门领导
