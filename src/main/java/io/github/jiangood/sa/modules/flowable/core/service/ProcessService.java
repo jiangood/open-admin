@@ -89,14 +89,7 @@ public class ProcessService {
             proc.setName(name);
             model.addProcess(proc);
 
-            StartEvent startEvent = new StartEvent();
-            startEvent.setId("StartEvent_1");
-            proc.addFlowElement(startEvent);
-
-            model.addGraphicInfo(startEvent.getId(), new GraphicInfo(200, 200, 30, 30));
-
             String xml = ModelTool.modelToXml(model);
-
             repositoryService.addModelEditorSource(m.getId(), xml.getBytes(StandardCharsets.UTF_8));
     }
 
