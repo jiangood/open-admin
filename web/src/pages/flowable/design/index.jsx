@@ -57,6 +57,8 @@ export default class extends React.Component {
             }
         });
 
+        console.log('导入的xml内容如下')
+        console.log(xml)
         this.bpmnModeler.importXML(xml)
         this.bpmnModeler.on('element.contextmenu', e => e.preventDefault()) // 关闭右键，影响操作
     };
