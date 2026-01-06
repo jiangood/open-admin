@@ -143,8 +143,8 @@ public class ProcessService {
         System.out.println(xml);
     }
 
-    public void deleteProcessDefinition(String id) {
-        List<Deployment> list = repositoryService.createDeploymentQuery().processDefinitionKey(id).list();
+    public void deleteProcessDefinitionByKey(String key) {
+        List<Deployment> list = repositoryService.createDeploymentQuery().processDefinitionKey(key).list();
         for (Deployment d : list) {
             repositoryService.deleteDeployment(d.getId(), true);
         }
