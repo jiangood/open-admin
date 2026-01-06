@@ -1,6 +1,7 @@
 package io.github.jiangood.sa.modules.flowable.core.service;
 
 
+import ch.qos.logback.core.Layout;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.sa.common.tools.FriendlyTool;
@@ -60,40 +61,73 @@ public class ProcessService {
     private RepositoryService repositoryService;
 
 
-    public List<ProcessDefinition> findAllProcessDefinition(){
+    public List<ProcessDefinition> findAllProcessDefinition() {
         return repositoryService.createProcessDefinitionQuery().active().orderByProcessDefinitionKey().asc().list();
     }
 
 
-    public void createProcessDefinition(ProcessMeta meta){
-            String key = meta.getKey();
-            String name = meta.getName();
-            log.info("初始化流程定义 {} {}  ", key, name);
+    public void createProcessDefinition(ProcessMeta meta) {
+        String key = meta.getKey();
+        String name = meta.getName();
+        log.info("初始化流程定义 {} {}  ", key, name);
 
-            long count = repositoryService.createModelQuery().modelKey(key).count();
-            if (count > 0) {
-                return;
-            }
+        long count = repositoryService.createModelQuery().modelKey(key).count();
+        if (count > 0) {
+            return;
+        }
 
-            Model m = repositoryService.newModel();
-            m.setName(name);
-            m.setKey(key);
-            repositoryService.saveModel(m);
+        Model m = repositoryService.newModel();
+        m.setName(name);
+        m.setKey(key);
+        repositoryService.saveModel(m);
 
 
-            // create default model xml
-            BpmnModel model = new BpmnModel();
-            Process proc = new Process();
-            proc.setExecutable(true);
-            proc.setId(key);
-            proc.setName(name);
-            model.addProcess(proc);
+        // create default model xml
+        BpmnModel bpmnModel = new BpmnModel();
+        Process proc = new Process();
+        proc.setExecutable(true);
+        proc.setId(key);
+        proc.setName(name);
+        bpmnModel.addProcess(proc);
 
-            String xml = ModelTool.modelToXml(model);
-            repositoryService.addModelEditorSource(m.getId(), xml.getBytes(StandardCharsets.UTF_8));
+        StartEvent startEvent = new StartEvent();
+        startEvent.setId("StartEvent_1");
+        proc.addFlowElement(startEvent);
+        bpmnModel.addGraphicInfo(startEvent.getId(), new GraphicInfo(200, 200, 30, 30));
+
+
+        String xml = ModelTool.modelToXml(bpmnModel);
+        log.info("生成流程默认xml内容\n{}", xml);
+        repositoryService.addModelEditorSource(m.getId(), xml.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void deleteProcessDefinition(String id){
+    public static void main(String[] args) {
+
+        // 1. 创建BpmnModel对象
+        BpmnModel bpmnModel = new BpmnModel();
+
+        // 2. 创建流程定义
+        Process process = new Process();
+        process.setId("process_1");
+        process.setName("新建流程");
+        process.setExecutable(true);
+
+        // 3. 添加开始事件
+        StartEvent startEvent = new StartEvent();
+        startEvent.setId("startEvent_1");
+        startEvent.setName("开始");
+        process.addFlowElement(startEvent);
+
+        // 4. 将流程添加到模型中
+        bpmnModel.addProcess(process);
+
+
+
+        String xml = ModelTool.modelToXml(bpmnModel);
+        System.out.println(xml);
+    }
+
+    public void deleteProcessDefinition(String id) {
         List<Deployment> list = repositoryService.createDeploymentQuery().processDefinitionKey(id).list();
         for (Deployment d : list) {
             repositoryService.deleteDeployment(d.getId(), true);
