@@ -13,9 +13,19 @@ export class FieldDate extends React.Component {
 
     render() {
         let {type, value, onChange, ...rest} = this.props;
+
+        if(type === 'YEAR'){
+            type = 'YYYY'
+        }else if(type === 'YEAR_MONTH'){
+            type = 'YYYY-MM'
+        }else if(type === 'YEAR_QUARTER'){
+            type = 'YYYY-QQ'
+        }else if(type === 'DAY'){
+            type = 'YYYY-MM-DD'
+        }
+
         switch (type) {
             case 'YYYY':
-            case 'YEAR':
                 return <DatePicker
                     value={this.strToDate(value, type)}
                     onChange={v => onChange(this.dateToStr(v,'YYYY'))}
@@ -23,7 +33,6 @@ export class FieldDate extends React.Component {
                     {...rest}
                 />;
             case 'YYYY-MM':
-            case 'YEAR_MONTH':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-MM')}
                     onChange={v => onChange(this.dateToStr(v,'YYYY-MM'))}
@@ -31,7 +40,6 @@ export class FieldDate extends React.Component {
                     {...rest}
                 />;
             case 'YYYY-QQ':
-            case 'YEAR_QUARTER':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-QQ')}
                     onChange={v => onChange(this.dateToStr(v,'YYYY-QQ'))}
@@ -39,7 +47,6 @@ export class FieldDate extends React.Component {
                     {...rest}
                 />;
             case 'YYYY-MM-DD':
-            case 'DAY':
                 return   <DatePicker
                     value={this.strToDate(value, 'YYYY-MM-DD')}
                     onChange={v => onChange(this.dateToStr(v,'YYYY-MM-DD'))}
