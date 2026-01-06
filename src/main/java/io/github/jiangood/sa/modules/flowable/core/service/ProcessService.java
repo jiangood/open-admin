@@ -65,6 +65,10 @@ public class ProcessService {
         repositoryService.deleteModel(modelId);
     }
 
+    public Model getModel(String modelId){
+      return  repositoryService.getModel(modelId);
+    }
+
     public List<ProcessDefinition> findAllProcessDefinition() {
         return repositoryService.createProcessDefinitionQuery().active().orderByProcessDefinitionKey().asc().list();
     }
