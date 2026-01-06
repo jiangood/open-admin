@@ -93,7 +93,7 @@ public class ProcessService {
         StartEvent startEvent = new StartEvent();
         startEvent.setId("StartEvent_1");
         proc.addFlowElement(startEvent);
-        bpmnModel.addGraphicInfo(startEvent.getId(), new GraphicInfo(200, 200, 30, 30));
+        bpmnModel.addGraphicInfo(startEvent.getId(), new GraphicInfo(150, 100, 36, 36));
 
 
         String xml = ModelTool.modelToXml(bpmnModel);
