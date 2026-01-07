@@ -48,6 +48,7 @@
         <poi.version>5.5.0</poi.version>
         <guava.version>33.5.0-jre</guava.version>
         <commons-io.version>2.21.0</commons-io.version>
+        <ureport.version>1.0.8</ureport.version>
     </properties>
     <dependencies>
         <dependency>
@@ -214,7 +215,7 @@
         <dependency>
             <groupId>io.github.jiangood</groupId>
             <artifactId>ureport-console</artifactId>
-            <version>1.0.7</version>
+            <version>${ureport.version}</version>
         </dependency>
         <dependency>
             <groupId>org.flowable</groupId>
