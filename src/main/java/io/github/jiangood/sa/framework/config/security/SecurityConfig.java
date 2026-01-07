@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
@@ -87,6 +88,9 @@ public class SecurityConfig {
                 ResponseTool.response(response, AjaxResult.UNAUTHORIZED);
             });
         });
+
+        // iframe 允许同域名下访问， 如嵌入ureport报表
+        http.headers(cfg -> cfg.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
 
 
         return http.build();
