@@ -10,7 +10,7 @@ import {Gap, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} f
 import HeaderRight from "./HeaderRight";
 import TabPageRender from "./TabPageRender";
 
-const {Header, Footer, Sider, Content} = Layout;
+const {Header, Sider, Content} = Layout;
 /**
  * 带菜单的布局，主要处理布局宇框架结构
  */
