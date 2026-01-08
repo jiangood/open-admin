@@ -4,6 +4,7 @@ import io.github.jiangood.sa.common.tools.datetime.DateFormatTool;
 import io.github.jiangood.sa.framework.config.security.LoginUser;
 import io.github.jiangood.sa.modules.common.LoginTool;
 import io.github.jiangood.sa.modules.flowable.core.FlowableManager;
+import io.github.jiangood.sa.modules.flowable.core.config.meta.ProcessMeta;
 import io.github.jiangood.sa.modules.flowable.core.config.meta.ProcessVariable;
 import io.github.jiangood.sa.modules.flowable.core.service.ProcessMetaService;
 import lombok.AllArgsConstructor;
@@ -49,47 +50,43 @@ public class FlowableManagerImpl implements FlowableManager {
             variables = new HashMap<>();
         }
 
-        LoginUser loginUser = LoginTool.getUser();
-
+        LoginUser user = LoginTool.getUser();
+        ProcessMeta meta = processMetaService.findOne(key);
+        Assert.notNull(meta, "流程元数据定义不存在：" + key);
 
         // 添加一些发起人的相关信息
-        String startUserId = initVariable(bizKey, variables, loginUser);
+        String startUserId = user.getId();
+        Assert.hasText(startUserId, "当前登录人员ID不能为空");
+        variables.put(VAR_USER_ID, startUserId);
+        variables.put(VAR_USER_NAME, user.getName());
+        variables.put(VAR_UNIT_ID, user.getUnitId());
+        variables.put(VAR_UNIT_NAME, user.getUnitName());
+        variables.put(VAR_DEPT_ID, user.getDeptId());
+        variables.put(VAR_DEPT_NAME, user.getDeptName());
+        variables.put(VAR_DEPT_LEADER, user.getDeptLeaderId());   // 部门领导
+        variables.put("BUSINESS_KEY", bizKey);
+        variables.put("GLOBAL_FORM_KEY", meta.getGlobalFormKey() != null ? meta.getGlobalFormKey() : meta.getKey()); // 全局表单key
+
 
         // 流程名称
-        ProcessDefinition def = repositoryService.createProcessDefinitionQuery()
+        ProcessDefinition definition = repositoryService.createProcessDefinitionQuery()
                 .processDefinitionKey(key).active()
                 .latestVersion()
                 .singleResult();
-        Assert.notNull(def, "流程尚未部署，请设计后部署。编码：" + key);
+        Assert.notNull(definition, "流程尚未部署，请设计后部署。编码：" + key);
 
 
         if (title == null) {
             String day = DateFormatTool.formatDayCn(new Date());
-            title = loginUser.getName() + day + "发起的【" + def.getName() + "】";
+            title = user.getName() + day + "发起的【" + definition.getName() + "】";
         }
 
-        validate(def, bizKey, variables);
-
-        // 设置发起人, 该方法会自动设置流程变量 INITIATOR -> startUserId
-        identityService.setAuthenticatedUserId(startUserId);
-
-
-        // 启动
-        runtimeService.createProcessInstanceBuilder()
-                .processDefinitionKey(key)
-                .businessKey(bizKey)
-                .variables(variables)
-                .name(title)
-                .start();
-    }
-
-
-    private void validate(ProcessDefinition definition, String bizKey, Map<String, Object> variables) {
         long instanceCount = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(bizKey).active().count();
         Assert.state(instanceCount == 0, "流程审批中，请勿重复提交");
 
         // 判断必填流程变量
-        List<ProcessVariable> variableList = processMetaService.findOne(definition.getKey()).getVariables();
+
+        List<ProcessVariable> variableList = meta.getVariables();
         if (!CollectionUtils.isEmpty(variableList)) {
             for (ProcessVariable formItem : variableList) {
                 String name = formItem.getName();
@@ -110,29 +107,21 @@ public class FlowableManagerImpl implements FlowableManager {
         }
 
 
+        // 设置发起人, 该方法会自动设置流程变量 INITIATOR -> startUserId
+        identityService.setAuthenticatedUserId(startUserId);
+
+        // 启动
+        runtimeService.createProcessInstanceBuilder()
+                .processDefinitionKey(key)
+                .businessKey(bizKey)
+                .variables(variables)
+                .name(title)
+                .start();
     }
 
 
-    /***
-     * 初始化变量
-     */
-    private String initVariable(String bizKey, Map<String, Object> variables, LoginUser user) {
-        String startUserId = user.getId();
-        Assert.hasText(startUserId, "当前登录人员ID不能为空");
-        variables.put(VAR_USER_ID, startUserId);
-        variables.put(VAR_USER_NAME, user.getName());
-
-        variables.put(VAR_UNIT_ID, user.getUnitId());
-        variables.put(VAR_UNIT_NAME, user.getUnitName());
-        variables.put(VAR_DEPT_ID, user.getDeptId());
-        variables.put(VAR_DEPT_NAME, user.getDeptName());
-        variables.put("BUSINESS_KEY", bizKey);
-
-        // 部门领导
-        variables.put(VAR_DEPT_LEADER, user.getDeptLeaderId());
 
 
-        return startUserId;
-    }
+
 
 }

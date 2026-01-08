@@ -14,4 +14,10 @@ public class ProcessMeta {
 
     private List<ProcessVariable> variables = new ArrayList<>();
     private List<FormDefinition> forms = new ArrayList<>();
+
+    /**
+     * 全局表单（可选）
+     * 为空时使用 流程key
+      */
+    private String globalFormKey;
 }

@@ -66,10 +66,7 @@ export default class extends React.Component {
                 title: '操作',
                 dataIndex: 'option',
                 render: (_, record) => {
-                    let path = '/flowable/task/form?taskId=' + record.id + '&instanceId=' + record.instanceId;
-                    if (record.formKey) {
-                        path += "&formKey=" + record.formKey
-                    }
+                    let path = '/flowable/task/form?taskId=' + record.id;
                     return (
                         <LinkButton
                             type='primary'

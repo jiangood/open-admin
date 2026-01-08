@@ -68,16 +68,16 @@ export default class InstanceInfo extends React.Component {
             <Tabs
                 items={[
                     {
-                        key: '1',
-                        label: '表单',
-                        icon: <FormOutlined/>,
-                        children: this.renderForm()
-                    },
-                    {
-                        key: '2',
+                        key: 'flow',
                         label: '流程',
                         icon: <ShareAltOutlined/>,
                         children: this.renderProcess(img, commentList)
+                    },
+                    {
+                        key: 'form',
+                        label: '表单',
+                        icon: <FormOutlined/>,
+                        children: this.renderForm()
                     }
                 ]}>
 
