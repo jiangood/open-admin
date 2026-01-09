@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, Modal, Tabs} from "antd";
-import {HttpUtils, LinkButton, MessageUtils, Page, PageLoading, ProTable} from "../../../framework";
+import {HttpUtils, LinkButton, Page, PageLoading, PageUtils, ProTable} from "../../../framework";
 
 
 export default class extends React.Component {
@@ -114,6 +114,15 @@ export default class extends React.Component {
                 title: '操作人',
                 dataIndex: 'assigneeInfo'
             },
+
+
+            {
+                title: '操作',
+                dataIndex: 'option',
+                render: (_, record) => (
+                     <Button size='small' onClick={() => PageUtils.open('/flowable/task/instance/view?id='+record.id, '流程信息') }> 查看 </Button>
+                ),
+            },
         ]}
         size='small'
     />;
@@ -166,14 +175,9 @@ export default class extends React.Component {
                 title: '操作',
                 dataIndex: 'option',
                 render: (_, record) => (
-                    <Button size='small' onClick={() => {
-                        MessageUtils.alert(<InstanceInfo id={record.id}/>, {
-                            width: '80vw',
-                            title: '流程信息'
-                        })
+                 <Button size='small' onClick={() => PageUtils.open('/flowable/task/instance/view?id='+record.id, '流程信息') }> 查看 </Button>
 
-                    }}> 查看 </Button>
-                ),
+            ),
             },
         ]}
     />;
