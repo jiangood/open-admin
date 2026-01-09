@@ -8,7 +8,7 @@ import io.github.jiangood.sa.common.dto.DropdownRequest;
 import io.github.jiangood.sa.common.dto.antd.Option;
 import io.github.jiangood.sa.common.dto.antd.TreeOption;
 import io.github.jiangood.sa.common.tools.tree.TreeTool;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.sa.framework.config.security.refresh.PermissionStaleService;
 import io.github.jiangood.sa.framework.data.domain.BaseEntity;

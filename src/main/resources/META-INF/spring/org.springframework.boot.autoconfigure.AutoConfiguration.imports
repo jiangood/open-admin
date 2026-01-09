@@ -1,2 +1,1 @@
-io.github.jiangood.sa.AdminStarterAutoConfiguration
-io.github.jiangood.sa.framework.config.security.SecurityConfig
+io.github.jiangood.sa.BasePackage

@@ -2,7 +2,7 @@ package io.github.jiangood.sa.modules.common;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

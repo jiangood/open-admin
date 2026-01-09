@@ -1,6 +1,6 @@
 package io.github.jiangood.sa.framework.config.init;
 
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

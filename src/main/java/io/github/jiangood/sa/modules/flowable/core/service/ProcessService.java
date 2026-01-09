@@ -8,7 +8,7 @@ import io.github.jiangood.sa.common.tools.PageTool;
 import io.github.jiangood.sa.common.tools.datetime.DateFormatTool;
 import io.github.jiangood.sa.framework.config.security.LoginUser;
 import io.github.jiangood.sa.modules.common.LoginTool;
-import io.github.jiangood.sa.properties.FlowableProperties;
+import io.github.jiangood.sa.modules.flowable.core.FlowableProperties;
 import io.github.jiangood.sa.modules.flowable.core.config.meta.ProcessMeta;
 import io.github.jiangood.sa.modules.flowable.core.config.meta.ProcessVariable;
 import io.github.jiangood.sa.modules.flowable.core.dto.TaskHandleType;

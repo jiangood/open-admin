@@ -3,8 +3,6 @@ package io.github.jiangood.sa.framework.config;
 import io.github.jiangood.sa.modules.system.file.FileOperator;
 import io.github.jiangood.sa.modules.system.file.LocalFileOperator;
 import io.github.jiangood.sa.modules.system.file.MinioFileOperator;
-import io.github.jiangood.sa.properties.MinioProperties;
-import io.github.jiangood.sa.properties.SysProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

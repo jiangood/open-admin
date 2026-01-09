@@ -12,7 +12,7 @@ import io.github.jiangood.sa.common.tools.DownloadTool;
 import io.github.jiangood.sa.common.tools.IdTool;
 import io.github.jiangood.sa.common.tools.ImgTool;
 import io.github.jiangood.sa.common.tools.enums.MaterialType;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.modules.system.dao.SysFileDao;
 import io.github.jiangood.sa.modules.system.entity.SysFile;
 import io.github.jiangood.sa.modules.system.file.FileOperator;

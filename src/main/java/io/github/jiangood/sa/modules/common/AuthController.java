@@ -4,7 +4,7 @@ import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.ICaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
 import io.github.jiangood.sa.common.dto.AjaxResult;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

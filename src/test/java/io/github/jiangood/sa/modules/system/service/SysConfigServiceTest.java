@@ -1,5 +1,6 @@
 package io.github.jiangood.sa.modules.system.service;
 
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.framework.config.data.SysMenuYmlDao;
 import io.github.jiangood.sa.modules.system.dao.SysConfigDao;
 import io.github.jiangood.sa.modules.system.entity.SysConfig;

@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.RSA;
 import io.github.jiangood.sa.common.tools.PasswordTool;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.framework.dict.DictAnnHandler;
 import io.github.jiangood.sa.modules.system.ConfigConsts;
 import io.github.jiangood.sa.modules.system.dao.SysConfigDao;

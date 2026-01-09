@@ -5,7 +5,6 @@ import io.github.jiangood.sa.common.dto.AjaxResult;
 import io.github.jiangood.sa.common.tools.ExceptionToMessageTool;
 import io.github.jiangood.sa.common.tools.HttpServletTool;
 import io.github.jiangood.sa.framework.CodeException;
-import io.github.jiangood.sa.properties.SysProperties;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;

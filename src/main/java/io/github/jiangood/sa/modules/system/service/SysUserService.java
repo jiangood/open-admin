@@ -3,7 +3,7 @@ package io.github.jiangood.sa.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.sa.common.tools.PasswordTool;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.framework.config.data.dto.MenuDefinition;
 import io.github.jiangood.sa.framework.data.domain.BaseEntity;
 import io.github.jiangood.sa.framework.data.service.BaseService;

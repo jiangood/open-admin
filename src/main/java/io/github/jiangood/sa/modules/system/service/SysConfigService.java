@@ -5,7 +5,7 @@ import cn.hutool.core.convert.Convert;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.sa.common.tools.RequestTool;
 import io.github.jiangood.sa.common.tools.tree.TreeTool;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.framework.config.data.SysConfigYmlDao;
 import io.github.jiangood.sa.framework.config.data.dto.ConfigDefinition;
 import io.github.jiangood.sa.framework.config.data.dto.ConfigGroupDefinition;

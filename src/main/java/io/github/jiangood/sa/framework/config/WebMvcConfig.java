@@ -4,7 +4,6 @@ import cn.hutool.captcha.generator.CodeGenerator;
 import cn.hutool.captcha.generator.MathGenerator;
 import cn.hutool.captcha.generator.RandomGenerator;
 import io.github.jiangood.sa.framework.config.argument.resolver.RequestBodyKeysArgumentResolver;
-import io.github.jiangood.sa.properties.SysProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;

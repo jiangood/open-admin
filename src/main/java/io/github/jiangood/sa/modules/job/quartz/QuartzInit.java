@@ -1,6 +1,6 @@
 package io.github.jiangood.sa.modules.job.quartz;
 
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.modules.job.dao.SysJobDao;
 import io.github.jiangood.sa.modules.job.entity.SysJob;
 import jakarta.annotation.Resource;

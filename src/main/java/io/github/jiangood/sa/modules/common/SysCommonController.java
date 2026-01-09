@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.sa.common.dto.AjaxResult;
 import io.github.jiangood.sa.common.dto.antd.MenuItem;
 import io.github.jiangood.sa.common.tools.tree.TreeTool;
-import io.github.jiangood.sa.properties.SysProperties;
+import io.github.jiangood.sa.framework.config.SysProperties;
 import io.github.jiangood.sa.framework.config.data.dto.MenuDefinition;
 import io.github.jiangood.sa.framework.config.security.LoginUser;
 import io.github.jiangood.sa.modules.common.dto.response.LoginDataResponse;

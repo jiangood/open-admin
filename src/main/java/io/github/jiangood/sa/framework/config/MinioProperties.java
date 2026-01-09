@@ -1,8 +1,9 @@
-package io.github.jiangood.sa.properties;
+package io.github.jiangood.sa.framework.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
 @Configuration
 @ConfigurationProperties(prefix = "minio")
 @Data
