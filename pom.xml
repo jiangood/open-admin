@@ -44,7 +44,7 @@
 
 
         <doclint>none</doclint>
-        <hutool.version>5.8.41</hutool.version>
+        <hutool.version>5.8.43</hutool.version>
         <poi.version>5.5.0</poi.version>
         <guava.version>33.5.0-jre</guava.version>
         <commons-io.version>2.21.0</commons-io.version>
