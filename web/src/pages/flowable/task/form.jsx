@@ -84,6 +84,9 @@ export default class extends React.Component {
 
         const {data, loading} = this.state
         const {commentList, img} = data
+        if(loading){
+            return <Spin/>
+        }
         if ( !taskInfo) {
             return <Spin/>
         }
