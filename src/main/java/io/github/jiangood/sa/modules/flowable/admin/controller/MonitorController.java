@@ -11,9 +11,11 @@ import io.github.jiangood.sa.modules.flowable.core.service.ProcessService;
 import io.github.jiangood.sa.modules.flowable.utils.FlowablePageTool;
 import io.github.jiangood.sa.modules.system.service.SysUserService;
 import lombok.AllArgsConstructor;
+import org.flowable.engine.HistoryService;
 import org.flowable.engine.RepositoryService;
 import org.flowable.engine.RuntimeService;
 import org.flowable.engine.TaskService;
+import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.ProcessDefinition;
 import org.flowable.engine.repository.ProcessDefinitionQuery;
 import org.flowable.engine.runtime.Execution;
@@ -47,6 +49,7 @@ public class MonitorController {
     private TaskService taskService;
     private SysUserService sysUserService;
     private ProcessService processService;
+    private HistoryService historyService;
 
     @GetMapping("definitionPage")
     public AjaxResult processDefinition(Pageable pageable) {
@@ -129,7 +132,7 @@ public class MonitorController {
 
     @GetMapping("instance/vars")
     public AjaxResult instanceVars(String id) {
-        ProcessInstance instance = runtimeService.createProcessInstanceQuery()
+        HistoricProcessInstance instance = historyService.createHistoricProcessInstanceQuery()
                 .includeProcessVariables()
                 .processInstanceId(id)
                 .singleResult();

@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Card, Form, Input, message, Modal, Radio, Spin, Splitter, Table, Tabs, Typography,} from "antd";
+import {Button, Card, Empty, Form, Input, message, Modal, Radio, Spin, Splitter, Table, Tabs, Typography,} from "antd";
 import {history} from "umi";
 import {FormRegistryUtils, Gap, HttpUtils, Page, PageUtils} from "../../../framework";
 import {FormOutlined, ShareAltOutlined} from "@ant-design/icons";
@@ -177,9 +177,8 @@ export default class extends React.Component {
 
         let ExForm = FormRegistryUtils.get(formName);
         if (!ExForm) {
-            return <div>
-                    表单不存在： {formName}。 请检查表单源代码：src/forms/{formName}.jsx
-            </div>
+            console.error(" 表单不存在： "+formName+"。 请检查表单源代码：src/forms/"+formName+".jsx")
+            return <Empty description={"表单不存在： " + formName}></Empty>
         }
 
         return <ExForm id={businessKey} formKey={formKey} ref={this.externalFormRef} ></ExForm>

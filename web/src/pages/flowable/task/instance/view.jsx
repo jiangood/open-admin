@@ -42,7 +42,6 @@ export default class extends React.Component {
         if (this.state.errorMsg) {
             return <Empty description={this.state.errorMsg}></Empty>
         }
-        const {id} = PageUtils.currentParams()
 
         const {data, loading} = this.state
         const {commentList, img} = data
@@ -78,23 +77,7 @@ export default class extends React.Component {
                 />
             </Card>
 
-            <Gap/>
-            <Card title='流程变量'>
-                <ProTable columns={[
-                    {
-                        dataIndex: 'key',
-                        title: '变量名'
-                    },
-                    {
-                        dataIndex: 'value',
-                        title: '变量值'
-                    },
-                ]}
-                          rowKey='key'
-                          request={() => HttpUtils.get('admin/flowable/monitor/instance/vars', {id})}
-                ></ProTable>
 
-            </Card>
         </Page>
     }
 
