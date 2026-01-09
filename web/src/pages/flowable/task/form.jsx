@@ -15,6 +15,7 @@ export default class extends React.Component {
 
 
         data: {
+            taskId: null,
             commentList: [],
             img: null
         },
@@ -63,7 +64,7 @@ export default class extends React.Component {
                 }
             }
 
-            value.taskId = this.state.taskId
+            value.taskId = this.state.data.taskId
             await HttpUtils.post("admin/flowable/my/handleTask", value)
             history.replace('/flowable/task')
         } catch (error) {
@@ -115,7 +116,6 @@ export default class extends React.Component {
                             disabled={submitLoading}
                         >
 
-                            <Form.Item noStyle name='id' initialValue={this.state.data.taskId}></Form.Item>
                             <Form.Item label='审批结果' name='result' rules={[{required: true, message: '请选择'}]}
                                        initialValue={'APPROVE'}>
                                 <Radio.Group>
