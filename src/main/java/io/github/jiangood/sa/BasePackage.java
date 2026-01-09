@@ -18,6 +18,7 @@ public class BasePackage {
 
     @Bean
     public SpringTool SpringTool() {
+        System.out.println(SpringTool.class.getName() + " 初始化...");
         return new SpringTool();
     }
 }
