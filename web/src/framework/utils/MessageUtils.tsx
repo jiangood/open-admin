@@ -88,21 +88,21 @@ export class MessageUtils {
     /**
      * 成功消息
      */
-    static success(content: React.ReactNode, duration: number = 3) {
+    static success(content: String, duration: number = 3) {
         this.messageApi.success(content, duration);
     }
 
     /**
      * 错误消息
      */
-    static error(content: React.ReactNode, duration: number = 3) {
+    static error(content: String, duration: number = 3) {
         this.messageApi.error(content, duration);
     }
 
     /**
      * 警告消息
      */
-    static warning(content: React.ReactNode, duration: number = 3) {
+    static warning(content: String, duration: number = 3) {
         this.messageApi.warning(content, duration);
     }
 
@@ -116,13 +116,15 @@ export class MessageUtils {
     /**
      * 弹出 Loading 提示
      */
-    static loading(content: React.ReactNode = '正在加载...', duration?: number) {
-        return this.messageApi.loading({content, duration: duration === undefined ? 0 : duration});
+    static loading(content: string = '正在加载...', duration?: number) {
+         duration = duration === undefined ? 0 : duration;
+        return this.messageApi.loading(content, duration);
     }
 
     static config(messageApi: MessageInstance, modalApi: HookAPI) {
         this.messageApi = messageApi;
         this.modalApi = modalApi;
+        console.log('MessageUtils.config', messageApi, modalApi)
     }
 
     private static modalApi:HookAPI = null;
