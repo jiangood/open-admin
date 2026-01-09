@@ -40,7 +40,8 @@ export class HttpUtils {
                 // 假设后端响应结构为 { success: boolean | null, message: string, data: any, code: number }
                 let {success, message, data} = body;
                 if (success == undefined) { // 如果没有success字段，说明非标准接口
-                    return response;
+                    resolve(response);
+                    return ;
                 }
 
                 if (!success) {
