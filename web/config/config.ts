@@ -22,6 +22,8 @@ export default defineConfig({
     mfsu: false,
     esbuildMinifyIIFE: true,
 
+
+
     plugins: [
         pluginDir +'/form-plugin',
         pluginDir +'/route-plugin',
