@@ -174,9 +174,9 @@ export default class extends React.Component {
 
     renderForm = () => {
         const {data} = this.state
-        const {processDefinitionKey, businessKey} = data
-        const formKey = this.props.formKey || processDefinitionKey;
-        const formName = formKey + 'Form'
+        const {businessKey} = data
+        const formKey = data.formKey;
+        const formName = data.formKey + 'Form'
 
         let ExForm = FormRegistryUtils.get(formName);
         if (!ExForm) {
