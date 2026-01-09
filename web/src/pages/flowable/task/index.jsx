@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Modal, Tabs} from "antd";
+import {Button, Tabs} from "antd";
 import {HttpUtils, LinkButton, Page, PageLoading, PageUtils, ProTable} from "../../../framework";
 
 

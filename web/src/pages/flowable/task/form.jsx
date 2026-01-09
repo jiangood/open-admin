@@ -2,7 +2,6 @@ import React from "react";
 import {Button, Card, Form, Input, message, Modal, Radio, Spin, Splitter, Table, Tabs, Typography,} from "antd";
 import {history} from "umi";
 import {FormRegistryUtils, Gap, HttpUtils, Page, PageUtils} from "../../../framework";
-import InstanceInfo from "../InstanceInfo";
 import {FormOutlined, ShareAltOutlined} from "@ant-design/icons";
 
 export default class extends React.Component {
