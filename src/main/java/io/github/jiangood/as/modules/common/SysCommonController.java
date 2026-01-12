@@ -17,6 +17,7 @@ import io.github.jiangood.as.modules.system.service.*;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,32 +34,16 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping("admin")
+@AllArgsConstructor
 public class SysCommonController {
 
-    @Resource
-    SysRoleService roleService;
-
-
-    @Resource
-    SysConfigService sysConfigService;
-
-
-    @Resource
-    SysFileService sysFileService;
-
-    @Resource
-    SysProperties sysProperties;
-
-    @Resource
+    private  SysRoleService roleService;
+    private SysConfigService sysConfigService;
+    private SysFileService sysFileService;
+    private SysProperties sysProperties;
     private SysUserService sysUserService;
-
-
-    @Resource
     private SysOrgService sysOrgService;
-
-    @Resource
     private SysUserMessageService sysUserMessageService;
-    @Resource
     private SysDictService sysDictService;
 
     /**

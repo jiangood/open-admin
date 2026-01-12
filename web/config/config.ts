@@ -14,6 +14,7 @@ console.log('isFramework', isFramework)
 const pluginDir = isFramework ? './config/plugins' : '@jiangood/admin-spring-boot-starter/config/dist/plugins';
 console.log('pluginDir', pluginDir)
 
+const host = '127.0.0.1:8080';
 export default defineConfig({
     // 配置是否让生成的文件包含 hash 后缀，通常用于增量发布和避免浏览器加载缓存。
     hash: true,
@@ -31,21 +32,21 @@ export default defineConfig({
 
     proxy: {
         '/admin': {
-            target: 'http://127.0.0.1:8002',
+            target: 'http://' + host,
             changeOrigin: true,
         },
         '/preview': {
-            target: 'http://127.0.0.1:8002',
+            target: 'http://'+host,
             changeOrigin: true,
         },
 
         '/ureport': {
-            target: 'http://127.0.0.1:8002',
+            target: 'http://' + host,
             changeOrigin: true,
             pathRewrite: {'^/ureport': '/ureport'},
         },
         '/admin/ws': {
-            target: 'http://127.0.0.1:8002',
+            target: 'ws://' +  host,
             changeOrigin: true,
             ws: true,
         },
