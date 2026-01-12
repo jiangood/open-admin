@@ -6,8 +6,8 @@
 ```java
 package io.admin.modules.system.entity;
 
-import annotation.tools.common.io.github.jiangood.sa.Remark;
-import domain.data.framework.io.github.jiangood.sa.BaseEntity;
+import annotation.tools.common.io.github.jiangood.as.Remark;
+import domain.data.framework.io.github.jiangood.as.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.validation.constraints.NotNull;
@@ -42,7 +42,7 @@ public class User extends BaseEntity {
 ```java
 package io.admin.modules.system.dao;
 
-import repository.data.framework.io.github.jiangood.sa.BaseDao;
+import repository.data.framework.io.github.jiangood.as.BaseDao;
 import io.admin.modules.system.entity.User;
 import org.springframework.stereotype.Repository;
 
@@ -58,7 +58,7 @@ public class UserDao extends BaseDao<User> {
 ```java
 package io.admin.modules.system.service;
 
-import service.data.framework.io.github.jiangood.sa.BaseService;
+import service.data.framework.io.github.jiangood.as.BaseService;
 import io.admin.modules.system.dao.UserDao;
 import io.admin.modules.system.entity.User;
 import jakarta.annotation.Resource;
@@ -79,10 +79,10 @@ public class UserService extends BaseService<User> {
 ```java
 package io.admin.modules.system.controller;
 
-import dto.common.io.github.jiangood.sa.AjaxResult;
-import argument.config.framework.io.github.jiangood.sa.RequestBodyKeys;
-import security.config.framework.io.github.jiangood.sa.HasPermission;
-import specification.data.framework.io.github.jiangood.sa.Spec;
+import dto.common.io.github.jiangood.as.AjaxResult;
+import argument.config.framework.io.github.jiangood.as.RequestBodyKeys;
+import security.config.framework.io.github.jiangood.as.HasPermission;
+import specification.data.framework.io.github.jiangood.as.Spec;
 import io.admin.modules.system.entity.User;
 import io.admin.modules.system.service.UserService;
 import jakarta.annotation.Resource;

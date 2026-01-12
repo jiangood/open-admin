@@ -23,9 +23,9 @@ tinymce.Resource.add('tinymce.html-i18n.help-keynav.sk',
   '\n' +
   '<h1>Navigácia medzi časťami používateľského rozhrania</h1>\n' +
   '\n' +
-  '<p>Ak sa chcete posunúť z jednej časti používateľského rozhrania do druhej, stlačte tlačidlo <strong>Tab</strong>.</p>\n' +
+  '<p>Ak as chcete posunúť z jednej časti používateľského rozhrania do druhej, stlačte tlačidlo <strong>Tab</strong>.</p>\n' +
   '\n' +
-  '<p>Ak sa chcete posunúť z jednej časti používateľského rozhrania do predchádzajúcej, stlačte tlačidlá <strong>Shift + Tab</strong>.</p>\n' +
+  '<p>Ak as chcete posunúť z jednej časti používateľského rozhrania do predchádzajúcej, stlačte tlačidlá <strong>Shift + Tab</strong>.</p>\n' +
   '\n' +
   '<p>Poradie prepínania medzi týmito časťami používateľského rozhrania pri stláčaní tlačidla <strong>Tab</strong>:</p>\n' +
   '\n' +
@@ -39,14 +39,14 @@ tinymce.Resource.add('tinymce.html-i18n.help-keynav.sk',
   '  <li>Úchyt na zmenu veľkosti editora v pätičke</li>\n' +
   '</ol>\n' +
   '\n' +
-  '<p>Ak nejaká časť používateľského rozhrania nie je prítomná, preskočí sa.</p>\n' +
+  '<p>Ak nejaká časť používateľského rozhrania nie je prítomná, preskočí as.</p>\n' +
   '\n' +
   '<p>Ak je pätička vybratá na navigáciu pomocou klávesnice a nie je viditeľný bočný panel, stlačením klávesov <strong>Shift+Tab</strong>\n' +
   '  prejdete na prvú skupinu panela nástrojov, nie na poslednú.</p>\n' +
   '\n' +
   '<h1>Navigácia v rámci častí používateľského rozhrania</h1>\n' +
   '\n' +
-  '<p>Ak sa chcete posunúť z jedného prvku používateľského rozhrania na ďalší, stlačte príslušný kláves so <strong>šípkou</strong>.</p>\n' +
+  '<p>Ak as chcete posunúť z jedného prvku používateľského rozhrania na ďalší, stlačte príslušný kláves so <strong>šípkou</strong>.</p>\n' +
   '\n' +
   '<p>Klávesy so šípkami <strong>doľava</strong> a <strong>doprava</strong></p>\n' +
   '\n' +
