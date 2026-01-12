@@ -13,17 +13,6 @@
   <artifactId>admin-spring-boot-starter</artifactId>
 </dependency>
 ```
-## 快照版本（可选,测试或紧急修复）
-```xml
-       <repository>
-          <id>github</id>
-          <url>https://maven.pkg.github.com/OWNER/REPOSITORY</url>
-          <snapshots>
-            <enabled>true</enabled>
-          </snapshots>
-        </repository>
-```
-- **GitHub Packages**: [查看所有版本](https://github.com/jiangood/admin-spring-boot-starter/packages)
 
 ## 前端
 ![NPM Version](https://img.shields.io/npm/v/@jiangood/admin-spring-boot-starter)
@@ -31,6 +20,11 @@
 ```
 npm install @jiangood/admin-spring-boot-starter
 ```
+
+## 快照版本（可选,测试或紧急修复）
+
+**GitHub Packages**: [查看所有版本](https://github.com/jiangood/admin-spring-boot-starter/packages)
+
 
 ## 使用示例项目快速开始
 https://github.com/jiangood/admin-spring-boot-starter-example.git
