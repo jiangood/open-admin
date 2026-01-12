@@ -13,7 +13,14 @@
   <artifactId>admin-spring-boot-starter</artifactId>
 </dependency>
 ```
-## 快照版本（可选）
+## 快照版本（可选,测试或紧急修复）
+       <repository>
+          <id>github</id>
+          <url>https://maven.pkg.github.com/OWNER/REPOSITORY</url>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
 - **GitHub Packages**: [查看所有版本](https://github.com/jiangood/admin-spring-boot-starter/packages)
 
 ## 前端
