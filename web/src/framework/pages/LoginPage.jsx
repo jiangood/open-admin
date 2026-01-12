@@ -74,12 +74,10 @@ export class LoginPage extends React.Component {
     }
 
 
-    getForm(siteInfo) {
-        if(this.props.form){
-            return this.props.form;
-        }
+    getForm = siteInfo => {
 
-        return <Form
+
+        const form = <Form
             name="normal_login"
             className="login-form"
             initialValues={{remember: true}}
@@ -118,7 +116,12 @@ export class LoginPage extends React.Component {
                 </Button>
             </Form.Item>
         </Form>;
-    }
+
+        if(this.props.formRender){
+            return this.props.formRender(form);
+        }
+        return form;
+    };
 
     renderFormBottom() {
         let siteInfo = this.state.siteInfo;

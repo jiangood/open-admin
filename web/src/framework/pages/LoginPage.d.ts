@@ -3,9 +3,10 @@ import React, {ReactNode} from "react";
 export interface LoginPageProps {
 
     /**
-     * 覆盖表单
+     * 表单渲染
+     * @param origForm 原始表单
      */
-    form?: ReactNode
+    formRender: (origForm: ReactNode) => {}
 
 
 }
