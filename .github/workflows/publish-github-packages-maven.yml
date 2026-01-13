@@ -1,7 +1,6 @@
 name: github package maven
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:

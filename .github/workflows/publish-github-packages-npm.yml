@@ -1,7 +1,6 @@
 name:  github package npm
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:
