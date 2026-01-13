@@ -139,6 +139,8 @@ export function MessageHolder(){
     const [modalApi, modalContextHolder] = Modal.useModal();
     const [messageApi, messageContextHolder] = message.useMessage();
     MessageUtils.config(messageApi,modalApi);
+
+
     return <>
         {modalContextHolder} {messageContextHolder}
     </>

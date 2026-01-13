@@ -5,7 +5,15 @@ import {ConfigProvider} from "antd";
 
 import {Outlet, withRouter} from "umi";
 import zhCN from 'antd/locale/zh_CN';
-import {ArrUtils, HttpUtils, MessageHolder, PageLoading, PageUtils, SysUtils, ThemeUtils,} from "../framework";
+import {
+    ArrUtils,
+    HttpUtils,
+    MessageHolder,
+    PageLoading,
+    PageUtils,
+    SysUtils,
+    ThemeUtils,
+} from "../framework";
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
 
@@ -21,24 +29,28 @@ class _Layouts extends React.Component {
 
 
     state = {
+        messageHolderInit:false,
         siteInfoLoading: true,
         loginInfoFinish: false
     }
 
+    onMessageHolderFinish = () => {
+        this.loadSiteInfo()
+        this.setState({messageHolderInit:true});
+    }
 
-    componentDidMount() {
+
+    loadSiteInfo = () => {
         HttpUtils.get("/admin/public/site-info").then(rs => {
             SysUtils.setSiteInfo(rs)
             this.setState({siteInfoLoading: false})
-
             this.loadLoginInfo()
         })
-    }
+    };
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         const pre = prevProps.location.pathname
         const cur = this.props.location.pathname
-
         if (pre !== cur) {
             this.loadLoginInfo()
         }
@@ -46,7 +58,9 @@ class _Layouts extends React.Component {
 
     isSimplePage() {
         let {pathname} = this.props.location;
-        return ArrUtils.contains(SIMPLE_URLS, pathname)
+        let isSimplePage = ArrUtils.contains(SIMPLE_URLS, pathname);
+        console.log('是否简单页面',isSimplePage)
+        return isSimplePage
     }
 
     loadLoginInfo = () => {
@@ -73,11 +87,6 @@ class _Layouts extends React.Component {
                 PageUtils.redirectToLogin()
             })
     }
-
-
-
-
-
 
     render() {
         return <ConfigProvider
@@ -115,15 +124,22 @@ class _Layouts extends React.Component {
                     }
                 }
             }}>
-            <MessageHolder />
+
             {this.renderContent()}
         </ConfigProvider>
     }
 
+
     renderContent = () => {
+        if(!this.state.messageHolderInit) {
+            console.log('先加载message holder')
+            return <MessageHolder onFinish={this.onMessageHolderFinish} />
+        }
+
         if (this.state.siteInfoLoading) {
             return <PageLoading message='加载站点信息...'/>
         }
+        
         let {params = {}} = this.props.location;
         console.log('layout: params', params)
         let simple = this.isSimplePage();
@@ -135,13 +151,10 @@ class _Layouts extends React.Component {
             return <PageLoading message='加载登录信息...'/>
         }
 
-
         return <AdminLayout path={this.state.path} logo={this.props.logo}/>
     };
-
-
-
 }
+
 
 export const Layouts = withRouter(_Layouts);
 export default Layouts
