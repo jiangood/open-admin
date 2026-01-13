@@ -112,16 +112,11 @@ class _Layouts extends React.Component {
                         triggerBg: ThemeUtils.getColor("primary-color-click"),
                         headerBg: 'white',
                         triggerHeight: 32
-                    },
-
-
+                    }
                 }
             }}>
-
-            {this.renderContent()}
-
             <MessageHolder />
-
+            {this.renderContent()}
         </ConfigProvider>
     }
 
