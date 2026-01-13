@@ -28,6 +28,10 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE_KEY }}
 
+      - name: echo version
+        run: mvn exec:exec -q -Dexec.executable='echo' -Dexec.args='${project.version}'
+
+
 
 
 
