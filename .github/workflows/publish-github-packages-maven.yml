@@ -27,6 +27,7 @@ jobs:
         run: mvn package  -q -DskipTests
       - name: 上传
         uses: svenstaro/upload-release-action@v2
+        run: ls
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: "target/*.jar"
