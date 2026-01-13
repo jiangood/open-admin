@@ -7,7 +7,7 @@
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@ant-design/icons": "^5.4.0",
+    "@ant-design/icons": "^6.0.0",
     "@bpmn-io/properties-panel": "^3.34.0",
     "@tinymce/tinymce-react": "^6.0.0",
     "@umijs/types": "^3.5.43",
@@ -37,5 +37,5 @@
     "dev": "umi dev",
     "build": "tsc --outDir config/dist --skipLibCheck --noEmitOnError false config/index.ts"
   },
-  "version": "0.2.4-beta.1"
+  "version": "0.2.4-beta.2"
 }
