@@ -8,6 +8,7 @@ export class LoginPageUtils {
 
     static postLogin(values) {
         return new Promise((resolve, reject) => {
+            console.log('开始登录')
             HttpUtils.postForm('/admin/auth/login', values).then(rs => {
                 console.log('登录结果', rs)
                 EventBusUtils.emit('loginSuccess')
