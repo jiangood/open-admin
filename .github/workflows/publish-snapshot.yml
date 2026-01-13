@@ -1,4 +1,4 @@
-name: Publish NPM, Maven
+name: Publish  Maven Snapshot
 
 on:
   workflow_dispatch:
