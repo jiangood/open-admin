@@ -24,19 +24,3 @@ npm install @jiangood/admin-spring-boot-starter
 ## 使用示例项目快速开始
 https://github.com/jiangood/admin-spring-boot-starter-example.git
 
-## 快照版本 GitHub Packages
-https://github.com/jiangood/admin-spring-boot-starter/packages
-
-maven 配置仓库
-```xml
-<repository>
-  <id>github</id>
-  <url>https://maven.pkg.github.com/jiangood/admin-spring-boot-starter</url>
-  <snapshots>
-    <enabled>true</enabled>
-  </snapshots>
-</repository>
-```
-
-npm  指定注册中心安装
---registry=https://npm.pkg.github.com
