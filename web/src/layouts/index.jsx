@@ -59,7 +59,8 @@ class _Layouts extends React.Component {
     isSimplePage() {
         let {pathname} = this.props.location;
         let isSimplePage = ArrUtils.contains(SIMPLE_URLS, pathname);
-        console.log('是否简单页面',isSimplePage)
+        console.log('简单页面列表定义', SIMPLE_URLS)
+        console.log('当前页面是否简单页面',pathname,isSimplePage)
         return isSimplePage
     }
 

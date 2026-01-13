@@ -57,22 +57,24 @@ export class MessageUtils {
         const isNumber = typeof initialValue === 'number';
         return new Promise((resolve) => {
             const ref = React.createRef()
+            let element:any = isNumber ? <InputNumber placeholder={placeholder}/> : <Input placeholder={placeholder}/>;
+            const content:any = <div>
+                <div style={{marginBottom: 4}}>{message}</div>
+                <Form ref={ref}>
+                    <Form.Item name='inputValue' initialValue={initialValue}>
+                        {element}
+                    </Form.Item>
+                </Form>
+            </div>;
             this.modalApi.confirm({
                 icon: null,
                 title: '提示',
-                content: <div>
-                    <div style={{marginBottom: 4}}>{message}</div>
-                    <Form ref={ref}>
-                        <Form.Item name='inputValue' initialValue={initialValue}>
-                            {isNumber ? <InputNumber placeholder={placeholder}/> : <Input  placeholder={placeholder}/>}
-                        </Form.Item>
-                    </Form>
-                </div>,
+                content:content,
                 okText: '确定',
                 cancelText: '取消',
                 onOk: () => {
                     const form = ref.current;
-                   const values= form.getFieldsValue()
+                    const values = form.getFieldsValue()
                     resolve(values.inputValue)
                 },
                 onCancel: () => {
@@ -89,6 +91,10 @@ export class MessageUtils {
      * 成功消息
      */
     static success(content: String, duration: number = 3) {
+        if(!this.messageApi){
+            alert(content)
+            return
+        }
         this.messageApi.success(content, duration);
     }
 
@@ -96,6 +102,11 @@ export class MessageUtils {
      * 错误消息
      */
     static error(content: String, duration: number = 3) {
+        console.error('调用 MessageUtils.error',content)
+        if(!this.messageApi){
+            alert(content)
+            return
+        }
         this.messageApi.error(content, duration);
     }
 
@@ -103,6 +114,10 @@ export class MessageUtils {
      * 警告消息
      */
     static warning(content: String, duration: number = 3) {
+        if(!this.messageApi){
+            alert(content)
+            return
+        }
         this.messageApi.warning(content, duration);
     }
 
@@ -110,6 +125,10 @@ export class MessageUtils {
      * 通用消息
      */
     static info(content: React.ReactNode, duration: number = 3) {
+        if(!this.messageApi){
+            alert(content)
+            return
+        }
         this.messageApi.info(content, duration);
     }
 
@@ -138,10 +157,10 @@ export class MessageUtils {
 export function MessageHolder(props){
     const [modalApi, modalContextHolder] = Modal.useModal();
     const [messageApi, messageContextHolder] = message.useMessage();
-    MessageUtils.config(messageApi,modalApi);
 
     React.useEffect(()=>{
         console.log('MessageHolder Rendered')
+        MessageUtils.config(messageApi,modalApi);
         props.onFinish()
     },[])
     return <>
