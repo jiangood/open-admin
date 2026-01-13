@@ -21,13 +21,12 @@
 npm install @jiangood/admin-spring-boot-starter
 ```
 
-## 快照版本（可选,测试或紧急修复）
-
-**GitHub Packages**: [查看所有版本](https://github.com/jiangood/admin-spring-boot-starter/packages)
-
-
 ## 使用示例项目快速开始
 https://github.com/jiangood/admin-spring-boot-starter-example.git
+
+## 快照版本 GitHub Packages
+https://github.com/jiangood/admin-spring-boot-starter/packages
+
 
 
 
