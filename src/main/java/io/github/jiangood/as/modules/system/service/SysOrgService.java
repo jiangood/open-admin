@@ -37,6 +37,10 @@ public class SysOrgService extends BaseService<SysOrg> {
     private SysUserDao sysUserDao;
 
 
+    public SysOrg findByThirdId(String thirdId) {
+        return sysOrgDao.findByField(SysOrg.Fields.thirdId, thirdId);
+    }
+
     @Override
     public void deleteByRequest(String id) {
         long count = sysOrgDao.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
