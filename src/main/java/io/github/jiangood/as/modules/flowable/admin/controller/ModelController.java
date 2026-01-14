@@ -92,7 +92,7 @@ public class ModelController {
     @GetMapping("detail")
     public AjaxResult detail(String id) {
         Model model = repositoryService.getModel(id);
-        Assert.notNull(model,"流程未定义");
+        Assert.notNull(model, "流程未定义");
 
         byte[] source = repositoryService.getModelEditorSource(id);
 

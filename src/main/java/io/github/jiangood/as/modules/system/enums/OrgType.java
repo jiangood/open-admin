@@ -16,7 +16,6 @@ public enum OrgType {
     private final int code;
 
 
-
     public static OrgType valueOf(int code) {
         for (OrgType type : OrgType.values()) {
             if (type.code == code) {

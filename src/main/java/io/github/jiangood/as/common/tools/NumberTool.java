@@ -11,7 +11,7 @@ public class NumberTool {
     /**
      * 格式化数字，将其转换为指定小数位数的字符串表示
      *
-     * @param number 要格式化的数字
+     * @param number        要格式化的数字
      * @param decimalPlaces 保留的小数位数
      * @return 格式化后的数字字符串，去除末尾多余的0
      * @throws IllegalArgumentException 当小数位数为负数时抛出异常

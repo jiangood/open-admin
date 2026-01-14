@@ -58,13 +58,11 @@ public class DictAnnHandler {
             }
 
 
-
-
             SysDict sysDict = sysDictDao.saveOrUpdate(code, label, false);
 
             boolean buildin = true;
             Field[] fields = cls.getFields();
-           {
+            {
                 for (int i = 0; i < fields.length; i++) {
                     Field field = fields[i];
 

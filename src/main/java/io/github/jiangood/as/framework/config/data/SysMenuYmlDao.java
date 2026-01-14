@@ -31,8 +31,9 @@ public class SysMenuYmlDao implements SysMenuDao {
 
     /**
      * 获取菜单列表
-     *
+     * <p>
      * 注意：需保证每次获取的都是新的引用，以免被外部调用修改
+     *
      * @return
      */
     @Override
@@ -43,7 +44,7 @@ public class SysMenuYmlDao implements SysMenuDao {
     @Override
     public List<MenuDefinition> findAllEnabled() {
         List<MenuDefinition> list = this.findAll();
-        TreeTool.removeIf(list,MenuDefinition::getChildren, MenuDefinition::isDisabled);
+        TreeTool.removeIf(list, MenuDefinition::getChildren, MenuDefinition::isDisabled);
         return list;
     }
 

@@ -186,9 +186,9 @@ public class TreeTool {
 
     }
 
-    public static <E> void removeIf(List<E> list,  Function<E, List<E>> getChildren,Predicate<? super E> filter) {
+    public static <E> void removeIf(List<E> list, Function<E, List<E>> getChildren, Predicate<? super E> filter) {
         list.removeIf(filter);
-        walk(list, getChildren, t->{
+        walk(list, getChildren, t -> {
             List<E> children = getChildren.apply(t);
             removeIf(children, getChildren, filter);
         });

@@ -14,7 +14,6 @@ import io.github.jiangood.as.modules.system.ConfigConsts;
 import io.github.jiangood.as.modules.system.entity.SysRole;
 import io.github.jiangood.as.modules.system.entity.SysUser;
 import io.github.jiangood.as.modules.system.service.*;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
@@ -37,7 +36,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class SysCommonController {
 
-    private  SysRoleService roleService;
+    private SysRoleService roleService;
     private SysConfigService sysConfigService;
     private SysFileService sysFileService;
     private SysProperties sysProperties;
@@ -52,7 +51,7 @@ public class SysCommonController {
     @GetMapping("public/site-info")
     public AjaxResult siteInfo() {
         Dict data = new Dict();
-        data.put("captcha",  sysProperties.isCaptcha());
+        data.put("captcha", sysProperties.isCaptcha());
         data.put("captchaType", sysProperties.getCaptchaType());
         data.put("copyright", sysProperties.getCopyright());
         data.put("loginBoxBottomTip", sysProperties.getLoginBoxBottomTip());

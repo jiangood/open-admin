@@ -69,7 +69,6 @@ public class SysOrgController {
     }
 
 
-
     @Log("机构-保存")
     @PreAuthorize("hasAuthority('sysOrg:save')")
     @PostMapping("save")

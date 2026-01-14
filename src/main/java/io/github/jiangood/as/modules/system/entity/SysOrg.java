@@ -72,8 +72,10 @@ public class SysOrg extends BaseEntity implements TreeNode<SysOrg> {
     private String thirdAccount;
 
 
-    public SysOrg(){}
-    public SysOrg(String id){
+    public SysOrg() {
+    }
+
+    public SysOrg(String id) {
         this.setId(id);
     }
 

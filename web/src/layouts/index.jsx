@@ -19,6 +19,7 @@ import 'dayjs/locale/zh-cn';
 
 import '../style/global.less'
 import './index.less'
+import {Logger} from "../framework/utils/Logger";
 
 dayjs.locale('zh-cn');
 
@@ -27,6 +28,7 @@ const SIMPLE_URLS = ['/login', '/test']
 
 class _Layouts extends React.Component {
 
+    log = Logger.getLogger('Layouts')
 
     state = {
         messageHolderInit:false,
@@ -126,6 +128,7 @@ class _Layouts extends React.Component {
                 }
             }}>
 
+            <MessageHolder onFinish={this.onMessageHolderFinish} />
             {this.renderContent()}
         </ConfigProvider>
     }
@@ -133,8 +136,8 @@ class _Layouts extends React.Component {
 
     renderContent = () => {
         if(!this.state.messageHolderInit) {
-            console.log('先加载message holder')
-            return <MessageHolder onFinish={this.onMessageHolderFinish} />
+            this.log.info('加载message holder...')
+            return <PageLoading message='加载消息组件...'/>
         }
 
         if (this.state.siteInfoLoading) {

@@ -3,6 +3,7 @@ import type {ModalFuncProps} from 'antd/es/modal/interface';
 import React from 'react';
 import {MessageInstance} from "antd/lib/message/interface";
 import {HookAPI} from "antd/lib/modal/useModal";
+import {Logger} from "./Logger";
 
 
 
@@ -102,7 +103,7 @@ export class MessageUtils {
      * 错误消息
      */
     static error(content: String, duration: number = 3) {
-        console.error('调用 MessageUtils.error',content)
+        console.log('调用 MessageUtils.error',content)
         if(!this.messageApi){
             alert(content)
             return
@@ -159,7 +160,7 @@ export function MessageHolder(props){
     const [messageApi, messageContextHolder] = message.useMessage();
 
     React.useEffect(()=>{
-        console.log('MessageHolder Rendered')
+        Logger.getLogger("MessageHolder").debug('Rendered')
         MessageUtils.config(messageApi,modalApi);
         props.onFinish()
     },[])

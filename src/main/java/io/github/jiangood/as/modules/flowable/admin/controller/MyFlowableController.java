@@ -45,6 +45,7 @@ public class MyFlowableController {
     private TaskService taskService;
     private HistoryService historyService;
     private ProcessService processService;
+
     @GetMapping("todoCount")
     public AjaxResult todo() {
         String userId = LoginTool.getUserId();
@@ -110,7 +111,6 @@ public class MyFlowableController {
     }
 
 
-
     /**
      * 流程处理信息
      *
@@ -151,7 +151,7 @@ public class MyFlowableController {
         // 兼容性代码 TODO 老系统运行几个月后可移除
         if (formKey == null) {
             HistoricProcessInstance instance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
-            formKey = instance.getProcessDefinitionKey() ;
+            formKey = instance.getProcessDefinitionKey();
         }
 
         // 增加表单key
@@ -174,7 +174,6 @@ public class MyFlowableController {
                 .listPage(0, 1);
         Assert.state(!list.isEmpty(), "暂无流程信息");
         HistoricProcessInstance instance = list.get(0);
-
 
 
         Map<String, Object> data = new HashMap<>();

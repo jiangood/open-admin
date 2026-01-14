@@ -31,7 +31,8 @@ public class ResponseTool {
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setHeader("Access-Control-Expose-Headers", "content-disposition");
     }
-    public static void setDownloadExcelHeader(String filename,  HttpServletResponse response) throws IOException {
+
+    public static void setDownloadExcelHeader(String filename, HttpServletResponse response) throws IOException {
         filename = URLUtil.encode(filename, StandardCharsets.UTF_8);
         response.setContentType(CONTENT_TYPE_EXCEL);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);

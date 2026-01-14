@@ -14,7 +14,7 @@ public class ProcessMetaService {
 
     private List<IProcessMetaDao> daoList;
 
-    public List<ProcessMeta> findAll(){
+    public List<ProcessMeta> findAll() {
         List<ProcessMeta> list = new ArrayList<>();
         for (IProcessMetaDao dao : daoList) {
             List<ProcessMeta> l = dao.findProcessMetaList();

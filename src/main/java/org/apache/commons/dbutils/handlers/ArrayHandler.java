@@ -16,13 +16,13 @@
  */
 package org.apache.commons.dbutils.handlers;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import io.github.jiangood.as.common.tools.jdbc.impl.MyBeanProcessor;
 import io.github.jiangood.as.common.tools.jdbc.impl.MyRowProcessor;
 import org.apache.commons.dbutils.ResultSetHandler;
 import org.apache.commons.dbutils.RowProcessor;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * {@code ResultSetHandler} implementation that converts a

@@ -115,7 +115,7 @@ public class ExcelTool {
     }
 
     public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws Exception {
-        ResponseTool.setDownloadExcelHeader(filename,response);
+        ResponseTool.setDownloadExcelHeader(filename, response);
 
         workbook.write(response.getOutputStream());
 

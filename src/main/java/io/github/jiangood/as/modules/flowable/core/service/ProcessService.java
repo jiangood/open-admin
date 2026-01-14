@@ -20,8 +20,8 @@ import io.github.jiangood.as.modules.system.entity.SysUser;
 import io.github.jiangood.as.modules.system.service.SysUserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.flowable.bpmn.model.*;
 import org.flowable.bpmn.model.Process;
+import org.flowable.bpmn.model.*;
 import org.flowable.engine.*;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.Deployment;
@@ -48,7 +48,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static io.github.jiangood.as.modules.flowable.FlowableConsts.*;
-import static io.github.jiangood.as.modules.flowable.FlowableConsts.VAR_DEPT_LEADER;
 
 @Slf4j
 @Component
@@ -64,6 +63,7 @@ public class ProcessService {
     private RepositoryService repositoryService;
     private IdentityService identityService;
     private ProcessMetaService processMetaService;
+
     public void start(String processDefinitionKey, String bizKey, Map<String, Object> variables) {
         start(processDefinitionKey, bizKey, null, variables);
     }
@@ -146,7 +146,7 @@ public class ProcessService {
     /**
      * 获取最新的历史流程实例
      * 根据业务键查询历史流程实例，并按开始时间降序排列，返回最近的一个流程实例
-     *
+     * <p>
      * 为什么不直接使用单个结果，因为可能存在多个结果
      *
      * @param bizKey 业务键，用于标识特定业务流程的唯一标识符
@@ -158,18 +158,18 @@ public class ProcessService {
                 .notDeleted()
                 .orderByProcessInstanceStartTime().desc()
                 .list();
-        if(list.isEmpty()){
+        if (list.isEmpty()) {
             return null;
         }
         return list.get(0);
     }
 
-    public void deleteModel(String modelId){
+    public void deleteModel(String modelId) {
         repositoryService.deleteModel(modelId);
     }
 
-    public Model getModel(String modelId){
-      return  repositoryService.getModel(modelId);
+    public Model getModel(String modelId) {
+        return repositoryService.getModel(modelId);
     }
 
     public List<ProcessDefinition> findAllProcessDefinition() {
@@ -206,7 +206,7 @@ public class ProcessService {
     }
 
     @NotNull
-    private  String createDefaultModelXml(String key, String name) {
+    private String createDefaultModelXml(String key, String name) {
         Assert.state(key.length() <= 16, "流程key长度不能超过16个字符");
         // create default model xml
         BpmnModel bpmnModel = new BpmnModel();
@@ -244,7 +244,6 @@ public class ProcessService {
 
         // 4. 将流程添加到模型中
         bpmnModel.addProcess(process);
-
 
 
         String xml = ModelTool.modelToXml(bpmnModel);

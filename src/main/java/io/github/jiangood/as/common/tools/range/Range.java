@@ -14,9 +14,8 @@ public class Range<T extends Comparable<T>> {
     T begin;
     T end;
 
-    public Range(){
+    public Range() {
     }
-
 
 
     public boolean isEmpty() {
