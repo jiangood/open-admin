@@ -57,19 +57,25 @@ public class SysOrg extends BaseEntity implements TreeNode<SysOrg> {
 
 
     /**
-     * 第三方系统的唯一标识符，常用于OAuth集成，统一认证等
+     * 第三方系统的唯一标识符
      */
     @JsonIgnore
     @Column(length = DBConstants.LEN_ID)
     private String thirdId;
 
+    /**
+     * 第三方系统的父级唯一标识符，常用于OAuth集成，统一认证等
+     */
     @JsonIgnore
     @Column(length = DBConstants.LEN_ID)
     private String thirdPid;
 
+    /**
+     * 第三方系统的编码
+     */
     @JsonIgnore
-    @Column(length = DBConstants.LEN_NAME)
-    private String thirdAccount;
+    @Column(length = DBConstants.LEN_CODE)
+    private String thirdCode;
 
 
     public SysOrg() {
