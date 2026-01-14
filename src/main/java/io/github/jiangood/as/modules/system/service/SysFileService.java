@@ -57,15 +57,13 @@ public class SysFileService {
     FileOperator fileOperator;
     @Resource
     private SysFileDao sysFileDao;
-    @Resource
-    private SysConfigService sysConfigService;
 
     public SysFile findByTradeNo(String tradeNo) {
         return sysFileDao.findByTradeNo(tradeNo);
     }
 
     public String getPreviewUrl(String id, HttpServletRequest request) {
-        String baseUrl = sysConfigService.getBaseUrl();
+        String baseUrl = sysProperties.getBaseUrl();
 
         return baseUrl + getPreviewUrl(id);
     }
@@ -81,7 +79,7 @@ public class SysFileService {
     }
 
     public String getDownloadUrl(String fileId, HttpServletRequest request) {
-        String baseUrl = sysConfigService.getBaseUrl();
+        String baseUrl = sysProperties.getBaseUrl();
 
         return baseUrl + DOWNLOAD_URL_PATTERN.replace("{id}", fileId);
     }

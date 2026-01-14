@@ -1,32 +1,5 @@
 ## 框架的核心配置项和菜单结构。 业务项目需在 application-data.yml 中进行配置。
 data:
-  # 数据库配置元数据
-  configs:
-    - group-name: 邮件配置
-      children:
-        - code: email.from
-          name: 邮件发送账号
-        - code: email.pass
-          name: 邮件发送密码
-    - group-name: 网站配置
-      children:
-        - code: sys.loginBackground
-          name: 登录背景图
-        - code: sys.loginBoxBottomTip
-          name: 登录框下面的提示
-        - code: sys.title
-          name: 站点标题
-        - code: sys.waterMark
-          name: 开启水印
-          value-type: boolean
-          description: 在所有页面增加水印
-    - group-name: 系统配置
-      children:
-        - code: sys.baseUrl
-          name: 请求基础地址
-          description: 非必填，可用于拼接完整请求地址
-        - code: sys.jwtSecret
-          name: jwt密码
   # 菜单配置
   menus:
     - name: 我的任务
@@ -66,12 +39,6 @@ data:
           icon: CopyOutlined
           perm-names: [ 查看,删除,保存 ]
           perm-codes: [ sysManual:view,sysManual:delete,sysManual:save ]
-        - id: sysConfig
-          name: 系统设置
-          path: /system/config
-          icon: SettingOutlined
-          perm-names: [ 查看,保存 ]
-          perm-codes: [ sysConfig:view,sysConfig:save ]
         - id: sysDict
           name: 数据字典
           path: /system/dict

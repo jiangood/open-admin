@@ -6,8 +6,6 @@ import cn.hutool.crypto.asymmetric.RSA;
 import io.github.jiangood.as.common.tools.PasswordTool;
 import io.github.jiangood.as.framework.config.SysProperties;
 import io.github.jiangood.as.framework.dict.DictAnnHandler;
-import io.github.jiangood.as.modules.system.ConfigConsts;
-import io.github.jiangood.as.modules.system.dao.SysConfigDao;
 import io.github.jiangood.as.modules.system.dao.SysUserDao;
 import io.github.jiangood.as.modules.system.entity.DataPermType;
 import io.github.jiangood.as.modules.system.entity.SysRole;
@@ -38,8 +36,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     SysUserDao sysUserDao;
 
 
-    @Resource
-    SysConfigDao sysConfigDao;
+
 
 
     @Resource
@@ -70,20 +67,13 @@ public class GlobalSystemDataInit implements CommandLineRunner {
         SysRole adminRole = sysRoleService.initDefaultAdmin();
         initUser(adminRole);
 
-        initSysConfigDefaultValue();
 
         log.info("系统初始化耗时：{}", System.currentTimeMillis() - time);
 
         systemHookService.trigger(SystemHookEventType.AFTER_DATA_INIT);
     }
 
-    private void initSysConfigDefaultValue() {
-        log.info("初始化系统配置的默认值");
 
-        RSA rsa = SecureUtil.rsa();
-        sysConfigDao.init(ConfigConsts.RSA_PUBLIC_KEY, rsa.getPublicKeyBase64()); // 放到siteInfo, 前端可获取
-        sysConfigDao.init(ConfigConsts.RSA_PRIVATE_KEY, rsa.getPrivateKeyBase64());
-    }
 
 
     private void initUser(SysRole adminRole) {

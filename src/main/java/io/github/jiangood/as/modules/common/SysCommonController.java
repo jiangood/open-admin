@@ -4,13 +4,13 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.as.common.dto.AjaxResult;
 import io.github.jiangood.as.common.dto.antd.MenuItem;
+import io.github.jiangood.as.common.tools.SysRsaTool;
 import io.github.jiangood.as.common.tools.tree.TreeTool;
 import io.github.jiangood.as.framework.config.SysProperties;
 import io.github.jiangood.as.framework.config.data.dto.MenuDefinition;
 import io.github.jiangood.as.framework.config.security.LoginUser;
 import io.github.jiangood.as.modules.common.dto.response.LoginDataResponse;
 import io.github.jiangood.as.modules.common.dto.response.LoginInfoResponse;
-import io.github.jiangood.as.modules.system.ConfigConsts;
 import io.github.jiangood.as.modules.system.entity.SysRole;
 import io.github.jiangood.as.modules.system.entity.SysUser;
 import io.github.jiangood.as.modules.system.service.*;
@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,8 +36,6 @@ import java.util.stream.Collectors;
 public class SysCommonController {
 
     private SysRoleService roleService;
-    private SysConfigService sysConfigService;
-    private SysFileService sysFileService;
     private SysProperties sysProperties;
     private SysUserService sysUserService;
     private SysOrgService sysOrgService;
@@ -58,18 +55,13 @@ public class SysCommonController {
         data.put("logoUrl", sysProperties.getLogoUrl());
         data.put("title", sysProperties.getTitle());
 
-        data.put("waterMark", sysConfigService.getMixed("sys.waterMark", Boolean.class));
+        data.put("waterMark", sysProperties.isWaterMark());
 
-        // 将公钥发给前端，用于前端加密
-        String publicKey = sysConfigService.getMixed(ConfigConsts.RSA_PUBLIC_KEY, String.class);
-        Assert.notNull(publicKey, "服务未初始化密钥信息，无法登录");
-        data.put("rsaPublicKey", publicKey);
+
+        data.put("rsaPublicKey", SysRsaTool.getPublicKey());
 
         // 登录背景图
-        String bg = sysConfigService.getMixed("sys.loginBackground", String.class);
-        if (bg != null && sysFileService.isFileExist(bg)) {
-            data.put("loginBackground", bg);
-        }
+        data.put("loginBackground", sysProperties.getLoginBackground());
 
         return AjaxResult.ok().data(data);
     }

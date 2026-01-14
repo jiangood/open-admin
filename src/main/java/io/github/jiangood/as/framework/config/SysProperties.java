@@ -1,5 +1,7 @@
 package io.github.jiangood.as.framework.config;
 
+import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.as.common.tools.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,6 +18,13 @@ public class SysProperties {
 
 
     public static final String CONFIG_PREFIX = "sys";
+
+
+    /**
+     * 请求基础地址
+     * 非必填，在复杂情况下使用，可用于拼接完整请求地址,
+     */
+    private String baseUrl;
 
 
     /**
@@ -43,6 +52,14 @@ public class SysProperties {
     private String logoUrl = "/admin/public/logo.jpg";
     private String loginBoxBottomTip = "当前非涉密网络，严禁传输处理涉密信息";
     private String copyright = "Copyright © 2023-2024  All Rights Reserved";
+    /**
+     * 登录背景图
+     */
+    private String loginBackground;
+    /**
+     * 是否开启水印
+     */
+    private boolean waterMark = false;
     /**
      * 不经过xss的路径, 如 /aa/*
      */
@@ -84,6 +101,14 @@ public class SysProperties {
 
     @NotBlank(message = "请配置默认密码")
     private String defaultPassword;
+
+    public String getBaseUrl() {
+        String url = this.baseUrl;
+        if (StrUtil.isEmpty(url)) {
+            url = RequestTool.getBaseUrl(RequestTool.currentRequest());
+        }
+        return url;
+    }
 
     public enum CaptchaType {
         MATH, RANDOM

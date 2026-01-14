@@ -1,6 +1,5 @@
 package io.github.jiangood.as.framework.config.data;
 
-import io.github.jiangood.as.framework.config.data.dto.ConfigGroupDefinition;
 import io.github.jiangood.as.framework.config.data.dto.MenuDefinition;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -18,8 +17,5 @@ public class DataProperties {
      */
     private List<MenuDefinition> menus = new ArrayList<>();
 
-    /**
-     * 系统配置定义（可在系统设置中查看和修改）
-     */
-    private List<ConfigGroupDefinition> configs = new ArrayList<>();
+
 }

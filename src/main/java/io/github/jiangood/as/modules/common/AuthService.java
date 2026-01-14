@@ -6,8 +6,8 @@ import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import io.github.jiangood.as.common.tools.PasswordTool;
+import io.github.jiangood.as.common.tools.SysRsaTool;
 import io.github.jiangood.as.framework.config.SysProperties;
-import io.github.jiangood.as.modules.system.ConfigConsts;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -65,9 +65,7 @@ public class AuthService {
     }
 
     public String decodeWebPassword(String password) {
-        String rsaPrivateKey = ConfigConsts.get(ConfigConsts.RSA_PRIVATE_KEY);
-        String rsaPublicKey = ConfigConsts.get(ConfigConsts.RSA_PUBLIC_KEY);
-        RSA rsa = SecureUtil.rsa(rsaPrivateKey, rsaPublicKey);
+        RSA rsa = SysRsaTool.getRsa();
         try {
             password = rsa.decryptStr(password, KeyType.PrivateKey);
         } catch (Exception e) {
