@@ -37,5 +37,5 @@
     "dev": "umi dev",
     "build": "tsc --outDir config/dist --skipLibCheck --noEmitOnError false config/index.ts"
   },
-  "version": "0.2.8-beta.2"
+  "version": "0.2.8-beta.3"
 }

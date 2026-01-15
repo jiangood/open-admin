@@ -100,7 +100,7 @@ export default class extends React.Component {
                             },
                             {
                                 key: '2',
-                                label: '流程',
+                                label: '流程图',
                                 icon: <ShareAltOutlined/>,
                                 children: this.renderProcess(img, commentList)
                             }
