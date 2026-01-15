@@ -31,6 +31,15 @@ export class StringUtils {
         return str;
     }
 
+    static removePrefixAndSuffix(str: string , prefix: string, suffix: string): string  {
+        if (str != null) {
+            str = StringUtils.removePrefix(str, prefix);
+            str = StringUtils.removeSuffix(str, suffix);
+        }
+        return str;
+    }
+
+
     /**
      * 生成指定长度的随机字符串
      * @param length 随机字符串的长度
@@ -66,6 +75,14 @@ export class StringUtils {
         }
         return str.includes(subStr);
     }
+
+    static containsAll(str: string | null | undefined, subStr: string, subStr2: string): boolean {
+        if (!str) {
+            return false;
+        }
+        return str.includes(subStr) && str.includes(subStr2);
+    }
+
 
     /**
      * 统计子字符串在原始字符串中出现的次数
@@ -382,15 +399,22 @@ export class StringUtils {
      * @param str
      * @param sp
      */
-    static split(str: any, sp: string):null|string[]|undefined {
+    static split(str: any, sp: string):string[] {
         if(str == null || str.length === 0){
-            return undefined
+            return []
         }
         if(Array.isArray(str)){
-            return str;
+            return str as string[];
         }
 
         return str.split(sp)
+    }
+    static splitTrim(str: any, sp: string):string[] {
+        const arr = StringUtils.split(str, sp).map(item => item.trim())
+        for (let i = 0; i < arr.length; i++) {
+            arr[i] = arr[i].trim()
+        }
+        return arr;
     }
 
     /**

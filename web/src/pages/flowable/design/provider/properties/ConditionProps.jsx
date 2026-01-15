@@ -1,4 +1,4 @@
-import {isTextFieldEntryEdited, TextFieldEntry} from '@bpmn-io/properties-panel';
+import {isTextFieldEntryEdited, TextAreaEntry, TextFieldEntry} from '@bpmn-io/properties-panel';
 import {useService} from 'bpmn-js-properties-panel';
 import {renderReact} from "./utils";
 import {ConditionDesignButton} from "./ConditionDesign";
@@ -61,10 +61,10 @@ function Component(props) {
     const moddle = useService('moddle');
 
 
-    return TextFieldEntry({
+    return TextAreaEntry({
         element,
         id: id,
-        label: '条件表达式',
+        label: '条件表达式(JUEL)',
         getValue,
         setValue: value=>setValue(value,element,modeling,moddle),
         debounce,
