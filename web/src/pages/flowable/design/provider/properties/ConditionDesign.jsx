@@ -101,7 +101,7 @@ function encode(data) {
 
     const isFun = op.startsWith('.')
     if (isFun) {
-        return left +   op + '("' + right + '")';
+        return left + op + '("' + right + '")';
     }
     const isStr = right.startsWith('"')
     if (isStr) {
@@ -183,7 +183,7 @@ export class ConditionDesignButton extends Component {
                 return <Select options={options} style={{width: 100}}></Select>
             }
         },
-        {dataIndex: 'right', title: '值'},
+        {dataIndex: 'right', title: '值', width: 200},
     ];
 
     render() {
@@ -193,25 +193,29 @@ export class ConditionDesignButton extends Component {
         return <div style={{display: 'flex', justifyContent: 'right', padding: 8}}>
             <Button type='primary'
                     size='small'
+
                     styles={{
                         root: {
                             backgroundColor: ThemeUtils.getColor('primary-color')
                         }
                     }}
+
                     onClick={() => this.setState({open: true})}
+
             >条件编辑器</Button>
 
 
-            <Modal title='条件编辑器 (复杂表达式暂不支持)' open={this.state.open}
+            <Modal title='条件编辑器 (复杂表达式暂不支持)' open={this.state.open} width={600}
                    onCancel={() => this.setState({open: false})}
                    footer={null}
                    mask={{blur: false}}
                    destroyOnHidden
             >
-                <FieldTable columns={this.columns}
-                            value={arrValue}
-                            onChange={this.onChange}
-                ></FieldTable>
+                <FieldTable
+                    columns={this.columns}
+                    value={arrValue}
+                    onChange={this.onChange}
+                />
             </Modal>
 
         </div>

@@ -18,7 +18,7 @@ export class ConditionExpressionUtils {
      * @param expr
      */
     static parseStrFunction(expr) {
-        const regExp = /^(\w+)\.(\w+)\("(.*)"\)$/;
+        const regExp = /^(\w+)(\.\w+)\("(.*)"\)$/;
         const match = expr.match(regExp);
         if (!match) {
             return null;
