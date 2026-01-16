@@ -120,11 +120,11 @@ public class SysOrgService extends BaseService<SysOrg> {
      *
      * @param orgs
      */
-    public Collection<SysOrg> getLeafs(Collection<SysOrg> orgs) {
+    public List<SysOrg> getLeafs(Collection<SysOrg> orgs) {
         return orgs.stream().filter(o -> sysOrgDao.checkIsLeaf(o.getId())).collect(Collectors.toList());
     }
 
-    public Collection<String> getLeafIds(Collection<String> orgs) {
+    public List<String> getLeafIds(Collection<String> orgs) {
         return orgs.stream().filter(orgId -> sysOrgDao.checkIsLeaf(orgId)).collect(Collectors.toList());
     }
 
