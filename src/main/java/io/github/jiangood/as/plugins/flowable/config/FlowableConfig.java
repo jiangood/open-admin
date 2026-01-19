@@ -11,7 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 
 import java.util.ArrayList;
 
-@ConditionalOnClass(org.flowable.spring.SpringProcessEngineConfiguration.class)
+@ConditionalOnClass(EngineConfigurationConfigurer.class)
 @Slf4j
 @AutoConfiguration
 @AllArgsConstructor
