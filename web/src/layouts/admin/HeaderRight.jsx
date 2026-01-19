@@ -62,7 +62,7 @@ export default class HeaderRight extends React.Component {
             </div>
 
             <div className='item' title='操作手册' onClick={() => PageUtils.open('/userCenter/manual', '操作手册')}>
-                <QuestionCircleOutlined/>
+                <QuestionCircleOutlined />
             </div>
 
 
