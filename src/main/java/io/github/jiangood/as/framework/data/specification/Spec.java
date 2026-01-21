@@ -10,6 +10,7 @@ import org.springframework.data.domain.Example;
 import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -183,9 +184,8 @@ public class Spec<T> implements Specification<T> {
     }
 
     public <I> Spec<T> in(String field, Collection<I> values) {
-        if (!CollectionUtils.isEmpty(values)) {
-            this.add(new ConditionSpec<>(Operator.IN, field, values));
-        }
+        Assert.notEmpty(values, "in查询的值不能为空");
+        this.add(new ConditionSpec<>(Operator.IN, field, values));
         return this;
     }
 
