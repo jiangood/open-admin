@@ -1,6 +1,7 @@
 package io.github.jiangood.as.common.tools;
 
 import io.github.jiangood.as.common.Array2DCoords;
+import org.springframework.util.Assert;
 
 import java.util.*;
 
@@ -10,6 +11,26 @@ import java.util.*;
  * 提供对Object[][]数组的各种操作功能
  */
 public class Array2DTool {
+
+    public static Object[][] getRows(Object[][] data, int row, int len) {
+        Assert.notNull(data, "数组不能为null");
+        Assert.state(row >= 0 && row < data.length, "起始行索引超出范围: " + row + ", 数组行数: " + data.length);
+        Assert.state(len >= 0, "获取行数不能小于0: " + len);
+        Assert.state(row + len <= data.length, "获取行数超出数组范围: " + (row + len) + ", 数组行数: " + data.length);
+
+        Object[][] result = new Object[len][];
+
+        for (int i = 0; i < len; i++) {
+            result[i] = new Object[data[row + i].length];
+            System.arraycopy(data[row + i], 0, result[i], 0, data[row + i].length);
+        }
+
+        return result;
+    }
+
+    public static Object[][] getRowsByRange(Object[][] data, int from, int to) {
+        return getRows(data, from, to - from);
+    }
 
     public static Object[][] deepCopy(Object[][] src) {
         int colSize = src[0].length;
@@ -149,6 +170,7 @@ public class Array2DTool {
         return array;
     }
 
+
     /**
      * 设置整行数据
      *
@@ -157,7 +179,7 @@ public class Array2DTool {
      * @param rowData  行数据数组
      * @return 修改后的数组（原数组被修改）
      */
-    public static Object[][] setRow(Object[][] array, int rowIndex, Object[] rowData) {
+    public static void setRowValue(Object[][] array, int rowIndex, Object[] rowData) {
         if (array == null) {
             throw new NullPointerException("数组不能为null");
         }
@@ -177,7 +199,6 @@ public class Array2DTool {
         }
 
         System.arraycopy(rowData, 0, array[rowIndex], 0, rowData.length);
-        return array;
     }
 
     /**
@@ -360,6 +381,64 @@ public class Array2DTool {
         }
 
         return result;
+    }
+
+    /***
+     * 插入多行数据
+     *
+     * @param original  原始数组
+     * @param rowIndex  要插入的行索引位置（0-based）
+     * @param rowsToAdd 要插入的多行数据
+     * @return 插入行后的新数组
+     */
+    public static Object[][] insertRows(Object[][] original, int rowIndex, Object[][] rowsToAdd) {
+        Assert.state(original != null, "原始数组不能为null");
+        Assert.state(rowsToAdd != null, "待插入的行数据不能为null");
+
+        int originalRowCount = original.length;
+        int colCount = originalRowCount > 0 ? original[0].length : 0;
+        int rowsToAddCount = rowsToAdd.length;
+
+        // 参数校验
+        if (rowIndex < 0 || rowIndex > originalRowCount) {
+            throw new IndexOutOfBoundsException("行索引超出范围: " + rowIndex + ", 数组行数: " + originalRowCount);
+        }
+
+        // 验证待插入的所有行的列数是否与原始数组一致
+        for (int i = 0; i < rowsToAddCount; i++) {
+            if (rowsToAdd[i] == null) {
+                throw new IllegalArgumentException("待插入的行数据不能为null，行索引: " + i);
+            }
+            if (rowsToAdd[i].length != colCount) {
+                throw new IllegalArgumentException(String.format("待插入行数据的列数(%d)必须等于原始数组的列数(%d)，行索引: %d",
+                        rowsToAdd[i].length, colCount, i));
+            }
+        }
+
+        // 创建新数组，行数增加rowsToAddCount
+        Object[][] result = new Object[originalRowCount + rowsToAddCount][colCount];
+
+        // 拷贝插入位置之前的行
+        for (int i = 0; i < rowIndex; i++) {
+            System.arraycopy(original[i], 0, result[i], 0, colCount);
+        }
+
+        // 插入新的行数据
+        for (int i = 0; i < rowsToAddCount; i++) {
+            System.arraycopy(rowsToAdd[i], 0, result[rowIndex + i], 0, colCount);
+        }
+
+        // 拷贝插入位置之后的行
+        for (int i = rowIndex; i < originalRowCount; i++) {
+            System.arraycopy(original[i], 0, result[i + rowsToAddCount], 0, colCount);
+        }
+
+        return result;
+    }
+
+    public static Object[][] insertRows(Object[][] original, int rowIndex, Collection<Object[]> rowList) {
+        Object[][] rowsToAdd = rowList.stream().toArray(Object[][]::new);
+        return insertRows(original, rowIndex, rowsToAdd);
     }
 
     /**

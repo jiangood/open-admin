@@ -6,6 +6,7 @@ import io.github.jiangood.as.common.tools.Array2DTool;
 import lombok.NoArgsConstructor;
 import org.springframework.util.Assert;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -63,6 +64,24 @@ public class Array2D {
         this.data = Array2DTool.setValueAutoGrow(this.data, row, col, value);
     }
 
+    public void setRowValue(int rowIndex, Object[] rowData) {
+        Array2DTool.setRowValue(this.data, rowIndex, rowData);
+    }
+
+    public void insertRows(int i, Object[][] rows){
+        this.data = Array2DTool.insertRows(this.data, i, rows);
+    }
+    public void insertRows(int i, Collection<Object[]> rows){
+        this.data = Array2DTool.insertRows(this.data, i, rows);
+    }
+
+    public Object[][] getRows(int from, int length) {
+        return Array2DTool.getRows(this.data, from, length);
+    }
+
+    public Object[][] getRowsByRange(int from, int to) {
+        return Array2DTool.getRowsByRange(this.data, from, to);
+    }
 
     public void appendRow(Object[] rowData) {
         this.data = Array2DTool.appendRow(data, rowData);
