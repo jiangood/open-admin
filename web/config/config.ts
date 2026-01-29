@@ -26,7 +26,7 @@ export default defineConfig({
 
 
     plugins: [
-        pluginDir +'/route-plugin',
+        pluginDir +'/common-plugin',
      ],
 
     proxy: {
