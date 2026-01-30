@@ -1,4 +1,4 @@
-package io.github.jiangood.as.framework.data.specification;
+package io.github.jiangood.openadmin.framework.data.specification;
 
 /**
  * 聚合函数
