@@ -1,12 +1,12 @@
-package io.github.jiangood.as.modules.api.service;
+package io.github.jiangood.openadmin.modules.api.service;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jiangood.as.common.tools.annotation.Remark;
-import io.github.jiangood.as.common.tools.field.FieldDescription;
-import io.github.jiangood.as.modules.api.ApiMapping;
-import io.github.jiangood.as.modules.api.entity.ApiResource;
-import io.github.jiangood.as.modules.api.entity.ApiResourceArgument;
-import io.github.jiangood.as.modules.api.entity.ApiResourceArgumentReturn;
+import io.github.jiangood.openadmin.common.tools.annotation.Remark;
+import io.github.jiangood.openadmin.common.tools.field.FieldDescription;
+import io.github.jiangood.openadmin.modules.api.ApiMapping;
+import io.github.jiangood.openadmin.modules.api.entity.ApiResource;
+import io.github.jiangood.openadmin.modules.api.entity.ApiResourceArgument;
+import io.github.jiangood.openadmin.modules.api.entity.ApiResourceArgumentReturn;
 import org.springframework.core.StandardReflectionParameterNameDiscoverer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package io.github.jiangood.as.common.tools.annotation;
+package io.github.jiangood.openadmin.common.tools.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;

@@ -1,8 +1,8 @@
-package io.github.jiangood.as.common.dto;
+package io.github.jiangood.openadmin.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import io.github.jiangood.as.common.tools.JsonTool;
+import io.github.jiangood.openadmin.common.tools.JsonTool;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.jiangood.as.common.CommonMessage.FORBIDDEN_MESSAGE;
+import static io.github.jiangood.openadmin.common.CommonMessage.FORBIDDEN_MESSAGE;
 
 /**
  * 响应结果数据

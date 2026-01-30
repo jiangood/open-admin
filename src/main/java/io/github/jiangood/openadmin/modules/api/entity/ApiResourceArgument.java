@@ -1,6 +1,6 @@
-package io.github.jiangood.as.modules.api.entity;
+package io.github.jiangood.openadmin.modules.api.entity;
 
-import io.github.jiangood.as.common.tools.annotation.Remark;
+import io.github.jiangood.openadmin.common.tools.annotation.Remark;
 import lombok.Getter;
 import lombok.Setter;
 

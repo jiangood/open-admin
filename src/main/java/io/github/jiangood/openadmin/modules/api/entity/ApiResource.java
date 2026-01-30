@@ -1,7 +1,7 @@
-package io.github.jiangood.as.modules.api.entity;
+package io.github.jiangood.openadmin.modules.api.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jiangood.as.framework.data.converter.BaseToListConverter;
+import io.github.jiangood.openadmin.framework.data.converter.BaseToListConverter;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;

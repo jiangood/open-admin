@@ -1,8 +1,8 @@
-package io.github.jiangood.as.modules.api.controller;
+package io.github.jiangood.openadmin.modules.api.controller;
 
-import io.github.jiangood.as.common.dto.AjaxResult;
-import io.github.jiangood.as.modules.api.entity.ApiAccessLog;
-import io.github.jiangood.as.modules.api.service.ApiAccessLogService;
+import io.github.jiangood.openadmin.common.dto.AjaxResult;
+import io.github.jiangood.openadmin.modules.api.entity.ApiAccessLog;
+import io.github.jiangood.openadmin.modules.api.service.ApiAccessLogService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

@@ -1,4 +1,4 @@
-package io.github.jiangood.as.common.tools;
+package io.github.jiangood.openadmin.common.tools;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

@@ -1,4 +1,4 @@
-package io.github.jiangood.as.modules.api;
+package io.github.jiangood.openadmin.modules.api;
 
 import java.lang.annotation.*;
 

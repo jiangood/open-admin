@@ -1,4 +1,4 @@
-package io.github.jiangood.as.modules.api.entity;
+package io.github.jiangood.openadmin.modules.api.entity;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,9 +1,9 @@
-package io.github.jiangood.as.modules.api.controller;
+package io.github.jiangood.openadmin.modules.api.controller;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.as.common.dto.AjaxResult;
-import io.github.jiangood.as.modules.api.entity.ApiResource;
-import io.github.jiangood.as.modules.api.service.ApiResourceService;
+import io.github.jiangood.openadmin.common.dto.AjaxResult;
+import io.github.jiangood.openadmin.modules.api.entity.ApiResource;
+import io.github.jiangood.openadmin.modules.api.service.ApiResourceService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.security.access.prepost.PreAuthorize;

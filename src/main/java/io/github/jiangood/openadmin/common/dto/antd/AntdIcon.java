@@ -1,4 +1,4 @@
-package io.github.jiangood.as.common.dto.antd;
+package io.github.jiangood.openadmin.common.dto.antd;
 
 public enum AntdIcon {
     AccountBookFilled,

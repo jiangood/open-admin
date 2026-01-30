@@ -1,8 +1,8 @@
-package io.github.jiangood.as.modules.api.service;
+package io.github.jiangood.openadmin.modules.api.service;
 
-import io.github.jiangood.as.framework.data.service.BaseService;
-import io.github.jiangood.as.modules.api.dao.ApiAccountDao;
-import io.github.jiangood.as.modules.api.entity.ApiAccount;
+import io.github.jiangood.openadmin.framework.data.service.BaseService;
+import io.github.jiangood.openadmin.modules.api.dao.ApiAccountDao;
+import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

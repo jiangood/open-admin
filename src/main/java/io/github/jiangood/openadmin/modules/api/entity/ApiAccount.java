@@ -1,9 +1,9 @@
-package io.github.jiangood.as.modules.api.entity;
+package io.github.jiangood.openadmin.modules.api.entity;
 
-import io.github.jiangood.as.common.tools.annotation.Remark;
-import io.github.jiangood.as.framework.data.converter.ToListConverter;
-import io.github.jiangood.as.framework.data.domain.BaseEntity;
-import io.github.jiangood.as.framework.validator.ValidateIpv4;
+import io.github.jiangood.openadmin.common.tools.annotation.Remark;
+import io.github.jiangood.openadmin.framework.data.converter.ToListConverter;
+import io.github.jiangood.openadmin.framework.data.domain.BaseEntity;
+import io.github.jiangood.openadmin.framework.validator.ValidateIpv4;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
