@@ -4,8 +4,7 @@
     "@types/react-dom": "^19.0.0",
     "@types/react-lazylog": "^4.5.1",
     "@umijs/plugins": "^4.3.17",
-    "typescript": "^5.0.0",
-    "@jiangood/admin-process-plugin-spring-boot-starter": "1.0.6"
+    "typescript": "^5.0.0"
   },
   "peerDependencies": {
     "@ant-design/icons": "^6.0.0",
@@ -26,8 +25,8 @@
     "react-dom": "^19.0.0",
     "umi": "^4.0.0"
   },
-  "name": "@jiangood/admin-spring-boot-starter",
-  "description": "admin-spring-boot-starter",
+  "name": "@jiangood/open-admin",
+  "description": "open-admin",
   "files": [
     "src/*",
     "config/dist/*",
