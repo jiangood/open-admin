@@ -9,12 +9,12 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>io.github.jiangood</groupId>
-    <artifactId>admin-spring-boot-starter</artifactId>
+    <artifactId>open-admin</artifactId>
     <!--<version>0.0.1-SNAPSHOT</version>-->
     <version>${revision}</version>
-    <name>admin-spring-boot-starter</name>
-    <description>小型管理系统框架</description>
-    <url>https://github.com/jiangood/admin-spring-boot-starter</url>
+    <name>open-admin</name>
+    <description>mis系统框架</description>
+    <url>https://github.com/jiangood/open-admin</url>
     <licenses>
         <license>
             <name>The Apache License, Version 2.0</name>
@@ -28,9 +28,9 @@
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git:github.com/jiangood/admin-spring-boot-starter.git</connection>
-        <developerConnection>scm:git@github.com:jiangood/admin-spring-boot-starter.git</developerConnection>
-        <url>https://github.com/jiangood/admin-spring-boot-starter/tree/master</url>
+        <connection>scm:git:git:github.com/jiangood/open-admin.git</connection>
+        <developerConnection>scm:git@github.com:jiangood/open-admin.git</developerConnection>
+        <url>https://github.com/jiangood/open-admin/tree/master</url>
     </scm>
     <properties>
         <!-- 这个表示版本号，构建时动态指定参数即可 如 mvn package -Drevision=1.1.1-->
@@ -51,13 +51,6 @@
 
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>io.github.jiangood</groupId>
-            <artifactId>admin-process-plugin-spring-boot-starter</artifactId>
-            <version>1.0.6</version>
-            <optional>true</optional>
-        </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
