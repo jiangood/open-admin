@@ -11,7 +11,7 @@ console.log('process.cwd()',process.cwd())
 
 const isFramework = fs.existsSync(path.join(process.cwd(), 'config/common-plugin.ts'));
 console.log('isFramework', isFramework)
-const pluginDir = isFramework ? './config' : '@jiangood/admin-spring-boot-starter/config/dist';
+const pluginDir = isFramework ? './config' : '@jiangood/open-admin/config/dist';
 console.log('pluginDir', pluginDir)
 
 const host = '127.0.0.1:8080';

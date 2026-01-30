@@ -2,7 +2,7 @@ import {IApi} from 'umi';
 import * as fs from "fs";
 import * as path from "path";
 
-const pkgName = '@jiangood/admin-spring-boot-starter';
+const pkgName = '@jiangood/open-admin';
 
 
 export default (api: IApi) => {
