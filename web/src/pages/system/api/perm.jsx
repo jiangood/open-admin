@@ -1,0 +1,69 @@
+import {message, Switch} from 'antd'
+import React from 'react'
+import {ArrUtils, HttpUtils, Page, PageUtils, ProTable} from "../../../framework";
+
+
+export default class extends React.Component {
+
+
+    state = {
+        perms: []
+    }
+
+    constructor(props) {
+        super(props);
+        this.accountId = PageUtils.currentParams().accountId
+    }
+
+    async componentDidMount() {
+        const rs = await HttpUtils.get('admin/apiAccount/get', {id: this.accountId})
+        this.setState({perms: rs.perms})
+    }
+
+    onChange = async (action, checked) => {
+        const hide = message.loading('保存中...', 0)
+        await HttpUtils.post('admin/apiAccount/grant', {accountId: this.accountId, action, checked});
+
+        const perms = this.state.perms
+        if (checked) {
+            ArrUtils.add(perms, action)
+        } else {
+            ArrUtils.remove(perms, action)
+        }
+        this.setState({perms})
+        hide();
+    }
+
+
+    render() {
+        return <Page>
+
+
+            <ProTable
+                rowKey='action'
+                columns={[
+                    {dataIndex: 'name', title: '名称'},
+                    {dataIndex: 'action', title: '动作'},
+                    {dataIndex: 'desc', title: '描述'},
+                    {
+                        dataIndex: 'option', title: '操作',
+                        render: (_, record) => {
+                            let action = record.action;
+                            return <Switch checked={this.state.perms.includes(action)}
+                                           onChange={(checked) => {
+                                               this.onChange(action, checked)
+
+                                           }}> </Switch>
+                        }
+                    }
+                ]}
+                request={(params,) => HttpUtils.get('admin/api/resource/page', params)}
+            />
+
+        </Page>
+
+
+    }
+}
+
+

@@ -1,0 +1,23 @@
+db_ip: 127.0.0.1
+db_port: 3306
+db_database: openadmin
+db_username: root
+db_password: 123456
+spring:
+  profiles:
+    active: default,dev
+  application:
+    name: open-admin
+
+
+logging:
+  file:
+    path: ./logs
+  level:
+    io.github.jiangood: debug
+sys:
+  reset-admin-pwd: admin_framework_123456
+  captcha: false
+  print-exception: true
+  default-password: admin_framework_123456
+

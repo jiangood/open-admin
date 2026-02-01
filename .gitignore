@@ -1,0 +1,34 @@
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+
+
+### VS Code ###
+/web/node_modules/
+/web/package-lock.json
+/web/pnpm-lock.yaml
+/web/src/.umi/
+/web/src/.umi-production/
+/web/dist/
+/web/config/dist/
+
+# 自动生成的
+/web/src/framework/utils/*.d.ts
+/web/src/framework/system/*.d.ts
+/web/spring-shell.log
+
+/.env
+/src/main/resources/application-dev.yml
+.flattened-pom.xml
+/web/npminstall-debug.log

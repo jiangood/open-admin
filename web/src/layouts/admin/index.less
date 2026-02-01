@@ -1,0 +1,65 @@
+.main-layout {
+  min-height: 100vh;
+  .header {
+    padding: 0 20px;
+    height: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgb(233, 237, 240);
+    background-color: rgb(246, 248, 250);
+
+    .header-left {
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .logo-img {
+        height: 38px;
+        cursor: pointer;
+      }
+    }
+
+    .header-right {
+      line-height: 36px;
+      display: flex;
+      align-items: center;
+
+      .item {
+        padding: 0 0.5rem;
+        cursor: pointer;
+
+        &:hover {
+          background: #063A69;
+          color: white;
+        }
+      }
+    }
+
+  }
+
+
+  #left-sider {
+    .left-menu {
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: unset;
+
+      .ant-menu-submenu-selected {
+        div {
+          color: white !important;
+        }
+      }
+    }
+
+  }
+
+  #admin-layout-content {
+    .tmgg-layout-tabs {
+      &>.ant-tabs-nav {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "devDependencies": {
+    "@types/lodash": "^4.17.23",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.0.0",
+    "@umijs/plugins": "^4.3.17",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "@ant-design/icons": "^6.0.0",
+    "@bpmn-io/properties-panel": "^3.34.0",
+    "@tinymce/tinymce-react": "^6.0.0",
+    "@umijs/types": "^3.5.43",
+    "antd": "^6.0.0",
+    "antd-img-crop": "^4.23.0",
+    "axios": "^1.13.2",
+    "bpmn-js": "^18.7.0",
+    "bpmn-js-properties-panel": "^5.43.0",
+    "dayjs": "^1.11.13",
+    "jsencrypt": "^3.5.4",
+    "lodash": "^4.17.23",
+    "preact": "^10.27.2",
+    "qs": "^6.14.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "umi": "^4.0.0"
+  },
+  "name": "@jiangood/open-admin",
+  "description": "open-admin",
+  "files": [
+    "src/*",
+    "config/*",
+    "!src/.umi",
+    "!src/pages/test/*"
+  ],
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "umi dev",
+    "build": "umi build"
+  },
+  "version": "1.0.0-beta.5"
+}
