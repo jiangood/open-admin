@@ -9,11 +9,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 
+@Component
 public class SpringTool implements ApplicationContextAware {
     public SpringTool() {
         System.out.println("SpringTool init");
@@ -45,6 +47,7 @@ public class SpringTool implements ApplicationContextAware {
      * @return
      */
     public static Set<Class<?>> getBasePackageClasses() {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         Set<Class<?>> list = new HashSet<>();
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
@@ -75,6 +78,7 @@ public class SpringTool implements ApplicationContextAware {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         return (T) applicationContext.getBean(name);
     }
 
@@ -86,6 +90,9 @@ public class SpringTool implements ApplicationContextAware {
      * @return Bean对象
      */
     public static <T> T getBean(Class<T> clazz) {
+        if (applicationContext == null) {
+            return null;
+        }
         try {
             return applicationContext.getBean(clazz);
         } catch (Exception e) {
@@ -104,6 +111,7 @@ public class SpringTool implements ApplicationContextAware {
      * @throws RuntimeException 如果Bean不存在，将抛出异常
      */
     public static <T> T getBean(String name, Class<T> clazz) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         return applicationContext.getBean(name, clazz);
     }
 
@@ -117,10 +125,12 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static <T> Map<String, T> getBeansOfType(Class<T> type) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         return applicationContext.getBeansOfType(type);
     }
 
     public static <T> Collection<String> getBeanNames(Class<T> type) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         Map<String, T> beansOfType = applicationContext.getBeansOfType(type);
         Set<String> beanNames = beansOfType.keySet();
         return beanNames;
@@ -142,6 +152,7 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static String[] getBeanNamesForType(Class<?> type) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         return applicationContext.getBeanNamesForType(type);
     }
 
@@ -183,6 +194,7 @@ public class SpringTool implements ApplicationContextAware {
     }
 
     public static boolean hasProfile(String name) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         return ArrayUtil.contains(applicationContext.getEnvironment().getActiveProfiles(), name);
     }
 
