@@ -48,6 +48,7 @@ public class TreeDropTool {
     public static List<String> resort(List<String> list, DropEvent e) {
         String k = e.getDragKey();
         if (e.getDropPositionEnum() == DropEvent.DropPositionEnum.INSIDE) {
+            list.remove(k); // 先移除，避免重复添加
             list.add(0, k);
             return list;
         }
