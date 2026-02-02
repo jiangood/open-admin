@@ -49,11 +49,12 @@ public class ResponseTool {
 
         if (content != null && title != null) {
             ClassPathResource resource = new ClassPathResource("h5_template.html");
-            InputStream is = resource.getInputStream();
-            String h5Template = IOUtils.toString(is, StandardCharsets.UTF_8);
+            try (InputStream is = resource.getInputStream()) {
+                String h5Template = IOUtils.toString(is, StandardCharsets.UTF_8);
 
-            String html = h5Template.replace("{title}", title).replace("{content}", content);
-            response.getWriter().write(html);
+                String html = h5Template.replace("{title}", title).replace("{content}", content);
+                response.getWriter().write(html);
+            }
         }
 
     }
@@ -84,7 +85,7 @@ public class ResponseTool {
                                               Integer code,
                                               String message) {
         response.setCharacterEncoding(CharsetUtil.UTF_8);
-        response.setContentType(ContentType.JSON.toString());
+        response.setContentType("application/json;charset=utf-8");
         AjaxResult result = AjaxResult.err().code(code).msg(message);
         String errorResponseJsonData = JsonTool.toPrettyJsonQuietly(result);
         try {
@@ -97,10 +98,14 @@ public class ResponseTool {
 
     public static void responseJson(HttpServletResponse response, Object data) {
         response.setCharacterEncoding(CharsetUtil.UTF_8);
-        response.setContentType(ContentType.JSON.toString());
+        response.setContentType("application/json;charset=utf-8");
         String errorResponseJsonData = JsonTool.toPrettyJsonQuietly(data);
         try {
-            response.getWriter().write(errorResponseJsonData);
+            if (errorResponseJsonData != null) {
+                response.getWriter().write(errorResponseJsonData);
+            } else {
+                response.getWriter().write("null");
+            }
         } catch (Exception e) {
             log.error(e.getClass().getName() + ":" + e.getMessage());
         }

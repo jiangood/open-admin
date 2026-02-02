@@ -141,4 +141,49 @@ class ResponseToolTest {
         assertTrue(responseContent.contains("Success"));
     }
 
+    @Test
+    void testResponseJsonWithNullData() throws IOException {
+        // 调用方法，传入null数据
+        ResponseTool.responseJson(mockResponse, null);
+        
+        // 验证设置的内容类型
+        verify(mockResponse).setCharacterEncoding("UTF-8");
+        verify(mockResponse).setContentType("application/json;charset=utf-8");
+        
+        // 验证响应内容为"null"
+        String responseContent = responseWriter.toString();
+        assertNotNull(responseContent);
+        assertEquals("null", responseContent);
+    }
+
+    @Test
+    void testResponseHtmlBlockWithNullContent() throws IOException {
+        String title = "Test Title";
+        
+        // 调用方法
+        ResponseTool.responseHtmlBlock(mockResponse, title, null);
+        
+        // 验证设置的内容类型
+        verify(mockResponse).setContentType("text/html;charset=utf-8");
+        
+        // 验证响应内容为空
+        String responseContent = responseWriter.toString();
+        assertEquals("", responseContent);
+    }
+
+    @Test
+    void testResponseHtmlBlockWithNullTitle() throws IOException {
+        String content = "<p>Test Content</p>";
+        
+        // 调用方法
+        ResponseTool.responseHtmlBlock(mockResponse, null, content);
+        
+        // 验证设置的内容类型
+        verify(mockResponse).setContentType("text/html;charset=utf-8");
+        
+        // 验证响应内容为空
+        String responseContent = responseWriter.toString();
+        assertEquals("", responseContent);
+    }
+
 }
