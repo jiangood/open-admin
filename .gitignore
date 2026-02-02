@@ -33,3 +33,4 @@ target/
 .flattened-pom.xml
 /web/npminstall-debug.log
 /.vscode/
+/.trae/

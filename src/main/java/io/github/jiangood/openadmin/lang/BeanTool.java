@@ -146,6 +146,10 @@ public class BeanTool {
 
         Map<String, Object> map = new HashMap<>();
 
+        if (bean == null) {
+            return map;
+        }
+
         try {
             Method[] declaredFields = ReflectionUtils.getAllDeclaredMethods(cls);
             for (Method method : declaredFields) {
