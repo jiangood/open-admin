@@ -9,11 +9,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@ComponentScan(basePackages = {"io.github.jiangood.openadmin.framework", "io.github.jiangood.openadmin.modules"})
-@EntityScan(basePackages = "io.github.jiangood.openadmin.modules")
+@ComponentScan(basePackages = BasePackage.PKG)
+@EntityScan(basePackages = BasePackage.PKG)
 @EnableCaching
 @EnableScheduling
 public class BasePackage {
+
+    public static final String PKG = "io.github.jiangood.openadmin";
 
     @Bean
     public SpringTool SpringTool() {

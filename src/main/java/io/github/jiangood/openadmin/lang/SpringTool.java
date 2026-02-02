@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class SpringTool extends SpringUtil implements ApplicationContextAware {
+public class SpringTool  implements ApplicationContextAware {
 
 
     /**
