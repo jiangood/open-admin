@@ -36,7 +36,7 @@ public class MapTool {
         String[] keyArr = keys.toArray(new String[keys.size()]);
 
         for (String key : keyArr) {
-            String keyUnderline = StrTool.toUnderlineCase(key);
+            String keyUnderline = StringTool.toUnderlineCase(key);
             if (!keyUnderline.equals(key)) {
                 Object v = map.get(key);
                 map.put(keyUnderline, v);

@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * 字符串工具类，提供字符串处理相关的工具方法
  */
-public class StrTool {
+public class StringTool {
 
     /**
      * 连接非空字符串，使用指定的连接符

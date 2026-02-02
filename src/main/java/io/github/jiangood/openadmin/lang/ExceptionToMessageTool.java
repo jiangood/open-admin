@@ -25,7 +25,7 @@ public class ExceptionToMessageTool {
         String message = dispatch(throwable);
 
         // 中文则提示中文，非中文则使用默认提示
-        if (!StrTool.hasChinese(message)) {
+        if (!StringTool.hasChinese(message)) {
             message = "服务器忙";
         }
         return message;

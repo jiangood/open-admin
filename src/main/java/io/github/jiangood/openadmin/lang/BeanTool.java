@@ -165,7 +165,7 @@ public class BeanTool {
                     continue;
                 }
 
-                String k = StrTool.removePreAndLowerFirst(name, "get");
+                String k = StringTool.removePreAndLowerFirst(name, "get");
                 if ("class".equals(k)) {
                     continue;
                 }
