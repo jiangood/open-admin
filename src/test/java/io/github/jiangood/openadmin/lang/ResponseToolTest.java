@@ -186,4 +186,67 @@ class ResponseToolTest {
         assertEquals("", responseContent);
     }
 
-}
+    @Test
+    void testResponseHtmlBlockWithValidContent() throws IOException {
+        String title = "Test Title";
+        String content = "<p>Test Content</p>";
+        
+        // 调用方法
+        ResponseTool.responseHtmlBlock(mockResponse, title, content);
+        
+        // 验证设置的内容类型
+        verify(mockResponse).setContentType("text/html;charset=utf-8");
+        
+        // 验证响应内容包含标题和内容
+        String responseContent = responseWriter.toString();
+        assertNotNull(responseContent);
+        assertTrue(responseContent.contains(title));
+        assertTrue(responseContent.contains(content));
+    }
+
+    @Test
+    void testResponseHtmlBlockWithImgContent() throws IOException {
+        String title = "Test Title";
+        String content = "<p>Test Content</p><img src=\"https://example.com/sysFile/preview/test.jpg\" alt=\"Test\" />";
+        
+        // 调用方法
+        ResponseTool.responseHtmlBlock(mockResponse, title, content);
+        
+        // 验证设置的内容类型
+        verify(mockResponse).setContentType("text/html;charset=utf-8");
+        
+        // 验证响应内容包含标题和处理后的图片标签（移除了前缀）
+        String responseContent = responseWriter.toString();
+        assertNotNull(responseContent);
+        assertTrue(responseContent.contains(title));
+        assertTrue(responseContent.contains("<img src=\"/sysFile/preview/test.jpg\" alt=\"Test\" />"));
+    }
+
+    @Test
+    void testSetDownloadHeaderWithSpecialCharacters() throws IOException {
+        String filename = "测试文件.txt";
+        String contentType = "text/plain";
+        
+        // 调用方法
+        ResponseTool.setDownloadHeader(filename, contentType, mockResponse);
+        
+        // 验证设置的头信息
+        verify(mockResponse).setContentType(contentType);
+        verify(mockResponse).setHeader("Content-Disposition", "attachment;filename=%E6%B5%8B%E8%AF%95%E6%96%87%E4%BB%B6.txt");
+        verify(mockResponse).setHeader("Access-Control-Expose-Headers", "content-disposition");
+    }
+
+    @Test
+    void testSetDownloadExcelHeaderWithSpecialCharacters() throws IOException {
+        String filename = "测试表格.xlsx";
+        
+        // 调用方法
+        ResponseTool.setDownloadExcelHeader(filename, mockResponse);
+        
+        // 验证设置的头信息
+        verify(mockResponse).setContentType(ResponseTool.CONTENT_TYPE_EXCEL);
+        verify(mockResponse).setHeader("Content-Disposition", "attachment;filename=%E6%B5%8B%E8%AF%95%E8%A1%A8%E6%A0%BC.xlsx");
+        verify(mockResponse).setHeader("Access-Control-Expose-Headers", "content-disposition");
+    }
+
+} 
