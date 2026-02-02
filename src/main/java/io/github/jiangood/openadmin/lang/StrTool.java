@@ -15,12 +15,15 @@ public class StrTool {
      * 连接非空字符串，使用指定的连接符
      *
      * @param conjunction 连接符
-     * @param list 字符串数组
+     * @param arr 字符串数组
      * @return 连接后的字符串，空字符串数组返回空字符串
      */
-    public static String joinIgnoreEmpty(char conjunction, String... list) {
+    public static String joinIgnoreEmpty(char conjunction, String... arr) {
+        if (arr == null || arr.length == 0) {
+            return "";
+        }
         StringBuilder sb = new StringBuilder();
-        for (String s : list) {
+        for (String s : arr) {
             if (s != null && !s.isEmpty()) {
                 sb.append(s).append(conjunction);
             }
@@ -39,6 +42,9 @@ public class StrTool {
      * @return 最后一个大写字母的下标位置，从0开始计数；如果未找到大写字母则返回-1
      */
     public static int lastUpperLetter(String str) {
+        if (isEmpty(str)) {
+            return -1;
+        }
         int len = str.length();
 
         // 从字符串末尾开始向前遍历查找大写字母
@@ -121,7 +127,13 @@ public class StrTool {
      * @return 处理后的字符串
      */
     public static String removePreAndLowerFirst(String str, String prefix) {
+        if (isEmpty(str)) {
+            return str;
+        }
         str = removePrefix(str, prefix);
+        if (isEmpty(str)) {
+            return str;
+        }
         return str.substring(0, 1).toLowerCase() + str.substring(1);
     }
 
