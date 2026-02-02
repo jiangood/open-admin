@@ -156,9 +156,8 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static String getProperty(String key) {
-        if (null == applicationContext) {
-            return null;
-        }
+        if(key == null) throw new NullPointerException("key is null");
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         return applicationContext.getEnvironment().getProperty(key);
     }
 

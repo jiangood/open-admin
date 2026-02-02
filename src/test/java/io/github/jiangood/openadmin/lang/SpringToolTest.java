@@ -106,6 +106,14 @@ public class SpringToolTest {
     }
 
     @Test
+    public void testHasProfileWhenNull() {
+        // 测试name为null的情况
+        boolean hasProfile = SpringTool.hasProfile(null);
+        // 应该返回false
+        Assertions.assertFalse(hasProfile);
+    }
+
+    @Test
     public void testPublishEvent() {
         // 测试发布事件，不抛出异常即可
         SpringTool.publishEvent(new TestEvent(this));
@@ -118,6 +126,20 @@ public class SpringToolTest {
         // 测试异步发布事件，不抛出异常即可
         SpringTool.publishEventAsync(new TestEvent(this));
     }
+
+
+    @Test
+    public void testGetBeanByNameAndClassWhenNull() {
+        // 测试name为null的情况
+        try {
+            SpringTool.getBean(null, SpringTool.class);
+            Assertions.fail("应该抛出异常");
+        } catch (Exception e) {
+            // 预期会抛出异常
+        }
+    }
+
+
 
     // 测试用的事件类
     static class TestEvent extends ApplicationEvent {
