@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;

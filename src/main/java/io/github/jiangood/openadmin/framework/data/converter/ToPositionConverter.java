@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.data.converter;
 
 
-import io.github.jiangood.openadmin.dto.Position;
+import io.github.jiangood.openadmin.lang.dto.Position;
 import io.github.jiangood.openadmin.lang.JsonTool;
 
 import java.io.IOException;

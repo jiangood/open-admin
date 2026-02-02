@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.lang.range;
 
 
-import io.github.jiangood.openadmin.dto.Point;
+import io.github.jiangood.openadmin.lang.dto.Point;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor

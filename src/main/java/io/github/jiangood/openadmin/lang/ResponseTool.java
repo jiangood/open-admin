@@ -4,7 +4,7 @@ package io.github.jiangood.openadmin.lang;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.ContentType;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

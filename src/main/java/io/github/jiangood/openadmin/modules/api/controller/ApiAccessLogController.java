@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.api.controller;
 
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccessLog;
 import io.github.jiangood.openadmin.modules.api.service.ApiAccessLogService;
 import jakarta.annotation.Resource;

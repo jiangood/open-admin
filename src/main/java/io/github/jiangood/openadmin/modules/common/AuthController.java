@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.common;// src/main/java/com/example
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.ICaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;

@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.dto;
+package io.github.jiangood.openadmin.lang.dto;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.jiangood.openadmin.dto.CommonMessage.FORBIDDEN_MESSAGE;
+import static io.github.jiangood.openadmin.lang.dto.CommonMessage.FORBIDDEN_MESSAGE;
 
 /**
  * 响应结果数据

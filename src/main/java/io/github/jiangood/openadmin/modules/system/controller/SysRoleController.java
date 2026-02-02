@@ -2,9 +2,9 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
-import io.github.jiangood.openadmin.dto.AjaxResult;
-import io.github.jiangood.openadmin.dto.DropdownRequest;
-import io.github.jiangood.openadmin.dto.antd.Option;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.DropdownRequest;
+import io.github.jiangood.openadmin.lang.dto.antd.Option;
 import io.github.jiangood.openadmin.lang.CollectionTool;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;

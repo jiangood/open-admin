@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.IpTool;
 import io.github.jiangood.openadmin.lang.RequestTool;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;

@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.dto.antd;
+package io.github.jiangood.openadmin.lang.dto.antd;
 
 // https://ant.design/components/menu-cn#itemtype
 

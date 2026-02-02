@@ -2,8 +2,8 @@ package io.github.jiangood.openadmin.modules.common;
 
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.dto.AjaxResult;
-import io.github.jiangood.openadmin.dto.antd.MenuItem;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.antd.MenuItem;
 import io.github.jiangood.openadmin.lang.SysRsaTool;
 import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;

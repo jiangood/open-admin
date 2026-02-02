@@ -139,7 +139,7 @@ public class UserService extends BaseService<User> {
 **示例**：
 
 ```java
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.User;
@@ -149,7 +149,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

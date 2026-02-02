@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.ArrayTool;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.lang.ResponseTool;

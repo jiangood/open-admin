@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.codec.Base64;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

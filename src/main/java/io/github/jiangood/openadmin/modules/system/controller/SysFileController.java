@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;

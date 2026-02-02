@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.api.controller;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.modules.api.entity.ApiResource;
 import io.github.jiangood.openadmin.modules.api.service.ApiResourceService;
 import jakarta.annotation.Resource;

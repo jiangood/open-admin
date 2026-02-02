@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.dto.table;
+package io.github.jiangood.openadmin.lang.dto.table;
 
 
 import cn.hutool.core.bean.BeanUtil;

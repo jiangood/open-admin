@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.ResponseTool;
 import io.github.jiangood.openadmin.framework.servlet.ReplaceParameterRequestWrapper;
 import io.github.jiangood.openadmin.modules.common.AuthService;

@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.dto.antd;
+package io.github.jiangood.openadmin.lang.dto.antd;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

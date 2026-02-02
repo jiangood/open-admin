@@ -315,7 +315,7 @@ public class Address {
 ### 在Controller中使用
 
 ```java
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.modules.system.entity.User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -326,7 +326,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("admin/user")
 public class UserController {
-    
+
     @PostMapping("save")
     public AjaxResult save(@Validated @RequestBody User user) {
         // 业务逻辑

@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.data.converter;
 
 
-import io.github.jiangood.openadmin.dto.Entry;
+import io.github.jiangood.openadmin.lang.dto.Entry;
 import io.github.jiangood.openadmin.lang.JsonTool;
 import jakarta.persistence.AttributeConverter;
 

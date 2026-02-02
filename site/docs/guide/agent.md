@@ -100,7 +100,7 @@ public class UserService extends BaseService<User> {
 ```java
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.Spec;
@@ -116,8 +116,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
-import io.github.jiangood.openadmin.dto.antd.Option;
+
+import io.github.jiangood.openadmin.lang.dto.antd.Option;
 
 @RestController
 @RequestMapping("admin/user")

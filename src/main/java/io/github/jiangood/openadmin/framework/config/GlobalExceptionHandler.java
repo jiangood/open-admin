@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.ExceptionToMessageTool;
 import io.github.jiangood.openadmin.lang.HttpServletTool;
 import io.github.jiangood.openadmin.lang.CodeException;

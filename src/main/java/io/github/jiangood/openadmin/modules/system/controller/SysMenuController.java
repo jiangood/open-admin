@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;

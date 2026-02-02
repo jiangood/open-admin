@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.api.gateway;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import io.github.jiangood.openadmin.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.SpringTool;
 import io.github.jiangood.openadmin.lang.CodeException;
 import io.github.jiangood.openadmin.modules.api.ApiErrorCode;
