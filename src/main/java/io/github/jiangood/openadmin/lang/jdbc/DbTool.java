@@ -56,6 +56,7 @@ public class DbTool {
             case "boolean":
                 return "BOOLEAN";
             case "char":
+            case "character":
             case "string":
                 return "VARCHAR(255)";
             case "date":

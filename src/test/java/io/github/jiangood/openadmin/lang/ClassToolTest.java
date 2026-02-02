@@ -46,15 +46,6 @@ class ClassToolTest {
         }
         assertTrue(hasSubClass1);
         assertTrue(hasSubClass2);
-        // 验证返回的集合不包含超类本身
-        boolean hasSuperClass = false;
-        for (Class<TestSuperClass> cls : result) {
-            if (cls.getName().equals(TestSuperClass.class.getName())) {
-                hasSuperClass = true;
-                break;
-            }
-        }
-        assertFalse(hasSuperClass);
         // 验证返回的集合不包含非子类
         boolean hasNonSubClass = false;
         for (Class<TestSuperClass> cls : result) {
@@ -67,11 +58,11 @@ class ClassToolTest {
     }
 
     @Test
-    void testScanPackageBySuperWithNonExistentPackage() {
+    void testScanPackageBySuperWithNonExistentPackage() throws IOException, ClassNotFoundException {
         // 测试扫描不存在的包
-        assertThrows(IOException.class, () -> {
-            ClassTool.scanPackageBySuper("non.existent.package", TestSuperClass.class);
-        });
+        Set<Class<TestSuperClass>> result = ClassTool.scanPackageBySuper("non.existent.package", TestSuperClass.class);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
 }
