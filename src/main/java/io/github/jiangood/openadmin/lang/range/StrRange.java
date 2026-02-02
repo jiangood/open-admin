@@ -11,6 +11,8 @@ import lombok.Setter;
 @Setter
 public class StrRange extends Range<String> {
 
+    public StrRange() {
+    }
 
     public StrRange(String str) {
         Range<String> dateRange = RangeTool.toStrRange(str);

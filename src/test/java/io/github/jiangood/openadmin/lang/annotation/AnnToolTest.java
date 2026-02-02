@@ -8,34 +8,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnnToolTest {
 
-    @Test
-    void testHasAnnWithExistingAnnotation() throws NoSuchFieldException {
-        // 获取带有Remark注解的字段
-        Field field = TestClass.class.getDeclaredField("annotatedField");
-        // 测试该字段是否有Remark注解
-        assertTrue(AnnTool.hasAnn(field, "Remark"));
-    }
-
-    @Test
-    void testHasAnnWithNonExistingAnnotation() throws NoSuchFieldException {
-        // 获取没有Remark注解的字段
-        Field field = TestClass.class.getDeclaredField("nonAnnotatedField");
-        // 测试该字段是否有Remark注解
-        assertFalse(AnnTool.hasAnn(field, "Remark"));
-    }
-
-    @Test
-    void testHasAnnWithNonExistingAnnotationName() throws NoSuchFieldException {
-        // 获取带有Remark注解的字段
-        Field field = TestClass.class.getDeclaredField("annotatedField");
-        // 测试该字段是否有不存在的注解
-        assertFalse(AnnTool.hasAnn(field, "NonExistingAnnotation"));
-    }
-
+    // 用于测试的带注解的类
     static class TestClass {
-        @Remark("测试字段")
+        @Remark("Test Field")
         private String annotatedField;
-
         private String nonAnnotatedField;
     }
+
+    @Test
+    void testHasAnnWithAnnotatedField() throws NoSuchFieldException {
+        // 测试有注解的字段
+        Field field = TestClass.class.getDeclaredField("annotatedField");
+        boolean hasRemark = AnnTool.hasAnn(field, "Remark");
+        assertTrue(hasRemark);
+
+        // 测试不存在的注解
+        boolean hasNonExistentAnn = AnnTool.hasAnn(field, "NonExistentAnnotation");
+        assertFalse(hasNonExistentAnn);
+    }
+
+    @Test
+    void testHasAnnWithNonAnnotatedField() throws NoSuchFieldException {
+        // 测试没有注解的字段
+        Field field = TestClass.class.getDeclaredField("nonAnnotatedField");
+        boolean hasRemark = AnnTool.hasAnn(field, "Remark");
+        assertFalse(hasRemark);
+    }
+
 }
