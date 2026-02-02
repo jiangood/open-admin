@@ -21,17 +21,9 @@ public class SpringTool implements ApplicationContextAware {
         System.out.println("SpringTool init");
     }
 
-    /**
-     * Spring应用上下文环境
-     * -- GETTER --
-     * 获取
-     *
-     * @return {@link ApplicationContext}
-     */
-    @Getter
+
     private static ApplicationContext applicationContext;
 
-    @SuppressWarnings("NullableProblems")
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         SpringTool.applicationContext = applicationContext;
