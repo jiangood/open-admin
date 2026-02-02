@@ -5,6 +5,9 @@ import java.time.Duration;
 public class DurationTool {
 
     public static String format(Duration duration) {
+        if (duration == null) {
+            return null;
+        }
         long days = duration.toDays();
         long hours = duration.toHoursPart();
         long minutes = duration.toMinutesPart();

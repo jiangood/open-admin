@@ -5,7 +5,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import io.github.jiangood.openadmin.lang.PasswordTool;
-import io.github.jiangood.openadmin.lang.SysRsaTool;
+import io.github.jiangood.openadmin.lang.RsaTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,9 +64,8 @@ public class AuthService {
     }
 
     public String decodeWebPassword(String password) {
-        RSA rsa = SysRsaTool.getRsa();
         try {
-            password = rsa.decryptStr(password, KeyType.PrivateKey);
+            password = RsaTool.decryptStr(password, KeyType.PrivateKey);
         } catch (Exception e) {
             log.error("输入密码解密失败: {}", e.getMessage());
             throw new IllegalStateException("密码未加密");

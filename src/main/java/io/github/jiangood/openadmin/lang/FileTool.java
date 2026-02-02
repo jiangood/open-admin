@@ -36,7 +36,7 @@ public class FileTool {
 
 
     public static File findByMainName(File directory, String targetFileName) {
-        if (!directory.exists()) {
+        if (directory == null || !directory.exists()) {
             return null;
         }
 

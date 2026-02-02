@@ -23,7 +23,7 @@ public class FriendlyTool {
      * @return 百分比字符串，例如"85.5%"
      */
     public static String getPercentage(double value, int decimalPlaces) {
-        return String.format("%.2" + decimalPlaces + "f%%", value * 100);
+        return String.format("%1$." + decimalPlaces + "f%%", value * 100);
     }
 
     /**

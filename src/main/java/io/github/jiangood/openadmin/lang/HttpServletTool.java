@@ -15,11 +15,12 @@ public class HttpServletTool {
      * 获取当前请求的request对象
      *
      * @return request对象
+     * @throws IllegalStateException 当请求上下文不存在时抛出
      */
     public static HttpServletRequest getRequest() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (requestAttributes == null) {
-            return null;
+            throw new IllegalStateException("Request context not found");
         }
 
         return requestAttributes.getRequest();
@@ -29,9 +30,13 @@ public class HttpServletTool {
      * 获取当前请求的response对象
      *
      * @return response对象
+     * @throws IllegalStateException 当请求上下文不存在时抛出
      */
     public static HttpServletResponse getResponse() {
         ServletRequestAttributes requestAttributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (requestAttributes == null) {
+            throw new IllegalStateException("Request context not found");
+        }
 
         return requestAttributes.getResponse();
     }

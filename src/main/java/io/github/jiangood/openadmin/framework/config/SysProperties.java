@@ -1,11 +1,15 @@
 package io.github.jiangood.openadmin.framework.config;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.openadmin.lang.AesTool;
 import io.github.jiangood.openadmin.lang.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -102,6 +106,14 @@ public class SysProperties {
     @NotBlank(message = "请配置默认密码")
     private String defaultPassword;
 
+    /**
+     * AesTool的密钥，默认AesTool为随机生成
+     */
+    private String aesKey;
+
+
+
+
     public String getBaseUrl() {
         String url = this.baseUrl;
         if (StrUtil.isEmpty(url)) {
@@ -112,5 +124,12 @@ public class SysProperties {
 
     public enum CaptchaType {
         MATH, RANDOM
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady() {
+        if(aesKey != null){
+            AesTool.initKey(aesKey);
+        }
     }
 }

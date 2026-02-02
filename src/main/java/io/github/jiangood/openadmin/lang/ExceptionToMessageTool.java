@@ -22,6 +22,9 @@ import java.util.Set;
 public class ExceptionToMessageTool {
 
     public static String convert(Throwable throwable) {
+        if (throwable == null) {
+            return null;
+        }
         String message = dispatch(throwable);
 
         // 中文则提示中文，非中文则使用默认提示
@@ -115,7 +118,7 @@ public class ExceptionToMessageTool {
                 }
             }
         }
-        return "执行事务异常" + e.getMessage();
+        return "服务器忙";
     }
 }
 

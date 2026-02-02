@@ -23,6 +23,11 @@ public class ConvertTool {
             return null;
         }
 
+        // 处理空字符串的情况
+        if (value instanceof String && ((String) value).trim().isEmpty()) {
+            return null;
+        }
+
         // 修复数字转枚举时，输入为long的异常（常见于数据取值）
         if (Enum.class.isAssignableFrom(type) && value instanceof Long) {
             value = ((Long) value).intValue();
@@ -39,11 +44,52 @@ public class ConvertTool {
             }
         }
 
+        try {
+            // 特殊处理数值范围检查
+            if (type == Byte.class && value instanceof String) {
+                try {
+                    Byte.parseByte((String) value);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            } else if (type == Short.class && value instanceof String) {
+                try {
+                    Short.parseShort((String) value);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            } else if (type == Integer.class && value instanceof String) {
+                try {
+                    Integer.parseInt((String) value);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            } else if (type == Long.class && value instanceof String) {
+                try {
+                    Long.parseLong((String) value);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            } else if (type == Float.class && value instanceof String) {
+                try {
+                    Float.parseFloat((String) value);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            } else if (type == Double.class && value instanceof String) {
+                try {
+                    Double.parseDouble((String) value);
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
 
-        T result = Convert.convert(type, value);
-
-
-        return result;
+            T result = Convert.convert(type, value);
+            return result;
+        } catch (Exception e) {
+            // 处理转换失败的情况，返回null
+            return null;
+        }
     }
 
 

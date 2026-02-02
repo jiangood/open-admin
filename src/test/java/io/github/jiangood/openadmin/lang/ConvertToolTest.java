@@ -75,4 +75,68 @@ class ConvertToolTest {
         assertNotNull(list2);
         assertEquals(3, list2.size());
     }
+
+    @Test
+    void testConvertNumericTypes() {
+        // 测试字符串转其他数值类型
+        Double doubleValue = ConvertTool.convert(Double.class, "123.45");
+        assertNotNull(doubleValue);
+        assertEquals(123.45, doubleValue);
+
+        Float floatValue = ConvertTool.convert(Float.class, "123.45");
+        assertNotNull(floatValue);
+        assertEquals(123.45f, floatValue);
+
+        Long longValue = ConvertTool.convert(Long.class, "123456789");
+        assertNotNull(longValue);
+        assertEquals(123456789L, longValue);
+
+        Short shortValue = ConvertTool.convert(Short.class, "123");
+        assertNotNull(shortValue);
+        assertEquals(Short.valueOf("123"), shortValue);
+
+        Byte byteValue = ConvertTool.convert(Byte.class, "123");
+        assertNotNull(byteValue);
+        assertEquals(Byte.valueOf("123"), byteValue);
+    }
+
+    @Test
+    void testConvertEdgeCases() {
+        // 测试空字符串
+        Integer emptyStrValue = ConvertTool.convert(Integer.class, "");
+        assertNull(emptyStrValue);
+
+        // 测试无效的数值字符串
+        Integer invalidStrValue = ConvertTool.convert(Integer.class, "abc");
+        assertNull(invalidStrValue);
+
+        // 测试超过范围的数值
+        Byte overflowByteValue = ConvertTool.convert(Byte.class, "256");
+        assertNull(overflowByteValue);
+    }
+
+    @Test
+    void testConvertEnumEdgeCases() {
+        // 测试无效的枚举索引
+        TestEnum invalidEnumValue = ConvertTool.convert(TestEnum.class, 999);
+        assertNull(invalidEnumValue);
+
+        // 测试无效的枚举名称
+        TestEnum invalidEnumNameValue = ConvertTool.convert(TestEnum.class, "INVALID");
+        assertNull(invalidEnumNameValue);
+    }
+
+    @Test
+    void testConvertSameType() {
+        // 测试相同类型的转换
+        Integer intValue = 123;
+        Integer result = ConvertTool.convert(Integer.class, intValue);
+        assertNotNull(result);
+        assertEquals(intValue, result);
+
+        String strValue = "test";
+        String strResult = ConvertTool.convert(String.class, strValue);
+        assertNotNull(strResult);
+        assertEquals(strValue, strResult);
+    }
 }
