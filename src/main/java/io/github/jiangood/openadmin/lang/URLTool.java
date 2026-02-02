@@ -19,12 +19,18 @@ public class URLTool {
         }
         if (url.contains("?")) {
             url = StrUtil.subAfter(url, '?', true);
+        } else if (!url.contains("&")) {
+            return map;
         }
 
         String[] ps = url.split("&");
         for (String p : ps) {
-            String[] arr = p.split("=");
-            map.put(arr[0], arr[1]);
+            String[] arr = p.split("=", 2);
+            if (arr.length == 2) {
+                map.put(arr[0], arr[1]);
+            } else if (arr.length == 1 && !arr[0].isEmpty()) {
+                map.put(arr[0], "");
+            }
         }
 
         return map;
@@ -52,7 +58,7 @@ public class URLTool {
     public static String appendPath(String url, String path) {
         if (url.contains("?")) {
             String[] arr = StrUtil.splitToArray(url, '?');
-            return arr[0] + path + arr[1];
+            return arr[0] + path + "?" + arr[1];
         }
 
         return url + path;
