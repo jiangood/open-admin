@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.framework.config.init;
 
 import io.github.jiangood.openadmin.lang.SpringTool;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.stereotype.Component;
@@ -9,10 +10,13 @@ import java.util.Collection;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class SystemHookService {
 
+    private final Collection<SystemHook> interceptors;
+
     public void trigger(SystemHookEventType type) {
-        for (SystemHook hook : SpringTool.getBeans(SystemHook.class)) {
+        for (SystemHook hook : interceptors) {
             hook.onEvent(type);
         }
 
@@ -34,7 +38,7 @@ public class SystemHookService {
     }
 
     public void beforeConfigSecurity(HttpSecurity http) {
-        for (SystemHook hook : SpringTool.getBeans(SystemHook.class)) {
+        for (SystemHook hook : interceptors) {
             hook.beforeConfigSecurity(http);
         }
     }

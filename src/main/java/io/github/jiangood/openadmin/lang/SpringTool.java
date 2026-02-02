@@ -2,8 +2,8 @@ package io.github.jiangood.openadmin.lang;
 
 
 import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.extra.spring.SpringUtil;
-import io.github.jiangood.openadmin.BasePackage;
+import io.github.jiangood.openadmin.OpenAdminConfiguration;
+import lombok.Getter;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -14,22 +14,20 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-public class SpringTool  implements ApplicationContextAware {
-
+public class SpringTool implements ApplicationContextAware {
+    public SpringTool() {
+        System.out.println("SpringTool init");
+    }
 
     /**
      * Spring应用上下文环境
-     */
-    private static ApplicationContext applicationContext;
-
-    /**
-     * 获取{@link ApplicationContext}
+     * -- GETTER --
+     * 获取
      *
      * @return {@link ApplicationContext}
      */
-    public static ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
+    @Getter
+    private static ApplicationContext applicationContext;
 
     @SuppressWarnings("NullableProblems")
     @Override
@@ -61,7 +59,7 @@ public class SpringTool  implements ApplicationContextAware {
                 list.addAll(Arrays.asList(basePackageClasses));
             }
         }
-        list.add(BasePackage.class);
+        list.add(OpenAdminConfiguration.class);
         return list;
     }
 
@@ -131,6 +129,7 @@ public class SpringTool  implements ApplicationContextAware {
 
 
     public static <T> List<T> getBeans(Class<T> type) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         Collection<T> values = applicationContext.getBeansOfType(type).values();
         return new ArrayList<>(values);
     }
@@ -194,17 +193,17 @@ public class SpringTool  implements ApplicationContextAware {
         }
     }
 
-    public static void publishEventAsync(ApplicationEvent event) {
-        if (null != applicationContext) {
-            Timer timer = new Timer();
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    applicationContext.publishEvent(event);
-                }
-            }, 5);
 
-        }
+    public static void publishEventAsync(ApplicationEvent event) {
+        AssertUtil.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        ThreadTool.execute(() -> {
+            try {
+                applicationContext.publishEvent(event);
+            } catch (Exception e) {
+                // 记录异常日志，防止异常被忽略
+                e.printStackTrace(); // 在实际项目中应使用日志框架记录
+            }
+        });
     }
 
     public static void publishEvent(Object event) {

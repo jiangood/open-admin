@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.lang;
 
-import io.github.jiangood.openadmin.BasePackage;
+import io.github.jiangood.openadmin.OpenAdminConfiguration;
 import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.springframework.core.io.ClassPathResource;
@@ -103,7 +103,7 @@ public class ResourceTool {
         if (r instanceof UrlResource ur) {
             String[] orders = {
                     "/org/springframework/",
-                    BasePackage.class.getPackageName().replaceAll("\\.", "/"),
+                    OpenAdminConfiguration.class.getPackageName().replaceAll("\\.", "/"),
             };
             for (int i = 0; i < orders.length; i++) {
                 String order = orders[i];
