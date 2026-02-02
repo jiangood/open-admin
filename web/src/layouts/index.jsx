@@ -33,8 +33,7 @@ function checkIsSimplePage(pathname) {
     if(pathname.startsWith("/test/")){
         return true
     }
-    let count = StringUtils.count(pathname,'/');
-    return ArrUtils.contains(SIMPLE_URLS, pathname) || count === 1;
+    return ArrUtils.contains(SIMPLE_URLS, pathname) ;
 }
 
 function checkIsPurePage(pathname){
