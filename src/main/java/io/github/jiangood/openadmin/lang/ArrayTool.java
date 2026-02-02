@@ -40,7 +40,7 @@ public class ArrayTool {
      * @return 如果数组中所有元素都是指定类型返回true，否则返回false
      */
     public static boolean isAllType(Object[] arr, Class<?> clazz) {
-        if (arr == null) {
+        if (arr == null || arr.length == 0) {
             return false;
         }
         for (Object o : arr) {
