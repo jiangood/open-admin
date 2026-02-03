@@ -6,9 +6,8 @@ export function FieldDictSelect(props) {
     const {value, onChange, typeCode, ...rest} = props;
     const options = DictUtils.dictOptions(typeCode);
 
-    debugger
 
-    return <Select value={value}
+    return <Select value={String(value)}
                    onChange={onChange}
                    style={{width: '100%', minWidth: 200}}
                    options={options}

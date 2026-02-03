@@ -1,5 +1,10 @@
 // 假设的类型定义，你需要确保与你的实际数据结构匹配
 import {SysUtils} from "./SysUtils";
+// 假设 SysUtil 和 StrUtil 的引入和类型
+// 实际使用时需要确保路径和模块存在
+import {Tag} from 'antd';
+import React from 'react';
+import {StringUtils} from "../StringUtils";
 
 export interface DictItem {
     value: string | number;
@@ -8,15 +13,9 @@ export interface DictItem {
 }
 
 
-// 假设 SysUtil 和 StrUtil 的引入和类型
-// 实际使用时需要确保路径和模块存在
-import {Tag} from 'antd';
-import React from 'react';
-import {StringUtils} from "../StringUtils";
-
 // 字典选项的格式
 export interface DictOption {
-    value: string|number;
+    value: string | number;
     label: string;
 }
 
@@ -76,7 +75,7 @@ export class DictUtils {
      * @param code 字典项编码
      * @returns Antd Tag 元素或纯字符串名称或空字符串
      */
-    public static dictTag(typeCode: string, code: string | number ): React.ReactElement | string {
+    public static dictTag(typeCode: string, code: string | number): React.ReactElement | string {
         if (typeCode == null || code == null) {
             return null;
         }
