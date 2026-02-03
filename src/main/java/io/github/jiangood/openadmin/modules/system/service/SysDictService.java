@@ -37,7 +37,10 @@ public class SysDictService {
                 DictDefinition.Item defItem = itemOptional.orElse(new DictDefinition.Item());
                 defItem.setName(dbItem.getText());
                 defItem.setCode(dbItem.getCode());
-                defItem.setColor(StatusColor.valueOf(dbItem.getColor()));
+                if(dbItem.getColor() != null){
+                    defItem.setColor(StatusColor.valueOf(dbItem.getColor()));
+                }
+
                 defItem.setEnabled(dbItem.getEnabled());
                 if (itemOptional.isEmpty()) {
                     def.getItems().add(defItem);
@@ -61,7 +64,9 @@ public class SysDictService {
             typeCode = StrUtil.toUnderlineCase(typeCode).toUpperCase();
 
             for (DictDefinition.Item item : definition.getItems()) {
-                map.put(typeCode, new DictItemDto(item.getCode(), item.getName(), item.getColor()));
+                StatusColor color = item.getColor();
+                String colorName = color != null ? color.name().toLowerCase() : null;
+                map.put(typeCode, new DictItemDto(item.getCode(), item.getName(),  colorName));
             }
         }
 

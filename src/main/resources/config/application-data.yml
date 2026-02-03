@@ -65,6 +65,7 @@ data:
   dicts:
     - name: 机构类型
       code: orgType
+      group-name: 系统管理
       items:
         - name: 单位
           code: 10
@@ -73,6 +74,7 @@ data:
           code: 20
     - name: 审核状态
       code: approveStatus
+      group-name: 系统管理
       items:
           - name: 待提交
             code: DRAFT
@@ -107,6 +109,7 @@ data:
           color: error
     - name: 数据权限
       code: dataPermType
+      group-name: 系统管理
       items:
         - name: 所有
           code: ALL

@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tag, Tree, Typography} from "antd";
 import {
     ButtonList,
-    FieldBoolean,
+    FieldBoolean, FieldDictSelect,
     HttpUtils,
     Page,
     PageLoading,
@@ -30,7 +30,7 @@ export default class extends React.Component {
     }
 
     onSelect = (selectedKeys) => {
-        const key = selectedKeys.length === 1 ? selectedKeys[0] : null
+        const key = selectedKeys.length === 1 ? selectedKeys[0] : null;
         this.setState({typeCode: key}, () => {
             this.tableRef.current.reload()
         })
@@ -136,12 +136,7 @@ export default class extends React.Component {
                     </Tree>
                 </Splitter.Panel>
                 <Splitter.Panel style={{paddingLeft: 16}}>
-                    <Typography.Text italic> 类型：</Typography.Text>
-                    <Typography.Text copyable>
-                        {this.state.typeCode}
-                    </Typography.Text>
-
-
+                    {this.renderTypeInfo()}
                     <ProTable
                         rowKey='code'
                         actionRef={this.tableRef}
@@ -159,8 +154,6 @@ export default class extends React.Component {
                         columns={this.columns}
                         search={false}
                     />
-
-
                 </Splitter.Panel>
             </Splitter>
             <Modal
@@ -185,7 +178,7 @@ export default class extends React.Component {
                         <Input/>
                     </Form.Item>
                     <Form.Item label='颜色' name='color' rules={[{required: true}]}>
-                        <Input/>
+                        <FieldDictSelect typeCode='ORG_TYPE' />
                     </Form.Item>
                     <Form.Item label='序号' name='seq' rules={[{required: true}]}>
                         <InputNumber/>
@@ -200,5 +193,16 @@ export default class extends React.Component {
         </Page>
 
 
+    }
+
+    renderTypeInfo() {
+        if(this.state.typeCode){
+            return <>
+                <Typography.Text italic> 类型：</Typography.Text>
+                <Typography.Text copyable>
+                    {this.state.typeCode}
+                </Typography.Text>
+            </>;
+        }
     }
 }

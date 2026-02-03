@@ -9,5 +9,5 @@ import lombok.Data;
 public class DictItemDto {
     private Object value;
     private String label;
-    private StatusColor color;
+    private String color;
 }
