@@ -10,38 +10,58 @@ const sidebars = {
       type: 'category',
       label: '项目概述',
       items: [
-        'quick-start',
         'architecture',
       ],
     },
     {
       type: 'category',
-      label: '前端文档',
+      label: '入门指南',
       items: [
-        'frontend/components',
-        'frontend/field-components',
-        'frontend/system-components',
-        'frontend/utils',
+        'quick-start',
       ],
     },
     {
       type: 'category',
-      label: '后端文档',
+      label: '核心功能',
       items: [
-        'backend/data-spec',
-        'backend/utils',
-        'backend/annotations',
-        'backend/validators',
-        'backend/job',
+        'core-features/user-permission',
+        'core-features/data-dict',
+      ],
+    },
+    {
+      type: 'category',
+      label: 'API文档',
+      items: [
+        {
+          type: 'category',
+          label: '前端API',
+          items: [
+            'api/frontend/components',
+            'api/frontend/field-components',
+            'api/frontend/system-components',
+            'api/frontend/utils',
+          ],
+        },
+        {
+          type: 'category',
+          label: '后端API',
+          items: [
+            'api/backend/data-spec',
+            'api/backend/utils',
+            'api/backend/annotations',
+            'api/backend/validators',
+            'api/backend/job',
+          ],
+        },
       ],
     },
     {
       type: 'category',
       label: '开发指南',
       items: [
-        'guide/coding-standard',
-        'guide/best-practices',
-        'guide/agent',
+        'development/coding-standard',
+        'development/best-practices',
+        'development/agent',
       ],
     },
   ],
