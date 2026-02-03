@@ -51,11 +51,6 @@ public class SysDictController {
     @PreAuthorize("hasAuthority('sysDict:save')")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysDictItem param, RequestBodyKeys updateFields) throws Exception {
-
-        // 能修改的都是非内置项目
-        param.setBuiltin(false);
-        updateFields.add(SysDictItem.Fields.builtin);
-
         SysDictItem result = service.save(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("保存成功");
     }

@@ -119,6 +119,27 @@ data:
           code: CHILDREN
         - name: 自定义
           code: CUSTOM
+    - name: 状态颜色
+      code: statusColor
+      items:
+        - name: 成功
+          code: SUCCESS
+        - name: 处理中
+          code: PROCESSING
+        - name: 错误
+          code: ERROR
+        - name: 警告
+          code: WARNING
+        - name: 默认
+          code: DEFAULT
+        - name: 红色
+          code: RED
+        - name: 蓝色
+          code: BLUE
+        - name: 绿色
+          code: GREEN
+        - name: 灰色
+          code: GRAY
 
 
 

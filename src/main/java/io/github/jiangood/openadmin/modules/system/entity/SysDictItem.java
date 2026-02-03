@@ -28,7 +28,7 @@ public class SysDictItem extends BaseEntity {
 
 
     @Remark("文本")
-    private String text;
+    private String name;
 
 
     @Column(nullable = false)
@@ -38,9 +38,7 @@ public class SysDictItem extends BaseEntity {
     @Column(length = 10)
     private String color;
 
-    @Remark("系统内置")
-    @NotNull
-    private Boolean builtin;
+
 
 
     @Remark("序号")

@@ -1,6 +1,8 @@
 package io.github.jiangood.openadmin.framework.migration;
 
+import cn.hutool.core.util.ArrayUtil;
 import io.github.jiangood.openadmin.framework.config.init.SystemHook;
+import io.github.jiangood.openadmin.lang.ArrayTool;
 import io.github.jiangood.openadmin.lang.jdbc.DbTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -32,6 +34,14 @@ public class MigrationSysDict implements SystemHook {
             // 删除错误的数据
             db.executeQuietly("DELETE FROM sys_dict_item where type_code in('orgType','materialType','approveStatus','sex','dataPermType','yesNo')");
 
+            db.executeQuietly("ALTER TABLE `sys_dict_item` DROP COLUMN `sys_dict_id`");
+            db.executeQuietly("ALTER TABLE `sys_dict_item` DROP COLUMN `builtin`");
+        }
+
+        String[] keys = db.getKeys("select * from sys_dict_item");
+        if(ArrayUtil.contains(keys,"text")){
+            db.executeQuietly("UPDATE sys_dict_item SET name = text;");
+            db.executeQuietly("ALTER TABLE `sys_dict_item` DROP COLUMN `text`");
         }
 
     }

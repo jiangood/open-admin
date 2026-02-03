@@ -85,14 +85,7 @@ export default class extends React.Component {
 
             }
         },
-        {
-            title: '系统内置',
-            dataIndex: 'builtin',
-            render(v) {
-                return v ? '是' : '否'
-            }
 
-        },
         {
             title: '序号',
             dataIndex: 'seq',
@@ -142,7 +135,7 @@ export default class extends React.Component {
                         actionRef={this.tableRef}
                         toolBarRender={() => {
                             return <ButtonList>
-                                <Button perm='sysDict:save' type='primary' onClick={this.handleAdd}>
+                                <Button perm='sysDict:save' type='primary' onClick={this.handleAdd} disabled={!this.state.typeCode}>
                                     <PlusOutlined/> 新增
                                 </Button>
                             </ButtonList>
@@ -168,17 +161,17 @@ export default class extends React.Component {
                       initialValues={this.state.formValues}
                       onFinish={this.onFinish}>
                     <Form.Item name='id' noStyle></Form.Item>
-                    <Form.Item label='类型编码' name='typeCode' rules={[{required: true}]}>
+                    <Form.Item label='类型编码' name='typeCode' rules={[{required: true}]} initialValue={this.state.typeCode}>
                         <Input/>
                     </Form.Item>
                     <Form.Item label='编码' name='code' rules={[{required: true}]}>
                         <Input/>
                     </Form.Item>
-                    <Form.Item label='文本' name='text' rules={[{required: true}]}>
+                    <Form.Item label='文本' name='name' rules={[{required: true}]} >
                         <Input/>
                     </Form.Item>
                     <Form.Item label='颜色' name='color' rules={[{required: true}]}>
-                        <FieldDictSelect typeCode='ORG_TYPE' />
+                        <FieldDictSelect typeCode='statusColor' />
                     </Form.Item>
                     <Form.Item label='序号' name='seq' rules={[{required: true}]}>
                         <InputNumber/>

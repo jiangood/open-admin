@@ -35,7 +35,7 @@ public class SysDictService {
             definitions.stream().filter(def -> def.getCode().equals(dbItem.getTypeCode())).findFirst().ifPresent(def -> {
                 Optional<DictDefinition.Item> itemOptional = def.getItems().stream().filter(e -> e.getCode().equals(dbItem.getCode())).findFirst();
                 DictDefinition.Item defItem = itemOptional.orElse(new DictDefinition.Item());
-                defItem.setName(dbItem.getText());
+                defItem.setName(dbItem.getName());
                 defItem.setCode(dbItem.getCode());
                 if(dbItem.getColor() != null){
                     defItem.setColor(StatusColor.valueOf(dbItem.getColor()));
