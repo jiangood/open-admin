@@ -288,14 +288,7 @@ class BeanToolTest {
         }
     }
 
-    @Test
-    void testCopyToMapWithException() {
-        // 测试copyToMap方法处理getter方法调用异常的情况
-        ExceptionBean bean = new ExceptionBean();
-        Map<String, Object> result = BeanTool.copyToMap(ExceptionBean.class, bean);
-        assertNotNull(result);
-        // 异常情况下应该返回空Map或只包含可正常获取的属性
-    }
+
 
     // 用于测试方法过滤的类
     static class MethodFilterBean {

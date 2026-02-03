@@ -183,7 +183,8 @@ public class BeanTool {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.getClass().getName() + ":" + e.getMessage());
+            throw new RuntimeException("复制为map时错误", e);
         }
         return map;
     }

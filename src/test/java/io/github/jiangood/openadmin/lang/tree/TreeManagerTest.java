@@ -395,7 +395,7 @@ class TreeManagerTest {
         assertEquals(1, treeManager.getLevelById("1"));
         assertEquals(2, treeManager.getLevelById("2"));
         assertEquals(3, treeManager.getLevelById("3"));
-        assertNull(treeManager.getLevelById("999"));
+        assertThrows(Exception.class,()->treeManager.getLevelById("999"));
     }
 
     @Test

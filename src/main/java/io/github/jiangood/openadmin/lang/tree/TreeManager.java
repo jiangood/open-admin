@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.lang.tree;
 
 import lombok.Getter;
+import org.springframework.util.Assert;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -263,7 +264,9 @@ public class TreeManager<T extends TreeNode<T>> {
 
     public int getLevelById(String id) {
         Map<String, Integer> lm = buildLevelMap();
-        return lm.get(id);
+        Integer level = lm.get(id);
+        Assert.state(level != null, "id not found:" + id);
+        return level;
     }
 
     public Map<String, Integer> buildLevelMap() {
