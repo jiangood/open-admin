@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.google.common.collect.LinkedListMultimap;
 import io.github.jiangood.openadmin.framework.config.datadefinition.DataPropertiesFactory;
@@ -35,13 +36,12 @@ public class SysDictService {
             definitions.stream().filter(def -> def.getCode().equals(dbItem.getTypeCode())).findFirst().ifPresent(def -> {
                 Optional<DictDefinition.Item> itemOptional = def.getItems().stream().filter(e -> e.getCode().equals(dbItem.getCode())).findFirst();
                 DictDefinition.Item defItem = itemOptional.orElse(new DictDefinition.Item());
-                defItem.setName(dbItem.getName());
-                defItem.setCode(dbItem.getCode());
+                BeanUtil.copyProperties(dbItem, defItem);
+
                 if(dbItem.getColor() != null){
                     defItem.setColor(StatusColor.valueOf(dbItem.getColor()));
                 }
 
-                defItem.setEnabled(dbItem.getEnabled());
                 if (itemOptional.isEmpty()) {
                     def.getItems().add(defItem);
                 }

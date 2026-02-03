@@ -16,6 +16,7 @@ public class DictDefinition {
     private List<Item> items = new ArrayList<>();
 
 
+
     @Data
     public static class Item {
         String name;
@@ -26,6 +27,8 @@ public class DictDefinition {
          * 是否启用， 禁用后，select等组件不能选择，但查看列表中可以查看
          */
         Boolean enabled = true;
+
+        private Integer seq;
     }
 
 
