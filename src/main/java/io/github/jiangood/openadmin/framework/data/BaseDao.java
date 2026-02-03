@@ -202,13 +202,16 @@ public abstract class BaseDao<T extends Persistable<String>> {
     // --- 4. 核心读取操作 (CRUD - Read) ---
 
     public T findById(String id) {
+        Assert.hasText(id, "id不能为空");
         return rep.findById(id).orElse(null);
     }
 
+    @Deprecated
     public T findOne(String id) {
         return rep.findById(id).orElse(null);
     }
 
+    @Deprecated
     public T findOne(T t) {
         return rep.findById(t.getId()).orElse(null);
     }
@@ -345,8 +348,21 @@ public abstract class BaseDao<T extends Persistable<String>> {
         return this.findAll(Spec.<T>of().eq(key, value).eq(key2, value2));
     }
 
-    public boolean isFieldUnique(String id, String fieldName, Object value) {
-        return rep.exists(Spec.<T>of().ne("id", id).eq(fieldName, value));
+    /**
+     * 判断字段值是否存在
+     * 例如修改用户名时，判断用户名是否唯一
+     * @param id
+     * @param fieldName
+     * @param value
+     * @return
+     */
+    public boolean isFieldExist(String id, String fieldName, Object value) {
+        Spec<T> spec = Spec.of();
+
+        spec.ne("id", id); // 修改数据时，不包含自身
+
+        spec.eq(fieldName, value);
+        return rep.exists(spec);
     }
 
     public List<T> findByExampleLike(T t, Sort sort) {
@@ -412,15 +428,19 @@ public abstract class BaseDao<T extends Persistable<String>> {
         query.where(predicate);
 
 
-        List<Selection<?>> selections = query.getSelection().getCompoundSelectionItems();
+        Selection<?> selection = query.getSelection();
+        if (selection == null) {
+            throw new IllegalArgumentException("请指定查询字段");
+        }
+        List<Selection<?>> selections = selection.getCompoundSelectionItems();
         List<Object[]> resultList = entityManager.createQuery(query).getResultList();
 
         // 转换为map
         return resultList.stream().map(record -> {
             Dict map = Dict.create();
             for (int i = 0; i < selections.size(); i++) {
-                Selection<?> selection = selections.get(i);
-                map.put(selection.getAlias(), record[i]);
+                Selection<?> item = selections.get(i);
+                map.put(item.getAlias(), record[i]);
             }
             return map;
         }).toList();
