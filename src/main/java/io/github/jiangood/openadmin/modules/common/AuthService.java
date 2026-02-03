@@ -3,13 +3,12 @@ package io.github.jiangood.openadmin.modules.common;// 文件名: CustomLoginFil
 import cn.hutool.captcha.generator.CodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
-import cn.hutool.crypto.asymmetric.RSA;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.lang.RsaTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -19,39 +18,42 @@ import org.springframework.util.Assert;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class AuthService {
 
 
     public static final String CAPTCHA_CODE = "captchaCode";
 
-    @Resource
-    LoginAttemptService loginAttemptService;
+    private final LoginAttemptService loginAttemptService;
 
-    @Resource
-    SysProperties prop;
+    private final SysProperties sysProperties;
 
-    @Resource
-    CodeGenerator codeGenerator;
+    private final CodeGenerator codeGenerator;
 
 
     /**
-     * @param request
      * @return 解密后的密码
      */
     public void validate(HttpServletRequest request) {
-        // 0. 随眠 1秒，对用户无感知，但等防止爆破攻击
-        ThreadUtil.sleep(1000);
-
         String username = request.getParameter("username");
         String captchaCode = request.getParameter("captchaCode");
 
-
+        // 检查账户是否被锁定
         boolean locked = loginAttemptService.isAccountLocked(username);
-        Assert.state(!locked, "账户已被锁定，请" + prop.getLoginLockMinutes() + "分钟后再试");
+        Assert.state(!locked, "账户已被锁定，请" + sysProperties.getLoginLockMinutes() + "分钟后再试");
 
+        // 实现指数退避策略的登录延迟
+        int remainingAttempts = loginAttemptService.getRemainingAttempts(username);
+        if (remainingAttempts > 0) {
+            // 计算延迟时间：基础延迟 1秒，每次失败后翻倍
+            int maxAttempts = sysProperties.getLoginLockMaxAttempts();
+            int failedAttempts = maxAttempts - remainingAttempts;
+            long delayMs = 1000L * (1L << Math.min(failedAttempts, 8)); // 最大延迟 256秒
+            ThreadUtil.sleep(delayMs);
+        }
 
         // 验证码校验
-        if (prop.isCaptcha()) {
+        if (sysProperties.isCaptcha()) {
             HttpSession session = request.getSession(false);
             Assert.notNull(session, "页面已失效，请刷新页面");
 
@@ -59,7 +61,6 @@ public class AuthService {
             String sessionCode = (String) session.getAttribute(CAPTCHA_CODE);
             Assert.state(codeGenerator.verify(sessionCode, captchaCode), "验证码错误");
         }
-
 
     }
 
