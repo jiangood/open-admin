@@ -14,6 +14,7 @@ import io.github.jiangood.openadmin.modules.api.entity.ApiResource;
 import io.github.jiangood.openadmin.modules.api.service.ApiAccountService;
 import io.github.jiangood.openadmin.modules.api.service.ApiResourceService;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.simpleframework.xml.core.Validate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

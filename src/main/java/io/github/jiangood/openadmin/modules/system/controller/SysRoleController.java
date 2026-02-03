@@ -20,6 +20,7 @@ import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
 import io.github.jiangood.openadmin.modules.system.service.SysRoleService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
