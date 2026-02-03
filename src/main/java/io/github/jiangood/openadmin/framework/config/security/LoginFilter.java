@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class LoginFilter extends OncePerRequestFilter {
         try {
             authService.validate(request);
             String password = request.getParameter("password");
+
 
             String passwordType = (String) request.getAttribute("passwordType");
             passwordType = StrUtil.nullToDefault(passwordType, "WEB");

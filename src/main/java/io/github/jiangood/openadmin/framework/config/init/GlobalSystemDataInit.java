@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.framework.config.init;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
-import io.github.jiangood.openadmin.framework.dict.DictAnnHandler;
 import io.github.jiangood.openadmin.modules.system.dao.SysUserDao;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
@@ -34,8 +33,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     SysUserDao sysUserDao;
 
 
-    @Resource
-    DictAnnHandler dictAnnHandler;
 
 
     @Resource
@@ -56,7 +53,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
         log.info("执行初始化程序： {}", getClass().getName());
         long time = System.currentTimeMillis();
 
-        dictAnnHandler.run();
         systemHookService.trigger(SystemHookEventType.AFTER_SYSTEM_MENU_INIT);
 
         SysRole adminRole = sysRoleService.initDefaultAdmin();

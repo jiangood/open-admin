@@ -1,91 +1,101 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import cn.hutool.core.util.StrUtil;
-import com.google.common.collect.Multimap;
-import io.github.jiangood.openadmin.lang.GoogleTool;
-import io.github.jiangood.openadmin.framework.data.BaseService;
-import io.github.jiangood.openadmin.modules.system.dao.SysDictDao;
+import com.google.common.collect.LinkedListMultimap;
+import io.github.jiangood.openadmin.framework.config.datadefinition.DataPropertiesFactory;
+import io.github.jiangood.openadmin.framework.config.datadefinition.DictDefinition;
+import io.github.jiangood.openadmin.framework.enums.StatusColor;
+import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.modules.system.dao.SysDictItemDao;
-import io.github.jiangood.openadmin.modules.system.entity.SysDict;
+import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
-public class SysDictService extends BaseService<SysDict> {
+public class SysDictService {
 
+    public static final String DEFAULT_GROUP = "默认分组";
     @Resource
     private SysDictItemDao sysDictItemDao;
 
-    @Resource
-    private SysDictDao sysDictDao;
 
-    public String findText(String typeCode, String itemCode) {
-        SysDict dict = sysDictDao.findByCode(typeCode);
-        SysDictItem item = sysDictItemDao.findByDictAndCode(dict, itemCode);
-        if (item == null) {
-            return null;
-        }
-        return item.getText();
-    }
+    public List<DictDefinition> getAll() {
+        List<DictDefinition> definitions = DataPropertiesFactory.getInstance().getDicts();
 
-    /**
-     * 初始一个数据字典
-     * 先判断是否存在
-     *
-     * @param code
-     * @param text
-     * @return
-     */
-    @Transactional
-    public SysDict init(String code, String text, String... itemCodeTextArr) {
-        SysDict old = sysDictDao.findByCode(code);
-        if (old != null) {
-            log.info("字典已存在，忽略初始化。 {}={}", code, text);
-            return old;
-        }
-        SysDict dict = new SysDict();
-        dict.setCode(code);
-        dict.setText(text);
-        dict = sysDictDao.save(dict);
-
-        for (int i = 0; i < itemCodeTextArr.length; i = i + 2) {
-            String itemCode = itemCodeTextArr[i];
-            String itemValue = itemCodeTextArr[i + 1];
-            sysDictItemDao.add(dict, itemCode, itemValue);
-        }
-
-        return dict;
-    }
-
-    public Map<String, Collection<SimpleDictItem>> dictMap() {
+        // 合并数据库中的
         List<SysDictItem> list = sysDictItemDao.findAll(Sort.by(SysDictItem.Fields.seq));
+        for (SysDictItem dbItem : list) {
+            definitions.stream().filter(def -> def.getCode().equals(dbItem.getTypeCode())).findFirst().ifPresent(def -> {
+                Optional<DictDefinition.Item> itemOptional = def.getItems().stream().filter(e -> e.getCode().equals(dbItem.getCode())).findFirst();
+                DictDefinition.Item defItem = itemOptional.orElse(new DictDefinition.Item());
+                defItem.setName(dbItem.getText());
+                defItem.setCode(dbItem.getCode());
+                defItem.setColor(StatusColor.valueOf(dbItem.getColor()));
+                defItem.setEnabled(dbItem.getEnabled());
+                if (itemOptional.isEmpty()) {
+                    def.getItems().add(defItem);
+                }
+            });
+        }
 
-        Multimap<String, SimpleDictItem> map = GoogleTool.newMultimap();
 
-        for (SysDictItem item : list) {
-            SysDict sysDict = item.getSysDict();
-            String dictCode = sysDict.getCode();
-            dictCode = StrUtil.toUnderlineCase(dictCode).toUpperCase();
+        return definitions;
+    }
 
-            Boolean isNumber = sysDict.getIsNumber() != null ? sysDict.getIsNumber() : false;
-            Object value = isNumber ? Integer.parseInt(item.getCode()) : item.getCode();
 
-            map.put(dictCode, new SimpleDictItem(value, item.getText(), item.getColor()));
+    public Map<String, Collection<DictItemDto>> dictMap() {
+        List<DictDefinition> list = getAll();
+
+        LinkedListMultimap<String, DictItemDto> map = LinkedListMultimap.create();
+
+
+        for (DictDefinition definition : list) {
+            String typeCode = definition.getCode();
+            typeCode = StrUtil.toUnderlineCase(typeCode).toUpperCase();
+
+            for (DictDefinition.Item item : definition.getItems()) {
+                map.put(typeCode, new DictItemDto(item.getCode(), item.getName(), item.getColor()));
+            }
         }
 
         return map.asMap();
     }
 
-    public record SimpleDictItem(Object value, String label, String color) {
+
+    public List<TreeOption> tree() {
+        List<DictDefinition> list = getAll();
+        List<TreeOption> treeList = new ArrayList<>();
+        {
+            TreeOption group = new TreeOption(DEFAULT_GROUP, DEFAULT_GROUP, null);
+            treeList.add(group);
+        }
+
+
+        List<String> groups = list.stream().map(DictDefinition::getGroupName).filter(Objects::nonNull).distinct().toList();
+        for (String s : groups) {
+            TreeOption group = new TreeOption(s, s, null);
+            treeList.add(group);
+        }
+
+        for (DictDefinition definition : list) {
+            String groupName = StrUtil.blankToDefault(definition.getGroupName(), DEFAULT_GROUP);
+            TreeOption option = new TreeOption(definition.getName(), definition.getCode(), groupName);
+            treeList.add(option);
+        }
+
+        return TreeTool.buildTree(treeList);
     }
 
+    public List<DictDefinition.Item> getItems(String typeCode) {
+        List<DictDefinition> list = this.getAll();
+        Optional<DictDefinition> first = list.stream().filter(e -> e.getCode().equals(typeCode)).findFirst();
+        return first.map(DictDefinition::getItems).orElse(null);
+    }
 }

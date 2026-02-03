@@ -16,7 +16,7 @@ logging:
   level:
     io.github.jiangood: debug
 sys:
-  reset-admin-pwd: OpEnAdMiN_${random.int[1000,9999]}
+  reset-admin-pwd: happy.Today@520!
   captcha: false
   print-exception: true
 

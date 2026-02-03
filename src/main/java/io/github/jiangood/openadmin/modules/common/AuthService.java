@@ -69,7 +69,7 @@ public class AuthService {
             password = RsaTool.decryptStr(password, KeyType.PrivateKey);
         } catch (Exception e) {
             log.error("输入密码解密失败: {}", e.getMessage());
-            throw new IllegalStateException("密码未加密");
+            throw new IllegalStateException("页面已过期，请刷新后重试");
         }
 
         boolean strengthOk = PasswordTool.isStrengthOk(password);

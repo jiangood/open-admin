@@ -62,7 +62,7 @@ public class SysOrgDao extends BaseDao<SysOrg> {
      * @param id
      */
     public List<SysOrg> findDirectChildUnit(String id, Boolean enabled) {
-        Spec<SysOrg> q = spec().eq(SysOrg.Fields.type, OrgType.TYPE_UNIT.getCode()).eq(SysOrg.Fields.pid, id);
+        Spec<SysOrg> q = spec().eq(SysOrg.Fields.type, OrgType.TYPE_UNIT).eq(SysOrg.Fields.pid, id);
         if (enabled != null) {
             q.eq(SysOrg.Fields.enabled, enabled);
         }

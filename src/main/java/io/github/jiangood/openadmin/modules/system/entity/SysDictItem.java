@@ -1,11 +1,9 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.jiangood.openadmin.lang.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.lang.annotation.Remark;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -20,10 +18,7 @@ import lombok.experimental.FieldNameConstants;
 public class SysDictItem extends BaseEntity {
 
 
-    @NotNull
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @ManyToOne
-    SysDict sysDict;
+    String typeCode;
 
 
     @NotNull

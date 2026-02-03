@@ -11,7 +11,7 @@ public class OrgRequest {
     Integer seq;
 
     Boolean enabled;
-    OrgType type;
+    Integer type;
     SysUser leader;
 
     String extra1;

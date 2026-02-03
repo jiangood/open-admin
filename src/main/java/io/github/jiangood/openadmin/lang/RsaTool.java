@@ -19,10 +19,6 @@ public class RsaTool {
         if (password == null || password.isEmpty()) {
             return null;
         }
-        try {
-            return rsa.decryptStr(password, keyType);
-        } catch (Exception e) {
-            return null;
-        }
+        return rsa.decryptStr(password, keyType);
     }
 }

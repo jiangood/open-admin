@@ -77,7 +77,7 @@ public class SysUserController {
         boolean isNew = input.isNew();
         String inputOrgId = input.getDeptId();
         SysOrg org = sysOrgService.detail(inputOrgId);
-        if (org.getType() == OrgType.TYPE_UNIT.getCode()) {
+        if (org.getType() == OrgType.TYPE_UNIT) {
             input.setUnitId(inputOrgId);
             input.setDeptId(null);
         } else {

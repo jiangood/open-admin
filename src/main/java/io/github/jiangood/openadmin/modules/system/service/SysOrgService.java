@@ -85,7 +85,7 @@ public class SysOrgService extends BaseService<SysOrg> {
             q.eq(SysOrg.Fields.enabled, true);
         }
         if (!containsDept) {
-            q.ne(SysOrg.Fields.type, OrgType.TYPE_DEPT.getCode());
+            q.ne(SysOrg.Fields.type, OrgType.TYPE_DEPT);
         }
 
         return sysOrgDao.findAll(q, Sort.by(SysOrg.Fields.type, SysOrg.Fields.seq));
@@ -200,7 +200,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         // 如果没有找到部门领导，则机构树的上一级部门找
         while (deptId != null) {
             SysOrg dept = sysOrgDao.findOne(deptId);
-            if (dept == null || dept.getType() != OrgType.TYPE_DEPT.getCode()) {
+            if (dept == null || dept.getType() != OrgType.TYPE_DEPT) {
                 break;
             }
             SysUser leader = dept.getLeader();

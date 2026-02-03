@@ -1,6 +1,5 @@
-package io.github.jiangood.openadmin.framework.config.datadefinition.wrapper;
+package io.github.jiangood.openadmin.framework.config.datadefinition;
 
-import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -21,5 +20,9 @@ public class DataProperties {
     private List<MenuDefinition> menus = new ArrayList<>();
 
 
+    /**
+     * 字典定义
+     */
+    private List<DictDefinition> dicts = new ArrayList<>();
 
 }

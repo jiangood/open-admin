@@ -146,8 +146,7 @@ export default class extends React.Component {
                               onDrop={this.onDrop}
                               showLine
                               defaultExpandAll
-                        >
-                        </Tree>
+                        />
                         {this.state.treeData.length === 0 && <Empty/>}
                     </Card>
                 </Splitter.Panel>

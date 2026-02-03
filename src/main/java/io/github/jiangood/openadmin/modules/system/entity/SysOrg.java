@@ -90,7 +90,7 @@ public class SysOrg extends BaseEntity implements TreeNode<SysOrg> {
         if (type == null) {
             return false;
         }
-        return type == OrgType.TYPE_DEPT.getCode();
+        return type == OrgType.TYPE_DEPT;
     }
 
 

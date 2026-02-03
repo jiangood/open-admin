@@ -1,5 +1,7 @@
 ## 框架的核心配置项和菜单结构。 业务项目需在 application-data.yml 中进行配置。
 data:
+  # 数据字典默认配置
+
   # 菜单配置
   menus:
     - id: sys
@@ -60,5 +62,17 @@ data:
           path: /system/api
           perm-names: [ 管理 ]
           perm-codes: [ api ]
+  dicts:
+    - name: 机构类型
+      code: orgType
+      items:
+        - name: 单位
+          code: 10
+          color: success
+        - name: 部门
+          code: 20
+
+
+
 
 

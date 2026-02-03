@@ -56,7 +56,7 @@ public class SysOrgController {
         }
 
         if (onlyShowUnit) {
-            q.eq(SysOrg.Fields.type, OrgType.TYPE_UNIT.getCode());
+            q.eq(SysOrg.Fields.type, OrgType.TYPE_UNIT);
         }
         q.orLike(searchText, SysOrg.Fields.name);
 
@@ -82,7 +82,7 @@ public class SysOrgController {
             }
         }
         SysOrg input2 = BeanTool.copy(input, new SysOrg());
-        input2.setType(input.getType().getCode());
+        input2.setType(input.getType());
 
         sysOrgService.save(input2, requestBodyKeys);
 
@@ -108,12 +108,11 @@ public class SysOrgController {
 
 
     private String getIconByType(int type) {
-        OrgType orgType = OrgType.valueOf(type);
-        switch (orgType) {
-            case TYPE_UNIT -> {
+        switch (type) {
+            case OrgType.TYPE_UNIT -> {
                 return "ApartmentOutlined";
             }
-            case TYPE_DEPT -> {
+            case OrgType.TYPE_DEPT -> {
                 return "HomeOutlined";
             }
 
