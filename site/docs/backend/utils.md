@@ -162,12 +162,12 @@ import io.github.jiangood.openadmin.lang.annotation.RemarkTool;
 import java.lang.reflect.Field;
 
 // 获取类的Remark注解值
-String className = RemarkUtils.getRemark(User.class);
+String className = RemarkTool.getRemark(User.class);
 
 // 获取字段的Remark注解值
 Field nameField = User.class.getDeclaredField("name");
-String fieldName = RemarkUtils.getRemark(nameField);
+String fieldName = RemarkTool.getRemark(nameField);
 
 // 获取枚举的Remark注解值
-String enumRemark = RemarkUtils.getRemark(UserStatus.ACTIVE);
+String enumRemark = RemarkTool.getRemark(UserStatus.ACTIVE);
 ```
