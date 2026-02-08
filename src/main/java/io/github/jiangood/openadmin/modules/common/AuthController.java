@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("login")
-    public AjaxResult login(@RequestBody LoginRequest loginRequest, HttpSession session) {
+    public AjaxResult login(@Validated @RequestBody LoginRequest loginRequest, HttpSession session) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
         String captchaCode = loginRequest.getCaptchaCode();

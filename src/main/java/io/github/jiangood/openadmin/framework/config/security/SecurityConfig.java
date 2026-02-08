@@ -10,6 +10,7 @@ import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,6 +30,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import java.util.List;
 
@@ -66,11 +68,10 @@ public class SecurityConfig {
             log.info("设置最大并发会话数为 {}", maximumSessions);
 
             cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-            cfg.sessionConcurrency(conCfg -> {
-                conCfg.
+            cfg.sessionConcurrency(configurer -> {
+                configurer.
                         maximumSessions(maximumSessions)
-                        //达到限制时，新登录失败
-                        .maxSessionsPreventsLogin(true)
+                        .maxSessionsPreventsLogin(true) // true:阻止新登录，false:踢出旧会话
                         .sessionRegistry(sessionRegistry());
             });
         });
@@ -120,7 +121,7 @@ public class SecurityConfig {
 
     /**
      * **重要**：注册一个 SessionRegistry Bean
-     * SessionRegistry 用于记录和管理所有的 Session 信息，是并发控制的基础。
+     * SessionRegistry 用于记录和管理所有的 Session 信息，是 maximumSessions 控制的基础。
      */
     @Bean
     public SessionRegistry sessionRegistry() {
@@ -128,5 +129,9 @@ public class SecurityConfig {
         return new SessionRegistryImpl();
     }
 
-
+    // 是 maximumSessions 控制的必要配置
+    @Bean
+    public ServletListenerRegistrationBean<HttpSessionEventPublisher> httpSessionEventPublisher() {
+        return new ServletListenerRegistrationBean<>(new HttpSessionEventPublisher());
+    }
 }
