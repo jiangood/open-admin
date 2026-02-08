@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.common.dto.response;
+package io.github.jiangood.openadmin.modules.common.dto;
 
 import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
 import io.github.jiangood.openadmin.modules.system.service.SysDictService;

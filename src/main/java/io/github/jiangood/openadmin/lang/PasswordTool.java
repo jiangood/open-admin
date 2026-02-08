@@ -10,16 +10,7 @@ import static cn.hutool.core.util.RandomUtil.BASE_CHAR_NUMBER;
 
 public class PasswordTool {
 
-    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder() {
-        @Override
-        public boolean matches(CharSequence rawPassword, String encodedPassword) {
-            // 特殊处理，密码相同时返回true
-            if (rawPassword.toString().equals(encodedPassword)) {
-                return true;
-            }
-            return super.matches(rawPassword, encodedPassword);
-        }
-    };
+    private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder() ;
 
     public static String random() {
         return RandomUtil.randomString(BASE_CHAR_NUMBER + "_-!.@$^&*()+=", 12);
@@ -31,10 +22,10 @@ public class PasswordTool {
      * @param plainText
      */
     public static String encode(String plainText) {
-        return getPasswordEncoder().encode(plainText);
+        return getEncoder().encode(plainText);
     }
 
-    public static PasswordEncoder getPasswordEncoder() {
+    public static PasswordEncoder getEncoder() {
         return PASSWORD_ENCODER;
     }
 

@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.common.dto.response;
+package io.github.jiangood.openadmin.modules.common.dto;
 
 import lombok.Data;
 

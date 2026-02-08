@@ -76,7 +76,7 @@ class PasswordToolTest {
         assertNotNull(encodedEmpty);
         
         // 测试密码编码器
-        PasswordEncoder encoder = PasswordTool.getPasswordEncoder();
+        PasswordEncoder encoder = PasswordTool.getEncoder();
         assertNotNull(encoder);
         
         // 测试密码匹配
@@ -90,7 +90,7 @@ class PasswordToolTest {
     @Test
     void testGetPasswordEncoder() {
         // 测试获取密码编码器
-        PasswordEncoder encoder = PasswordTool.getPasswordEncoder();
+        PasswordEncoder encoder = PasswordTool.getEncoder();
         
         assertNotNull(encoder);
         

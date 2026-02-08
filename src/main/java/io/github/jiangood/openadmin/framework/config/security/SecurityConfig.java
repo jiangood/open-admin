@@ -1,18 +1,20 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.ArrayTool;
-import io.github.jiangood.openadmin.lang.PasswordTool;
-import io.github.jiangood.openadmin.lang.ResponseTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import io.github.jiangood.openadmin.framework.config.init.SystemHookService;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
-import lombok.AllArgsConstructor;
+import io.github.jiangood.openadmin.lang.ArrayTool;
+import io.github.jiangood.openadmin.lang.PasswordTool;
+import io.github.jiangood.openadmin.lang.ResponseTool;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -28,25 +30,27 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 
+import java.util.List;
+
 @Slf4j
 @Configuration
-@AllArgsConstructor
+@RequiredArgsConstructor
 @EnableWebSecurity
 @EnableMethodSecurity  // 必须启用这个注解
 public class SecurityConfig {
 
     private final SysProperties sysProperties;
 
-    private SystemHookService systemHookService;
+    private final SystemHookService systemHookService;
+
 
     // 配置 HTTP 安全
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, LoginFilter loginFilter, PermissionRefreshFilter permissionRefreshFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,  PermissionRefreshFilter permissionRefreshFilter) throws Exception {
         String[] loginExclude = ArrayTool.toStrArr(sysProperties.getXssExcludePathList());
 
         systemHookService.beforeConfigSecurity(http);
-        // 前后端分离项目，关闭csrf
-        http.csrf(AbstractHttpConfigurer::disable);
+
         http.authorizeHttpRequests(authz -> {
             if (loginExclude.length > 0) {
                 authz.requestMatchers(loginExclude).permitAll();
@@ -56,15 +60,6 @@ public class SecurityConfig {
                     .anyRequest().permitAll();
         });
 
-        http.formLogin(cfg -> {
-            cfg.loginProcessingUrl("/admin/auth/login").defaultSuccessUrl("/admin/auth/success").successHandler((request, response, authentication) -> {
-                AjaxResult rs = AjaxResult.ok("登录成功");
-                ResponseTool.response(response, rs);
-            }).failureHandler((request, response, exception) -> {
-                AjaxResult rs = AjaxResult.err("登录失败" + exception.getMessage());
-                ResponseTool.response(response, rs);
-            });
-        });
 
         http.sessionManagement(cfg -> {
             int maximumSessions = sysProperties.getMaximumSessions();
@@ -72,14 +67,18 @@ public class SecurityConfig {
 
             cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
             cfg.sessionConcurrency(conCfg -> {
-                conCfg.maximumSessions(maximumSessions)
+                conCfg.
+                        maximumSessions(maximumSessions)
                         //达到限制时，新登录失败
-                        //.maxSessionsPreventsLogin(true)
+                        .maxSessionsPreventsLogin(true)
                         .sessionRegistry(sessionRegistry());
             });
         });
-        http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
+
+
+
+        // 认证通过后判断是否需要刷新权限（如修改用户）
+        http.addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling(cfg -> {
             cfg.accessDeniedHandler((request, response, e) -> {
@@ -89,8 +88,11 @@ public class SecurityConfig {
             });
         });
 
-        // iframe 允许同域名下访问， 如嵌入ureport报表
-        http.headers(cfg -> cfg.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));
+
+        http.headers(cfg -> cfg.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin));   // iframe 允许同域名下访问， 如嵌入ureport报表
+        http.csrf(AbstractHttpConfigurer::disable); // 前后端分离项目，关闭csrf
+        http.httpBasic(AbstractHttpConfigurer::disable);
+        http.formLogin(AbstractHttpConfigurer::disable);
 
 
         return http.build();
@@ -101,13 +103,13 @@ public class SecurityConfig {
     // 密码编码器
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordTool.getPasswordEncoder();
+        return PasswordTool.getEncoder();
     }
 
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class).build();
+    public AuthenticationManager authManager(List<AuthenticationProvider> providers) {
+        return new ProviderManager(providers);
     }
 
     @Bean
