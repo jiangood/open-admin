@@ -23,12 +23,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 /**
- * 自定义的登录逻辑
+ * 登录逻辑验证
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AuthProvider implements AuthenticationProvider {
+public class AuthTokenProvider implements AuthenticationProvider {
 
 
     public static final String MSG_REFRESH = "页面已失效，请刷新浏览器后重试";

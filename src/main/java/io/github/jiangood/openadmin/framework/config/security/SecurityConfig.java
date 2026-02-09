@@ -2,8 +2,7 @@ package io.github.jiangood.openadmin.framework.config.security;
 
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import io.github.jiangood.openadmin.framework.config.init.SystemHookService;
-import io.github.jiangood.openadmin.framework.config.security.login.LoginFilter;
-import io.github.jiangood.openadmin.framework.config.security.login.MySecurityConfigurer;
+import io.github.jiangood.openadmin.framework.config.security.login.LoginConfigurer;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
 import io.github.jiangood.openadmin.lang.ArrayTool;
 import io.github.jiangood.openadmin.lang.PasswordTool;
@@ -13,9 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,8 +22,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
-
-import java.util.List;
 
 @Slf4j
 @Configuration
@@ -42,7 +36,6 @@ public class SecurityConfig {
 
     private final PermissionRefreshFilter permissionRefreshFilter;
 
-    public static final String LOGIN_URL = "/admin/auth/login";
 
 
     // 配置 HTTP 安全
@@ -95,7 +88,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable); // 前后端分离项目，关闭csrf
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-        http.apply(new MySecurityConfigurer<>());
+        http.apply(new LoginConfigurer<>());
 
         http.formLogin(AbstractHttpConfigurer::disable);
 
