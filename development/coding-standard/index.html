@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-development/coding-standard" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.9.2">
+<title data-rh="true">编码规范 | open-admin</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:image" content="https://jiangood.github.io/open-admin/img/logo.svg"><meta data-rh="true" name="twitter:image" content="https://jiangood.github.io/open-admin/img/logo.svg"><meta data-rh="true" property="og:url" content="https://jiangood.github.io/open-admin/development/coding-standard/"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="编码规范 | open-admin"><meta data-rh="true" name="description" content="本文档介绍了 open-admin 项目的编码规范，包括后端和前端的编码标准。"><meta data-rh="true" property="og:description" content="本文档介绍了 open-admin 项目的编码规范，包括后端和前端的编码标准。"><link data-rh="true" rel="icon" href="/open-admin/img/logo.svg"><link data-rh="true" rel="canonical" href="https://jiangood.github.io/open-admin/development/coding-standard/"><link data-rh="true" rel="alternate" href="https://jiangood.github.io/open-admin/development/coding-standard/" hreflang="en"><link data-rh="true" rel="alternate" href="https://jiangood.github.io/open-admin/development/coding-standard/" hreflang="x-default"><script data-rh="true" type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"编码规范","item":"https://jiangood.github.io/open-admin/development/coding-standard"}]}</script><link rel="stylesheet" href="/open-admin/assets/css/styles.20e5a1d3.css">
+<script src="/open-admin/assets/js/runtime~main.b6c9e543.js" defer="defer"></script>
+<script src="/open-admin/assets/js/main.b1169ec1.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<svg style="display: none;"><defs>
+<symbol id="theme-svg-external-link" viewBox="0 0 24 24"><path fill="currentColor" d="M21 13v10h-21v-19h12v2h-10v15h17v-8h2zm3-12h-10.988l4.035 4-6.977 7.07 2.828 2.828 6.977-7.07 4.125 4.172v-11z"/></symbol>
+</defs></svg>
+<script>!function(){var t=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return window.localStorage.getItem("theme")}catch(t){}}();document.documentElement.setAttribute("data-theme",t||"light"),document.documentElement.setAttribute("data-theme-choice",t||"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><link rel="preload" as="image" href="/open-admin/img/logo.svg"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="theme-layout-navbar navbar navbar--fixed-top"><div class="navbar__inner"><div class="theme-layout-navbar-left navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/open-admin/"><div class="navbar__logo"><img src="/open-admin/img/logo.svg" alt="open-admin Logo" class="themedComponent_mlkZ themedComponent--light_NVdE"><img src="/open-admin/img/logo.svg" alt="open-admin Logo" class="themedComponent_mlkZ themedComponent--dark_xIcU"></div><b class="navbar__title text--truncate">open-admin</b></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/open-admin/">文档</a></div><div class="theme-layout-navbar-right navbar__items navbar__items--right"><a href="https://github.com/jiangood/open-admin" target="_blank" rel="noopener noreferrer" class="navbar__item navbar__link navbar-github-link">GitHub<svg width="13.5" height="13.5" aria-label="(opens in new tab)" class="iconExternalLink_nPIU"><use href="#theme-svg-external-link"></use></svg></a><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="system mode" aria-label="Switch between dark and light mode (currently system mode)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" class="toggleIcon_g3eP systemToggleIcon_QzmC"><path fill="currentColor" d="m12 21c4.971 0 9-4.029 9-9s-4.029-9-9-9-9 4.029-9 9 4.029 9 9 9zm4.95-13.95c1.313 1.313 2.05 3.093 2.05 4.95s-0.738 3.637-2.05 4.95c-1.313 1.313-3.093 2.05-4.95 2.05v-14c1.857 0 3.637 0.737 4.95 2.05z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="theme-layout-main main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd"><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/open-admin/"><span title="首页" class="linkLabel_WmDU">首页</span></a></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/open-admin/architecture/"><span title="项目概述" class="categoryLinkLabel_W154">项目概述</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/open-admin/quick-start/"><span title="入门指南" class="categoryLinkLabel_W154">入门指南</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/open-admin/core-features/user-permission/"><span title="核心功能" class="categoryLinkLabel_W154">核心功能</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item menu__list-item--collapsed"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret" role="button" aria-expanded="false" href="/open-admin/api/frontend/components/"><span title="API文档" class="categoryLinkLabel_W154">API文档</span></a></div></li><li class="theme-doc-sidebar-item-category theme-doc-sidebar-item-category-level-1 menu__list-item"><div class="menu__list-item-collapsible"><a class="categoryLink_byQd menu__link menu__link--sublist menu__link--sublist-caret menu__link--active" role="button" aria-expanded="true" href="/open-admin/development/coding-standard/"><span title="开发指南" class="categoryLinkLabel_W154">开发指南</span></a></div><ul class="menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" tabindex="0" href="/open-admin/development/coding-standard/"><span title="编码规范" class="linkLabel_WmDU">编码规范</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/open-admin/development/best-practices/"><span title="最佳实践" class="linkLabel_WmDU">最佳实践</span></a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-2 menu__list-item"><a class="menu__link" tabindex="0" href="/open-admin/development/agent/"><span title="智能体使用" class="linkLabel_WmDU">智能体使用</span></a></li></ul></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/open-admin/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li class="breadcrumbs__item"><span class="breadcrumbs__link">开发指南</span></li><li class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link">编码规范</span></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><header><h1>编码规范</h1></header>
+<p>本文档介绍了 open-admin 项目的编码规范，包括后端和前端的编码标准。</p>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="后端编码规范">后端编码规范<a href="#后端编码规范" class="hash-link" aria-label="Direct link to 后端编码规范" title="Direct link to 后端编码规范" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-基础规范">1. 基础规范<a href="#1-基础规范" class="hash-link" aria-label="Direct link to 1. 基础规范" title="Direct link to 1. 基础规范" translate="no">​</a></h3>
+<ul>
+<li class="">使用阿里巴巴的Java开发规范，idea有插件：Alibaba Java Code Guidelines</li>
+<li class="">使用idea自带的Reformat Code功能</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-命名规范">2. 命名规范<a href="#2-命名规范" class="hash-link" aria-label="Direct link to 2. 命名规范" title="Direct link to 2. 命名规范" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>类名</strong>：使用大驼峰命名法，如 <code>UserService</code></li>
+<li class=""><strong>方法名</strong>：使用小驼峰命名法，如 <code>getUserList()</code></li>
+<li class=""><strong>变量名</strong>：使用小驼峰命名法，如 <code>userId</code></li>
+<li class=""><strong>常量名</strong>：使用全大写，下划线分隔，如 <code>MAX_PAGE_SIZE</code></li>
+<li class=""><strong>包名</strong>：使用小写字母，如 <code>io.github.jiangood.openadmin</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-代码结构">3. 代码结构<a href="#3-代码结构" class="hash-link" aria-label="Direct link to 3. 代码结构" title="Direct link to 3. 代码结构" translate="no">​</a></h3>
+<ul>
+<li class="">实体类（Entity）：存储路径 <code>src/main/java/io/github/jiangood/openadmin/modules/xxx/entity</code></li>
+<li class="">DAO类：存储路径 <code>src/main/java/io/github/jiangood/openadmin/modules/xxx/dao</code></li>
+<li class="">Service类：存储路径 <code>src/main/java/io/github/jiangood/openadmin/modules/xxx/service</code></li>
+<li class="">Controller类：存储路径 <code>src/main/java/io/github/jiangood/openadmin/modules/xxx/controller</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="4-注释规范">4. 注释规范<a href="#4-注释规范" class="hash-link" aria-label="Direct link to 4. 注释规范" title="Direct link to 4. 注释规范" translate="no">​</a></h3>
+<ul>
+<li class="">类注释：使用 <code>@Remark</code> 注解</li>
+<li class="">字段注释：使用 <code>@Remark</code> 注解</li>
+<li class="">方法注释：使用 Javadoc 格式</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="5-异常处理">5. 异常处理<a href="#5-异常处理" class="hash-link" aria-label="Direct link to 5. 异常处理" title="Direct link to 5. 异常处理" translate="no">​</a></h3>
+<ul>
+<li class="">使用统一的异常处理机制</li>
+<li class="">业务异常使用 <code>BusinessException</code></li>
+<li class="">系统异常使用 <code>SystemException</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="6-日志规范">6. 日志规范<a href="#6-日志规范" class="hash-link" aria-label="Direct link to 6. 日志规范" title="Direct link to 6. 日志规范" translate="no">​</a></h3>
+<ul>
+<li class="">使用 <code>LoggerFactory</code> 获取 Logger</li>
+<li class="">日志级别：<!-- -->
+<ul>
+<li class=""><code>DEBUG</code>：调试信息</li>
+<li class=""><code>INFO</code>：一般信息</li>
+<li class=""><code>WARN</code>：警告信息</li>
+<li class=""><code>ERROR</code>：错误信息</li>
+</ul>
+</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="前端编码规范">前端编码规范<a href="#前端编码规范" class="hash-link" aria-label="Direct link to 前端编码规范" title="Direct link to 前端编码规范" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-基础规范-1">1. 基础规范<a href="#1-基础规范-1" class="hash-link" aria-label="Direct link to 1. 基础规范" title="Direct link to 1. 基础规范" translate="no">​</a></h3>
+<ul>
+<li class="">遵循 React 官方编码规范</li>
+<li class="">遵循 Ant Design 设计规范</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-命名规范-1">2. 命名规范<a href="#2-命名规范-1" class="hash-link" aria-label="Direct link to 2. 命名规范" title="Direct link to 2. 命名规范" translate="no">​</a></h3>
+<ul>
+<li class=""><strong>组件名</strong>：使用大驼峰命名法，如 <code>ProTable</code></li>
+<li class=""><strong>方法名</strong>：使用小驼峰命名法，如 <code>handleSave()</code></li>
+<li class=""><strong>变量名</strong>：使用小驼峰命名法，如 <code>formValues</code></li>
+<li class=""><strong>常量名</strong>：使用全大写，下划线分隔，如 <code>MAX_WIDTH</code></li>
+<li class=""><strong>文件命名</strong>：使用小写开头，如 <code>user-list.jsx</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-代码结构-1">3. 代码结构<a href="#3-代码结构-1" class="hash-link" aria-label="Direct link to 3. 代码结构" title="Direct link to 3. 代码结构" translate="no">​</a></h3>
+<ul>
+<li class="">页面组件：<code>web/src/pages/xxx/index.jsx</code></li>
+<li class="">公共组件：<code>web/src/components/xxx.jsx</code></li>
+<li class="">工具类：<code>web/src/utils/xxx.js</code></li>
+<li class="">样式文件：<code>web/src/styles/xxx.css</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="4-注释规范-1">4. 注释规范<a href="#4-注释规范-1" class="hash-link" aria-label="Direct link to 4. 注释规范" title="Direct link to 4. 注释规范" translate="no">​</a></h3>
+<ul>
+<li class="">组件注释：使用 JSDoc 格式</li>
+<li class="">方法注释：使用单行或多行注释</li>
+<li class="">复杂逻辑注释：使用多行注释说明</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="5-代码风格">5. 代码风格<a href="#5-代码风格" class="hash-link" aria-label="Direct link to 5. 代码风格" title="Direct link to 5. 代码风格" translate="no">​</a></h3>
+<ul>
+<li class="">使用 ES6+ 语法</li>
+<li class="">使用箭头函数</li>
+<li class="">使用模板字符串</li>
+<li class="">使用解构赋值</li>
+<li class="">使用 <code>const</code> 和 <code>let</code>，避免使用 <code>var</code></li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="6-组件规范">6. 组件规范<a href="#6-组件规范" class="hash-link" aria-label="Direct link to 6. 组件规范" title="Direct link to 6. 组件规范" translate="no">​</a></h3>
+<ul>
+<li class="">优先使用框架提供的组件，如 <code>ProTable</code>、<code>ProModal</code></li>
+<li class="">自定义组件时，遵循 React 组件设计原则</li>
+<li class="">组件参数使用 TypeScript 类型定义</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="7-性能优化">7. 性能优化<a href="#7-性能优化" class="hash-link" aria-label="Direct link to 7. 性能优化" title="Direct link to 7. 性能优化" translate="no">​</a></h3>
+<ul>
+<li class="">使用 <code>React.memo</code> 优化函数组件渲染</li>
+<li class="">使用 <code>useCallback</code> 和 <code>useMemo</code> 优化性能</li>
+<li class="">避免在渲染过程中创建新的函数和对象</li>
+<li class="">使用虚拟列表处理长列表</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="8-错误处理">8. 错误处理<a href="#8-错误处理" class="hash-link" aria-label="Direct link to 8. 错误处理" title="Direct link to 8. 错误处理" translate="no">​</a></h3>
+<ul>
+<li class="">使用 try-catch 捕获异常</li>
+<li class="">使用统一的错误处理机制</li>
+<li class="">对用户友好的错误提示</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="版本控制规范">版本控制规范<a href="#版本控制规范" class="hash-link" aria-label="Direct link to 版本控制规范" title="Direct link to 版本控制规范" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-git-提交规范">1. Git 提交规范<a href="#1-git-提交规范" class="hash-link" aria-label="Direct link to 1. Git 提交规范" title="Direct link to 1. Git 提交规范" translate="no">​</a></h3>
+<ul>
+<li class="">提交信息格式：<code>type(scope): subject</code>
+<ul>
+<li class=""><code>type</code>：提交类型，如 <code>feat</code>、<code>fix</code>、<code>docs</code>、<code>style</code>、<code>refactor</code>、<code>test</code>、<code>chore</code></li>
+<li class=""><code>scope</code>：修改范围</li>
+<li class=""><code>subject</code>：提交说明</li>
+</ul>
+</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-分支管理">2. 分支管理<a href="#2-分支管理" class="hash-link" aria-label="Direct link to 2. 分支管理" title="Direct link to 2. 分支管理" translate="no">​</a></h3>
+<ul>
+<li class=""><code>master</code>：主分支，用于发布</li>
+<li class=""><code>dev</code>：开发分支，用于集成开发</li>
+<li class=""><code>feature/xxx</code>：功能分支，用于开发新功能</li>
+<li class=""><code>fix/xxx</code>：修复分支，用于修复 bug</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-代码审查">3. 代码审查<a href="#3-代码审查" class="hash-link" aria-label="Direct link to 3. 代码审查" title="Direct link to 3. 代码审查" translate="no">​</a></h3>
+<ul>
+<li class="">提交代码前进行自我审查</li>
+<li class="">团队成员之间进行代码审查</li>
+<li class="">使用代码审查工具辅助审查</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="测试规范">测试规范<a href="#测试规范" class="hash-link" aria-label="Direct link to 测试规范" title="Direct link to 测试规范" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-单元测试">1. 单元测试<a href="#1-单元测试" class="hash-link" aria-label="Direct link to 1. 单元测试" title="Direct link to 1. 单元测试" translate="no">​</a></h3>
+<ul>
+<li class="">使用 JUnit 5 进行后端单元测试</li>
+<li class="">使用 Jest 进行前端单元测试</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-集成测试">2. 集成测试<a href="#2-集成测试" class="hash-link" aria-label="Direct link to 2. 集成测试" title="Direct link to 2. 集成测试" translate="no">​</a></h3>
+<ul>
+<li class="">测试模块间的集成</li>
+<li class="">测试 API 接口</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-端到端测试">3. 端到端测试<a href="#3-端到端测试" class="hash-link" aria-label="Direct link to 3. 端到端测试" title="Direct link to 3. 端到端测试" translate="no">​</a></h3>
+<ul>
+<li class="">使用 Selenium 或 Cypress 进行端到端测试</li>
+<li class="">测试完整的用户流程</li>
+</ul>
+<h2 class="anchor anchorTargetStickyNavbar_Vzrq" id="文档规范">文档规范<a href="#文档规范" class="hash-link" aria-label="Direct link to 文档规范" title="Direct link to 文档规范" translate="no">​</a></h2>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="1-代码文档">1. 代码文档<a href="#1-代码文档" class="hash-link" aria-label="Direct link to 1. 代码文档" title="Direct link to 1. 代码文档" translate="no">​</a></h3>
+<ul>
+<li class="">为公共 API 编写详细的文档</li>
+<li class="">使用 JSDoc 和 Javadoc 格式</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="2-项目文档">2. 项目文档<a href="#2-项目文档" class="hash-link" aria-label="Direct link to 2. 项目文档" title="Direct link to 2. 项目文档" translate="no">​</a></h3>
+<ul>
+<li class="">维护 README.md 文件</li>
+<li class="">维护 CHANGELOG.md 文件</li>
+<li class="">编写详细的使用文档</li>
+</ul>
+<h3 class="anchor anchorTargetStickyNavbar_Vzrq" id="3-api-文档">3. API 文档<a href="#3-api-文档" class="hash-link" aria-label="Direct link to 3. API 文档" title="Direct link to 3. API 文档" translate="no">​</a></h3>
+<ul>
+<li class="">为 RESTful API 编写详细的文档</li>
+<li class="">使用 Swagger 或 SpringDoc 生成 API 文档</li>
+</ul></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="row margin-top--sm theme-doc-footer-edit-meta-row"><div class="col noPrint_WFHX"><a href="https://github.com/jiangood/open-admin/tree/master/site/docs/development/coding-standard.md" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_JAkA"></div></div></footer></article><nav class="docusaurus-mt-lg pagination-nav" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--prev" href="/open-admin/api/backend/job/"><div class="pagination-nav__sublabel">Previous</div><div class="pagination-nav__label">作业调度模块</div></a><a class="pagination-nav__link pagination-nav__link--next" href="/open-admin/development/best-practices/"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">最佳实践</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#后端编码规范" class="table-of-contents__link toc-highlight">后端编码规范</a><ul><li><a href="#1-基础规范" class="table-of-contents__link toc-highlight">1. 基础规范</a></li><li><a href="#2-命名规范" class="table-of-contents__link toc-highlight">2. 命名规范</a></li><li><a href="#3-代码结构" class="table-of-contents__link toc-highlight">3. 代码结构</a></li><li><a href="#4-注释规范" class="table-of-contents__link toc-highlight">4. 注释规范</a></li><li><a href="#5-异常处理" class="table-of-contents__link toc-highlight">5. 异常处理</a></li><li><a href="#6-日志规范" class="table-of-contents__link toc-highlight">6. 日志规范</a></li></ul></li><li><a href="#前端编码规范" class="table-of-contents__link toc-highlight">前端编码规范</a><ul><li><a href="#1-基础规范-1" class="table-of-contents__link toc-highlight">1. 基础规范</a></li><li><a href="#2-命名规范-1" class="table-of-contents__link toc-highlight">2. 命名规范</a></li><li><a href="#3-代码结构-1" class="table-of-contents__link toc-highlight">3. 代码结构</a></li><li><a href="#4-注释规范-1" class="table-of-contents__link toc-highlight">4. 注释规范</a></li><li><a href="#5-代码风格" class="table-of-contents__link toc-highlight">5. 代码风格</a></li><li><a href="#6-组件规范" class="table-of-contents__link toc-highlight">6. 组件规范</a></li><li><a href="#7-性能优化" class="table-of-contents__link toc-highlight">7. 性能优化</a></li><li><a href="#8-错误处理" class="table-of-contents__link toc-highlight">8. 错误处理</a></li></ul></li><li><a href="#版本控制规范" class="table-of-contents__link toc-highlight">版本控制规范</a><ul><li><a href="#1-git-提交规范" class="table-of-contents__link toc-highlight">1. Git 提交规范</a></li><li><a href="#2-分支管理" class="table-of-contents__link toc-highlight">2. 分支管理</a></li><li><a href="#3-代码审查" class="table-of-contents__link toc-highlight">3. 代码审查</a></li></ul></li><li><a href="#测试规范" class="table-of-contents__link toc-highlight">测试规范</a><ul><li><a href="#1-单元测试" class="table-of-contents__link toc-highlight">1. 单元测试</a></li><li><a href="#2-集成测试" class="table-of-contents__link toc-highlight">2. 集成测试</a></li><li><a href="#3-端到端测试" class="table-of-contents__link toc-highlight">3. 端到端测试</a></li></ul></li><li><a href="#文档规范" class="table-of-contents__link toc-highlight">文档规范</a><ul><li><a href="#1-代码文档" class="table-of-contents__link toc-highlight">1. 代码文档</a></li><li><a href="#2-项目文档" class="table-of-contents__link toc-highlight">2. 项目文档</a></li><li><a href="#3-api-文档" class="table-of-contents__link toc-highlight">3. API 文档</a></li></ul></li></ul></div></div></div></div></main></div></div></div></div>
+</body>
+</html>
