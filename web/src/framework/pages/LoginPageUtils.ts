@@ -16,7 +16,6 @@ export class LoginPageUtils {
                 history.push(redirect)
                 resolve(rs)
             }).catch(e => {
-                debugger
                 console.log('登录错误', e)
                 reject(e)
             })

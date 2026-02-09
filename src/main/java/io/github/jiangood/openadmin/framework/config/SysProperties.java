@@ -111,6 +111,9 @@ public class SysProperties {
     private String aesKey;
 
 
+    private String rsaPublicKey;
+    private String rsaPrivateKey;
+
 
 
     public String getBaseUrl() {

@@ -3,20 +3,14 @@ package io.github.jiangood.openadmin.modules.common;// src/main/java/com/example
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.ICaptcha;
 import cn.hutool.captcha.generator.CodeGenerator;
-import io.github.jiangood.openadmin.framework.config.security.login.DefaultAuthenticationToken;
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.framework.config.SysProperties;
-import io.github.jiangood.openadmin.modules.common.dto.LoginRequest;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -24,37 +18,16 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequestMapping("/admin/auth")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthController {
 
     public static final String CAPTCHA_CODE = "captchaCode";
 
 
-    @Resource
-    SysProperties prop;
+    private final  CodeGenerator codeGenerator;
 
-    @Resource
-    CodeGenerator codeGenerator;
 
-    private final AuthenticationManager authenticationManager;
 
-    @PostMapping("login")
-    public AjaxResult login(@Validated @RequestBody LoginRequest loginRequest, HttpSession session) {
-        String username = loginRequest.getUsername();
-        String password = loginRequest.getPassword();
-        String captchaCode = loginRequest.getCaptchaCode();
-
-        String sessionCode = (String) session.getAttribute(CAPTCHA_CODE);
-
-        DefaultAuthenticationToken token = new DefaultAuthenticationToken(username,password,captchaCode,sessionCode);
-        Authentication authentication = authenticationManager.authenticate(token);
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-        session.setAttribute("USERNAME", authentication.getName());
-
-        return AjaxResult.ok();
-    }
     @PostMapping("logout")
     public AjaxResult logout(HttpServletRequest request) {
         SecurityContextHolder.clearContext();

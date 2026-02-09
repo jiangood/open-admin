@@ -37,7 +37,8 @@ public class LoginTool {
             return null;
         }
 
-        return (LoginUser) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+        return (LoginUser) principal;
     }
 
     public static List<String> getOrgPermissions() {

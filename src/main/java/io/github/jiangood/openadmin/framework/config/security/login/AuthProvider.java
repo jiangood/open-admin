@@ -11,7 +11,10 @@ import io.github.jiangood.openadmin.modules.common.LoginAttemptService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.AccountExpiredException;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +28,7 @@ import org.springframework.util.Assert;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class DefaultAuthProvider implements AuthenticationProvider {
+public class AuthProvider implements AuthenticationProvider {
 
 
     public static final String MSG_REFRESH = "页面已失效，请刷新浏览器后重试";
@@ -42,13 +45,13 @@ public class DefaultAuthProvider implements AuthenticationProvider {
 
     @Override
     public boolean supports(Class<?> authentication) {
-        return DefaultAuthenticationToken.class.isAssignableFrom(authentication);
+        return AuthToken.class.isAssignableFrom(authentication);
     }
 
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        if (!(authentication instanceof DefaultAuthenticationToken authToken)) {
+        if (!(authentication instanceof AuthToken authToken)) {
             return null;
         }
 
@@ -104,11 +107,9 @@ public class DefaultAuthProvider implements AuthenticationProvider {
 
 
         // 创建已认证的令牌
-        return new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null, // 移除密码
-                userDetails.getAuthorities()
-        );
+        AuthToken token = new AuthToken(userDetails, userDetails.getAuthorities());
+        token.setDetails(userDetails);
+        return token;
     }
 
 

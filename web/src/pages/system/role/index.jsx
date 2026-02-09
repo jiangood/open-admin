@@ -173,7 +173,6 @@ export default class extends React.Component {
             menuIds: [...this.state.menuChecked, ...this.state.menuHalfChecked]
         }
         HttpUtils.post('admin/sysRole/grantMenu', params).then(rs => {
-            debugger
             this.setState({menuOpen: false})
         })
     }
