@@ -4,6 +4,7 @@ import io.github.jiangood.openadmin.lang.ResponseTool;
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.HttpSecurityBuilder;
 import org.springframework.security.config.annotation.web.configurers.AbstractAuthenticationFilterConfigurer;
@@ -14,6 +15,7 @@ import org.springframework.security.web.authentication.session.SessionAuthentica
 import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+@Slf4j
 public final class LoginConfigurer<H extends HttpSecurityBuilder<H>> extends AbstractAuthenticationFilterConfigurer<H, LoginConfigurer<H>, LoginFilter> {
 
     public static final String DEFAULT_LOGIN_URL = "/admin/auth/login";
@@ -48,6 +50,10 @@ public final class LoginConfigurer<H extends HttpSecurityBuilder<H>> extends Abs
         if (exception instanceof SessionAuthenticationException) {
             message = "您的账号已在其他地方登录，本次登录被拒绝";
         }
+
+        log.info("登录失败 {} {}", exception.getClass().getName(), exception.getMessage());
+
+
         ResponseTool.responseJson(response, AjaxResult.err(message));
     }
 
