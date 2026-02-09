@@ -365,6 +365,19 @@ public abstract class BaseDao<T extends Persistable<String>> {
         return rep.exists(spec);
     }
 
+
+    /**
+     * 判断字段值是否唯一
+     * @param id
+     * @param fieldName
+     * @param value
+     * @return
+     */
+    public boolean isUnique(String id, String fieldName, Object value) {
+        boolean exist = this.isFieldExist(id, fieldName, value);
+        return !exist;
+    }
+
     public List<T> findByExampleLike(T t, Sort sort) {
         return this.rep.findAll(Spec.<T>of().addExample(t), sort);
     }

@@ -3,24 +3,23 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.DropdownRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
-import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.DropdownRequest;
+import io.github.jiangood.openadmin.lang.dto.IdRequest;
+import io.github.jiangood.openadmin.lang.dto.antd.Option;
+import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.modules.common.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermRequest;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserResponse;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import jakarta.annotation.Resource;
@@ -73,31 +72,17 @@ public class SysUserController {
     @PreAuthorize("hasAuthority('sysUser:save')")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
-        String defaultPassword = sysProperties.getDefaultPassword();
         boolean isNew = input.isNew();
-        String inputOrgId = input.getDeptId();
-        SysOrg org = sysOrgService.detail(inputOrgId);
-        if (org.getType() == OrgType.TYPE_UNIT) {
-            input.setUnitId(inputOrgId);
-            input.setDeptId(null);
-        } else {
-            SysOrg unit = sysOrgService.findParentUnit(org);
-            Assert.notNull(unit, "部门%s没有所属单位".formatted(org.getName()));
-            input.setUnitId(unit.getId());
-        }
-
-
-        updateFields.add("unitId");
         sysUserService.save(input, updateFields);
-
+        String message = "更新成功";
         if (isNew) {
-
-            return AjaxResult.ok().msg("添加成功,密码：" + defaultPassword);
+            String defaultPassword = sysProperties.getDefaultPassword();
+            message = "添加新用户成功,密码：" + defaultPassword;
         } else {
             permissionStaleService.markUserStale(input.getAccount());
         }
 
-        return AjaxResult.ok();
+        return AjaxResult.ok(message);
     }
 
 
