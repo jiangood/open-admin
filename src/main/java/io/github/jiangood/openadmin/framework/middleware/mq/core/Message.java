@@ -10,15 +10,15 @@ public class Message {
     Long id;
     String topic;
     String tag;
-    String message;
+    String body;
     Integer retryCount = 0;
     Boolean isDeadLetter = false;
 
-    public Message(String topic, String tag, String message) {
+    public Message(String topic, String tag, String body) {
         this.id = IdUtil.getSnowflakeNextId();
         this.topic = topic;
         this.tag = tag;
-        this.message = message;
+        this.body = body;
         this.retryCount = 0;
         this.isDeadLetter = false;
     }

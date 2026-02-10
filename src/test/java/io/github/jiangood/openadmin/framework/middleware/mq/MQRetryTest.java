@@ -59,9 +59,9 @@ public class MQRetryTest {
         private CountDownLatch latch = new CountDownLatch(1);
 
         @Override
-        public Result consume(Message msg) {
+        public Result onMessage(Message msg) {
             count++;
-            log.info("消费消息 ({}次): id={}, topic={}, message={}", count, msg.getId(), msg.getTopic(), msg.getMessage());
+            log.info("消费消息 ({}次): id={}, topic={}, message={}", count, msg.getId(), msg.getTopic(), msg.getBody());
             
             // 前2次返回重试，第3次应该被丢弃
             if (count < 3) {

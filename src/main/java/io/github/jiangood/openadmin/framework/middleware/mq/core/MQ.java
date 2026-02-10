@@ -115,7 +115,7 @@ public class MQ implements MessageQueueTemplate {
                             // 超过最大重试次数，放入死信队列
                             message.setIsDeadLetter(true);
                             deadLetterQueue.add(message);
-                            log.warn("消息超过最大重试次数，放入死信队列: topic={}, message={}", topic, message.getMessage());
+                            log.warn("消息超过最大重试次数，放入死信队列: topic={}, message={}", topic, message.getBody());
                             if(rep != null){
                                 rep.save(message);
                             }
@@ -123,21 +123,21 @@ public class MQ implements MessageQueueTemplate {
                         }
                         
                         MQListener consumer = this.consumers.get(topic);
-                        Result result = consumer.consume(message);
+                        Result result = consumer.onMessage(message);
                         if (result == Result.RETRY_LATER) {
                             message.setRetryCount(message.getRetryCount() + 1);
                             if (message.getRetryCount() >= MAX_RETRY_COUNT) {
                                 // 超过最大重试次数，放入死信队列
                                 message.setIsDeadLetter(true);
                                 deadLetterQueue.add(message);
-                                log.warn("消息超过最大重试次数，放入死信队列: topic={}, message={}", topic, message.getMessage());
+                                log.warn("消息超过最大重试次数，放入死信队列: topic={}, message={}", topic, message.getBody());
                                 if(rep != null){
                                     rep.save(message);
                                 }
                             } else {
                                 // 重新放入队列重试
                                 queue.add(message);
-                                log.info("消息重试: topic={}, retryCount={}, message={}", topic, message.getRetryCount(), message.getMessage());
+                                log.info("消息重试: topic={}, retryCount={}, message={}", topic, message.getRetryCount(), message.getBody());
                             }
                         }
                         if(result == Result.SUCCESS || result == Result.DUPLICATE || result == Result.FAILURE){

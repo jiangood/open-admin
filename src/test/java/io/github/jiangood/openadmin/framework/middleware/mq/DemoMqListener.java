@@ -12,7 +12,7 @@ public class DemoMqListener implements MQListener {
 
 
     @Override
-    public Result consume(Message msg) {
+    public Result onMessage(Message msg) {
         System.out.println("消费消息" + msg);
         return Result.SUCCESS;
     }

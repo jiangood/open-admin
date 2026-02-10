@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 public class DeadLetterQueueListener implements MQListener {
 
     @Override
-    public Result consume(Message msg) {
+    public Result onMessage(Message msg) {
         try {
             // 处理死信消息
             log.warn("处理死信消息: id={}, topic={}, tag={}, retryCount={}, message={}", 
-                    msg.getId(), msg.getTopic(), msg.getTag(), msg.getRetryCount(), msg.getMessage());
+                    msg.getId(), msg.getTopic(), msg.getTag(), msg.getRetryCount(), msg.getBody());
             
             // 这里可以添加具体的死信处理逻辑，例如：
             // 1. 记录到日志文件

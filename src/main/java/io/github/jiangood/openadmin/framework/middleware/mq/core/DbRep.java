@@ -24,7 +24,7 @@ public class DbRep implements Rep {
                 "id BIGINT PRIMARY KEY, " +
                 "topic VARCHAR(255), " +
                 "tag VARCHAR(255), " +
-                "message TEXT, " +
+                "body TEXT, " +
                 "retry_count INT DEFAULT 0, " +
                 "is_dead_letter BOOLEAN DEFAULT FALSE" +
                 ")";
@@ -40,7 +40,7 @@ public class DbRep implements Rep {
         if (result.isEmpty()) {
             // 插入新消息
             String sql = "INSERT INTO " + TABLE_NAME + " (id, topic, tag, message, retry_count, is_dead_letter) VALUES (?, ?, ?, ?, ?, ?)";
-            dbTool.update(sql, msg.getId(), msg.getTopic(), msg.getTag(), msg.getMessage(), msg.getRetryCount(), msg.getIsDeadLetter());
+            dbTool.update(sql, msg.getId(), msg.getTopic(), msg.getTag(), msg.getBody(), msg.getRetryCount(), msg.getIsDeadLetter());
         } else {
             // 更新现有消息
             String sql = "UPDATE " + TABLE_NAME + " SET retry_count = ?, is_dead_letter = ? WHERE id = ?";

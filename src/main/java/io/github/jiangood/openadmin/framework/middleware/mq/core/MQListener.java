@@ -4,5 +4,5 @@ public interface MQListener {
 
 
 
-    Result consume(Message msg);
+    Result onMessage(Message msg);
 }
