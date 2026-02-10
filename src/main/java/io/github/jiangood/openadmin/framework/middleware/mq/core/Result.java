@@ -23,7 +23,12 @@ public enum Result {
     /**
      * 重复消息，直接丢弃
      */
-    DUPLICATE(true);
+    DUPLICATE(true),
+
+    /**
+     * 消息已进入死信队列
+     */
+    DEAD_LETTER(false);
 
     private final boolean success;
 

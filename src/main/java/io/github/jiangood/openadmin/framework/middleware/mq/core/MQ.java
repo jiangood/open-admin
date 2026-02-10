@@ -20,6 +20,13 @@ public class MQ implements MessageQueueTemplate {
     private final Map<String, BlockingQueue<Message>> topicQueues = new HashMap<>();
     private final Map<String, MQListener> consumers = new HashMap<>();
 
+    // 死信队列
+    private final BlockingQueue<Message> deadLetterQueue = new LinkedBlockingQueue<>();
+    private MQListener deadLetterListener;
+
+    // 最大重试次数
+    private static final int MAX_RETRY_COUNT = 3;
+
     private Rep rep;
 
     @Getter
@@ -66,6 +73,13 @@ public class MQ implements MessageQueueTemplate {
         consumers.put(topic, listener);
     }
 
+    /**
+     * 订阅死信队列
+     */
+    public void subscribeDeadLetter(MQListener listener) {
+        this.deadLetterListener = listener;
+    }
+
     private ExecutorService executorService;
 
     public void start() {
@@ -76,11 +90,15 @@ public class MQ implements MessageQueueTemplate {
         if(rep != null){
             List<Message> dbList = rep.loadAll();
             for (Message message : dbList) {
-                BlockingQueue<Message> queue = topicQueues.get(message.getTopic());
-                if(queue == null){
-                    log.error("消息队列不存在: {}", message.getTopic());
-                }else {
-                    queue.add(message);
+                if (message.getIsDeadLetter()) {
+                    deadLetterQueue.add(message);
+                } else {
+                    BlockingQueue<Message> queue = topicQueues.get(message.getTopic());
+                    if(queue == null){
+                        log.error("消息队列不存在: {}", message.getTopic());
+                    }else {
+                        queue.add(message);
+                    }
                 }
             }
         }
@@ -88,19 +106,44 @@ public class MQ implements MessageQueueTemplate {
 
         Set<String> topics = topicQueues.keySet();
 
-        executorService = Executors.newFixedThreadPool(topics.size());
+        executorService = Executors.newFixedThreadPool(topics.size() + (deadLetterListener != null ? 1 : 0));
 
-
+        // 启动普通队列消费者
         for (String topic : topics) {
             BlockingQueue<Message> queue = topicQueues.get(topic);
             executorService.submit(() -> {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
                         Message message = queue.take();
+                        // 检查是否已经超过最大重试次数
+                        if (message.getRetryCount() >= MAX_RETRY_COUNT) {
+                            // 超过最大重试次数，放入死信队列
+                            message.setIsDeadLetter(true);
+                            deadLetterQueue.add(message);
+                            log.warn("消息超过最大重试次数，放入死信队列: topic={}, message={}", topic, message.getMessage());
+                            if(rep != null){
+                                rep.save(message);
+                            }
+                            continue;
+                        }
+                        
                         MQListener consumer = this.consumers.get(topic);
                         Result result = consumer.consume(message);
                         if (result == Result.RETRY_LATER) {
-                            queue.add(message);
+                            message.setRetryCount(message.getRetryCount() + 1);
+                            if (message.getRetryCount() >= MAX_RETRY_COUNT) {
+                                // 超过最大重试次数，放入死信队列
+                                message.setIsDeadLetter(true);
+                                deadLetterQueue.add(message);
+                                log.warn("消息超过最大重试次数，放入死信队列: topic={}, message={}", topic, message.getMessage());
+                                if(rep != null){
+                                    rep.save(message);
+                                }
+                            } else {
+                                // 重新放入队列重试
+                                queue.add(message);
+                                log.info("消息重试: topic={}, retryCount={}, message={}", topic, message.getRetryCount(), message.getMessage());
+                            }
                         }
                         if(result == Result.SUCCESS || result == Result.DUPLICATE || result == Result.FAILURE){
                             if(rep != null){
@@ -116,6 +159,29 @@ public class MQ implements MessageQueueTemplate {
                 }
             });
         }
+
+        // 启动死信队列消费者
+        if (deadLetterListener != null) {
+            executorService.submit(() -> {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        Message message = deadLetterQueue.take();
+                        Result result = deadLetterListener.consume(message);
+                        if (result == Result.SUCCESS || result == Result.DUPLICATE || result == Result.FAILURE) {
+                            if(rep != null){
+                                rep.delete(message.getId());
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    } catch (Exception e) {
+                        System.err.println("死信队列消费异常: " + e.getMessage());
+                    }
+                }
+            });
+        }
+
         isRunning = true;
     }
 
@@ -128,6 +194,7 @@ public class MQ implements MessageQueueTemplate {
             executorService.shutdown();
             topicQueues.clear();
             consumers.clear();
+            deadLetterQueue.clear();
         }
         isRunning = false;
     }
@@ -149,6 +216,12 @@ public class MQ implements MessageQueueTemplate {
         // 订阅topic2
         queue.subscribe("蔡琴", message -> {
             System.out.println("蔡琴粉丝: " + message);
+            return Result.SUCCESS;
+        });
+
+        // 订阅死信队列
+        queue.subscribeDeadLetter(message -> {
+            System.out.println("死信队列消费者: " + message);
             return Result.SUCCESS;
         });
 
