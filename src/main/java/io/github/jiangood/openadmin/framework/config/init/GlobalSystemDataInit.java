@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.init;
 
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
@@ -38,8 +39,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     @Resource
     SysProperties sysProperties;
 
-    @Value("${spring.application.name}")
-    String applicationName;
 
 
     @Resource
@@ -65,7 +64,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     private void initUser(SysRole adminRole) {
         log.info("-------------------------------------------");
         log.info("初始化管理员中....");
-        String account = "admin-" + applicationName;
+        String account = "admin";
 
         SysUser admin = sysUserDao.findByAccount(account);
         if (admin == null) {
