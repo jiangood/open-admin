@@ -83,8 +83,7 @@ class PasswordToolTest {
         assertTrue(encoder.matches(plainPassword, encodedPassword1), "密码应该匹配");
         assertFalse(encoder.matches("wrongPassword", encodedPassword1), "错误密码不应该匹配");
         
-        // 测试特殊处理：密码相同时返回true
-        assertTrue(encoder.matches(plainPassword, plainPassword), "密码相同时应该返回true");
+        assertFalse(encoder.matches(plainPassword, plainPassword), "密码相同时应该返回false");
     }
 
     @Test
