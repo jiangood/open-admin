@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
 import io.github.jiangood.openadmin.framework.config.SysProperties;
-import io.github.jiangood.openadmin.framework.config.init.SystemHookService;
+import io.github.jiangood.openadmin.framework.config.init.FrameworkLifecycleManager;
 import io.github.jiangood.openadmin.framework.config.security.login.LoginConfigurer;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
 import io.github.jiangood.openadmin.lang.ArrayTool;
@@ -12,10 +12,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,7 +34,7 @@ public class SecurityConfig {
 
     private final SysProperties sysProperties;
 
-    private final SystemHookService systemHookService;
+    private final FrameworkLifecycleManager lifecycleHookManager;
 
     private final PermissionRefreshFilter permissionRefreshFilter;
 
@@ -43,15 +45,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         String[] loginExclude = ArrayTool.toStrArr(sysProperties.getXssExcludePathList());
 
-        systemHookService.beforeConfigSecurity(http);
+        lifecycleHookManager.onConfigSecurity(http);
 
-        http.authorizeHttpRequests(authz -> {
-            if (loginExclude.length > 0) {
-                authz.requestMatchers(loginExclude).permitAll();
+        http.authorizeHttpRequests(new Customizer<AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry>() {
+            @Override
+            public void customize(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authz) {
+                lifecycleHookManager.onConfigSecurityAuthorizeHttpRequests(authz);
+                if (loginExclude.length > 0) {
+                    authz.requestMatchers(loginExclude).permitAll();
+                }
+                authz.requestMatchers("/admin/auth/**", "/admin/public/**").permitAll()
+                        .requestMatchers("/admin/**", "/ureport/**").authenticated()
+                        .anyRequest().permitAll();
             }
-            authz.requestMatchers("/admin/auth/**", "/admin/public/**").permitAll()
-                    .requestMatchers("/admin/**", "/ureport/**").authenticated()
-                    .anyRequest().permitAll();
         });
 
 

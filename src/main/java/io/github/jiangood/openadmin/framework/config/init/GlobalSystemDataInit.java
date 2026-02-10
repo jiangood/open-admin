@@ -43,25 +43,22 @@ public class GlobalSystemDataInit implements CommandLineRunner {
 
 
     @Resource
-    private SystemHookService systemHookService;
+    private FrameworkLifecycleManager lifecycleManager;
 
     @Override
     public void run(String... args) throws Exception {
-        systemHookService.trigger(SystemHookEventType.BEFORE_DATA_INIT);
+        lifecycleManager.onDataInit();
 
 
         log.info("执行初始化程序： {}", getClass().getName());
         long time = System.currentTimeMillis();
 
-        systemHookService.trigger(SystemHookEventType.AFTER_SYSTEM_MENU_INIT);
 
         SysRole adminRole = sysRoleService.initDefaultAdmin();
         initUser(adminRole);
 
-
+        lifecycleManager.afterDataInit();
         log.info("系统初始化耗时：{}", System.currentTimeMillis() - time);
-
-        systemHookService.trigger(SystemHookEventType.AFTER_DATA_INIT);
     }
 
 

@@ -1,8 +1,7 @@
 package io.github.jiangood.openadmin.framework.migration;
 
 import cn.hutool.core.util.ArrayUtil;
-import io.github.jiangood.openadmin.framework.config.init.SystemHook;
-import io.github.jiangood.openadmin.lang.ArrayTool;
+import io.github.jiangood.openadmin.framework.config.init.FrameworkLifecycle;
 import io.github.jiangood.openadmin.lang.jdbc.DbTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,13 +11,13 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class MigrationSysDict implements SystemHook {
+public class MigrationSysDict implements FrameworkLifecycle {
 
     private final DbTool db;
 
 
     @Override
-    public void beforeDataInit() {
+    public void onDataInit() {
         Set<String> tableNames = db.getTableNames();
         if(!tableNames.contains("sys_dict_item")){
             return;
