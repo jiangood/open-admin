@@ -35,7 +35,7 @@ public class SysMenuDaoYamlImpl implements SysMenuDao {
     @Override
     public List<MenuDefinition> findAllEnabled() {
         List<MenuDefinition> list = this.findAll();
-        TreeTool.removeIf(list, MenuDefinition::getChildren, MenuDefinition::isDisabled);
+        TreeTool.removeIf(list, MenuDefinition::getChildren, m->m.getDisabled() != null && m.getDisabled());
         return list;
     }
 

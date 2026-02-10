@@ -23,7 +23,7 @@ public class BaseDto {
 
 
     @Remark("更新人ID")
-    private String updateUser;
+    private String updateBy;
 
-
+    private Boolean deleteFlag;
 }

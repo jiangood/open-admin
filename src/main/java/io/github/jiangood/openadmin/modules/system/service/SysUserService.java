@@ -19,6 +19,7 @@ import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
+import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -116,14 +117,30 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
     @Override
-    public SysUser save(SysUser input, List<String> requestKeys) throws Exception {
+    public SysUser save(SysUser input, List<String> updateFields) throws Exception {
         boolean isNew = input.isNew();
+        // 校验
+        boolean accountUnique = sysUserDao.isUnique(input.getId(), SysUser.Fields.account, input.getAccount());
+        Assert.state(accountUnique, "用户名已存在");
+
+        String inputOrgId = input.getDeptId();
+        SysOrg org = sysOrgDao.findById(inputOrgId);
+        if (org.getType() == OrgType.TYPE_UNIT) {
+            input.setUnitId(inputOrgId);
+            input.setDeptId(null);
+        } else {
+            SysOrg unit = sysOrgDao.findParentUnit(org);
+            Assert.notNull(unit, "部门%s没有所属单位".formatted(org.getName()));
+            input.setUnitId(unit.getId());
+        }
+
+        updateFields.add("unitId");
         if (isNew) {
             String password = sysProperties.getDefaultPassword();
             input.setPassword(PasswordTool.encode(password));
         }
 
-        return super.save(input, requestKeys);
+        return super.save(input, updateFields);
     }
 
 

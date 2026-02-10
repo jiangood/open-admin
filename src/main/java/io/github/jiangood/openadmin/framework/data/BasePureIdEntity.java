@@ -14,16 +14,18 @@ import lombok.Setter;
 
 import java.io.Serializable;
 
+/**
+ *  ID 需要手动设置
+ */
 @Getter
 @Setter
 @MappedSuperclass
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler","fieldHandler"}, ignoreUnknown = true)
 @EqualsAndHashCode(of = "id", callSuper = false)
-public abstract class BaseEntity extends BaseNoIdEntity implements Serializable {
+public abstract class BasePureIdEntity extends BaseNoIdEntity implements Serializable {
 
     @Schema(description = "唯一标识", hidden = true)
     @Id
-    @GenerateUuidV7
     @Column(length = DBConstants.LEN_ID)
     private String id;
 

@@ -32,7 +32,7 @@ public class MenuDefinition {
     /**
      * 在 点击tab时，刷新页面
      */
-    private boolean refreshOnTabClick;
+    private Boolean refreshOnTabClick;
 
 
     /**
@@ -56,5 +56,17 @@ public class MenuDefinition {
     /**
      * 是否禁用菜单，默认false
      */
-    private boolean disabled;
+    private Boolean disabled;
+
+    private ItemType type;
+
+    public  enum ItemType {
+
+        // 分组，区别文件夹， 在同一个阶层，分组显示
+        GROUP,
+
+        // 分割线
+        DIVIDER,
+    }
+
 }

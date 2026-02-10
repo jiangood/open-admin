@@ -31,6 +31,7 @@ public class MenuItem implements Cloneable {
 
     private String path;
 
+    private String type;
 
     @Override
     public MenuItem clone() {

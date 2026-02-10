@@ -5,63 +5,72 @@ data:
   # 菜单配置
   menus:
     - id: sys
-      name: 系统管理
+      name: 设置
       seq: 10000 # 系统管理排在后面
+      icon: SettingOutlined
       children:
-        - id: sysOrg
-          name: 机构管理
-          path: /system/org
-          icon: ApartmentOutlined
-          perm-names: [ 保存 ,查看,删除 ]
-          perm-codes: [ sysOrg:save,sysOrg:view,sysOrg:delete ]
-        - id: sysUser
+        - id: group_user
           name: 用户管理
-          path: /system/user
-          icon: UserOutlined
-          perm-names: [ 列表,保存,删除,重置密码,授权数据 ]
-          perm-codes: [ sysUser:view,sysUser:save,sysUser:delete,sysUser:resetPwd,sysUser:grantPerm ]
-        - id: sysRole
-          name: 角色管理
-          path: /system/role
-          icon: IdcardOutlined
-          perm-names: [ 管理 ]
-          perm-codes: [ sysRole:manage ]
-        - id: sysManual
-          name: 操作手册
-          path: /system/sysManual
-          icon: CopyOutlined
-          perm-names: [ 查看,删除,保存 ]
-          perm-codes: [ sysManual:view,sysManual:delete,sysManual:save ]
-        - id: sysDict
-          name: 数据字典
-          path: /system/dict
-          icon: FileSearchOutlined
-          perm-names: [ 查看,保存,删除 ]
-          perm-codes: [ sysDict:view,sysDict:save,sysDict:delete ]
-        - id: job
-          name: 作业管理
-          path: /system/job
-          icon: OrderedListOutlined
-          perm-names: [ 查看,保存,执行一次,清理日志 ]
-          perm-codes: [ job:view,job:save, job:triggerJob,job:jobLogClean ]
-        - id: sysLog
-          name: 操作日志
-          path: /system/log
-          icon: FileSearchOutlined
-          perm-names: [ 查看 ]
-          perm-codes: [ sysLog:view ]
-        - id: sysFile
-          name: 文件列表
-          path: /system/file
-          icon: FolderOpenOutlined
-          perm-names: [ 查看,删除 ]
-          perm-codes: [ sysFile:view,sysFile:delete ]
-        - id: api
-          name: 接口管理
-          icon: ApiOutlined
-          path: /system/api
-          perm-names: [ 管理 ]
-          perm-codes: [ api ]
+          type: group
+          children:
+            - id: sysUser
+              name: 用户管理
+              path: /system/user
+              icon: UserOutlined
+              perm-names: [ 列表,保存,删除,重置密码,授权数据 ]
+              perm-codes: [ sysUser:view,sysUser:save,sysUser:delete,sysUser:resetPwd,sysUser:grantPerm ]
+            - id: sysOrg
+              name: 机构管理
+              path: /system/org
+              icon: ApartmentOutlined
+              perm-names: [ 保存 ,查看,删除 ]
+              perm-codes: [ sysOrg:save,sysOrg:view,sysOrg:delete ]
+            - id: sysRole
+              name: 角色管理
+              path: /system/role
+              icon: IdcardOutlined
+              perm-names: [ 管理 ]
+              perm-codes: [ sysRole:manage ]
+        - id: group_sys
+          name: 系统设置
+          type: group
+          children:
+            - id: sysManual
+              name: 操作手册
+              path: /system/sysManual
+              icon: CopyOutlined
+              perm-names: [ 查看,删除,保存 ]
+              perm-codes: [ sysManual:view,sysManual:delete,sysManual:save ]
+            - id: sysDict
+              name: 数据字典
+              path: /system/dict
+              icon: FileSearchOutlined
+              perm-names: [ 查看,保存,删除 ]
+              perm-codes: [ sysDict:view,sysDict:save,sysDict:delete ]
+            - id: job
+              name: 作业管理
+              path: /system/job
+              icon: OrderedListOutlined
+              perm-names: [ 查看,保存,执行一次,清理日志 ]
+              perm-codes: [ job:view,job:save, job:triggerJob,job:jobLogClean ]
+            - id: sysLog
+              name: 操作日志
+              path: /system/log
+              icon: FileSearchOutlined
+              perm-names: [ 查看 ]
+              perm-codes: [ sysLog:view ]
+            - id: sysFile
+              name: 文件列表
+              path: /system/file
+              icon: FolderOpenOutlined
+              perm-names: [ 查看,删除 ]
+              perm-codes: [ sysFile:view,sysFile:delete ]
+            - id: api
+              name: 接口管理
+              icon: ApiOutlined
+              path: /system/api
+              perm-names: [ 管理 ]
+              perm-codes: [ api ]
   dicts:
     - name: 机构类型
       code: orgType

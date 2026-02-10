@@ -1,5 +1,5 @@
 import React from 'react';
-import {Badge, Layout, Menu, Watermark} from 'antd';
+import {Badge, Layout, Menu, Spin, Watermark} from 'antd';
 
 import {history, Link} from 'umi';
 import "./index.less"
@@ -20,12 +20,15 @@ export default class extends React.Component {
         menuTree: [],
         menuMap: {},
         pathMenuMap: {},
+        defaultOpenKeys: null,
+        menuLoading:true,
 
 
         currentMenuKey: null,
 
 
         siteInfo: {},
+
     }
 
 
@@ -43,9 +46,11 @@ export default class extends React.Component {
 
 
     initMenu = () => {
+        this.setState({menuLoading: true})
         HttpUtils.get('/admin/menuInfo').then(info => {
             const {menuTree, pathMenuMap, menuMap} = info
-            this.setState({menuMap})
+            const defaultOpenKeys = [menuTree.find(e => e.children != null).key]; //打开第一个文件夹
+            this.setState({menuMap, defaultOpenKeys})
 
             let pathname = PageUtils.currentPathname();
 
@@ -63,6 +68,8 @@ export default class extends React.Component {
             this.setState({menuTree, pathMenuMap})
 
             this.loadBadge(menuMap)
+        }).finally(()=>{
+            this.setState({menuLoading: false})
         })
 
 
@@ -114,25 +121,12 @@ export default class extends React.Component {
                     <Gap/>
 
 
-                    <Menu items={this.state.menuTree}
-                          theme='dark'
-                          mode="inline"
-                          className='left-menu'
-                          onClick={({key}) => {
-                              const menu = this.state.menuMap[key]
-                              let {path} = menu;
-                              this.setState({currentMenuKey: key})
-                              history.push(path)
-                          }}
-                          selectedKeys={[this.state.currentMenuKey]}
-                          inlineIndent={16}
-                    >
-                    </Menu>
+                    {this.renderLeftMenu()}
 
                 </Sider>
 
                 <Content id='admin-layout-content'>
-                    {this.getContent(loginInfo)}
+                    {this.renderCenterContent(loginInfo)}
                 </Content>
 
             </Layout>
@@ -140,7 +134,28 @@ export default class extends React.Component {
     }
 
 
-    getContent = () => {
+    renderLeftMenu() {
+        if(this.state.menuLoading){
+            return <Spin />
+        }
+        return <Menu items={this.state.menuTree}
+                     theme='dark'
+                     mode="inline"
+                     className='left-menu'
+                     defaultOpenKeys={this.state.defaultOpenKeys}
+                     onClick={({key}) => {
+                         const menu = this.state.menuMap[key]
+                         let {path} = menu;
+                         this.setState({currentMenuKey: key})
+                         history.push(path)
+                     }}
+                     selectedKeys={[this.state.currentMenuKey]}
+                     inlineIndent={16}
+        >
+        </Menu>;
+    }
+
+    renderCenterContent = () => {
         const {siteInfo, loginInfo} = this.state
         if (this.state.menuTree.length === 0) { // 加载菜单中
             return <></>

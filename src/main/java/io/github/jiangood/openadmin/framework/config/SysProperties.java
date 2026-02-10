@@ -114,7 +114,10 @@ public class SysProperties {
     private String rsaPublicKey;
     private String rsaPrivateKey;
 
-
+    /**
+     * 是否开启简单消息队列，默认关闭
+     */
+    private Boolean simpleMessageQueueEnabled;
 
     public String getBaseUrl() {
         String url = this.baseUrl;

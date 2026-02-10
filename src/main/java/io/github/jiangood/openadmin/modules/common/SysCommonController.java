@@ -2,13 +2,13 @@ package io.github.jiangood.openadmin.modules.common;
 
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.antd.MenuItem;
-import io.github.jiangood.openadmin.lang.RsaTool;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
+import io.github.jiangood.openadmin.lang.RsaTool;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.antd.MenuItem;
+import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.modules.common.dto.LoginDataResponse;
 import io.github.jiangood.openadmin.modules.common.dto.LoginInfoResponse;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
@@ -123,16 +123,19 @@ public class SysCommonController {
         Map<String, MenuDefinition> pathMenuMap = new HashMap<>();
         Map<String, MenuDefinition> menuMap = new HashMap<>();
         List<MenuItem> list = menuDefinitions.stream()
-                .filter(def -> !def.isDisabled())
+                .filter(def -> def.getDisabled() == null || !def.getDisabled())
                 .map(def -> {
                     MenuItem item = new MenuItem();
                     item.setKey(def.getId());
-                    item.setIcon(def.getIcon());
                     item.setLabel(def.getName());
                     item.setTitle(def.getName().substring(0, 1));
                     item.setParentKey(def.getPid());
+                    item.setIcon(def.getIcon());
                     item.setPath(StrUtil.nullToEmpty(def.getPath()));
 
+                    if(def.getType() != null ){
+                        item.setType(def.getType().name().toLowerCase());
+                    }
 
                     if (def.getPath() != null) {
                         pathMenuMap.put(def.getPath(), def);
