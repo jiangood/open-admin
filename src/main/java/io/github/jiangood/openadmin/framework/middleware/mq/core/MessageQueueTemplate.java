@@ -1,7 +1,15 @@
 package io.github.jiangood.openadmin.framework.middleware.mq.core;
 
-public interface MessageQueueTemplate {
+public class MessageQueueTemplate {
 
-    boolean send(String topic, String tag, String message);
+    private final MQ mq;
+
+    public MessageQueueTemplate(MQ mq) {
+        this.mq = mq;
+    }
+
+    boolean send(String topic, String tag, String message){
+        return mq.send(topic, tag, message);
+    }
 
 }

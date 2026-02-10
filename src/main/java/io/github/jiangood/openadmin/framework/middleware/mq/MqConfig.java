@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.middleware.mq;
 
-import cn.hutool.core.lang.Assert;
 import io.github.jiangood.openadmin.framework.middleware.mq.annotation.MQMessageListener;
 import io.github.jiangood.openadmin.framework.middleware.mq.core.DbRep;
 import io.github.jiangood.openadmin.framework.middleware.mq.core.MQ;
@@ -22,7 +21,7 @@ import java.util.List;
 @Configuration
 public class MqConfig implements SmartLifecycle {
 
-    private MQ mq ;
+    private MQ mq;
 
     private final List<MQListener> listeners;
 
@@ -34,7 +33,7 @@ public class MqConfig implements SmartLifecycle {
 
     @Bean
     public MessageQueueTemplate messageQueueTemplate() {
-        return mq;
+        return new MessageQueueTemplate(mq);
     }
 
     @Override

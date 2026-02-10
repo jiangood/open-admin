@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingQueue;
  * 基于内存的mq实现
  */
 @Slf4j
-public class MQ implements MessageQueueTemplate {
+public class MQ {
 
     // 存储所有topic对应的队列
     private final Map<String, BlockingQueue<Message>> topicQueues = new HashMap<>();
