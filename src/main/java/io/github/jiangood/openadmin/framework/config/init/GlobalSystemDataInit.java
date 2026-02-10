@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.config.init;
 
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
@@ -11,7 +10,6 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.SysRoleService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -42,7 +40,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
 
 
     @Resource
-    private FrameworkLifecycleManager lifecycleManager;
+    private OpenLifecycleManager lifecycleManager;
 
     @Override
     public void run(String... args) throws Exception {

@@ -11,33 +11,33 @@ import java.util.Collection;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class FrameworkLifecycleManager {
+public class OpenLifecycleManager {
 
-    private final Collection<FrameworkLifecycle> lifecycles;
+    private final Collection<OpenLifecycle> lifecycles;
 
 
 
-    public void onConfigSecurity(HttpSecurity http) {
-        for (FrameworkLifecycle lifecycle : lifecycles) {
+    public void onConfigSecurity(HttpSecurity http) throws Exception {
+        for (OpenLifecycle lifecycle : lifecycles) {
             lifecycle.onConfigSecurity(http);
         }
     }
 
 
     public void onConfigSecurityAuthorizeHttpRequests(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authz) {
-        for (FrameworkLifecycle lifecycle : lifecycles) {
+        for (OpenLifecycle lifecycle : lifecycles) {
             lifecycle.onConfigSecurityAuthorizeHttpRequests(authz);
         }
     }
 
     public void onDataInit() {
-        for (FrameworkLifecycle lifecycle : lifecycles) {
+        for (OpenLifecycle lifecycle : lifecycles) {
             lifecycle.onDataInit();
         }
     }
 
     public void afterDataInit() {
-        for (FrameworkLifecycle lifecycle : lifecycles) {
+        for (OpenLifecycle lifecycle : lifecycles) {
             lifecycle.afterDataInit();
         }
     }

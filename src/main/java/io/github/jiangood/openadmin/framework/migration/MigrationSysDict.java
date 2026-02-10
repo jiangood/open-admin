@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.migration;
 
 import cn.hutool.core.util.ArrayUtil;
-import io.github.jiangood.openadmin.framework.config.init.FrameworkLifecycle;
+import io.github.jiangood.openadmin.framework.config.init.OpenLifecycle;
 import io.github.jiangood.openadmin.lang.jdbc.DbTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
-public class MigrationSysDict implements FrameworkLifecycle {
+public class MigrationSysDict implements OpenLifecycle {
 
     private final DbTool db;
 
