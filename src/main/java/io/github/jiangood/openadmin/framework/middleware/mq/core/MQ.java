@@ -4,10 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -101,9 +98,14 @@ public class MQ implements MessageQueueTemplate {
                     try {
                         Message message = queue.take();
                         MQListener consumer = this.consumers.get(topic);
-                        consumer.consume(message);
-                        if(rep != null){
-                            rep.delete(message.getId());
+                        Result result = consumer.consume(message);
+                        if (result == Result.RETRY_LATER) {
+                            queue.add(message);
+                        }
+                        if(result == Result.SUCCESS || result == Result.DUPLICATE || result == Result.FAILURE){
+                            if(rep != null){
+                                rep.delete(message.getId());
+                            }
                         }
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
