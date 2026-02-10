@@ -8,7 +8,10 @@ public class MessageQueueTemplate {
         this.mq = mq;
     }
 
-    boolean send(String topic, String tag, String message){
+    public boolean send(String topic, String tag, String message){
+        if (mq == null || !mq.isRunning()) {
+            throw new IllegalStateException("MQ未启动");
+        }
         return mq.send(topic, tag, message);
     }
 
