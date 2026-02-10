@@ -43,7 +43,7 @@ public class DbRep implements Rep {
 
     @Override
     public List<Message> loadAll() {
-        String sql = "SELECT id, topic, tag, message FROM " + TABLE_NAME + " order by id";
+        String sql = "SELECT * FROM " + TABLE_NAME + " order by id";
         return dbTool.findAll(Message.class, sql);
     }
 }

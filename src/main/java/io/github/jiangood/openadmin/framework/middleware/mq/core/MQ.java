@@ -1,6 +1,8 @@
 package io.github.jiangood.openadmin.framework.middleware.mq.core;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.Assert;
 
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +25,9 @@ public class MQ implements MessageQueueTemplate {
 
     private Rep rep;
 
+    @Getter
+    private boolean isRunning = false;
+
     public MQ(Rep rep) {
         this.rep = rep;
     }
@@ -34,6 +39,7 @@ public class MQ implements MessageQueueTemplate {
      * 发送消息到指定topic（自动创建队列）
      */
     public synchronized boolean send(String topic, String tag, String message) {
+        Assert.state(isRunning, "MQ未启动");
         BlockingQueue<Message> queue = topicQueues.computeIfAbsent(topic, k -> new LinkedBlockingQueue<>());
         try {
             Message e = new Message(topic, tag, message);
@@ -108,6 +114,7 @@ public class MQ implements MessageQueueTemplate {
                 }
             });
         }
+        isRunning = true;
     }
 
 
@@ -120,6 +127,7 @@ public class MQ implements MessageQueueTemplate {
             topicQueues.clear();
             consumers.clear();
         }
+        isRunning = false;
     }
 
 

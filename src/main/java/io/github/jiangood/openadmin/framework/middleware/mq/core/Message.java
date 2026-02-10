@@ -2,8 +2,10 @@ package io.github.jiangood.openadmin.framework.middleware.mq.core;
 
 import cn.hutool.core.util.IdUtil;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class Message {
     Long id;
     String topic;

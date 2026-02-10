@@ -12,7 +12,11 @@ class MessageQueueTemplateTest {
     @Resource
     private  MessageQueueTemplate messageQueueTemplate;
     @Test
-    void send() {
+    void send() throws InterruptedException {
+
+        Thread.sleep(5000);
         messageQueueTemplate.send("demo", "", "hello world");
+
+        Thread.sleep(5000);
     }
 }

@@ -38,10 +38,6 @@ public class MqConfig implements SmartLifecycle {
 
     @Override
     public void start() {
-        if (listeners == null || listeners.isEmpty()) {
-            return;
-        }
-
         log.info("简单MQ启动...");
         try {
             for (MQListener listener : listeners) {
@@ -69,6 +65,6 @@ public class MqConfig implements SmartLifecycle {
 
     @Override
     public boolean isRunning() {
-        return mq != null;
+        return mq != null && mq.isRunning();
     }
 }
