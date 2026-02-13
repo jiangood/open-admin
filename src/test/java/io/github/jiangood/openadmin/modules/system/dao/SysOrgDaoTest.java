@@ -55,7 +55,7 @@ public class SysOrgDaoTest {
     @Test
     public void testFindById() {
         // 测试通过ID查找组织
-        SysOrg foundOrg = sysOrgDao.findById(testOrg.getId());
+        SysOrg foundOrg = sysOrgDao.findByIdOrNull(testOrg.getId());
         assertNotNull(foundOrg, "组织应该能通过ID找到");
         assertEquals(testOrg.getId(), foundOrg.getId(), "找到的组织ID应该与查询的ID一致");
         assertEquals(testOrg.getName(), foundOrg.getName(), "找到的组织名称应该与保存的名称一致");
