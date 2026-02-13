@@ -1,8 +1,8 @@
 package io.github.jiangood.openadmin.modules.api.service;
 
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.modules.api.dao.ApiAccountRepository;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
+import io.github.jiangood.openadmin.modules.api.repository.ApiAccountRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

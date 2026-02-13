@@ -22,7 +22,7 @@ import java.util.Map;
 public class ApiAccessLogService {
 
     @Resource
-    ApiAccessLogRepository dao;
+    ApiAccessLogRepository apiAccessLogRepository;
 
     public void add(long timestamp, ApiAccount account, ApiResource resource, Map<String, Object> params, Object retValue, String ip, long executionTime) {
         ApiAccessLog a = new ApiAccessLog();
@@ -41,47 +41,47 @@ public class ApiAccessLogService {
 
         a.setAccountName(account.getName());
 
-        dao.save(a);
+        apiAccessLogRepository.save(a);
     }
 
     // BaseService 方法
     @Transactional
     public ApiAccessLog save(ApiAccessLog input, List<String> requestKeys) throws Exception {
         if (input.isNew()) {
-            return dao.save(input);
+            return apiAccessLogRepository.save(input);
         }
 
-        dao.updateField(input, requestKeys);
-        return dao.findOne(input.getId());
+        apiAccessLogRepository.updateField(input, requestKeys);
+        return apiAccessLogRepository.findOne(input.getId());
     }
 
     @Transactional
     public void delete(String id) {
-        dao.deleteById(id);
+        apiAccessLogRepository.deleteById(id);
     }
 
     public Page<ApiAccessLog> getPage(Specification<ApiAccessLog> spec, Pageable pageable) {
-        return dao.findAll(spec, pageable);
+        return apiAccessLogRepository.findAll(spec, pageable);
     }
 
     public ApiAccessLog detail(String id) {
-        return dao.findOne(id);
+        return apiAccessLogRepository.findOne(id);
     }
 
     public ApiAccessLog get(String id) {
-        return dao.findOne(id);
+        return apiAccessLogRepository.findOne(id);
     }
 
     public List<ApiAccessLog> getAll() {
-        return dao.findAll();
+        return apiAccessLogRepository.findAll();
     }
 
     public List<ApiAccessLog> getAll(Sort sort) {
-        return dao.findAll(sort);
+        return apiAccessLogRepository.findAll(sort);
     }
 
     public List<ApiAccessLog> getAll(Specification<ApiAccessLog> s, Sort sort) {
-        return dao.findAll(s, sort);
+        return apiAccessLogRepository.findAll(s, sort);
     }
 
     public Spec<ApiAccessLog> spec() {
@@ -89,7 +89,7 @@ public class ApiAccessLogService {
     }
 
     public ApiAccessLog save(ApiAccessLog t) {
-        return dao.save(t);
+        return apiAccessLogRepository.save(t);
     }
 
 }

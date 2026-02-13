@@ -7,8 +7,8 @@ import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.modules.common.LoginTool;
-import io.github.jiangood.openadmin.modules.system.dao.SysOpLogDao;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
+import io.github.jiangood.openadmin.modules.system.repository.SysLogRepository;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.util.List;
 public class SysLogService {
 
     @Resource
-    private SysOpLogDao dao;
+    private SysLogRepository sysLogRepository;
 
     public void saveOperationLog(JoinPoint joinPoint, long duration, String params, AjaxResult result) {
         Date now = new Date();
@@ -59,47 +59,47 @@ public class SysLogService {
         if (!result.isSuccess()) {
             sysLog.setError(result.getMessage());
         }
-        dao.save(sysLog);
+        sysLogRepository.save(sysLog);
     }
 
     // BaseService 方法
     @Transactional
     public SysLog save(SysLog input, List<String> requestKeys) throws Exception {
         if (input.isNew()) {
-            return dao.save(input);
+            return sysLogRepository.save(input);
         }
 
-        dao.updateField(input, requestKeys);
-        return dao.findById(input.getId()).orElse(null);
+        sysLogRepository.updateField(input, requestKeys);
+        return sysLogRepository.findById(input.getId()).orElse(null);
     }
 
     @Transactional
     public void delete(String id) {
-        dao.deleteById(id);
+        sysLogRepository.deleteById(id);
     }
 
     public Page<SysLog> getPage(Specification<SysLog> spec, Pageable pageable) {
-        return dao.findAll(spec, pageable);
+        return sysLogRepository.findAll(spec, pageable);
     }
 
     public SysLog detail(String id) {
-        return dao.findById(id).orElse(null);
+        return sysLogRepository.findById(id).orElse(null);
     }
 
     public SysLog get(String id) {
-        return dao.findById(id).orElse(null);
+        return sysLogRepository.findById(id).orElse(null);
     }
 
     public List<SysLog> getAll() {
-        return dao.findAll();
+        return sysLogRepository.findAll();
     }
 
     public List<SysLog> getAll(Sort sort) {
-        return dao.findAll(sort);
+        return sysLogRepository.findAll(sort);
     }
 
     public List<SysLog> getAll(Specification<SysLog> s, Sort sort) {
-        return dao.findAll(s, sort);
+        return sysLogRepository.findAll(s, sort);
     }
 
     public Spec<SysLog> spec() {
@@ -107,7 +107,7 @@ public class SysLogService {
     }
 
     public SysLog save(SysLog t) {
-        return dao.save(t);
+        return sysLogRepository.save(t);
     }
 
 }

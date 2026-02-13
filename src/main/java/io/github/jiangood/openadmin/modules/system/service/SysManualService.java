@@ -1,8 +1,8 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.modules.system.dao.SysManualDao;
 import io.github.jiangood.openadmin.modules.system.entity.SysManual;
+import io.github.jiangood.openadmin.modules.system.repository.SysManualRepository;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,48 +17,48 @@ import java.util.List;
 public class SysManualService {
 
     @Resource
-    SysManualDao dao;
+    SysManualRepository sysManualRepository;
 
     @Transactional
     public SysManual save(SysManual input, List<String> requestKeys) throws Exception {
         if (input.isNew()) {
-            int maxVersion = dao.findMaxVersion(input.getName());
+            int maxVersion = sysManualRepository.findMaxVersion(input.getName());
             input.setVersion(maxVersion + 1);
-            return dao.save(input);
+            return sysManualRepository.save(input);
         }
 
-        dao.updateField(input, requestKeys);
-        return dao.findOne(input.getId());
+        sysManualRepository.updateField(input, requestKeys);
+        return sysManualRepository.findOne(input.getId());
     }
 
     // BaseService 方法
     @Transactional
     public void delete(String id) {
-        dao.deleteById(id);
+        sysManualRepository.deleteById(id);
     }
 
     public Page<SysManual> getPage(Specification<SysManual> spec, Pageable pageable) {
-        return dao.findAll(spec, pageable);
+        return sysManualRepository.findAll(spec, pageable);
     }
 
     public SysManual detail(String id) {
-        return dao.findOne(id);
+        return sysManualRepository.findOne(id);
     }
 
     public SysManual get(String id) {
-        return dao.findOne(id);
+        return sysManualRepository.findOne(id);
     }
 
     public List<SysManual> getAll() {
-        return dao.findAll();
+        return sysManualRepository.findAll();
     }
 
     public List<SysManual> getAll(Sort sort) {
-        return dao.findAll(sort);
+        return sysManualRepository.findAll(sort);
     }
 
     public List<SysManual> getAll(Specification<SysManual> s, Sort sort) {
-        return dao.findAll(s, sort);
+        return sysManualRepository.findAll(s, sort);
     }
 
     public Spec<SysManual> spec() {
@@ -66,7 +66,7 @@ public class SysManualService {
     }
 
     public SysManual save(SysManual t) {
-        return dao.save(t);
+        return sysManualRepository.save(t);
     }
 }
 

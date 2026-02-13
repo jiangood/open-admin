@@ -13,9 +13,9 @@ import io.github.jiangood.openadmin.lang.IdTool;
 import io.github.jiangood.openadmin.lang.ImgTool;
 import io.github.jiangood.openadmin.lang.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
-import io.github.jiangood.openadmin.modules.system.dao.SysFileDao;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.file.FileOperator;
+import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -56,10 +56,10 @@ public class SysFileService {
     @Resource
     FileOperator fileOperator;
     @Resource
-    private SysFileDao sysFileDao;
+    private SysFileRepository sysFileRepository;
 
     public SysFile findByTradeNo(String tradeNo) {
-        return sysFileDao.findByTradeNo(tradeNo);
+        return sysFileRepository.findByTradeNo(tradeNo);
     }
 
     public String getPreviewUrl(String id, HttpServletRequest request) {
@@ -85,8 +85,8 @@ public class SysFileService {
     }
 
     public void deleteById(String id) throws Exception {
-        SysFile sysFile = sysFileDao.findOne(id);
-        sysFileDao.deleteById(id);
+        SysFile sysFile = sysFileRepository.findOne(id);
+        sysFileRepository.deleteById(id);
 
         // 删除具体文件
         fileOperator.delete(sysFile.getObjectName());
@@ -122,7 +122,7 @@ public class SysFileService {
         FileUtil.del(tempFile);
 
         sysFile.setOrigUrl(origUrl);
-        sysFileDao.save(sysFile);
+        sysFileRepository.save(sysFile);
 
         return sysFile;
     }
@@ -213,7 +213,7 @@ public class SysFileService {
         }
         FileUtil.del(tempFile);
 
-        sysFile = sysFileDao.save(sysFile);
+        sysFile = sysFileRepository.save(sysFile);
 
         log.debug("上传文件结束 {}", objectName);
 
@@ -223,7 +223,7 @@ public class SysFileService {
     public SysFile getFileAndStream(String fileId, Integer w) throws Exception {
         Assert.hasText(fileId, "文件id不能为空");
         // 获取文件名
-        SysFile sysFile = sysFileDao.findOne(fileId);
+        SysFile sysFile = sysFileRepository.findOne(fileId);
         Assert.notNull(sysFile, "文件数据记录不存在");
 
         // 返回文件字节码
@@ -259,13 +259,13 @@ public class SysFileService {
      * @throws Exception
      */
     public File downloadToLocal(String id, File localFile) throws Exception {
-        SysFile sysFile = sysFileDao.findOne(id);
+        SysFile sysFile = sysFileRepository.findOne(id);
         fileOperator.downloadFile(sysFile.getObjectName(), localFile);
         return localFile;
     }
 
     public File downloadToLocalTemp(String id) throws Exception {
-        SysFile sysFile = sysFileDao.findOne(id);
+        SysFile sysFile = sysFileRepository.findOne(id);
         File tempFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
         fileOperator.downloadFile(sysFile.getObjectName(), tempFile);
 
@@ -273,7 +273,7 @@ public class SysFileService {
     }
 
     public SysFile findOne(String id) {
-        return sysFileDao.findOne(id);
+        return sysFileRepository.findOne(id);
     }
 
     public void fillAllImageUrl(SysFile sysFile) {
@@ -292,7 +292,7 @@ public class SysFileService {
     }
 
     public Page<SysFile> findAll(Specification<SysFile> q, Pageable pageable) {
-        Page<SysFile> page = sysFileDao.findAll(q, pageable);
+        Page<SysFile> page = sysFileRepository.findAll(q, pageable);
         for (SysFile sysFile : page) {
             this.fillAllImageUrl(sysFile);
         }
@@ -303,7 +303,7 @@ public class SysFileService {
         if (StrUtil.isEmpty(id)) {
             return false;
         }
-        SysFile file = sysFileDao.findOne(id);
+        SysFile file = sysFileRepository.findOne(id);
         if (file == null) {
             return false;
         }

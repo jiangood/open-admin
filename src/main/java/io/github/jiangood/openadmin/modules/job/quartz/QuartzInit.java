@@ -1,8 +1,8 @@
 package io.github.jiangood.openadmin.modules.job.quartz;
 
 import io.github.jiangood.openadmin.framework.config.SysProperties;
-import io.github.jiangood.openadmin.modules.job.dao.SysJobDao;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
+import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,7 +24,7 @@ public class QuartzInit implements CommandLineRunner {
 
 
     @Resource
-    private SysJobDao sysJobDao;
+    private SysJobRepository sysJobRepository;
 
 
     @Resource
@@ -42,7 +42,7 @@ public class QuartzInit implements CommandLineRunner {
         }
 
         // 2. 加载数据库任务
-        List<SysJob> list = sysJobDao.findAllByEnabledTrue();
+        List<SysJob> list = sysJobRepository.findAllByEnabledTrue();
         for (SysJob sysJob : list) {
             try {
                 log.info("加载定时任务: {} {}", sysJob.getName(), sysJob.getJobClass());

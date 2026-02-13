@@ -29,7 +29,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
     SysRoleService sysRoleService;
 
     @Resource
-    SysUserRepository sysUserDao;
+    SysUserRepository sysUserRepository;
 
 
 
@@ -64,7 +64,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
         log.info("初始化管理员中....");
         String account = "admin";
 
-        SysUser admin = sysUserDao.findByAccount(account);
+        SysUser admin = sysUserRepository.findByAccount(account);
         if (admin == null) {
             String pwd = PasswordTool.random();
             admin = new SysUser();
@@ -74,7 +74,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
             admin.getRoles().add(adminRole);
             admin.setDataPermType(DataPermType.ALL);
             admin.setPassword(PasswordTool.encode(pwd));
-            admin = sysUserDao.save(admin);
+            admin = sysUserRepository.save(admin);
             log.info("创建默认管理员 {}", admin.getAccount());
         }
         log.info("管理员登录账号:{}", admin.getAccount());
@@ -83,7 +83,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
         if (StrUtil.isNotEmpty(pwd)) {
             admin.setPassword(PasswordTool.encode(pwd));
             log.info("管理员密码重置为 {}", pwd);
-            sysUserDao.save(admin);
+            sysUserRepository.save(admin);
         }
 
         log.info("-------------------------------------------");
