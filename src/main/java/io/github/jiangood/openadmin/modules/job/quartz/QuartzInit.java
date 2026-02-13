@@ -42,7 +42,7 @@ public class QuartzInit implements CommandLineRunner {
         }
 
         // 2. 加载数据库任务
-        List<SysJob> list = sysJobDao.findAllEnabled();
+        List<SysJob> list = sysJobDao.findAllByEnabledTrue();
         for (SysJob sysJob : list) {
             try {
                 log.info("加载定时任务: {} {}", sysJob.getName(), sysJob.getJobClass());

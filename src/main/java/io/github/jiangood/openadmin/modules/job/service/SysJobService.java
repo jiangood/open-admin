@@ -44,7 +44,7 @@ public class SysJobService {
             db = sysJobDao.save(input);
         } else {
             sysJobDao.updateField(input, requestKeys);
-            db = sysJobDao.findById(input.getId());
+            db = sysJobDao.findById(input.getId()).orElse(null);
         }
 
         quartzService.deleteJob(db);
@@ -59,11 +59,11 @@ public class SysJobService {
     @Transactional
     public void deleteJob(String id) throws SchedulerException {
         log.info("删除定时任务 {}", id);
-        SysJob job = sysJobDao.findOne(id);
+        SysJob job = sysJobDao.findById(id).orElse(null);
         Assert.notNull(job, "该任务已被删除，请勿重复操作");
         quartzService.deleteJob(job);
 
-        sysJobExecuteRecordDao.deleteByJobId(id);
+        sysJobExecuteRecordDao.deleteBySysJobId(id);
 
         sysJobDao.deleteById(id);
     }
@@ -83,11 +83,11 @@ public class SysJobService {
     }
 
     public SysJob detail(String id) {
-        return sysJobDao.findById(id);
+        return sysJobDao.findById(id).orElse(null);
     }
 
     public SysJob get(String id) {
-        return sysJobDao.findById(id);
+        return sysJobDao.findById(id).orElse(null);
     }
 
     public List<SysJob> getAll() {
