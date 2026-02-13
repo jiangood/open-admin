@@ -47,7 +47,7 @@ public class SysOrgService {
 
     @Transactional
     public void resetPidByThird(String id) {
-        SysOrg db = sysOrgDao.findByIdOrNull(id);
+        SysOrg db = sysOrgDao.findOne(id);
         String thirdPid = db.getThirdPid();
         if (thirdPid != null) {
             SysOrg parent = sysOrgDao.findByThirdId(thirdPid);
@@ -110,7 +110,7 @@ public class SysOrgService {
         }
 
         sysOrgDao.updateField(input, requestKeys);
-        return sysOrgDao.findByIdOrNull(input.getId());
+        return sysOrgDao.findOne(input.getId());
     }
 
 
@@ -166,7 +166,7 @@ public class SysOrgService {
      * @param orgId
      */
     public SysOrg findUnitByOrgId(String orgId) {
-        SysOrg org = sysOrgDao.findByIdOrNull(orgId);
+        SysOrg org = sysOrgDao.findOne(orgId);
 
         return this.findUnit(org);
     }
@@ -178,7 +178,7 @@ public class SysOrgService {
 
         // 如果没有找到部门领导，则机构树的上一级部门找
         while (deptId != null) {
-            SysOrg dept = sysOrgDao.findByIdOrNull(deptId);
+            SysOrg dept = sysOrgDao.findOne(deptId);
             if (dept == null || dept.getType() != OrgType.TYPE_DEPT) {
                 break;
             }
@@ -205,7 +205,7 @@ public class SysOrgService {
     }
 
     public SysOrg findOne(String id) {
-        return sysOrgDao.findByIdOrNull(id);
+        return sysOrgDao.findOne(id);
     }
 
     public List<SysOrg> getAll() {
@@ -215,14 +215,14 @@ public class SysOrgService {
 
     @Transactional
     public void sort(String dragKey, DropResult result) {
-        SysOrg dragOrg = sysOrgDao.findByIdOrNull(dragKey);
+        SysOrg dragOrg = sysOrgDao.findOne(dragKey);
         dragOrg.setPid(result.getParentKey());
 
         List<String> sortedKeys = result.getSortedKeys();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String sortedKey = sortedKeys.get(i);
             // 组织机构一般少，这里遍历获取
-            SysOrg org = sysOrgDao.findByIdOrNull(sortedKey);
+            SysOrg org = sysOrgDao.findOne(sortedKey);
             org.setSeq(i);
         }
 
@@ -234,11 +234,11 @@ public class SysOrgService {
     }
 
     public SysOrg detail(String id) {
-        return sysOrgDao.findByIdOrNull(id);
+        return sysOrgDao.findOne(id);
     }
 
     public SysOrg get(String id) {
-        return sysOrgDao.findByIdOrNull(id);
+        return sysOrgDao.findOne(id);
     }
 
     public List<SysOrg> getAll(Sort sort) {

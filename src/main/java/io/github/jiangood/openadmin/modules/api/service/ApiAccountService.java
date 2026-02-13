@@ -31,7 +31,7 @@ public class ApiAccountService {
         }
 
         apiAccountDao.updateField(input, requestKeys);
-        return apiAccountDao.findByIdOrNull(input.getId());
+        return apiAccountDao.findOne(input.getId());
     }
 
     @Transactional
@@ -44,11 +44,11 @@ public class ApiAccountService {
     }
 
     public ApiAccount detail(String id) {
-        return apiAccountDao.findByIdOrNull(id);
+        return apiAccountDao.findOne(id);
     }
 
     public ApiAccount get(String id) {
-        return apiAccountDao.findByIdOrNull(id);
+        return apiAccountDao.findOne(id);
     }
 
     public List<ApiAccount> getAll() {

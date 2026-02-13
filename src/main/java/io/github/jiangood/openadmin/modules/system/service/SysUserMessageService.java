@@ -45,7 +45,7 @@ public class SysUserMessageService {
     }
 
     public void read(String id) {
-        SysUserMessage db = sysUserMsgDao.findByIdOrNull(id);
+        SysUserMessage db = sysUserMsgDao.findOne(id);
         db.setReadTime(new Date());
         db.setIsRead(true);
         sysUserMsgDao.save(db);
@@ -59,7 +59,7 @@ public class SysUserMessageService {
         }
 
         sysUserMsgDao.updateField(input, requestKeys);
-        return sysUserMsgDao.findByIdOrNull(input.getId());
+        return sysUserMsgDao.findOne(input.getId());
     }
 
     @Transactional
@@ -72,11 +72,11 @@ public class SysUserMessageService {
     }
 
     public SysUserMessage detail(String id) {
-        return sysUserMsgDao.findByIdOrNull(id);
+        return sysUserMsgDao.findOne(id);
     }
 
     public SysUserMessage get(String id) {
-        return sysUserMsgDao.findByIdOrNull(id);
+        return sysUserMsgDao.findOne(id);
     }
 
     public List<SysUserMessage> getAll() {

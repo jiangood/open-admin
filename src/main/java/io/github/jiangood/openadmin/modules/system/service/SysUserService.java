@@ -322,7 +322,7 @@ public class SysUserService {
     }
 
     public List<SysUser> findByRoleId(String id) {
-        SysRole role = roleDao.findByIdOrNull(id);
+        SysRole role = roleDao.findOne(id);
         Assert.state(role != null, "角色不存在");
 
         return this.findByRole(role);
