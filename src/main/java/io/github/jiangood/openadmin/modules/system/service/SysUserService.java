@@ -124,7 +124,7 @@ public class SysUserService {
         Assert.state(accountUnique, "用户名已存在");
 
         String inputOrgId = input.getDeptId();
-        SysOrg org = sysOrgDao.findById(inputOrgId);
+        SysOrg org = sysOrgDao.findByIdOrNull(inputOrgId);
         if (org.getType() == OrgType.TYPE_UNIT) {
             input.setUnitId(inputOrgId);
             input.setDeptId(null);
@@ -308,7 +308,7 @@ public class SysUserService {
     }
 
     public List<SysUser> findByRoleId(String id) {
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleDao.findByIdOrNull(id);
         Assert.state(role != null, "角色不存在");
 
         return this.findByRole(role);

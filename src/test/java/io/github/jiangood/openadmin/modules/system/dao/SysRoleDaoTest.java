@@ -1,130 +1,131 @@
 package io.github.jiangood.openadmin.modules.system.dao;
 
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
-public class SysRoleDaoTest {
+@Transactional
+@Rollback
+class SysRoleDaoTest {
 
     @Autowired
     private SysRoleDao sysRoleDao;
 
-    private SysRole testRole;
-
-    @BeforeEach
-    public void setUp() {
-        // 清理测试数据
-        sysRoleDao.deleteAll();
-
-        // 创建测试角色
-        testRole = new SysRole();
-        testRole.setName("测试角色");
-        testRole.setCode("test_role");
-        testRole.setSeq(1);
-        testRole.setRemark("测试用角色");
-        testRole.setEnabled(true);
-        testRole.setBuiltin(false);
-        testRole = sysRoleDao.save(testRole);
-    }
-
     @Test
-    public void testSave() {
+    void testSave() {
         SysRole role = new SysRole();
-        role.setName("新测试角色");
-        role.setCode("new_test_role");
-        role.setSeq(2);
-        role.setRemark("新测试用角色");
-        role.setEnabled(true);
+        role.setName("Test Role");
+        role.setCode("TEST_ROLE");
         role.setBuiltin(false);
+        role.setEnabled(true);
+        role.setSeq(1);
+        role.setRemark("This is a test role");
 
         SysRole savedRole = sysRoleDao.save(role);
         assertNotNull(savedRole.getId());
-        assertEquals("new_test_role", savedRole.getCode());
-        assertEquals("新测试角色", savedRole.getName());
+        assertEquals("Test Role", savedRole.getName());
+        assertEquals("TEST_ROLE", savedRole.getCode());
+        assertFalse(savedRole.getBuiltin());
+        assertTrue(savedRole.getEnabled());
+        assertEquals(1, savedRole.getSeq());
+        assertEquals("This is a test role", savedRole.getRemark());
     }
 
     @Test
-    public void testFindByCode() {
-        SysRole foundRole = sysRoleDao.findByCode("test_role");
+    void testFindById() {
+        SysRole role = new SysRole();
+        role.setName("Test Role");
+        role.setCode("TEST_ROLE");
+        role.setBuiltin(false);
+        role.setEnabled(true);
+
+        SysRole savedRole = sysRoleDao.save(role);
+        SysRole foundRole = sysRoleDao.findById(savedRole.getId()).orElse(null);
         assertNotNull(foundRole);
-        assertEquals("测试角色", foundRole.getName());
-
-        // 测试不存在的编码
-        SysRole nonExistentRole = sysRoleDao.findByCode("non-existent");
-        assertNull(nonExistentRole);
+        assertEquals(savedRole.getId(), foundRole.getId());
     }
 
     @Test
-    public void testCountByCode() {
-        long count = sysRoleDao.countByCode("test_role");
+    void testDeleteById() {
+        SysRole role = new SysRole();
+        role.setName("Test Role");
+        role.setCode("TEST_ROLE");
+        role.setBuiltin(false);
+        role.setEnabled(true);
+
+        SysRole savedRole = sysRoleDao.save(role);
+        sysRoleDao.deleteById(savedRole.getId());
+        SysRole foundRole = sysRoleDao.findById(savedRole.getId()).orElse(null);
+        assertNull(foundRole);
+    }
+
+    @Test
+    void testFindAll() {
+        for (int i = 0; i < 3; i++) {
+            SysRole role = new SysRole();
+            role.setName("Test Role " + i);
+            role.setCode("TEST_ROLE_" + i);
+            role.setBuiltin(false);
+            role.setEnabled(true);
+            sysRoleDao.save(role);
+        }
+
+        List<SysRole> roles = sysRoleDao.findAll();
+        assertTrue(roles.size() >= 3);
+    }
+
+    @Test
+    void testUpdate() {
+        SysRole role = new SysRole();
+        role.setName("Test Role");
+        role.setCode("TEST_ROLE");
+        role.setBuiltin(false);
+        role.setEnabled(true);
+
+        SysRole savedRole = sysRoleDao.save(role);
+        savedRole.setName("Updated Test Role");
+        savedRole.setEnabled(false);
+
+        SysRole updatedRole = sysRoleDao.save(savedRole);
+        assertEquals("Updated Test Role", updatedRole.getName());
+        assertFalse(updatedRole.getEnabled());
+    }
+
+    @Test
+    void testFindByCode() {
+        SysRole role = new SysRole();
+        role.setName("Test Role");
+        role.setCode("TEST_ROLE");
+        role.setBuiltin(false);
+        role.setEnabled(true);
+
+        sysRoleDao.save(role);
+        SysRole foundRole = sysRoleDao.findByCode("TEST_ROLE");
+        assertNotNull(foundRole);
+        assertEquals("TEST_ROLE", foundRole.getCode());
+    }
+
+    @Test
+    void testCountByCode() {
+        SysRole role = new SysRole();
+        role.setName("Test Role");
+        role.setCode("TEST_ROLE");
+        role.setBuiltin(false);
+        role.setEnabled(true);
+
+        sysRoleDao.save(role);
+        long count = sysRoleDao.countByCode("TEST_ROLE");
         assertEquals(1, count);
 
-        // 测试不存在的编码
-        long nonExistentCount = sysRoleDao.countByCode("non-existent");
+        long nonExistentCount = sysRoleDao.countByCode("NON_EXISTENT_ROLE");
         assertEquals(0, nonExistentCount);
     }
-
-    @Test
-    public void testDelete() {
-        String roleId = testRole.getId();
-        sysRoleDao.delete(testRole);
-
-        SysRole deletedRole = sysRoleDao.findById(roleId);
-        assertNull(deletedRole);
-    }
-
-    @Test
-    public void testFindById() {
-        SysRole foundRole = sysRoleDao.findById(testRole.getId());
-        assertNotNull(foundRole);
-        assertEquals("测试角色", foundRole.getName());
-
-        // 测试不存在的ID
-        SysRole nonExistentRole = sysRoleDao.findById("non-existent-id");
-        assertNull(nonExistentRole);
-    }
-
-    @Test
-    public void testExistsById() {
-        boolean exists = sysRoleDao.existsById(testRole.getId());
-        assertTrue(exists);
-
-        // 测试不存在的ID
-        boolean nonExists = sysRoleDao.existsById("non-existent-id");
-        assertFalse(nonExists);
-    }
-
-    @Test
-    public void testCount() {
-        long count = sysRoleDao.count();
-        assertEquals(1, count);
-
-        // 添加一个角色后再次计数
-        SysRole newRole = new SysRole();
-        newRole.setName("计数测试角色");
-        newRole.setCode("count_test_role");
-        newRole.setEnabled(true);
-        newRole.setBuiltin(false);
-        sysRoleDao.save(newRole);
-
-        long newCount = sysRoleDao.count();
-        assertEquals(2, newCount);
-    }
-
-    @Test
-    public void testFindAll() {
-        List<SysRole> roles = sysRoleDao.findAll();
-        assertEquals(1, roles.size());
-        assertEquals("测试角色", roles.get(0).getName());
-    }
-
 }

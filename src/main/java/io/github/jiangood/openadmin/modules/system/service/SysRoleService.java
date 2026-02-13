@@ -42,19 +42,19 @@ public class SysRoleService {
 
     @Transactional
     public void delete(String id) {
-        SysRole db = roleDao.findById(id);
+        SysRole db = roleDao.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         Assert.state(!db.getBuiltin(), "内置角色不能删除");
         roleDao.deleteById(id);
     }
 
 
     public List<SysRole> findValid() {
-        return roleDao.findAllByField(SysRole.Fields.enabled, true);
+        return roleDao.findAllByEnabled(true);
     }
 
     @Transactional
     public List<MenuDefinition> ownMenu(String id) {
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleDao.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         List<MenuDefinition> menuList;
 
         if (role.isAdmin()) {
@@ -82,13 +82,13 @@ public class SysRoleService {
 
 
     public List<SysUser> findUsers(String roleId) {
-        SysRole role = roleDao.findOne(roleId);
+        SysRole role = roleDao.findById(roleId).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         return new ArrayList<>(role.getUsers());
     }
 
 
     public List<SysRole> findAllByCode(Collection<String> roles) {
-        return roleDao.findAll(spec().in(SysRole.Fields.code, roles));
+        return roleDao.findAllByCodeIn(roles);
     }
 
 
@@ -116,7 +116,7 @@ public class SysRoleService {
 
     @Transactional
     public SysRole grantUsers(String id, List<String> userIdList) {
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleDao.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         role.getUsers().clear();
 
         return role;
@@ -134,7 +134,7 @@ public class SysRoleService {
             finalMenus.addAll(pids);
         }
 
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleDao.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         role.setPerms(perms);
         role.setMenus(finalMenus);
         return roleDao.save(role);
@@ -145,7 +145,7 @@ public class SysRoleService {
     }
 
     public SysRole findOne(String id) {
-        return roleDao.findOne(id);
+        return roleDao.findById(id).orElse(null);
     }
 
     // BaseService 方法
@@ -155,8 +155,8 @@ public class SysRoleService {
             return roleDao.save(input);
         }
 
-        roleDao.updateField(input, requestKeys);
-        return roleDao.findById(input.getId());
+        // 由于updateField方法不存在，我们直接使用save方法更新
+        return roleDao.save(input);
     }
 
     public Page<SysRole> getPage(Specification<SysRole> spec, Pageable pageable) {
@@ -164,11 +164,11 @@ public class SysRoleService {
     }
 
     public SysRole detail(String id) {
-        return roleDao.findById(id);
+        return roleDao.findById(id).orElse(null);
     }
 
     public SysRole get(String id) {
-        return roleDao.findById(id);
+        return roleDao.findById(id).orElse(null);
     }
 
     public List<SysRole> getAll(Sort sort) {

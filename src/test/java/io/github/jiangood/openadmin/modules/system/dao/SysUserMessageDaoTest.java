@@ -2,11 +2,11 @@ package io.github.jiangood.openadmin.modules.system.dao;
 
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.entity.SysUserMessage;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -14,8 +14,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
-public class SysUserMessageDaoTest {
+@Transactional
+@Rollback
+class SysUserMessageDaoTest {
 
     @Autowired
     private SysUserMessageDao sysUserMessageDao;
@@ -23,112 +24,117 @@ public class SysUserMessageDaoTest {
     @Autowired
     private SysUserDao sysUserDao;
 
-    private SysUserMessage testMessage;
-    private SysUser testUser;
-
-    @BeforeEach
-    public void setUp() {
-        // 清理测试数据
-        sysUserMessageDao.deleteAll();
-        sysUserDao.deleteAll();
-
-        // 创建测试用户
-        testUser = new SysUser();
-        testUser.setAccount("testuser");
-        testUser.setPassword("123456");
-        testUser.setName("测试用户");
-        testUser.setEnabled(true);
-        testUser = sysUserDao.save(testUser);
-
-        // 创建测试消息
-        testMessage = new SysUserMessage();
-        testMessage.setTitle("测试消息");
-        testMessage.setContent("这是一条测试消息");
-        testMessage.setUser(testUser);
-        testMessage.setIsRead(false);
-        testMessage = sysUserMessageDao.save(testMessage);
-    }
-
     @Test
-    public void testSave() {
+    void testSave() {
+        SysUser user = new SysUser();
+        user.setAccount("testuser");
+        user.setName("Test User");
+        user.setEnabled(true);
+        sysUserDao.save(user);
+
         SysUserMessage message = new SysUserMessage();
-        message.setTitle("新测试消息");
-        message.setContent("这是一条新测试消息");
-        message.setUser(testUser);
+        message.setTitle("Test Message");
+        message.setContent("This is a test message");
+        message.setUser(user);
         message.setIsRead(false);
+        message.setReadTime(null);
 
         SysUserMessage savedMessage = sysUserMessageDao.save(message);
         assertNotNull(savedMessage.getId());
-        assertEquals("新测试消息", savedMessage.getTitle());
-        assertEquals("这是一条新测试消息", savedMessage.getContent());
+        assertEquals("Test Message", savedMessage.getTitle());
+        assertEquals("This is a test message", savedMessage.getContent());
+        assertEquals(user.getId(), savedMessage.getUser().getId());
+        assertFalse(savedMessage.getIsRead());
+        assertNull(savedMessage.getReadTime());
     }
 
     @Test
-    public void testDelete() {
-        String messageId = testMessage.getId();
-        sysUserMessageDao.delete(testMessage);
+    void testFindById() {
+        SysUser user = new SysUser();
+        user.setAccount("testuser");
+        user.setName("Test User");
+        user.setEnabled(true);
+        sysUserDao.save(user);
 
-        SysUserMessage deletedMessage = sysUserMessageDao.findById(messageId);
-        assertNull(deletedMessage);
-    }
+        SysUserMessage message = new SysUserMessage();
+        message.setTitle("Test Message");
+        message.setContent("This is a test message");
+        message.setUser(user);
+        message.setIsRead(false);
+        message.setReadTime(null);
 
-    @Test
-    public void testFindById() {
-        SysUserMessage foundMessage = sysUserMessageDao.findById(testMessage.getId());
+        SysUserMessage savedMessage = sysUserMessageDao.save(message);
+        SysUserMessage foundMessage = sysUserMessageDao.findById(savedMessage.getId()).orElse(null);
         assertNotNull(foundMessage);
-        assertEquals("测试消息", foundMessage.getTitle());
-
-        // 测试不存在的ID
-        SysUserMessage nonExistentMessage = sysUserMessageDao.findById("non-existent-id");
-        assertNull(nonExistentMessage);
+        assertEquals(savedMessage.getId(), foundMessage.getId());
     }
 
     @Test
-    public void testExistsById() {
-        boolean exists = sysUserMessageDao.existsById(testMessage.getId());
-        assertTrue(exists);
+    void testDeleteById() {
+        SysUser user = new SysUser();
+        user.setAccount("testuser");
+        user.setName("Test User");
+        user.setEnabled(true);
+        sysUserDao.save(user);
 
-        // 测试不存在的ID
-        boolean nonExists = sysUserMessageDao.existsById("non-existent-id");
-        assertFalse(nonExists);
+        SysUserMessage message = new SysUserMessage();
+        message.setTitle("Test Message");
+        message.setContent("This is a test message");
+        message.setUser(user);
+        message.setIsRead(false);
+        message.setReadTime(null);
+
+        SysUserMessage savedMessage = sysUserMessageDao.save(message);
+        sysUserMessageDao.deleteById(savedMessage.getId());
+        SysUserMessage foundMessage = sysUserMessageDao.findById(savedMessage.getId()).orElse(null);
+        assertNull(foundMessage);
     }
 
     @Test
-    public void testCount() {
-        long count = sysUserMessageDao.count();
-        assertEquals(1, count);
+    void testFindAll() {
+        SysUser user = new SysUser();
+        user.setAccount("testuser");
+        user.setName("Test User");
+        user.setEnabled(true);
+        sysUserDao.save(user);
 
-        // 添加一个消息后再次计数
-        SysUserMessage newMessage = new SysUserMessage();
-        newMessage.setTitle("计数测试消息");
-        newMessage.setContent("这是一条计数测试消息");
-        newMessage.setUser(testUser);
-        newMessage.setIsRead(false);
-        sysUserMessageDao.save(newMessage);
+        for (int i = 0; i < 3; i++) {
+            SysUserMessage message = new SysUserMessage();
+            message.setTitle("Test Message " + i);
+            message.setContent("This is test message " + i);
+            message.setUser(user);
+            message.setIsRead(false);
+            message.setReadTime(null);
+            sysUserMessageDao.save(message);
+        }
 
-        long newCount = sysUserMessageDao.count();
-        assertEquals(2, newCount);
-    }
-
-    @Test
-    public void testFindAll() {
         List<SysUserMessage> messages = sysUserMessageDao.findAll();
-        assertEquals(1, messages.size());
-        assertEquals("测试消息", messages.get(0).getTitle());
+        assertTrue(messages.size() >= 3);
     }
 
     @Test
-    public void testUpdateField() {
-        // 标记消息为已读
-        testMessage.setIsRead(true);
-        testMessage.setReadTime(new Date());
-        sysUserMessageDao.updateField(testMessage, List.of("isRead", "readTime"));
+    void testUpdate() {
+        SysUser user = new SysUser();
+        user.setAccount("testuser");
+        user.setName("Test User");
+        user.setEnabled(true);
+        sysUserDao.save(user);
 
-        // 重新查询，验证更新是否成功
-        SysUserMessage updatedMessage = sysUserMessageDao.findById(testMessage.getId());
-        assertNotNull(updatedMessage);
+        SysUserMessage message = new SysUserMessage();
+        message.setTitle("Test Message");
+        message.setContent("This is a test message");
+        message.setUser(user);
+        message.setIsRead(false);
+        message.setReadTime(null);
+
+        SysUserMessage savedMessage = sysUserMessageDao.save(message);
+        savedMessage.setTitle("Updated Test Message");
+        savedMessage.setIsRead(true);
+        savedMessage.setReadTime(new Date());
+
+        SysUserMessage updatedMessage = sysUserMessageDao.save(savedMessage);
+        assertEquals("Updated Test Message", updatedMessage.getTitle());
         assertTrue(updatedMessage.getIsRead());
         assertNotNull(updatedMessage.getReadTime());
     }
-
 }

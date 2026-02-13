@@ -52,6 +52,8 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
 
     public T findByIdAndRefresh(String id);
 
+    T findByIdOrNull(ID id);
+
 
     // --- 5.1 JpaQuery/字段等值查询 (Custom Query Helpers) ---
 
@@ -128,19 +130,21 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
 
     // --- 7. 结果集映射 (Dictionary Mapping) ---
 
-    public Map<String, T> findKeyed(Iterable<String> ids);
+    public Map<ID, T> findKeyed(Iterable<ID> ids);
+
 
     /**
      * 将查找接口转换为map， key为id，value为对象
      */
-    public Map<String, T> dict(Specification<T> spec);
+    public Map<ID, T> dict();
+    public Map<ID, T> dict(Specification<T> spec);
 
-    public Map<String, T> dict(Specification<T> spec, Function<T, String> keyField);
+    public Map<ID, T> dict(Specification<T> spec, Function<T, ID> keyField);
 
     /**
      * 将查询结果的两个字段组装成map
      */
-    public <V> Map<String, V> dict(Specification<T> spec, Function<T, String> keyField, Function<T, V> valueField);
+    public <V> Map<ID, V> dict(Specification<T> spec, Function<T, ID> keyField, Function<T, V> valueField);
 
     /**
      * 获取实体的ID

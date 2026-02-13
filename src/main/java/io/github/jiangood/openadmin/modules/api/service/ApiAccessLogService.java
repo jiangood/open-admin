@@ -52,7 +52,7 @@ public class ApiAccessLogService {
         }
 
         dao.updateField(input, requestKeys);
-        return dao.findById(input.getId());
+        return dao.findByIdOrNull(input.getId());
     }
 
     @Transactional
@@ -65,11 +65,11 @@ public class ApiAccessLogService {
     }
 
     public ApiAccessLog detail(String id) {
-        return dao.findById(id);
+        return dao.findByIdOrNull(id);
     }
 
     public ApiAccessLog get(String id) {
-        return dao.findById(id);
+        return dao.findByIdOrNull(id);
     }
 
     public List<ApiAccessLog> getAll() {

@@ -21,10 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -98,7 +95,9 @@ public class SysOrgService {
     }
 
     public String getNameById(String id) {
-        return sysOrgDao.getNameById(id);
+        Optional<SysOrg> o = sysOrgDao.findById(id);
+
+        return o.map(SysOrg::getName).orElse(null);
     }
 
 
@@ -204,7 +203,7 @@ public class SysOrgService {
 
         // 如果没有找到部门领导，则机构树的上一级部门找
         while (deptId != null) {
-            SysOrg dept = sysOrgDao.findOne(deptId);
+            SysOrg dept = sysOrgDao.findByIdOrNull(deptId);
             if (dept == null || dept.getType() != OrgType.TYPE_DEPT) {
                 break;
             }
@@ -231,7 +230,7 @@ public class SysOrgService {
     }
 
     public SysOrg findOne(String id) {
-        return sysOrgDao.findOne(id);
+        return sysOrgDao.findByIdOrNull(id);
     }
 
     public List<SysOrg> getAll() {
@@ -241,14 +240,14 @@ public class SysOrgService {
 
     @Transactional
     public void sort(String dragKey, DropResult result) {
-        SysOrg dragOrg = sysOrgDao.findOne(dragKey);
+        SysOrg dragOrg = sysOrgDao.findByIdOrNull(dragKey);
         dragOrg.setPid(result.getParentKey());
 
         List<String> sortedKeys = result.getSortedKeys();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String sortedKey = sortedKeys.get(i);
             // 组织机构一般少，这里遍历获取
-            SysOrg org = sysOrgDao.findOne(sortedKey);
+            SysOrg org = sysOrgDao.findByIdOrNull(sortedKey);
             org.setSeq(i);
         }
 
@@ -260,11 +259,11 @@ public class SysOrgService {
     }
 
     public SysOrg detail(String id) {
-        return sysOrgDao.findById(id);
+        return sysOrgDao.findByIdOrNull(id);
     }
 
     public SysOrg get(String id) {
-        return sysOrgDao.findById(id);
+        return sysOrgDao.findByIdOrNull(id);
     }
 
     public List<SysOrg> getAll(Sort sort) {

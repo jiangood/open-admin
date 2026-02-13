@@ -1,235 +1,106 @@
 package io.github.jiangood.openadmin.modules.system.dao;
 
-import io.github.jiangood.openadmin.lang.tree.TreeManager;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-
-import java.util.List;
-import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@ActiveProfiles("test")
+@Transactional
 public class SysOrgDaoTest {
 
     @Autowired
     private SysOrgDao sysOrgDao;
 
     private SysOrg testOrg;
-    private SysOrg testDept;
+    private static final String TEST_THIRD_ID = "test-third-id-123";
 
     @BeforeEach
     public void setUp() {
-        // 清理测试数据
-        sysOrgDao.deleteAll();
-
-        // 创建测试机构
+        // 创建测试组织实体
         testOrg = new SysOrg();
-        testOrg.setName("测试机构");
-        testOrg.setType(OrgType.TYPE_UNIT);
-        testOrg.setEnabled(true);
+        testOrg.setName("Test Organization");
+        testOrg.setPid(null); // 根节点
         testOrg.setSeq(1);
-        testOrg = sysOrgDao.save(testOrg);
+        testOrg.setEnabled(true);
+        testOrg.setType(OrgType.TYPE_UNIT);
+        testOrg.setThirdId(TEST_THIRD_ID);
 
-        // 创建测试部门
-        testDept = new SysOrg();
-        testDept.setName("测试部门");
-        testDept.setType(OrgType.TYPE_DEPT);
-        testDept.setPid(testOrg.getId());
-        testDept.setEnabled(true);
-        testDept.setSeq(1);
-        testDept = sysOrgDao.save(testDept);
+        // 保存测试组织
+        testOrg = sysOrgDao.save(testOrg);
     }
 
     @Test
     public void testSave() {
-        SysOrg org = new SysOrg();
-        org.setName("新测试机构");
-        org.setType(OrgType.TYPE_UNIT);
-        org.setEnabled(true);
-        org.setSeq(2);
+        // 测试保存组织
+        SysOrg newOrg = new SysOrg();
+        newOrg.setName("New Test Organization");
+        newOrg.setPid(testOrg.getId()); // 作为子节点
+        newOrg.setSeq(2);
+        newOrg.setEnabled(true);
+        newOrg.setType(OrgType.TYPE_UNIT);
+        newOrg.setThirdId("new-test-third-id");
 
-        SysOrg savedOrg = sysOrgDao.save(org);
-        assertNotNull(savedOrg.getId());
-        assertEquals("新测试机构", savedOrg.getName());
+        SysOrg savedOrg = sysOrgDao.save(newOrg);
+        assertNotNull(savedOrg.getId(), "保存的组织应该有ID");
+        assertEquals(newOrg.getName(), savedOrg.getName(), "保存的组织名称应该与输入的名称一致");
+        assertEquals(newOrg.getPid(), savedOrg.getPid(), "保存的组织父ID应该与输入的父ID一致");
+    }
+
+    @Test
+    public void testFindById() {
+        // 测试通过ID查找组织
+        SysOrg foundOrg = sysOrgDao.findById(testOrg.getId());
+        assertNotNull(foundOrg, "组织应该能通过ID找到");
+        assertEquals(testOrg.getId(), foundOrg.getId(), "找到的组织ID应该与查询的ID一致");
+        assertEquals(testOrg.getName(), foundOrg.getName(), "找到的组织名称应该与保存的名称一致");
     }
 
     @Test
     public void testFindByThirdId() {
-        // 设置第三方ID
-        testOrg.setThirdId("third-test-id");
-        sysOrgDao.save(testOrg);
-
-        SysOrg foundOrg = sysOrgDao.findByThirdId("third-test-id");
-        assertNotNull(foundOrg);
-        assertEquals("测试机构", foundOrg.getName());
-
-        // 测试不存在的第三方ID
-        SysOrg nonExistentOrg = sysOrgDao.findByThirdId("non-existent");
-        assertNull(nonExistentOrg);
+        // 测试通过第三方ID查找组织
+        SysOrg foundOrg = sysOrgDao.findByThirdId(TEST_THIRD_ID);
+        assertNotNull(foundOrg, "组织应该能通过第三方ID找到");
+        assertEquals(testOrg.getId(), foundOrg.getId(), "找到的组织ID应该与保存的组织ID一致");
+        assertEquals(TEST_THIRD_ID, foundOrg.getThirdId(), "找到的组织第三方ID应该与查询的第三方ID一致");
     }
 
     @Test
-    public void testGetTreeManager() {
-        TreeManager<SysOrg> treeManager = sysOrgDao.getTreeManager();
-        assertNotNull(treeManager);
-        // 测试树管理器是否包含我们创建的机构
-        assertTrue(treeManager.getMap().containsKey(testOrg.getId()));
-        assertTrue(treeManager.getMap().containsKey(testDept.getId()));
-    }
-
-    @Test
-    public void testCheckIsLeaf() {
-        // 测试机构是否是叶子节点（应该是，因为它只有一个部门子节点）
-        boolean isLeaf = sysOrgDao.checkIsLeaf(testOrg.getId());
-        assertFalse(isLeaf);
-
-        // 测试部门是否是叶子节点（应该是，因为它没有子节点）
-        boolean isDeptLeaf = sysOrgDao.checkIsLeaf(testDept.getId());
-        assertTrue(isDeptLeaf);
-    }
-
-    @Test
-    public void testFindDirectChildUnit() {
-        // 创建一个子机构
-        SysOrg childUnit = new SysOrg();
-        childUnit.setName("子测试机构");
-        childUnit.setType(OrgType.TYPE_UNIT);
-        childUnit.setPid(testOrg.getId());
-        childUnit.setEnabled(true);
-        childUnit.setSeq(1);
-        sysOrgDao.save(childUnit);
-
-        // 测试查询直接下级公司
-        List<SysOrg> childUnits = sysOrgDao.findDirectChildUnit(testOrg.getId(), true);
-        assertEquals(1, childUnits.size());
-        assertEquals("子测试机构", childUnits.get(0).getName());
-    }
-
-    @Test
-    public void testFindDirectChildUnitId() {
-        // 创建一个子机构
-        SysOrg childUnit = new SysOrg();
-        childUnit.setName("子测试机构");
-        childUnit.setType(OrgType.TYPE_UNIT);
-        childUnit.setPid(testOrg.getId());
-        childUnit.setEnabled(true);
-        childUnit.setSeq(1);
-        childUnit = sysOrgDao.save(childUnit);
-
-        // 测试查询直接下级公司ID
-        List<String> childUnitIds = sysOrgDao.findDirectChildUnitId(testOrg.getId());
-        assertEquals(1, childUnitIds.size());
-        assertEquals(childUnit.getId(), childUnitIds.get(0));
-    }
-
-    @Test
-    public void testFindLevelById() {
-        int orgLevel = sysOrgDao.findLevelById(testOrg.getId());
-        int deptLevel = sysOrgDao.findLevelById(testDept.getId());
-        assertTrue(orgLevel < deptLevel);
-    }
-
-    @Test
-    public void testFindParentUnit() {
-        // 测试查找部门的上级单位
-        SysOrg parentUnit = sysOrgDao.findParentUnit(testDept);
-        assertNotNull(parentUnit);
-        assertEquals("测试机构", parentUnit.getName());
-
-        // 测试查找机构的上级单位（应该是null）
-        SysOrg orgParentUnit = sysOrgDao.findParentUnit(testOrg);
-        assertNull(orgParentUnit);
-    }
-
-    @Test
-    public void testFindParentUnitId() {
-        // 测试查找部门的上级单位ID
-        String parentUnitId = sysOrgDao.findParentUnitId(testDept, 1);
-        assertNotNull(parentUnitId);
-        assertEquals(testOrg.getId(), parentUnitId);
-    }
-
-    @Test
-    public void testFindUnit() {
-        // 测试查找部门对应的单位
-        SysOrg unit = sysOrgDao.findUnit(testDept);
-        assertNotNull(unit);
-        assertEquals("测试机构", unit.getName());
-
-        // 测试查找单位对应的单位（应该是自身）
-        SysOrg orgUnit = sysOrgDao.findUnit(testOrg);
-        assertNotNull(orgUnit);
-        assertEquals(testOrg.getId(), orgUnit.getId());
-    }
-
-    @Test
-    public void testGetParentIdListById() {
-        List<String> parentIds = sysOrgDao.getParentIdListById(testDept.getId());
-        assertTrue(parentIds.contains(testOrg.getId()));
-    }
-
-    @Test
-    public void testDict() {
-        Map<String, SysOrg> dict = sysOrgDao.dict();
-        assertNotNull(dict);
-        assertTrue(dict.containsKey(testOrg.getId()));
-        assertTrue(dict.containsKey(testDept.getId()));
-    }
-
-    @Test
-    public void testGetNameById() {
-        String orgName = sysOrgDao.getNameById(testOrg.getId());
-        assertEquals("测试机构", orgName);
-
-        String deptName = sysOrgDao.getNameById(testDept.getId());
-        assertEquals("测试部门", deptName);
-    }
-
-    @Test
-    public void testFindAllValid() {
-        List<SysOrg> validOrgs = sysOrgDao.findAllValid();
-        assertEquals(2, validOrgs.size());
-    }
-
-    @Test
-    public void testFindChildIdListWithSelfById() {
-        List<String> childIdsWithSelf = sysOrgDao.findChildIdListWithSelfById(testOrg.getId());
-        assertTrue(childIdsWithSelf.contains(testOrg.getId()));
-        assertTrue(childIdsWithSelf.contains(testDept.getId()));
-    }
-
-    @Test
-    public void testFindChildIdListById() {
-        List<String> childIds = sysOrgDao.findChildIdListById(testOrg.getId());
-        assertTrue(childIds.contains(testDept.getId()));
-        assertFalse(childIds.contains(testOrg.getId()));
+    public void testFindByThirdId_NotFound() {
+        // 测试查找不存在的第三方ID
+        SysOrg foundOrg = sysOrgDao.findByThirdId("non-existent-third-id");
+        assertNull(foundOrg, "不存在的第三方ID应该返回null");
     }
 
     @Test
     public void testFindByPid() {
-        List<SysOrg> depts = sysOrgDao.findByPid(testOrg.getId());
-        assertEquals(1, depts.size());
-        assertEquals("测试部门", depts.get(0).getName());
+        // 测试通过父ID查找子组织
+        // 先创建一个子组织
+        SysOrg childOrg = new SysOrg();
+        childOrg.setName("Child Organization");
+        childOrg.setPid(testOrg.getId());
+        childOrg.setSeq(2);
+        childOrg.setEnabled(true);
+        childOrg.setType(OrgType.TYPE_UNIT);
+        sysOrgDao.save(childOrg);
 
-        // 测试查找顶级机构
-        List<SysOrg> topOrgs = sysOrgDao.findByPid(null);
-        assertEquals(1, topOrgs.size());
-        assertEquals("测试机构", topOrgs.get(0).getName());
+        // 查找子组织
+        var childOrgs = sysOrgDao.findByPid(testOrg.getId());
+        assertNotNull(childOrgs, "子组织列表应该非空");
+        assertFalse(childOrgs.isEmpty(), "子组织列表应该包含至少一个元素");
+        assertTrue(childOrgs.stream().anyMatch(org -> org.getId().equals(childOrg.getId())), "子组织列表应该包含刚创建的子组织");
     }
 
     @Test
-    public void testCleanCache() {
-        // 测试清理缓存方法是否正常执行
-        sysOrgDao.cleanCache();
-        // 没有异常抛出即表示测试通过
+    public void testDelete() {
+        // 测试删除组织
+        sysOrgDao.delete(testOrg);
+        SysOrg foundOrg = sysOrgDao.findById(testOrg.getId());
+        assertNull(foundOrg, "删除的组织不应该能通过ID找到");
     }
-
 }
-

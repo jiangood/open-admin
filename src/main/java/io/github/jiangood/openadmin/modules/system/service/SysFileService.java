@@ -85,7 +85,7 @@ public class SysFileService {
     }
 
     public void deleteById(String id) throws Exception {
-        SysFile sysFile = sysFileDao.findOne(id);
+        SysFile sysFile = sysFileDao.findByIdOrNull(id);
         sysFileDao.deleteById(id);
 
         // 删除具体文件
@@ -223,7 +223,7 @@ public class SysFileService {
     public SysFile getFileAndStream(String fileId, Integer w) throws Exception {
         Assert.hasText(fileId, "文件id不能为空");
         // 获取文件名
-        SysFile sysFile = sysFileDao.findOne(fileId);
+        SysFile sysFile = sysFileDao.findByIdOrNull(fileId);
         Assert.notNull(sysFile, "文件数据记录不存在");
 
         // 返回文件字节码
@@ -259,13 +259,13 @@ public class SysFileService {
      * @throws Exception
      */
     public File downloadToLocal(String id, File localFile) throws Exception {
-        SysFile sysFile = sysFileDao.findOne(id);
+        SysFile sysFile = sysFileDao.findByIdOrNull(id);
         fileOperator.downloadFile(sysFile.getObjectName(), localFile);
         return localFile;
     }
 
     public File downloadToLocalTemp(String id) throws Exception {
-        SysFile sysFile = sysFileDao.findOne(id);
+        SysFile sysFile = sysFileDao.findByIdOrNull(id);
         File tempFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
         fileOperator.downloadFile(sysFile.getObjectName(), tempFile);
 
@@ -273,7 +273,7 @@ public class SysFileService {
     }
 
     public SysFile findOne(String id) {
-        return sysFileDao.findOne(id);
+        return sysFileDao.findByIdOrNull(id);
     }
 
     public void fillAllImageUrl(SysFile sysFile) {
@@ -303,7 +303,7 @@ public class SysFileService {
         if (StrUtil.isEmpty(id)) {
             return false;
         }
-        SysFile file = sysFileDao.findOne(id);
+        SysFile file = sysFileDao.findByIdOrNull(id);
         if (file == null) {
             return false;
         }

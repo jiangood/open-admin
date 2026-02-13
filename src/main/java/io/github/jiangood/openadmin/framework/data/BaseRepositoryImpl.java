@@ -29,6 +29,11 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
         this.domainClass = entityInformation.getJavaType();
     }
 
+    @Override
+    public T findByIdOrNull(ID id) {
+        return this.findById(id).orElse(null);
+    }
+
     @Transactional
     @Override
     public void flush() {
@@ -264,42 +269,47 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     // --- 7. 结果集映射 (Dictionary Mapping) ---
 
     @Override
-    public Map<String, T> findKeyed(Iterable<String> ids) {
+    public Map<ID, T> findKeyed(Iterable<ID> ids) {
         List<ID> idList = new ArrayList<>();
-        for (String id : ids) {
+        for (ID id : ids) {
             idList.add((ID) id);
         }
         List<T> list = findAllById(idList);
-        Map<String, T> map = new HashMap<>();
+        Map<ID, T> map = new HashMap<>();
         for (T t : list) {
             if (t instanceof Persistable) {
-                map.put(((Persistable<?>) t).getId().toString(), t);
+                map.put(getId(t), t);
             }
         }
         return map;
+    }
+
+    @Override
+    public Map<ID, T> dict() {
+       return dict(null);
     }
 
     /**
      * 将查找接口转换为map， key为id，value为对象
      */
     @Override
-    public Map<String, T> dict(Specification<T> spec) {
+    public Map<ID, T> dict(Specification<T> spec) {
         List<T> list = findAll(spec);
-        Map<String, T> map = new HashMap<>();
+        Map<ID, T> map = new HashMap<>();
         for (T t : list) {
             if (t instanceof Persistable) {
-                map.put(((Persistable<?>) t).getId().toString(), t);
+                map.put(getId(t), t);
             }
         }
         return map;
     }
 
     @Override
-    public Map<String, T> dict(Specification<T> spec, Function<T, String> keyField) {
+    public Map<ID, T> dict(Specification<T> spec, Function<T, ID> keyField) {
         List<T> list = findAll(spec);
-        Map<String, T> map = new HashMap<>();
+        Map<ID, T> map = new HashMap<>();
         for (T t : list) {
-            String key = keyField.apply(t);
+            ID key = keyField.apply(t);
             if (key != null) {
                 map.put(key, t);
             }
@@ -311,11 +321,11 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
      * 将查询结果的两个字段组装成map
      */
     @Override
-    public <V> Map<String, V> dict(Specification<T> spec, Function<T, String> keyField, Function<T, V> valueField) {
+    public <V> Map<ID, V> dict(Specification<T> spec, Function<T, ID> keyField, Function<T, V> valueField) {
         List<T> list = findAll(spec);
-        Map<String, V> map = new HashMap<>();
+        Map<ID, V> map = new HashMap<>();
         for (T t : list) {
-            String key = keyField.apply(t);
+            ID key = keyField.apply(t);
             if (key != null) {
                 map.put(key, valueField.apply(t));
             }

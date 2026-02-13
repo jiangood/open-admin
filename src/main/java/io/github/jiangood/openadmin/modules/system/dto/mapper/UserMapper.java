@@ -5,6 +5,7 @@ import io.github.jiangood.openadmin.modules.system.dao.SysOrgDao;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserResponse;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
+import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +15,7 @@ import java.util.List;
 public class UserMapper {
 
     @Resource
-    SysOrgDao orgDao;
+    SysOrgService orgDao;
 
 
     public UserResponse toResponse(SysUser input) {

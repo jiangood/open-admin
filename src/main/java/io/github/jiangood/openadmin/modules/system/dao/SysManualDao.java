@@ -1,20 +1,17 @@
 package io.github.jiangood.openadmin.modules.system.dao;
 
-import io.github.jiangood.openadmin.framework.data.BaseDao;
-import io.github.jiangood.openadmin.framework.data.specification.Spec;
+import io.github.jiangood.openadmin.framework.data.BaseRepository;
 import io.github.jiangood.openadmin.modules.system.entity.SysManual;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public class SysManualDao extends BaseDao<SysManual> {
+public interface SysManualDao extends BaseRepository<SysManual, String> {
 
+    SysManual findTop1ByNameOrderByVersionDesc(String name);
 
-    public int findMaxVersion(String name) {
-        Spec<SysManual> q = Spec.<SysManual>of().eq(SysManual.Fields.name, name);
-
-        SysManual e = this.findTop1(q, Sort.by(Sort.Direction.DESC, SysManual.Fields.version));
-
+    default int findMaxVersion(String name) {
+        SysManual e = this.findTop1ByNameOrderByVersionDesc(name);
         return e == null ? 0 : e.getVersion();
     }
 
