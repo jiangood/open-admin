@@ -39,6 +39,7 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
 
 
 
+    T findOne(ID id);
 
     public List<T> findAllById(String[] ids);
 

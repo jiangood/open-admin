@@ -30,6 +30,11 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
+    public T findOne(ID id) {
+        return super.findById(id).orElse(null);
+    }
+
+    @Override
     public T findByIdOrNull(ID id) {
         return this.findById(id).orElse(null);
     }
