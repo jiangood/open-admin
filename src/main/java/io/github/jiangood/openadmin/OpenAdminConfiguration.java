@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin;
 
+import io.github.jiangood.openadmin.framework.config.BaseRepositoryFactoryBean;
 import io.github.jiangood.openadmin.framework.data.BaseRepositoryImpl;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
@@ -14,6 +15,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableScheduling
 @EnableJpaRepositories(
+        repositoryFactoryBeanClass = BaseRepositoryFactoryBean.class,
         repositoryBaseClass = BaseRepositoryImpl.class
 )
 public class OpenAdminConfiguration {

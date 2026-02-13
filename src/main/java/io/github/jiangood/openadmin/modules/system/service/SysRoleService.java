@@ -3,27 +3,30 @@ package io.github.jiangood.openadmin.modules.system.service;
 import io.github.jiangood.openadmin.lang.dto.IdRequest;
 import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
-import io.github.jiangood.openadmin.framework.data.BaseService;
+import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.dao.SysMenuDao;
 import io.github.jiangood.openadmin.modules.system.dao.SysRoleDao;
-import io.github.jiangood.openadmin.modules.system.dao.SysUserDao;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.*;
+import java.util.ArrayList;
 
 /**
  * 系统角色service接口实现类
  */
 @Slf4j
 @Service
-public class SysRoleService extends BaseService<SysRole> {
-
+public class SysRoleService {
 
     @Resource
     private SysRoleDao roleDao;
@@ -31,21 +34,17 @@ public class SysRoleService extends BaseService<SysRole> {
     @Resource
     private SysMenuDao sysMenuDao;
 
-    @Resource
-    private SysUserDao sysUserDao;
-
 
     public SysRole findByCode(String code) {
         return roleDao.findByCode(code);
     }
 
 
-    @Override
+    @Transactional
     public void delete(String id) {
-
-        SysRole db = baseDao.findById(id);
+        SysRole db = roleDao.findById(id);
         Assert.state(!db.getBuiltin(), "内置角色不能删除");
-        baseDao.deleteById(id);
+        roleDao.deleteById(id);
     }
 
 
@@ -84,9 +83,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
     public List<SysUser> findUsers(String roleId) {
         SysRole role = roleDao.findOne(roleId);
-        List<SysUser> userList = sysUserDao.findByRole(role);
-
-        return userList;
+        return new ArrayList<>(role.getUsers());
     }
 
 
@@ -122,8 +119,6 @@ public class SysRoleService extends BaseService<SysRole> {
         SysRole role = roleDao.findOne(id);
         role.getUsers().clear();
 
-        List<SysUser> users = sysUserDao.findAllById(userIdList);
-        role.getUsers().addAll(users);
         return role;
     }
 
@@ -151,5 +146,44 @@ public class SysRoleService extends BaseService<SysRole> {
 
     public SysRole findOne(String id) {
         return roleDao.findOne(id);
+    }
+
+    // BaseService 方法
+    @Transactional
+    public SysRole save(SysRole input, List<String> requestKeys) throws Exception {
+        if (input.isNew()) {
+            return roleDao.save(input);
+        }
+
+        roleDao.updateField(input, requestKeys);
+        return roleDao.findById(input.getId());
+    }
+
+    public Page<SysRole> getPage(Specification<SysRole> spec, Pageable pageable) {
+        return roleDao.findAll(spec, pageable);
+    }
+
+    public SysRole detail(String id) {
+        return roleDao.findById(id);
+    }
+
+    public SysRole get(String id) {
+        return roleDao.findById(id);
+    }
+
+    public List<SysRole> getAll(Sort sort) {
+        return roleDao.findAll(sort);
+    }
+
+    public List<SysRole> getAll(Specification<SysRole> s, Sort sort) {
+        return roleDao.findAll(s, sort);
+    }
+
+    public Spec<SysRole> spec() {
+        return Spec.of();
+    }
+
+    public SysRole save(SysRole t) {
+        return roleDao.save(t);
     }
 }

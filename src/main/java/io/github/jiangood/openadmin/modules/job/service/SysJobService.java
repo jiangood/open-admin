@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.job.service;
 
-import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
+import io.github.jiangood.openadmin.modules.job.dao.SysJobDao;
 import io.github.jiangood.openadmin.modules.job.dao.SysJobExecuteRecordDao;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
@@ -12,6 +12,7 @@ import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +22,10 @@ import java.util.List;
 
 @Slf4j
 @Service
-public class SysJobService extends BaseService<SysJob> {
+public class SysJobService {
+
+    @Resource
+    private SysJobDao sysJobDao;
 
     @Resource
     QuartzManager quartzService;
@@ -33,9 +37,15 @@ public class SysJobService extends BaseService<SysJob> {
     Scheduler scheduler;
 
 
-    @Override
+    @Transactional
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {
-        SysJob db = super.save(input, requestKeys);
+        SysJob db;
+        if (input.isNew()) {
+            db = sysJobDao.save(input);
+        } else {
+            sysJobDao.updateField(input, requestKeys);
+            db = sysJobDao.findById(input.getId());
+        }
 
         quartzService.deleteJob(db);
         if (db.getEnabled()) {
@@ -49,13 +59,13 @@ public class SysJobService extends BaseService<SysJob> {
     @Transactional
     public void deleteJob(String id) throws SchedulerException {
         log.info("删除定时任务 {}", id);
-        SysJob job = baseDao.findOne(id);
+        SysJob job = sysJobDao.findOne(id);
         Assert.notNull(job, "该任务已被删除，请勿重复操作");
         quartzService.deleteJob(job);
 
         sysJobExecuteRecordDao.deleteByJobId(id);
 
-        baseDao.deleteById(id);
+        sysJobDao.deleteById(id);
     }
 
 
@@ -64,6 +74,44 @@ public class SysJobService extends BaseService<SysJob> {
     }
 
     public Page<SysJob> page(String searchText, Pageable pageable) throws SchedulerException {
-        return baseDao.findAll(Spec.<SysJob>of().orLike(searchText, SysJob.Fields.name, SysJob.Fields.jobClass), pageable);
+        return sysJobDao.findAll(Spec.<SysJob>of().orLike(searchText, SysJob.Fields.name, SysJob.Fields.jobClass), pageable);
+    }
+
+    // BaseService 方法
+    public Page<SysJob> getPage(Specification<SysJob> spec, Pageable pageable) {
+        return sysJobDao.findAll(spec, pageable);
+    }
+
+    public SysJob detail(String id) {
+        return sysJobDao.findById(id);
+    }
+
+    public SysJob get(String id) {
+        return sysJobDao.findById(id);
+    }
+
+    public List<SysJob> getAll() {
+        return sysJobDao.findAll();
+    }
+
+    public List<SysJob> getAll(Sort sort) {
+        return sysJobDao.findAll(sort);
+    }
+
+    public List<SysJob> getAll(Specification<SysJob> s, Sort sort) {
+        return sysJobDao.findAll(s, sort);
+    }
+
+    public Spec<SysJob> spec() {
+        return Spec.of();
+    }
+
+    public SysJob save(SysJob t) {
+        return sysJobDao.save(t);
+    }
+
+    @Transactional
+    public void delete(String id) {
+        sysJobDao.deleteById(id);
     }
 }

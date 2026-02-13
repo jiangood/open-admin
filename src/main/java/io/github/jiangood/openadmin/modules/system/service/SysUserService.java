@@ -6,7 +6,6 @@ import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SysProperties;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
-import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.dao.SysMenuDao;
 import io.github.jiangood.openadmin.modules.system.dao.SysOrgDao;
@@ -26,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-public class SysUserService extends BaseService<SysUser> {
+public class SysUserService {
 
 
     @Resource
@@ -116,7 +116,7 @@ public class SysUserService extends BaseService<SysUser> {
         return new PageImpl<>(responseList, page.getPageable(), page.getTotalElements());
     }
 
-    @Override
+    @Transactional
     public SysUser save(SysUser input, List<String> updateFields) throws Exception {
         boolean isNew = input.isNew();
         // 校验
@@ -138,9 +138,11 @@ public class SysUserService extends BaseService<SysUser> {
         if (isNew) {
             String password = sysProperties.getDefaultPassword();
             input.setPassword(PasswordTool.encode(password));
+            return sysUserDao.save(input);
         }
 
-        return super.save(input, updateFields);
+        sysUserDao.updateField(input, updateFields);
+        return sysUserDao.findById(input.getId());
     }
 
 
@@ -319,5 +321,34 @@ public class SysUserService extends BaseService<SysUser> {
 
     public SysUser findOne(String id) {
         return sysUserDao.findOne(id);
+    }
+
+    // BaseService 方法
+    public Page<SysUser> getPage(Specification<SysUser> spec, Pageable pageable) {
+        return sysUserDao.findAll(spec, pageable);
+    }
+
+    public SysUser detail(String id) {
+        return sysUserDao.findById(id);
+    }
+
+    public SysUser get(String id) {
+        return sysUserDao.findById(id);
+    }
+
+    public List<SysUser> getAll(Sort sort) {
+        return sysUserDao.findAll(sort);
+    }
+
+    public List<SysUser> getAll(Specification<SysUser> s, Sort sort) {
+        return sysUserDao.findAll(s, sort);
+    }
+
+    public io.github.jiangood.openadmin.framework.data.specification.Spec<SysUser> spec() {
+        return io.github.jiangood.openadmin.framework.data.specification.Spec.of();
+    }
+
+    public SysUser save(SysUser t) {
+        return sysUserDao.save(t);
     }
 }

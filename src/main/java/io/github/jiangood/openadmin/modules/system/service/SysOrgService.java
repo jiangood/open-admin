@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import io.github.jiangood.openadmin.lang.dto.IdRequest;
 import io.github.jiangood.openadmin.lang.tree.drop.DropResult;
-import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.common.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dao.SysOrgDao;
@@ -14,6 +13,8 @@ import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @CacheConfig(cacheNames = "sys_org")
-public class SysOrgService extends BaseService<SysOrg> {
+public class SysOrgService {
 
     @Resource
     private SysOrgDao sysOrgDao;
@@ -56,7 +57,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         }
     }
 
-    @Override
+    @Transactional
     public void delete(String id) {
         long count = sysOrgDao.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
@@ -101,7 +102,6 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
 
-    @Override
     @Transactional
     public SysOrg save(SysOrg input, List<String> requestKeys) throws Exception {
         boolean isNew = input.isNew();
@@ -112,7 +112,12 @@ public class SysOrgService extends BaseService<SysOrg> {
             Assert.state(!childIdListById.contains(input.getId()), "父节点不能为本节点的子节点，请重新选择父节点");
         }
 
-        return super.save(input, requestKeys);
+        if (input.isNew()) {
+            return sysOrgDao.save(input);
+        }
+
+        sysOrgDao.updateField(input, requestKeys);
+        return sysOrgDao.findById(input.getId());
     }
 
 
@@ -233,9 +238,6 @@ public class SysOrgService extends BaseService<SysOrg> {
         return sysOrgDao.findAll(Sort.by(SysOrg.Fields.seq));
     }
 
-    public List<SysOrg> getAll(Specification<SysOrg> q, Sort sort) {
-        return sysOrgDao.findAll(q, sort);
-    }
 
     @Transactional
     public void sort(String dragKey, DropResult result) {
@@ -250,5 +252,34 @@ public class SysOrgService extends BaseService<SysOrg> {
             org.setSeq(i);
         }
 
+    }
+
+    // BaseService 方法
+    public Page<SysOrg> getPage(Specification<SysOrg> spec, Pageable pageable) {
+        return sysOrgDao.findAll(spec, pageable);
+    }
+
+    public SysOrg detail(String id) {
+        return sysOrgDao.findById(id);
+    }
+
+    public SysOrg get(String id) {
+        return sysOrgDao.findById(id);
+    }
+
+    public List<SysOrg> getAll(Sort sort) {
+        return sysOrgDao.findAll(sort);
+    }
+
+    public List<SysOrg> getAll(Specification<SysOrg> s, Sort sort) {
+        return sysOrgDao.findAll(s, sort);
+    }
+
+    public Spec<SysOrg> spec() {
+        return Spec.of();
+    }
+
+    public SysOrg save(SysOrg t) {
+        return sysOrgDao.save(t);
     }
 }
