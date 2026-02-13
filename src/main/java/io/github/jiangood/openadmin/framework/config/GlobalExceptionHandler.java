@@ -120,8 +120,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
     public AjaxResult assertError(RuntimeException e) {
         log.error(">>> 运行时异常，具体信息为：{}", e.getMessage());
-        e.printStackTrace();
-        if (sysProperties.isPrintException()) {
+        if (sysProperties.isPrintGlobalException()) {
             log.error("打印异常已开启,以下是异常详细信息", e);
         }
 

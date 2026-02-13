@@ -142,5 +142,10 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
      */
     public <V> Map<String, V> dict(Specification<T> spec, Function<T, String> keyField, Function<T, V> valueField);
 
+    /**
+     * 获取实体的ID
+     */
+    public ID getId(T entity);
+
 
 }
