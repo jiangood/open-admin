@@ -67,14 +67,17 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     @Override
     public void updateFieldDirect(T entity, List<String> fieldsToUpdate) {
         Assert.notEmpty(fieldsToUpdate, "fieldsToUpdate不能为空");
+        Assert.notNull(entity, "实体对象不能为空");
+        
         ID id = getId(entity);
-        Assert.notNull(id, "id不能为空");
+        Assert.notNull(id, "实体ID不能为空");
 
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaUpdate<T> update = cb.createCriteriaUpdate(domainClass);
         Root<T> root = update.from(domainClass);
 
         for (String fieldName : fieldsToUpdate) {
+            Assert.hasText(fieldName, "字段名不能为空");
             Object value = BeanUtil.getFieldValue(entity, fieldName);
             update.set(root.get(fieldName), value);
         }
@@ -83,17 +86,28 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
         // 执行更新
         int updated = entityManager.createQuery(update).executeUpdate();
         if (updated == 0) {
-            throw new OptimisticLockingFailureException("更新失败，记录可能已被删除");
+            throw new IllegalArgumentException(String.format("更新失败，记录可能已被删除或ID不存在: %s", id));
         }
     }
 
 
     @Override
     public List<T> findAllById(String[] ids) {
+        if (ids == null || ids.length == 0) {
+            return Collections.emptyList();
+        }
+        
         List<ID> idList = new ArrayList<>();
         for (String id : ids) {
-            idList.add((ID) id);
+            if (id != null && !id.trim().isEmpty()) {
+                idList.add((ID) id);
+            }
         }
+        
+        if (idList.isEmpty()) {
+            return Collections.emptyList();
+        }
+        
         return findAllById(idList);
     }
 
@@ -346,6 +360,86 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     public ID getId(T entity) {
         return (ID) entityManager.getEntityManagerFactory()
                 .getPersistenceUnitUtil().getIdentifier(entity);
+    }
+
+    // --- 8. Batch Operations --- 
+
+    /**
+     * 批量保存实体
+     */
+    @Transactional
+    @Override
+    public List<T> saveAllBatch(Iterable<T> entities) {
+        List<T> result = new ArrayList<>();
+        int count = 0;
+        for (T entity : entities) {
+            entityManager.persist(entity);
+            result.add(entity);
+            
+            // 每100个实体刷新一次，避免内存占用过高
+            if (++count % 100 == 0) {
+                entityManager.flush();
+                entityManager.clear();
+            }
+        }
+        entityManager.flush();
+        return result;
+    }
+
+    /**
+     * 批量更新指定字段
+     */
+    @Transactional
+    @Override
+    public void updateFieldBatch(Iterable<T> entities, List<String> fieldsToUpdate) {
+        Assert.notEmpty(fieldsToUpdate, "fieldsToUpdate不能为空");
+        
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        int count = 0;
+        
+        for (T entity : entities) {
+            ID id = getId(entity);
+            Assert.notNull(id, "id不能为空");
+            
+            CriteriaUpdate<T> update = cb.createCriteriaUpdate(domainClass);
+            Root<T> root = update.from(domainClass);
+            
+            for (String fieldName : fieldsToUpdate) {
+                Object value = cn.hutool.core.bean.BeanUtil.getFieldValue(entity, fieldName);
+                update.set(root.get(fieldName), value);
+            }
+            update.where(cb.equal(root.get("id"), id));
+            
+            entityManager.createQuery(update).executeUpdate();
+            
+            // 每100个实体刷新一次
+            if (++count % 100 == 0) {
+                entityManager.flush();
+                entityManager.clear();
+            }
+        }
+        entityManager.flush();
+    }
+
+    /**
+     * 批量删除
+     */
+    @Transactional
+    @Override
+    public void deleteAllBatch(Iterable<ID> ids) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaDelete<T> delete = cb.createCriteriaDelete(domainClass);
+        Root<T> root = delete.from(domainClass);
+        
+        List<ID> idList = new ArrayList<>();
+        for (ID id : ids) {
+            idList.add(id);
+        }
+        
+        if (!idList.isEmpty()) {
+            delete.where(root.get("id").in(idList));
+            entityManager.createQuery(delete).executeUpdate();
+        }
     }
 
 }

@@ -114,18 +114,40 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
     /**
      * 分组统计
      * <p>
-     * 例子
-     * Spec<User> spec = Spec.<User>of()
-     * .select("username")
-     * .selectFnc(Spec.Fuc.SUM, "age")
-     * .selectFnc(Spec.Fuc.COUNT, "age").
-     * groupBy("username");
+     * 执行复杂的分组统计查询，支持多字段选择、聚合函数和分组操作
+     * <p>
+     * <strong>使用示例：</strong>
+     * <pre>
+     * Spec&lt;User&gt; spec = Spec.&lt;User&gt;of()
+     *     .select("username")                           // 选择分组字段
+     *     .selectFnc(Spec.Fuc.SUM, "age", "totalAge")   // 计算年龄总和，别名为totalAge
+     *     .selectFnc(Spec.Fuc.COUNT, "id", "userCount") // 计算用户数量，别名为userCount
+     *     .groupBy("username")                           // 按用户名分组
+     *     .orderBy("totalAge", Direction.DESC);          // 按总年龄降序排序
+     * 
+     * List&lt;Dict&gt; result = userRepository.stats(spec);
+     * // 结果格式: [{"username": "admin", "totalAge": 30, "userCount": 1}, ...]
+     * </pre>
      *
-     * @param spec
-     * @return 列表，
+     * @param spec 包含查询条件、选择字段、聚合函数和分组信息的Specification
+     * @return 统计结果列表，每个元素是一个Dict，包含分组字段和统计值
      */
     public List<Dict> stats(Specification<T> spec);
 
+    /**
+     * 单结果统计
+     * <p>
+     * 执行统计查询并确保只返回一个结果
+     * <p>
+     * <strong>使用场景：</strong>
+     * - 计算总记录数
+     * - 计算平均值、总和等单一统计值
+     * - 其他需要确保只返回一个结果的统计场景
+     *
+     * @param spec 包含查询条件和统计信息的Specification
+     * @return 统计结果Dict，包含统计字段和值
+     * @throws IllegalStateException 如果查询返回多个结果
+     */
     public Dict statsSingleResult(Specification<T> spec);
 
 
@@ -151,6 +173,26 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
      * 获取实体的ID
      */
     public ID getId(T entity);
+
+    // --- 8. Batch Operations --- 
+
+    /**
+     * 批量保存实体
+     */
+    @Transactional
+    public List<T> saveAllBatch(Iterable<T> entities);
+
+    /**
+     * 批量更新指定字段
+     */
+    @Transactional
+    public void updateFieldBatch(Iterable<T> entities, List<String> fieldsToUpdate);
+
+    /**
+     * 批量删除
+     */
+    @Transactional
+    public void deleteAllBatch(Iterable<ID> ids);
 
 
 }
