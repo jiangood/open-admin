@@ -7,8 +7,8 @@ import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.lang.tree.TreeManager;
 import io.github.jiangood.openadmin.lang.tree.drop.DropResult;
 import io.github.jiangood.openadmin.modules.common.LoginTool;
-import io.github.jiangood.openadmin.modules.system.dao.SysOrgDao;
-import io.github.jiangood.openadmin.modules.system.dao.SysUserDao;
+import io.github.jiangood.openadmin.modules.system.dao.SysOrgRepository;
+import io.github.jiangood.openadmin.modules.system.dao.SysUserRepository;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
@@ -36,24 +36,24 @@ import java.util.stream.Collectors;
 public class SysOrgService {
 
     @Resource
-    private SysOrgDao sysOrgDao;
+    private SysOrgRepository sysOrgRepository;
     @Resource
-    private SysUserDao sysUserDao;
+    private SysUserRepository sysUserRepository;
 
 
     public SysOrg findByThirdId(String thirdId) {
-        return sysOrgDao.findByThirdId(thirdId);
+        return sysOrgRepository.findByThirdId(thirdId);
     }
 
     @Transactional
     public void resetPidByThird(String id) {
-        SysOrg db = sysOrgDao.findOne(id);
+        SysOrg db = sysOrgRepository.findOne(id);
         String thirdPid = db.getThirdPid();
         if (thirdPid != null) {
-            SysOrg parent = sysOrgDao.findByThirdId(thirdPid);
+            SysOrg parent = sysOrgRepository.findByThirdId(thirdPid);
             if (parent != null) {
                 db.setPid(parent.getId());
-                sysOrgDao.save(db);
+                sysOrgRepository.save(db);
                 log.info("设置机构{}的pid为{} ({})", db.getName(), db.getPid(), parent.getName());
             }
         }
@@ -61,10 +61,10 @@ public class SysOrgService {
 
     @Transactional
     public void delete(String id) {
-        long count = sysOrgDao.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
+        long count = sysOrgRepository.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
 
-        sysOrgDao.deleteById(id);
+        sysOrgRepository.deleteById(id);
     }
 
     public List<SysOrg> findByLoginUser(boolean containsDept) {
@@ -91,7 +91,7 @@ public class SysOrgService {
             q.ne(SysOrg.Fields.type, OrgType.TYPE_DEPT);
         }
 
-        return sysOrgDao.findAll(q, Sort.by(SysOrg.Fields.type, SysOrg.Fields.seq));
+        return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.type, SysOrg.Fields.seq));
     }
 
 
@@ -106,11 +106,11 @@ public class SysOrgService {
         }
 
         if (input.isNew()) {
-            return sysOrgDao.save(input);
+            return sysOrgRepository.save(input);
         }
 
-        sysOrgDao.updateField(input, requestKeys);
-        return sysOrgDao.findOne(input.getId());
+        sysOrgRepository.updateField(input, requestKeys);
+        return sysOrgRepository.findOne(input.getId());
     }
 
 
@@ -149,12 +149,12 @@ public class SysOrgService {
 
 
     public List<SysOrg> findByType(OrgType type) {
-        return sysOrgDao.findAll(spec().eq(SysOrg.Fields.type, type).eq(SysOrg.Fields.enabled, true), Sort.by(SysOrg.Fields.seq));
+        return sysOrgRepository.findAll(spec().eq(SysOrg.Fields.type, type).eq(SysOrg.Fields.enabled, true), Sort.by(SysOrg.Fields.seq));
     }
 
 
     public List<SysOrg> findByTypeAndLevel(OrgType orgType, int orgLevel) {
-        List<SysOrg> all = sysOrgDao.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, orgType), Sort.by(SysOrg.Fields.seq));
+        List<SysOrg> all = sysOrgRepository.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, orgType), Sort.by(SysOrg.Fields.seq));
 
         return all.stream().filter(o -> this.findLevelById(o.getId()) == orgLevel).collect(Collectors.toList());
     }
@@ -166,19 +166,19 @@ public class SysOrgService {
      * @param orgId
      */
     public SysOrg findUnitByOrgId(String orgId) {
-        SysOrg org = sysOrgDao.findOne(orgId);
+        SysOrg org = sysOrgRepository.findOne(orgId);
 
         return this.findUnit(org);
     }
 
 
     public SysUser getDeptLeader(String userId) {
-        SysUser user = sysUserDao.findOne(userId);
+        SysUser user = sysUserRepository.findOne(userId);
         String deptId = user.getDeptId();
 
         // 如果没有找到部门领导，则机构树的上一级部门找
         while (deptId != null) {
-            SysOrg dept = sysOrgDao.findOne(deptId);
+            SysOrg dept = sysOrgRepository.findOne(deptId);
             if (dept == null || dept.getType() != OrgType.TYPE_DEPT) {
                 break;
             }
@@ -205,24 +205,24 @@ public class SysOrgService {
     }
 
     public SysOrg findOne(String id) {
-        return sysOrgDao.findOne(id);
+        return sysOrgRepository.findOne(id);
     }
 
     public List<SysOrg> getAll() {
-        return sysOrgDao.findAll(Sort.by(SysOrg.Fields.seq));
+        return sysOrgRepository.findAll(Sort.by(SysOrg.Fields.seq));
     }
 
 
     @Transactional
     public void sort(String dragKey, DropResult result) {
-        SysOrg dragOrg = sysOrgDao.findOne(dragKey);
+        SysOrg dragOrg = sysOrgRepository.findOne(dragKey);
         dragOrg.setPid(result.getParentKey());
 
         List<String> sortedKeys = result.getSortedKeys();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String sortedKey = sortedKeys.get(i);
             // 组织机构一般少，这里遍历获取
-            SysOrg org = sysOrgDao.findOne(sortedKey);
+            SysOrg org = sysOrgRepository.findOne(sortedKey);
             org.setSeq(i);
         }
 
@@ -230,23 +230,23 @@ public class SysOrgService {
 
     // BaseService 方法
     public Page<SysOrg> getPage(Specification<SysOrg> spec, Pageable pageable) {
-        return sysOrgDao.findAll(spec, pageable);
+        return sysOrgRepository.findAll(spec, pageable);
     }
 
     public SysOrg detail(String id) {
-        return sysOrgDao.findOne(id);
+        return sysOrgRepository.findOne(id);
     }
 
     public SysOrg get(String id) {
-        return sysOrgDao.findOne(id);
+        return sysOrgRepository.findOne(id);
     }
 
     public List<SysOrg> getAll(Sort sort) {
-        return sysOrgDao.findAll(sort);
+        return sysOrgRepository.findAll(sort);
     }
 
     public List<SysOrg> getAll(Specification<SysOrg> s, Sort sort) {
-        return sysOrgDao.findAll(s, sort);
+        return sysOrgRepository.findAll(s, sort);
     }
 
     public Spec<SysOrg> spec() {
@@ -254,11 +254,11 @@ public class SysOrgService {
     }
 
     public SysOrg save(SysOrg t) {
-        return sysOrgDao.save(t);
+        return sysOrgRepository.save(t);
     }
 
     public List<SysOrg> findAll() {
-        return sysOrgDao.findAll();
+        return sysOrgRepository.findAll();
 
     }
 
@@ -315,7 +315,7 @@ public class SysOrgService {
             q.eq(SysOrg.Fields.enabled, enabled);
         }
 
-        return sysOrgDao.findAll(q);
+        return sysOrgRepository.findAll(q);
     }
 
 
@@ -401,7 +401,7 @@ public class SysOrgService {
     public List<SysOrg> findAllValid() {
         Spec<SysOrg> q = spec().eq(SysOrg.Fields.enabled, true);
 
-        return sysOrgDao.findAll(q, Sort.by(SysOrg.Fields.seq));
+        return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.seq));
     }
 
     public List<String> findChildIdListWithSelfById(String id) {
@@ -412,7 +412,7 @@ public class SysOrgService {
     }
 
     public List<SysOrg> findAllById(List<String> orgIdList) {
-        return sysOrgDao.findAllById(orgIdList);
+        return sysOrgRepository.findAllById(orgIdList);
     }
 
 

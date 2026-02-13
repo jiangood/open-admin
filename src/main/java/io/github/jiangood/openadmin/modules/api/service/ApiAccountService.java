@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.api.service;
 
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.modules.api.dao.ApiAccountDao;
+import io.github.jiangood.openadmin.modules.api.dao.ApiAccountRepository;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
@@ -17,50 +17,50 @@ import java.util.List;
 public class ApiAccountService {
 
     @Resource
-    ApiAccountDao apiAccountDao;
+    ApiAccountRepository apiAccountRepository;
 
     public ApiAccount findByAppId(String appId) {
-        return apiAccountDao.findByField(ApiAccount.Fields.appId, appId);
+        return apiAccountRepository.findByField(ApiAccount.Fields.appId, appId);
     }
 
     // BaseService 方法
     @Transactional
     public ApiAccount save(ApiAccount input, List<String> requestKeys) throws Exception {
         if (input.isNew()) {
-            return apiAccountDao.save(input);
+            return apiAccountRepository.save(input);
         }
 
-        apiAccountDao.updateField(input, requestKeys);
-        return apiAccountDao.findOne(input.getId());
+        apiAccountRepository.updateField(input, requestKeys);
+        return apiAccountRepository.findOne(input.getId());
     }
 
     @Transactional
     public void delete(String id) {
-        apiAccountDao.deleteById(id);
+        apiAccountRepository.deleteById(id);
     }
 
     public Page<ApiAccount> getPage(Specification<ApiAccount> spec, Pageable pageable) {
-        return apiAccountDao.findAll(spec, pageable);
+        return apiAccountRepository.findAll(spec, pageable);
     }
 
     public ApiAccount detail(String id) {
-        return apiAccountDao.findOne(id);
+        return apiAccountRepository.findOne(id);
     }
 
     public ApiAccount get(String id) {
-        return apiAccountDao.findOne(id);
+        return apiAccountRepository.findOne(id);
     }
 
     public List<ApiAccount> getAll() {
-        return apiAccountDao.findAll();
+        return apiAccountRepository.findAll();
     }
 
     public List<ApiAccount> getAll(Sort sort) {
-        return apiAccountDao.findAll(sort);
+        return apiAccountRepository.findAll(sort);
     }
 
     public List<ApiAccount> getAll(Specification<ApiAccount> s, Sort sort) {
-        return apiAccountDao.findAll(s, sort);
+        return apiAccountRepository.findAll(s, sort);
     }
 
     public Spec<ApiAccount> spec() {
@@ -68,6 +68,6 @@ public class ApiAccountService {
     }
 
     public ApiAccount save(ApiAccount t) {
-        return apiAccountDao.save(t);
+        return apiAccountRepository.save(t);
     }
 }
