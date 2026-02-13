@@ -6,6 +6,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * 系统角色
