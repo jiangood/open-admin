@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.ExceptionToMessageTool;
 import io.github.jiangood.openadmin.lang.HttpServletTool;
-import io.github.jiangood.openadmin.lang.BizException;
+import io.github.jiangood.openadmin.lang.BusinessException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
 
 
     @Resource
-    SysProperties sysProperties;
+    SystemProperties systemProperties;
 
 
     /**
@@ -111,17 +111,16 @@ public class GlobalExceptionHandler {
     /**
      * 拦截权限异常
      */
-    @ExceptionHandler(BizException.class)
-    public AjaxResult systemException(BizException e) {
+    @ExceptionHandler(BusinessException.class)
+    public AjaxResult systemException(BusinessException e) {
         return AjaxResult.err(e.getCode(), e.getMessage());
     }
 
 
     @ExceptionHandler({IllegalArgumentException.class, IllegalStateException.class})
-    public AjaxResult assertError(RuntimeException e) {
+    public AjaxResult handleAssertionError(RuntimeException e) {
         log.error(">>> 运行时异常，具体信息为：{}", e.getMessage());
-        e.printStackTrace();
-        if (sysProperties.isPrintException()) {
+        if (systemProperties.isPrintGlobalException()) {
             log.error("打印异常已开启,以下是异常详细信息", e);
         }
 
@@ -200,8 +199,8 @@ public class GlobalExceptionHandler {
         StringBuilder sb = new StringBuilder();
 
         //多个错误用逗号分隔
-        List<ObjectError> allErrorInfos = bindingResult.getAllErrors();
-        for (ObjectError error : allErrorInfos) {
+        List<ObjectError> allErrors = bindingResult.getAllErrors();
+        for (ObjectError error : allErrors) {
             if (error instanceof FieldError) {
                 sb.append(((FieldError) error).getField());
             }

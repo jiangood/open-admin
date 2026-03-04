@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import cn.hutool.extra.spring.SpringUtil;
-import io.github.jiangood.openadmin.framework.config.SysProperties;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 
 public class RsaTool {
 
@@ -26,7 +26,7 @@ public class RsaTool {
         if (rsa != null) {
             return rsa;
         }
-        SysProperties p = SpringUtil.getBean(SysProperties.class);
+        SystemProperties p = SpringUtil.getBean(SystemProperties.class);
         String k1 = p.getRsaPrivateKey();
         String k2 = p.getRsaPublicKey();
         if (StrUtil.isAllBlank(k1, k2)) {

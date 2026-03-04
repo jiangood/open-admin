@@ -34,3 +34,4 @@ target/
 /web/npminstall-debug.log
 /.vscode/
 /.trae/
+/logs/

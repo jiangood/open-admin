@@ -11,38 +11,40 @@ class PasswordToolTest {
 
     @Test
     void testRandom() {
-        // 测试生成随机密码
-        String password1 = PasswordTool.random();
-        assertNotNull(password1);
-        assertFalse(password1.isEmpty());
-        
-        // 测试密码长度（应该是12位）
-        assertEquals(12, password1.length());
-        
-        // 测试多次生成的密码不同
-        String password2 = PasswordTool.random();
-        String password3 = PasswordTool.random();
-        
-        assertNotNull(password2);
-        assertNotNull(password3);
-        assertNotEquals(password1, password2, "多次生成的随机密码应该不同");
-        assertNotEquals(password2, password3, "多次生成的随机密码应该不同");
-        assertNotEquals(password1, password3, "多次生成的随机密码应该不同");
-        
-        // 测试密码包含的字符类型（应该包含字母、数字和特殊字符）
-        boolean hasLetter = false;
-        boolean hasNumber = false;
-        boolean hasSpecialChar = false;
-        
-        for (char c : password1.toCharArray()) {
-            if (Character.isLetter(c)) hasLetter = true;
-            if (Character.isDigit(c)) hasNumber = true;
-            if (!Character.isLetterOrDigit(c)) hasSpecialChar = true;
+        for (int i = 0; i < 1000; i++) {
+            // 测试生成随机密码
+            String password1 = PasswordTool.random();
+            assertNotNull(password1);
+            assertFalse(password1.isEmpty());
+
+            // 测试密码长度（应该是12位）
+            assertEquals(12, password1.length());
+
+            // 测试多次生成的密码不同
+            String password2 = PasswordTool.random();
+            String password3 = PasswordTool.random();
+
+            assertNotNull(password2);
+            assertNotNull(password3);
+            assertNotEquals(password1, password2, "多次生成的随机密码应该不同");
+            assertNotEquals(password2, password3, "多次生成的随机密码应该不同");
+            assertNotEquals(password1, password3, "多次生成的随机密码应该不同");
+
+            // 测试密码包含的字符类型（应该包含字母、数字和特殊字符）
+            boolean hasLetter = false;
+            boolean hasNumber = false;
+            boolean hasSpecialChar = false;
+
+            for (char c : password1.toCharArray()) {
+                if (Character.isLetter(c)) hasLetter = true;
+                if (Character.isDigit(c)) hasNumber = true;
+                if (!Character.isLetterOrDigit(c)) hasSpecialChar = true;
+            }
+
+            assertTrue(hasLetter, "随机密码应该包含字母");
+            assertTrue(hasNumber, "随机密码应该包含数字");
+            assertTrue(hasSpecialChar, "随机密码应该包含特殊字符");
         }
-        
-        assertTrue(hasLetter, "随机密码应该包含字母");
-        assertTrue(hasNumber, "随机密码应该包含数字");
-        assertTrue(hasSpecialChar, "随机密码应该包含特殊字符");
     }
 
     @Test

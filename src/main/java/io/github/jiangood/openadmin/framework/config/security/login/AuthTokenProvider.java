@@ -4,7 +4,7 @@ import cn.hutool.captcha.generator.CodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
-import io.github.jiangood.openadmin.framework.config.SysProperties;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.lang.RsaTool;
 import io.github.jiangood.openadmin.modules.common.LoginAttemptService;
@@ -36,7 +36,7 @@ public class AuthTokenProvider implements AuthenticationProvider {
 
     private final LoginAttemptService loginAttemptService;
 
-    private final SysProperties sysProperties;
+    private final SystemProperties systemProperties;
 
     private final CodeGenerator codeGenerator;
 
@@ -61,7 +61,7 @@ public class AuthTokenProvider implements AuthenticationProvider {
         String sessionCode = authToken.getSessionCode();
 
         // 验证码校验
-        if (sysProperties.isCaptcha()) {
+        if (systemProperties.isCaptcha()) {
             if (StrUtil.isBlank(captchaCode)) throw new AccessDeniedException("请输入验证码");
 
             boolean verify = codeGenerator.verify(sessionCode, captchaCode);
@@ -85,7 +85,7 @@ public class AuthTokenProvider implements AuthenticationProvider {
         int remainingAttempts = loginAttemptService.getRemainingAttempts(username);
         if (remainingAttempts > 0) {
             // 计算延迟时间：基础延迟 1秒，每次失败后翻倍
-            int maxAttempts = sysProperties.getLoginLockMaxAttempts();
+            int maxAttempts = systemProperties.getLoginLockMaxAttempts();
             int failedAttempts = maxAttempts - remainingAttempts;
             long delayMs = 1000L * (1L << Math.min(failedAttempts, 3)); // 最大延迟 8秒，防止DoS攻击
             ThreadUtil.sleep(delayMs);
@@ -103,7 +103,7 @@ public class AuthTokenProvider implements AuthenticationProvider {
 
         // 检查账户是否被锁定
         boolean locked = loginAttemptService.isAccountLocked(username);
-        Assert.state(!locked, "账户已被锁定，请" + sysProperties.getLoginLockMinutes() + "分钟后再试");
+        Assert.state(!locked, "账户已被锁定，请" + systemProperties.getLoginLockMinutes() + "分钟后再试");
 
 
         // 创建已认证的令牌

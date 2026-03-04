@@ -77,5 +77,8 @@ public class SysRole extends BaseEntity {
         if (enabled == null) {
             enabled = true;
         }
+        if (builtin == null) {
+            builtin = false;
+        }
     }
 }

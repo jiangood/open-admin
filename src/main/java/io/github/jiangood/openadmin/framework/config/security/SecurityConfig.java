@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
-import io.github.jiangood.openadmin.framework.config.SysProperties;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.init.OpenLifecycleManager;
 import io.github.jiangood.openadmin.framework.config.security.login.LoginConfigurer;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
@@ -13,13 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -34,7 +32,7 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 @EnableMethodSecurity  // 必须启用这个注解
 public class SecurityConfig {
 
-    private final SysProperties sysProperties;
+    private final SystemProperties systemProperties;
 
     private final OpenLifecycleManager lifecycleHookManager;
 
@@ -45,7 +43,7 @@ public class SecurityConfig {
     // 配置 HTTP 安全
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        String[] loginExclude = ArrayTool.toStrArr(sysProperties.getXssExcludePathList());
+        String[] loginExclude = ArrayTool.toStrArr(systemProperties.getXssExcludePathList());
 
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
         lifecycleHookManager.onConfigSecurity(http,authenticationManager);
@@ -62,7 +60,7 @@ public class SecurityConfig {
 
 
         http.sessionManagement(cfg -> {
-            int maximumSessions = sysProperties.getMaximumSessions();
+            int maximumSessions = systemProperties.getMaximumSessions();
             log.info("设置最大并发会话数为 {}", maximumSessions);
 
             cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);

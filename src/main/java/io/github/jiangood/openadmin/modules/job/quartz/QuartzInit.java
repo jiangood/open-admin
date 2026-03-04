@@ -1,8 +1,8 @@
 package io.github.jiangood.openadmin.modules.job.quartz;
 
-import io.github.jiangood.openadmin.framework.config.SysProperties;
-import io.github.jiangood.openadmin.modules.job.dao.SysJobDao;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
+import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -24,25 +24,25 @@ public class QuartzInit implements CommandLineRunner {
 
 
     @Resource
-    private SysJobDao sysJobDao;
+    private SysJobRepository sysJobRepository;
 
 
     @Resource
     private QuartzManager quartzService;
 
     @Resource
-    private SysProperties sysProperties;
+    private SystemProperties systemProperties;
 
 
     @Override
     public void run(String... args) throws Exception {
-        if (!sysProperties.isJobEnable()) {
+        if (!systemProperties.isJobEnable()) {
             log.warn("定时任务模块已设置全局关闭");
             return;
         }
 
         // 2. 加载数据库任务
-        List<SysJob> list = sysJobDao.findAllEnabled();
+        List<SysJob> list = sysJobRepository.findAllByEnabledTrue();
         for (SysJob sysJob : list) {
             try {
                 log.info("加载定时任务: {} {}", sysJob.getName(), sysJob.getJobClass());

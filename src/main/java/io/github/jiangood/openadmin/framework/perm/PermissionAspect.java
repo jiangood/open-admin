@@ -7,7 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import static io.github.jiangood.openadmin.lang.dto.CommonMessage.FORBIDDEN_MESSAGE;
+import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
 
 @Aspect
 @Component
@@ -18,7 +18,7 @@ public class PermissionAspect {
         String permission = hasPermission.value();
 
         if (!hasPermission(permission)) {
-            throw new AccessDeniedException(FORBIDDEN_MESSAGE + "：" + permission);
+            throw new AccessDeniedException(MGS_FORBIDDEN + "：" + permission);
         }
     }
 

@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.lang.dto;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import io.github.jiangood.openadmin.framework.MessageConst;
 import io.github.jiangood.openadmin.lang.JsonTool;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,8 +11,6 @@ import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static io.github.jiangood.openadmin.lang.dto.CommonMessage.FORBIDDEN_MESSAGE;
 
 /**
  * 响应结果数据
@@ -26,9 +25,10 @@ public class AjaxResult {
     public static final int FAILURE = 500;
 
 
-    public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), FORBIDDEN_MESSAGE);
+    public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), MessageConst.MGS_FORBIDDEN);
 
-    public static final AjaxResult UNAUTHORIZED = AjaxResult.err(HttpStatus.UNAUTHORIZED.value(), "身份验证失败，请重新登录");
+
+    public static final AjaxResult UNAUTHORIZED = AjaxResult.err(HttpStatus.UNAUTHORIZED.value(), MessageConst.MSG_UNAUTHORIZED);
 
 
     boolean success;

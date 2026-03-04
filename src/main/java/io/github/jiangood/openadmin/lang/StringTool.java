@@ -1,8 +1,12 @@
 package io.github.jiangood.openadmin.lang;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.CharUtil;
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
 import com.google.common.base.CaseFormat;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,6 +14,29 @@ import java.util.UUID;
  * 字符串工具类，提供字符串处理相关的工具方法
  */
 public class StringTool {
+
+    /**
+     *  * 打乱字符串中字符的顺序
+     * @param str
+     * @return
+     */
+    public static String shuffle(String str) {
+        if (StrUtil.isEmpty(str) || str.length() <= 1) {
+            return str;
+        }
+
+        char[] chars = str.toCharArray();
+
+        chars = ArrayUtil.shuffle(chars);
+        // Fisher-Yates 洗牌算法
+        for (int i = chars.length - 1; i > 0; i--) {
+            int j = RandomUtil.randomInt(i + 1);
+            char temp = chars[i];
+            chars[i] = chars[j];
+            chars[j] = temp;
+        }
+        return new String(chars);
+    }
 
     /**
      * 连接非空字符串，使用指定的连接符
