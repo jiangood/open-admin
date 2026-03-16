@@ -7,6 +7,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -16,10 +19,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
 
-@Data
+@Getter
+@Setter
 @MappedSuperclass
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler","fieldHandler"}, ignoreUnknown = true)
 @EntityListeners(AuditingEntityListener.class)
+
 public abstract class BaseNoIdEntity implements Persistable<String> {
 
     @Schema(description = "创建者", hidden = true)
@@ -41,6 +46,5 @@ public abstract class BaseNoIdEntity implements Persistable<String> {
     @LastModifiedDate
     private Date updateTime;
 
-    @Schema(description = "删除标志 true/false 删除/未删除", hidden = true)
-    private Boolean deleteFlag;
+
 }

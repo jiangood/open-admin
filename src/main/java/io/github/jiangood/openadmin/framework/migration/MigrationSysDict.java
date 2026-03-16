@@ -30,9 +30,12 @@ public class MigrationSysDict implements OpenLifecycle {
 
             if(tableNames.contains("sys_dict")){
                 // 填充typeCode
-                Map<String, Object> map = db.findTwoFieldListToMap("SELECT t.id, d.`code` from sys_dict_item t LEFT JOIN sys_dict d on d.id = t.sys_dict_id");
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    db.update("UPDATE sys_dict_item SET type_code = ? WHERE id = ?", entry.getValue(), entry.getKey());
+                Set<String> columns = db.getTableColumns("sys_dict_item");
+                if(columns.contains("sys_dict_id")){
+                    Map<String, Object> map = db.findTwoFieldListToMap("SELECT t.id, d.`code` from sys_dict_item t LEFT JOIN sys_dict d on d.id = t.sys_dict_id");
+                    for (Map.Entry<String, Object> entry : map.entrySet()) {
+                        db.update("UPDATE sys_dict_item SET type_code = ? WHERE id = ?", entry.getValue(), entry.getKey());
+                    }
                 }
             }
 
