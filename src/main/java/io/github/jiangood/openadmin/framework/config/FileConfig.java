@@ -18,7 +18,7 @@ public class FileConfig {
 
 
     @Resource
-    SysProperties sysProperties;
+    SystemProperties systemProperties;
 
     @Bean
     public FileOperator fileOperator() {
@@ -27,7 +27,7 @@ public class FileConfig {
             return new MinioFileOperator(minioProperties.getUrl(), minioProperties.getAccessKey(), minioProperties.getSecretKey(), minioProperties.getBucketName());
         }
         log.info("本地文件模式");
-        return new LocalFileOperator(sysProperties.getFileUploadPath());
+        return new LocalFileOperator(systemProperties.getFileUploadPath());
     }
 
 }

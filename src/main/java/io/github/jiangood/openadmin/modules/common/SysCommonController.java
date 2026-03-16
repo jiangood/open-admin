@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.common;
 
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.framework.config.SysProperties;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.lang.RsaTool;
@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 public class SysCommonController {
 
     private SysRoleService roleService;
-    private SysProperties sysProperties;
+    private SystemProperties systemProperties;
     private SysUserService sysUserService;
     private SysOrgService sysOrgService;
     private SysUserMessageService sysUserMessageService;
@@ -48,20 +48,20 @@ public class SysCommonController {
     @GetMapping("public/site-info")
     public AjaxResult siteInfo() {
         Dict data = new Dict();
-        data.put("captcha", sysProperties.isCaptcha());
-        data.put("captchaType", sysProperties.getCaptchaType());
-        data.put("copyright", sysProperties.getCopyright());
-        data.put("loginBoxBottomTip", sysProperties.getLoginBoxBottomTip());
-        data.put("logoUrl", sysProperties.getLogoUrl());
-        data.put("title", sysProperties.getTitle());
+        data.put("captcha", systemProperties.isCaptcha());
+        data.put("captchaType", systemProperties.getCaptchaType());
+        data.put("copyright", systemProperties.getCopyright());
+        data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
+        data.put("logoUrl", systemProperties.getLogoUrl());
+        data.put("title", systemProperties.getTitle());
 
-        data.put("waterMark", sysProperties.isWaterMark());
+        data.put("waterMark", systemProperties.isWaterMark());
 
 
         data.put("rsaPublicKey", RsaTool.getPublicKey());
 
         // 登录背景图
-        data.put("loginBackground", sysProperties.getLoginBackground());
+        data.put("loginBackground", systemProperties.getLoginBackground());
 
         return AjaxResult.ok().data(data);
     }

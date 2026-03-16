@@ -5,7 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
 import io.github.jiangood.openadmin.lang.SpringTool;
-import io.github.jiangood.openadmin.lang.BizException;
+import io.github.jiangood.openadmin.lang.BusinessException;
 import io.github.jiangood.openadmin.modules.api.ApiErrorCode;
 import io.github.jiangood.openadmin.modules.api.ApiSignTool;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
@@ -111,13 +111,13 @@ public class ApiGatewayController {
 
     private void check(Boolean state, ApiErrorCode errorCode) {
         if (!state) {
-            throw new BizException(errorCode.getCode(), errorCode.getMessage());
+            throw new BusinessException(errorCode.getCode(), errorCode.getMessage());
         }
     }
 
     private void check(Boolean state, ApiErrorCode errorCode, String detailMessage) {
         if (!state) {
-            throw new BizException(errorCode.getCode(), errorCode.getMessage() + ", " + detailMessage);
+            throw new BusinessException(errorCode.getCode(), errorCode.getMessage() + ", " + detailMessage);
         }
     }
 
@@ -133,7 +133,7 @@ public class ApiGatewayController {
         int code = ApiErrorCode.GLOBAL_ERROR.getCode();
         String msg = e.getMessage();
 
-        if (e instanceof BizException be) {
+        if (e instanceof BusinessException be) {
             code = be.getCode();
             msg = be.getMessage();
         }

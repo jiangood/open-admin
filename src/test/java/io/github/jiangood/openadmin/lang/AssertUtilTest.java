@@ -18,7 +18,7 @@ class AssertUtilTest {
         int expectedCode = 400;
         String expectedMsg = "测试失败";
         
-        BizException exception = assertThrows(BizException.class, () -> 
+        BusinessException exception = assertThrows(BusinessException.class, () ->
             AssertUtil.state(false, expectedCode, expectedMsg)
         );
         

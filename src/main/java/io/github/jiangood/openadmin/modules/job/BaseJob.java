@@ -1,9 +1,9 @@
 package io.github.jiangood.openadmin.modules.job;
 
-import io.github.jiangood.openadmin.modules.job.dao.SysJobDao;
-import io.github.jiangood.openadmin.modules.job.dao.SysJobExecuteRecordDao;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
+import io.github.jiangood.openadmin.modules.job.repository.SysJobExecuteRecordRepository;
+import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import io.github.jiangood.openadmin.modules.log.file.FileLogTool;
 import jakarta.annotation.Resource;
 import org.quartz.*;
@@ -15,10 +15,10 @@ import java.util.Date;
 public abstract class BaseJob implements Job {
 
     @Resource
-    private SysJobExecuteRecordDao sysJobLogDao;
+    private SysJobExecuteRecordRepository sysJobExecuteRecordRepository;
 
     @Resource
-    private SysJobDao sysJobDao;
+    private SysJobRepository sysJobRepository;
 
 
     @Override
@@ -29,13 +29,13 @@ public abstract class BaseJob implements Job {
         String jobName = context.getJobDetail().getKey().getName();
 
         // 1. 数据库保存记录
-        SysJob job = sysJobDao.findByName(jobName);
+        SysJob job = sysJobRepository.findByName(jobName);
 
         SysJobExecuteRecord jobLog = new SysJobExecuteRecord();
         jobLog.setSysJob(job);
         Date fireTime = context.getFireTime();
         jobLog.setBeginTime(fireTime);
-        jobLog = sysJobLogDao.save(jobLog);
+        jobLog = sysJobExecuteRecordRepository.save(jobLog);
 
 
         // 2. 设置日志
@@ -54,7 +54,7 @@ public abstract class BaseJob implements Job {
         jobLog.setJobRunTime(System.currentTimeMillis() - fireTime.getTime());
         jobLog.setResult(result);
         jobLog.setEndTime(new Date());
-        sysJobLogDao.save(jobLog);
+        sysJobExecuteRecordRepository.save(jobLog);
         logger.info("执行结束 返回值{}", result);
         FileLogTool.clear();
     }

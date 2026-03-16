@@ -3,65 +3,64 @@ package io.github.jiangood.openadmin.modules.system.service;
 import io.github.jiangood.openadmin.lang.dto.IdRequest;
 import io.github.jiangood.openadmin.lang.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
-import io.github.jiangood.openadmin.framework.data.BaseService;
-import io.github.jiangood.openadmin.modules.system.dao.SysMenuDao;
-import io.github.jiangood.openadmin.modules.system.dao.SysRoleDao;
-import io.github.jiangood.openadmin.modules.system.dao.SysUserDao;
+import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
+import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
+import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.*;
+import java.util.ArrayList;
 
 /**
  * 系统角色service接口实现类
  */
 @Slf4j
 @Service
-public class SysRoleService extends BaseService<SysRole> {
-
-
-    @Resource
-    private SysRoleDao roleDao;
+public class SysRoleService {
 
     @Resource
-    private SysMenuDao sysMenuDao;
+    private SysRoleRepository roleRepository;
 
     @Resource
-    private SysUserDao sysUserDao;
+    private SysMenuRepository sysMenuRepository;
 
 
     public SysRole findByCode(String code) {
-        return roleDao.findByCode(code);
+        return roleRepository.findByCode(code);
     }
 
 
-    @Override
+    @Transactional
     public void delete(String id) {
-
-        SysRole db = baseDao.findById(id);
+        SysRole db = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         Assert.state(!db.getBuiltin(), "内置角色不能删除");
-        baseDao.deleteById(id);
+        roleRepository.deleteById(id);
     }
 
 
     public List<SysRole> findValid() {
-        return roleDao.findAllByField(SysRole.Fields.enabled, true);
+        return roleRepository.findAllByEnabled(true);
     }
 
     @Transactional
     public List<MenuDefinition> ownMenu(String id) {
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         List<MenuDefinition> menuList;
 
         if (role.isAdmin()) {
-            menuList = sysMenuDao.findAll();
+            menuList = sysMenuRepository.findAll();
         } else {
-            menuList = sysMenuDao.findAllById(role.getMenus());
+            menuList = sysMenuRepository.findAllById(role.getMenus());
         }
 
         // 去重排序
@@ -83,22 +82,20 @@ public class SysRoleService extends BaseService<SysRole> {
 
 
     public List<SysUser> findUsers(String roleId) {
-        SysRole role = roleDao.findOne(roleId);
-        List<SysUser> userList = sysUserDao.findByRole(role);
-
-        return userList;
+        SysRole role = roleRepository.findById(roleId).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        return new ArrayList<>(role.getUsers());
     }
 
 
     public List<SysRole> findAllByCode(Collection<String> roles) {
-        return roleDao.findAll(spec().in(SysRole.Fields.code, roles));
+        return roleRepository.findAllByCodeIn(roles);
     }
 
 
     @Transactional
     public SysRole initDefaultAdmin() {
         String roleCode = "admin";
-        SysRole role = roleDao.findByCode(roleCode);
+        SysRole role = roleRepository.findByCode(roleCode);
         if (role != null) {
             return role;
         }
@@ -109,21 +106,19 @@ public class SysRoleService extends BaseService<SysRole> {
         sysRole.setBuiltin(true);
         sysRole.setRemark("系统生成");
 
-        return roleDao.save(sysRole);
+        return roleRepository.save(sysRole);
     }
 
     public SysRole getAdminRole() {
         String roleCode = "admin";
-        return roleDao.findByCode(roleCode);
+        return roleRepository.findByCode(roleCode);
     }
 
     @Transactional
     public SysRole grantUsers(String id, List<String> userIdList) {
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         role.getUsers().clear();
 
-        List<SysUser> users = sysUserDao.findAllById(userIdList);
-        role.getUsers().addAll(users);
         return role;
     }
 
@@ -131,7 +126,7 @@ public class SysRoleService extends BaseService<SysRole> {
     @Transactional
     public SysRole savePerms(String id, List<String> perms, List<String> menus) {
         // 菜单的目录也加进来
-        List<MenuDefinition> list = sysMenuDao.findAll();
+        List<MenuDefinition> list = sysMenuRepository.findAll();
         List<String> finalMenus = new ArrayList<>();
         for (String menu : menus) {
             List<String> pids = TreeTool.getPids(menu, list, MenuDefinition::getId, MenuDefinition::getPid);
@@ -139,17 +134,56 @@ public class SysRoleService extends BaseService<SysRole> {
             finalMenus.addAll(pids);
         }
 
-        SysRole role = roleDao.findOne(id);
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         role.setPerms(perms);
         role.setMenus(finalMenus);
-        return roleDao.save(role);
+        return roleRepository.save(role);
     }
 
     public List<SysRole> getAll() {
-        return roleDao.findAll();
+        return roleRepository.findAll();
     }
 
     public SysRole findOne(String id) {
-        return roleDao.findOne(id);
+        return roleRepository.findById(id).orElse(null);
+    }
+
+    // BaseService 方法
+    @Transactional
+    public SysRole save(SysRole input, List<String> requestKeys) throws Exception {
+        if (input.isNew()) {
+            return roleRepository.save(input);
+        }
+
+        // 由于updateField方法不存在，我们直接使用save方法更新
+        return roleRepository.save(input);
+    }
+
+    public Page<SysRole> getPage(Specification<SysRole> spec, Pageable pageable) {
+        return roleRepository.findAll(spec, pageable);
+    }
+
+    public SysRole detail(String id) {
+        return roleRepository.findById(id).orElse(null);
+    }
+
+    public SysRole get(String id) {
+        return roleRepository.findById(id).orElse(null);
+    }
+
+    public List<SysRole> getAll(Sort sort) {
+        return roleRepository.findAll(sort);
+    }
+
+    public List<SysRole> getAll(Specification<SysRole> s, Sort sort) {
+        return roleRepository.findAll(s, sort);
+    }
+
+    public Spec<SysRole> spec() {
+        return Spec.of();
+    }
+
+    public SysRole save(SysRole t) {
+        return roleRepository.save(t);
     }
 }

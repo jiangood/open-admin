@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.framework.config.SysProperties;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -52,7 +52,7 @@ public class SysUserController {
     private SysOrgService sysOrgService;
 
     @Resource
-    private SysProperties sysProperties;
+    private SystemProperties systemProperties;
 
     @Resource
     private PermissionStaleService permissionStaleService;
@@ -76,7 +76,7 @@ public class SysUserController {
         sysUserService.save(input, updateFields);
         String message = "更新成功";
         if (isNew) {
-            String defaultPassword = sysProperties.getDefaultPassword();
+            String defaultPassword = systemProperties.getDefaultPassword();
             message = "添加新用户成功,密码：" + defaultPassword;
         } else {
             permissionStaleService.markUserStale(input.getAccount());
@@ -123,7 +123,7 @@ public class SysUserController {
     @PreAuthorize("hasAuthority('sysUser:resetPwd')")
     @PostMapping("resetPwd")
     public AjaxResult resetPwd(@RequestBody SysUser user) {
-        String defaultPassWord = sysProperties.getDefaultPassword();
+        String defaultPassWord = systemProperties.getDefaultPassword();
         Assert.hasText(defaultPassWord, "未配置默认密码，请再配置sys.default-password");
         sysUserService.resetPwd(user.getId());
         return AjaxResult.ok().msg("重置成功,新密码为：" + defaultPassWord).data("新密码：" + defaultPassWord);

@@ -6,5 +6,5 @@ spring.datasource.url: ${spring.datasource.url}
 spring.datasource.username: ${spring.datasource.username}
 hibernate.ddl-auto: ${spring.jpa.hibernate.ddl-auto}
 logging.file.path: ${logging.file.path}
-sys.simple-message-queue-enable: ${sys.simple-message-queue-enable}
+sys.simple-message-queue-enabled: ${sys.simple-message-queue-enabled}
 Writing to the console can be very slow. Avoid logging to the  console in production environments, especially in high volume systems.

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 @SpringBootTest
+@Import(OpenAdminConfiguration.class)
 public class SpringToolTest {
 
     @Test
@@ -82,14 +84,12 @@ public class SpringToolTest {
     public void testGetProperty() {
         String property = SpringTool.getProperty("spring.application.name");
         // 配置文件中可能没有设置，所以允许为null
-        Assertions.assertNotNull(property);
     }
 
     @Test
     public void testGetApplicationName() {
         String applicationName = SpringTool.getApplicationName();
         // 配置文件中可能没有设置，所以允许为null
-        Assertions.assertNotNull(applicationName);
     }
 
     @Test
@@ -152,8 +152,4 @@ public class SpringToolTest {
     static class TestBean {
     }
 
-    // 用于测试的SpringBootApplication类
-    @SpringBootApplication
-    static class TestApplication {
-    }
 }

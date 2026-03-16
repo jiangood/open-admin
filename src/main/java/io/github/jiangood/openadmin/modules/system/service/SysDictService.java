@@ -8,9 +8,9 @@ import io.github.jiangood.openadmin.framework.config.datadefinition.DictDefiniti
 import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
 import io.github.jiangood.openadmin.lang.tree.TreeTool;
-import io.github.jiangood.openadmin.modules.system.dao.SysDictItemDao;
 import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
+import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -24,14 +24,14 @@ public class SysDictService {
 
     public static final String DEFAULT_GROUP = "默认分组";
     @Resource
-    private SysDictItemDao sysDictItemDao;
+    private SysDictItemRepository sysDictItemRepository;
 
 
     public List<DictDefinition> getAll() {
         List<DictDefinition> definitions = DataPropertiesFactory.getInstance().getDicts();
 
         // 合并数据库中的
-        List<SysDictItem> list = sysDictItemDao.findAll(Sort.by(SysDictItem.Fields.seq));
+        List<SysDictItem> list = sysDictItemRepository.findAll(Sort.by(SysDictItem.Fields.seq));
         for (SysDictItem dbItem : list) {
             definitions.stream().filter(def -> def.getCode().equals(dbItem.getTypeCode())).findFirst().ifPresent(def -> {
                 Optional<DictDefinition.Item> itemOptional = def.getItems().stream().filter(e -> e.getCode().equals(dbItem.getCode())).findFirst();

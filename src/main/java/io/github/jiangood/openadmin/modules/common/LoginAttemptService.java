@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.common;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.github.jiangood.openadmin.framework.config.SysProperties;
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ public class LoginAttemptService {
     private final Cache<String, Integer> loginAttempts = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofDays(1)).build();
     private final Cache<String, Long> lockedAccounts = CacheBuilder.newBuilder().expireAfterWrite(Duration.ofDays(1)).build();
     @Resource
-    private SysProperties prop;
+    private SystemProperties prop;
 
     /**
      * 记录登录失败
