@@ -1,24 +1,20 @@
 package io.github.jiangood.openadmin.framework.migration;
 
-import cn.hutool.core.util.ArrayUtil;
-import io.github.jiangood.openadmin.framework.config.init.OpenLifecycle;
+import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycle;
+import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycleBeforeJpaInit;
 import io.github.jiangood.openadmin.lang.jdbc.DbTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Set;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
-public class MigrationSysDict implements OpenLifecycle {
-
-    private final DbTool db;
+public class MigrationSysDict implements OpenLifecycleBeforeJpaInit {
 
     @Override
-    public void beforeJpaInit() {
+    public void process(DbTool db) {
         Set<String> tableNames = db.getTableNames();
 
         if(tableNames.contains("sys_dict")){
@@ -27,5 +23,4 @@ public class MigrationSysDict implements OpenLifecycle {
             db.dropTable("sys_dict");
         }
     }
-
 }

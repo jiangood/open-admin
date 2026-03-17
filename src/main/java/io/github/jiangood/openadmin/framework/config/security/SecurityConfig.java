@@ -1,13 +1,14 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
-import io.github.jiangood.openadmin.framework.config.init.OpenLifecycleManager;
 import io.github.jiangood.openadmin.framework.config.security.login.LoginConfigurer;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
+import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycle;
 import io.github.jiangood.openadmin.lang.ArrayTool;
 import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.lang.ResponseTool;
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
+import java.util.Collection;
+
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -34,7 +37,7 @@ public class SecurityConfig {
 
     private final SystemProperties systemProperties;
 
-    private final OpenLifecycleManager lifecycleHookManager;
+    private final Collection<OpenLifecycle> lifecycles;
 
     private final PermissionRefreshFilter permissionRefreshFilter;
 
@@ -46,10 +49,10 @@ public class SecurityConfig {
         String[] loginExclude = ArrayTool.toStrArr(systemProperties.getXssExcludePathList());
 
         AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
-        lifecycleHookManager.onConfigSecurity(http,authenticationManager);
+        lifecycles.forEach(l->l.onConfigSecurity(http,authenticationManager));
 
         http.authorizeHttpRequests(authz -> {
-            lifecycleHookManager.onConfigSecurityAuthorizeHttpRequests(authz);
+            lifecycles.forEach(l->l.onConfigSecurityAuthorizeHttpRequests(authz));
             if (loginExclude.length > 0) {
                 authz.requestMatchers(loginExclude).permitAll();
             }

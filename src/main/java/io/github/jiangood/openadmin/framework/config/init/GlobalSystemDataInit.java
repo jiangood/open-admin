@@ -1,18 +1,21 @@
 package io.github.jiangood.openadmin.framework.config.init;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
+import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycle;
+import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import io.github.jiangood.openadmin.modules.system.service.SysRoleService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * 系统数据初始化
@@ -20,29 +23,19 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component(GlobalSystemDataInit.BEAN_NAME)
 @Order(0)
-public class GlobalSystemDataInit implements CommandLineRunner{
+@RequiredArgsConstructor
+public class GlobalSystemDataInit implements CommandLineRunner {
 
+    public static final String BEAN_NAME = "sys_init";
 
-    public static final String BEAN_NAME = "sysInit";
-
-    @Resource
-    SysRoleService sysRoleService;
-
-    @Resource
-    SysUserRepository sysUserRepository;
-
-
-    @Resource
-    SystemProperties systemProperties;
-
-
-
-    @Resource
-    private OpenLifecycleManager lifecycleManager;
+    private final SysRoleService sysRoleService;
+    private final SysUserRepository sysUserRepository;
+    private final SystemProperties systemProperties;
+    private final List<OpenLifecycle> lifecycles;
 
     @Override
     public void run(String... args) throws Exception {
-        lifecycleManager.onDataInit();
+        lifecycles.forEach(OpenLifecycle::onDataInit);
 
 
         log.info("执行初始化程序： {}", getClass().getName());
@@ -52,7 +45,8 @@ public class GlobalSystemDataInit implements CommandLineRunner{
         SysRole adminRole = sysRoleService.initDefaultAdmin();
         initUser(adminRole);
 
-        lifecycleManager.afterDataInit();
+        lifecycles.forEach(OpenLifecycle::afterDataInit);
+
         log.info("系统初始化耗时：{}", System.currentTimeMillis() - time);
     }
 

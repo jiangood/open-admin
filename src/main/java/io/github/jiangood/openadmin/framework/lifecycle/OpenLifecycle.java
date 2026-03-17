@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.framework.config.init;
+package io.github.jiangood.openadmin.framework.lifecycle;
 
 import jakarta.persistence.PrePersist;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,10 +7,7 @@ import org.springframework.security.config.annotation.web.configurers.AuthorizeH
 
 public interface OpenLifecycle {
 
-    @PrePersist
-    default void beforeJpaInit(){
 
-    }
 
 
     default void onDataInit() {
@@ -24,7 +21,7 @@ public interface OpenLifecycle {
 
 
 
-    default void onConfigSecurity(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception{
+    default void onConfigSecurity(HttpSecurity http, AuthenticationManager authenticationManager) {
 
     }
 
