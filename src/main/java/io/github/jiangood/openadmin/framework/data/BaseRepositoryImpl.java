@@ -293,7 +293,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     // --- 7. 结果集映射 (Dictionary Mapping) ---
 
     @Override
-    public Map<ID, T> findKeyed(Iterable<ID> ids) {
+    public Map<ID, T> findMap(Iterable<ID> ids) {
         List<ID> idList = new ArrayList<>();
         for (ID id : ids) {
             idList.add((ID) id);
@@ -308,17 +308,16 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
         return map;
     }
 
-    @Override
-    public Map<ID, T> dict() {
-        return dict(null);
-    }
+
+
+
 
     /**
      * 将查找接口转换为map， key为id，value为对象
      */
     @Override
-    public Map<ID, T> dict(Specification<T> spec) {
-        List<T> list = findAll(spec);
+    public Map<ID, T> findMap(Specification<T> spec, Sort sort) {
+        List<T> list = findAll(spec,sort);
         Map<ID, T> map = new HashMap<>();
         for (T t : list) {
             if (t instanceof Persistable) {
@@ -329,8 +328,8 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     }
 
     @Override
-    public Map<ID, T> dict(Specification<T> spec, Function<T, ID> keyField) {
-        List<T> list = findAll(spec);
+    public Map<ID, T> findMap(Specification<T> spec, Sort sort,Function<T, ID> keyField) {
+        List<T> list = findAll(spec,sort);
         Map<ID, T> map = new HashMap<>();
         for (T t : list) {
             ID key = keyField.apply(t);
@@ -345,14 +344,31 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
      * 将查询结果的两个字段组装成map
      */
     @Override
-    public <V> Map<ID, V> dict(Specification<T> spec, Function<T, ID> keyField, Function<T, V> valueField) {
-        List<T> list = findAll(spec);
+    public <V> Map<ID, V> findMap(Specification<T> spec, Sort sort,Function<T, ID> keyField, Function<T, V> valueField) {
+        List<T> list = findAll(spec,sort);
         Map<ID, V> map = new HashMap<>();
         for (T t : list) {
             ID key = keyField.apply(t);
             if (key != null) {
                 map.put(key, valueField.apply(t));
             }
+        }
+        return map;
+    }
+
+    @Override
+    public Map<ID, List<T>> findMapList(Specification<T> spec, Sort sort, Function<T, ID> keyField) {
+        List<T> list = findAll(spec,sort);
+        Map<ID, List<T>> map = new HashMap<>();
+        for (T t : list) {
+            ID key = keyField.apply(t);
+            if (key == null) {
+                continue;
+            }
+            if(!map.containsKey(key)){
+                map.put(key,new ArrayList<>());
+            }
+            map.get(key).add(t);
         }
         return map;
     }

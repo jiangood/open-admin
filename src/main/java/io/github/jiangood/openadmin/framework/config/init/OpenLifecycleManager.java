@@ -16,6 +16,11 @@ public class OpenLifecycleManager {
 
     private final Collection<OpenLifecycle> lifecycles;
 
+    public void beforeJpaInit(){
+        for (OpenLifecycle lifecycle : lifecycles) {
+            lifecycle.beforeJpaInit();
+        }
+    }
 
 
     public void onConfigSecurity(HttpSecurity http, AuthenticationManager authenticationManager) throws Exception {

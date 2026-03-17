@@ -137,34 +137,7 @@ data:
 
 ## 使用示例
 
-### 1. 后端使用
 
-#### 1.1 获取字典列表
-
-```java
-import io.github.jiangood.openadmin.modules.system.service.SysDictService;
-import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
-import io.github.jiangood.openadmin.framework.config.datadefinition.DictDefinition;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-@Autowired
-private SysDictService sysDictService;
-
-// 根据字典类型获取字典列表
-List<DictDefinition.Item> genderList = sysDictService.getItems("gender");
-
-// 获取所有字典定义
-List<DictDefinition> allDicts = sysDictService.getAll();
-
-// 获取字典映射
-Map<String, Collection<DictItemDto>> dictMap = sysDictService.dictMap();
-```
-
-#### 1.2 字典缓存
-
-系统会自动缓存字典数据，当字典发生变化时，缓存会自动更新。
 
 ### 2. 前端使用
 

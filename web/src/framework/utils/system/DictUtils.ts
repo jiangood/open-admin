@@ -7,7 +7,7 @@ import React from 'react';
 import {StringUtils} from "../StringUtils";
 
 export interface DictItem {
-    value: string | number;
+    code: string | number;
     label: string;
     color?: string;
 }
@@ -31,14 +31,14 @@ export class DictUtils {
      * @returns 对应的字典项列表，未找到返回空数组
      */
     public static dictList(code: string): DictItem[] {
-        const map = SysUtils.getDictInfo();
-        if (!map) {
+        const info = SysUtils.getDictInfo();
+        if (!info) {
             return [];
         }
 
-        code = StringUtils.toUnderlineCase(code).toUpperCase();
+        let list = info.filter(e=>e.typeCode === code);
 
-        return map[code] || [];
+        return list
     }
 
     /**
@@ -50,7 +50,7 @@ export class DictUtils {
         const list: DictItem[] = DictUtils.dictList(typeCode);
         return list.map(i => {
             return {
-                value: i.value,
+                value: i.code,
                 label: i.label,
             }
         });

@@ -87,7 +87,7 @@ public class SysCommonController {
         }
         r.setLogin(true);
         r.setNeedUpdatePwd(false); // TODO
-        r.setDictMap(sysDictService.dictMap());
+        r.setDictInfo(sysDictService.getAllItems());
 
 
         List<String> permissions = LoginTool.getPermissions();

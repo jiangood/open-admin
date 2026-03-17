@@ -87,7 +87,7 @@ public class ApiAccountController {
     @GetMapping("accountOptions")
     public AjaxResult accountOptions() {
         List<ApiAccount> list = service.getAll();
-        List<Option> options = list.stream().map(a -> Option.of(a.getId(), a.getName())).toList();
+        List<Option> options = list.stream().map(a -> new  Option(a.getId(), a.getName())).toList();
         return AjaxResult.ok().data(options);
     }
 

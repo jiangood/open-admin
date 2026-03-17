@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component(GlobalSystemDataInit.BEAN_NAME)
 @Order(0)
-public class GlobalSystemDataInit implements CommandLineRunner {
+public class GlobalSystemDataInit implements CommandLineRunner{
 
 
     public static final String BEAN_NAME = "sysInit";
@@ -30,8 +30,6 @@ public class GlobalSystemDataInit implements CommandLineRunner {
 
     @Resource
     SysUserRepository sysUserRepository;
-
-
 
 
     @Resource

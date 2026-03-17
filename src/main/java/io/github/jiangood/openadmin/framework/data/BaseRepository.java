@@ -153,21 +153,24 @@ public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecific
 
     // --- 7. 结果集映射 (Dictionary Mapping) ---
 
-    public Map<ID, T> findKeyed(Iterable<ID> ids);
+    public Map<ID, T> findMap(Iterable<ID> ids);
 
 
     /**
      * 将查找接口转换为map， key为id，value为对象
      */
-    public Map<ID, T> dict();
-    public Map<ID, T> dict(Specification<T> spec);
 
-    public Map<ID, T> dict(Specification<T> spec, Function<T, ID> keyField);
+    public Map<ID, T> findMap(Specification<T> spec, Sort sort);
+
+    public Map<ID, T> findMap(Specification<T> spec, Sort sort,Function<T, ID> keyField);
 
     /**
      * 将查询结果的两个字段组装成map
      */
-    public <V> Map<ID, V> dict(Specification<T> spec, Function<T, ID> keyField, Function<T, V> valueField);
+    public <V> Map<ID, V> findMap(Specification<T> spec, Sort sort,Function<T, ID> keyField, Function<T, V> valueField);
+
+
+    public Map<ID, List<T>> findMapList(Specification<T> spec, Sort sort,Function<T, ID> keyField);
 
     /**
      * 获取实体的ID

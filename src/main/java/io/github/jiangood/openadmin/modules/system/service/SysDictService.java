@@ -6,13 +6,13 @@ import com.google.common.collect.LinkedListMultimap;
 import io.github.jiangood.openadmin.framework.config.datadefinition.DataPropertiesFactory;
 import io.github.jiangood.openadmin.framework.config.datadefinition.DictDefinition;
 import io.github.jiangood.openadmin.framework.enums.StatusColor;
-import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
+import io.github.jiangood.openadmin.lang.BeanTool;
 import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -22,84 +22,45 @@ import java.util.*;
 @Service
 public class SysDictService {
 
-    public static final String DEFAULT_GROUP = "默认分组";
     @Resource
     private SysDictItemRepository sysDictItemRepository;
+    public List<DictItemDto> getAllItems() {
+        List<DictDefinition> ymlList = DataPropertiesFactory.getInstance().getDicts();
+        Map<String, List<SysDictItem>> dbMap = sysDictItemRepository.findMapList(null,Sort.by(SysDictItem.Fields.seq), SysDictItem::getTypeCode);
 
-
-    public List<DictDefinition> getAll() {
-        List<DictDefinition> definitions = DataPropertiesFactory.getInstance().getDicts();
-
-        // 合并数据库中的
-        List<SysDictItem> list = sysDictItemRepository.findAll(Sort.by(SysDictItem.Fields.seq));
-        for (SysDictItem dbItem : list) {
-            definitions.stream().filter(def -> def.getCode().equals(dbItem.getTypeCode())).findFirst().ifPresent(def -> {
-                Optional<DictDefinition.Item> itemOptional = def.getItems().stream().filter(e -> e.getCode().equals(dbItem.getCode())).findFirst();
-                DictDefinition.Item defItem = itemOptional.orElse(new DictDefinition.Item());
-                BeanUtil.copyProperties(dbItem, defItem);
-
-                if(dbItem.getColor() != null){
-                    defItem.setColor(StatusColor.valueOf(dbItem.getColor()));
+        List<DictItemDto> result = new ArrayList<>();
+        for (DictDefinition definition : ymlList) {
+            List<DictDefinition.Item> items = definition.getItems();
+            if(items != null){
+                for (DictDefinition.Item item : items) {
+                    DictItemDto dto = new DictItemDto();
+                    BeanTool.copy(item,dto);
+                    fillInfo(dto,definition);
+                    result.add(dto);
                 }
+            }
+            List<SysDictItem> dbItemList = dbMap.get(definition.getCode());
+            if(dbItemList != null){
+                for (SysDictItem sysDictItem : dbItemList) {
+                    DictItemDto dto = new DictItemDto();
+                    BeanTool.copy(sysDictItem,dto);
+                    fillInfo(dto,definition);
 
-                if (itemOptional.isEmpty()) {
-                    def.getItems().add(defItem);
+                    result.add(dto);
                 }
-            });
-        }
-
-
-        return definitions;
-    }
-
-
-    public Map<String, Collection<DictItemDto>> dictMap() {
-        List<DictDefinition> list = getAll();
-
-        LinkedListMultimap<String, DictItemDto> map = LinkedListMultimap.create();
-
-
-        for (DictDefinition definition : list) {
-            String typeCode = definition.getCode();
-            typeCode = StrUtil.toUnderlineCase(typeCode).toUpperCase();
-
-            for (DictDefinition.Item item : definition.getItems()) {
-                StatusColor color = item.getColor();
-                String colorName = color != null ? color.name().toLowerCase() : null;
-                map.put(typeCode, new DictItemDto(item.getCode(), item.getName(),  colorName));
             }
         }
 
-        return map.asMap();
+        return result;
+    }
+
+    private void fillInfo(DictItemDto dto, DictDefinition definition) {
+        dto.setTypeCode(definition.getCode());
+        dto.setTypeLabel(definition.getLabel());
+        dto.setUid(dto.getTypeCode() + "-" + dto.getCode());
     }
 
 
-    public List<TreeOption> tree() {
-        List<DictDefinition> list = getAll();
-        List<TreeOption> treeList = new ArrayList<>();
 
 
-        List<String> groups = list.stream().map(DictDefinition::getGroupName).filter(Objects::nonNull).distinct().toList();
-        groups = new ArrayList<>(groups);
-        groups.add(DEFAULT_GROUP);
-        for (String s : groups) {
-            TreeOption option = new TreeOption(s, s, null);
-            option.setSelectable(false);
-            treeList.add(option);
-        }
-
-        for (DictDefinition definition : list) {
-            String groupName = StrUtil.blankToDefault(definition.getGroupName(), DEFAULT_GROUP);
-            TreeOption option = new TreeOption(definition.getName(), definition.getCode(), groupName);
-            treeList.add(option);
-        }
-
-        return TreeTool.buildTree(treeList);
-    }
-
-    public List<DictDefinition.Item> getItems(String typeCode) {
-        List<DictDefinition> list = this.getAll();
-        Optional<DictDefinition> first = list.stream().filter(e -> e.getCode().equals(typeCode)).findFirst();
-        return first.map(DictDefinition::getItems).orElse(Collections.emptyList());
-    }
 }

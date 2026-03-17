@@ -80,9 +80,10 @@ export class ProTable extends React.Component {
 
         this.setState({loading: true})
         request(params).then(rs => {
-            const {content, totalElements, extData} = rs;
+            const {content, totalElements, size,extData} = rs;
 
-            this.setState({dataSource: content, total: parseInt(totalElements)})
+
+            this.setState({dataSource: content, total: parseInt(totalElements),pageSize:size})
             if (extData) {
                 this.setState({extData})
             }

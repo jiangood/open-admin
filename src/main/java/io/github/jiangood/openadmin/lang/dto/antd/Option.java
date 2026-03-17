@@ -22,13 +22,11 @@ public class Option {
 
     Object data;
 
-
-    public static Option of(Object value, String label) {
-        Option option = new Option();
-        option.setValue(value);
-        option.setLabel(label);
-        return option;
+    public Option(Object value,String label) {
+        this.value = value;
+        this.label = label;
     }
+
 
 
     public static <T> List<Option> convertList(Iterable<T> list, Function<T, Object> valueFn, Function<T, String> labelFn) {
@@ -36,7 +34,7 @@ public class Option {
         for (T t : list) {
             String label = labelFn.apply(t);
             Object value = valueFn.apply(t);
-            result.add(Option.of(value, label));
+            result.add(new Option(value, label));
         }
         return result;
     }
@@ -44,7 +42,7 @@ public class Option {
     public static <T> List<Option> convertList(Iterable<String> list) {
         List<Option> result = new ArrayList<>();
         for (String t : list) {
-            result.add(Option.of(t, t));
+            result.add(new Option(t, t));
         }
         return result;
     }

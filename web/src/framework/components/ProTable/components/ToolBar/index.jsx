@@ -27,8 +27,8 @@ export default class Toolbar extends React.Component {
             <div className='pro-table-toolbar-left'>
                 {showSearch && <Input.Search placeholder='搜索...'
                                              allowClear
-                                             onChange={(e) => {
-                                                 this.props.onSearch({searchText: e.target.value})
+                                             onSearch={e=>{
+                                                 this.props.onSearch({searchText: e})
                                              }}
                 />}
             </div>

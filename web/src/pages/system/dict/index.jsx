@@ -2,21 +2,17 @@ import React from "react";
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tag, Tree, Typography} from "antd";
 import {
     ButtonList,
-    FieldBoolean, FieldDictSelect,
+    FieldBoolean, FieldDictSelect, FieldRemoteSelect,
     HttpUtils,
     Page,
-    PageLoading,
     ProTable,
-    ViewBooleanEnableDisable
+    ViewBooleanEnableDisable, ViewText
 } from "../../../framework";
 import {PlusOutlined} from "@ant-design/icons";
 
 export default class extends React.Component {
 
     state = {
-        treeData: [],
-        treeLoading: true,
-        typeCode: null,
         formValues: {},
         formOpen: false
     }
@@ -24,17 +20,9 @@ export default class extends React.Component {
     formRef = React.createRef()
     tableRef = React.createRef()
 
-    async componentDidMount() {
-        const treeData = await HttpUtils.get('admin/dict/tree');
-        this.setState({treeData, treeLoading: false});
-    }
 
-    onSelect = (selectedKeys) => {
-        const key = selectedKeys.length === 1 ? selectedKeys[0] : null;
-        this.setState({typeCode: key}, () => {
-            this.tableRef.current.reload()
-        })
-    }
+
+
     handleAdd = () => {
         this.setState({formOpen: true, formValues: {}})
     }
@@ -44,7 +32,6 @@ export default class extends React.Component {
     }
 
     onFinish = values => {
-        values.sysDict = {id: this.props.sysDictId}
         HttpUtils.post('admin/dict/save', values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload()
@@ -59,8 +46,16 @@ export default class extends React.Component {
 
     columns = [
         {
-            title: '文本',
-            dataIndex: 'name',
+            title: '类型标签',
+            dataIndex: 'typeLabel',
+        },
+        {
+            title: '类型编码',
+            dataIndex: 'typeCode',
+        },
+        {
+            title: '标签',
+            dataIndex: 'label',
         },
         {
             title: '编码',
@@ -94,6 +89,9 @@ export default class extends React.Component {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => {
+                if(!record.id){ // 非数据库定义的不让修改
+                    return
+                }
 
                 return (
                     <ButtonList>
@@ -110,45 +108,25 @@ export default class extends React.Component {
     ]
 
     render() {
-        if (this.state.treeLoading) {
-            return <PageLoading/>
-        }
-
-        return <Page>
-            <Splitter>
-                <Splitter.Panel defaultSize={600} style={{paddingRight: 16}}>
-                    <Tree
-                        treeData={this.state.treeData}
-                        onSelect={this.onSelect}
-
-                        showIcon
-                        blockNode
-                        showLine
-                        defaultExpandAll
-                    >
-                    </Tree>
-                </Splitter.Panel>
-                <Splitter.Panel style={{paddingLeft: 16}}>
-                    {this.renderTypeInfo()}
-                    <ProTable
-                        rowKey='code'
-                        actionRef={this.tableRef}
-                        toolBarRender={() => {
-                            return <ButtonList>
-                                <Button perm='sysDict:save' type='primary' onClick={this.handleAdd} disabled={!this.state.typeCode}>
-                                    <PlusOutlined/> 新增
-                                </Button>
-                            </ButtonList>
-                        }}
-                        request={(params) => {
-                            params.typeCode = this.state.typeCode
-                            return HttpUtils.get('admin/dict/page', params);
-                        }}
-                        columns={this.columns}
-                        search={false}
-                    />
-                </Splitter.Panel>
-            </Splitter>
+        return <Page padding>
+            <ProTable
+                rowKey='uid'
+                actionRef={this.tableRef}
+                toolBarRender={() => {
+                    return <ButtonList>
+                        <Button perm='sysDict:save' type='primary' onClick={this.handleAdd} >
+                            <PlusOutlined/> 新增
+                        </Button>
+                    </ButtonList>
+                }}
+                request={(params) => {
+                    params.typeCode = this.state.typeCode
+                    return HttpUtils.get('admin/dict/page', params);
+                }}
+                columns={this.columns}
+                showToolbarSearch={true}
+                scrollY={500}
+            />
             <Modal
                 title='编辑数据字典项'
                 open={this.state.formOpen}
@@ -161,13 +139,16 @@ export default class extends React.Component {
                       initialValues={this.state.formValues}
                       onFinish={this.onFinish}>
                     <Form.Item name='id' noStyle></Form.Item>
-                    <Form.Item label='类型编码' name='typeCode' rules={[{required: true}]} initialValue={this.state.typeCode}>
-                        <Input/>
+                    <Form.Item label='类型' name='color' rules={[{required: true}]} >
+                       <ViewText />
+                    </Form.Item>
+                    <Form.Item label='类型' name='typeCode' rules={[{required: true}]} >
+                        <FieldRemoteSelect url='/admin/dict/typeOptions' />
                     </Form.Item>
                     <Form.Item label='编码' name='code' rules={[{required: true}]}>
                         <Input/>
                     </Form.Item>
-                    <Form.Item label='文本' name='name' rules={[{required: true}]} >
+                    <Form.Item label='标签' name='label' rules={[{required: true}]} help='显示文本'>
                         <Input/>
                     </Form.Item>
                     <Form.Item label='颜色' name='color' rules={[{required: true}]}>
@@ -188,14 +169,5 @@ export default class extends React.Component {
 
     }
 
-    renderTypeInfo() {
-        if(this.state.typeCode){
-            return <>
-                <Typography.Text italic> 类型：</Typography.Text>
-                <Typography.Text copyable>
-                    {this.state.typeCode}
-                </Typography.Text>
-            </>;
-        }
-    }
+
 }

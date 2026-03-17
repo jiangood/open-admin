@@ -72,82 +72,79 @@ data:
               perm-names: [ 管理 ]
               perm-codes: [ api ]
   dicts:
-    - name: 机构类型
+    - label: 机构类型
       code: orgType
-      group-name: 系统管理
       items:
-        - name: 单位
+        - label: 单位
           code: 10
           color: success
-        - name: 部门
+        - label: 部门
           code: 20
-    - name: 审核状态
+    - label: 审核状态
       code: approveStatus
-      group-name: 系统管理
       items:
-          - name: 待提交
+          - label: 待提交
             code: DRAFT
             color: default
-          - name: 审核中
+          - label: 审核中
             code: PENDING
             color: warning
-          - name: 审核通过
+          - label: 审核通过
             code: APPROVED
             color: success
-          - name: 审核未通过
+          - label: 审核未通过
             code: REJECTED
             color: error
-    - name: 性别
+    - label: 性别
       code: sex
       items:
-        - name: 男
+        - label: 男
           code: MALE
-        - name: 女
+        - label: 女
           code: FEMALE
-        - name: 保密
+        - label: 保密
           code: UNKNOWN
 
-    - name: 是否
+    - label: 是否
       code: yesNo
       items:
-        - name: 是
+        - label: 是
           code: Y
           color: success
-        - name: 否
+        - label: 否
           code: N
           color: error
-    - name: 数据权限
+    - label: 数据权限
       code: dataPermType
-      group-name: 系统管理
       items:
-        - name: 所有
+        - label: 所有
           code: ALL
-        - name: 本级
+        - label: 本级
           code: LEVEL
-        - name: 本级和子级
+        - label: 本级和子级
           code: CHILDREN
-        - name: 自定义
+        - label: 自定义
           code: CUSTOM
-    - name: 状态颜色
+    - label: 状态颜色
       code: statusColor
       items:
-        - name: 成功
+        - label: 成功
           code: SUCCESS
-        - name: 处理中
+        - label: 处理中
           code: PROCESSING
-        - name: 错误
+        - label: 错误
           code: ERROR
-        - name: 警告
+        - label: 警告
           code: WARNING
-        - name: 默认
+        - label: 默认
           code: DEFAULT
-        - name: 红色
+        - label: 红色
           code: RED
-        - name: 蓝色
+        - label: 蓝色
           code: BLUE
-        - name: 绿色
+        - label: 绿色
           code: GREEN
-        - name: 灰色
+        - label: 灰色
           code: GRAY
 
 

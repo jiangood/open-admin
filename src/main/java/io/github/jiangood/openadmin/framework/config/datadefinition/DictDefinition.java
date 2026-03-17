@@ -9,9 +9,8 @@ import java.util.List;
 @Data
 public class DictDefinition {
 
-    private String name;
+    private String label;
     private String code;
-    private String groupName;
 
     private List<Item> items = new ArrayList<>();
 
@@ -19,7 +18,7 @@ public class DictDefinition {
 
     @Data
     public static class Item {
-        String name;
+        String label;
         String code;
         StatusColor color;
 

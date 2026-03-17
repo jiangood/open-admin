@@ -1,11 +1,9 @@
 package io.github.jiangood.openadmin.modules.common.dto;
 
 import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
-import io.github.jiangood.openadmin.modules.system.service.SysDictService;
 import lombok.Data;
 
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 @Data
 public class LoginDataResponse {
@@ -14,7 +12,7 @@ public class LoginDataResponse {
     private boolean needUpdatePwd;
 
 
-    private Map<String, Collection<DictItemDto>> dictMap;
+    private List<DictItemDto> dictInfo;
 
     private LoginInfoResponse loginInfo;
 }
