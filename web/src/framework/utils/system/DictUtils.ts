@@ -65,7 +65,7 @@ export class DictUtils {
      */
     public static dictLabel(typeCode: string, code: string | number): string | undefined {
         const items = DictUtils.dictList(typeCode);
-        const item = items.find(i => i.value === code);
+        const item = items.find(i => i.code === code);
         return item ? item.label : undefined;
     }
 
@@ -79,7 +79,7 @@ export class DictUtils {
         if (typeCode == null || code == null) {
             return null;
         }
-        const item = DictUtils.dictList(typeCode).find(i => i.value === code);
+        const item = DictUtils.dictList(typeCode).find(i => i.code === code);
 
         if (item == null) {
             return null;
@@ -91,6 +91,6 @@ export class DictUtils {
             return label;
         }
 
-        return React.createElement(Tag, {color: color}, label);
+        return React.createElement(Tag, {color: color.toLowerCase()}, label);
     }
 }

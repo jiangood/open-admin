@@ -1,3 +1,5 @@
 import { ViewProps } from "../types";
+import {Component} from "react";
 
-export function ViewApproveStatus(props: ViewProps<string>);
+
+export class ViewApproveStatus extends Component<ViewProps<String>,any>{}

@@ -1,13 +1,10 @@
 package io.github.jiangood.openadmin.framework.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.jiangood.openadmin.framework.data.DBConstants;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedBy;
@@ -30,7 +27,7 @@ public abstract class BaseNoIdEntity implements Persistable<String> {
     @Schema(description = "创建者", hidden = true)
     @CreatedBy
     @Column(length = DBConstants.LEN_ID, updatable = false)
-    private String createBy;
+    private String createUser;
 
     @Schema(description = "创建时间", hidden = true)
     @CreatedDate
@@ -40,7 +37,7 @@ public abstract class BaseNoIdEntity implements Persistable<String> {
     @Schema(description = "更新者", hidden = true)
     @LastModifiedBy
     @Column(length = DBConstants.LEN_ID)
-    private String updateBy;
+    private String updateUser;
 
     @Schema(description = "更新时间", hidden = true)
     @LastModifiedDate
