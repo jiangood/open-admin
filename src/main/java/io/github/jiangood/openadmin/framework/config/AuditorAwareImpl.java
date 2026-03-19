@@ -1,5 +1,6 @@
-package io.github.jiangood.openadmin.framework.config.security;
+package io.github.jiangood.openadmin.framework.config;
 
+import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.modules.common.LoginTool;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.AuditorAware;

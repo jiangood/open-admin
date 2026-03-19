@@ -22,7 +22,7 @@ public class LoginAttemptService {
      *
      * @param username 用户名
      */
-    public void loginFailed(String username) {
+    public void onFailed(String username) {
         // 如果账户已锁定，直接返回
         if (isAccountLocked(username)) {
             return;
@@ -48,7 +48,7 @@ public class LoginAttemptService {
      *
      * @param username 用户名
      */
-    public void loginSucceeded(String username) {
+    public void onSuccess(String username) {
         loginAttempts.invalidate(username);
         lockedAccounts.invalidate(username);
     }

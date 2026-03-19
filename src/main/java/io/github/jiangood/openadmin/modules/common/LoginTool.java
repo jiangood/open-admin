@@ -31,7 +31,7 @@ public class LoginTool {
             return null;
         }
         String account = authentication.getName();
-        log.debug("获取当前登录用户 {}", account);
+        log.debug("获取当前用户 {}", account);
         boolean authenticated = authentication.isAuthenticated();
         if (!authenticated || "anonymousUser".equals(account)) {
             return null;

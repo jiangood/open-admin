@@ -21,7 +21,7 @@ public interface OpenLifecycle {
 
 
 
-    default void onConfigSecurity(HttpSecurity http, AuthenticationManager authenticationManager) {
+    default void onConfigSecurity(HttpSecurity http) {
 
     }
 

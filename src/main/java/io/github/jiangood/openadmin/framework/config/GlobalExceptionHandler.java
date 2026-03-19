@@ -8,6 +8,7 @@ import io.github.jiangood.openadmin.lang.BusinessException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -16,6 +17,8 @@ import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -35,18 +38,40 @@ import java.io.FileNotFoundException;
 import java.sql.SQLException;
 import java.util.List;
 
+import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
+import static io.github.jiangood.openadmin.framework.MessageConst.MSG_UNAUTHORIZED;
+
 /**
  * 全局异常处理器
  */
 @RestControllerAdvice
 @Slf4j
-@Order(Ordered.LOWEST_PRECEDENCE)
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
 
-    @Resource
-    SystemProperties systemProperties;
 
+    private final SystemProperties systemProperties;
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public AjaxResult handleAccessDeniedException(AccessDeniedException ex) {
+        if (systemProperties.isPrintGlobalException()) {
+            log.error(MGS_FORBIDDEN, ex);
+        }
+        String msg = ex.getMessage();
+        if (msg.startsWith(MGS_FORBIDDEN)) {
+            return AjaxResult.err(HttpStatus.FORBIDDEN.value(), msg);
+        }
+        return AjaxResult.FORBIDDEN;
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public AjaxResult handleAuthenticationException(AuthenticationException ex) {
+        if (systemProperties.isPrintGlobalException()) {
+            log.error(MSG_UNAUTHORIZED, ex);
+        }
+        return AjaxResult.UNAUTHORIZED;
+    }
 
     /**
      * 拦截未知的运行时异常

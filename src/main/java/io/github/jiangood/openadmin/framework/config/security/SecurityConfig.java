@@ -1,32 +1,33 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
+import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
-import io.github.jiangood.openadmin.framework.config.security.login.LoginConfigurer;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
 import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycle;
 import io.github.jiangood.openadmin.lang.ArrayTool;
-import io.github.jiangood.openadmin.lang.PasswordTool;
 import io.github.jiangood.openadmin.lang.ResponseTool;
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -40,23 +41,25 @@ public class SecurityConfig {
     private final Collection<OpenLifecycle> lifecycles;
 
     private final PermissionRefreshFilter permissionRefreshFilter;
+    private final SecurityHolder securityHolder;
 
+    public static final String[] LOGIN_EXCLUDE = {
+            "/admin/auth/**", "/admin/public/**"
+    };
 
 
     // 配置 HTTP 安全
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        String[] loginExclude = ArrayTool.toStrArr(systemProperties.getXssExcludePathList());
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        List<String> exclude = new ArrayList<>(systemProperties.getLoginExcludePathPatterns());
+        Collections.addAll(exclude, LOGIN_EXCLUDE);
 
-        AuthenticationManager authenticationManager = authenticationConfiguration.getAuthenticationManager();
-        lifecycles.forEach(l->l.onConfigSecurity(http,authenticationManager));
+
+        lifecycles.forEach(l -> l.onConfigSecurity(http));
 
         http.authorizeHttpRequests(authz -> {
-            lifecycles.forEach(l->l.onConfigSecurityAuthorizeHttpRequests(authz));
-            if (loginExclude.length > 0) {
-                authz.requestMatchers(loginExclude).permitAll();
-            }
-            authz.requestMatchers("/admin/auth/**", "/admin/public/**").permitAll()
+            lifecycles.forEach(l -> l.onConfigSecurityAuthorizeHttpRequests(authz));
+            authz.requestMatchers(ArrayTool.toStrArr(exclude)).permitAll()
                     .requestMatchers("/admin/**", "/ureport/**").authenticated()
                     .anyRequest().permitAll();
         });
@@ -68,16 +71,13 @@ public class SecurityConfig {
 
             cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
             cfg.sessionConcurrency(configurer -> {
-                configurer.
-                        maximumSessions(maximumSessions)
-                        .maxSessionsPreventsLogin(true) // true:阻止新登录，false:踢出旧会话
+                configurer.maximumSessions(maximumSessions)
+                        .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
                 ;
             });
 
         });
 
-
-        http.authenticationManager(authenticationConfiguration.getAuthenticationManager());
 
         // 认证通过后判断是否需要刷新权限（如修改用户）
         http.addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
@@ -96,28 +96,23 @@ public class SecurityConfig {
         http.httpBasic(AbstractHttpConfigurer::disable);
         http.formLogin(AbstractHttpConfigurer::disable);
 
-        http.apply(new LoginConfigurer<>());
+        DefaultSecurityFilterChain chain = http.build();
 
+        // 缓存对象
+        securityHolder.setSharedObjects(http.getSharedObjects());
 
-        return http.build();
+        return chain;
     }
 
 
     // 密码编码器
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordTool.getEncoder();
+        return new BCryptPasswordEncoder();
     }
 
-
-
-
-
-    // 是 maximumSessions 控制的必要配置
     @Bean
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
     }
-
-
 }
