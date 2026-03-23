@@ -38,7 +38,10 @@ public class LoginTool {
         }
 
         Object principal = authentication.getPrincipal();
-        return (LoginUser) principal;
+        if(principal instanceof LoginUser loginUser){
+            return loginUser;
+        }
+        return null;
     }
 
     public static List<String> getOrgPermissions() {

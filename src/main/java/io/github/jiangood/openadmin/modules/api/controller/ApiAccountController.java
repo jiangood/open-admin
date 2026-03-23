@@ -1,114 +1,132 @@
 package io.github.jiangood.openadmin.modules.api.controller;
 
-import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.modules.api.ApiErrorCode;
-import io.github.jiangood.openadmin.modules.api.dto.GrantRequest;
+import io.github.jiangood.openadmin.lang.DownloadTool;
+import io.github.jiangood.openadmin.lang.JsonTool;
+import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.lang.dto.IdRequest;
+import io.github.jiangood.openadmin.modules.api.SwaggerToWordConverter;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
-import io.github.jiangood.openadmin.modules.api.entity.ApiResource;
 import io.github.jiangood.openadmin.modules.api.service.ApiAccountService;
-import io.github.jiangood.openadmin.modules.api.service.ApiResourceService;
-import jakarta.annotation.Resource;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.PathItem;
+import io.swagger.v3.oas.models.Paths;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
 import org.simpleframework.xml.core.Validate;
+import org.springdoc.webmvc.api.OpenApiResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 @RestController
 @RequestMapping("admin/apiAccount")
+@PreAuthorize("hasAuthority('api')")
+@RequiredArgsConstructor
 public class ApiAccountController {
 
-    @Resource
-    private ApiAccountService service;
+    private final ApiAccountService apiAccountService;
+    private final OpenApiResource openApiResource;
 
-
-    @Resource
-    private ApiResourceService apiResourceService;
-
-
-    @PreAuthorize("hasAuthority('api')")
-    @GetMapping("docInfo")
-    public AjaxResult docInfo(String id) {
-        List<ApiResource> list = apiResourceService.findAll();
-        if (StrUtil.isNotEmpty(id)) {
-            ApiAccount acc = service.get(id);
-            list = list.stream().filter(t -> acc.getPerms().contains(t.getAction())).toList();
-        }
-
-        Dict resultData = new Dict();
-        resultData.put("apiList", list);
-
-        List<Dict> errorList = new ArrayList<>();
-        for (ApiErrorCode value : ApiErrorCode.values()) {
-            errorList.add(Dict.of("code", value.getCode(), "message", value.getMessage()));
-        }
-
-        resultData.put("errorList", errorList);
-
-
-        return AjaxResult.ok().data(resultData);
-    }
-
-    @PreAuthorize("hasAuthority('apiAccount:view')")
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
-        Spec<ApiAccount> q = service.spec().orLike(searchText, "name");
-        Page<ApiAccount> page = service.getPage(q, pageable);
+        Spec<ApiAccount> q = apiAccountService.spec().orLike(searchText, "name");
+        Page<ApiAccount> page = apiAccountService.getPage(q, pageable);
         return AjaxResult.ok().data(page);
     }
 
-    @PreAuthorize("hasAuthority('apiAccount:save')")
     @PostMapping("save")
     public AjaxResult save(@RequestBody ApiAccount input, RequestBodyKeys updateFields) throws Exception {
-        service.save(input, updateFields);
+        apiAccountService.save(input, updateFields);
         return AjaxResult.ok().msg("保存成功");
     }
 
-    @PreAuthorize("hasAuthority('api')")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        service.delete(idRequest.getId());
+        apiAccountService.delete(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
 
-    @PreAuthorize("hasAuthority('api')")
-    @GetMapping("accountOptions")
-    public AjaxResult accountOptions() {
-        List<ApiAccount> list = service.getAll();
-        List<Option> options = list.stream().map(a -> new  Option(a.getId(), a.getName())).toList();
-        return AjaxResult.ok().data(options);
-    }
 
-    @PreAuthorize("hasAuthority('api')")
-    @PostMapping("grant")
-    public AjaxResult grant(@Validate @RequestBody GrantRequest request) {
-        ApiAccount acc = service.get(request.getAccountId());
-        if (request.getChecked()) {
-            acc.getPerms().add(request.getAction());
-        } else {
-            acc.getPerms().remove(request.getAction());
+
+    @GetMapping("permList")
+    public AjaxResult permList(HttpServletRequest req) throws IOException {
+        // 获取 OpenAPI 对象
+        byte[] bytes = openApiResource.openapiJson(req, "/admin/api-docs/open-api", Locale.getDefault());
+        OpenAPI openAPI = JsonTool.jsonToBean(bytes, OpenAPI.class);
+
+
+        List<Res> list = new ArrayList<>();
+        Paths paths = openAPI.getPaths();
+        for (Map.Entry<String, PathItem> entry : paths.entrySet()) {
+            String path = entry.getKey();
+            PathItem pathItem = entry.getValue();
+            Operation operation = pathItem.getGet();
+            if(operation == null){
+                operation = pathItem.getPost();
+            }
+            Assert.state(operation != null, "只支持GET或POST方法");
+
+            Res res = new Res();
+            res.path = path;
+            res.name = operation.getSummary();
+            res.description = operation.getDescription();
+            res.id = operation.getOperationId();
+
+            list.add(res);
         }
-        service.save(acc);
-        return AjaxResult.ok();
+
+
+        return AjaxResult.ok().data(list);
     }
 
-    @PreAuthorize("hasAuthority('api')")
-    @GetMapping("get")
-    public AjaxResult get(String id) {
-        ApiAccount acc = service.get(id);
-        return AjaxResult.ok().data(acc);
+
+    @PostMapping("grant/{id}")
+    public AjaxResult grant(@PathVariable String id, @Validate @RequestBody List<String> perms) {
+        ApiAccount acc = apiAccountService.get(id);
+        acc.setPerms(perms);
+        apiAccountService.save(acc);
+        return AjaxResult.ok().msg("授权成功");
+    }
+
+    @GetMapping("export/{id}")
+    public void export(@PathVariable String id, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        ApiAccount acc = apiAccountService.get(id);
+        byte[] bytes = openApiResource.openapiJson(req, "/admin/api-docs/open-api", Locale.getDefault());
+
+
+        File file = new SwaggerToWordConverter(new String(bytes, StandardCharsets.UTF_8), acc.getPerms()).convert();
+
+        DownloadTool.setDownloadParam("接口文档_" + acc.getName() + ".docx" , file.length(), resp);
+        DownloadTool.download(file, resp);
+
+    }
+
+
+
+    @Data
+    public static class Res {
+        String path;
+        String id;
+        String name;
+        String description;
     }
 
 

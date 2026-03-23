@@ -23,6 +23,10 @@ public class ApiAccountService {
         return apiAccountRepository.findByField(ApiAccount.Fields.appId, appId);
     }
 
+    public ApiAccount findByToken(String token){
+        return apiAccountRepository.findByField(ApiAccount.Fields.appSecret, token);
+    }
+
     // BaseService 方法
     @Transactional
     public ApiAccount save(ApiAccount input, List<String> requestKeys) throws Exception {

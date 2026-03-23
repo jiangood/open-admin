@@ -31,7 +31,14 @@ const proxyConfig = {
     '/ureport': {
         target: `http://${host}`,
         changeOrigin: true,
-        pathRewrite: {'^/ureport': '/ureport'},
+    },
+    '/swagger-ui': {
+        target: `http://${host}`,
+        changeOrigin: true,
+    },
+    '/v3/api-docs': {
+        target: `http://${host}`,
+        changeOrigin: true,
     },
     '/admin/ws': {
         target: `ws://${host}`,

@@ -22,6 +22,15 @@ spring:
     generate-ddl: true
     show-sql: true
 
+springdoc:
+  api-docs:
+    enabled: true # 生成环境建议关闭
+    path: /admin/api-docs
+  swagger-ui:
+    enabled: true
+    path: /admin/ # /admin/swagger-ui/index.html
+  paths-to-match:
+    - /api/**
 
 
 logging:

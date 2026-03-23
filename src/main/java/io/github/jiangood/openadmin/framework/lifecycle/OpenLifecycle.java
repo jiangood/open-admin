@@ -21,13 +21,5 @@ public interface OpenLifecycle {
 
 
 
-    default void onConfigSecurity(HttpSecurity http) {
-
-    }
-
-
-    default void onConfigSecurityAuthorizeHttpRequests(AuthorizeHttpRequestsConfigurer<HttpSecurity>.AuthorizationManagerRequestMatcherRegistry authz) {
-
-    }
 
 }

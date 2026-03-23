@@ -34,7 +34,7 @@ public @interface ValidateIpv4 {
                 if (str.contains(",")) {
                     String[] arr = str.split(",");
                     for (String s : arr) {
-                        boolean ipv4 = Validator.isIpv4(str);
+                        boolean ipv4 = Validator.isIpv4(s);
                         if (!ipv4) {
                             return false;
                         }

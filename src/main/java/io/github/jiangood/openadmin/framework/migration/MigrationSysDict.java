@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Set;
 
 @Component
@@ -15,7 +16,7 @@ public class MigrationSysDict implements OpenLifecycleBeforeJpaInit {
 
     @Override
     public void process(DbTool db) {
-        Set<String> tableNames = db.getTableNames();
+        List<String> tableNames = db.getTableNames();
 
         if(tableNames.contains("sys_dict")){
             log.warn("清理历史数据字典...");

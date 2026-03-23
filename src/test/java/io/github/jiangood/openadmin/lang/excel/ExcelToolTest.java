@@ -172,13 +172,13 @@ class ExcelToolTest {
 
     // 测试用的实体类
     static class TestEntity {
-        @Remark("姓名")
+        @ExcelColumn("姓名")
         private String name;
         
-        @Remark("年龄")
+        @ExcelColumn("年龄")
         private Integer age;
         
-        @Remark("地址")
+        @ExcelColumn("地址")
         private String address;
 
         public TestEntity() {

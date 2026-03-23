@@ -15,28 +15,18 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 @Getter
 @Setter
-@Table(name = "sys_api_access_log")
-public class ApiAccessLog extends BaseEntity {
+@Table(name = "sys_api_log")
+public class ApiLog extends BaseEntity {
 
     @Remark("时间戳")
     @Column(length = 50)
     private Long timestamp;
 
-    @Remark("接口名称")
-    @Column(length = 100)
-    private String name;
 
     @Remark("接口")
-    @Column(length = 30)
-    private String action;
+    @Column(length = 100)
+    private String url;
 
-    @Remark("请求数据")
-    @Lob
-    private String requestData;
-
-    @Remark("响应数据")
-    @Lob
-    private String responseData;
 
     @Column(length = 15)
     private String ip;
@@ -48,7 +38,11 @@ public class ApiAccessLog extends BaseEntity {
     private Long executionTime;
 
     @Remark("接口账户")
+    @Column(length = 50)
     private String accountName;
+
+    @Column(length = 32)
+    private String accountId;
 
 
 }

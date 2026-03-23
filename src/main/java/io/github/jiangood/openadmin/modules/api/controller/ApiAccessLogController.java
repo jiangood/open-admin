@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.api.controller;
 
 import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.modules.api.entity.ApiAccessLog;
+import io.github.jiangood.openadmin.modules.api.entity.ApiLog;
 import io.github.jiangood.openadmin.modules.api.service.ApiAccessLogService;
 import jakarta.annotation.Resource;
 import org.springframework.data.domain.Page;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("admin/apiAccessLog")
+@RequestMapping("admin/apiLog")
 public class ApiAccessLogController {
 
     @Resource
@@ -22,7 +22,7 @@ public class ApiAccessLogController {
     @Deprecated
     @RequestMapping("page")
     public AjaxResult page(@PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
-        Page<ApiAccessLog> page = service.getPage(null, pageable);
+        Page<ApiLog> page = service.getPage(null, pageable);
         return AjaxResult.ok().data(page);
     }
 

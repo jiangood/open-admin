@@ -139,7 +139,15 @@ public class JsonTool {
         }
 
         return om.readValue(json, cls);
+    }
 
+    public static <T> T jsonToBean(byte[] json, Class<T> cls) throws IOException {
+        if (json == null) {
+            return null;
+
+        }
+
+        return om.readValue(json, cls);
     }
 
     /**

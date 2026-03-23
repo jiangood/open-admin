@@ -34,7 +34,7 @@
     </scm>
     <properties>
         <!-- 这个表示版本号，构建时动态指定参数即可 如 mvn package -Drevision=1.1.1-->
-        <revision>1.2.5-SNAPSHOT</revision>
+        <revision>1.2.7-SNAPSHOT</revision>
         <java.version>17</java.version>
         <compile.version>17</compile.version>
         <maven.compiler.source>17</maven.compiler.source>
@@ -48,7 +48,7 @@
         <poi.version>5.5.0</poi.version>
         <guava.version>33.5.0-jre</guava.version>
         <commons-io.version>2.21.0</commons-io.version>
-        <springdoc-version>2.8.9</springdoc-version>
+        <springdoc-version>2.8.16</springdoc-version>
     </properties>
     <dependencies>
         <dependency>
@@ -152,9 +152,9 @@
 
 
         <dependency>
-            <groupId>commons-dbutils</groupId>
+            <groupId>io.github.jiangood</groupId>
             <artifactId>commons-dbutils</artifactId>
-            <version>1.8.1</version>
+            <version>1.9.0</version>
         </dependency>
         <dependency>
             <groupId>cn.hutool</groupId>

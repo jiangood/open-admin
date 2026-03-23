@@ -12,16 +12,19 @@ import org.apache.commons.dbutils.handlers.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.util.Assert;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 
-@Getter
 @Slf4j
 public class DbTool {
 
@@ -31,47 +34,7 @@ public class DbTool {
         this.runner = new QueryRunner(dataSource);
     }
 
-    public static String getSqlType(Class<?> cls) {
-        if (Enum.class.isAssignableFrom(cls)) {
-            return "varchar(50)";
-        }
-        if (BigDecimal.class.isAssignableFrom(cls)) {
-            return "decimal(10,2)";
-        }
 
-
-        String typeName = cls.getSimpleName().toLowerCase();
-        switch (typeName) {
-            case "byte":
-            case "short":
-            case "int":
-            case "integer":
-                return "INT";
-            case "long":
-                return "BIGINT";
-            case "float":
-                return "FLOAT";
-            case "double":
-                return "DOUBLE";
-            case "boolean":
-                return "BOOLEAN";
-            case "char":
-            case "character":
-            case "string":
-                return "VARCHAR(255)";
-            case "date":
-                return "datetime(6)";
-
-
-            // support collection, convert to string
-            case "list":
-            case "set":
-                return "text";
-
-            default:
-                throw new IllegalStateException("not support field type " + cls);
-        }
-    }
 
     public int dropTable(String tableName) {
         return this.execute("DROP TABLE IF EXISTS " + tableName);
@@ -288,7 +251,7 @@ public class DbTool {
     public int update(String sql, Object... params) {
         params = checkParam(params);
 
-        return getRunner().update(sql, params);
+        return runner.update(sql, params);
     }
 
     @SneakyThrows
@@ -296,53 +259,27 @@ public class DbTool {
         if (params == null) {
             params = new Object[0][0];
         }
-        return getRunner().batch(sql, params);
+        return runner.batch(sql, params);
     }
 
     @SneakyThrows
     public int[] batch(String sql) {
-        return getRunner().batch(sql, new Object[0][0]);
+        return runner.batch(sql, new Object[0][0]);
     }
 
     @SneakyThrows
     public int execute(String sql, Object... params) {
-        return getRunner().execute(sql, params);
+        return runner.execute(sql, params);
     }
 
     public int executeQuietly(String sql, Object... params) {
         try {
-            return getRunner().execute(sql, params);
+            return runner.execute(sql, params);
         } catch (SQLException e) {
             log.error("可忽略的sql异常 {}", e.getMessage());
             log.error(sql);
         }
         return 0;
-    }
-
-    public String[] getKeys(String sql) {
-        sql = sql.replace("?", "''");
-        Connection conn = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            conn = getRunner().getDataSource().getConnection();
-
-            ps = conn.prepareStatement(sql);
-            rs = ps.executeQuery();
-
-            ResultSetMetaData metaData = rs.getMetaData();
-
-            String[] ks = new String[metaData.getColumnCount()];
-            for (int i = 1; i <= ks.length; i++) {
-                ks[i - 1] = metaData.getColumnLabel(i);
-            }
-            return ks;
-        } catch (Exception ex) {
-            throw new IllegalStateException(ex);
-        } finally {
-            org.apache.commons.dbutils.DbUtils.closeQuietly(conn, ps, rs);
-        }
-
     }
 
     @SuppressWarnings("rawtypes")
@@ -361,6 +298,7 @@ public class DbTool {
     /**
      * insert map data to table
      */
+    @SneakyThrows
     public int insert(String tableName, Map<String, Object> map) {
         StringBuilder sb = new StringBuilder();
         sb.append("INSERT INTO ").append(tableName).append(" (");
@@ -380,8 +318,10 @@ public class DbTool {
         }
         sb.deleteCharAt(sb.length() - 1);
         sb.append(")");
+        String sql = sb.toString();
+        Object[] params = map.values().toArray();
 
-        return this.update(sb.toString(), map.values().toArray());
+        return runner.update(sql, params);
     }
 
     public int updateById(String table, Map<String, Object> data) {
@@ -412,18 +352,18 @@ public class DbTool {
 
     @SneakyThrows
     public <T> T query(final String sql, final ResultSetHandler<T> rsh, final Object... params) {
-        return getRunner().query(sql, rsh, params);
+        return runner.query(sql, rsh, params);
     }
 
     @SneakyThrows
-    public Set<String> getTableNames() {
-        try (Connection conn = this.getRunner().getDataSource().getConnection()) {
+    public List<String> getTableNames() {
+        try (Connection conn = this.runner.getDataSource().getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
 
-            Set<String> tables;
+            List<String> tables;
             try (ResultSet resultSet = metaData.getTables(null, null, null, new String[]{"TABLE"})) {
 
-                tables = new HashSet<>();
+                tables = new ArrayList<>();
                 while (resultSet.next()) {
                     String tableName = resultSet.getString("TABLE_NAME");
                     tables.add(tableName);
@@ -437,7 +377,14 @@ public class DbTool {
 
     @SneakyThrows
     public Set<String> getTableColumns(String tableName) {
-        try (Connection conn = this.getRunner().getDataSource().getConnection()) {
+        List<String> tableNames = getTableNames();
+        if (!tableNames.contains(tableName)) {
+          // 数据库表名可能存在大小写问题，如h2生成的是大写表名
+            tableName = tableName.toUpperCase();
+        }
+        Assert.state(tableNames.contains(tableName), "表不存在");
+
+        try (Connection conn = this.runner.getDataSource().getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
 
 
@@ -458,7 +405,7 @@ public class DbTool {
 
     @SneakyThrows
     public String getTableColumnType(String tableName, String columnName) {
-        try (Connection conn = this.getRunner().getDataSource().getConnection()) {
+        try (Connection conn = this.runner.getDataSource().getConnection()) {
             DatabaseMetaData metaData = conn.getMetaData();
 
             try (ResultSet rs = metaData.getColumns(null, null, tableName, null)) {
@@ -527,6 +474,45 @@ public class DbTool {
         return sql.toLowerCase().contains("order by");
     }
 
+    public static String getSqlType(Class<?> cls) {
+        if (Enum.class.isAssignableFrom(cls)) {
+            return "varchar(50)";
+        }
+        if (BigDecimal.class.isAssignableFrom(cls)) {
+            return "decimal(10,2)";
+        }
 
 
+        String typeName = cls.getSimpleName().toLowerCase();
+        switch (typeName) {
+            case "byte":
+            case "short":
+            case "int":
+            case "integer":
+                return "INT";
+            case "long":
+                return "BIGINT";
+            case "float":
+                return "FLOAT";
+            case "double":
+                return "DOUBLE";
+            case "boolean":
+                return "BOOLEAN";
+            case "char":
+            case "character":
+            case "string":
+                return "VARCHAR(255)";
+            case "date":
+                return "datetime(6)";
+
+
+            // support collection, convert to string
+            case "list":
+            case "set":
+                return "text";
+
+            default:
+                throw new IllegalStateException("not support field type " + cls);
+        }
+    }
 }

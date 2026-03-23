@@ -1,29 +1,37 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, Modal, Popconfirm, Tabs} from 'antd'
+import {Button, Form, Input, message, Modal, Popconfirm, Switch, Table, Tabs} from 'antd'
 import React from 'react'
 import {
+    ArrUtils,
     ButtonList,
     FieldBoolean,
     FieldDate,
-    HttpUtils,
+    HttpUtils, ObjectUtils,
     Page,
-    PageUtils,
     ProTable,
     StringUtils,
     ViewPassword
 } from "../../../framework";
-import {ApiDoc} from "./ApiDoc";
 
 
 export default class extends React.Component {
 
     state = {
         formValues: {},
-        formOpen: false
+        formOpen: false,
+
+        list: [],
+        grantFormOpen: false
     }
 
     formRef = React.createRef()
     tableRef = React.createRef()
+
+    componentDidMount() {
+        HttpUtils.get("/admin/apiAccount/permList").then(rs => {
+            this.setState({list: rs})
+        })
+    }
 
     handleAdd = () => {
         this.setState({formOpen: true, formValues: {}})
@@ -48,14 +56,9 @@ export default class extends React.Component {
 
     columns = [
         {
-            title: '名称',
+            title: '账户名称',
             dataIndex: 'name',
         },
-        {
-            title: 'appId',
-            dataIndex: 'appId',
-        },
-
         {
             title: 'appSecret',
             dataIndex: 'appSecret',
@@ -79,48 +82,74 @@ export default class extends React.Component {
             },
         },
         {
+            title: '权限',
+            dataIndex: 'perms',
+            render(perms) {
+                if (!perms) {
+                    return
+                }
+                return perms.join(', ')
+            }
+        },
+        {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => (
                 <ButtonList>
                     <Button size='small' perm='api'
-                            onClick={() => PageUtils.open('/system/api/perm?accountId=' + record.id, '账户权限')}
-                            type='primary'>权限</Button>
+                            onClick={() => {
+                                this.handlePreGrant(record);
+                            }}
+                            type='primary'>授权</Button>
                     <Button size='small' perm='api' onClick={() => this.handleEdit(record)}>编辑</Button>
                     <Popconfirm perm='api' title='是否确定删除接口访客' onConfirm={() => this.handleDelete(record)}>
                         <Button size='small'>删除</Button>
                     </Popconfirm>
+                    <Button size='small' perm='api' href={'/admin/apiAccount/export/' + record.id} target={'_blank'}>下载文档</Button>
                 </ButtonList>
             ),
         },
     ]
+
+    handlePreGrant(record) {
+        this.setState({grantFormOpen: true, formValues: ObjectUtils.clone(record)})
+    }
 
     randomAppSecret = () => {
         const appSecret = StringUtils.random(32)
         this.formRef.current.setFieldsValue({appSecret})
     }
 
+    onGrantItemChange = (id, checked) => {
+        const perms = this.state.formValues.perms
+        if (checked) {
+            ArrUtils.add(perms, id)
+        } else {
+            ArrUtils.remove(perms, id)
+        }
+        this.setState({formValues: this.state.formValues})
+    }
+
+    onGrant = () => {
+        const hide = message.loading('授权中...', 0)
+        let accountId = this.state.formValues.id;
+        HttpUtils.post('admin/apiAccount/grant/'+accountId,  this.state.formValues.perms).then(rs => {
+            this.setState({grantFormOpen: false})
+            this.tableRef.current.reload()
+        }).finally(hide)
+    };
+
+
     render() {
         return <Page padding>
             <Tabs items={[
-
                 {
-                    label: '接口列表',
-                    key: '2',
-                    children: <ProTable
-                        rowKey='action'
-                        columns={[
-                            {dataIndex: 'name', title: '名称'},
-                            {dataIndex: 'action', title: '动作'},
-                            {dataIndex: 'desc', title: '描述'},
-
-                        ]}
-                        request={(params,) => HttpUtils.get('admin/api/resource/page', params)}
-                    />
+                    label: '接口文档',
+                    key: 'doc',
+                    children: <iframe src={'/admin/swagger-ui/index.html'} width="100%" height="1000px"></iframe>
                 },
-
                 {
-                    label: '账号列表',
+                    label: '账号管理',
                     key: '1',
                     children: <ProTable
                         actionRef={this.tableRef}
@@ -134,81 +163,33 @@ export default class extends React.Component {
                         request={(params) => HttpUtils.get('admin/apiAccount/page', params)}
                         columns={this.columns}
                     />
-                }, {
-                    label: '接口文档',
-                    key: '3',
-                    children: <ApiDoc/>
                 },
                 {
                     label: '访问记录',
-                    key: '4',
+                    key: 'log',
                     children: <ProTable
-                        request={(params) => HttpUtils.get('admin/apiAccessLog/page', params)}
+                        request={(params) => HttpUtils.get('admin/apiLog/page', params)}
                         columns={[
-
-                            {
-                                title: '接口名称',
-                                dataIndex: 'name',
-
-
-                            },
-
                             {
                                 title: '接口',
-                                dataIndex: 'action',
-
-
+                                dataIndex: 'url',
                             },
-
-                            {
-                                title: 'requestId',
-                                dataIndex: 'requestId',
-
-                            },
-
-                            {
-                                title: '请求数据',
-                                dataIndex: 'requestData',
-
-
-                            },
-
-                            {
-                                title: '响应数据',
-                                dataIndex: 'responseData',
-
-
-                            },
-
                             {
                                 title: 'ip',
                                 dataIndex: 'ip',
-
-
                             },
-
                             {
                                 title: 'ipLocation',
                                 dataIndex: 'ipLocation',
-
-
                             },
-
                             {
                                 title: '执行时间',
                                 dataIndex: 'executionTime',
-
-
                             },
-
                             {
                                 title: '接口账户',
                                 dataIndex: 'accountName',
-
-
-                            },
-
-
+                            }
                         ]}
                     />
                 },
@@ -223,7 +204,7 @@ export default class extends React.Component {
                    onOk={() => this.formRef.current.submit()}
                    onCancel={() => this.setState({formOpen: false})}
                    destroyOnHidden
-                   maskClosable={false}
+                   mask={{closable:false}}
             >
 
                 <Form ref={this.formRef} labelCol={{flex: '100px'}}
@@ -258,6 +239,37 @@ export default class extends React.Component {
                     </Form.Item>
 
                 </Form>
+            </Modal>
+
+
+            <Modal title='权限列表' destroyOnHidden={true} width={800}
+                   open={this.state.grantFormOpen}
+                   onCancel={() => this.setState({grantFormOpen: false, formValues: null})}
+                   onOk={this.onGrant}
+            >
+                <Table
+                    dataSource={this.state.list}
+                    pagination={false}
+                    rowKey='id'
+                    size={'small'}
+                    columns={[
+                        {dataIndex: 'id', title: '标识'},
+                        {dataIndex: 'name', title: '名称'},
+                        {dataIndex: 'description', title: '描述'},
+                        {dataIndex: 'path', title: '路径'},
+                        {
+                            dataIndex: 'option', title: '操作',
+                            render: (_, record) => {
+                                let id = record.id;
+                                return <Switch checked={this.state.formValues.perms.includes(id)}
+                                               onChange={(checked) => {
+                                                   this.onGrantItemChange(id, checked)
+                                               }} />
+                            }
+                        }
+                    ]}
+
+                />
             </Modal>
         </Page>
 
