@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.api;
 
+import cn.hutool.extra.spring.SpringUtil;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.properties.SpringDocConfigProperties;
 import org.springdoc.core.properties.SwaggerUiConfigProperties;
@@ -12,14 +13,19 @@ import org.springframework.util.Assert;
 @RequiredArgsConstructor
 public class ApiConfigValidator implements CommandLineRunner {
 
-    private final SpringDocConfigProperties springDocConfigProperties;
-    private final SwaggerUiConfigProperties swaggerUiConfigProperties;
 
     @Override
     public void run(String... args) throws Exception {
-        String docPath = springDocConfigProperties.getApiDocs().getPath();
-        String swaggerPath = swaggerUiConfigProperties.getPath();
-        Assert.state("/admin/api-docs".equals(docPath), "必须配置" + Constants.SPRINGDOC_PREFIX + ".path为/admin/api-docs");
-        Assert.state("/admin/".equals(swaggerPath), "必须配置" + Constants.SPRINGDOC_SWAGGER_PREFIX + ".path为/admin/");
+        SpringDocConfigProperties springDocConfigProperties = SpringUtil.getBean(SpringDocConfigProperties.class);
+        if (springDocConfigProperties != null) {
+            String docPath = springDocConfigProperties.getApiDocs().getPath();
+            Assert.state("/admin/api-docs".equals(docPath), "必须配置" + Constants.SPRINGDOC_PREFIX + ".path为/admin/api-docs");
+        }
+
+        SwaggerUiConfigProperties swaggerUiConfigProperties = SpringUtil.getBean(SwaggerUiConfigProperties.class);
+        if (swaggerUiConfigProperties != null) {
+            String swaggerPath = swaggerUiConfigProperties.getPath();
+            Assert.state("/admin/".equals(swaggerPath), "必须配置" + Constants.SPRINGDOC_SWAGGER_PREFIX + ".path为/admin/");
+        }
     }
 }
