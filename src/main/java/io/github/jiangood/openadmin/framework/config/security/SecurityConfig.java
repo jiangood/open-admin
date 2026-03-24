@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
+import cn.hutool.core.collection.CollUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
 import io.github.jiangood.openadmin.lang.ArrayTool;
@@ -54,15 +55,16 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
-                    authz .requestMatchers("/admin/public/**","/admin/auth/**").permitAll()
+                    authz.requestMatchers("/admin/public/**", "/admin/auth/**").permitAll()
                             .requestMatchers("/admin/**",
-                            // 报表
-                            "/ureport/**",
-                            // 接口文档 springdoc
-                            "/swagger-ui/**",
-                            "/v3/api-docs").authenticated()
-
-                    ;
+                                    // 报表
+                                    "/ureport/**",
+                                    // 接口文档 springdoc的默认地址，以免暴露
+                                    "/swagger-ui/**",
+                                    "/v3/api-docs").authenticated();
+                    if (CollUtil.isNotEmpty(systemProperties.getLoginExcludePathPatterns())) {
+                        authz.requestMatchers(ArrayTool.toStrArr(systemProperties.getLoginExcludePathPatterns())).permitAll();
+                    }
                 })
                 .sessionManagement(cfg -> {
                     int maximumSessions = systemProperties.getMaximumSessions();
@@ -125,9 +127,7 @@ public class SecurityConfig {
     @Order(3)
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/favicon.ico").permitAll()
-                .requestMatchers(ArrayTool.toStrArr(systemProperties.getLoginExcludePathPatterns())).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         );
         return http.build();
     }
