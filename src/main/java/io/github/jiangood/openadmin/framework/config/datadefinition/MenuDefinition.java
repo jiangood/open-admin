@@ -58,15 +58,6 @@ public class MenuDefinition {
      */
     private Boolean disabled;
 
-    private ItemType type;
 
-    public  enum ItemType {
-
-        // 分组，区别文件夹， 在同一个阶层，分组显示
-        GROUP,
-
-        // 分割线
-        DIVIDER,
-    }
 
 }

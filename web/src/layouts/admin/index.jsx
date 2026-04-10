@@ -20,7 +20,6 @@ export default class extends React.Component {
         menuTree: [],
         menuMap: {},
         pathMenuMap: {},
-        defaultOpenKeys: null,
         menuLoading:true,
 
 
@@ -49,8 +48,7 @@ export default class extends React.Component {
         this.setState({menuLoading: true})
         HttpUtils.get('/admin/menuInfo').then(info => {
             const {menuTree, pathMenuMap, menuMap} = info
-            const defaultOpenKeys = [menuTree.find(e => e.children != null).key]; //打开第一个文件夹
-            this.setState({menuMap, defaultOpenKeys})
+            this.setState({menuMap})
 
             let pathname = PageUtils.currentPathname();
 
@@ -142,7 +140,6 @@ export default class extends React.Component {
                      theme='dark'
                      mode="inline"
                      className='left-menu'
-                     defaultOpenKeys={this.state.defaultOpenKeys}
                      onClick={({key}) => {
                          const menu = this.state.menuMap[key]
                          let {path} = menu;

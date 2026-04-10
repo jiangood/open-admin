@@ -84,6 +84,7 @@ public class AuthController {
             }
             catch (AuthenticationException e) {
                 loginAttemptService.onFailed(username);
+                log.error("登录失败",e);
                 return AjaxResult.err("账号或密码错误");
             }
         }

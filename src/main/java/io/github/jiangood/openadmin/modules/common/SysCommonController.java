@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.common;
 
+import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
@@ -127,15 +128,14 @@ public class SysCommonController {
                 .map(def -> {
                     MenuItem item = new MenuItem();
                     item.setKey(def.getId());
+                    Assert.notNull(def.getName(), "菜单名称不能为空");
                     item.setLabel(def.getName());
                     item.setTitle(def.getName().substring(0, 1));
                     item.setParentKey(def.getPid());
                     item.setIcon(def.getIcon());
                     item.setPath(StrUtil.nullToEmpty(def.getPath()));
 
-                    if(def.getType() != null ){
-                        item.setType(def.getType().name().toLowerCase());
-                    }
+
 
                     if (def.getPath() != null) {
                         pathMenuMap.put(def.getPath(), def);
