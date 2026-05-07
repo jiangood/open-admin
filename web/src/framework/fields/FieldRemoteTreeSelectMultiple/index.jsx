@@ -1,8 +1,9 @@
-import {Spin, TreeSelect} from 'antd';
+import { Spin, TreeSelect } from 'antd';
 import React from 'react';
-import {HttpUtils, StringUtils} from "../../utils";
+import { StringUtils } from '../../utils';
+import BaseRemoteSelect from '../BaseRemoteSelect';
 
-export class FieldRemoteTreeSelectMultiple extends React.Component {
+export class FieldRemoteTreeSelectMultiple extends BaseRemoteSelect {
     static defaultProps = {
         treeDefaultExpandAll: true,
         style: {
@@ -11,50 +12,30 @@ export class FieldRemoteTreeSelectMultiple extends React.Component {
         },
     };
 
-    state = {
-        data: [],
-        loading: false,
-        key: this.props.id,
-    };
-
-    componentDidMount() {
-        this.loadData();
+    getLoadParams() {
+        return undefined;
     }
 
-    loadData = async () => {
-        const {url} = this.props;
-        this.setState({loading: true});
-        try {
-            const rs = await HttpUtils.get(url);
-            this.setState({data: rs});
-        } finally {
-            this.setState({loading: false});
-        }
-    };
-
     render() {
-        const {value, onChange, style, treeDefaultExpandAll} = this.props;
-        const {data, loading} = this.state;
+        const { value, onChange, style, treeDefaultExpandAll } = this.props;
+        const { data, loading } = this.state;
 
-        if (loading) {
-            return <Spin/>;
-        }
+        if (loading) return <Spin />;
 
         return (
             <TreeSelect
                 style={style}
-                allowClear={true}
-                dropdownStyle={{maxHeight: 400, overflow: 'auto'}}
+                allowClear
+                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
                 treeData={data}
                 showCheckedStrategy={TreeSelect.SHOW_ALL}
                 value={value || undefined}
                 onChange={onChange}
-                multiple={true}
-                filterTreeNode={(inputValue, treeNode) => {
-                    const {title} = treeNode;
-                    return StringUtils.contains(title, inputValue);
-                }}
-                treeLine={{showLeafIcon: true}}
+                multiple
+                filterTreeNode={(inputValue, treeNode) =>
+                    StringUtils.contains(treeNode.title, inputValue)
+                }
+                treeLine={{ showLeafIcon: true }}
                 treeDefaultExpandAll={treeDefaultExpandAll}
             />
         );
