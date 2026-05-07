@@ -60,7 +60,7 @@ public class ExampleJob extends BaseJob {
 |------|------|------|--------|
 | `getFields()` | 获取参数字段列表 | - | `List<FieldDescription>` |
 
-## 作业管理
+## 定时作业
 
 ### 作业实体
 

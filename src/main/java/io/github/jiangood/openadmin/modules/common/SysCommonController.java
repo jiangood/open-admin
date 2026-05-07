@@ -53,6 +53,7 @@ public class SysCommonController {
         data.put("captchaType", systemProperties.getCaptchaType());
         data.put("copyright", systemProperties.getCopyright());
         data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
+        data.put("showLogo", systemProperties.isShowLogo());
         data.put("logoUrl", systemProperties.getLogoUrl());
         data.put("title", systemProperties.getTitle());
 

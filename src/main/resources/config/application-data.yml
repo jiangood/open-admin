@@ -40,7 +40,7 @@ data:
           perm-names: [ 查看,保存,删除 ]
           perm-codes: [ sysDict:view,sysDict:save,sysDict:delete ]
         - id: job
-          name: 作业管理
+          name: 定时作业
           path: /system/job
           icon: OrderedListOutlined
           perm-names: [ 查看,保存,执行一次,清理日志 ]
