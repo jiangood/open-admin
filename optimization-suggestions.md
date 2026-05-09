@@ -767,6 +767,16 @@ UMI 配置中开启 `dynamicImport`。
 
 **建议**: UmiJS 配置 `publicPath` 为 CDN 地址，配合 Webpack 的 content hash 做长期缓存。
 
+### 11.8 未使用 React Compiler 🟡 ⭐⭐
+
+**问题**: 函数组件需要手动使用 `useMemo` / `useCallback` / `React.memo` 避免不必要的重新渲染，容易遗漏或误用，导致冗余渲染或 bug。
+
+**建议**: 接入 React Compiler（原 React Forget），在构建时自动记忆组件和 Hook 的返回值，无需手动编写 memoization。
+- 项目已使用 React 19，兼容 React Compiler
+- UmiJS 4 中通过 `extraBabelPlugins` 或 `vite.extraBabelPlugins` 配置 Babel 插件
+- 接入后可以逐步移除手动 `useMemo` / `useCallback`，减少心智负担
+- 注意：首次接入可能需要对部分代码添加 `"use no memo"` 指令排除不兼容的组件
+
 ---
 
 ## 12. 前端 - 代码质量
