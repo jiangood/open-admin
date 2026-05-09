@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.system.dao.impl;
+package io.github.jiangood.openadmin.modules.system.repository.impl;
 
 import io.github.jiangood.openadmin.framework.config.datadefinition.DataPropertiesFactory;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
