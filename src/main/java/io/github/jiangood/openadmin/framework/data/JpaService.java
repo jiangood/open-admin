@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.system.service;
+package io.github.jiangood.openadmin.framework.data;
 
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
