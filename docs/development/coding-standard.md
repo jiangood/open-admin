@@ -319,20 +319,20 @@ public class XxxController {
 
 ##### YAML 权限定义
 
-权限在 `application-data.yml` 中通过 `perms` 对象列表定义，配合自动前缀推导实现最简配置：
+权限在 `application-data.yml` 中通过 `perms` 对象列表定义：
 
 ```yaml
 data:
   menus:
-    - id: sysUser                    # 前缀自动推导为 sys-user（kebab-case）
+    - id: sys-user                    # id 即权限码前缀
       name: 用户管理
-      perms:                         # 对象列表，每项一个权限
-        - {name: 查询, code: query}  # 完整码: sys-user:query
-        - {name: 新增, code: save}   # 完整码: sys-user:save
-        - {name: 删除, code: delete}
+      perms:                          # 对象列表，每项一个权限
+        - {name: 查询, code: query}   # 完整码: sys-user:query
+        - {name: 新增, code: save}    # 完整码: sys-user:save
 ```
 
-- **前缀**：权限码前缀为菜单的 `id`（kebab-case），如 `id: sys-user` 对应前缀 `sys-user`。驼峰 id 会自动转换（`sysUser` → `sys-user`）
+- **前缀**：权限码前缀为菜单的 `id`（kebab-case）。驼峰 id 会自动转换（`sysUser` → `sys-user`）
+- **`code` 格式**：推荐只写 action 段（如 `query`），由 `id` + `code` 拼接出完整码。也支持直接写完整码（`sys-user:query`），便于从旧项目迁移
 - **对象列表**：`perm-names`/`perm-codes` 两个数组已被 `perms` 对象列表替代，避免位置耦合
 - **行内流**：每个权限按 `{name: 名称, code: action}` 行内格式书写，兼顾紧凑和可读性
 
