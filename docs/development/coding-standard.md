@@ -332,7 +332,7 @@ data:
         - {name: 删除, code: delete}
 ```
 
-- **前缀推导**：权限码前缀默认从 `id` 字段 kebab-case 化得来（`sysUser`→`sys-user`），绝大多数情况无需显式指定
+- **前缀**：权限码前缀为菜单的 `id`（kebab-case），如 `id: sys-user` 对应前缀 `sys-user`
 - **`perm-prefix` 覆盖**：如需自定义前缀，在菜单节点上加 `perm-prefix: custom-prefix` 字段
 - **对象列表**：`perm-names`/`perm-codes` 两个数组已被 `perms` 对象列表替代，避免位置耦合
 - **行内流**：每个权限按 `{name: 名称, code: action}` 行内格式书写，兼顾紧凑和可读性

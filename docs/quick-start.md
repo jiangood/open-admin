@@ -85,7 +85,7 @@ pnpm dev
 ```yaml
 data:
   menus:
-    - id: sysUser
+    - id: sys-user
       name: 用户管理
       path: /system/user
       icon: UserOutlined

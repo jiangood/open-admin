@@ -50,7 +50,7 @@ data:
       seq: 10000
       icon: SettingOutlined
       children:
-        - id: sysUser
+        - id: sys-user
           name: 用户管理
           path: /system/user
           icon: UserOutlined
@@ -60,7 +60,7 @@ data:
             - {name: 删除, code: delete}
             - {name: 重置密码, code: reset-password}
             - {name: 分配权限, code: grant-permission}
-        - id: sysOrg
+        - id: sys-org
           name: 机构管理
           path: /system/org
           icon: ApartmentOutlined
@@ -68,7 +68,7 @@ data:
             - {name: 查询, code: query}
             - {name: 新增, code: save}
             - {name: 删除, code: delete}
-        - id: sysRole
+        - id: sys-role
           name: 角色管理
           path: /system/role
           icon: IdcardOutlined
@@ -77,7 +77,7 @@ data:
             - {name: 新增, code: save}
             - {name: 删除, code: delete}
             - {name: 分配权限, code: grant-permission}
-        - id: sysManual
+        - id: sys-manual
           name: 操作手册
           path: /system/sysManual
           icon: CopyOutlined
@@ -85,7 +85,7 @@ data:
             - {name: 查看, code: query}
             - {name: 新增, code: save}
             - {name: 删除, code: delete}
-        - id: sysDict
+        - id: sys-dict
           name: 数据字典
           path: /system/dict
           icon: FileSearchOutlined
@@ -103,7 +103,7 @@ data:
             - {name: 删除, code: delete}
             - {name: 执行一次, code: trigger}
             - {name: 清理日志, code: clean-log}
-        - id: sysFile
+        - id: sys-file
           name: 文件管理
           path: /system/file
           icon: FolderOpenOutlined
@@ -118,7 +118,7 @@ data:
             - {name: 查询, code: query}
             - {name: 新增, code: save}
             - {name: 删除, code: delete}
-        - id: sysLog
+        - id: sys-log
           name: 操作日志
           path: /system/log
           icon: FileSearchOutlined
