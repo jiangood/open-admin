@@ -5,10 +5,10 @@ import cn.hutool.core.bean.copier.CopyOptions;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import io.github.jiangood.openadmin.lang.JsonTool;
-import io.github.jiangood.openadmin.lang.ResourceTool;
-import io.github.jiangood.openadmin.lang.YmlTool;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
+import io.github.jiangood.openadmin.util.JsonTool;
+import io.github.jiangood.openadmin.util.ResourceTool;
+import io.github.jiangood.openadmin.util.YmlTool;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 

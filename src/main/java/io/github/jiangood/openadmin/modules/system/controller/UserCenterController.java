@@ -1,13 +1,13 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
-import io.github.jiangood.openadmin.modules.common.LoginTool;
-import io.github.jiangood.openadmin.modules.system.dto.request.UpdatePwdRequest;
+import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.modules.system.dto.request.UpdatePwdReq;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterInfo;
-import io.github.jiangood.openadmin.modules.system.dto.response.UserResponse;
+import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,17 +15,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("admin/userCenter")
+@RequiredArgsConstructor
 public class UserCenterController {
 
-    @Resource
-    private SysUserService sysUserService;
+    private final SysUserService sysUserService;
 
 
     @RequestMapping("info")
     public AjaxResult info() {
         LoginUser sysUser = LoginTool.getUser();
 
-        UserResponse user = sysUserService.findOneDto(sysUser.getId());
+        UserVO user = sysUserService.findOneDto(sysUser.getId());
 
         UserCenterInfo info = new UserCenterInfo();
         info.setName(sysUser.getName());
@@ -41,8 +41,8 @@ public class UserCenterController {
     }
 
 
-    @PostMapping("updatePwd")
-    public AjaxResult updatePwd(@RequestBody UpdatePwdRequest request) {
+    @PostMapping("update-pwd")
+    public AjaxResult updatePwd(@RequestBody UpdatePwdReq request) {
         String newPassword = request.getNewPassword();
         sysUserService.updatePwd(LoginTool.getUserId(), newPassword);
         return AjaxResult.ok();

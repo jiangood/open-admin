@@ -25,14 +25,14 @@ public class SysUserMessageService {
     public Page<SysUserMessage> findByUser(String id, Boolean read, Pageable pageable) {
         Spec<SysUserMessage> spec = Spec.<SysUserMessage>of().eq(SysUserMessage.Fields.user + ".id", id);
         if (read != null) {
-            spec.eq(SysUserMessage.Fields.isRead, read);
+            spec.eq(SysUserMessage.Fields.read, read);
         }
 
         return sysUserMessageRepository.findAll(spec, pageable);
     }
 
     public long countUnReadByUser(String id) {
-        return sysUserMessageRepository.count(Spec.<SysUserMessage>of().eq(SysUserMessage.Fields.user + ".id", id).eq(SysUserMessage.Fields.isRead, false));
+        return sysUserMessageRepository.count(Spec.<SysUserMessage>of().eq(SysUserMessage.Fields.user + ".id", id).eq(SysUserMessage.Fields.read, false));
     }
 
     @Transactional
@@ -47,7 +47,7 @@ public class SysUserMessageService {
     public void read(String id) {
         SysUserMessage db = sysUserMessageRepository.findOne(id);
         db.setReadTime(new Date());
-        db.setIsRead(true);
+        db.setRead(true);
         sysUserMessageRepository.save(db);
     }
 

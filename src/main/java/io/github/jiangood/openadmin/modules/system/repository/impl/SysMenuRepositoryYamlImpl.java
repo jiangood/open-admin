@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.repository.impl;
 
 import io.github.jiangood.openadmin.framework.config.datadefinition.DataPropertiesFactory;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

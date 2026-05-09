@@ -1,7 +1,5 @@
 import React from "react";
 import {Button, Form, Input, Modal} from "antd";
-
-
 import {history} from 'umi'
 import {HttpUtils} from "../../framework";
 
@@ -9,7 +7,7 @@ export default class extends React.Component {
 
 
     onFinish = (values) => {
-        HttpUtils.post('admin/userCenter/updatePwd', values).then(() => {
+        HttpUtils.post('admin/userCenter/update-pwd', values).then(() => {
             Modal.success({
                 title: '提示',
                 content: '修改密码成功',
@@ -23,7 +21,7 @@ export default class extends React.Component {
 
     validator = (rule, value) => {
         return new Promise((resolve, reject) => {
-            HttpUtils.get("admin/sysUser/pwdStrength", {password: value}).then(response => {
+            HttpUtils.get("admin/sysUser/pwd-strength", {password: value}).then(response => {
                 const rs = response.data
                 if (!rs.success) {
                     reject(rs.message)

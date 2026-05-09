@@ -6,11 +6,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SysOrgRepository extends BaseRepository<SysOrg, String> {
 
-    SysOrg findByThirdId(String thirdId);
+    Optional<SysOrg> findByThirdId(String thirdId);
 
     List<SysOrg> findByPid(String pid, Sort sort);
 

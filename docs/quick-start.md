@@ -70,7 +70,7 @@ pnpm dev
 
 1. **Entity** — `modules/xxx/entity/` 下创建实体类，继承 `BaseEntity`
 2. **Repository** — `modules/xxx/repository/` 下创建 Repository 接口，继承 `BaseRepository`
-3. **Service** — `modules/xxx/service/` 下创建 Service，继承 `JpaService`
+3. **Service** — `modules/xxx/service/` 下创建 Service，使用构造器注入 Repository
 4. **Controller** — `modules/xxx/controller/` 下创建 REST 接口
 
 ### 前端

@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.api.service;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
 import io.github.jiangood.openadmin.modules.api.repository.ApiAccountRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ApiAccountService {
 
-    @Resource
-    ApiAccountRepository apiAccountRepository;
+    private final ApiAccountRepository apiAccountRepository;
 
     public ApiAccount findByAppId(String appId) {
         return apiAccountRepository.findByField(ApiAccount.Fields.appId, appId);
@@ -39,32 +39,28 @@ public class ApiAccountService {
     }
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         apiAccountRepository.deleteById(id);
     }
 
-    public Page<ApiAccount> getPage(Specification<ApiAccount> spec, Pageable pageable) {
+    public Page<ApiAccount> findAll(Specification<ApiAccount> spec, Pageable pageable) {
         return apiAccountRepository.findAll(spec, pageable);
     }
 
-    public ApiAccount detail(String id) {
-        return apiAccountRepository.findOne(id);
-    }
-
-    public ApiAccount get(String id) {
-        return apiAccountRepository.findOne(id);
-    }
-
-    public List<ApiAccount> getAll() {
+    public List<ApiAccount> findAll() {
         return apiAccountRepository.findAll();
     }
 
-    public List<ApiAccount> getAll(Sort sort) {
+    public List<ApiAccount> findAll(Sort sort) {
         return apiAccountRepository.findAll(sort);
     }
 
-    public List<ApiAccount> getAll(Specification<ApiAccount> s, Sort sort) {
+    public List<ApiAccount> findAll(Specification<ApiAccount> s, Sort sort) {
         return apiAccountRepository.findAll(s, sort);
+    }
+
+    public ApiAccount findById(String id) {
+        return apiAccountRepository.findOne(id);
     }
 
     public Spec<ApiAccount> spec() {

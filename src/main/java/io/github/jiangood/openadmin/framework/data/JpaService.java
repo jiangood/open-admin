@@ -2,8 +2,9 @@ package io.github.jiangood.openadmin.framework.data;
 
 import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
-import io.github.jiangood.openadmin.lang.SpringTool;
+import io.github.jiangood.openadmin.util.SpringTool;
 import jakarta.persistence.Entity;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.ClassMetadata;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Component
+@Slf4j
 public class JpaService {
 
 
@@ -46,7 +48,7 @@ public class JpaService {
             return list;
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("查找实体类失败", e);
             return Collections.emptyList();
         }
     }

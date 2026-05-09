@@ -1,24 +1,24 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.DropEvent;
-import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
-import io.github.jiangood.openadmin.lang.BeanTool;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
-import io.github.jiangood.openadmin.lang.tree.drop.DropResult;
-import io.github.jiangood.openadmin.lang.tree.drop.TreeDropTool;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.dto.antd.DropEvent;
+import io.github.jiangood.openadmin.util.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.util.BeanTool;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
+import io.github.jiangood.openadmin.util.tree.drop.DropResult;
+import io.github.jiangood.openadmin.util.tree.drop.TreeDropTool;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
-import io.github.jiangood.openadmin.modules.common.LoginTool;
-import io.github.jiangood.openadmin.modules.system.dto.request.OrgRequest;
+import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.modules.system.dto.request.OrgReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
@@ -34,13 +34,12 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("admin/sysOrg")
 @Slf4j
+@RequiredArgsConstructor
 public class SysOrgController {
 
-    @Resource
-    private SysOrgService sysOrgService;
+    private final SysOrgService sysOrgService;
 
-    @Resource
-    private PermissionStaleService permissionStaleService;
+    private final PermissionStaleService permissionStaleService;
 
     /**
      * 管理页面的树，包含禁用的
@@ -65,7 +64,7 @@ public class SysOrgController {
         List<String> orgPermissions = LoginTool.getOrgPermissions();
         q.in("id", orgPermissions);
 
-        List<SysOrg> list = sysOrgService.getAll(q, Sort.by("seq"));
+        List<SysOrg> list = sysOrgService.findAll(q, Sort.by("seq"));
 
 
         return AjaxResult.ok().data(list2Tree(list));
@@ -75,7 +74,7 @@ public class SysOrgController {
     @Log("机构-保存")
     @PreAuthorize("hasAuthority('sysOrg:save')")
     @PostMapping("save")
-    public AjaxResult saveOrUpdate(@RequestBody OrgRequest input, RequestBodyKeys requestBodyKeys) throws Exception {
+    public AjaxResult saveOrUpdate(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
         if (input.getLeader() != null) {
             if (StrUtil.isEmpty(input.getLeader().getId())) {
                 input.setLeader(null);
@@ -94,15 +93,15 @@ public class SysOrgController {
     @Log("机构-删除")
     @PreAuthorize("hasAuthority('sysOrg:delete')")
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        sysOrgService.delete(idRequest.getId());
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        sysOrgService.deleteById(idRequest.getId());
         permissionStaleService.markUserStale(LoginTool.getUser().getUsername());
         return AjaxResult.ok().msg("删除机构成功");
     }
 
     @GetMapping("detail")
     public AjaxResult detail(String id) {
-        SysOrg org = sysOrgService.detail(id);
+        SysOrg org = sysOrgService.findById(id).orElse(null);
         return AjaxResult.ok().data(org);
     }
 
@@ -124,7 +123,7 @@ public class SysOrgController {
     @PostMapping("sort")
     @PreAuthorize("hasAuthority('sysOrg:save')")
     public AjaxResult sort(@RequestBody DropEvent e) {
-        List<SysOrg> nodes = sysOrgService.getAll();
+        List<SysOrg> nodes = sysOrgService.findAll();
         List<TreeOption> tree = list2Tree(nodes);
 
         DropResult dropResult = TreeDropTool.onDrop(e, tree);
@@ -136,7 +135,7 @@ public class SysOrgController {
     }
 
 
-    @GetMapping("allTree")
+    @GetMapping("all-tree")
     public AjaxResult allTree() {
         List<SysOrg> list = this.sysOrgService.findByLoginUser(true, true);
 
@@ -144,7 +143,7 @@ public class SysOrgController {
     }
 
 
-    @GetMapping("unitTree")
+    @GetMapping("unit-tree")
     public AjaxResult unitTree() throws Exception {
         List<SysOrg> list = this.sysOrgService.findByLoginUser(false, false);
 
@@ -154,7 +153,7 @@ public class SysOrgController {
         return AjaxResult.ok().data(list2Tree(list));
     }
 
-    @GetMapping("deptTree")
+    @GetMapping("dept-tree")
     public AjaxResult deptTree() {
         List<SysOrg> list = this.sysOrgService.findByLoginUser(true, false);
 

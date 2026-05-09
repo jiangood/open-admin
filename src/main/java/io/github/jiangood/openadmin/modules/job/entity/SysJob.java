@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.job.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.DBConstants;
 import io.github.jiangood.openadmin.framework.data.converter.ToMapConverter;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -19,6 +19,7 @@ import java.util.Map;
 @Getter
 @Setter
 @Entity
+@Table(name = "sys_job")
 @FieldNameConstants
 public class SysJob extends BaseEntity {
 

@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 
 @Remark("数据权限类型")
 public enum DataPermType {

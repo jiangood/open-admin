@@ -6,7 +6,7 @@ import {DeviceUtils, HttpUtils, MessageUtils,  PageUtils, SysUtils} from "../../
 
 
 const ID = 'header-right';
-export default class HeaderRight extends React.Component {
+export class HeaderRight extends React.Component {
 
     state = {
         isMobileDevice: false
@@ -27,7 +27,7 @@ export default class HeaderRight extends React.Component {
             await MessageUtils.alert('退出登录成功');
             history.replace('/login')
         }).catch(async e => {
-            let confirm = await MessageUtils.confirm('退出登录失败，是否清空缓存');
+            const confirm = await MessageUtils.confirm('退出登录失败，是否清空缓存');
             if (confirm) {
                 localStorage.clear();
                 history.replace('/login')

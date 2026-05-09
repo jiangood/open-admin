@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.framework.config.init;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycle;
-import io.github.jiangood.openadmin.lang.PasswordTool;
+import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -56,7 +56,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
         log.info("初始化管理员中....");
         String account = "admin";
 
-        SysUser admin = sysUserRepository.findByAccount(account);
+        SysUser admin = sysUserRepository.findByAccount(account).orElse(null);
         if (admin == null) {
             String pwd = PasswordTool.random();
             admin = new SysUser();

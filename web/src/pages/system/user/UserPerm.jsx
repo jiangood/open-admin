@@ -20,7 +20,7 @@ export default class UserPerm extends React.Component {
     show(item) {
         this.setState({visible: true})
 
-        HttpUtils.get('admin/sysUser/getPermInfo', {id: item.id}).then(rs => {
+        HttpUtils.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
             this.setState({formValues: rs})
             this.formRef.current.setFieldsValue(rs)
         })
@@ -34,7 +34,7 @@ export default class UserPerm extends React.Component {
         })
 
 
-        HttpUtils.post('admin/sysUser/grantPerm', values).then(rs => {
+        HttpUtils.post('admin/sysUser/grant-perm', values).then(rs => {
             this.setState({
                 visible: false,
                 confirmLoading: false
@@ -49,7 +49,7 @@ export default class UserPerm extends React.Component {
     }
 
     render() {
-        let {visible, confirmLoading} = this.state
+        const {visible, confirmLoading} = this.state
 
         return <Modal
             title="授权"

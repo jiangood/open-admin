@@ -25,7 +25,7 @@ function FieldRemoteSelectTest() {
   return (
     <Section title="FieldRemoteSelect — 远程搜索单选（字典类型选项）">
       <div>选中值: {JSON.stringify(value)}</div>
-      <FieldRemoteSelect url="/admin/dict/typeOptions" value={value} onChange={setValue} />
+      <FieldRemoteSelect url="/admin/dict/type-options" value={value} onChange={setValue} />
     </Section>
   );
 }
@@ -75,7 +75,7 @@ function FieldRemoteTreeTest() {
   return (
     <Section title="FieldRemoteTree — 扁平树多选（部门树）">
       <div>选中值: {JSON.stringify(value)}</div>
-      <FieldRemoteTree url="/admin/sysOrg/deptTree" value={value} onChange={setValue} />
+      <FieldRemoteTree url="/admin/sysOrg/dept-tree" value={value} onChange={setValue} />
     </Section>
   );
 }

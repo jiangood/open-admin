@@ -27,7 +27,7 @@ export class Gap extends React.Component {
         };
 
 
-        let sizePx = SizeMap[size];
+        const sizePx = SizeMap[size];
         const isHorizontal = direction === 'horizontal';
 
 

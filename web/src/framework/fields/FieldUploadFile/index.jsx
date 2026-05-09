@@ -1,7 +1,7 @@
 import React from "react";
 import ImgCrop from "antd-img-crop";
 import {Modal, Upload} from "antd";
-import UploadOutlined from "@ant-design/icons/lib/icons/UploadOutlined";
+import { UploadOutlined } from "@ant-design/icons";
 import {ViewFile} from "../../views";
 import {ObjectUtils} from "../../utils";
 

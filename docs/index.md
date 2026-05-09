@@ -23,8 +23,8 @@ open-admin 是一个小型管理系统框架（后台管理脚手架），提供
 
 ### API / 后端
 
-- **[数据规范](./api/backend/data-spec.md)** — Spec 动态查询构建器
-- **[工具类](./api/backend/utils.md)** — ExcelTool、JdbcUtils、LoginTool 等
+- **[Spec 动态查询](./api/backend/data-spec.md)** — JPA Spec 动态查询构建器
+- **[工具类](./api/backend/utils.md)** — ExcelTool、JdbcUtils、LoginTool、TreeTool 等
 - **[注解](./api/backend/annotations.md)** — ID 生成、作业调度等注解
 - **[验证器](./api/backend/validators.md)** — 手机号、身份证等校验注解
 - **[作业调度](./api/backend/job.md)** — Quartz 定时任务

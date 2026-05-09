@@ -6,7 +6,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobExecuteRecordRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -22,19 +22,13 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SysJobService {
 
-    @Resource
-    private SysJobRepository sysJobRepository;
-
-    @Resource
-    QuartzManager quartzService;
-
-    @Resource
-    SysJobExecuteRecordRepository sysJobExecuteRecordRepository;
-
-    @Resource
-    Scheduler scheduler;
+    private final SysJobRepository sysJobRepository;
+    private final QuartzManager quartzService;
+    private final SysJobExecuteRecordRepository sysJobExecuteRecordRepository;
+    private final Scheduler scheduler;
 
 
     @Transactional
@@ -78,27 +72,23 @@ public class SysJobService {
     }
 
     // BaseService 方法
-    public Page<SysJob> getPage(Specification<SysJob> spec, Pageable pageable) {
+    public java.util.Optional<SysJob> findById(String id) {
+        return sysJobRepository.findById(id);
+    }
+
+    public Page<SysJob> findAll(Specification<SysJob> spec, Pageable pageable) {
         return sysJobRepository.findAll(spec, pageable);
     }
 
-    public SysJob detail(String id) {
-        return sysJobRepository.findById(id).orElse(null);
-    }
-
-    public SysJob get(String id) {
-        return sysJobRepository.findById(id).orElse(null);
-    }
-
-    public List<SysJob> getAll() {
+    public List<SysJob> findAll() {
         return sysJobRepository.findAll();
     }
 
-    public List<SysJob> getAll(Sort sort) {
+    public List<SysJob> findAll(Sort sort) {
         return sysJobRepository.findAll(sort);
     }
 
-    public List<SysJob> getAll(Specification<SysJob> s, Sort sort) {
+    public List<SysJob> findAll(Specification<SysJob> s, Sort sort) {
         return sysJobRepository.findAll(s, sort);
     }
 
@@ -111,7 +101,7 @@ public class SysJobService {
     }
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         sysJobRepository.deleteById(id);
     }
 }

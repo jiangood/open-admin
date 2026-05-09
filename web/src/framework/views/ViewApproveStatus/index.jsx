@@ -9,7 +9,7 @@ import {Component} from "react";
  */
 export class ViewApproveStatus extends Component {
     render() {
-        let {value} = this.props;
+        const {value} = this.props;
        return  DictUtils.dictTag('approveStatus', value)
     }
 }

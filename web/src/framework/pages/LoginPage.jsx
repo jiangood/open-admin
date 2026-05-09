@@ -1,10 +1,12 @@
 import React from 'react';
 import {Button, Form, Input, message, Space} from 'antd';
 import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import "./LoginPage.less"
-import {MessageUtils, SysUtils} from "../utils";
 import {JSEncrypt} from "jsencrypt";
+
+import {MessageUtils, SysUtils} from "../utils";
 import {LoginPageUtils} from "./LoginPageUtils";
+
+import "./LoginPage.less"
 
 
 export class LoginPage extends React.Component {
@@ -56,7 +58,7 @@ export class LoginPage extends React.Component {
 
         const pageStyle = {}
         if (siteInfo.loginBackground) {
-            let url = 'admin/sysFile/preview/' + siteInfo.loginBackground;
+            const url = 'admin/sysFile/preview/' + siteInfo.loginBackground;
             pageStyle.backgroundImage = 'url("' + url + '")'
         }
 
@@ -101,7 +103,7 @@ export class LoginPage extends React.Component {
                     <Input size='large' placeholder='验证码' prefix={<SafetyCertificateOutlined/>}/>
                     <img height={36}
                          width={100}
-                         src={"/admin/auth/captchaImage?_random=" + this.state.random}
+                         src={"/admin/auth/captcha-image?_random=" + this.state.random}
                          onClick={() => {
                              this.setState({random: Math.random()})
                          }}></img>
@@ -124,7 +126,7 @@ export class LoginPage extends React.Component {
     };
 
     renderFormBottom() {
-        let siteInfo = this.state.siteInfo;
+        const siteInfo = this.state.siteInfo;
         if (siteInfo.loginBoxBottomTip) {
             return <div style={{color: 'white', marginTop: 50, fontSize: '14px', textAlign: 'center'}}>
                 <WarningOutlined/> {siteInfo.loginBoxBottomTip}

@@ -1,7 +1,7 @@
 import { Spin, TreeSelect } from 'antd';
 import React from 'react';
 import { StringUtils } from '../../utils';
-import BaseRemoteSelect from '../BaseRemoteSelect';
+import { BaseRemoteSelect } from '../BaseRemoteSelect';
 
 export class FieldRemoteTreeSelect extends BaseRemoteSelect {
     static defaultProps = {

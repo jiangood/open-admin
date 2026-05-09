@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.enums.StatusColor;
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -14,7 +14,7 @@ import lombok.experimental.FieldNameConstants;
 @Setter
 @Entity
 @FieldNameConstants
-@Table(uniqueConstraints = @UniqueConstraint(name = "uk_sys_dict_item", columnNames = {"typeCode", "code"}))
+@Table(name = "sys_dict_item", uniqueConstraints = @UniqueConstraint(name = "uk_sys_dict_item", columnNames = {"typeCode", "code"}))
 public class SysDictItem extends BaseEntity {
 
 

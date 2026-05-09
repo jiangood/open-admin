@@ -1,11 +1,11 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.service.SysLogService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("admin/sysLog")
+@RequiredArgsConstructor
 public class SysLogController {
 
 
-    @Resource
-    private SysLogService service;
+    private final SysLogService service;
 
 
     @PreAuthorize("hasAuthority('sysLog:view')")
@@ -31,7 +31,7 @@ public class SysLogController {
         q.betweenDateRange(SysLog.Fields.operationTime, dateRange, true);
         q.like(SysLog.Fields.operation, operation);
 
-        Page<SysLog> page = service.getPage(q, pageable);
+        Page<SysLog> page = service.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }
 

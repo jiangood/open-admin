@@ -6,16 +6,16 @@ export class ViewFile extends React.Component {
 
 
     render() {
-        let fileId = this.props.value
+        const fileId = this.props.value
 
         if (!fileId) {
             return <Empty/>;
         }
 
-        let arr = fileId.split(',');
+        const arr = fileId.split(',');
 
-        let urlList = arr.map(id => 'admin/sysFile/preview/' + id);
-        let height = this.props.height;
+        const urlList = arr.map(id => 'admin/sysFile/preview/' + id);
+        const height = this.props.height;
 
         if(urlList.length === 1){
             const url = urlList[0]

@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.api.entity;
 
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.converter.ToListConverter;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.validator.ValidateIpv4;
@@ -41,7 +41,7 @@ public class ApiAccount extends BaseEntity {
 
     @Remark("状态")
     @NotNull(message = "状态不能为空")
-    private Boolean enable;
+    private Boolean enabled;
 
 
     @Remark("有效期")

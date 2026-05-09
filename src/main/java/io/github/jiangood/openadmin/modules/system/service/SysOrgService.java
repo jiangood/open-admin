@@ -4,15 +4,15 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.lang.tree.TreeManager;
-import io.github.jiangood.openadmin.lang.tree.drop.DropResult;
-import io.github.jiangood.openadmin.modules.common.LoginTool;
+import io.github.jiangood.openadmin.util.tree.TreeManager;
+import io.github.jiangood.openadmin.util.tree.drop.DropResult;
+import io.github.jiangood.openadmin.framework.common.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Page;
@@ -27,30 +27,30 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 @CacheConfig(cacheNames = "sys_org")
 public class SysOrgService {
 
-    @Resource
-    private SysOrgRepository sysOrgRepository;
-    @Resource
-    private SysUserRepository sysUserRepository;
+    private final SysOrgRepository sysOrgRepository;
+    private final SysUserRepository sysUserRepository;
 
 
-    public SysOrg findByThirdId(String thirdId) {
+    public Optional<SysOrg> findByThirdId(String thirdId) {
         return sysOrgRepository.findByThirdId(thirdId);
     }
 
     @Transactional
     public void resetPidByThird(String id) {
-        SysOrg db = sysOrgRepository.findOne(id);
+        SysOrg db = sysOrgRepository.findById(id).orElse(null);
         String thirdPid = db.getThirdPid();
         if (thirdPid != null) {
-            SysOrg parent = sysOrgRepository.findByThirdId(thirdPid);
+            SysOrg parent = sysOrgRepository.findByThirdId(thirdPid).orElse(null);
             if (parent != null) {
                 db.setPid(parent.getId());
                 sysOrgRepository.save(db);
@@ -60,7 +60,7 @@ public class SysOrgService {
     }
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         long count = sysOrgRepository.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
 
@@ -110,7 +110,7 @@ public class SysOrgService {
         }
 
         sysOrgRepository.updateField(input, requestKeys);
-        return sysOrgRepository.findOne(input.getId());
+        return sysOrgRepository.findById(input.getId()).orElse(null);
     }
 
 
@@ -166,19 +166,19 @@ public class SysOrgService {
      * @param orgId
      */
     public SysOrg findUnitByOrgId(String orgId) {
-        SysOrg org = sysOrgRepository.findOne(orgId);
+        SysOrg org = sysOrgRepository.findById(orgId).orElse(null);
 
         return this.findUnit(org);
     }
 
 
     public SysUser getDeptLeader(String userId) {
-        SysUser user = sysUserRepository.findOne(userId);
+        SysUser user = sysUserRepository.findById(userId).orElse(null);
         String deptId = user.getDeptId();
 
         // 如果没有找到部门领导，则机构树的上一级部门找
         while (deptId != null) {
-            SysOrg dept = sysOrgRepository.findOne(deptId);
+            SysOrg dept = sysOrgRepository.findById(deptId).orElse(null);
             if (dept == null || dept.getType() != OrgType.TYPE_DEPT) {
                 break;
             }
@@ -204,48 +204,40 @@ public class SysOrgService {
 
     }
 
-    public SysOrg findOne(String id) {
-        return sysOrgRepository.findOne(id);
+    public Optional<SysOrg> findById(String id) {
+        return sysOrgRepository.findById(id);
     }
 
-    public List<SysOrg> getAll() {
+    public List<SysOrg> findAll() {
         return sysOrgRepository.findAll(Sort.by(SysOrg.Fields.seq));
     }
 
 
     @Transactional
     public void sort(String dragKey, DropResult result) {
-        SysOrg dragOrg = sysOrgRepository.findOne(dragKey);
+        SysOrg dragOrg = sysOrgRepository.findById(dragKey).orElse(null);
         dragOrg.setPid(result.getParentKey());
 
         List<String> sortedKeys = result.getSortedKeys();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String sortedKey = sortedKeys.get(i);
             // 组织机构一般少，这里遍历获取
-            SysOrg org = sysOrgRepository.findOne(sortedKey);
+            SysOrg org = sysOrgRepository.findById(sortedKey).orElse(null);
             org.setSeq(i);
         }
 
     }
 
     // BaseService 方法
-    public Page<SysOrg> getPage(Specification<SysOrg> spec, Pageable pageable) {
+    public Page<SysOrg> findAll(Specification<SysOrg> spec, Pageable pageable) {
         return sysOrgRepository.findAll(spec, pageable);
     }
 
-    public SysOrg detail(String id) {
-        return sysOrgRepository.findOne(id);
-    }
-
-    public SysOrg get(String id) {
-        return sysOrgRepository.findOne(id);
-    }
-
-    public List<SysOrg> getAll(Sort sort) {
+    public List<SysOrg> findAll(Sort sort) {
         return sysOrgRepository.findAll(sort);
     }
 
-    public List<SysOrg> getAll(Specification<SysOrg> s, Sort sort) {
+    public List<SysOrg> findAll(Specification<SysOrg> s, Sort sort) {
         return sysOrgRepository.findAll(s, sort);
     }
 
@@ -255,11 +247,6 @@ public class SysOrgService {
 
     public SysOrg save(SysOrg t) {
         return sysOrgRepository.save(t);
-    }
-
-    public List<SysOrg> findAll() {
-        return sysOrgRepository.findAll();
-
     }
 
     public List<String> findChildIdListWithSelfById(String id, boolean containsDept) {
@@ -391,7 +378,7 @@ public class SysOrgService {
         if (id == null) {
             return null;
         }
-        SysOrg org = this.findOne(id);
+        SysOrg org = this.findById(id).orElse(null);
         return org.getName();
     }
 

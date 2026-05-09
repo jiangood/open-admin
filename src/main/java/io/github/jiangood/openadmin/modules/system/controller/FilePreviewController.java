@@ -1,10 +1,11 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.util.URLUtil;
-import io.github.jiangood.openadmin.lang.ContentTypeTool;
+import io.github.jiangood.openadmin.util.ContentTypeTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.service.SysFileService;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,7 @@ import java.util.Set;
 
 @Slf4j
 @Controller
+@RequiredArgsConstructor
 public class FilePreviewController {
 
     private final Set<String> allowedPreviewTypes = Set.of(
@@ -31,8 +33,7 @@ public class FilePreviewController {
     );
 
 
-    @jakarta.annotation.Resource
-    SysFileService sysFileService;
+    private final SysFileService sysFileService;
 
     /**
      * 文件预览入口
@@ -49,7 +50,7 @@ public class FilePreviewController {
                                                              HttpServletRequest request,
                                                              Integer w, // 图片宽度
                                                              @PathVariable(required = false) String suffix) {
-        SysFile file = sysFileService.findOne(id);
+        SysFile file = sysFileService.findById(id).orElse(null);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }

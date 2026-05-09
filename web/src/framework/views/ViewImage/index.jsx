@@ -15,10 +15,10 @@ export class ViewImage extends React.Component {
       vs = vs.split(',');
     }
 
-    let urlList = [];
+    const urlList = [];
     for (let v of vs) {
-      let isId = v.indexOf('/') === -1;
-      let isAbsUrl = v.startsWith('http');
+      const isId = v.indexOf('/') === -1;
+      const isAbsUrl = v.startsWith('http');
       if (isAbsUrl) {
         urlList.push(v);
         continue;

@@ -30,7 +30,7 @@ export default class extends React.Component {
     tableRef = React.createRef()
 
     resetPwd(row) {
-        HttpUtils.post('admin/sysUser/resetPwd', {id: row.id}).then(rs => {
+        HttpUtils.post('admin/sysUser/reset-pwd', {id: row.id}).then(rs => {
             Modal.success({
                 title: '重置密码成功',
                 content: rs

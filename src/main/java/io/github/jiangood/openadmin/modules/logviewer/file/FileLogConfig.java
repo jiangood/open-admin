@@ -15,6 +15,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import ch.qos.logback.core.sift.AppenderFactory;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,7 @@ import java.io.File;
  * 根据 mdc设置的key记录日志到单独文件
  * （可使用封装的FileLogUtils)
  */
+@Slf4j
 @Getter
 @Configuration
 public class FileLogConfig {
@@ -87,7 +89,7 @@ public class FileLogConfig {
 
     public File buildLogFile(String key) {
         File file = new File(logPath, key + ".log");
-        System.out.println("计算文件日志地址 " + file.getAbsolutePath());
+        log.info("计算文件日志地址 {}", file.getAbsolutePath());
         return file;
     }
 }

@@ -4,15 +4,318 @@
 
 ### 命名规范
 
+#### 通用 Java 命名
+
 | 项 | 规范 |
 |----|------|
 | 类名 | 大驼峰 — `UserService`, `PageRequest` |
 | 方法名 | 小驼峰 — `getUserList()`, `findById()` |
 | 变量名 | 小驼峰 — `userId`, `pageSize` |
 | 常量名 | 大写加下划线 — `MAX_PAGE_SIZE` |
-| 包名 | 全小写 — `io.github.jiangood.openadmin` |
-| 枚举 | 类名大驼峰，常量大写加下划线 — `Sex.MALE` |
+| 包名 | 全小写，单数，按层分包 — `modules/system/service`, `modules/system/entity` |
+| 枚举类名 | 大驼峰，常量大写加下划线 — `Sex.MALE`, `ApproveStatus.PENDING` |
 | Record | 大驼峰，参数小驼峰 — `record PageRequest(int page, int size)` |
+
+#### Entity 命名
+
+| 项 | 规范 | 示例 |
+|----|------|------|
+| 实体类 | 大驼峰，单数名词 | `User`, `Role`, `OrderItem` |
+| 表名 | 全小写下划线，复数名词 | `t_user`, `sys_role`（按模块前缀） |
+| 字段名 | 小驼峰，JPA 自动映射下划线列名 | `userId`, `createTime` 对应 `user_id`, `create_time` |
+| 关联字段 | 以对方实体命名 | `private Role role;`（非 `roleId` + `@ManyToOne`） |
+| 外键字段 | `xxxId` 用于 `@JoinColumn` | `private String orgId;`（仅存 ID，无关联） |
+| 布尔字段 | 用 `xxx` 非 `isXxx`（避免序列化问题） | `enabled` 而非 `isEnabled`，`deleted` 而非 `isDeleted` |
+| 枚举字段 | 使用 `EnumType.STRING` 存储 | `@Enumerated(STRING) private Sex sex;` |
+
+```java
+@Entity
+@Table(name = "sys_user")
+public class User {
+    @Id
+    private String id;
+
+    private String account;
+
+    private String password;
+
+    private String orgId;  // 仅存 ID，非 @ManyToOne
+
+    @Enumerated(EnumType.STRING)
+    private Sex sex;
+
+    private Boolean enabled;
+
+    // BaseEntity 公共字段
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+}
+```
+
+- 实体继承 `BaseEntity`（含 `id`, `createTime`, `updateTime`, `deleted` 等通用字段），避免重复声明
+- `@Table(name = "sys_xxx")` 显式指定表名
+- 字段用 `@Column` 注解，JPA 自动将小驼峰映射为下划线（`createTime` → `create_time`）
+- 优先使用 `@ManyToOne(fetch = LAZY)` 而非 EAGER；集合关联用 `@OneToMany` 默认 LAZY
+- 避免实体间双向关联，仅保留查询方向
+
+#### Repository 命名
+
+##### 基础 CRUD
+
+Repository 基础 CRUD 方法继承自 `JpaRepository`，统一遵循：
+
+| 操作 | 方法 | 说明 |
+|------|------|------|
+| 新增/保存 | `save(S entity)` | 新增或更新（JPA 自动判断） |
+| 删除 | `deleteById(ID id)` | 根据 ID 删除 |
+| 单个查询 | `findById(ID id)` | 返回 `Optional<T>` |
+| 列表查询 | `findAll()` | 查询全部 |
+| 分页查询 | `findAll(Pageable pageable)` | 分页查询 |
+| 列表条件 | `findAll(Specification<T> spec)` | 动态条件查询 |
+| 分页条件 | `findAll(Specification<T> spec, Pageable pageable)` | 动态条件 + 分页 |
+| 存在判断 | `existsById(ID id)` | 是否存在 |
+| 计数 | `count()` | 总数 |
+
+##### 派生查询
+
+Repository 方法名遵循 Spring Data JPA 派生查询语法，框架自动根据方法名生成实现：
+
+| 模式 | 方法命名 | 示例 |
+|------|---------|------|
+| 精确查询 | `findBy{字段}` | `Optional<User> findByAccount(String account)` |
+| 多条件 | `findBy{字段}And{字段}` | `Optional<User> findByAccountAndPassword(String a, String p)` |
+| 全部查询 | `findAllBy{条件}` | `List<User> findAllByEnabledTrue()` |
+| 范围查询 | `findAllBy{字段}In` | `List<User> findAllByIdIn(Collection<String> ids)` |
+| 模糊查询 | `findBy{字段}Containing` | `List<User> findByNameContaining(String name)` |
+| 排序 | 追加 `OrderBy{字段}{Asc\|Desc}` | `List<User> findAllByOrderByUpdateTimeDesc()` |
+| 计数 | `countBy{字段}` | `long countByOrgId(String orgId)` |
+| 存在判断 | `existsBy{字段}` | `boolean existsByAccount(String account)` |
+| 删除 | `deleteBy{字段}` | `void deleteByOrgId(String orgId)` |
+| 限制 | `findTopBy{字段}` | `Optional<User> findTopByOrderByCreateTimeDesc()` |
+
+```java
+public interface UserRepository extends JpaRepository<User, String> {
+
+    // 基础 CRUD 继承自 JpaRepository，无需声明
+
+    // 派生查询
+    Optional<User> findByAccount(String account);
+
+    List<User> findAllByEnabledTrue();
+
+    List<User> findAllByEnabledTrueAndIdIn(Collection<String> ids);
+
+    boolean existsByAccount(String account);
+
+    long countByOrgId(String orgId);
+}
+```
+
+- 单条查询返回 `Optional<T>`，不返回 `null`（主流标准）
+- 多条查询返回 `List<T>` 或 `Page<T>`
+- 简单条件用派生方法，复杂条件用 `Specification` 或 `@Query`
+
+#### Service 层 CRUD 命名
+
+Service 层统一遵循以下命名模式，与 Repository 方法对应：
+
+| 操作 | Repository 方法 | Service 方法 | 说明 |
+|------|----------------|-------------|------|
+| 新增/保存 | `save` | `save` | 新增与修改统一使用 save |
+| 修改 | `save` | `update` | JPA 无 update 方法，但 Service 可用 update 表语义 |
+| 删除 | `deleteById` | `deleteById` | 按 ID 删除 |
+| 单个查询 | `findById` | `findById` | 返回 `Optional<T>`，避免 null |
+| 列表查询 | `findAll` | `findAll` | 或加条件如 findAllEnabled |
+| 分页查询 | `findAll(Pageable)` | `findAll(Pageable)` | 或 findByCondition |
+| 存在判断 | `existsById` | `existsById` | 直接复用 |
+| 计数 | `count` | `count` | 直接复用 |
+
+```java
+// 标准 Service CRUD
+@Service
+@Transactional(readOnly = true)
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public Page<UserVO> findAll(UserPageQuery query, Pageable pageable) {
+        return userRepository.findAll(Spec.of(), pageable).map(UserVO::of);
+    }
+
+    public Optional<UserVO> findById(String id) {
+        return userRepository.findById(id).map(UserVO::of);
+    }
+
+    @Transactional
+    public UserVO save(UserCreateReq req) {
+        User user = new User();
+        // ...
+        return UserVO.of(userRepository.save(user));
+    }
+
+    @Transactional
+    public UserVO update(String id, UserUpdateReq req) {
+        User user = userRepository.findById(id).orElseThrow(...);
+        // ...
+        return UserVO.of(userRepository.save(user));
+    }
+
+    @Transactional
+    public void deleteById(String id) {
+        userRepository.deleteById(id);
+    }
+}
+```
+
+- 返回给前端的数据封装为 `VO`（Value Object），不直接暴露 Entity
+- 读方法加 `@Transactional(readOnly = true)`，写方法在类级别覆盖
+- 业务操作方法直接用动词命名：`grantPermission()`, `resetPassword()`, `assignRole()`
+- 方法名不加 `Service` 后缀
+
+#### Controller / REST API 命名
+
+遵循 RESTful 主流规范，URL 使用 kebab-case 复数名词，后端管理 API 以 `admin/` 前缀：
+
+| 操作 | HTTP | URL | 方法名 |
+|------|------|-----|--------|
+| 分页查询 | GET | `admin/xxx/page` | `page(...)` |
+| 查询详情 | GET | `admin/xxx/{id}` | `getById(@PathVariable id)` |
+| 新增 | POST | `admin/xxx/save` | `save(@RequestBody dto)` |
+| 修改 | POST | `admin/xxx/save` | `save(@RequestBody dto, RequestBodyKeys keys)` |
+| 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
+| 下拉选项 | GET | `admin/xxx/type-options` | `typeOptions(...)` |
+
+```java
+@RestController
+@RequestMapping("admin/xxx")
+@RequiredArgsConstructor
+public class XxxController {
+
+    private final XxxService service;
+
+    @HasPermission("xxx:query")
+    @RequestMapping("page")
+    public AjaxResult page(String searchText,
+        @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
+        Spec<Xxx> q = Spec.of().orLike(searchText, "name");
+        Page<Xxx> page = service.findAll(q, pageable);
+        return AjaxResult.ok().data(page);
+    }
+
+    @GetMapping("{id}")
+    public AjaxResult getById(@PathVariable String id) {
+        return AjaxResult.of(service.findById(id));
+    }
+
+    @HasPermission("xxx:save")
+    @PostMapping("save")
+    public AjaxResult save(@RequestBody Xxx input, RequestBodyKeys updateFields) {
+        service.save(input, updateFields);
+        return AjaxResult.ok().msg("保存成功");
+    }
+
+    @HasPermission("xxx:delete")
+    @PostMapping("delete")
+    public AjaxResult delete(@Valid @RequestBody IdReq req) {
+        service.deleteById(req.getId());
+        return AjaxResult.ok().msg("删除成功");
+    }
+}
+```
+
+- URL 使用 kebab-case 复数名词，以 `admin/` 为前缀：`admin/users/page`, `admin/order-items/save`
+- 新增/修改统一使用 `save` 方法，通过 `RequestBodyKeys` 区分更新字段
+- Controller 不做业务逻辑，只做参数校验 + 调用 Service
+- 统一返回 `AjaxResult` 包装
+
+#### DTO / VO 命名
+
+| 类型 | 后缀 | 说明 | 示例 |
+|------|------|------|------|
+| 创建请求 | `CreateReq` | 新建接口参数 | `UserCreateReq` |
+| 更新请求 | `UpdateReq` | 修改接口参数 | `UserUpdateReq` |
+| 查询请求 | `Query` / `PageQuery` | 查询参数 | `UserPageQuery` |
+| 值对象 | `VO` | 返回给前端的数据 | `UserVO` |
+| 通用请求 | 放在 `common/dto/` | 复用 | `IdsReq`, `IdReq` |
+| 通用分页 | `PageDTO<T>` | 通用分页结果 | `PageDTO<UserVO>` |
+
+- `Req` 后缀表示请求对象，`VO` 表示响应对象
+- 请求对象用 `@Valid` 校验，避免 Controller 中手写校验逻辑
+- VO 通过静态工厂方法创建：`UserVO.of(User user)`，不暴露构造器
+- 通用请求放在 `common/dto/`，模块专用放在 `modules/xxx/dto/`
+- **Entity / DTO 互转类**命名为 `XxxConverter`，放在 `dto/converter/` 包下
+
+#### 权限码命名
+
+权限码使用 `@HasPermission("...")` 注解（替代 `@PreAuthorize("hasAuthority('...')")`），格式为全小写两段式：
+
+```
+{资源}:{操作}
+```
+
+| 段 | 说明 | 示例 |
+|----|------|------|
+| 资源 | 业务对象/功能名，全小写 kebab-case（多词用连字符） | `sys-user`, `sys-log`, `sys-dict`, `job`, `api` |
+| 操作 | 具体操作，全小写 kebab-case 动词 | `query`, `create`, `update`, `delete`, `export`, `import` |
+
+##### 标准 CRUD 操作
+
+| 操作 | 说明 | 对应接口 |
+|------|------|---------|
+| `query` | 分页/列表/详情查询 | `page()`, `getById()` |
+| `create` | 新增 | `save()`（新增场景） |
+| `update` | 修改 | `save()`（修改场景） |
+| `delete` | 删除 | `delete()` |
+
+##### 常见扩展操作
+
+| 操作 | 说明 | 示例 |
+|------|------|------|
+| `export` | 导出 | `sys-user:export` |
+| `import` | 导入 | `sys-user:import` |
+| `reset-password` | 重置密码 | `sys-user:reset-password` |
+| `grant-permission` | 分配权限 | `sys-role:grant-permission` |
+| `trigger` | 触发执行 | `job:trigger` |
+
+- 扩展操作使用 kebab-case（`reset-password`、`grant-permission`），不用小驼峰
+- 避免使用单一 `manage` 权限码覆盖所有操作，应拆分为细粒度权限码
+- 接口级别权限只需要 `query`，无需拆分为 `page`、`detail` 等子操作
+
+##### 示例
+
+```java
+// ✅ 使用 @HasPermission（替代 @PreAuthorize("hasAuthority(...)")）
+@HasPermission("sys-user:query")
+@HasPermission("sys-user:create")
+@HasPermission("sys-user:update")
+@HasPermission("sys-user:delete")
+@HasPermission("sys-user:reset-password")
+@HasPermission("sys-role:grant-permission")
+
+// ✅ 非系统模块
+@HasPermission("job:query")
+@HasPermission("job:trigger")
+
+// ❌ 避免：小驼峰、manage 一锅端
+// sysUser:resetPwd          → sys-user:reset-password
+// job:triggerJob            → job:trigger
+// sysRole:manage             → sys-role:query / sys-role:create / ...
+// sysLog:view                → sys-log:query
+```
+
+##### 权限码与 URL 对照
+
+| URL | 权限码 |
+|-----|--------|
+| `admin/system/user/page` | `sys-user:query` |
+| `admin/system/user/save`（新增） | `sys-user:create` |
+| `admin/system/user/save`（修改） | `sys-user:update` |
+| `admin/system/user/delete` | `sys-user:delete` |
+| `admin/system/role/grant-permission` | `sys-role:grant-permission` |
 
 ### 代码结构
 
@@ -102,13 +405,14 @@ try {
 
 | 操作 | HTTP | URL | 方法命名 |
 |------|------|-----|---------|
-| 查询列表 | GET | `/xxx/page` | `page()` |
-| 查询详情 | GET | `/xxx/{id}` | `get(@PathVariable id)` |
-| 新增 | POST | `/xxx` | `add(@RequestBody dto)` |
-| 修改 | PUT | `/xxx/{id}` | `update(@PathVariable id, @RequestBody dto)` |
-| 删除 | DELETE | `/xxx/{id}` | `delete(@PathVariable id)` |
+| 查询列表 | GET | `admin/xxx/page` | `page()` |
+| 查询详情 | GET | `admin/xxx/{id}` | `getById(@PathVariable id)` |
+| 新增/修改 | POST | `admin/xxx/save` | `save(@RequestBody dto)` |
+| 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
+| 下拉选项 | GET | `admin/xxx/type-options` | `typeOptions(...)` |
 
-- URL 统一使用复数名词
+- URL 统一使用 kebab-case 复数名词，以 `admin/` 为前缀
+- 新增/修改统一使用 POST + save 方法，不区 PUT
 - 查询参数用 `@RequestParam`，请求体用 `@RequestBody`
 
 ### 事务

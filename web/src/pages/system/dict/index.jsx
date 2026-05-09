@@ -1,5 +1,7 @@
 import React from "react";
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tag, Tree, Typography} from "antd";
+import {PlusOutlined} from "@ant-design/icons";
+
 import {
     ButtonList,
     FieldBoolean, FieldDictSelect, FieldRemoteSelect,
@@ -8,7 +10,6 @@ import {
     ProTable,
     ViewBooleanEnableDisable, ViewText
 } from "../../../framework";
-import {PlusOutlined} from "@ant-design/icons";
 
 export default class extends React.Component {
 
@@ -143,7 +144,7 @@ export default class extends React.Component {
                        <ViewText />
                     </Form.Item>
                     <Form.Item label='类型' name='typeCode' rules={[{required: true}]} >
-                        <FieldRemoteSelect url='/admin/dict/typeOptions' />
+                        <FieldRemoteSelect url='/admin/dict/type-options' />
                     </Form.Item>
                     <Form.Item label='编码' name='code' rules={[{required: true}]}>
                         <Input/>

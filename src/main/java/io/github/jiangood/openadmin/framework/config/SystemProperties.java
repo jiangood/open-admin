@@ -2,8 +2,8 @@ package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.AesTool;
-import io.github.jiangood.openadmin.lang.RequestTool;
+import io.github.jiangood.openadmin.util.AesTool;
+import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.boot.context.event.ApplicationReadyEvent;

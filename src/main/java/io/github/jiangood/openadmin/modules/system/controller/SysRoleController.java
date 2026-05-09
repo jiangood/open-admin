@@ -2,24 +2,24 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.DropdownRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
-import io.github.jiangood.openadmin.lang.CollectionTool;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.dto.DropdownReq;
+import io.github.jiangood.openadmin.util.dto.antd.Option;
+import io.github.jiangood.openadmin.util.CollectionTool;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserToRoleRequest;
-import io.github.jiangood.openadmin.modules.system.dto.request.SaveRolePermRequest;
+import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserToRoleReq;
+import io.github.jiangood.openadmin.modules.system.dto.request.SaveRolePermReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
 import io.github.jiangood.openadmin.modules.system.service.SysRoleService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,34 +35,31 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("admin/sysRole")
+@RequiredArgsConstructor
 public class SysRoleController {
 
-    @Resource
-    private SysRoleService sysRoleService;
+    private final SysRoleService sysRoleService;
 
-    @Resource
-    private SysMenuService sysMenuService;
+    private final SysMenuService sysMenuService;
 
 
-    @Resource
-    private SysUserService sysUserService;
+    private final SysUserService sysUserService;
 
-    @Resource
-    private PermissionStaleService permissionStaleService;
+    private final PermissionStaleService permissionStaleService;
 
     @PreAuthorize("hasAuthority('sysRole:manage')")
     @RequestMapping("page")
     public AjaxResult page(@PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysRole> q = Spec.of();
-        Page<SysRole> page = sysRoleService.getPage(q, pageable);
+        Page<SysRole> page = sysRoleService.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }
 
 
     @PreAuthorize("hasAuthority('sysRole:manage')")
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        sysRoleService.delete(idRequest.getId());
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        sysRoleService.deleteById(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
 
@@ -84,7 +81,7 @@ public class SysRoleController {
     }
 
 
-    @RequestMapping("bizTree")
+    @RequestMapping("biz-tree")
     public AjaxResult bizTree() {
         List<SysRole> list = sysRoleService.findValid();
 
@@ -101,9 +98,9 @@ public class SysRoleController {
     }
 
     @PreAuthorize("hasAuthority('sysRole:manage')")
-    @RequestMapping("ownPerms")
+    @RequestMapping("own-perms")
     public AjaxResult ownPerms(String id) {
-        SysRole role = sysRoleService.detail(id);
+        SysRole role = sysRoleService.findById(id).orElse(null);
         List<String> rolePerms = role.getPerms();
 
         List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
@@ -130,7 +127,7 @@ public class SysRoleController {
      * @return
      */
     @PreAuthorize("hasAuthority('sysRole:manage')")
-    @RequestMapping("permTreeTable")
+    @RequestMapping("perm-tree-table")
     public AjaxResult menuTree() {
         List<MenuDefinition> tree = sysMenuService.menuTree();
 
@@ -138,8 +135,8 @@ public class SysRoleController {
     }
 
     @PreAuthorize("hasAuthority('sysRole:manage')")
-    @RequestMapping("savePerms")
-    public AjaxResult savePerms(@RequestBody SaveRolePermRequest request) {
+    @RequestMapping("save-perms")
+    public AjaxResult savePerms(@RequestBody SaveRolePermReq request) {
         SysRole sysRole = sysRoleService.savePerms(request.getId(), request.getPerms(), request.getMenus());
         for (SysUser user : sysRole.getUsers()) {
             permissionStaleService.markUserStale(user.getAccount());
@@ -149,9 +146,9 @@ public class SysRoleController {
 
 
     @PreAuthorize("hasAuthority('sysRole:manage')")
-    @RequestMapping("userList")
+    @RequestMapping("user-list")
     public AjaxResult userList(String id) {
-        List<SysUser> users = sysUserService.getAll();
+        List<SysUser> users = sysUserService.findAll();
         List<Dict> list = users.stream().map(u -> Dict.of("key", u.getId(), "title", u.getName())).toList();
 
         List<SysUser> ownUser = sysRoleService.findUsers(id);
@@ -167,14 +164,14 @@ public class SysRoleController {
     @PreAuthorize("hasAuthority('sysRole:manage')")
     @GetMapping("get")
     public AjaxResult get(String id) {
-        SysRole role = sysRoleService.detail(id);
+        SysRole role = sysRoleService.findById(id).orElse(null);
         return AjaxResult.ok().data(role);
     }
 
 
     @PreAuthorize("hasAuthority('sysRole:manage')")
-    @RequestMapping("grantUsers")
-    public AjaxResult saveUserList(@RequestBody GrantUserToRoleRequest request) {
+    @RequestMapping("grant-users")
+    public AjaxResult saveUserList(@RequestBody GrantUserToRoleReq request) {
         SysRole sysRole = sysRoleService.grantUsers(request.getId(), request.getUserIdList());
         for (SysUser user : sysRole.getUsers()) {
             permissionStaleService.markUserStale(user.getAccount());
@@ -183,7 +180,7 @@ public class SysRoleController {
     }
 
     @RequestMapping("options")
-    public AjaxResult options(DropdownRequest dropdownRequest) {
+    public AjaxResult options(DropdownReq dropdownRequest) {
         String searchText = dropdownRequest.getSearchText();
         List<SysRole> list = sysRoleService.findValid();
         if (searchText != null) {

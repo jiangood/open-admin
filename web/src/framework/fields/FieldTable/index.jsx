@@ -58,7 +58,7 @@ export class FieldTable extends React.Component {
 
     onCellChange = (index, dataIndex, e) => {
         let {dataSource} = this.state;
-        let row = dataSource[index];
+        const row = dataSource[index];
 
         let v = e;
         if (e != null && e.hasOwnProperty('target')) {
@@ -78,13 +78,13 @@ export class FieldTable extends React.Component {
     };
 
     remove = (record) => {
-        let {dataSource} = this.state;
+        const {dataSource} = this.state;
         ArrUtils.remove(dataSource, record);
         this.setState({dataSource: [...dataSource]}, this.notifyParent);
     };
 
     notifyParent = () => {
-        let {dataSource} = this.state;
+        const {dataSource} = this.state;
         this.props.onChange && this.props.onChange(dataSource);
     };
 

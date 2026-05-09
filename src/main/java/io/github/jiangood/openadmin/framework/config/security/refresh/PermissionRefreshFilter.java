@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.config.security.refresh;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.ResponseTool;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.ResponseTool;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

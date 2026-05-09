@@ -1,9 +1,11 @@
-import {Button, Form, Table} from 'antd';
-import Toolbar from './components/ToolBar';
 import React from "react";
-import './index.less'
+import {Button, Form, Table} from 'antd';
 import {SearchOutlined} from "@ant-design/icons";
+
+import { Toolbar } from './components/ToolBar';
 import {StringUtils} from "../../utils";
+
+import './index.less'
 
 
 export class ProTable extends React.Component {
@@ -58,7 +60,7 @@ export class ProTable extends React.Component {
             }
         }
 
-        let scrollY = this.props.scrollY;
+        const scrollY = this.props.scrollY;
         if (scrollY) {
             this.setState({scrollY: scrollY})
         }
@@ -101,7 +103,7 @@ export class ProTable extends React.Component {
         const {selectedRows} = this.state
         for (let i = 0; i < selectedRows.length; i++) {
             for (let newItem of list) {
-                let oldItem = selectedRows[i];
+                const oldItem = selectedRows[i];
                 if (oldItem[rowKey] === newItem[rowKey]) {
                     selectedRows[i] = newItem;
                     break
@@ -210,7 +212,7 @@ export class ProTable extends React.Component {
         if (!toolBarRender) {
             return
         }
-        let {selectedRows, selectedRowKeys, params} = this.state;
+        const {selectedRows, selectedRowKeys, params} = this.state;
         return toolBarRender(params, {
             selectedRows: selectedRows,
             selectedRowKeys: selectedRowKeys,
@@ -224,7 +226,7 @@ export class ProTable extends React.Component {
         if (rowSelection === true) {
             rowSelection = {}
         }
-        let {type, onChange: inputOnChange} = rowSelection
+        const {type, onChange: inputOnChange} = rowSelection
 
 
         return {

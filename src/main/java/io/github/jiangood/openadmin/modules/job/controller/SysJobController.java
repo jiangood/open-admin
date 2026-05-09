@@ -3,12 +3,12 @@ package io.github.jiangood.openadmin.modules.job.controller;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ClassUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
-import io.github.jiangood.openadmin.lang.SpringTool;
-import io.github.jiangood.openadmin.lang.field.Field;
-import io.github.jiangood.openadmin.lang.field.FieldDescription;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.dto.antd.Option;
+import io.github.jiangood.openadmin.util.SpringTool;
+import io.github.jiangood.openadmin.util.field.Field;
+import io.github.jiangood.openadmin.util.field.FieldDescription;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
@@ -19,7 +19,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.service.SysJobService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.quartz.*;
 import org.springframework.data.domain.Page;
@@ -36,16 +36,12 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("admin/job")
+@RequiredArgsConstructor
 public class SysJobController {
 
-    @Resource
-    private SysJobService service;
-
-    @Resource
-    private Scheduler scheduler;
-
-    @Resource
-    private QuartzManager quartzService;
+    private final SysJobService service;
+    private final Scheduler scheduler;
+    private final QuartzManager quartzService;
 
 
     @HasPermission("job:view")
@@ -64,7 +60,7 @@ public class SysJobController {
 
 
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) throws SchedulerException {
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) throws SchedulerException {
         service.deleteJob(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
@@ -72,16 +68,16 @@ public class SysJobController {
 
     @Log("作业-执行一次")
     @PreAuthorize("hasAuthority('job:triggerJob')")
-    @GetMapping("triggerJob")
+    @GetMapping("trigger-job")
     public AjaxResult triggerJob(String id) throws SchedulerException, ClassNotFoundException {
-        SysJob job = service.get(id);
+        SysJob job = service.findById(id).orElse(null);
         quartzService.triggerJob(job);
 
         return AjaxResult.ok().msg("执行一次命令已发送");
     }
 
 
-    @GetMapping("jobClassOptions")
+    @GetMapping("job-class-options")
     public AjaxResult jobClassList() {
         Collection<String> basePackages = SpringTool.getBasePackageClasses().stream().map(Class::getPackageName).toList();
 
@@ -114,7 +110,7 @@ public class SysJobController {
         return AjaxResult.ok().data(options);
     }
 
-    @PostMapping("getJobParamFields")
+    @PostMapping("get-job-param-fields")
     public AjaxResult getJobParamFields(String className, @RequestBody Map<String, Object> jobData) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, JsonProcessingException {
         Class<?> jobCls = Class.forName(className);
         String name = jobCls.getName();
@@ -155,7 +151,7 @@ public class SysJobController {
         return AjaxResult.ok().data(result);
     }
 
-    @RequestMapping("executeRecord")
+    @RequestMapping("execute-record")
     public AjaxResult executeRecordPage(@RequestParam String jobId, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysJobExecuteRecord> q = Spec.of();
         q.eq(SysJobExecuteRecord.Fields.sysJob + ".id", jobId);

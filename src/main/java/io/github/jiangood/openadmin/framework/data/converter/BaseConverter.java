@@ -2,12 +2,14 @@ package io.github.jiangood.openadmin.framework.data.converter;
 
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import io.github.jiangood.openadmin.lang.JsonTool;
+import io.github.jiangood.openadmin.util.JsonTool;
 import jakarta.persistence.AttributeConverter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.Serializable;
 
+@Slf4j
 public class BaseConverter<T> implements AttributeConverter<T, String>, Serializable {
 
 
@@ -37,7 +39,7 @@ public class BaseConverter<T> implements AttributeConverter<T, String>, Serializ
         try {
             return JsonTool.jsonToBean(dbData, reference);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("JSON转换实体失败", e);
         }
         return null;
     }

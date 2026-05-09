@@ -1,10 +1,10 @@
 package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.ExceptionToMessageTool;
-import io.github.jiangood.openadmin.lang.HttpServletTool;
-import io.github.jiangood.openadmin.lang.BusinessException;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.ExceptionToMessageTool;
+import io.github.jiangood.openadmin.util.HttpServletTool;
+import io.github.jiangood.openadmin.util.BusinessException;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
     public AjaxResult InvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e, HttpServletRequest request) {
-        e.printStackTrace();
+        log.error("数据访问API使用异常", e);
         Throwable throwable = e.getCause();
         return AjaxResult.err().msg(throwable.getMessage());
     }

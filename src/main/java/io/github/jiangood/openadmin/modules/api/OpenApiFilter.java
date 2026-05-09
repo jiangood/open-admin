@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.api;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
-import io.github.jiangood.openadmin.lang.ResponseTool;
+import io.github.jiangood.openadmin.util.ResponseTool;
 import io.github.jiangood.openadmin.modules.api.ApiConstant;
 import io.github.jiangood.openadmin.modules.api.ApiResult;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
@@ -52,7 +52,7 @@ public class OpenApiFilter extends OncePerRequestFilter {
             }
             String token = header.substring(7);
             ApiAccount account = apiAccountService.findByToken(token);
-            if (account == null || !account.getEnable()) {
+            if (account == null || !account.getEnabled()) {
                 ResponseTool.responseJson(response, ApiResult.error(3001, "账号不存在或已禁用"));
                 return;
             }

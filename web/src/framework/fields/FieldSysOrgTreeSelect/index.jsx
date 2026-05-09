@@ -13,8 +13,8 @@ export class FieldSysOrgTreeSelect extends React.Component {
     render() {
         const {type, ...rest} = this.props;
         const url = type === 'dept'?
-            '/admin/sysOrg/deptTree':
-            '/admin/sysOrg/unitTree';
+            '/admin/sysOrg/dept-tree':
+            '/admin/sysOrg/unit-tree';
 
         return <FieldRemoteTreeSelect url={url} {...rest}/>;
     }

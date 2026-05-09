@@ -7,7 +7,7 @@ import React from 'react';
 import './index.less';
 import {DateUtils, PageUtils, StorageUtils} from "../../../../utils";
 
-export default class Toolbar extends React.Component {
+export class Toolbar extends React.Component {
 
     state = {
         // 查询历史的模态框
@@ -104,7 +104,7 @@ export default class Toolbar extends React.Component {
             return
         }
         const list = StorageUtils.get(this.getParamKey()) || []
-        let data = {time: DateUtils.now(), params};
+        const data = {time: DateUtils.now(), params};
         list.unshift(data)
         if (list.length > 5) {
             list.pop()

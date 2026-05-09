@@ -5,7 +5,7 @@ import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
 import io.github.jiangood.openadmin.modules.api.entity.ApiLog;
 import io.github.jiangood.openadmin.modules.api.repository.ApiLogRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ApiAccessLogService {
 
-    @Resource
-    ApiLogRepository apiAccessLogRepository;
+    private final ApiLogRepository apiAccessLogRepository;
 
     public void add(long timestamp, ApiAccount account, String url, String ip, long executionTime) {
         ApiLog a = new ApiLog();
@@ -47,32 +47,28 @@ public class ApiAccessLogService {
     }
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         apiAccessLogRepository.deleteById(id);
     }
 
-    public Page<ApiLog> getPage(Specification<ApiLog> spec, Pageable pageable) {
+    public Page<ApiLog> findAll(Specification<ApiLog> spec, Pageable pageable) {
         return apiAccessLogRepository.findAll(spec, pageable);
     }
 
-    public ApiLog detail(String id) {
-        return apiAccessLogRepository.findOne(id);
-    }
-
-    public ApiLog get(String id) {
-        return apiAccessLogRepository.findOne(id);
-    }
-
-    public List<ApiLog> getAll() {
+    public List<ApiLog> findAll() {
         return apiAccessLogRepository.findAll();
     }
 
-    public List<ApiLog> getAll(Sort sort) {
+    public List<ApiLog> findAll(Sort sort) {
         return apiAccessLogRepository.findAll(sort);
     }
 
-    public List<ApiLog> getAll(Specification<ApiLog> s, Sort sort) {
+    public List<ApiLog> findAll(Specification<ApiLog> s, Sort sort) {
         return apiAccessLogRepository.findAll(s, sort);
+    }
+
+    public ApiLog findById(String id) {
+        return apiAccessLogRepository.findOne(id);
     }
 
     public Spec<ApiLog> spec() {

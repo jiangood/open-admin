@@ -7,12 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
 public interface SysUserRepository extends BaseRepository<SysUser, String> {
 
-    SysUser findByAccount(String account);
+    Optional<SysUser> findByAccount(String account);
 
     List<SysUser> findAllByEnabledTrueAndIdIn(Collection<String> ids);
 

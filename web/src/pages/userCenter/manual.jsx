@@ -45,7 +45,7 @@ export default class extends React.Component {
         return <Page>
             <ProTable
                 actionRef={this.tableRef}
-                request={(params) => HttpUtils.get('admin/sysManual/pageForUser', params)}
+                request={(params) => HttpUtils.get('admin/sysManual/page-for-user', params)}
                 columns={this.columns}
             />
         </Page>

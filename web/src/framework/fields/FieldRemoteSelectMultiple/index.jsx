@@ -1,6 +1,6 @@
 import React from 'react';
 import { Select } from 'antd';
-import BaseRemoteSelect from '../BaseRemoteSelect';
+import { BaseRemoteSelect } from '../BaseRemoteSelect';
 
 export class FieldRemoteSelectMultiple extends BaseRemoteSelect {
     static defaultProps = {

@@ -1,11 +1,11 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.modules.common.LoginTool;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.framework.common.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysUserMessage;
 import io.github.jiangood.openadmin.modules.system.service.SysUserMessageService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,11 +19,11 @@ import java.sql.SQLException;
 
 @RestController
 @RequestMapping("admin/user/msg")
+@RequiredArgsConstructor
 public class UserMsgController {
 
 
-    @Resource
-    SysUserMessageService sysUserMsgService;
+    private final SysUserMessageService sysUserMsgService;
 
 
     @RequestMapping("page")

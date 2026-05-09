@@ -44,7 +44,7 @@ export default class extends React.Component {
 
         const {params} = this.state
         HttpUtils.get('admin/sysOrg/tree', params).then(rs => {
-            let treeData = rs;
+            const treeData = rs;
             this.setState({treeData})
         }).finally(() => {
             this.setState({treeLoading: false});
@@ -91,9 +91,9 @@ export default class extends React.Component {
 
 
     render() {
-        let {formValues} = this.state;
-        let disabled = formValues == null;
-        let params = this.state.params;
+        const {formValues} = this.state;
+        const disabled = formValues == null;
+        const params = this.state.params;
         return <Page padding>
             <Card>
                 <Space>

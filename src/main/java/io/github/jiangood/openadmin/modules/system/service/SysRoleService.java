@@ -1,14 +1,14 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,23 +25,22 @@ import java.util.ArrayList;
  * 系统角色service接口实现类
  */
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class SysRoleService {
 
-    @Resource
-    private SysRoleRepository roleRepository;
+    private final SysRoleRepository roleRepository;
 
-    @Resource
-    private SysMenuRepository sysMenuRepository;
+    private final SysMenuRepository sysMenuRepository;
 
 
-    public SysRole findByCode(String code) {
+    public Optional<SysRole> findByCode(String code) {
         return roleRepository.findByCode(code);
     }
 
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         SysRole db = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         Assert.state(!db.getBuiltin(), "内置角色不能删除");
         roleRepository.deleteById(id);
@@ -95,7 +94,7 @@ public class SysRoleService {
     @Transactional
     public SysRole initDefaultAdmin() {
         String roleCode = "admin";
-        SysRole role = roleRepository.findByCode(roleCode);
+        SysRole role = roleRepository.findByCode(roleCode).orElse(null);
         if (role != null) {
             return role;
         }
@@ -111,7 +110,7 @@ public class SysRoleService {
 
     public SysRole getAdminRole() {
         String roleCode = "admin";
-        return roleRepository.findByCode(roleCode);
+        return roleRepository.findByCode(roleCode).orElse(null);
     }
 
     @Transactional
@@ -140,12 +139,12 @@ public class SysRoleService {
         return roleRepository.save(role);
     }
 
-    public List<SysRole> getAll() {
+    public List<SysRole> findAll() {
         return roleRepository.findAll();
     }
 
-    public SysRole findOne(String id) {
-        return roleRepository.findById(id).orElse(null);
+    public Optional<SysRole> findById(String id) {
+        return roleRepository.findById(id);
     }
 
     // BaseService 方法
@@ -159,23 +158,15 @@ public class SysRoleService {
         return roleRepository.save(input);
     }
 
-    public Page<SysRole> getPage(Specification<SysRole> spec, Pageable pageable) {
+    public Page<SysRole> findAll(Specification<SysRole> spec, Pageable pageable) {
         return roleRepository.findAll(spec, pageable);
     }
 
-    public SysRole detail(String id) {
-        return roleRepository.findById(id).orElse(null);
-    }
-
-    public SysRole get(String id) {
-        return roleRepository.findById(id).orElse(null);
-    }
-
-    public List<SysRole> getAll(Sort sort) {
+    public List<SysRole> findAll(Sort sort) {
         return roleRepository.findAll(sort);
     }
 
-    public List<SysRole> getAll(Specification<SysRole> s, Sort sort) {
+    public List<SysRole> findAll(Specification<SysRole> s, Sort sort) {
         return roleRepository.findAll(s, sort);
     }
 

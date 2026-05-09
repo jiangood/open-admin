@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 系统角色
@@ -14,7 +15,7 @@ import java.util.List;
 @Repository
 public interface SysRoleRepository extends BaseRepository<SysRole, String> {
 
-    SysRole findByCode(String code);
+    Optional<SysRole> findByCode(String code);
 
     long countByCode(String code);
 

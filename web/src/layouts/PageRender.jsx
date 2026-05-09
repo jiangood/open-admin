@@ -26,7 +26,7 @@ let APP_DATA_CACHE = null
  * @constructor
  */
 export  function PageRender(props) {
-    let {pathname, search, passLocation} = props
+    const {pathname, search, passLocation} = props
 
     let appData = useAppData()
     if(Object.keys(appData).length === 0){
@@ -49,13 +49,13 @@ class _PageRender extends React.Component {
     }
 
     passLocationRender = () => {
-        let {pathname, search,  appData} = this.props
+        const {pathname, search,  appData} = this.props
 
         const map = appData.routeComponents
         const key = pathname.substring(1); // 移除第一个斜杠
-        let componentType = map[key] || map[key + '/index']
+        const componentType = map[key] || map[key + '/index']
         if (componentType) {
-            let params =search ? UrlUtils.getParams(search): {}
+            const params =search ? UrlUtils.getParams(search): {}
             const location = {pathname, search, params}
             return React.createElement(componentType, {location});
         }
@@ -63,8 +63,8 @@ class _PageRender extends React.Component {
 
 
     defaultRender = () => {
-        let {pathname, appData} = this.props
-        let matchArr = matchRoutes(appData.clientRoutes, pathname)
+        const {pathname, appData} = this.props
+        const matchArr = matchRoutes(appData.clientRoutes, pathname)
 
         if (matchArr != null) {
             if (pathname === '/') {

@@ -15,19 +15,19 @@ export  class RoleTree  extends React.Component {
 
 
     componentDidMount() {
-        HttpUtils.get('admin/sysRole/bizTree').then(tree => {
+        HttpUtils.get('admin/sysRole/biz-tree').then(tree => {
             this.setState({treeData: tree,treeDataLoading: false})
         })
     }
 
     onSelect = keys => {
-        let orgId = keys[0] || null;
+        const orgId = keys[0] || null;
         this.props.onSelect(orgId)
     }
 
 
     render() {
-        let {treeData, treeDataLoading} = this.state
+        const {treeData, treeDataLoading} = this.state
         if (treeDataLoading) {
             return <Skeleton title='加载中...'/>
         }

@@ -15,20 +15,20 @@ export  class OrgTree  extends React.Component {
 
 
     componentDidMount() {
-        HttpUtils.get('admin/sysOrg/deptTree').then(tree => {
+        HttpUtils.get('admin/sysOrg/dept-tree').then(tree => {
             this.setState({treeData: tree,treeDataLoading: false})
         })
     }
 
 
     onSelectOrg = orgIds => {
-        let orgId = orgIds[0] || null;
+        const orgId = orgIds[0] || null;
         this.props.onChange(orgId)
     }
 
 
     render() {
-        let {treeData, treeDataLoading} = this.state
+        const {treeData, treeDataLoading} = this.state
         if (treeDataLoading) {
             return <Skeleton title='加载中...'/>
         }

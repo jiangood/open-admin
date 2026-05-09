@@ -4,7 +4,7 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.api.ApiResult;
-import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
+import io.github.jiangood.openadmin.modules.system.dto.DictItemVO;
 import io.github.jiangood.openadmin.modules.system.service.SysDictService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,9 +29,9 @@ public class CommonOpenApiController {
     @HasPermission("common:dict")
     @Operation(operationId = "common:dict", summary = "获得数据字典项", description = "根据字典类型编码，获得对应的项目")
     @GetMapping("/dict")
-    public ApiResult<List<DictItemDto>> dict(@Parameter(description = "字典类型编码" ) @RequestParam String typeCode) {
-        List<DictItemDto> list = sysDictService.getAllItems();
-        List<DictItemDto> rs = list.stream().filter(t -> t.getTypeCode().equalsIgnoreCase(typeCode)).toList();
+    public ApiResult<List<DictItemVO>> dict(@Parameter(description = "字典类型编码" ) @RequestParam String typeCode) {
+        List<DictItemVO> list = sysDictService.getAllItems();
+        List<DictItemVO> rs = list.stream().filter(t -> t.getTypeCode().equalsIgnoreCase(typeCode)).toList();
         return ApiResult.ok(rs);
     }
 

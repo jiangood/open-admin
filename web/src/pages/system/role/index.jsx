@@ -39,7 +39,7 @@ export default class extends React.Component {
 
     handleEditUser = record => {
         this.setState({usersModalOpen: true, formValues: record})
-        HttpUtils.get('admin/sysRole/userList', {id: record.id}).then(rs => {
+        HttpUtils.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
             this.setState({userList: rs.list, targetKeys: rs.selectedKeys})
         })
     }
@@ -153,7 +153,7 @@ export default class extends React.Component {
             id: this.state.formValues.id,
             userIdList: this.state.targetKeys
         }
-        HttpUtils.post('admin/sysRole/grantUsers', params).then(rs => {
+        HttpUtils.post('admin/sysRole/grant-users', params).then(rs => {
             this.setState({usersModalOpen: false})
         })
     }

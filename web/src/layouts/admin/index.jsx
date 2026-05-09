@@ -5,8 +5,8 @@ import {history, Link} from 'umi';
 import "./index.less"
 import {Gap, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
 
-import HeaderRight from "./HeaderRight";
-import TabPageRender from "./TabPageRender";
+import { HeaderRight } from "./HeaderRight";
+import { TabPageRender } from "./TabPageRender";
 
 const {Header, Sider, Content} = Layout;
 /**
@@ -36,7 +36,7 @@ export default class extends React.Component {
         // 判断是否手机端，自动收起菜单
 
 
-        let siteInfo = SysUtils.getSiteInfo();
+        const siteInfo = SysUtils.getSiteInfo();
         const loginInfo = SysUtils.getLoginInfo()
         this.setState({siteInfo, loginInfo})
 
@@ -46,18 +46,18 @@ export default class extends React.Component {
 
     initMenu = () => {
         this.setState({menuLoading: true})
-        HttpUtils.get('/admin/menuInfo').then(info => {
+        HttpUtils.get('/admin/menu-info').then(info => {
             const {menuTree, pathMenuMap, menuMap} = info
             this.setState({menuMap})
 
-            let pathname = PageUtils.currentPathname();
+            const pathname = PageUtils.currentPathname();
 
             TreeUtils.walk(menuTree, (item) => {
                 item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 12}}/>
             })
 
             if (pathname !== "" && pathname !== "/") {
-                let menu = pathMenuMap[pathname]
+                const menu = pathMenuMap[pathname]
                 if (menu) {
                     this.setState({currentMenuKey: menu.key})
                 }
@@ -142,7 +142,7 @@ export default class extends React.Component {
                      className='left-menu'
                      onClick={({key}) => {
                          const menu = this.state.menuMap[key]
-                         let {path} = menu;
+                         const {path} = menu;
                          this.setState({currentMenuKey: key})
                          history.push(path)
                      }}
@@ -157,7 +157,7 @@ export default class extends React.Component {
         if (this.state.menuTree.length === 0) { // 加载菜单中
             return <></>
         }
-        let tabPageRenderNode = <TabPageRender pathMenuMap={this.state.pathMenuMap}/>;
+        const tabPageRenderNode = <TabPageRender pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {
             return <Watermark content={[loginInfo.name, loginInfo.account]}>
                 {tabPageRenderNode}

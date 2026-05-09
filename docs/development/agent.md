@@ -18,7 +18,7 @@
 ```java
 package io.github.jiangood.openadmin.modules.xxx.entity;
 
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -63,16 +63,41 @@ public interface XxxRepository extends BaseRepository<Xxx, String> {
 ```java
 package io.github.jiangood.openadmin.modules.xxx.service;
 
-import io.github.jiangood.openadmin.framework.data.JpaService;
+import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.xxx.repository.XxxRepository;
 import io.github.jiangood.openadmin.modules.xxx.entity.Xxx;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
+@RequiredArgsConstructor
 @Service
-public class XxxService extends JpaService<Xxx, String> {
-    @Resource
-    private XxxRepository xxxRepository;
+public class XxxService {
+
+    private final XxxRepository xxxRepository;
+
+    public Page<Xxx> findAll(Spec<Xxx> spec, Pageable pageable) {
+        return xxxRepository.findAll(spec, pageable);
+    }
+
+    public List<Xxx> findAll(Spec<Xxx> spec, Sort sort) {
+        return xxxRepository.findAll(spec, sort);
+    }
+
+    @Transactional
+    public Xxx save(Xxx input) throws Exception {
+        return xxxRepository.save(input);
+    }
+
+    @Transactional
+    public void deleteById(String id) {
+        xxxRepository.deleteById(id);
+    }
 }
 ```
 
@@ -81,12 +106,14 @@ public class XxxService extends JpaService<Xxx, String> {
 ```java
 package io.github.jiangood.openadmin.modules.xxx.controller;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
-import io.github.jiangood.openadmin.framework.data.Spec;
+import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.xxx.entity.Xxx;
 import io.github.jiangood.openadmin.modules.xxx.service.XxxService;
-import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -94,35 +121,35 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
+import io.github.jiangood.openadmin.util.dto.antd.Option;
 
 @RestController
 @RequestMapping("admin/xxx")
+@RequiredArgsConstructor
 public class XxxController {
 
-    @Resource
-    private XxxService service;
+    private final XxxService service;
 
     @HasPermission("xxx:view")
     @RequestMapping("page")
     public AjaxResult page(String searchText,
         @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<Xxx> q = Spec.of().orLike(searchText, "name");
-        Page<Xxx> page = service.findAllByUserAction(q, pageable);
+        Page<Xxx> page = service.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }
 
     @HasPermission("xxx:save")
     @PostMapping("save")
     public AjaxResult save(@RequestBody Xxx input) {
-        service.saveOrUpdateByUserAction(input);
+        service.save(input);
         return AjaxResult.ok().msg("保存成功");
     }
 
     @HasPermission("xxx:delete")
-    @RequestMapping("delete")
-    public AjaxResult delete(String id) {
-        service.deleteByUserAction(id);
+    @PostMapping("delete")
+    public AjaxResult delete(@Valid @RequestBody IdReq req) {
+        service.deleteById(req.getId());
         return AjaxResult.ok().msg("删除成功");
     }
 
@@ -232,3 +259,4 @@ data:
 - 确保代码完整、可运行
 - 检查 import 是否正确
 - 框架已有功能不要重复开发
+- 使用构造器注入（`@RequiredArgsConstructor`），禁止 `@Resource` 字段注入

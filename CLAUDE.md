@@ -36,7 +36,8 @@ open-admin/
 │   │   ├── migration/         # 数据迁移
 │   │   ├── validator/         # 自定义校验注解 (手机号, 身份证, 密码等)
 │   │   └── enums/             # 基础枚举 (YesNo, Sex, ApproveStatus)
-│   ├── lang/                  # 工具类库 (BeanTool, StringTool, JsonTool, TreeTool, ExcelTool, FileTool 等)
+│   ├── common/                # 登录/认证/站点信息
+│   ├── util/                  # 工具类库 (BeanTool, StringTool, JsonTool, TreeTool, ExcelTool, FileTool 等)
 │   └── modules/
 │       ├── system/            # 系统管理模块 (用户/角色/菜单/组织/字典/文件/日志)
 │       │   ├── entity/        # JPA 实体
@@ -47,8 +48,7 @@ open-admin/
 │       │   └── file/          # 文件存储 (本地/Minio)
 │       ├── job/               # 定时任务模块 (Quartz)
 │       ├── api/               # API 开放接口模块 (对外接口管理)
-│       ├── log/               # 文件日志查看
-│       └── common/            # 通用模块 (登录/认证/站点信息)
+│       ├── logviewer/         # 文件日志查看
 ├── web/                       # 前端项目 (UmiJS)
 │   ├── package.json
 │   ├── src/
@@ -74,7 +74,7 @@ open-admin/
 - **菜单定义**: 通过 YAML 文件定义菜单树 (`SysMenuRepositoryYamlImpl`)，也支持数据库存储
 - **代码生成**: 后端 JpaService 提供通用增删改查，前端 ProTable + Field 组件实现通用列表/表单。代码生成时主要关注 Entity/Repository + 前端页面
 - **权限**: `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
-- **工具类**: `io.github.jiangood.openadmin.lang` 包下大量工具类 (BeanTool, JsonTool, TreeTool, ExcelTool 等)，可按需使用
+- **工具类**: `io.github.jiangood.openadmin.util` 包下大量工具类 (BeanTool, JsonTool, TreeTool, ExcelTool 等)，可按需使用
 - **ID 生成**: 默认使用 UUIDv7 (时间排序，MySQL 友好)
 
 ## Logo 配置

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Spin, Tree } from 'antd';
-import BaseRemoteSelect from '../BaseRemoteSelect';
+import { BaseRemoteSelect } from '../BaseRemoteSelect';
 
 /**
  * 多选树

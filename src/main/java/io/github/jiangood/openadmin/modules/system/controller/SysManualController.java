@@ -1,12 +1,12 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysManual;
 import io.github.jiangood.openadmin.modules.system.service.SysManualService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("admin/sysManual")
+@RequiredArgsConstructor
 public class SysManualController {
 
-    @Resource
-    SysManualService service;
+    private final SysManualService service;
 
     @PreAuthorize("hasAuthority('sysManual:view')")
     @RequestMapping("page")
@@ -31,7 +31,7 @@ public class SysManualController {
         Spec<SysManual> q = Spec.of();
         q.orLike(searchText, SysManual.Fields.name);
 
-        Page<SysManual> page = service.getPage(q, pageable);
+        Page<SysManual> page = service.findAll(q, pageable);
 
 
         return AjaxResult.ok().data(page);
@@ -47,8 +47,8 @@ public class SysManualController {
 
     @PreAuthorize("hasAuthority('sysManual:delete')")
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        service.delete(idRequest.getId());
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        service.deleteById(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
 

@@ -8,17 +8,17 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
-import io.github.jiangood.openadmin.lang.DownloadTool;
-import io.github.jiangood.openadmin.lang.IdTool;
-import io.github.jiangood.openadmin.lang.ImgTool;
-import io.github.jiangood.openadmin.lang.enums.MaterialType;
+import io.github.jiangood.openadmin.util.DownloadTool;
+import io.github.jiangood.openadmin.util.IdTool;
+import io.github.jiangood.openadmin.util.ImgTool;
+import io.github.jiangood.openadmin.util.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.file.FileOperator;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.data.domain.Page;
@@ -34,12 +34,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 文件服务类
  * <p>
  * 由于会被其他模块使用，不继承BaseService,减少干扰
  */
+@RequiredArgsConstructor
 @Service
 @Slf4j
 public class SysFileService {
@@ -48,17 +50,14 @@ public class SysFileService {
     public static final String DOWNLOAD_URL_PATTERN = "/sysFile/download/{id}";
 
 
-    public static final int[] IMAGE_SIZE = {400, 800, 1200}; // 小图，中，大图
+    public static final int[] IMAGE_SIZE = {400, 800, 1200};
     public static final String[] IMAGE_SIZE_LABEL = {"小图", "中图", "大图"};
 
-    @Resource
-    SystemProperties systemProperties;
-    @Resource
-    FileOperator fileOperator;
-    @Resource
-    private SysFileRepository sysFileRepository;
+    private final SystemProperties systemProperties;
+    private final FileOperator fileOperator;
+    private final SysFileRepository sysFileRepository;
 
-    public SysFile findByTradeNo(String tradeNo) {
+    public Optional<SysFile> findByTradeNo(String tradeNo) {
         return sysFileRepository.findByTradeNo(tradeNo);
     }
 
@@ -85,7 +84,7 @@ public class SysFileService {
     }
 
     public void deleteById(String id) throws Exception {
-        SysFile sysFile = sysFileRepository.findOne(id);
+        SysFile sysFile = sysFileRepository.findById(id).orElse(null);
         sysFileRepository.deleteById(id);
 
         // 删除具体文件
@@ -223,7 +222,7 @@ public class SysFileService {
     public SysFile getFileAndStream(String fileId, Integer w) throws Exception {
         Assert.hasText(fileId, "文件id不能为空");
         // 获取文件名
-        SysFile sysFile = sysFileRepository.findOne(fileId);
+        SysFile sysFile = sysFileRepository.findById(fileId).orElse(null);
         Assert.notNull(sysFile, "文件数据记录不存在");
 
         // 返回文件字节码
@@ -259,21 +258,21 @@ public class SysFileService {
      * @throws Exception
      */
     public File downloadToLocal(String id, File localFile) throws Exception {
-        SysFile sysFile = sysFileRepository.findOne(id);
+        SysFile sysFile = sysFileRepository.findById(id).orElse(null);
         fileOperator.downloadFile(sysFile.getObjectName(), localFile);
         return localFile;
     }
 
     public File downloadToLocalTemp(String id) throws Exception {
-        SysFile sysFile = sysFileRepository.findOne(id);
+        SysFile sysFile = sysFileRepository.findById(id).orElse(null);
         File tempFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
         fileOperator.downloadFile(sysFile.getObjectName(), tempFile);
 
         return tempFile;
     }
 
-    public SysFile findOne(String id) {
-        return sysFileRepository.findOne(id);
+    public Optional<SysFile> findById(String id) {
+        return sysFileRepository.findById(id);
     }
 
     public void fillAllImageUrl(SysFile sysFile) {
@@ -303,7 +302,7 @@ public class SysFileService {
         if (StrUtil.isEmpty(id)) {
             return false;
         }
-        SysFile file = sysFileRepository.findOne(id);
+        SysFile file = sysFileRepository.findById(id).orElse(null);
         if (file == null) {
             return false;
         }

@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,7 +21,7 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @Getter
 @Setter
-@Table(uniqueConstraints = {@UniqueConstraint(name = "uk_sys_manual", columnNames = {"name", "version"})})
+@Table(name = "sys_manual", uniqueConstraints = {@UniqueConstraint(name = "uk_sys_manual", columnNames = {"name", "version"})})
 @FieldNameConstants
 public class SysManual extends BaseEntity {
 

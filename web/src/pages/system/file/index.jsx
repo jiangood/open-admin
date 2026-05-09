@@ -1,7 +1,8 @@
-import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import React from 'react'
-import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, ProTable} from "../../../framework";
+import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
+
+import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, ProTable} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -63,8 +64,8 @@ export default class extends React.Component {
 
                 if (record.imageUrls?.length > 0) {
                     for (let item of record.imageUrls) {
-                        let url = item.url;
-                        let label = item.label;
+                        const url = item.url;
+                        const label = item.label;
                         nodes.push(<a href={(url)} target='_blank' style={{marginLeft: 8}}>{label}</a>)
                     }
                 }

@@ -12,6 +12,7 @@ import lombok.experimental.FieldNameConstants;
 import java.util.Date;
 
 @Entity
+@Table(name = "sys_job_execute_record")
 @Getter
 @Setter
 @FieldNameConstants

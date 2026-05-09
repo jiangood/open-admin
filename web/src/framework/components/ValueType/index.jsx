@@ -1,6 +1,7 @@
 import React from "react";
-import {fieldRegistry, viewRegistry} from "./registry";
 import {Input} from "antd";
+
+import {fieldRegistry, viewRegistry} from "./registry";
 import {ViewText} from "../../views";
 
 function getComponent(registry, type) {

@@ -1,10 +1,10 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysManual;
 import io.github.jiangood.openadmin.modules.system.service.SysManualService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,10 +16,10 @@ import java.util.*;
 
 @RestController
 @RequestMapping("admin/sysManual")
+@RequiredArgsConstructor
 public class SysManualPublicController {
 
-    @Resource
-    SysManualService service;
+    private final SysManualService service;
 
 
     /**
@@ -29,12 +29,12 @@ public class SysManualPublicController {
      * @param pageable
      * @return
      */
-    @RequestMapping("pageForUser")
+    @RequestMapping("page-for-user")
     public AjaxResult pageForUser(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = {}) Pageable pageable) {
         Spec<SysManual> s = Spec.<SysManual>of().orLike(searchText, "name");
 
         // 查询并保留最大版本记录
-        List<SysManual> list = service.getAll(s, Sort.by("name", "version"));
+        List<SysManual> list = service.findAll(s, Sort.by("name", "version"));
         Map<String, SysManual> rs = new HashMap<>();
         for (SysManual e : list) {
             if (!rs.containsKey(e.getName())) {

@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.framework.data;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ClassUtil;
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.spi.BootstrapContext;
@@ -101,7 +101,7 @@ public class HibernateEntityCommentIntegrator implements Integrator {
                 }
             }
         } catch (SecurityException e) {
-            e.printStackTrace();
+            log.error("设置数据库表字段注释失败", e);
         }
     }
 

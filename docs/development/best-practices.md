@@ -29,23 +29,6 @@ public class User extends BaseEntity {
 - 复杂查询使用 `Spec` 构建
 - 原生 SQL 使用 `DbTool`
 
-### Controller
-
-- 使用 `@HasPermission` 进行权限控制
-- 使用 `AjaxResult` 统一返回格式
-- 分页参数使用 `@PageableDefault`
-
-```java
-@HasPermission("user:view")
-@RequestMapping("page")
-public AjaxResult page(String searchText,
-    @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
-    Spec<User> q = Spec.of().orLike(searchText, "username", "name");
-    Page<User> page = service.findAllByUserAction(q, pageable);
-    return AjaxResult.ok().data(page);
-}
-```
-
 ### 作业调度
 
 - 继承 `BaseJob`，实现 `execute` 方法
@@ -67,27 +50,6 @@ web/src/pages/system/role/index.jsx
 - 使用 `ProTable` 展示列表
 - 使用 `ButtonList` 管理操作按钮
 - 使用 `Field` 系列组件构建表单
-
-### 权限控制
-
-```jsx
-// 在按钮上使用 perm 属性
-<Button perm='user:save' type='primary' onClick={handleAdd}>新增</Button>
-
-// 使用 HasPerm 控制区块
-<HasPerm perm="user:manage">
-  <高级功能 />
-</HasPerm>
-```
-
-### 数据请求
-
-使用 `HttpUtils` 发送请求：
-
-```js
-HttpUtils.get('admin/user/page', {page: 1}).then(data => ...);
-HttpUtils.post('admin/user/save', values).then(() => tableRef.current.reload());
-```
 
 ## 系统配置
 

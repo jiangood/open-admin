@@ -82,12 +82,12 @@ public class SysUserRepositoryTest {
     // 测试特有方法
     @Test
     void testFindByAccount() {
-        SysUser foundUser = sysUserRepository.findByAccount("admin");
+        SysUser foundUser = sysUserRepository.findByAccount("admin").orElse(null);
         assertNotNull(foundUser);
         assertEquals("管理员", foundUser.getName());
 
         // 测试不存在的账号
-        SysUser nonExistentUser = sysUserRepository.findByAccount("nonexistent");
+        SysUser nonExistentUser = sysUserRepository.findByAccount("nonexistent").orElse(null);
         assertNull(nonExistentUser);
     }
 

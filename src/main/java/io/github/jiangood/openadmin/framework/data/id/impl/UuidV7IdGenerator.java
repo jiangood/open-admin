@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.data.id.impl;
 
-import io.github.jiangood.openadmin.lang.IdTool;
+import io.github.jiangood.openadmin.util.IdTool;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
 

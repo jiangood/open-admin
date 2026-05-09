@@ -58,3 +58,26 @@ String className = RemarkTool.getRemark(User.class);
 String fieldName = RemarkTool.getRemark(nameField);
 String enumRemark = RemarkTool.getRemark(UserStatus.ACTIVE);
 ```
+
+## TreeTool
+
+将列表转换为树结构的工具类。
+
+```java
+// 构建树
+List<Dept> tree = TreeTool.buildTree(
+    deptList, Dept::getId, Dept::getParentId,
+    Dept::getChildren, Dept::setChildren
+);
+
+// 遍历
+TreeTool.walk(tree, Dept::getChildren, (dept, level) -> {
+    System.out.println(level + ": " + dept.getName());
+});
+
+// 叶子节点
+List<Dept> leafs = TreeTool.getLeafs(tree, Dept::getChildren);
+
+// 树转列表
+List<Dept> flat = TreeTool.treeToList(tree, Dept::getChildren);
+```

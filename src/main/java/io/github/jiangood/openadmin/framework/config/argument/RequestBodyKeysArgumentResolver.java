@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.framework.config.argument;
 
 import cn.hutool.core.collection.IterUtil;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.github.jiangood.openadmin.lang.JsonTool;
+import io.github.jiangood.openadmin.util.JsonTool;
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;

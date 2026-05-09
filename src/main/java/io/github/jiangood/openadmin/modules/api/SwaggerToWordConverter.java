@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.api;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.JsonTool;
+import io.github.jiangood.openadmin.util.JsonTool;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;

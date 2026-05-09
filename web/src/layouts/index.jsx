@@ -1,9 +1,11 @@
-import AdminLayout from "./admin"
 import React from "react";
 import {ConfigProvider} from "antd";
-
-import {Outlet, withRouter} from "umi";
 import zhCN from 'antd/locale/zh_CN';
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
+import {Outlet, withRouter} from "umi";
+
+import AdminLayout from "./admin"
 import {
     ArrUtils,
     HttpUtils,
@@ -13,12 +15,10 @@ import {
     SysUtils,
     ThemeUtils,
 } from "../framework";
-import dayjs from 'dayjs';
-import 'dayjs/locale/zh-cn';
+import {Logger} from "../framework/utils/Logger";
 
 import '../style/global.less'
 import './index.less'
-import {Logger} from "../framework/utils/Logger";
 
 dayjs.locale('zh-cn');
 
@@ -78,12 +78,12 @@ class _Layouts extends React.Component {
 
 
     loadLoginInfo = () => {
-        let {pathname} = this.props.location;
+        const {pathname} = this.props.location;
         if (checkIsPurePage(pathname) || checkIsSimplePage(pathname) || this.state.loginInfoFinish) {
             return;
         }
 
-        HttpUtils.get('/admin/public/checkLogin')
+        HttpUtils.get('/admin/public/check-login')
             .then(rs => {
                 const {needUpdatePwd, dictInfo, loginInfo} = rs
                 SysUtils.setDictInfo(dictInfo)
@@ -147,7 +147,7 @@ class _Layouts extends React.Component {
 
 
     renderContent = () => {
-        let {pathname} = this.props.location;
+        const {pathname} = this.props.location;
 
         if(checkIsPurePage(pathname)){
             return <Outlet/>
@@ -158,7 +158,7 @@ class _Layouts extends React.Component {
             return <PageLoading message='加载消息组件...'/>
         }
 
-        let {params = {}} = this.props.location;
+        const {params = {}} = this.props.location;
         console.log('layout: params', params)
         if (checkIsSimplePage(pathname) || params.hasOwnProperty('_noLayout')) {
             return <Outlet/>

@@ -12,7 +12,7 @@ export class ButtonList extends React.Component {
 
 
     render() {
-        let {children} = this.props;
+        const {children} = this.props;
 
         // 单节点的情况
         if (!Array.isArray(children)) {
@@ -35,7 +35,7 @@ export class ButtonList extends React.Component {
     }
 
     checkPerm = element => {
-        let props = element.props;
+        const props = element.props;
         return props == null || props.perm == null || PermUtils.hasPermission(props.perm);
 
     };

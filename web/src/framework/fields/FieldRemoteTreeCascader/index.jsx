@@ -1,7 +1,7 @@
 import { Cascader, Spin } from 'antd';
 import React from 'react';
 import { TreeUtils } from '../../utils';
-import BaseRemoteSelect from '../BaseRemoteSelect';
+import { BaseRemoteSelect } from '../BaseRemoteSelect';
 
 /**
  * 远程树级联选择器，类似 select，但是树级联

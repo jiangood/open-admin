@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
-import io.github.jiangood.openadmin.modules.system.dto.response.UserResponse;
+import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
@@ -31,7 +31,7 @@ public class SysUserDetailsService implements UserDetailsService {
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.debug("loadUserByUsername {}", username);
-        SysUser user = userService.findByAccount(username);
+        SysUser user = userService.findByAccount(username).orElse(null);
         if (user == null) {
             throw new UsernameNotFoundException("用户不存在: " + username);
         }
@@ -48,7 +48,7 @@ public class SysUserDetailsService implements UserDetailsService {
 
         LoginUser loginUser = new LoginUser(user.getAccount(), user.getPassword(), authorities);
 
-        UserResponse dto = userService.findOneDto(user.getId());
+        UserVO dto = userService.findOneDto(user.getId());
         loginUser.setId(dto.getId());
         loginUser.setDeptId(dto.getDeptId());
         loginUser.setDeptName(dto.getDeptLabel());

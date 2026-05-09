@@ -1,10 +1,12 @@
 package io.github.jiangood.openadmin.framework.config.check;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class ConfigChecker implements ApplicationRunner {
     
@@ -34,16 +36,13 @@ public class ConfigChecker implements ApplicationRunner {
             !expectedLocale.equals(locale) ||
             expectedOneIndexed != oneIndexed) {
             
-            System.err.println("❌ 配置错误！期望配置：");
-            System.err.println("  spring.jackson.time-zone: " + expectedTimeZone + " (当前: " + timeZone + ")");
-            System.err.println("  spring.jackson.date-format: " + expectedDateFormat + " (当前: " + dateFormat + ")");
-            System.err.println("  spring.jackson.locale: " + expectedLocale + " (当前: " + locale + ")");
-            System.err.println("  spring.data.web.pageable.one-indexed-parameters: " + expectedOneIndexed + " (当前: " + oneIndexed + ")");
+            log.error("配置错误！期望配置：\n  spring.jackson.time-zone: {} (当前: {})\n  spring.jackson.date-format: {} (当前: {})\n  spring.jackson.locale: {} (当前: {})\n  spring.data.web.pageable.one-indexed-parameters: {} (当前: {})",
+                expectedTimeZone, timeZone, expectedDateFormat, dateFormat, expectedLocale, locale, expectedOneIndexed, oneIndexed);
             
             // 可以选择抛出异常阻止启动，或者只打印警告
             throw new RuntimeException("配置校验失败，请检查 application.yml");
         }
         
-        System.out.println("✅ 配置校验通过，项目启动成功！");
+        log.info("配置校验通过，项目启动成功！");
     }
 }

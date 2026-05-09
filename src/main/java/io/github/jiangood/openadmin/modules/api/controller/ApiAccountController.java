@@ -2,10 +2,10 @@ package io.github.jiangood.openadmin.modules.api.controller;
 
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.lang.DownloadTool;
-import io.github.jiangood.openadmin.lang.JsonTool;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
+import io.github.jiangood.openadmin.util.DownloadTool;
+import io.github.jiangood.openadmin.util.JsonTool;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.modules.api.SwaggerToWordConverter;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
 import io.github.jiangood.openadmin.modules.api.service.ApiAccountService;
@@ -48,7 +48,7 @@ public class ApiAccountController {
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<ApiAccount> q = apiAccountService.spec().orLike(searchText, "name");
-        Page<ApiAccount> page = apiAccountService.getPage(q, pageable);
+        Page<ApiAccount> page = apiAccountService.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }
 
@@ -59,14 +59,14 @@ public class ApiAccountController {
     }
 
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        apiAccountService.delete(idRequest.getId());
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        apiAccountService.deleteById(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
 
 
 
-    @GetMapping("permList")
+    @GetMapping("perm-list")
     public AjaxResult permList(HttpServletRequest req) throws IOException {
         // 获取 OpenAPI 对象
         byte[] bytes = openApiResource.openapiJson(req, "/admin/api-docs/open-api", Locale.getDefault());
@@ -100,7 +100,7 @@ public class ApiAccountController {
 
     @PostMapping("grant/{id}")
     public AjaxResult grant(@PathVariable String id, @Validate @RequestBody List<String> perms) {
-        ApiAccount acc = apiAccountService.get(id);
+        ApiAccount acc = apiAccountService.findById(id);
         acc.setPerms(perms);
         apiAccountService.save(acc);
         return AjaxResult.ok().msg("授权成功");
@@ -108,7 +108,7 @@ public class ApiAccountController {
 
     @GetMapping("export/{id}")
     public void export(@PathVariable String id, HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        ApiAccount acc = apiAccountService.get(id);
+        ApiAccount acc = apiAccountService.findById(id);
         byte[] bytes = openApiResource.openapiJson(req, "/admin/api-docs/open-api", Locale.getDefault());
 
 

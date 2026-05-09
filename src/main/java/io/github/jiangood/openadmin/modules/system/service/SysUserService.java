@@ -4,7 +4,7 @@ import cn.hutool.cache.Cache;
 import cn.hutool.cache.CacheUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.lang.PasswordTool;
+import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -12,15 +12,15 @@ import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import io.github.jiangood.openadmin.modules.system.dto.mapper.UserMapper;
-import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermRequest;
-import io.github.jiangood.openadmin.modules.system.dto.response.UserResponse;
+import io.github.jiangood.openadmin.modules.system.dto.converter.UserConverter;
+import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermReq;
+import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -37,33 +37,28 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class SysUserService {
 
     private static final Cache<String, String> NAME_CACHE = CacheUtil.newTimedCache(1000 * 60 * 5);
 
-    @Resource
-    private SysUserRepository sysUserRepository;
+    private final SysUserRepository sysUserRepository;
 
-    @Resource
-    private SysRoleRepository roleRepository;
+    private final SysRoleRepository roleRepository;
 
-    @Resource
-    private SysOrgService sysOrgService;
+    private final SysOrgService sysOrgService;
 
-    @Resource
-    private SysMenuRepository sysMenuRepository;
+    private final SysMenuRepository sysMenuRepository;
 
-    @Resource
-    private UserMapper userMapper;
+    private final UserConverter userConverter;
 
-    @Resource
-    private SystemProperties systemProperties;
+    private final SystemProperties systemProperties;
 
 
-    public UserResponse findOneDto(String id) {
+    public UserVO findOneDto(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
-        return userMapper.toResponse(user);
+        return userConverter.toResponse(user);
     }
 
 
@@ -73,13 +68,13 @@ public class SysUserService {
         return sysUserRepository.findAll(s, Sort.by(SysUser.Fields.name));
     }
 
-    public SysUser findByAccount(String account) {
+    public Optional<SysUser> findByAccount(String account) {
         return sysUserRepository.findByAccount(account);
     }
 
 
-    public SysUser findByPhone(String phoneNumber) {
-        return sysUserRepository.findByField(SysUser.Fields.phone, phoneNumber);
+    public Optional<SysUser> findByPhone(String phoneNumber) {
+        return Optional.ofNullable(sysUserRepository.findByField(SysUser.Fields.phone, phoneNumber));
     }
 
 
@@ -90,7 +85,7 @@ public class SysUserService {
     }
 
 
-    public Page<UserResponse> getAll(String orgId, String roleId, String searchText, Pageable pageable) throws SQLException {
+    public Page<UserVO> getAll(String orgId, String roleId, String searchText, Pageable pageable) throws SQLException {
         Spec<SysUser> query = Spec.of();
 
         if (StrUtil.isNotEmpty(orgId)) {
@@ -110,7 +105,7 @@ public class SysUserService {
         }
 
         Page<SysUser> page = sysUserRepository.findAll(query, pageable);
-        List<UserResponse> responseList = userMapper.toResponse(page.getContent());
+        List<UserVO> responseList = userConverter.toResponse(page.getContent());
         return new PageImpl<>(responseList, page.getPageable(), page.getTotalElements());
     }
 
@@ -122,7 +117,7 @@ public class SysUserService {
         Assert.state(accountUnique, "用户名已存在");
 
         String inputOrgId = input.getDeptId();
-        SysOrg org = sysOrgService.findOne(inputOrgId);
+        SysOrg org = sysOrgService.findById(inputOrgId).orElse(null);
         if (org.getType() == OrgType.TYPE_UNIT) {
             input.setUnitId(inputOrgId);
             input.setDeptId(null);
@@ -145,7 +140,7 @@ public class SysUserService {
 
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
         try {
             sysUserRepository.delete(sysUser);
@@ -278,10 +273,10 @@ public class SysUserService {
         return result;
     }
 
-    public GrantUserPermRequest getPermInfo(String id) {
+    public GrantUserPermReq getPermInfo(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
 
-        GrantUserPermRequest p = new GrantUserPermRequest();
+        GrantUserPermReq p = new GrantUserPermReq();
         p.setId(user.getId());
         p.setDataPermType(user.getDataPermType());
         p.setOrgIds(user.getDataPerms().stream().map(BaseEntity::getId).collect(Collectors.toList()));
@@ -315,51 +310,42 @@ public class SysUserService {
 
 
     public List<SysUser> findByRoleCode(String code) {
-        SysRole role = roleRepository.findByCode(code);
+        SysRole role = roleRepository.findByCode(code).orElse(null);
         Assert.state(role != null, "编码为" + code + "的角色不存在");
 
         return this.findByRole(role);
     }
 
     public List<SysUser> findByRoleId(String id) {
-        SysRole role = roleRepository.findOne(id);
+        SysRole role = roleRepository.findById(id).orElse(null);
         Assert.state(role != null, "角色不存在");
 
         return this.findByRole(role);
     }
 
 
-    public List<SysUser> getAll() {
+    public List<SysUser> findAll() {
         return sysUserRepository.findAll();
     }
 
-    public SysUser findOne(String id) {
-        return sysUserRepository.findById(id).orElse(null);
+    public Optional<SysUser> findById(String id) {
+        return sysUserRepository.findById(id);
     }
 
-    // BaseService 方法
-    public Page<SysUser> getPage(Specification<SysUser> spec, Pageable pageable) {
+    public Page<SysUser> findAll(Specification<SysUser> spec, Pageable pageable) {
         return sysUserRepository.findAll(spec, pageable);
     }
 
-    public SysUser detail(String id) {
-        return sysUserRepository.findById(id).orElse(null);
-    }
-
-    public SysUser get(String id) {
-        return sysUserRepository.findById(id).orElse(null);
-    }
-
-    public List<SysUser> getAll(Sort sort) {
+    public List<SysUser> findAll(Sort sort) {
         return sysUserRepository.findAll(sort);
     }
 
-    public List<SysUser> getAll(Specification<SysUser> s, Sort sort) {
+    public List<SysUser> findAll(Specification<SysUser> s, Sort sort) {
         return sysUserRepository.findAll(s, sort);
     }
 
-    public io.github.jiangood.openadmin.framework.data.specification.Spec<SysUser> spec() {
-        return io.github.jiangood.openadmin.framework.data.specification.Spec.of();
+    public Spec<SysUser> spec() {
+        return Spec.of();
     }
 
     public SysUser save(SysUser t) {

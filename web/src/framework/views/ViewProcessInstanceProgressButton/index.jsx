@@ -10,7 +10,7 @@ export class ViewProcessInstanceProgressButton extends React.Component {
 
     onClick = () => {
         console.log('点击追踪流程')
-        let content = <ViewProcessInstanceProgress value={this.props.value} />;
+        const content = <ViewProcessInstanceProgress value={this.props.value} />;
         MessageUtils.alert(content,{
             title:'流程审批信息',
             width:800

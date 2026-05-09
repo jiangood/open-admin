@@ -1,16 +1,16 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.IpTool;
-import io.github.jiangood.openadmin.lang.RequestTool;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.IpTool;
+import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
-import io.github.jiangood.openadmin.modules.common.LoginTool;
+import io.github.jiangood.openadmin.framework.common.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.repository.SysLogRepository;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -26,11 +26,11 @@ import java.util.Date;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class SysLogService {
 
-    @Resource
-    private SysLogRepository sysLogRepository;
+    private final SysLogRepository sysLogRepository;
 
     public void saveOperationLog(JoinPoint joinPoint, long duration, String params, AjaxResult result) {
         Date now = new Date();
@@ -74,31 +74,23 @@ public class SysLogService {
     }
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         sysLogRepository.deleteById(id);
     }
 
-    public Page<SysLog> getPage(Specification<SysLog> spec, Pageable pageable) {
+    public Page<SysLog> findAll(Specification<SysLog> spec, Pageable pageable) {
         return sysLogRepository.findAll(spec, pageable);
     }
 
-    public SysLog detail(String id) {
-        return sysLogRepository.findById(id).orElse(null);
-    }
-
-    public SysLog get(String id) {
-        return sysLogRepository.findById(id).orElse(null);
-    }
-
-    public List<SysLog> getAll() {
+    public List<SysLog> findAll() {
         return sysLogRepository.findAll();
     }
 
-    public List<SysLog> getAll(Sort sort) {
+    public List<SysLog> findAll(Sort sort) {
         return sysLogRepository.findAll(sort);
     }
 
-    public List<SysLog> getAll(Specification<SysLog> s, Sort sort) {
+    public List<SysLog> findAll(Specification<SysLog> s, Sort sort) {
         return sysLogRepository.findAll(s, sort);
     }
 

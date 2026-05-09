@@ -28,7 +28,7 @@ export default class extends React.Component {
     tableRef = React.createRef()
 
     componentDidMount() {
-        HttpUtils.get("/admin/apiAccount/permList").then(rs => {
+        HttpUtils.get("/admin/apiAccount/perm-list").then(rs => {
             this.setState({list: rs})
         })
     }
@@ -76,7 +76,7 @@ export default class extends React.Component {
         },
         {
             title: '启用',
-            dataIndex: 'enable',
+            dataIndex: 'enabled',
             render(v) {
                 return v == null ? null : (v ? '是' : '否')
             },
@@ -132,7 +132,7 @@ export default class extends React.Component {
 
     onGrant = () => {
         const hide = message.loading('授权中...', 0)
-        let accountId = this.state.formValues.id;
+        const accountId = this.state.formValues.id;
         HttpUtils.post('admin/apiAccount/grant/'+accountId,  this.state.formValues.perms).then(rs => {
             this.setState({grantFormOpen: false})
             this.tableRef.current.reload()
@@ -234,7 +234,7 @@ export default class extends React.Component {
                     <Form.Item label='有效期' name='endTime' style={{marginTop: 32}}>
                         <FieldDate type='YYYY-MM-DD'/>
                     </Form.Item>
-                    <Form.Item label='启用' name='enable' rules={[{required: true}]}>
+                    <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
                         <FieldBoolean/>
                     </Form.Item>
 
@@ -260,7 +260,7 @@ export default class extends React.Component {
                         {
                             dataIndex: 'option', title: '操作',
                             render: (_, record) => {
-                                let id = record.id;
+                                const id = record.id;
                                 return <Switch checked={this.state.formValues.perms.includes(id)}
                                                onChange={(checked) => {
                                                    this.onGrantItemChange(id, checked)

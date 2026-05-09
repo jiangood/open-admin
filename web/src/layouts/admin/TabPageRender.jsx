@@ -4,7 +4,7 @@ import {Tabs} from "antd";
 import {PageRender} from "../PageRender";
 import {PageUtils} from "../../framework";
 
-class TabPageRender extends React.Component {
+class TabPageRenderComponent extends React.Component {
 
     state = {
         active: null,
@@ -35,12 +35,12 @@ class TabPageRender extends React.Component {
         const {location} = this.props
 
         const {pathname, search} = location
-        let {tabs} = this.state
+        const {tabs} = this.state
 
         const old = tabs.find(t => t.key === url)
         if (old == null) {
             const cmp = <PageRender pathname={pathname} search={search}/>
-            let label = this.getLabel(pathname);
+            const label = this.getLabel(pathname);
             tabs.push({
                 key: url,
                 label: label,
@@ -61,7 +61,7 @@ class TabPageRender extends React.Component {
         if (path === '/') {
             return '首页'
         }
-        let label = PageUtils.currentLabel();
+        const label = PageUtils.currentLabel();
 
         if (!label) {
             const menu = this.props.pathMenuMap[path]
@@ -75,7 +75,7 @@ class TabPageRender extends React.Component {
 
 
     render() {
-        let {tabs} = this.state
+        const {tabs} = this.state
         if (tabs.length === 0) {
             return null
         }
@@ -102,8 +102,8 @@ class TabPageRender extends React.Component {
 
     lastTabClickTime = 0
     onTabClick = (key, event) => {
-        let now = new Date().getTime();
-        let doubleClick = now - this.lastTabClickTime < 300;
+        const now = new Date().getTime();
+        const doubleClick = now - this.lastTabClickTime < 300;
         // 双击时刷新
         if (doubleClick) {
             this.refresh(key);
@@ -155,4 +155,4 @@ class TabPageRender extends React.Component {
 
 
 // 让组件有路由相关的参数，如 this.props.location
-export default withRouter(TabPageRender)
+export const TabPageRender = withRouter(TabPageRenderComponent)

@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.enums;
 
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

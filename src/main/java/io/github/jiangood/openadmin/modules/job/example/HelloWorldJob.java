@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.job.example;
 
-import io.github.jiangood.openadmin.lang.field.FieldDescription;
+import io.github.jiangood.openadmin.util.field.FieldDescription;
 import io.github.jiangood.openadmin.modules.job.BaseJob;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import org.quartz.JobDataMap;
@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 public class HelloWorldJob extends BaseJob {
     @Override
     public String execute(JobDataMap data, Logger logger) throws Exception {
-        System.out.printf("你好世界, 欢迎您%s!%n", data.get("name"));
+        logger.info("你好世界, 欢迎您{}!", data.get("name"));
         logger.info("运行你好世界");
         return "OK";
     }

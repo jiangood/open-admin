@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import io.github.jiangood.openadmin.lang.annotation.Remark;
+import io.github.jiangood.openadmin.util.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.DBConstants;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import jakarta.persistence.*;
@@ -20,6 +20,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
+@Table(name = "sys_user")
 @FieldNameConstants
 @Remark("系统用户")
 public class SysUser extends BaseEntity {

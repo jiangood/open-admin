@@ -9,11 +9,11 @@ export class ViewPassword extends React.Component {
     }
 
     render() {
-        let v = this.props.value;
+        const v = this.props.value;
         if (v == null) {
             return null
         }
-        let visible = this.state.visible;
+        const visible = this.state.visible;
         return <Space>
             <span>{this.state.visible ? v : '******'}</span>
             <a onClick={() => this.setState({visible: !visible})}>

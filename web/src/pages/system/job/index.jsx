@@ -1,3 +1,4 @@
+import React from 'react'
 import {
     Alert,
     AutoComplete,
@@ -13,8 +14,8 @@ import {
     Switch,
     Tag
 } from 'antd'
-import React from 'react'
 import {PlusOutlined} from "@ant-design/icons";
+
 import {ButtonList, HttpUtils, Page, ProTable, StringUtils, ValueType} from "../../../framework";
 
 
@@ -63,7 +64,7 @@ export default class extends React.Component {
     formRef = React.createRef()
 
     componentDidMount() {
-        HttpUtils.get('admin/job/jobClassOptions').then(rs => {
+        HttpUtils.get('admin/job/job-class-options').then(rs => {
             this.setState({jobClassOptions: rs})
         })
     }
@@ -78,7 +79,7 @@ export default class extends React.Component {
     }
 
     loadJobParamFields(className, jobData) {
-        HttpUtils.post("admin/job/getJobParamFields", jobData || {}, {className}).then(rs => {
+        HttpUtils.post("admin/job/get-job-param-fields", jobData || {}, {className}).then(rs => {
             this.setState({paramList: rs})
         })
     }
@@ -98,7 +99,7 @@ export default class extends React.Component {
     }
 
     handleTriggerJob = row => {
-        HttpUtils.get('admin/job/triggerJob', {id: row.id}).then(rs => {
+        HttpUtils.get('admin/job/trigger-job', {id: row.id}).then(rs => {
             this.tableRef.current.reload();
         })
     }
@@ -288,13 +289,13 @@ export default class extends React.Component {
                         title: '操作',
                         dataIndex: 'option',
                         render: (_, record) => {
-                            let url = '/admin/sys/log/' + record.id;
+                            const url = '/admin/sys/log/' + record.id;
                             return <a href={url} target='_blank'>日志</a>;
                         },
                     }
                 ]} request={params => {
                     params.jobId = this.state.formValues.id
-                    return HttpUtils.get('admin/job/executeRecord', params);
+                    return HttpUtils.get('admin/job/execute-record', params);
                 }}></ProTable>
 
             </Modal>
@@ -306,7 +307,7 @@ export default class extends React.Component {
             this.loadJobParamFields(values.jobClass)
             const option = this.state.jobClassOptions.find(o => o.value === changed.jobClass)
             if (option) {
-                let {label} = option;
+                const {label} = option;
                 if (StringUtils.contains(label, " ")) { // 取中文名部门设置为name
                     this.formRef.current.setFieldValue("name", label.split(" ")[1])
                 }

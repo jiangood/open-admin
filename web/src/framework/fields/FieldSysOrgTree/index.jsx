@@ -12,8 +12,8 @@ export class FieldSysOrgTree extends React.Component {
   render() {
     const {type, ...rest} = this.props;
     const url = type === 'dept'?
-        '/admin/sysOrg/deptTree':
-        '/admin/sysOrg/unitTree';
+        '/admin/sysOrg/dept-tree':
+        '/admin/sysOrg/unit-tree';
     return <FieldRemoteTree url={url} {...rest} />;
   }
 

@@ -1,12 +1,12 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.enums.MaterialType;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.service.SysFileService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 @Slf4j
 @RestController
 @RequestMapping("admin/sysFile")
+@RequiredArgsConstructor
 public class SysFileController {
 
-    @Resource
-    private SysFileService service;
+    private final SysFileService service;
 
 
     @PreAuthorize("hasAuthority('sysFile:view')")
@@ -79,13 +79,13 @@ public class SysFileController {
 
     @GetMapping("detail")
     public AjaxResult detail(String id) {
-        return AjaxResult.ok().data(service.findOne(id));
+        return AjaxResult.ok().data(service.findById(id).orElse(null));
     }
 
 
     @PreAuthorize("hasAuthority('sysFile:delete')")
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) throws Exception {
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) throws Exception {
         service.deleteById(idRequest.getId());
         return AjaxResult.ok();
     }

@@ -18,7 +18,7 @@ open-admin 采用前后端分离架构。
 │   Java 21 + Spring Boot 4.0 + JPA + Security       │
 │                                                     │
 │   ┌─────────┐ ┌──────────┐ ┌─────────┐ ┌────────┐ │
-│   │ modules │ │framework │ │  lang   │ │ config │ │
+│   │ modules │ │framework │ │  util   │ │ config │ │
 │   │ (业务)  │ │  (框架)  │ │ (工具)  │ │ (配置) │ │
 │   └─────────┘ └──────────┘ └─────────┘ └────────┘ │
 └──────────────────┬─────────────────────────────────┘
@@ -39,14 +39,14 @@ open-admin/
 │   │   ├── perm/               # @HasPermission 注解 + 切面
 │   │   ├── log/                # @Log 操作日志注解 + 切面
 │   │   ├── filter/             # RequestBody 缓存过滤器
-│   │   └── lifecycle/          # 应用生命周期钩子
-│   ├── lang/                   # 工具类库（BeanTool、JsonTool、TreeTool、ExcelTool 等）
+│   │   ├── lifecycle/          # 应用生命周期钩子
+│   │   └── common/             # 通用（登录/认证/站点信息）
+│   ├── util/                   # 工具类库（BeanTool、JsonTool、TreeTool、ExcelTool 等）
 │   └── modules/
 │       ├── system/             # 系统管理（用户/角色/菜单/组织/字典/文件/日志）
 │       ├── job/                # 定时任务（Quartz）
 │       ├── api/                # 开放接口管理
-│       ├── logviewer/          # 文件日志查看
-│       └── common/             # 通用（登录/认证/站点信息）
+│       └── logviewer/          # 文件日志查看
 ├── web/                        # 前端项目（UmiJS）
 │   └── src/
 │       ├── framework/          # @jiangood/open-admin 框架组件库
@@ -83,7 +83,7 @@ open-admin/
 
 - Entity 继承 `BaseEntity` 自动获得 id、createTime、updateTime
 - Repository 继承 `BaseRepository` 获得通用 CRUD
-- Service 继承 `JpaService` 获得通用业务方法
+- Service 使用构造器注入 Repository 实现业务逻辑
 
 ### 动态查询
 

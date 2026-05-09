@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.system.service;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,11 +14,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 
+@RequiredArgsConstructor
 @Service
 public class SysDictItemService {
 
-    @Resource
-    private SysDictItemRepository sysDictItemRepository;
+    private final SysDictItemRepository sysDictItemRepository;
 
     // BaseService 方法
     @Transactional
@@ -32,31 +32,23 @@ public class SysDictItemService {
     }
 
     @Transactional
-    public void delete(String id) {
+    public void deleteById(String id) {
         sysDictItemRepository.deleteById(id);
     }
 
-    public Page<SysDictItem> getPage(Specification<SysDictItem> spec, Pageable pageable) {
+    public Page<SysDictItem> findAll(Specification<SysDictItem> spec, Pageable pageable) {
         return sysDictItemRepository.findAll(spec, pageable);
     }
 
-    public SysDictItem detail(String id) {
-        return sysDictItemRepository.findById(id).orElse(null);
-    }
-
-    public SysDictItem get(String id) {
-        return sysDictItemRepository.findById(id).orElse(null);
-    }
-
-    public List<SysDictItem> getAll() {
+    public List<SysDictItem> findAll() {
         return sysDictItemRepository.findAll();
     }
 
-    public List<SysDictItem> getAll(Sort sort) {
+    public List<SysDictItem> findAll(Sort sort) {
         return sysDictItemRepository.findAll(sort);
     }
 
-    public List<SysDictItem> getAll(Specification<SysDictItem> s, Sort sort) {
+    public List<SysDictItem> findAll(Specification<SysDictItem> s, Sort sort) {
         return sysDictItemRepository.findAll(s, sort);
     }
 

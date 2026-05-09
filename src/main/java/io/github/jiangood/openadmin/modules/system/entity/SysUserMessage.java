@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
@@ -16,6 +17,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Entity
+@Table(name = "sys_user_message")
 @FieldNameConstants
 public class SysUserMessage extends BaseEntity {
 
@@ -32,8 +34,8 @@ public class SysUserMessage extends BaseEntity {
     private SysUser user;
 
 
-    @Column
-    private Boolean isRead;
+    @Column(name = "is_read")
+    private Boolean read;
 
     private Date readTime;
 

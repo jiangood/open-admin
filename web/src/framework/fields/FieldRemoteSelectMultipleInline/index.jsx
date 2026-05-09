@@ -1,7 +1,7 @@
 import React from 'react';
 import { Select } from 'antd';
 import { StringUtils } from '../../utils';
-import BaseRemoteSelect from '../BaseRemoteSelect';
+import { BaseRemoteSelect } from '../BaseRemoteSelect';
 
 /**
  * 多选，但是值是字符串，逗号拼接的

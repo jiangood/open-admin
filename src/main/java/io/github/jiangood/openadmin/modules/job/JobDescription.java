@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.job;
 
 
-import io.github.jiangood.openadmin.lang.field.FieldDescription;
+import io.github.jiangood.openadmin.util.field.FieldDescription;
 
 import java.lang.annotation.*;
 

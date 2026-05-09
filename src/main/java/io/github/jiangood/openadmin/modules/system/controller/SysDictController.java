@@ -2,10 +2,10 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.datadefinition.DictDefinition;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
-import io.github.jiangood.openadmin.modules.system.dto.DictItemDto;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.dto.antd.Option;
+import io.github.jiangood.openadmin.modules.system.dto.DictItemVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.service.SysDictItemService;
 import io.github.jiangood.openadmin.modules.system.service.SysDictService;
@@ -31,7 +31,7 @@ public class SysDictController {
     @PreAuthorize("hasAuthority('sysDict:view')")
     @RequestMapping("page")
     public AjaxResult page(String searchText) {
-        List<DictItemDto> list = sysDictService.getAllItems();
+        List<DictItemVO> list = sysDictService.getAllItems();
         if(searchText != null){
             list = list.stream().filter(e->e.getTypeLabel().contains(searchText) || e.getTypeCode().contains(searchText)).toList();
         }
@@ -39,11 +39,11 @@ public class SysDictController {
         return AjaxResult.ok().data(new PageImpl<>(list));
     }
     @PreAuthorize("hasAuthority('sysDict:save')")
-    @GetMapping("typeOptions")
+    @GetMapping("type-options")
     public AjaxResult typeOptions(String searchText) {
-        List<DictItemDto> list = sysDictService.getAllItems();
+        List<DictItemVO> list = sysDictService.getAllItems();
         Map<String,String> map = new LinkedHashMap<>();
-        for (DictItemDto dictItemDto : list) {
+        for (DictItemVO dictItemDto : list) {
             map.put(dictItemDto.getTypeCode(), dictItemDto.getTypeLabel());
         }
         List<Option> options = new ArrayList<>();
@@ -70,8 +70,8 @@ public class SysDictController {
 
     @PreAuthorize("hasAuthority('sysDict:delete')")
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        itemService.delete(idRequest.getId());
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        itemService.deleteById(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
 

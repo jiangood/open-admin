@@ -35,7 +35,7 @@ export default class extends React.Component {
                 }
 
 
-                let rowSelectedKey = this.state.rowSelectedKeys[record.id];
+                const rowSelectedKey = this.state.rowSelectedKeys[record.id];
                 return <Checkbox.Group options={options}
                                        value={rowSelectedKey}
                                        onChange={(ks) => {
@@ -59,10 +59,10 @@ export default class extends React.Component {
             HttpUtils.get('admin/sysRole/get', {id: this.roleId}).then(rs => {
                 this.setState({roleInfo: rs})
             }),
-            HttpUtils.get('admin/sysRole/permTreeTable', {id: this.roleId}).then(rs => {
+            HttpUtils.get('admin/sysRole/perm-tree-table', {id: this.roleId}).then(rs => {
                 this.setState({dataSource: rs})
             }),
-            HttpUtils.get('admin/sysRole/ownPerms', {id: this.roleId}).then(rs => {
+            HttpUtils.get('admin/sysRole/own-perms', {id: this.roleId}).then(rs => {
                 this.setState({rowSelectedKeys: rs})
             })
         ]).then(rs => {
@@ -82,7 +82,7 @@ export default class extends React.Component {
             menus.push(menuId)
             ArrUtils.addAll(perms, ks)
         }
-        HttpUtils.post('admin/sysRole/savePerms', {id: this.roleId, perms, menus}).then(rs => {
+        HttpUtils.post('admin/sysRole/save-perms', {id: this.roleId, perms, menus}).then(rs => {
             //  Page.open(PageUtils.currentPathname(), PageUtils.currentLabel())
         })
     };

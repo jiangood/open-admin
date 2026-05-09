@@ -1,9 +1,9 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
 import cn.hutool.core.io.FileUtil;
-import io.github.jiangood.openadmin.lang.ContentTypeTool;
-import io.github.jiangood.openadmin.lang.RequestTool;
-import io.github.jiangood.openadmin.lang.enums.MaterialType;
+import io.github.jiangood.openadmin.util.ContentTypeTool;
+import io.github.jiangood.openadmin.util.RequestTool;
+import io.github.jiangood.openadmin.util.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +20,7 @@ import java.io.InputStream;
 @Getter
 @Setter
 @Entity
+@Table(name = "sys_file")
 @FieldNameConstants
 public class SysFile extends BaseEntity {
 

@@ -9,20 +9,20 @@ import io.github.jiangood.openadmin.framework.config.security.refresh.Permission
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
-import io.github.jiangood.openadmin.lang.dto.AjaxResult;
-import io.github.jiangood.openadmin.lang.dto.DropdownRequest;
-import io.github.jiangood.openadmin.lang.dto.IdRequest;
-import io.github.jiangood.openadmin.lang.dto.antd.Option;
-import io.github.jiangood.openadmin.lang.dto.antd.TreeOption;
-import io.github.jiangood.openadmin.lang.tree.TreeTool;
-import io.github.jiangood.openadmin.modules.common.LoginTool;
-import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermRequest;
-import io.github.jiangood.openadmin.modules.system.dto.response.UserResponse;
+import io.github.jiangood.openadmin.util.dto.AjaxResult;
+import io.github.jiangood.openadmin.util.dto.DropdownReq;
+import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.dto.antd.Option;
+import io.github.jiangood.openadmin.util.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
+import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermReq;
+import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.data.domain.Page;
@@ -42,27 +42,24 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("admin/sysUser")
+@RequiredArgsConstructor
 public class SysUserController {
 
-    @Resource
-    private SysUserService sysUserService;
+    private final SysUserService sysUserService;
 
 
-    @Resource
-    private SysOrgService sysOrgService;
+    private final SysOrgService sysOrgService;
 
-    @Resource
-    private SystemProperties systemProperties;
+    private final SystemProperties systemProperties;
 
-    @Resource
-    private PermissionStaleService permissionStaleService;
+    private final PermissionStaleService permissionStaleService;
 
 
     @PreAuthorize("hasAuthority('sysUser:view')")
     @RequestMapping("page")
     public AjaxResult page(String orgId, String roleId, String searchText, @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 
-        Page<UserResponse> page = sysUserService.getAll(orgId, roleId, searchText, pageable);
+        Page<UserVO> page = sysUserService.getAll(orgId, roleId, searchText, pageable);
 
         return AjaxResult.ok().data(page);
     }
@@ -89,9 +86,9 @@ public class SysUserController {
     @Log("用户-删除")
     @PreAuthorize("hasAuthority('sysUser:delete')")
     @PostMapping("delete")
-    public AjaxResult delete(@Valid @RequestBody IdRequest idRequest) {
-        SysUser user = sysUserService.findOne(idRequest.getId());
-        sysUserService.delete(idRequest.getId());
+    public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        SysUser user = sysUserService.findById(idRequest.getId()).orElse(null);
+        sysUserService.deleteById(idRequest.getId());
         permissionStaleService.markUserStale(user.getAccount());
 
         return AjaxResult.ok().msg("删除用户成功");
@@ -103,7 +100,7 @@ public class SysUserController {
      *
      * @param password
      */
-    @GetMapping("pwdStrength")
+    @GetMapping("pwd-strength")
     public AjaxResult pwdStrength(String password) {
         if (StrUtil.isEmpty(password)) {
             return AjaxResult.err().msg("请输入密码");
@@ -121,7 +118,7 @@ public class SysUserController {
 
     @Log("用户-重置密码")
     @PreAuthorize("hasAuthority('sysUser:resetPwd')")
-    @PostMapping("resetPwd")
+    @PostMapping("reset-pwd")
     public AjaxResult resetPwd(@RequestBody SysUser user) {
         String defaultPassWord = systemProperties.getDefaultPassword();
         Assert.hasText(defaultPassWord, "未配置默认密码，请再配置sys.default-password");
@@ -131,7 +128,7 @@ public class SysUserController {
 
 
     @RequestMapping("options")
-    public AjaxResult options(DropdownRequest dropdownRequest) {
+    public AjaxResult options(DropdownReq dropdownRequest) {
         String searchText = dropdownRequest.getSearchText();
         Spec<SysUser> query = Spec.of();
 
@@ -149,7 +146,7 @@ public class SysUserController {
 
         }
 
-        Page<SysUser> page = sysUserService.getPage(query, PageRequest.of(0, 200));
+        Page<SysUser> page = sysUserService.findAll(query, PageRequest.of(0, 200));
 
 
         Map<String, SysOrg> dict = sysOrgService.dict();
@@ -173,9 +170,9 @@ public class SysUserController {
     /**
      * 拥有数据
      */
-    @GetMapping("getPermInfo")
+    @GetMapping("get-perm-info")
     public AjaxResult getPermInfo(String id) {
-        GrantUserPermRequest permInfo = sysUserService.getPermInfo(id);
+        GrantUserPermReq permInfo = sysUserService.getPermInfo(id);
         return AjaxResult.ok().data(permInfo);
     }
 
@@ -185,8 +182,8 @@ public class SysUserController {
      */
     @Log("用户-授权数据")
     @PreAuthorize("hasAuthority('sysUser:grantPerm')")
-    @PostMapping("grantPerm")
-    public AjaxResult grantPerm(@Valid @RequestBody GrantUserPermRequest param) {
+    @PostMapping("grant-perm")
+    public AjaxResult grantPerm(@Valid @RequestBody GrantUserPermReq param) {
         SysUser sysUser = sysUserService.grantPerm(param.getId(), param.getRoleIds(), param.getDataPermType(), param.getOrgIds());
 
         permissionStaleService.markUserStale(sysUser.getAccount());
