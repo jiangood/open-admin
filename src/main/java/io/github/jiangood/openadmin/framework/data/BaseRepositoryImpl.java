@@ -217,7 +217,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
      */
     @Override
     public List<T> findTop(int size, Specification<T> c, Sort sort) {
-        Page<T> page = findAll(c, PageRequest.of(0, size, sort));
+        Page<T> page = findAll(c != null ? c : Specification.unrestricted(), PageRequest.of(0, size, sort));
         return page.hasContent() ? page.getContent() : Collections.emptyList();
     }
 
@@ -231,7 +231,8 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
         Root<T> root = query.from(domainClass);
 
         Path<?> path = root.get(fieldName);
-        Predicate predicate = c.toPredicate(root, query, builder);
+        Specification<T> spec = c != null ? c : Specification.unrestricted();
+        Predicate predicate = spec.toPredicate(root, query, builder);
 
         query.select(path).where(predicate);
 
@@ -260,8 +261,10 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
         CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
         Root<T> root = query.from(domainClass);
 
-        Predicate predicate = spec.toPredicate(root, query, builder);
-        query.where(predicate);
+        if (spec != null) {
+            Predicate predicate = spec.toPredicate(root, query, builder);
+            query.where(predicate);
+        }
 
 
         Selection<?> selection = query.getSelection();
@@ -317,7 +320,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
      */
     @Override
     public Map<ID, T> findMap(Specification<T> spec, Sort sort) {
-        List<T> list = findAll(spec,sort);
+        List<T> list = findAll(spec != null ? spec : Specification.unrestricted(), sort);
         Map<ID, T> map = new HashMap<>();
         for (T t : list) {
             if (t instanceof Persistable) {
@@ -329,7 +332,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
 
     @Override
     public Map<ID, T> findMap(Specification<T> spec, Sort sort,Function<T, ID> keyField) {
-        List<T> list = findAll(spec,sort);
+        List<T> list = findAll(spec != null ? spec : Specification.unrestricted(), sort);
         Map<ID, T> map = new HashMap<>();
         for (T t : list) {
             ID key = keyField.apply(t);
@@ -345,7 +348,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
      */
     @Override
     public <V> Map<ID, V> findMap(Specification<T> spec, Sort sort,Function<T, ID> keyField, Function<T, V> valueField) {
-        List<T> list = findAll(spec,sort);
+        List<T> list = findAll(spec != null ? spec : Specification.unrestricted(), sort);
         Map<ID, V> map = new HashMap<>();
         for (T t : list) {
             ID key = keyField.apply(t);
@@ -358,7 +361,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
 
     @Override
     public Map<ID, List<T>> findMapList(Specification<T> spec, Sort sort, Function<T, ID> keyField) {
-        List<T> list = findAll(spec,sort);
+        List<T> list = findAll(spec != null ? spec : Specification.unrestricted(), sort);
         Map<ID, List<T>> map = new HashMap<>();
         for (T t : list) {
             ID key = keyField.apply(t);
