@@ -317,6 +317,26 @@ public class XxxController {
 | `admin/system/user/delete` | `sys-user:delete` |
 | `admin/system/role/grant-permission` | `sys-role:grant-permission` |
 
+##### YAML 权限定义
+
+权限在 `application-data.yml` 中通过 `perms` 对象列表定义，配合自动前缀推导实现最简配置：
+
+```yaml
+data:
+  menus:
+    - id: sysUser                    # 前缀自动推导为 sys-user（kebab-case）
+      name: 用户管理
+      perms:                         # 对象列表，每项一个权限
+        - {name: 查询, code: query}  # 完整码: sys-user:query
+        - {name: 新增, code: save}   # 完整码: sys-user:save
+        - {name: 删除, code: delete}
+```
+
+- **前缀推导**：权限码前缀默认从 `id` 字段 kebab-case 化得来（`sysUser`→`sys-user`），绝大多数情况无需显式指定
+- **`perm-prefix` 覆盖**：如需自定义前缀，在菜单节点上加 `perm-prefix: custom-prefix` 字段
+- **对象列表**：`perm-names`/`perm-codes` 两个数组已被 `perms` 对象列表替代，避免位置耦合
+- **行内流**：每个权限按 `{name: 名称, code: action}` 行内格式书写，兼顾紧凑和可读性
+
 ### 代码结构
 
 | 层 | 路径 | 职责 |

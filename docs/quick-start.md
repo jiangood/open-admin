@@ -89,8 +89,12 @@ data:
       name: 用户管理
       path: /system/user
       icon: UserOutlined
-      perm-names: [ 列表,保存,删除,重置密码,授权数据 ]
-      perm-codes: [ sysUser:view,sysUser:save,sysUser:delete,sysUser:resetPwd,sysUser:grantPerm ]
+      perms:
+        - {name: 查询, code: query}
+        - {name: 新增, code: save}
+        - {name: 删除, code: delete}
+        - {name: 重置密码, code: reset-password}
+        - {name: 分配权限, code: grant-permission}
 ```
 
 ## 集成到已有业务项目

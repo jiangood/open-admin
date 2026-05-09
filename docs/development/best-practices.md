@@ -77,8 +77,10 @@ data:
           name: 用户管理
           path: /system/user
           icon: UserOutlined
-          perm-names: [ 列表,保存,删除 ]
-          perm-codes: [ user:view,user:save,user:delete ]
+          perms:
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
 ```
 
 ## 部署

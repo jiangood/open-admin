@@ -249,8 +249,10 @@ data:
       name: 业务名称
       path: /system/xxx
       icon: SettingOutlined
-      perm-names: [ 列表,保存,删除 ]
-      perm-codes: [ xxx:view,xxx:save,xxx:delete ]
+      perms:
+        - {name: 查询, code: query}
+        - {name: 新增, code: save}
+        - {name: 删除, code: delete}
 ```
 
 ## 约束
