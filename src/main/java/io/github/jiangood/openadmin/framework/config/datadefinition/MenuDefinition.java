@@ -47,14 +47,12 @@ public class MenuDefinition {
     }
 
     public List<String> getPermCodes() {
-        if (id == null) {
-            return perms.stream().map(PermDefinition::getCode).toList();
-        }
         String prefix = resolvedPermPrefix();
-        if (prefix == null) {
-            return perms.stream().map(PermDefinition::getCode).toList();
-        }
-        return perms.stream().map(p -> prefix + ":" + p.getCode()).toList();
+        return perms.stream().map(p -> {
+            if (prefix == null) return p.getCode();
+            if (p.getCode() != null && p.getCode().contains(":")) return p.getCode();
+            return prefix + ":" + p.getCode();
+        }).toList();
     }
 
     /** 兼容旧项目中的驼峰 id（sysUser→sys-user） */
