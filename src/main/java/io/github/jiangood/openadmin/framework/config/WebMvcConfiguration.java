@@ -7,7 +7,6 @@ import io.github.jiangood.openadmin.framework.config.RequestBodyKeysArgumentReso
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -26,7 +25,6 @@ import java.util.List;
 @Slf4j
 @Configuration
 @EnableScheduling
-@EnableCaching
 @ConditionalOnClass(name = "org.springframework.web.servlet.config.annotation.WebMvcConfigurer")
 public class WebMvcConfiguration implements WebMvcConfigurer {
     /**

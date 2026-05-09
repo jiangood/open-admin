@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import cn.hutool.cache.Cache;
-import cn.hutool.cache.CacheUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
@@ -27,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -40,8 +39,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 public class SysUserService {
-
-    private static final Cache<String, String> NAME_CACHE = CacheUtil.newTimedCache(1000 * 60 * 5);
 
     private final SysUserRepository sysUserRepository;
 
@@ -163,28 +160,15 @@ public class SysUserService {
     }
 
 
-    public synchronized String getNameById(String userId) {
+    @Cacheable(value = "userName", key = "#userId", sync = true)
+    public String getNameById(String userId) {
         if (userId == null) {
             return null;
         }
 
-        if (NAME_CACHE.containsKey(userId)) {
-            return NAME_CACHE.get(userId);
-        }
-
-        SysUser user = sysUserRepository.findById(userId).orElse(null);
-        if (user == null) {
-            return null;
-        }
-
-        String name = user.getName();
-        if (name == null) {
-            return null;
-        }
-
-        NAME_CACHE.put(userId, name);
-
-        return name;
+        return sysUserRepository.findById(userId)
+                .map(SysUser::getName)
+                .orElse(null);
     }
 
 

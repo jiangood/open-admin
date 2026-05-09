@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.framework.data;
 
-import cn.hutool.cache.Cache;
-import cn.hutool.cache.CacheUtil;
 import io.github.jiangood.openadmin.util.SpringTool;
 import jakarta.persistence.Entity;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +9,8 @@ import org.springframework.core.type.ClassMetadata;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
@@ -21,8 +21,14 @@ import java.util.*;
 @Slf4j
 public class JpaService {
 
+    private static final String CACHE_NAME = "jpaEntityNames";
+    private static final String CACHE_KEY = "ALL_NAMES";
 
-    private final Cache<String, List<String>> cache = CacheUtil.newTimedCache(5 * 1000 * 60);
+    private final CacheManager cacheManager;
+
+    public JpaService(CacheManager cacheManager) {
+        this.cacheManager = cacheManager;
+    }
 
     private static List<String> findBySuperClass(Class baseClas) {
         try {
@@ -76,10 +82,14 @@ public class JpaService {
     }
 
     public List<String> findAllNames() {
-        String key = "ALL_NAMES";
-        if (cache.containsKey(key)) {
-            return cache.get(key);
+        Cache cache = cacheManager.getCache(CACHE_NAME);
+        if (cache != null) {
+            List<String> cached = cache.get(CACHE_KEY, List.class);
+            if (cached != null) {
+                return cached;
+            }
         }
+
         Set<Class<?>> basePackageClasses = SpringTool.getBasePackageClasses();
         List<String> entityList = new LinkedList<>();
         for (Class<?> cls : basePackageClasses) {
@@ -88,7 +98,9 @@ public class JpaService {
         }
         Collections.sort(entityList);
 
-        cache.put(key, entityList);
+        if (cache != null) {
+            cache.put(CACHE_KEY, entityList);
+        }
 
         return entityList;
     }
