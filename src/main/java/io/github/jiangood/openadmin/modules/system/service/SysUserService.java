@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,6 +53,8 @@ public class SysUserService {
     private final UserConverter userConverter;
 
     private final SystemProperties systemProperties;
+
+    private final PermissionStaleService permissionStaleService;
 
 
     public UserVO findOneDto(String id) {
@@ -221,6 +225,7 @@ public class SysUserService {
         throw new IllegalStateException("有未处理的类型" + dataPermType);
     }
 
+    @Cacheable(value = "userPerms", key = "#id", sync = true)
     @Transactional
     public Set<String> getUserPerms(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
@@ -255,6 +260,15 @@ public class SysUserService {
         }
 
         return result;
+    }
+
+    @CacheEvict(value = "userPerms", key = "#id")
+    public void evictPermsCache(String id) {
+    }
+
+    public void markPermsStale(String userId, String username) {
+        permissionStaleService.markUserStale(username);
+        evictPermsCache(userId);
     }
 
     public GrantUserPermReq getPermInfo(String id) {

@@ -30,13 +30,13 @@ public class ApiAccountRepositoryTest {
         testAccount1.setName("测试账号1");
         testAccount1.setAppId("APP_ID_1");
         testAccount1.setAppSecret("APP_SECRET_1");
-        testAccount1.setEnable(true);
+        testAccount1.setEnabled(true);
 
         testAccount2 = new ApiAccount();
         testAccount2.setName("测试账号2");
         testAccount2.setAppId("APP_ID_2");
         testAccount2.setAppSecret("APP_SECRET_2");
-        testAccount2.setEnable(false);
+        testAccount2.setEnabled(false);
 
         apiAccountRepository.save(testAccount1);
         apiAccountRepository.save(testAccount2);
@@ -64,7 +64,7 @@ public class ApiAccountRepositoryTest {
         newAccount.setName("测试账号3");
         newAccount.setAppId("APP_ID_3");
         newAccount.setAppSecret("APP_SECRET_3");
-        newAccount.setEnable(true);
+        newAccount.setEnabled(true);
         ApiAccount savedAccount = apiAccountRepository.save(newAccount);
         assertNotNull(savedAccount.getId());
 
@@ -82,13 +82,13 @@ public class ApiAccountRepositoryTest {
         account3.setName("测试账号3");
         account3.setAppId("APP_ID_3");
         account3.setAppSecret("APP_SECRET_3");
-        account3.setEnable(true);
+        account3.setEnabled(true);
 
         ApiAccount account4 = new ApiAccount();
         account4.setName("测试账号4");
         account4.setAppId("APP_ID_4");
         account4.setAppSecret("APP_SECRET_4");
-        account4.setEnable(true);
+        account4.setEnabled(true);
 
         List<ApiAccount> batchAccounts = Arrays.asList(account3, account4);
         List<ApiAccount> savedBatchAccounts = apiAccountRepository.saveAllBatch(batchAccounts);
@@ -136,7 +136,7 @@ public class ApiAccountRepositoryTest {
         assertEquals("测试账号1", foundByAppId.getName());
 
         // 测试findAllByField
-        List<ApiAccount> enabledAccounts = apiAccountRepository.findAllByField("enable", true);
+        List<ApiAccount> enabledAccounts = apiAccountRepository.findAllByField("enabled", true);
         assertEquals(1, enabledAccounts.size());
     }
 }

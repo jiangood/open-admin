@@ -10,7 +10,6 @@ import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.util.tree.drop.DropResult;
 import io.github.jiangood.openadmin.util.tree.drop.TreeDropTool;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
-import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
@@ -18,6 +17,7 @@ import io.github.jiangood.openadmin.modules.system.dto.request.OrgReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
+import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class SysOrgController {
 
     private final SysOrgService sysOrgService;
 
-    private final PermissionStaleService permissionStaleService;
+    private final SysUserService sysUserService;
 
     /**
      * 管理页面的树，包含禁用的
@@ -85,7 +85,8 @@ public class SysOrgController {
 
         sysOrgService.save(input2, requestBodyKeys);
 
-        permissionStaleService.markUserStale(LoginTool.getUser().getUsername());
+        var loginUser = LoginTool.getUser();
+        sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());
 
         return AjaxResult.ok().msg("保存机构成功");
     }
@@ -95,7 +96,8 @@ public class SysOrgController {
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         sysOrgService.deleteById(idRequest.getId());
-        permissionStaleService.markUserStale(LoginTool.getUser().getUsername());
+        var loginUser = LoginTool.getUser();
+        sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());
         return AjaxResult.ok().msg("删除机构成功");
     }
 

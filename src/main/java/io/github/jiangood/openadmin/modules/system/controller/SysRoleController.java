@@ -9,7 +9,6 @@ import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.util.CollectionTool;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
-import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserToRoleReq;
@@ -45,8 +44,6 @@ public class SysRoleController {
 
     private final SysUserService sysUserService;
 
-    private final PermissionStaleService permissionStaleService;
-
     @HasPermission("sys-role:query")
     @RequestMapping("page")
     public AjaxResult page(@PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
@@ -74,7 +71,7 @@ public class SysRoleController {
         role = sysRoleService.save(role, updateFields);
 
         for (SysUser user : role.getUsers()) {
-            permissionStaleService.markUserStale(user.getAccount());
+            sysUserService.markPermsStale(user.getId(), user.getAccount());
         }
 
         return AjaxResult.ok().data(role).msg("保存角色成功");
@@ -139,7 +136,7 @@ public class SysRoleController {
     public AjaxResult savePerms(@RequestBody SaveRolePermReq request) {
         SysRole sysRole = sysRoleService.savePerms(request.getId(), request.getPerms(), request.getMenus());
         for (SysUser user : sysRole.getUsers()) {
-            permissionStaleService.markUserStale(user.getAccount());
+            sysUserService.markPermsStale(user.getId(), user.getAccount());
         }
         return AjaxResult.ok().msg("保存角色权限成功");
     }
@@ -174,7 +171,7 @@ public class SysRoleController {
     public AjaxResult saveUserList(@RequestBody GrantUserToRoleReq request) {
         SysRole sysRole = sysRoleService.grantUsers(request.getId(), request.getUserIdList());
         for (SysUser user : sysRole.getUsers()) {
-            permissionStaleService.markUserStale(user.getAccount());
+            sysUserService.markPermsStale(user.getId(), user.getAccount());
         }
         return AjaxResult.ok().msg("授权用户成功");
     }

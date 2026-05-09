@@ -5,7 +5,6 @@ import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
-import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
@@ -52,8 +51,6 @@ public class SysUserController {
 
     private final SystemProperties systemProperties;
 
-    private final PermissionStaleService permissionStaleService;
-
 
     @HasPermission("sys-user:query")
     @RequestMapping("page")
@@ -76,7 +73,7 @@ public class SysUserController {
             String defaultPassword = systemProperties.getDefaultPassword();
             message = "添加新用户成功,密码：" + defaultPassword;
         } else {
-            permissionStaleService.markUserStale(input.getAccount());
+            sysUserService.markPermsStale(input.getId(), input.getAccount());
         }
 
         return AjaxResult.ok(message);
@@ -89,7 +86,7 @@ public class SysUserController {
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         SysUser user = sysUserService.findById(idRequest.getId()).orElse(null);
         sysUserService.deleteById(idRequest.getId());
-        permissionStaleService.markUserStale(user.getAccount());
+        sysUserService.markPermsStale(user.getId(), user.getAccount());
 
         return AjaxResult.ok().msg("删除用户成功");
     }
@@ -185,8 +182,7 @@ public class SysUserController {
     @PostMapping("grant-perm")
     public AjaxResult grantPerm(@Valid @RequestBody GrantUserPermReq param) {
         SysUser sysUser = sysUserService.grantPerm(param.getId(), param.getRoleIds(), param.getDataPermType(), param.getOrgIds());
-
-        permissionStaleService.markUserStale(sysUser.getAccount());
+        sysUserService.markPermsStale(sysUser.getId(), sysUser.getAccount());
 
         return AjaxResult.ok().msg("授权成功");
     }
