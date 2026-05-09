@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.framework.config.argument.resolver;
+package io.github.jiangood.openadmin.framework.config.argument;
 
 import cn.hutool.core.collection.IterUtil;
 import com.fasterxml.jackson.databind.JsonNode;
