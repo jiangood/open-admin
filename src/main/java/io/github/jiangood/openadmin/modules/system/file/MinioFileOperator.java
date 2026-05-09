@@ -37,7 +37,7 @@ public class MinioFileOperator implements FileOperator {
         PutObjectArgs arg = PutObjectArgs.builder()
                 .bucket(bucketName)
                 .object(key)
-                .stream(inputStream, inputStream.available(), -1)
+                .stream(inputStream, (long) inputStream.available(), -1L)
                 .build();
 
         this.client.putObject(arg);

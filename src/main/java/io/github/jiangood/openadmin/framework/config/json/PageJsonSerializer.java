@@ -1,10 +1,11 @@
 package io.github.jiangood.openadmin.framework.config.json;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import io.github.jiangood.openadmin.framework.data.PageExt;
+import org.springframework.boot.jackson.JacksonComponent;
 import org.springframework.data.domain.Page;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
 import java.io.IOException;
 
@@ -14,7 +15,8 @@ import java.io.IOException;
  *
  * @gendoc
  */
-public class PageJsonSerializer<T> extends JsonSerializer<Page<T>> {
+@JacksonComponent
+public class PageJsonSerializer<T> extends ValueSerializer<Page<T>> {
 
     /**
      * 前后端交互时，分页是否从1开始的算的
@@ -22,30 +24,30 @@ public class PageJsonSerializer<T> extends JsonSerializer<Page<T>> {
     private static final boolean oneIndexed = true;
 
     @Override
-    public void serialize(Page<T> page, JsonGenerator gen, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(Page<T> page, JsonGenerator gen, SerializationContext ctx) {
         int number = page.getNumber();
         if (oneIndexed) {
             number++;
         }
 
-        gen.writeStartObject(); // means start, like '{}'
+        gen.writeStartObject();
 
-        gen.writeNumberField("page", number); // 页码
-        gen.writeNumberField("size", page.getSize()); //每页大小
+        gen.writeNumberProperty("page", number);
+        gen.writeNumberProperty("size", page.getSize());
 
-        gen.writeObjectField("content", page.getContent());
+        gen.writePOJOProperty("content", page.getContent());
 
-        gen.writeBooleanField("empty", page.isEmpty());
-        gen.writeBooleanField("first", page.isFirst());
-        gen.writeBooleanField("last", page.isLast());
+        gen.writeBooleanProperty("empty", page.isEmpty());
+        gen.writeBooleanProperty("first", page.isFirst());
+        gen.writeBooleanProperty("last", page.isLast());
 
-        gen.writeNumberField("number", number);
-        gen.writeNumberField("numberOfElements", page.getNumberOfElements());
-        gen.writeNumberField("totalPages", page.getTotalPages());
-        gen.writeNumberField("totalElements", page.getTotalElements());
+        gen.writeNumberProperty("number", number);
+        gen.writeNumberProperty("numberOfElements", page.getNumberOfElements());
+        gen.writeNumberProperty("totalPages", page.getTotalPages());
+        gen.writeNumberProperty("totalElements", page.getTotalElements());
 
         if (page instanceof PageExt<T> ext) {
-            gen.writeObjectField("extData", ext.getExtData());
+            gen.writePOJOProperty("extData", ext.getExtData());
         }
 
         gen.writeEndObject();

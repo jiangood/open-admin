@@ -8,7 +8,7 @@ open-admin 是一个小型管理系统框架（后台管理脚手架），提供
 
 ## Tech Stack
 
-- **Backend**: Java 17, Spring Boot 3.5, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
+- **Backend**: Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
 - **Frontend**: React 19, Ant Design 6, UmiJS 4 (React framework, not Ant Design Pro)
 - **Build**: Maven (backend), pnpm (frontend)
 

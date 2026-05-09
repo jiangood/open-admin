@@ -2,9 +2,10 @@ package io.github.jiangood.openadmin.framework.config.json;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import org.springframework.boot.jackson.JacksonComponent;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,10 +17,11 @@ import java.time.ZoneId;
  *
  * @author jiangtao
  */
-public class LocalDateJacksonConverter extends JsonDeserializer<LocalDate> {
+@JacksonComponent
+public class LocalDateJacksonConverter extends ValueDeserializer<LocalDate> {
 
     @Override
-    public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public LocalDate deserialize(JsonParser p, DeserializationContext ctxt) {
         String originDate = p.getText();
         DateTime dateTime = DateUtil.parse(originDate);
 
@@ -28,9 +30,4 @@ public class LocalDateJacksonConverter extends JsonDeserializer<LocalDate> {
         return localTime.toLocalDate();
     }
 
-
-    @Override
-    public Class<?> handledType() {
-        return LocalDate.class;
-    }
 }

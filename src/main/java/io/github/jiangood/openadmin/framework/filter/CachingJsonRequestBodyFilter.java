@@ -32,7 +32,7 @@ public class CachingJsonRequestBodyFilter extends OncePerRequestFilter {
         boolean isMe = request instanceof ContentCachingRequestWrapper;
 
         if (isJson && isPost && !isMe) {
-            request = new ContentCachingRequestWrapper(request);
+            request = new ContentCachingRequestWrapper(request, 10240);
         }
 
         filterChain.doFilter(request, response);

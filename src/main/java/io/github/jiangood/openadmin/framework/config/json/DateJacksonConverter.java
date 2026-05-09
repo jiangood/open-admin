@@ -1,9 +1,10 @@
 package io.github.jiangood.openadmin.framework.config.json;
 
 import cn.hutool.core.date.DateUtil;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import org.springframework.boot.jackson.JacksonComponent;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
 import java.io.IOException;
 import java.util.Date;
@@ -13,17 +14,14 @@ import java.util.Date;
  *
  * @author jiangtao
  */
-public class DateJacksonConverter extends JsonDeserializer<Date> {
+@JacksonComponent
+public class DateJacksonConverter extends ValueDeserializer<Date> {
 
     @Override
-    public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+    public Date deserialize(JsonParser p, DeserializationContext ctxt) {
         String originDate = p.getText();
 
         return DateUtil.parse(originDate);
     }
 
-    @Override
-    public Class<?> handledType() {
-        return Date.class;
-    }
 }
