@@ -1,5 +1,5 @@
 import {SysUtils} from "./SysUtils";
-import {ArrUtils} from "../ArrUtils";
+import {ArrayUtils} from "../ArrayUtils";
 
 /**
  * 登录用户信息接口，
@@ -49,7 +49,7 @@ export class PermUtils {
 
     // 检查是否拥有超级权限 '*'
     // 假设 ArrUtils.contains(array, item) 存在且返回 boolean
-    if (ArrUtils.contains(permissions, "*")) {
+    if (ArrayUtils.contains(permissions, "*")) {
       return true;
     }
 

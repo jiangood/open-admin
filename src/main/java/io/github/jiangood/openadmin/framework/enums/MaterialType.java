@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.util.enums;
+package io.github.jiangood.openadmin.framework.enums;
 
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;

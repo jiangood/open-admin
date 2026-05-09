@@ -1,4 +1,4 @@
-import {ArrUtils} from "./ArrUtils"; // 假设 ArrUtil 已经被正确定义和导出
+import {ArrayUtils} from "./ArrayUtils";
 
 /**
  * 🌳 通用树节点接口
@@ -169,7 +169,7 @@ export class TreeUtils {
             // 优先使用 key 字段，其次使用 id 字段
             const key = item.key || item.id;
 
-            if (ArrUtils.contains(keyList, key)) {
+            if (ArrayUtils.contains(keyList, key)) {
                 itemList.push(item);
             }
         });

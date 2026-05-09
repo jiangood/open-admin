@@ -1,5 +1,5 @@
 export * from "./DateUtils";
-export * from "./ArrUtils";
+export * from "./ArrayUtils";
 export * from "./UrlUtils"
 export * from "./StringUtils"
 export * from "./EventBusUtils";

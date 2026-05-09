@@ -15,14 +15,14 @@ import lombok.Setter;
 import java.io.Serializable;
 
 /**
- *  ID 需要手动设置
+ *  ID 需要手动设置（非自动生成）
  */
 @Getter
 @Setter
 @MappedSuperclass
 @JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler","fieldHandler"}, ignoreUnknown = true)
 @EqualsAndHashCode(of = "id", callSuper = false)
-public abstract class BasePureIdEntity extends BaseNoIdEntity implements Serializable {
+public abstract class BaseManualIdEntity extends BaseNoIdEntity implements Serializable {
 
     @Schema(description = "唯一标识", hidden = true)
     @Id

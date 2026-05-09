@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.framework.console;
+package io.github.jiangood.openadmin.framework.common;
 
 import cn.hutool.core.codec.Base64;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;

@@ -11,7 +11,7 @@ import cn.hutool.http.HttpUtil;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.ImgTool;
-import io.github.jiangood.openadmin.util.enums.MaterialType;
+import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.file.FileOperator;

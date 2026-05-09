@@ -3,21 +3,39 @@ import { Spin, message } from 'antd';
 import { debounce } from 'lodash';
 import { HttpUtils } from '../../utils';
 
+interface BaseRemoteSelectState {
+    data: any[];
+    loading: boolean;
+}
+
+export interface BaseRemoteSelectProps {
+    url?: string;
+    value?: any;
+    debounceTime?: number;
+    [key: string]: any;
+}
+
 /**
  * 远程数据加载选择器基类
  *
  * 处理通用的数据加载、防抖搜索、竞态处理、错误提示逻辑。
  * 子类只需覆写 getLoadParams() 和 render()。
  */
-export class BaseRemoteSelect extends React.Component {
-    constructor(props) {
+export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> {
+    private fetchIdRef: number = 0;
+    private loadDataDebounce: ReturnType<typeof debounce>;
+
+    static defaultProps = {
+        debounceTime: 300,
+    };
+
+    constructor(props: P) {
         super(props);
-        this.fetchIdRef = 0;
         this.state = {
             data: [],
             loading: false,
         };
-        this.loadDataDebounce = debounce(this._loadData, props.debounceTime || 300);
+        this.loadDataDebounce = debounce(this._loadData, (props as any).debounceTime || 300);
     }
 
     componentDidMount() {
@@ -33,23 +51,23 @@ export class BaseRemoteSelect extends React.Component {
     // ========== 子类可覆写 ==========
 
     /** 返回请求 URL */
-    getUrl() {
+    getUrl(): string | undefined {
         return this.props.url;
     }
 
     /** 返回请求参数。searchText=undefined 表示初始加载 */
-    getLoadParams(searchText) {
+    getLoadParams(searchText?: string): Record<string, any> {
         return { searchText, selected: this.props.value };
     }
 
     /** 是否在挂载时自动加载数据 */
-    shouldLoadOnMount() {
+    shouldLoadOnMount(): boolean {
         return true;
     }
 
     // ========== 数据加载 ==========
 
-    _loadData = async (searchText) => {
+    private _loadData = async (searchText?: string) => {
         const url = this.getUrl();
         const fetchId = ++this.fetchIdRef;
 
@@ -79,7 +97,7 @@ export class BaseRemoteSelect extends React.Component {
      * - 传 searchText → 防抖后加载（用于搜索输入）
      * - 不传 → 立即加载（用于初始加载）
      */
-    loadData = (searchText) => {
+    loadData = (searchText?: string) => {
         if (searchText != null) {
             this.loadDataDebounce(searchText);
         } else {
@@ -88,7 +106,7 @@ export class BaseRemoteSelect extends React.Component {
     };
 
     /** 搜索输入处理（供 showSearch.onSearch 使用） */
-    handleSearch = (value) => {
+    handleSearch = (value: string) => {
         if (value.trim() === '') {
             this.loadData();
             return;
@@ -98,15 +116,14 @@ export class BaseRemoteSelect extends React.Component {
 
     // ========== Helper 方法 ==========
 
-    getShowSearch() {
+    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } {
         return {
             filterOption: false,
             onSearch: this.handleSearch,
         };
     }
 
-    getNotFoundContent() {
+    getNotFoundContent(): React.ReactNode {
         return this.state.loading ? <Spin size="small" /> : '数据为空';
     }
 }
-

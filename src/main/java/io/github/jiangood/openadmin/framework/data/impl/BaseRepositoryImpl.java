@@ -1,8 +1,9 @@
-package io.github.jiangood.openadmin.framework.data;
+package io.github.jiangood.openadmin.framework.data.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
+import io.github.jiangood.openadmin.framework.data.BaseRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.*;
 import org.springframework.data.domain.*;

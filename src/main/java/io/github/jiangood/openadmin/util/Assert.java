@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.util;
 
-public class AssertUtil {
+public class Assert {
 
 
     public static void state(boolean state, int code, String msg) {

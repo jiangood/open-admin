@@ -2,7 +2,7 @@ import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, message, Modal, Popconfirm, Switch, Table, Tabs} from 'antd'
 import React from 'react'
 import {
-    ArrUtils,
+    ArrayUtils,
     ButtonList,
     FieldBoolean,
     FieldDate,
@@ -123,9 +123,9 @@ export default class extends React.Component {
     onGrantItemChange = (id, checked) => {
         const perms = this.state.formValues.perms
         if (checked) {
-            ArrUtils.add(perms, id)
+            ArrayUtils.add(perms, id)
         } else {
-            ArrUtils.remove(perms, id)
+            ArrayUtils.remove(perms, id)
         }
         this.setState({formValues: this.state.formValues})
     }

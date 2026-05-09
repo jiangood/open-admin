@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class AssertUtilTest {
+class AssertTest {
 
     @Test
     void testStateWhenTrue() {
         // 当state为true时，不应该抛出异常
-        assertDoesNotThrow(() -> AssertUtil.state(true, 200, "测试成功"));
+        assertDoesNotThrow(() -> Assert.state(true, 200, "测试成功"));
     }
 
     @Test
@@ -19,7 +19,7 @@ class AssertUtilTest {
         String expectedMsg = "测试失败";
         
         BusinessException exception = assertThrows(BusinessException.class, () ->
-            AssertUtil.state(false, expectedCode, expectedMsg)
+            Assert.state(false, expectedCode, expectedMsg)
         );
         
         // 验证异常的消息和代码

@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin;
 
-import io.github.jiangood.openadmin.framework.data.BaseRepositoryImpl;
+import io.github.jiangood.openadmin.framework.data.impl.BaseRepositoryImpl;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
