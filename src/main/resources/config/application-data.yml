@@ -55,9 +55,9 @@ data:
           path: /system/user
           icon: UserOutlined
           perms:
-            - {name: 查询用户, code: query}
-            - {name: 新增用户, code: save}
-            - {name: 删除用户, code: delete}
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
             - {name: 重置密码, code: reset-password}
             - {name: 分配权限, code: grant-permission}
         - id: sysOrg
@@ -65,42 +65,42 @@ data:
           path: /system/org
           icon: ApartmentOutlined
           perms:
-            - {name: 查询机构, code: query}
-            - {name: 新增机构, code: save}
-            - {name: 删除机构, code: delete}
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
         - id: sysRole
           name: 角色管理
           path: /system/role
           icon: IdcardOutlined
           perms:
-            - {name: 查询角色, code: query}
-            - {name: 新增角色, code: save}
-            - {name: 删除角色, code: delete}
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
             - {name: 分配权限, code: grant-permission}
         - id: sysManual
           name: 操作手册
           path: /system/sysManual
           icon: CopyOutlined
           perms:
-            - {name: 查询手册, code: query}
-            - {name: 新增手册, code: save}
-            - {name: 删除手册, code: delete}
+            - {name: 查看, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
         - id: sysDict
           name: 数据字典
           path: /system/dict
           icon: FileSearchOutlined
           perms:
-            - {name: 查询字典, code: query}
-            - {name: 新增字典, code: save}
-            - {name: 删除字典, code: delete}
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
         - id: job
           name: 定时作业
           path: /system/job
           icon: OrderedListOutlined
           perms:
-            - {name: 查询作业, code: query}
-            - {name: 新增作业, code: save}
-            - {name: 删除作业, code: delete}
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
             - {name: 执行一次, code: trigger}
             - {name: 清理日志, code: clean-log}
         - id: sysFile
@@ -108,19 +108,19 @@ data:
           path: /system/file
           icon: FolderOpenOutlined
           perms:
-            - {name: 查看文件, code: query}
-            - {name: 删除文件, code: delete}
+            - {name: 查看, code: query}
+            - {name: 删除, code: delete}
         - id: api
           name: 接口管理
           icon: ApiOutlined
           path: /system/api
           perms:
-            - {name: 查询接口, code: query}
-            - {name: 新增接口, code: save}
-            - {name: 删除接口, code: delete}
+            - {name: 查询, code: query}
+            - {name: 新增, code: save}
+            - {name: 删除, code: delete}
         - id: sysLog
           name: 操作日志
           path: /system/log
           icon: FileSearchOutlined
           perms:
-            - {name: 查看日志, code: query}
+            - {name: 查看, code: query}
