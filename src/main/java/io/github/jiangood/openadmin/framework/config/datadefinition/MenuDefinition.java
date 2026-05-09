@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.datadefinition;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jiangood.openadmin.util.dto.antd.AntdIcon;
 import lombok.Data;
 
@@ -13,51 +14,38 @@ public class MenuDefinition {
 
     private String pid;
 
-
-    // 名称
     private String name;
 
-
-    // 图标
     private AntdIcon icon;
 
-    // 路由
     private String path;
 
-
-    // 排序
     private Integer seq;
 
-
-    /**
-     * 在 点击tab时，刷新页面
-     */
     private Boolean refreshOnTabClick;
 
-
-    /**
-     * 子节点（表中不存在，用于构造树）
-     */
     private List<MenuDefinition> children;
 
-    private List<String> permNames = new ArrayList<>();
+    @JsonIgnore
+    private List<PermDefinition> perms = new ArrayList<>();
 
-    /**
-     * 权限表，
-     */
-    private List<String> permCodes = new ArrayList<>();
-
-
-    /**
-     * 菜单的消息数量接口
-     */
     private String messageCountUrl;
 
-    /**
-     * 是否禁用菜单，默认false
-     */
     private Boolean disabled;
 
+    @Data
+    public static class PermDefinition {
+        private String name;
+        private String code;
+    }
 
+    // 以下 getter 保持前端 API 接口不变（从 perms 对象列表派生）
+    public List<String> getPermNames() {
+        return perms.stream().map(PermDefinition::getName).toList();
+    }
+
+    public List<String> getPermCodes() {
+        return perms.stream().map(PermDefinition::getCode).toList();
+    }
 
 }

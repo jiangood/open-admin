@@ -93,6 +93,44 @@ data:
       perm-codes: [ sysUser:view,sysUser:save,sysUser:delete,sysUser:resetPwd,sysUser:grantPerm ]
 ```
 
+## 集成到已有项目
+
+open-admin 作为可嵌入框架，可以直接作为依赖引入现有项目。
+
+### 后端集成
+
+在已有 Spring Boot 项目的 `pom.xml` 中添加：
+
+```xml
+<dependency>
+    <groupId>io.github.jiangood</groupId>
+    <artifactId>open-admin</artifactId>
+    <version>${open-admin.version}</version>
+</dependency>
+```
+
+然后在 `application.yml` 中配置数据源，项目启动后自动完成系统初始化（建表、默认菜单、管理员账号）。
+
+### 前端集成
+
+在已有 UmiJS 项目的 `package.json` 中添加：
+
+```json
+{
+  "dependencies": {
+    "@jiangood/open-admin": "^1.0.0"
+  }
+}
+```
+
+引入后可直接使用 ProTable、字段组件、权限组件等框架组件，套用后台布局即可复用用户管理、角色管理、字典管理等全套管理页面。
+
+### 按需使用
+
+- **只后端不需要前端**：仅添加 Maven 依赖，通过 REST API 访问管理功能
+- **只前端不需要后端**：仅添加 npm 依赖，对接自己的后端 API
+- **全栈集成**：同时添加前后端依赖，开箱即用
+
 ## 常见问题
 
 ### 数据库连接失败

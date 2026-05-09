@@ -30,7 +30,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,7 +55,7 @@ public class SysUserController {
     private final PermissionStaleService permissionStaleService;
 
 
-    @PreAuthorize("hasAuthority('sysUser:view')")
+    @HasPermission("sys-user:query")
     @RequestMapping("page")
     public AjaxResult page(String orgId, String roleId, String searchText, @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 
@@ -66,7 +66,7 @@ public class SysUserController {
 
 
     @Log("用户-保存")
-    @PreAuthorize("hasAuthority('sysUser:save')")
+    @HasPermission("sys-user:save")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
         boolean isNew = input.isNew();
@@ -84,7 +84,7 @@ public class SysUserController {
 
 
     @Log("用户-删除")
-    @PreAuthorize("hasAuthority('sysUser:delete')")
+    @HasPermission("sys-user:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         SysUser user = sysUserService.findById(idRequest.getId()).orElse(null);
@@ -117,7 +117,7 @@ public class SysUserController {
 
 
     @Log("用户-重置密码")
-    @PreAuthorize("hasAuthority('sysUser:resetPwd')")
+    @HasPermission("sys-user:reset-password")
     @PostMapping("reset-pwd")
     public AjaxResult resetPwd(@RequestBody SysUser user) {
         String defaultPassWord = systemProperties.getDefaultPassword();
@@ -181,7 +181,7 @@ public class SysUserController {
      * 授权数据
      */
     @Log("用户-授权数据")
-    @PreAuthorize("hasAuthority('sysUser:grantPerm')")
+    @HasPermission("sys-user:grant-permission")
     @PostMapping("grant-perm")
     public AjaxResult grantPerm(@Valid @RequestBody GrantUserPermReq param) {
         SysUser sysUser = sysUserService.grantPerm(param.getId(), param.getRoleIds(), param.getDataPermType(), param.getOrgIds());

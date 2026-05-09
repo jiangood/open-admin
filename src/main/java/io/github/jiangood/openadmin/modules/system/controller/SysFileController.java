@@ -14,7 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,7 +30,7 @@ public class SysFileController {
     private final SysFileService service;
 
 
-    @PreAuthorize("hasAuthority('sysFile:view')")
+    @HasPermission("sys-file:query")
     @RequestMapping("page")
     public AjaxResult page(String dateRange,
                            String originName,
@@ -83,7 +83,7 @@ public class SysFileController {
     }
 
 
-    @PreAuthorize("hasAuthority('sysFile:delete')")
+    @HasPermission("sys-file:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) throws Exception {
         service.deleteById(idRequest.getId());

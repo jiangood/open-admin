@@ -24,7 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,13 +38,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("admin/apiAccount")
-@PreAuthorize("hasAuthority('api')")
 @RequiredArgsConstructor
 public class ApiAccountController {
 
     private final ApiAccountService apiAccountService;
     private final OpenApiResource openApiResource;
 
+    @HasPermission("api:query")
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<ApiAccount> q = apiAccountService.spec().orLike(searchText, "name");
@@ -52,12 +52,14 @@ public class ApiAccountController {
         return AjaxResult.ok().data(page);
     }
 
+    @HasPermission("api:save")
     @PostMapping("save")
     public AjaxResult save(@RequestBody ApiAccount input, RequestBodyKeys updateFields) throws Exception {
         apiAccountService.save(input, updateFields);
         return AjaxResult.ok().msg("保存成功");
     }
 
+    @HasPermission("api:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         apiAccountService.deleteById(idRequest.getId());
@@ -66,6 +68,7 @@ public class ApiAccountController {
 
 
 
+    @HasPermission("api:query")
     @GetMapping("perm-list")
     public AjaxResult permList(HttpServletRequest req) throws IOException {
         // 获取 OpenAPI 对象
@@ -98,6 +101,7 @@ public class ApiAccountController {
     }
 
 
+    @HasPermission("api:save")
     @PostMapping("grant/{id}")
     public AjaxResult grant(@PathVariable String id, @Validate @RequestBody List<String> perms) {
         ApiAccount acc = apiAccountService.findById(id);
@@ -106,6 +110,7 @@ public class ApiAccountController {
         return AjaxResult.ok().msg("授权成功");
     }
 
+    @HasPermission("api:query")
     @GetMapping("export/{id}")
     public void export(@PathVariable String id, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         ApiAccount acc = apiAccountService.findById(id);

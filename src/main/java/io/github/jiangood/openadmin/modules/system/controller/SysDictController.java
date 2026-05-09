@@ -12,7 +12,7 @@ import io.github.jiangood.openadmin.modules.system.service.SysDictService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -28,7 +28,7 @@ public class SysDictController {
 
 
 
-    @PreAuthorize("hasAuthority('sysDict:view')")
+    @HasPermission("sys-dict:query")
     @RequestMapping("page")
     public AjaxResult page(String searchText) {
         List<DictItemVO> list = sysDictService.getAllItems();
@@ -38,7 +38,7 @@ public class SysDictController {
 
         return AjaxResult.ok().data(new PageImpl<>(list));
     }
-    @PreAuthorize("hasAuthority('sysDict:save')")
+    @HasPermission("sys-dict:save")
     @GetMapping("type-options")
     public AjaxResult typeOptions(String searchText) {
         List<DictItemVO> list = sysDictService.getAllItems();
@@ -60,7 +60,7 @@ public class SysDictController {
         return AjaxResult.ok().data(options);
     }
 
-    @PreAuthorize("hasAuthority('sysDict:save')")
+    @HasPermission("sys-dict:save")
     @PostMapping("save")
     public AjaxResult save(@RequestBody SysDictItem param, RequestBodyKeys updateFields) throws Exception {
         SysDictItem result = itemService.save(param, updateFields);
@@ -68,7 +68,7 @@ public class SysDictController {
     }
 
 
-    @PreAuthorize("hasAuthority('sysDict:delete')")
+    @HasPermission("sys-dict:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         itemService.deleteById(idRequest.getId());

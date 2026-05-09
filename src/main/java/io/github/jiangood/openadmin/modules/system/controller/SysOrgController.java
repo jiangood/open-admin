@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
+import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -72,7 +72,7 @@ public class SysOrgController {
 
 
     @Log("机构-保存")
-    @PreAuthorize("hasAuthority('sysOrg:save')")
+    @HasPermission("sys-org:save")
     @PostMapping("save")
     public AjaxResult saveOrUpdate(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
         if (input.getLeader() != null) {
@@ -91,7 +91,7 @@ public class SysOrgController {
     }
 
     @Log("机构-删除")
-    @PreAuthorize("hasAuthority('sysOrg:delete')")
+    @HasPermission("sys-org:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         sysOrgService.deleteById(idRequest.getId());
@@ -121,7 +121,7 @@ public class SysOrgController {
 
 
     @PostMapping("sort")
-    @PreAuthorize("hasAuthority('sysOrg:save')")
+    @HasPermission("sys-org:save")
     public AjaxResult sort(@RequestBody DropEvent e) {
         List<SysOrg> nodes = sysOrgService.findAll();
         List<TreeOption> tree = list2Tree(nodes);
