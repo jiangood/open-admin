@@ -2,11 +2,11 @@ package io.github.jiangood.openadmin.framework.config.security;
 
 import cn.hutool.core.collection.CollUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
-import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
+import io.github.jiangood.openadmin.framework.config.security.PermissionRefreshFilter;
 import io.github.jiangood.openadmin.util.ArrayTool;
 import io.github.jiangood.openadmin.util.ResponseTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
-import io.github.jiangood.openadmin.modules.api.OpenApiFilter;
+import io.github.jiangood.openadmin.modules.api.filter.OpenApiFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;

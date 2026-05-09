@@ -1,12 +1,12 @@
 package io.github.jiangood.openadmin.modules.api.controller;
 
-import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
+import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.JsonTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
-import io.github.jiangood.openadmin.modules.api.SwaggerToWordConverter;
+import io.github.jiangood.openadmin.modules.api.util.SwaggerToWordConverter;
 import io.github.jiangood.openadmin.modules.api.entity.ApiAccount;
 import io.github.jiangood.openadmin.modules.api.service.ApiAccountService;
 import io.swagger.v3.oas.models.OpenAPI;

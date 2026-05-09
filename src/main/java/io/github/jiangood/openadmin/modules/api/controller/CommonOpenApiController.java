@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.api.controller;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
-import io.github.jiangood.openadmin.modules.api.ApiResult;
+import io.github.jiangood.openadmin.modules.api.dto.ApiResult;
 import io.github.jiangood.openadmin.modules.system.dto.DictItemVO;
 import io.github.jiangood.openadmin.modules.system.service.SysDictService;
 import io.swagger.v3.oas.annotations.Operation;

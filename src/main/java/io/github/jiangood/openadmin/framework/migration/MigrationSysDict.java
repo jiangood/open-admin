@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.migration;
 
-import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycle;
-import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycleBeforeJpaInit;
+import io.github.jiangood.openadmin.framework.config.OpenLifecycle;
+import io.github.jiangood.openadmin.framework.config.OpenLifecycleBeforeJpaInit;
 import io.github.jiangood.openadmin.util.jdbc.DbTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

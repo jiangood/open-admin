@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.framework.config;
 
 
-import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycleBeforeJpaInit;
 import io.github.jiangood.openadmin.util.jdbc.DbTool;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

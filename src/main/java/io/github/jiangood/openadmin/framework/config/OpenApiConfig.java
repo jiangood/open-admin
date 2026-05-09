@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import io.github.jiangood.openadmin.modules.api.ApiConstant;
+import io.github.jiangood.openadmin.modules.api.filter.ApiConstant;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.configuration.SpringDocConfiguration;

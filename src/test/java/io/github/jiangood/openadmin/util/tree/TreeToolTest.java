@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util.tree;
 
 import cn.hutool.core.lang.Dict;
-import io.github.jiangood.openadmin.util.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.util.dto.TreeOption;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;

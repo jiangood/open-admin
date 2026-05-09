@@ -6,7 +6,7 @@ import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.util.tree.TreeManager;
 import io.github.jiangood.openadmin.util.tree.drop.DropResult;
-import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;

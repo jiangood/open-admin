@@ -6,7 +6,7 @@ import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
-import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.repository.SysLogRepository;
 import jakarta.servlet.http.HttpServletRequest;

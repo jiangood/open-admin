@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
-import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysUserMessage;
 import io.github.jiangood.openadmin.modules.system.service.SysUserMessageService;
 import lombok.RequiredArgsConstructor;

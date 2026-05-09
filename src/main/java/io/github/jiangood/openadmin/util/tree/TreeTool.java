@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.util.tree;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
-import io.github.jiangood.openadmin.util.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.util.dto.TreeOption;
 
 import java.util.*;
 import java.util.function.BiConsumer;

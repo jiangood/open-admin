@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.framework.config.datadefinition;
 
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jiangood.openadmin.util.dto.antd.AntdIcon;
+import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import lombok.Data;
 
 import java.util.ArrayList;
