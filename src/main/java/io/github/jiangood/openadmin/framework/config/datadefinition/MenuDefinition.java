@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.datadefinition;
 
+import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jiangood.openadmin.util.dto.antd.AntdIcon;
 import lombok.Data;
@@ -49,7 +50,17 @@ public class MenuDefinition {
         if (id == null) {
             return perms.stream().map(PermDefinition::getCode).toList();
         }
-        return perms.stream().map(p -> id + ":" + p.getCode()).toList();
+        String prefix = resolvedPermPrefix();
+        if (prefix == null) {
+            return perms.stream().map(PermDefinition::getCode).toList();
+        }
+        return perms.stream().map(p -> prefix + ":" + p.getCode()).toList();
+    }
+
+    /** 兼容旧项目中的驼峰 id（sysUser→sys-user） */
+    private String resolvedPermPrefix() {
+        if (id == null) return null;
+        return StrUtil.toSymbolCase(id, '-');
     }
 
 }
