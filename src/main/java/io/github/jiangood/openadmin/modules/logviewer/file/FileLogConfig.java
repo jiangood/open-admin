@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.log.file;
+package io.github.jiangood.openadmin.modules.logviewer.file;
 
 
 import ch.qos.logback.classic.Level;

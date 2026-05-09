@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.log.file;
+package io.github.jiangood.openadmin.modules.logviewer.file;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
