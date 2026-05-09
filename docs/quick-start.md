@@ -93,13 +93,13 @@ data:
       perm-codes: [ sysUser:view,sysUser:save,sysUser:delete,sysUser:resetPwd,sysUser:grantPerm ]
 ```
 
-## 集成到已有项目
+## 集成到已有业务项目
 
-open-admin 作为可嵌入框架，可以直接作为依赖引入现有项目。
+open-admin 作为可嵌入框架，可以直接作为依赖引入现有业务项目。
 
 ### 后端集成
 
-在已有 Spring Boot 项目的 `pom.xml` 中添加：
+在业务项目的 `pom.xml` 中添加：
 
 ```xml
 <dependency>
@@ -113,7 +113,7 @@ open-admin 作为可嵌入框架，可以直接作为依赖引入现有项目。
 
 ### 前端集成
 
-在已有 UmiJS 项目的 `package.json` 中添加：
+在业务项目的 `package.json` 中添加：
 
 ```json
 {
