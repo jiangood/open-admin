@@ -38,4 +38,4 @@ open-admin 是一个小型管理系统框架，提供了一整套前后端开箱
 
 ## 快速开始
 
-请参考 [快速开始](https://jiangood.github.io/open-admin/) 文档，了解如何搭建项目环境和开始使用。
+请参考 [docs/quick-start.md](docs/quick-start.md) 文档，了解如何搭建项目环境和开始使用。完整文档见 [docs/](docs/index.md)。
