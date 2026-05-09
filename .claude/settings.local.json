@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(mvn compile *)",
-      "Bash(git ls-files *)"
+      "Bash(git ls-files *)",
+      "Bash(mvn clean *)",
+      "Bash(java -version)",
+      "Bash(mvn -version)",
+      "Bash(winget search *)"
     ]
   }
 }
