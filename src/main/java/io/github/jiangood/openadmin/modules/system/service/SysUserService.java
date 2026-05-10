@@ -105,7 +105,7 @@ public class SysUserService {
             );
         }
 
-        Page<SysUser> page = sysUserRepository.findAll(query, pageable);
+        Page<SysUser> page = sysUserRepository.findAllWithRoles(query, pageable);
         List<UserVO> responseList = userConverter.toResponse(page.getContent());
         return new PageImpl<>(responseList, page.getPageable(), page.getTotalElements());
     }

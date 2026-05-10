@@ -29,27 +29,7 @@
 
 ## 1. 后端 - 架构设计
 
-### 1.12 无优雅关闭/重启机制 🟢 ⭐⭐
-
-**问题**: 应用关闭时，Quartz 任务、虚拟线程池等没有明确的关闭顺序，可能导致正在执行的任务被中断。
-
-**建议**: 实现 `SmartLifecycle` 或 `DisposableBean`，在应用关闭时等待正在执行的任务完成。
-
----
-
 ## 2. 后端 - 性能优化
-
-### 2.1 N+1 查询问题 🔴 ⭐⭐
-
-**问题**: `SysUserDetailsService.loadUserByUsername()` 先查用户，再通过 `getUserPerms()` 查权限，在 `getUserPerms()` 中遍历角色时可能产生 N+1 查询。
-
-**建议**: 使用 `@EntityGraph(attributePaths = "roles")` 或 `JOIN FETCH` 一次查询带上角色和权限。
-
-### 2.2 用户列表批量查询性能差 🟡 ⭐⭐
-
-**问题**: `SysUserService.getAll()` 使用 `Spec` 查询，`userConverter.toResponse()` 可能逐条转换（含关联查询）。
-
-**建议**: 用 `EntityGraph` 或 `@Query` 批量加载关联实体（角色、组织），避免逐条转换。
 
 ### 2.3 `PermissionAspect` 重复认证 🟡 ⭐
 
