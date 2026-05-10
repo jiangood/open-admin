@@ -357,12 +357,6 @@ import DOMPurify from 'dompurify';
 
 ## 16. 文档与可维护性
 
-### 16.2 缺少架构决策记录 (ADR) 🟢 ⭐
-
-**问题**: 一些重要的架构选择（如为什么选择 YAML 菜单定义、为什么用 UUIDv7 等）没有文档记录。
-
-**建议**: 在 `docs/adr/` 目录下记录重要的架构决策。
-
 ### 16.3 API 文档不完整 🟢 ⭐⭐
 
 **问题**: 虽然集成了 Springdoc OpenAPI，但 Controller 和 DTO 上缺少 `@Schema` 注释。
