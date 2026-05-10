@@ -63,7 +63,7 @@ open-admin/
 
 提供通用的框架能力，不包含业务逻辑：
 
-- **data** — `BaseEntity`（通用字段）、`BaseRepositoryImpl`（通用 CRUD）、`Spec`（动态查询）、ID 生成器
+- **data** — `BaseEntity`（通用字段）、`BaseRepositoryImpl`（通用 CRUD）、`BaseService<T>`（通用 Service 基类）、`Spec`（动态查询）、ID 生成器
 - **config/security** — Spring Security 配置、`SysUserDetailsService`
 - **perm** — `@HasPermission` 权限注解 + SpEL 表达式支持
 - **log** — `@Log` 操作日志注解
@@ -111,7 +111,7 @@ open-admin 设计为可嵌入框架，业务项目通过以下方式使用：
 
 - Entity 继承 `BaseEntity` 自动获得 id、createTime、updateTime
 - Repository 继承 `BaseRepository` 获得通用 CRUD
-- Service 使用构造器注入 Repository 实现业务逻辑
+- Service 继承 `BaseService<T>` 获得通用 CRUD，构造器注入 Repository，仅需实现特有业务方法
 
 ### 动态查询
 

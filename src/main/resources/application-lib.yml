@@ -21,7 +21,7 @@ spring:
     password: ${db_password}
   jpa:
     generate-ddl: true
-    show-sql: true
+    show-sql: false
   data:
     web:
       pageable:

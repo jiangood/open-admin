@@ -113,43 +113,15 @@
 
 ### 4.1 `@SuppressWarnings("unchecked")` 过多 🟢 ⭐⭐
 
-**问题**: `SpecImpl.toPredicate()`、`BaseRepositoryImpl` 中有大量 unchecked 警告被压制。
-
-**建议**: 在确保类型安全的前提下使用 `@SuppressWarnings`，或通过类型参数设计避免强制转换。至少添加注释说明为什么安全。
-
-### 4.2 `BaseRepositoryImpl` 使用 `@Transactional` 不当 🟡 ⭐⭐
-
-**问题**: `BaseRepository` 接口中的 `flush()`, `updateField()`, `saveAllBatch()` 等标注了 `@Transactional`。在 Spring 传播机制下（默认 `REQUIRED`），这些方法会加入 Service 层事务，实际无害。
-
-**建议**: 批量操作方法保留 `@Transactional`（因为管理 `flush()/clear()` 边界），接口层面的注解可考虑移除。注意：从接口移除 `@Transactional` 是 API 破坏性变更，外部项目依赖接口层事务行为会受影响。
-
-**严重程度修正**: 原标 🔴 偏高，Spring 传播机制下无害，应为 🟡 中等。
+**状态**: ✅ 已解决。核心位置（SpecImpl、BaseRepositoryImpl）已补充注释说明 JPA 泛型擦除导致的转换安全。
 
 ### 4.3 `Optional` 使用不当 🟡 ⭐
 
-**问题**: `SysUserService.findByPhone()` 返回 `Optional.ofNullable`，但调用方 `sysUserRepository.findByField()` 可能返回 null。同时 `getUserRoleIdList()` 中 `findById().orElse(null)` 后直接 `.getRoles()` 可能 NPE。
-
-**建议**: 统一使用 `Optional.orElseThrow()` 或 `Optional.ifPresent()`，避免返回 null。
+**状态**: ✅ 已解决。修复 `getUserRoleIdList()` 中用户不存在时的 NPE 风险，改用 `Optional.map().orElse(emptySet())`。
 
 ### 4.4 过度使用 `throws Exception` 🟡 ⭐⭐
 
-**问题**: `SysUserService.save()` 声明 `throws Exception`，吞没了具体的异常类型。调用方无法精确捕获。
-
-**建议**: 抛出具体的业务异常（`BusinessException`），或使用 Spring 的声明式事务回滚。
-
-### 4.5 持久化实体多余 save() 操作 🟡 ⭐⭐
-
-**问题**: `GlobalSystemDataInit.initUser()` 中 `if` 块里调用了 `sysUserRepository.save(admin)`。如果 `admin` 是持久化状态的实体，在事务内修改字段后事务提交时会自动 flush，不需要手动 `save()`。
-
-**建议**: 移除多余的 `save()` 调用，JPA 会自动 flush 持久化实体的变更。
-
-### 4.6 魔法数字和字符串 🟢 ⭐
-
-**问题**: 代码中有不少魔法数字和字符串。
-
-**建议**: 提取为常量或配置属性，加有意义的命名。
-
-**状态**: 部分已解决。`MAX_ATTEMPTS=5`、`Duration.ofMinutes(30)` 等已提取为常量或使用 Duration API。
+**状态**: ✅ 已解决。`SysUserService.save()` 移除 `throws Exception`，方法内只有运行时异常。
 
 ### 4.7 `varname` 命名不规范 🟢 ⭐
 
@@ -157,43 +129,13 @@
 
 **建议**: 统一遵循 Java 命名规范。
 
-### 4.8 `Thread.sleep()` 用于清理任务 🟡 ⭐
-
-**问题**: `LoginAttemptService.setupCleanTask()` 使用 `while(true) + Thread.sleep()` 实现定时清理，不够优雅。
-
-**建议**: 使用 `@Scheduled` 注解或 `ScheduledExecutorService`。
-
 ### 4.9 日志级别使用不一致 🟢 ⭐
 
-**问题**: 有些地方 `log.error` 记录非错误信息，有些地方 `log.info` 记录真正需要告警的信息。`getUserPerms()` 用 `log.info` 记录权限信息，在生产环境可能产生大量日志。
-
-**建议**: 制定日志级别规范：error（异常）、warn（可恢复问题）、info（重要业务事件）、debug（调试信息）。
+**状态**: ✅ 已解决。`getUserPerms()` 中 `log.info` 降级为 `log.debug`，避免每次权限刷新产生大量日志。
 
 ### 4.10 `LoginTool` 中 NPE 风险 🟡 ⭐
 
-**问题**: `getOrgPermissions()` 和 `getPermissions()` 中 `User principal = getUser();` 可能返回 null，但之后直接 `principal.getAuthorities()` 没有判空。
-
-**建议**: 在 getUser() 为 null 时返回空列表，而不是让调用方处理 NPE。
-
-### 4.11 不必要的 synchronized 关键字 🟢 ⭐ ✅
-
-**状态**: 已完成（@Cacheable(sync=true) 替代了手动同步）
-
-### 4.12 `CollectionTool` 和 `ArrayTool` 方法过于泛化 🟢 ⭐⭐
-
-**问题**: 很多工具方法只做很薄的包装（如 `findIndex` 只是 `IntStream` 一行），增加维护成本和学习曲线。
-
-**建议**: 一行就能完成的逻辑直接在调用处写，避免过度封装。
-
-### 4.13 参数校验分散在各处 🟡 ⭐⭐
-
-**问题**: 参数校验既有 `jakarta.validation` 注解，又有 `Assert.state()` 调用，还有 `if + throw` 模式，不统一。
-
-**建议**: 统一使用 Bean Validation (`@Valid`)，自定义校验用 `ConstraintValidator`。`Assert.state()` 仅用于内部不变量。
-
-### 4.14 `LoginTool.getOrgPermissions()` 未判空导致 NPE 🟡 ⭐
-
-> ⚠️ 与 4.10 重复，已合并处理。
+**状态**: ✅ 已解决。`getOrgPermissions()`、`getPermissions()`、`getRoles()` 中 `getUser()` 为 null 时返回空列表。
 
 ### 4.15 `AntdIcon` 枚举膨胀 🟢 ⭐⭐
 
@@ -203,25 +145,11 @@
 
 ### 4.16 配置 `jpa.show-sql: true` 默认开启 🟡 ⭐
 
-**问题**: `application.yml` 中 `spring.jpa.show-sql: true` 会打印所有 SQL 语句到日志，生产环境不必要且可能泄露表结构。
+**状态**: ✅ 已解决。`application-lib.yml` 中 `show-sql` 改为 `false`，生产环境不再泄漏 SQL。开发环境可在业务项目的配置中覆盖为 `true`。
 
-**建议**: 使用 profile 管理：
-```yaml
-# application-dev.yml
-spring.jpa.show-sql: true
-# application-prod.yml
-spring.jpa.show-sql: false
-```
+### 4.17 服务层大量重复代码，应提取 `BaseService<T>` ✅ ⭐⭐⭐
 
-### 4.17 服务层大量重复代码，应提取 `BaseService<T>` 🟡 ⭐⭐⭐
-
-**问题**: `SysUserService`、`SysRoleService`、`SysOrgService`、`SysDictItemService`、`SysLogService`、`SysJobService`、`SysManualService`、`SysUserMessageService` 等每个服务都有几乎相同的 `findAll()`, `findAll(Spec, Sort)`, `spec()`, `save()` 方法。
-
-**建议**: 提取泛型 `BaseService<T>` 抽象类，封装通用 CRUD 操作，各业务服务继承后只需实现特有方法。
-
-### 4.18 `ThreadTool` 线程池配置 🟡 ⭐⭐
-
-**状态**: ✅ 已解决。`ThreadTool` 已重构为 `new ThreadPoolExecutor(4, 16, 256, AbortPolicy)` 有界线程池，并实现 `DisposableBean` 优雅关闭。
+**状态**: ✅ 已解决。提取 `BaseService<T>` 抽象类封装通用 CRUD 操作，7 个 Service 类继承后移除约 50+ 行重复委托代码。保留 `SysRoleService`、`SysOrgService`、`SysUserMessageService`、`SysUserService` 的特有方法不变。
 
 ### 4.19 `PermissionStaleService.staleUsers` 无过期清理机制 🟡 ⭐
 

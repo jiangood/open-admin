@@ -26,8 +26,16 @@ public class User extends BaseEntity {
 ### 数据访问
 
 - Repository 继承 `BaseRepository`，获得通用 CRUD
+- Service 继承 `BaseService<T>`，自动获得 `findAll`、`findById`、`save`、`deleteById`、`spec` 等方法，避免重复编写委托代码
 - 复杂查询使用 `Spec` 构建
 - 原生 SQL 使用 `DbTool`
+
+### Service 层
+
+- 继承 `BaseService<T>`，通过 `super(repository)` 注入
+- 有额外 Repository 依赖时，保留对应字段并在构造器中赋值
+- 覆盖 `save(T, List<String>)` 实现自定义保存逻辑（校验、字段过滤等）
+- 覆盖 `deleteById` 实现前置检查（如内置角色保护、子节点检查）
 
 ### 作业调度
 

@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
@@ -25,7 +26,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -38,9 +38,8 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
-public class SysUserService {
+public class SysUserService extends BaseService<SysUser> {
 
     private final SysUserRepository sysUserRepository;
 
@@ -55,6 +54,20 @@ public class SysUserService {
     private final SystemProperties systemProperties;
 
     private final PermissionStaleService permissionStaleService;
+
+    public SysUserService(SysUserRepository sysUserRepository, SysRoleRepository roleRepository,
+                          SysOrgService sysOrgService, SysMenuRepository sysMenuRepository,
+                          UserConverter userConverter, SystemProperties systemProperties,
+                          PermissionStaleService permissionStaleService) {
+        super(sysUserRepository);
+        this.sysUserRepository = sysUserRepository;
+        this.roleRepository = roleRepository;
+        this.sysOrgService = sysOrgService;
+        this.sysMenuRepository = sysMenuRepository;
+        this.userConverter = userConverter;
+        this.systemProperties = systemProperties;
+        this.permissionStaleService = permissionStaleService;
+    }
 
 
     public UserVO findOneDto(String id) {
@@ -80,9 +93,9 @@ public class SysUserService {
 
 
     public Set<String> getUserRoleIdList(String userId) {
-        SysUser user = sysUserRepository.findById(userId).orElse(null);
-        Set<SysRole> roles = user.getRoles();
-        return roles.stream().map(BaseEntity::getId).collect(Collectors.toSet());
+        return sysUserRepository.findById(userId)
+                .map(user -> user.getRoles().stream().map(BaseEntity::getId).collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
     }
 
 
@@ -111,7 +124,7 @@ public class SysUserService {
     }
 
     @Transactional
-    public SysUser save(SysUser input, List<String> updateFields) throws Exception {
+    public SysUser save(SysUser input, List<String> updateFields) {
         boolean isNew = input.isNew();
         // 校验
         boolean accountUnique = sysUserRepository.isUnique(input.getId(), SysUser.Fields.account, input.getAccount());
@@ -230,7 +243,7 @@ public class SysUserService {
     public Set<String> getUserPerms(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
 
-        log.info("获取用户权限:{}", user.getName());
+        log.debug("获取用户权限:{}", user.getName());
         Set<String> result = new TreeSet<>();
         for (SysRole role : user.getRoles()) {
             // 添加角色，格式必须以 ROLE_ 开头，如 ROLE_ADMIN
@@ -319,34 +332,5 @@ public class SysUserService {
         Assert.state(role != null, "角色不存在");
 
         return this.findByRole(role);
-    }
-
-
-    public List<SysUser> findAll() {
-        return sysUserRepository.findAll();
-    }
-
-    public Optional<SysUser> findById(String id) {
-        return sysUserRepository.findById(id);
-    }
-
-    public Page<SysUser> findAll(Specification<SysUser> spec, Pageable pageable) {
-        return sysUserRepository.findAll(spec, pageable);
-    }
-
-    public List<SysUser> findAll(Sort sort) {
-        return sysUserRepository.findAll(sort);
-    }
-
-    public List<SysUser> findAll(Specification<SysUser> s, Sort sort) {
-        return sysUserRepository.findAll(s, sort);
-    }
-
-    public Spec<SysUser> spec() {
-        return Spec.of();
-    }
-
-    public SysUser save(SysUser t) {
-        return sysUserRepository.save(t);
     }
 }

@@ -383,6 +383,7 @@ public class BaseRepositoryImpl<T, ID> extends SimpleJpaRepository<T, ID>
     @SuppressWarnings("unchecked")
     @Override
     public ID getId(T entity) {
+        // 安全: BaseRepository<T, ID> 的泛型 ID 由运行时实体标注 @Id 的字段类型保证一致
         return (ID) entityManager.getEntityManagerFactory()
                 .getPersistenceUnitUtil().getIdentifier(entity);
     }

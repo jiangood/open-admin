@@ -46,6 +46,9 @@ public class LoginTool {
 
     public static List<String> getOrgPermissions() {
         User principal = getUser();
+        if (principal == null) {
+            return List.of();
+        }
         Collection<GrantedAuthority> authorities = principal.getAuthorities();
 
         return authorities.stream().map(GrantedAuthority::getAuthority)
@@ -56,6 +59,9 @@ public class LoginTool {
 
     public static List<String> getPermissions() {
         User principal = getUser();
+        if (principal == null) {
+            return List.of();
+        }
         Collection<GrantedAuthority> authorities = principal.getAuthorities();
 
         return authorities.stream().map(GrantedAuthority::getAuthority)
@@ -65,6 +71,9 @@ public class LoginTool {
 
     public static List<String> getRoles() {
         User principal = getUser();
+        if (principal == null) {
+            return List.of();
+        }
         Collection<GrantedAuthority> authorities = principal.getAuthorities();
 
         return authorities.stream().map(GrantedAuthority::getAuthority)

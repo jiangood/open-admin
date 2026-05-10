@@ -28,7 +28,7 @@ class SpecImpl<T, V> implements Specification<T> {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Predicate toPredicate(Root<T> root, CriteriaQuery<?> query, CriteriaBuilder cb) {
-        // 使用更新后的 getPath 方法，支持点操作
+        // 安全: ExpressionTool.getPath 返回的 Path 由 JPA CriteriaBuilder 运行时校验，泛型擦除后类型参数无实际约束
         Expression path = ExpressionTool.getPath(root, field);
 
 

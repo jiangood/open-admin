@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.util.tree.TreeManager;
 import io.github.jiangood.openadmin.util.tree.drop.DropResult;
@@ -12,13 +13,9 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -32,13 +29,18 @@ import java.util.stream.Collectors;
 
 
 @Slf4j
-@RequiredArgsConstructor
 @Service
 @CacheConfig(cacheNames = "sys_org")
-public class SysOrgService {
+public class SysOrgService extends BaseService<SysOrg> {
 
     private final SysOrgRepository sysOrgRepository;
     private final SysUserRepository sysUserRepository;
+
+    public SysOrgService(SysOrgRepository sysOrgRepository, SysUserRepository sysUserRepository) {
+        super(sysOrgRepository);
+        this.sysOrgRepository = sysOrgRepository;
+        this.sysUserRepository = sysUserRepository;
+    }
 
 
     public Optional<SysOrg> findByThirdId(String thirdId) {
@@ -204,12 +206,8 @@ public class SysOrgService {
 
     }
 
-    public Optional<SysOrg> findById(String id) {
-        return sysOrgRepository.findById(id);
-    }
-
     public List<SysOrg> findAll() {
-        return sysOrgRepository.findAll(Sort.by(SysOrg.Fields.seq));
+        return repository.findAll(Sort.by(SysOrg.Fields.seq));
     }
 
 
@@ -226,27 +224,6 @@ public class SysOrgService {
             org.setSeq(i);
         }
 
-    }
-
-    // BaseService 方法
-    public Page<SysOrg> findAll(Specification<SysOrg> spec, Pageable pageable) {
-        return sysOrgRepository.findAll(spec, pageable);
-    }
-
-    public List<SysOrg> findAll(Sort sort) {
-        return sysOrgRepository.findAll(sort);
-    }
-
-    public List<SysOrg> findAll(Specification<SysOrg> s, Sort sort) {
-        return sysOrgRepository.findAll(s, sort);
-    }
-
-    public Spec<SysOrg> spec() {
-        return Spec.of();
-    }
-
-    public SysOrg save(SysOrg t) {
-        return sysOrgRepository.save(t);
     }
 
     public List<String> findChildIdListWithSelfById(String id, boolean containsDept) {
