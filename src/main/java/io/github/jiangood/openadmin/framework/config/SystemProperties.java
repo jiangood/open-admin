@@ -32,7 +32,7 @@ public class SystemProperties {
     /**
      * 是否开启验证码登录
      */
-    private boolean captcha = true;
+    private boolean captchaEnable = true;
     /**
      * 最大并发会话数， 即同时登录用户数
      */

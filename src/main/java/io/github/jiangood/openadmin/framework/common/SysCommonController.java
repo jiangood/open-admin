@@ -46,7 +46,7 @@ public class SysCommonController {
     @GetMapping("public/site-info")
     public AjaxResult siteInfo() {
         Dict data = new Dict();
-        data.put("captcha", systemProperties.isCaptcha());
+        data.put("captcha", systemProperties.isCaptchaEnable());
         data.put("copyright", systemProperties.getCopyright());
         data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
         data.put("showLogo", systemProperties.isShowLogo());

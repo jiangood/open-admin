@@ -46,7 +46,7 @@
 
 **状态**: ✅ 已完成
 
-**处理**: `SystemProperties.captcha` 默认值从 `false` 改为 `true`，所有新项目默认开启验证码。业务项目可在 `application.yml` 中设 `sys.captcha: false` 关闭。
+**处理**: `SystemProperties.captchaEnable` 默认值从 `false` 改为 `true`，配置名从 `sys.captcha` 改为 `sys.captcha-enable`。所有新项目默认开启验证码，业务项目可在 `application.yml` 中设 `sys.captcha-enable: false` 关闭。
 
 ### 3.12 数据库密码和默认管理员密码硬编码 🟡 ⭐
 
@@ -648,7 +648,7 @@ import DOMPurify from 'dompurify';
 
 | # | 建议 | 类型 | 说明 |
 |---|------|------|------|
-| 1 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captcha` 默认改为 `true` |
+| 1 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captchaEnable` 默认改为 `true`，配置名 `sys.captcha` → `sys.captcha-enable` |
 | 2 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `@Profile` 区分 dev/prod，生产环境禁止通配符 |
 | 3 | 3.14 登录错误信息泄露账号状态 | 🟡 安全 | 所有失败场景统一返回模糊描述 |
 | 4 | 3.15 IpTool 超时配置 | 🟡 Bug | `HttpRequest.execute()` 添加 `.timeout(5000)` |

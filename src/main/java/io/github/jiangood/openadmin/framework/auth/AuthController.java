@@ -96,7 +96,7 @@ public class AuthController {
     }
 
     private void checkCaptchaCode(String captchaCode, String sessionCode) {
-        if (systemProperties.isCaptcha()) {
+        if (systemProperties.isCaptchaEnable()) {
             Assert.hasText(captchaCode, "请输入验证码");
             boolean verify = captchaCodeGenerator.verify(sessionCode, captchaCode);
             Assert.state(verify, "验证码错误");
