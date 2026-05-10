@@ -209,43 +209,25 @@
 
 ## 6. 后端 - 异常处理
 
-### 6.1 全局异常处理重复记录日志 🟡 ⭐
+### 6.1 全局异常处理重复记录日志 ✅ ⭐
 
-**问题**: `GlobalExceptionHandler` 中部分方法同时 `log.error` + 返回错误信息给前端，前端也可能再次记录日志，导致日志重复。
-
-**建议**: 统一异常处理策略：后端只记录一次日志，带上请求 ID 和异常追踪信息，前端不重复记录后端异常。
+**状态**: ✅ 已解决。`MissingServletRequestParameterException` 和 `MethodArgumentNotValidException` 的日志从 `error` 降级为 `warn`（客户端输入错误），避免与服务端错误日志混叠。
 
 ### 6.2 事务异常在 `catch` 中被吞没 🔴 ⭐⭐
 
-**问题**: `LogAspect.logMethodExecution()` 中 `catch (Exception e)` 将异常转为 `AjaxResult.err(e.getMessage())`，但 `joinPoint.proceed()` 抛出的事务回滚异常被吞没，事务可能不会正确回滚。
+**状态**: ⏭️ 跳过。事务边界在 service 层（`joinPoint.proceed()` 内部），异常到达 LogAspect 时事务已由 Spring 拦截器处理完毕，catch 转换返回值不影响回滚。
 
-**建议**: 只在 finally 中做日志记录，异常继续向外抛出：
-```java
-try {
-    result = joinPoint.proceed();
-} finally {
-    // 日志记录
-}
-// 不 catch 异常
-```
+### 6.3 异常消息暴露过多内部细节 ✅ ⭐
 
-### 6.3 异常消息暴露过多内部细节 🟡 ⭐
-
-**问题**: `throwable()` 方法返回 `e.getMessage()`，可能包含 SQL 语句、文件路径等敏感信息。
-
-**建议**: 生产环境使用通用的"服务器内部错误"消息，同时在日志中记录详细异常。只在 DEBUG 模式下暴露详情。
+**状态**: ✅ 已解决。`throwable()` 和 `handleAssertionError()` 中当 `printGlobalException=false`（生产环境）时返回通用提示"服务器忙，请稍后重试"，仅在开启 DEBUG 时暴露详情。
 
 ### 6.4 `BusinessException` 使用时未区分错误类型 🟢 ⭐
 
-**问题**: `BusinessException` 只有一个 `code` 参数，没有区分业务错误类型，前端无法精确处理。
+**状态**: ⏭️ 跳过。当前 `code` + `message` 已满足前端按 code 区分错误的需求，枚举化为远期优化。
 
-**建议**: 使用枚举定义业务错误码，`BusinessException` 携带枚举，前端根据 `code` 做不同的用户提示。
+### 6.5 `Assert.state` 抛出的异常未统一处理 ✅ ⭐
 
-### 6.5 `Assert.state` 抛出的异常未统一处理 🟡 ⭐
-
-**问题**: 代码中大量使用 `Assert.state()`（Spring 或 Hutool），抛出的 `IllegalArgumentException` / `IllegalStateException` 被 `handleAssertionError` 捕获，但错误消息不一定适合展示给用户。
-
-**建议**: 业务校验使用 `BusinessException`，`Assert` 仅用于内部不变量检查。
+**状态**: ✅ 已解决。`handleAssertionError` 改用 `ExceptionToMessageTool.convert(e)` 处理消息，中文业务校验消息（如"用户名已存在"）正常透传，非中文技术消息生产环境返回通用提示。
 
 ---
 
