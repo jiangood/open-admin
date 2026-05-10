@@ -118,10 +118,8 @@ class TabPageRenderComponent extends React.Component {
         if(tab != null){
             const old = tab.children
             if(old != null){
-                console.log('准备刷新：', key)
                 tab.children = '刷新中...'
                 this.setState({tabs}, () => {
-                    console.log('刷新节点', tab)
                     tab.children = old
                     this.setState({tabs})
                 })

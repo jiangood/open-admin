@@ -64,7 +64,6 @@ export class FieldUploadFile extends React.Component {
     }
 
     handleChange = ({fileList, event, file}) => {
-        console.log('检测到文件变化', fileList);
         const rs = file.response;
         if (rs != null && rs.success === false) {
             Modal.error({
@@ -82,7 +81,6 @@ export class FieldUploadFile extends React.Component {
         }
         if (this.props.onChange) {
             const value = newIds.join(',');
-            console.log('上传文件值', value);
             this.props.onChange(value);
         }
 

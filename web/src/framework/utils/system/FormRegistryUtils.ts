@@ -39,7 +39,6 @@ export class FormRegistryUtils {
     }
 
     FormRegistryUtils.forms.set(formKey, formComponent);
-    console.log(`✅ 【FormRegistryUtils】表单 "${formKey}" 注册成功`);
   }
 
   /**

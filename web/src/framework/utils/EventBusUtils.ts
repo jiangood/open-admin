@@ -89,7 +89,6 @@ export class EventBusUtils {
         name: string,
         ...args: T
     ): void {
-        console.log('触发事件：',name, args)
         const list = EventBusUtils.__stack[name] as StaticEventEntry<T>[];
 
         if (list !== undefined) {

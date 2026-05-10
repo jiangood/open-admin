@@ -159,7 +159,6 @@ class _Layouts extends React.Component {
         }
 
         const {params = {}} = this.props.location;
-        console.log('layout: params', params)
         if (checkIsSimplePage(pathname) || params.hasOwnProperty('_noLayout')) {
             return <Outlet/>
         }

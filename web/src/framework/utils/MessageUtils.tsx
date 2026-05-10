@@ -103,7 +103,6 @@ export class MessageUtils {
      * 错误消息
      */
     static error(content: String, duration: number = 3) {
-        console.log('调用 MessageUtils.error',content)
         if(!this.messageApi){
             alert(content)
             return
@@ -144,7 +143,6 @@ export class MessageUtils {
     static config(messageApi: MessageInstance, modalApi: HookAPI) {
         this.messageApi = messageApi;
         this.modalApi = modalApi;
-        console.log('MessageUtils.config', messageApi, modalApi)
     }
 
     private static modalApi:HookAPI = null;
