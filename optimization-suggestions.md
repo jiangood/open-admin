@@ -151,11 +151,9 @@
 
 **状态**: ✅ 已解决。提取 `BaseService<T>` 抽象类封装通用 CRUD 操作，7 个 Service 类继承后移除约 50+ 行重复委托代码。保留 `SysRoleService`、`SysOrgService`、`SysUserMessageService`、`SysUserService` 的特有方法不变。
 
-### 4.19 `PermissionStaleService.staleUsers` 无过期清理机制 🟡 ⭐
+### 4.19 `PermissionStaleService.staleUsers` 无过期清理机制 ✅ ⭐
 
-**问题**: `PermissionStaleService` 使用 `ConcurrentHashMap` 存储 stale 用户标记，但没有任何到期清理机制。标记过的用户记录会永远留在内存中，可能导致内存泄漏。
-
-**建议**: 使用 `Cache<String, Boolean>` 并设置 TTL 过期时间，或定期清理已处理过的记录。
+**状态**: ✅ 已解决。`ConcurrentHashMap` 替换为 Caffeine `Cache` 并设置 10 分钟 `expireAfterWrite`，标记过期后自动清理，无需手动维护。
 
 ### 4.20 服务方法声明不匹配的异常 🟢 ⭐
 
