@@ -73,7 +73,11 @@
 
 **状态**: ✅ 已完成
 
-**处理**: `_getLocation()` 中 `HttpRequest` 添加 `.timeout(5000)`，外部服务不可用时 5 秒超时断开。
+**处理**: 重构为多 Provider 架构，按序重试：
+- **ip-api.com**（主，支持中文 JSON，45次/分钟免费）
+- **cip.cc**（原服务，降级为第一个 fallback）
+- **ipinfo.io**（第二 fallback，5万次/月免费）
+所有请求统一 5s 超时。
 
 ### 3.16 `MigrationSysDict` 静默删除旧表 🔴 ⭐⭐
 
