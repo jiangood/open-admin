@@ -4,6 +4,8 @@ import {Tabs} from "antd";
 import {PageRender} from "../PageRender";
 import {PageUtils} from "../../framework";
 
+const MAX_TABS = 20;
+
 class TabPageRenderComponent extends React.Component {
 
     state = {
@@ -11,6 +13,8 @@ class TabPageRenderComponent extends React.Component {
         urlLabelMap: {},
         tabs: [],
     }
+
+    accessOrder = [];
 
     componentDidMount() {
         const url = this.getUrl(this.props)
@@ -31,9 +35,13 @@ class TabPageRenderComponent extends React.Component {
         }
     }
 
+    recordAccess(url) {
+        this.accessOrder = this.accessOrder.filter(k => k !== url);
+        this.accessOrder.push(url);
+    }
+
     onUrlChange = url => {
         const {location} = this.props
-
         const {pathname, search} = location
         const {tabs} = this.state
 
@@ -46,6 +54,15 @@ class TabPageRenderComponent extends React.Component {
                 label: label,
                 children: cmp
             });
+
+            if (tabs.length > MAX_TABS) {
+                const keep = new Set([url, ...this.accessOrder.slice(-3)]);
+                const removeIdx = tabs.findIndex(t => !keep.has(t.key));
+                if (removeIdx > -1) {
+                    tabs.splice(removeIdx, 1);
+                }
+            }
+
             this.setState({tabs: [...tabs]})
         }else {
             const menu = this.props.pathMenuMap[pathname]
@@ -54,6 +71,7 @@ class TabPageRenderComponent extends React.Component {
             }
         }
 
+        this.recordAccess(url);
         this.setState({active: url})
     };
 
@@ -104,7 +122,6 @@ class TabPageRenderComponent extends React.Component {
     onTabClick = (key, event) => {
         const now = new Date().getTime();
         const doubleClick = now - this.lastTabClickTime < 300;
-        // 双击时刷新
         if (doubleClick) {
             this.refresh(key);
         }
@@ -136,6 +153,7 @@ class TabPageRenderComponent extends React.Component {
     onRemove = url => {
         let {tabs} = this.state
         tabs = tabs.filter(t => t.key !== url)
+        this.accessOrder = this.accessOrder.filter(k => k !== url);
 
         this.setState({tabs})
         if (tabs.length > 0) {
@@ -152,5 +170,4 @@ class TabPageRenderComponent extends React.Component {
 }
 
 
-// 让组件有路由相关的参数，如 this.props.location
 export const TabPageRender = withRouter(TabPageRenderComponent)

@@ -8,13 +8,7 @@
 
 
 
-### 3.10 首次登录未强制改密 🟢 ⭐
 
-**问题**: 默认密码由 `SystemProperties.getDefaultPassword()` 生成（`RandomUtil.randomString(16)`），密码本身不弱。但首次登录后没有强制修改密码机制。
-
-**建议**: 添加首次登录强制改密流程。
-
-**严重程度修正**: 原标 🟡 偏高，"默认密码弱"不准确，应为 🟢 轻微。
 
 ### 3.12 数据库密码和默认管理员密码硬编码 🟡 ⭐
 
@@ -38,21 +32,7 @@
 
 **建议**: 改用 String 类型 + 运行时验证。或从 JSON/YAML 配置文件动态加载图标映射，减少 Java 枚举的维护成本。
 
----
 
-## 5. 后端 - JPA/数据层
-
----
-
-## 6. 后端 - 异常处理
-
----
-
-## 7. 后端 - 日志与监控
-
-*所有建议已评估，当前无需处理。*
-
----
 
 ## 8. 后端 - 测试覆盖
 
@@ -87,13 +67,8 @@
 
 **建议**: 使用 JMH 对核心方法（权限查询、Spec 构建、数据导出）做微基准测试。
 
----
 
-## 9. 后端 - 依赖管理
 
-*所有建议已处理，详见历史记录。*
-
----
 
 ## 10. 前端 - 架构与组件
 
@@ -117,12 +92,6 @@
 **问题**: `loadBadge` 在 `componentDidMount` 中发起多个请求，如果菜单项过多，会同时发出大量请求。
 
 **建议**: 使用 `Promise.allSettled` 或限制并发数。添加轮询间隔配置。
-
-### 10.7 `TabPageRender` 可能无限增长 🟡 ⭐⭐
-
-**问题**: Tab 页签缓存（`TabPageRender`）如果用户浏览大量页面，DOM 节点可能过多导致性能下降。
-
-**建议**: 限制最大 Tab 数量（如 20 个），超出时移除最近最少使用的 Tab。
 
 ### 10.8 前端代码中使用 `// eslint-disable-next-line` 🟢 ⭐
 
@@ -264,11 +233,6 @@ import DOMPurify from 'dompurify';
 
 **建议**: 确保 Modal 使用 `destroyOnClose={true}`，或使用 `form.setFieldsValue()` 在编辑时主动更新表单。
 
-### 12.17 下拉选择框缺少 `getPopupContainer` 🟡 ⭐
-
-**问题**: `FieldRemoteSelect`、`FieldDictSelect`、`FieldRemoteTreeSelect` 等字段组件没有设置 `getPopupContainer` 属性。在 Modal 内使用时，下拉菜单可能被 Modal 边界裁剪。
-
-**建议**: 为所有 Select/TreeSelect 类字段组件添加 `getPopupContainer={trigger => trigger.parentElement}`。
 
 ### 12.18 缺少组件单元测试 🟡 ⭐⭐
 
