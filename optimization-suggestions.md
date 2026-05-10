@@ -99,13 +99,7 @@
 
 **建议**: 对于 `ref.current` 赋值，这是 React 的惯用模式，可以考虑添加全局规则例外。
 
-### 10.9 前端包名与后端耦合 🟢 ⭐⭐
 
-**问题**: npm 包名为 `@jiangood/open-admin`，暴露的路径 `src/index.ts` 导入了 `pages/test` 等业务页面，框架库不应依赖业务页面。
-
-**建议**: 将 `framework/` 下的组件完全独立为 npm 包，业务页面在项目中单独管理。
-
----
 
 ## 11. 前端 - 性能优化
 
@@ -118,19 +112,7 @@
 - 类组件中在 `shouldComponentUpdate` 做浅比较
 - 列表中使用 `React.memo` 包裹
 
-### 11.2 图片资源未优化 🟡 ⭐
 
-**问题**: 图片资源没有做压缩和响应式处理。
-
-**建议**: 使用 WebP 格式替代 JPEG/PNG，或使用 CDN 图片处理服务做自动压缩。
-
-**注意**: 大部分图片来自后端 API（`siteInfo.logoUrl`、`siteInfo.loginBackground`），前端自身不管理这些图片资源。
-
-### 11.4 大列表渲染未虚拟化 🟡 ⭐⭐
-
-**问题**: `ProTable` 使用 Ant Design 的 `Table`，数据量大时（>1000 行）渲染性能差。
-
-**建议**: 使用 `virtualized` 属性或引入 `react-window` 虚拟滚动，配置 `scroll={{ y: 400 }}`。
 
 ### 11.5 `loadBadge` 每条请求单独 setState 🟡 ⭐
 
@@ -185,12 +167,6 @@ import DOMPurify from 'dompurify';
 // ...
 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(content)}} />
 ```
-
-### 12.8 登录页面加载状态永久卡死 🔴 ⭐⭐
-
-**问题**: `pages/login.jsx` 中，如果 RSA 公钥缺失，方法执行 `return` 但不重置 `this.state.logging`，登录按钮永久处于禁用状态。
-
-**建议**: 在 return 前重置 loading 状态，或使用 try/catch/finally 模式保证状态重置。
 
 ### 12.9 Ant Design API 使用错误 🟡 ⭐
 

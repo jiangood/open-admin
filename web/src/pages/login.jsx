@@ -54,6 +54,7 @@ export default class extends React.Component {
         const pubkey = this.state.siteInfo.rsaPublicKey;
         if (!pubkey) {
             message.error("未获取密钥，请刷新浏览器再试")
+            this.setState({logging: false})
             return
         }
         const crypt = new JSEncrypt();
