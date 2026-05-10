@@ -34,7 +34,7 @@
     </scm>
     <properties>
         <!-- 这个表示版本号，构建时动态指定参数即可 如 mvn package -Drevision=1.1.1-->
-        <revision>1.2.7-SNAPSHOT</revision>
+        <revision>2.0.0</revision>
         <java.version>21</java.version>
         <compile.version>21</compile.version>
         <maven.compiler.source>21</maven.compiler.source>

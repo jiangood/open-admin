@@ -39,7 +39,7 @@
     "dev": "umi dev",
     "build": "umi build"
   },
-  "version": "1.0.0-beta.5",
+  "version": "2.0.0",
   "dependencies": {
     "react-compiler-runtime": "^1.0.0"
   }

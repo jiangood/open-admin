@@ -363,11 +363,5 @@ import DOMPurify from 'dompurify';
 
 **建议**: 为所有公开接口添加完整的 OpenAPI 注释，包括请求参数说明、响应示例。
 
-### 16.4 变更日志不规范 🟢 ⭐
-
-**问题**: 没有规范的 CHANGELOG.md，依赖者无法快速了解版本变更。
-
-**建议**: 使用 conventional commits 规范提交信息，配合 `git-cliff` 或类似工具自动生成 CHANGELOG。
-
 
 
