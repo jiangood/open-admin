@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.framework.common;
 
 import cn.hutool.core.codec.Base64;
+import io.github.jiangood.openadmin.framework.ratelimit.RateLimit;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,7 @@ import java.io.IOException;
 public class UtilsController {
 
     @PostMapping("file-base64")
+    @RateLimit(count = 10, duration = 60)
     public AjaxResult getLoginUser(MultipartFile file) throws IOException {
         byte[] bytes = file.getBytes();
         String encode = Base64.encode(bytes);

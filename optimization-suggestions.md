@@ -43,20 +43,13 @@
 
 **状态**: ✅ 已解决。添加 30 分钟滑动窗口，窗口过期自动重置计数器并解锁。
 
-### 3.4 密码强度校验可绕过 🟡 ⭐
-
-**问题**: `PasswordTool.validateStrength()` 使用 Hutool 的 `PasswdStrength`，如果用户不通过 `resetPwd()` 而直接调用 `setPassword()` + `save()` 可绕过。
-
-**建议**: 在 Entity 的 `@PrePersist` / `@PreUpdate` 中自动校验密码强度，或者在 Service 层统一封装密码修改方法。
-
 ### 3.5 缺少请求频率限制 🔴 ⭐⭐⭐
 
-**问题**: 登录接口、验证码接口、短信发送等没有频率限制，可能被暴力攻击。
-
-**建议**: 
-- 引入 `Bucket4j` 或 Spring 的 `Resilience4j RateLimiter`
-- 或使用 Nginx/ApI Gateway 的频率限制
-- 对 `/api/auth/login` 按 IP + 用户名双重限流
+**状态**: ✅ 已解决。新增 `@RateLimit(count, duration)` 注解 + AOP 切面，基于滑动窗口按 IP 限流。已应用的接口：
+- `/admin/auth/login` — 60s/10次
+- `/admin/auth/captcha-image` — 60s/30次
+- `/api/gateway/dict` — 60s/60次
+- `/admin/utils/file-base64` — 60s/10次
 
 ### 3.6 缺少 CSRF 保护 🟡 ⭐⭐
 

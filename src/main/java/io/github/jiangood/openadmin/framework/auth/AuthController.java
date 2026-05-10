@@ -7,6 +7,7 @@ import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.security.SecurityHolder;
+import io.github.jiangood.openadmin.framework.ratelimit.RateLimit;
 import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.util.RsaTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
@@ -44,6 +45,7 @@ public class AuthController {
     private final SystemProperties systemProperties;
 
     @PostMapping("login")
+    @RateLimit(count = 10, duration = 60)
     public AjaxResult login(@RequestBody @Valid LoginReq loginRequest, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
@@ -128,6 +130,7 @@ public class AuthController {
     }
 
     @GetMapping("captcha-image")
+    @RateLimit(count = 30, duration = 60)
     public void captcha(HttpSession session, HttpServletResponse response) throws IOException {
         log.info("正在生成验证码, sessionId={}", session.getId());
         try {
