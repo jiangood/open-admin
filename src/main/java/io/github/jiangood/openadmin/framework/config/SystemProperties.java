@@ -2,11 +2,9 @@ package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.util.AesTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -106,15 +104,6 @@ public class SystemProperties {
     private String defaultPassword = RandomUtil.randomString(16);
 
     /**
-     * AesTool的密钥，默认AesTool为随机生成
-     */
-    private String aesKey;
-
-
-    private String rsaPublicKey;
-    private String rsaPrivateKey;
-
-    /**
      * 文件存储配置
      */
     private FileStorage file = new FileStorage();
@@ -165,10 +154,4 @@ public class SystemProperties {
         MATH, RANDOM
     }
 
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
-        if(aesKey != null){
-            AesTool.initKey(aesKey);
-        }
-    }
 }
