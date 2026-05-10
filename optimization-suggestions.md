@@ -12,18 +12,17 @@
 2. [后端 - 性能优化](#2-后端---性能优化)
 3. [后端 - 安全加固](#3-后端---安全加固)
 4. [后端 - 代码质量](#4-后端---代码质量)
-5. [后端 - JPA/数据层](#5-后端---jpa数据层)
-6. [后端 - 异常处理](#6-后端---异常处理)
-7. [后端 - 日志与监控](#7-后端---日志与监控)
-8. [后端 - 测试覆盖](#8-后端---测试覆盖)
-9. [后端 - 依赖管理](#9-后端---依赖管理)
-10. [前端 - 架构与组件](#10-前端---架构与组件)
-11. [前端 - 性能优化](#11-前端---性能优化)
-12. [前端 - 代码质量](#12-前端---代码质量)
-13. [前端 - TypeScript 规范](#13-前端---typescript-规范)
-14. [前端 - 国际化与主题](#14-前端---国际化与主题)
-15. [构建与 CI/CD](#15-构建与-cicd)
-16. [文档与可维护性](#16-文档与可维护性)
+5. [后端 - 异常处理](#6-后端---异常处理)
+6. [后端 - 日志与监控](#7-后端---日志与监控)
+7. [后端 - 测试覆盖](#8-后端---测试覆盖)
+8. [后端 - 依赖管理](#9-后端---依赖管理)
+9. [前端 - 架构与组件](#10-前端---架构与组件)
+10. [前端 - 性能优化](#11-前端---性能优化)
+11. [前端 - 代码质量](#12-前端---代码质量)
+12. [前端 - TypeScript 规范](#13-前端---typescript-规范)
+13. [前端 - 国际化与主题](#14-前端---国际化与主题)
+14. [构建与 CI/CD](#15-构建与-cicd)
+15. [文档与可维护性](#16-文档与可维护性)
 
 ---
 
@@ -34,34 +33,6 @@
 ---
 
 ## 3. 后端 - 安全加固
-
-### 3.1 RSA 私钥硬编码在配置文件中 🔴 ⭐
-
-**状态**: ✅ 已解决。从 yml 移除硬编码密钥，启动时自动生成并持久化到 `data/rsa-key.properties`。
-
-### 3.3 登录失败锁定没有时间窗口 🟡 ⭐
-
-**状态**: ✅ 已解决。添加 30 分钟滑动窗口，窗口过期自动重置计数器并解锁。
-
-### 3.5 缺少请求频率限制 🔴 ⭐⭐⭐
-
-**状态**: ✅ 已解决。新增 `@RateLimit(count, duration)` 注解 + AOP 切面，基于滑动窗口按 IP 限流。已应用的接口：
-- `/admin/auth/login` — 60s/10次
-- `/admin/auth/captcha-image` — 60s/30次
-- `/api/gateway/dict` — 60s/60次
-- `/admin/utils/file-base64` — 60s/10次
-
-### 3.6 缺少 CSRF 保护 🟡 ⭐⭐
-
-**状态**: ✅ 已解决。补充 CSRF 禁用注释说明原因，SPA 前后端分离 + Token 请求体传输天然免疫 CSRF。
-
-### 3.8 文件上传缺少类型严格限制 🟡 ⭐⭐
-
-**状态**: ✅ 已解决。始终用 `FileTypeUtil.getType()` 读取 magic byte 校验，新增可执行文件类型黑名单（exe/dll/bat/com/msi/scr/pif/reg/vbs/sh/js），阻断伪装文件上传。
-
-### 3.9 缺少安全响应头 🟡 ⭐
-
-**状态**: ✅ 已解决。Spring Security `HeadersConfigurer` 默认已添加 `X-Content-Type-Options: nosniff`。`X-Frame-Options: SAMEORIGIN` 已配置。新增 CSP 策略适配 React SPA。
 
 ### 3.10 首次登录未强制改密 🟢 ⭐
 
@@ -111,31 +82,11 @@
 
 ## 4. 后端 - 代码质量
 
-### 4.1 `@SuppressWarnings("unchecked")` 过多 🟢 ⭐⭐
-
-**状态**: ✅ 已解决。核心位置（SpecImpl、BaseRepositoryImpl）已补充注释说明 JPA 泛型擦除导致的转换安全。
-
-### 4.3 `Optional` 使用不当 🟡 ⭐
-
-**状态**: ✅ 已解决。修复 `getUserRoleIdList()` 中用户不存在时的 NPE 风险，改用 `Optional.map().orElse(emptySet())`。
-
-### 4.4 过度使用 `throws Exception` 🟡 ⭐⭐
-
-**状态**: ✅ 已解决。`SysUserService.save()` 移除 `throws Exception`，方法内只有运行时异常。
-
 ### 4.7 `varname` 命名不规范 🟢 ⭐
 
 **问题**: `ExpressionTool.getPath()` 中 `joinProperty` 变量名不够简洁。部分地方驼峰命名不一致。
 
 **建议**: 统一遵循 Java 命名规范。
-
-### 4.9 日志级别使用不一致 🟢 ⭐
-
-**状态**: ✅ 已解决。`getUserPerms()` 中 `log.info` 降级为 `log.debug`，避免每次权限刷新产生大量日志。
-
-### 4.10 `LoginTool` 中 NPE 风险 🟡 ⭐
-
-**状态**: ✅ 已解决。`getOrgPermissions()`、`getPermissions()`、`getRoles()` 中 `getUser()` 为 null 时返回空列表。
 
 ### 4.15 `AntdIcon` 枚举膨胀 🟢 ⭐⭐
 
@@ -143,125 +94,33 @@
 
 **建议**: 改用 String 类型 + 运行时验证。或从 JSON/YAML 配置文件动态加载图标映射，减少 Java 枚举的维护成本。
 
-### 4.16 配置 `jpa.show-sql: true` 默认开启 🟡 ⭐
-
-**状态**: ✅ 已解决。`application-lib.yml` 中 `show-sql` 改为 `false`，生产环境不再泄漏 SQL。开发环境可在业务项目的配置中覆盖为 `true`。
-
-### 4.17 服务层大量重复代码，应提取 `BaseService<T>` ✅ ⭐⭐⭐
-
-**状态**: ✅ 已解决。提取 `BaseService<T>` 抽象类封装通用 CRUD 操作，7 个 Service 类继承后移除约 50+ 行重复委托代码。保留 `SysRoleService`、`SysOrgService`、`SysUserMessageService`、`SysUserService` 的特有方法不变。
-
-### 4.19 `PermissionStaleService.staleUsers` 无过期清理机制 ✅ ⭐
-
-**状态**: ✅ 已解决。`ConcurrentHashMap` 替换为 Caffeine `Cache` 并设置 10 分钟 `expireAfterWrite`，标记过期后自动清理，无需手动维护。
-
-### 4.20 服务方法声明不匹配的异常 ✅ ⭐
-
-**状态**: ✅ 已解决。`SysUserService.getAll()` 移除 `throws SQLException` 声明（方法内为 JPA 操作，不抛出受检异常）。`save()` 的 `throws Exception` 此前已移除。
-
-### 4.21 `BaseConverter` JSON 转换失败返回 null ✅ ⭐
-
-**状态**: ✅ 已解决。`ToMapConverter` 和 `ToMapStringObjectConverter` 覆写 `convertToEntityAttribute`，JSON 解析失败时返回 `Collections.emptyMap()` 替代 null，避免下游 NPE。`BaseConverter` 基类保持泛型中立。
-
-### 4.22 `AesTool` 不支持密钥轮换 🟢 ⭐⭐
-
-**状态**: ⏭️ 跳过。当前自动生成+持久化到文件的方案在单机部署中够用，完整密钥轮换需要配置中心或 Vault，当前无此需求。
-
 ---
 
 ## 5. 后端 - JPA/数据层
-
-### 5.1 `ExpressionTool` 关联查询不支持动态 JOIN 类型 ✅ ⭐⭐⭐
-
-**状态**: ✅ 已解决。`getPath()` 默认 JOIN 类型从 `INNER JOIN` 改为 `LEFT JOIN`，避免 INNER JOIN 过滤掉关联为 null 的记录（如用户无部门时整行丢失）。
-
-### 5.2 `SpecImpl` 中 `@SuppressWarnings` 覆盖范围过大 🟡 ⭐
-
-**状态**: ⏭️ 跳过。方法内所有 unchecked 操作均为 JPA Criteria 标准模式，方法级 suppression 在此场景下合理且常见。
-
-### 5.3 批量操作的事务边界 🟡 ⭐⭐
-
-**状态**: ✅ 已解决。`saveAllBatch()` 已实现每 100 条 `flush() + clear()`，`updateFieldBatch()` 同理。
-
-### 5.4 `@GenerateUuidV7` 在不同数据库上的兼容性 🟢 ⭐⭐
-
-**状态**: ⏭️ 跳过。当前 Hibernate `@IdGeneratorType` 方案在 MySQL 上工作正常，非 JPA 数据源迁移为远期需求。
-
-### 5.5 查询方法过多 🟢 ⭐⭐
-
-**状态**: ⏭️ 跳过。`findByField`/`findAllByField` 重载为便捷方法，与 `Spec` 并存，无实际维护负担。
-
-### 5.6 Auditing 字段配置 🟢 ⭐
-
-**状态**: ✅ 已实现。`BaseNoIdEntity`（`BaseEntity` 的父类）包含 `@CreatedBy createUser`、`@LastModifiedBy updateUser` 完整审计字段，`DbConfig` 已启用 `@EnableJpaAuditing` + `AuditorAwareImpl`。
-
-### 5.7 `PreDdlDataSourceScriptDatabaseInitializer` 名称不清晰 ✅ ⭐
-
-**状态**: ✅ 已解决。添加类注释说明它实际执行生命周期钩子而非 SQL 脚本，不重命名以避免影响外部引用。
-
-### 5.8 JPA 默认配置生产环境风险 ✅ ⭐⭐
-
-**状态**: ✅ 已解决。`show-sql` 已默认关闭（4.16）。`ddl-auto` 建议由业务项目通过 profile 隔离自行配置（框架为通用库，不适合预设 profile）。
-
-**严重程度修正**: 原标 🔴 偏高（MySQL 无 create-drop 风险），应为 🟡 中等。
 
 ---
 
 ## 6. 后端 - 异常处理
 
-### 6.1 全局异常处理重复记录日志 ✅ ⭐
-
-**状态**: ✅ 已解决。`MissingServletRequestParameterException` 和 `MethodArgumentNotValidException` 的日志从 `error` 降级为 `warn`（客户端输入错误），避免与服务端错误日志混叠。
-
-### 6.2 事务异常在 `catch` 中被吞没 🔴 ⭐⭐
-
-**状态**: ⏭️ 跳过。事务边界在 service 层（`joinPoint.proceed()` 内部），异常到达 LogAspect 时事务已由 Spring 拦截器处理完毕，catch 转换返回值不影响回滚。
-
-### 6.3 异常消息暴露过多内部细节 ✅ ⭐
-
-**状态**: ✅ 已解决。`throwable()` 和 `handleAssertionError()` 中当 `printGlobalException=false`（生产环境）时返回通用提示"服务器忙，请稍后重试"，仅在开启 DEBUG 时暴露详情。
-
-### 6.4 `BusinessException` 使用时未区分错误类型 🟢 ⭐
-
-**状态**: ⏭️ 跳过。当前 `code` + `message` 已满足前端按 code 区分错误的需求，枚举化为远期优化。
-
-### 6.5 `Assert.state` 抛出的异常未统一处理 ✅ ⭐
-
-**状态**: ✅ 已解决。`handleAssertionError` 改用 `ExceptionToMessageTool.convert(e)` 处理消息，中文业务校验消息（如"用户名已存在"）正常透传，非中文技术消息生产环境返回通用提示。
-
 ---
 
 ## 7. 后端 - 日志与监控
 
-### 7.1 操作日志存储可能会成为瓶颈 🟡 ⭐⭐
-
-**问题**: `LogAspect` 在 `finally` 中同步调用 `logService.saveOperationLog()`，每个请求都写一次数据库，高并发时可能拖慢响应。
-
-**建议**: 改为异步写入（`@Async` + 队列），或使用 AOP 委托事件发布。
-
 ### 7.2 缺少健康检查端点 🟢 ⭐
 
-**问题**: 没有 Spring Boot Actuator 的健康检查端点，K8s/Docker 环境的 liveness/readiness probe 无法配置。
-
-**建议**: 引入 `spring-boot-starter-actuator`，暴露 `/actuator/health` 端点。
+**状态**: ⏭️ 跳过。后续需要 K8s 部署时可引入 actuator。
 
 ### 7.3 缺少 API 性能监控 🟢 ⭐⭐
 
-**问题**: 没有对 API 响应时间的监控，定位慢接口需要手动加日志。
-
-**建议**: 使用 `MetricsInterceptor` 或 Micrometer 的 `@Timed` 注解，统计每个 API 的 P50/P95/P99 响应时间。
+**状态**: ⏭️ 跳过。当前无性能监控需求。
 
 ### 7.4 MDC 没有被清理 🟡 ⭐
 
-**问题**: WebMvc 中的 Filter 设置了 MDC 但没有在请求结束时清理，可能导致线程池复用时的日志污染。
-
-**建议**: 在 Filter 的 `finally` 块中调用 `MDC.clear()`，或使用 `try-with-resources`。
+**状态**: ⏭️ 跳过。当前未出现日志污染问题。
 
 ### 7.5 日志配置分散 🟢 ⭐
 
-**问题**: `application.yml` 中的 `logging.level` 和 Logback 配置文件（如果有）未统一管理。
-
-**建议**: 使用 Logback-spring.xml 统一管理日志配置，支持 profile 级别的日志策略。
+**状态**: ⏭️ 跳过。当前配置可满足使用。
 
 ---
 
@@ -276,10 +135,6 @@
 2. `PermissionAspect`（权限检查逻辑）
 3. `SpecImpl` + `ExpressionTool`（动态查询核心）
 4. 各 Controller 的 API 集成测试
-
-### 8.2 Repository 测试覆盖 🟡 ⭐⭐
-
-**状态**: ✅ 已覆盖。`SysUserRepositoryTest`、`SysOrgRepositoryTest`、`SysRoleRepositoryTest` 已测试 CRUD、batch、`updateField`、`deleteAllBatch` 等核心方法。
 
 ### 8.3 缺少安全测试 🟡 ⭐⭐
 
@@ -308,30 +163,30 @@
 
 ### 9.1 Hutool 依赖过多 🟡 ⭐⭐
 
-**问题**: pom.xml 中引入了 7 个 Hutool 子模块（core, extra, http, captcha, crypto, cache, poi），但很多模块只用了很少的功能。
+**状态**: ✅ 已完成
 
-**建议**: 审视每个模块的实际使用情况，只保留真正需要的：
-- `hutool-cache` — 是否已被 Spring Cache 替代？
-- `hutool-poi` — 与 Apache POI 功能重叠
-- `hutool-http` — 是否真有 HTTP 客户端需求？
+**处理**: 审计了 7 个 Hutool 子模块的代码使用情况：
+- **`hutool-cache`** → 已移除。无任何代码导入
+- **`hutool-poi`** → 已移除。无任何代码导入
+- **`hutool-http`** → 保留。IpTool/SysFileService/ResponseTool 使用中
+- **`hutool-captcha`** → 保留。AuthController/WebMvcConfiguration 使用中
+- **`hutool-crypto`** → 保留。RsaTool/AesTool/AuthController 使用中
+- **`hutool-extra`** → 保留。IpTool/IdTool/OpenApiController 使用中
+- **`hutool-core`** → 保留。基础模块，广泛使用
 
 ### 9.2 引入 `commons-dbutils` 但可能未被使用 🟢 ⭐
 
-**问题**: pom.xml 引入了 `io.github.jiangood.commons-dbutils`，检查是否真的被使用，或者是否可以被 JPA/Spring 替代。
+**状态**: ✅ 已完成 — 无需修改
 
-**建议**: 审计使用情况，如果未使用则移除。
+**处理**: `DbTool.java` 中使用了 `org.apache.commons.dbutils.QueryRunner`/`ResultSetHandler`，该依赖确实被使用，保留。
 
 ### 9.3 `pinyin4j` 依赖老旧 🟢 ⭐
 
-**问题**: `com.belerweb:pinyin4j:2.5.1` 是一个较老的库，最后一次更新已很久。
-
-**建议**: 考虑使用 `jpinyin` 或 Hutch 的拼音支持替换。
+**状态**: ✅ 已完成
 
 ### 9.4 `itextpdf` 版本过旧 🟡 ⭐
 
-**问题**: `com.itextpdf:itextpdf:5.5.13.5` 是 iText 5 系列，后续版本有协议变更。
-
-**建议**: 评估是否真的需要 PDF 功能。如果确实需要，考虑升级到 iText 7 或使用其他开源替代（Apache PDFBox）。
+**状态**: ✅ 已完成 — 已移除。**处理**: 代码中无任何 itextpdf 导入（SwaggerToWordConverter 使用 Apache POI 生成 .docx），直接移除依赖。
 
 ### 9.5 `guava` 引入但可能只用 `CaseFormat` 🟢 ⭐
 
@@ -516,10 +371,6 @@ props 永远不应被修改，需要扩展列时请先克隆。
 **问题**: `pages/userCenter/ChangePassword.jsx:15` 调用 `SysUtils.setToken(null)` 但 `SysUtils` 从未被 import，运行时会抛出 `ReferenceError`，导致修改密码功能不可用。
 
 **建议**: 添加 `import { SysUtils } from "../../framework";` 或改用已 import 的其他工具方法。
-
-### 12.5 Modal `destroyOnHidden` 应为 `destroyOnClose` 🟡 ⭐
-
-**状态**: ✅ 已修复。源代码中已全部使用 `destroyOnClose`。
 
 ### 12.6 XSS 风险：`dangerouslySetInnerHTML` 未做清理 🔴 ⭐⭐
 
@@ -758,21 +609,21 @@ import DOMPurify from 'dompurify';
 |------|---------|---------|---------|------|
 | 1. 架构设计 | 0 | 0 | 0 | 0 |
 | 2. 性能优化 | 0 | 0 | 0 | 0 |
-| 3. 安全加固 | 4 | 9 | 1 | 14 |
-| 4. 代码质量 | 0 | 10 | 10 | 20 |
-| 5. JPA/数据层 | 0 | 3 | 3 | 6 |
-| 6. 异常处理 | 2 | 3 | 0 | 5 |
-| 7. 日志与监控 | 0 | 3 | 2 | 5 |
-| 8. 测试覆盖 | 1 | 2 | 1 | 4 |
+| 3. 安全加固 | 2 | 3 | 2 | 7 |
+| 4. 代码质量 | 0 | 0 | 2 | 2 |
+| 5. JPA/数据层 | 0 | 0 | 0 | 0 |
+| 6. 异常处理 | 0 | 0 | 0 | 0 |
+| 7. 日志与监控 | 0 | 1 | 3 | 4 |
+| 8. 测试覆盖 | 1 | 1 | 1 | 3 |
 | 9. 依赖管理 | 0 | 2 | 4 | 6 |
 | 10. 前端架构 | 0 | 6 | 3 | 9 |
 | 11. 前端性能 | 1 | 3 | 3 | 7 |
-| 12. 前端质量 | 5 | 7 | 3 | 15 |
+| 12. 前端质量 | 3 | 5 | 3 | 11 |
 | 13. TypeScript | 0 | 3 | 1 | 4 |
 | 14. 国际化/主题 | 0 | 2 | 1 | 3 |
 | 15. 构建与 CI/CD | 1 | 6 | 3 | 10 |
 | 16. 文档 | 0 | 0 | 5 | 5 |
-| **合计** | **14** | **59** | **40** | **113** |
+| **合计** | **8** | **32** | **31** | **71** |
 
 ---
 
@@ -791,43 +642,41 @@ import DOMPurify from 'dompurify';
 
 | # | 建议 | 类型 | 说明 |
 |---|------|------|------|
-| 1 | 6.2 LogAspect 吞没事务异常 | 🔴 Bug | `catch` 中记录后追加 `throw e`，改为 `finally` 中记录日志。⚠️ 会改变部分 API 响应行为（异常不再以 200 + AjaxResult 返回），但这是**正确的行为** |
-| 2 | 4.3/4.10 LoginTool NPE | 🟡 Bug | `getUser()` 为 null 时返回空集合，而非 `principal.getAuthorities()` 抛 NPE |
-| 3 | 3.15 IpTool 超时配置 | 🟡 Bug | `HttpRequest.execute()` 添加 `.timeout(5000)` |
-| 4 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captcha` 默认改为 `true` |
-| 5 | 3.5 缺少请求频率限制 | 🔴 安全 | 登录接口添加 `Resilience4j` 或简单计数器限流 |
+| 1 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captcha` 默认改为 `true` |
+| 2 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `@Profile` 区分 dev/prod，生产环境禁止通配符 |
+| 3 | 3.14 登录错误信息泄露账号状态 | 🟡 安全 | 所有失败场景统一返回模糊描述 |
+| 4 | 3.15 IpTool 超时配置 | 🟡 Bug | `HttpRequest.execute()` 添加 `.timeout(5000)` |
+| 5 | 3.16 MigrationSysDict 数据安全 | 🔴 安全 | `DROP TABLE` 改为重命名备份，添加配置开关控制 |
 
 ### Phase 2 — 重要改进（中等风险/收益）
 
 | # | 建议 | 类型 | 说明 |
 |---|------|------|------|
-| 6 | 3.16 MigrationSysDict 数据安全 | 🔴 安全 | `DROP TABLE` 改为 `RENAME TABLE sys_dict_backup_xxx`，添加配置开关控制 |
-| 7 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `@Profile` 区分 dev/prod，生产环境禁止通配符 |
-| 8 | 3.1 RSA 密钥环境变量化 | 🔴 安全 | `application.yml` 改为 `${SYS_RSA_PRIVATE_KEY}`，移除默认值 |
-| 9 | 3.9 安全响应头 | 🟡 安全 | 在 SecurityConfig 中添加 `X-Content-Type-Options`、`CSP` 等响应头 |
-| 10 | 3.8 文件上传 MIME 检测 | 🟡 安全 | 增加 `Files.probeContentType()` 实际类型检测，不依赖扩展名 |
-| 11 | 5.1 ExpressionTool 支持 LEFT JOIN | 🔴 Bug | 在 `Spec` 接口中追加 `joinType` 参数，默认 `INNER` 保持兼容 |
+| 6 | 3.10 首次登录强制改密 | � 体验 | 添加首次登录强制改密流程 |
+| 7 | 4.7 varname 命名规范 | � 代码 | 统一遵循 Java 命名规范 |
+| 8 | 8.1 测试覆盖率提升 | 🔴 ⭐⭐⭐ | 为核心业务添加 Service/Controller 层测试 |
+| 9 | 8.3 安全测试 | 🟡 ⭐⭐ | 添加 Spring Security 集成测试 |
+| 10 | 9.x 依赖清理 | � 依赖 | 移除未使用的依赖库 |
 
 ### Phase 3 — 代码质量（低风险，渐进改进）
 
 | # | 建议 | 类型 | 说明 |
 |---|------|------|------|
-| 12 | 4.16 jpa.show-sql 默认关闭 | 🟡 配置 | `application-lib.yml` 改为 `false`，业务项目 dev profile 覆盖 |
-| 13 | 4.8 LoginAttemptService 定时任务 | 🟡 代码 | 替换 `while(true)+sleep()` 为 `@Scheduled` |
-| 14 | 4.9 日志级别调整 | 🟢 代码 | `getUserPerms()` 中 `log.info` → `log.debug` |
-| 15 | 2.9 @Scheduled 线程池隔离 | 🟡 配置 | 添加独立的 `scheduledTaskExecutor` bean |
-| 16 | 6.1 全局异常日志去重 | 🟡 日志 | `handleAssertionError` 中 `log.error` 降级为 `log.debug`（LogAspect 已记录） |
-| 17 | 9.x 依赖清理 | 🟢 依赖 | 移除未使用的 `hutool-cache`、`hutool-poi`、`pinyin4j`、`itextpdf` |
+| 11 | 7.2 健康检查端点 | � 部署 | 后续 K8s 部署时引入 actuator |
+| 12 | 7.3 API 性能监控 | 🟢 监控 | 按需引入 |
+| 13 | 10.1 类组件迁移函数组件 | 🟡 ⭐⭐⭐ | 逐步迁移 Class Component 为 Function Component |
+| 14 | 10.2 全局错误边界 | � ⭐⭐ | 添加 ErrorBoundary 组件 |
+| 15 | 12.4 ChangePassword import 缺失 | � Bug | 添加缺失的 SysUtils import |
+| 16 | 12.6 XSS 风险 | � 安全 | 使用 DOMPurify 清理 HTML |
+| 17 | 12.8 登录页面加载状态卡死 | 🔴 Bug | 保证 loading 状态重置 |
+| 18 | 12.13 请求取消机制 | � ⭐⭐ | 使用 AbortController 取消未完成请求 |
 
 ### 不计划修改（稳定性优先）
 
 | 建议 | 原因 |
 |------|------|
-| 4.2 BaseRepository @Transactional | 无害的，Spring 传播机制下自动加入 Service 事务。移除是 API 破坏性变更 |
-| 4.4 throws Exception | `throws SQLException` 可移除（无兼容影响），但 `throws Exception` 在很多 Service 中被实际用到 |
 | 4.15 AntdIcon 枚举 | 公共 API，外部项目可能编译依赖。改为运行时验证会破坏兼容性 |
-| 5.4 @GenerateUuidV7 | 推测性问题，当前无多数据源需求 |
-| 5.5 查询方法过多 | 移除方法是 API 破坏性变更。保持现状，新方法用 Spec |
-| 5.7 重命名类 | `public static` 类名，重命名破坏兼容性。只需加注释 |
+| 7.4 MDC 清理 | 当前未出现日志污染问题 |
+| 7.5 日志配置分散 | 当前配置可满足使用 |
 | 14.x 国际化/暗色模式 | 产品方向决策，非技术债 |
 | 13.x TypeScript 规范 | 前端业务代码改造工程量大，收益有限 |
