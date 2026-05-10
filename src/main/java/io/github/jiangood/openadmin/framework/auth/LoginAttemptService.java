@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.auth;
 
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,17 +18,17 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class LoginAttemptService {
 
+    private final SystemProperties systemProperties;
     private final ConcurrentHashMap<String, LoginAttempt> attemptCache = new ConcurrentHashMap<>();
-
 
     @PostConstruct
     public void setupCleanTask() {
-        // 每分钟清理过期记录
+        Duration cleanDuration = Duration.ofMinutes(systemProperties.getLoginLockMinutes() * 2);
         Thread.ofVirtual().name("login-attempt-cleaner").start(() -> {
             while (true) {
                 try {
                     Thread.sleep(Duration.ofMinutes(1));
-                    Instant expire = Instant.now().minus(Duration.ofMinutes(30));
+                    Instant expire = Instant.now().minus(cleanDuration);
                     attemptCache.values().removeIf(attempt -> attempt.getLastAttemptTime().isBefore(expire));
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
@@ -48,7 +49,7 @@ public class LoginAttemptService {
     public int getRemainingAttempts(String username) {
         LoginAttempt attempt = attemptCache.get(username);
         if (attempt == null) {
-            return 5;
+            return systemProperties.getLoginLockMaxAttempts();
         }
         return attempt.getRemainingAttempts();
     }
@@ -58,33 +59,62 @@ public class LoginAttemptService {
     }
 
     public void onFailed(String username) {
-        LoginAttempt attempt = attemptCache.computeIfAbsent(username, k -> new LoginAttempt());
+        LoginAttempt attempt = attemptCache.computeIfAbsent(username,
+                k -> new LoginAttempt(systemProperties.getLoginLockMaxAttempts(), systemProperties.getLoginLockMinutes()));
         attempt.recordFailure();
         log.warn("登录失败: {}", username);
     }
 
     // 内部类
     static class LoginAttempt {
+        private final int maxAttempts;
+        private final Duration windowDuration;
         private int failedAttempts;
+        private Instant windowStartTime;
         private Instant lastAttemptTime;
-        private static final int MAX_ATTEMPTS = 5;
 
-        LoginAttempt() {
+        LoginAttempt(int maxAttempts, int windowDurationMinutes) {
+            this.maxAttempts = maxAttempts;
+            this.windowDuration = Duration.ofMinutes(windowDurationMinutes);
             this.failedAttempts = 0;
-            this.lastAttemptTime = Instant.now();
+            Instant now = Instant.now();
+            this.windowStartTime = now;
+            this.lastAttemptTime = now;
         }
 
         synchronized void recordFailure() {
+            if (isWindowExpired()) {
+                reset();
+            }
             this.failedAttempts++;
             this.lastAttemptTime = Instant.now();
         }
 
-        boolean isLocked() {
-            return failedAttempts >= MAX_ATTEMPTS;
+        synchronized boolean isLocked() {
+            if (failedAttempts < maxAttempts) {
+                return false;
+            }
+            if (isWindowExpired()) {
+                reset();
+                return false;
+            }
+            return true;
         }
 
-        int getRemainingAttempts() {
-            return MAX_ATTEMPTS - failedAttempts;
+        synchronized int getRemainingAttempts() {
+            if (isWindowExpired()) {
+                reset();
+            }
+            return maxAttempts - failedAttempts;
+        }
+
+        private boolean isWindowExpired() {
+            return Instant.now().isAfter(windowStartTime.plus(windowDuration));
+        }
+
+        private void reset() {
+            this.failedAttempts = 0;
+            this.windowStartTime = Instant.now();
         }
 
         Instant getLastAttemptTime() {
