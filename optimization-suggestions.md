@@ -169,30 +169,12 @@
 
 **建议**: 收集所有请求结果后一次性 `setState`。
 
-### 11.6 依赖包体积过大 🟡 ⭐⭐
-
-**问题**: `antd`、`@ant-design/icons`、`bpmn-js`、`tinymce` 等库都比较大。
-
-**建议**: 
-- 使用 `@ant-design/icons` 按需引入（而不是 `import { XXX } from '@ant-design/icons'` 的 Tree Shaking 可能不完善）
-- 评估 bpmn-js 是否真正需要
-- tinymce 考虑延迟加载
 
 ### 11.7 未使用 CDN 缓存 🟢 ⭐⭐
 
 **问题**: 前端资源未配置 CDN 和缓存策略。
 
 **建议**: UmiJS 配置 `publicPath` 为 CDN 地址，配合 Webpack 的 content hash 做长期缓存。
-
-### 11.8 未使用 React Compiler 🟡 ⭐⭐
-
-**问题**: 函数组件需要手动使用 `useMemo` / `useCallback` / `React.memo` 避免不必要的重新渲染，容易遗漏或误用，导致冗余渲染或 bug。
-
-**建议**: 接入 React Compiler（原 React Forget），在构建时自动记忆组件和 Hook 的返回值，无需手动编写 memoization。
-- 项目已使用 React 19，兼容 React Compiler
-- UmiJS 4 中通过 `extraBabelPlugins` 或 `vite.extraBabelPlugins` 配置 Babel 插件
-- 接入后可以逐步移除手动 `useMemo` / `useCallback`，减少心智负担
-- 注意：首次接入可能需要对部分代码添加 `"use no memo"` 指令排除不兼容的组件
 
 ---
 
