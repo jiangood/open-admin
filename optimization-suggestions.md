@@ -165,27 +165,19 @@
 
 ### 4.22 `AesTool` 不支持密钥轮换 🟢 ⭐⭐
 
-**问题**: `AesTool` 的 `KEY_CAN_CHANGE` 标志位在第一次设置密钥后就不可更改。分布式部署中所有实例需要共享密钥，不支持密钥轮换。
-
-**建议**: 使用配置中心或 Vault 管理密钥，支持运行时动态刷新。
+**状态**: ⏭️ 跳过。当前自动生成+持久化到文件的方案在单机部署中够用，完整密钥轮换需要配置中心或 Vault，当前无此需求。
 
 ---
 
 ## 5. 后端 - JPA/数据层
 
-### 5.1 `ExpressionTool` 关联查询不支持动态 JOIN 类型 🔴 ⭐⭐⭐
+### 5.1 `ExpressionTool` 关联查询不支持动态 JOIN 类型 ✅ ⭐⭐⭐
 
-**问题**: `ExpressionTool.getPath()` 默认使用 `INNER JOIN`，对于可能为 null 的关联字段（如用户可能没有部门），INNER JOIN 会错误地过滤掉结果。
-
-**建议**: 
-- 支持在 Spec 中指定 JOIN 类型
-- 或对可为空的关联使用 `LEFT JOIN`（当前 `ExpressionTool` 没有参数可以传入 JoinType）
+**状态**: ✅ 已解决。`getPath()` 默认 JOIN 类型从 `INNER JOIN` 改为 `LEFT JOIN`，避免 INNER JOIN 过滤掉关联为 null 的记录（如用户无部门时整行丢失）。
 
 ### 5.2 `SpecImpl` 中 `@SuppressWarnings` 覆盖范围过大 🟡 ⭐
 
-**问题**: `@SuppressWarnings({"unchecked", "rawtypes"})` 标记在方法级别，可能隐藏了真正的问题。
-
-**建议**: 缩小到具体语句级别。
+**状态**: ⏭️ 跳过。方法内所有 unchecked 操作均为 JPA Criteria 标准模式，方法级 suppression 在此场景下合理且常见。
 
 ### 5.3 批量操作的事务边界 🟡 ⭐⭐
 

@@ -18,12 +18,12 @@ public class ExpressionTool {
         for (int i = 0; i < parts.length - 1; i++) {
             String joinProperty = parts[i];
 
-            // 如果当前路径是 Root，则执行 Join。默认使用 INNER JOIN。
+            // 如果当前路径是 Root，则执行 Join。使用 LEFT JOIN 避免过滤掉关联为 null 的记录。
             if (path instanceof Root) {
-                path = ((Root<?>) path).join(joinProperty, JoinType.INNER);
+                path = ((Root<?>) path).join(joinProperty, JoinType.LEFT);
             } else if (path instanceof Join) {
                 // 如果当前路径是 Join，则在其上继续 Join（对于多层关联）或 Get（对于嵌入对象）
-                path = ((Join<?, ?>) path).join(joinProperty, JoinType.INNER);
+                path = ((Join<?, ?>) path).join(joinProperty, JoinType.LEFT);
             } else {
                 // 对于嵌入式对象或其它 Path 类型，直接 Get
                 path = path.get(joinProperty);
