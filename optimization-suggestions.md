@@ -206,12 +206,6 @@ this.setState({menuTree: newMenuTree});
 ```
 props 永远不应被修改，需要扩展列时请先克隆。
 
-### 12.4 `ChangePassword.jsx` 缺少关键 import 🔴 ⭐
-
-**问题**: `pages/userCenter/ChangePassword.jsx:15` 调用 `SysUtils.setToken(null)` 但 `SysUtils` 从未被 import，运行时会抛出 `ReferenceError`，导致修改密码功能不可用。
-
-**建议**: 添加 `import { SysUtils } from "../../framework";` 或改用已 import 的其他工具方法。
-
 ### 12.6 XSS 风险：`dangerouslySetInnerHTML` 未做清理 🔴 ⭐⭐
 
 **问题**: `pages/userCenter/message.jsx:29` 使用 `dangerouslySetInnerHTML={{__html: content}}` 渲染消息内容，但没有做 HTML 清理。如果消息内容包含恶意脚本，会造成 XSS 攻击。
