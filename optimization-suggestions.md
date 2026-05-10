@@ -357,12 +357,6 @@ import DOMPurify from 'dompurify';
 
 ## 16. 文档与可维护性
 
-### 16.1 JavaDoc 缺失严重 🟢 ⭐⭐
-
-**问题**: 很多公共方法缺少 JavaDoc，特别是 `BaseRepository`、`Spec`、`ExpressionTool` 这些被外部项目引用的 API。
-
-**建议**: 为所有 `public` 和 `protected` 方法添加 JavaDoc，说明参数、返回值和异常。
-
 ### 16.2 缺少架构决策记录 (ADR) 🟢 ⭐
 
 **问题**: 一些重要的架构选择（如为什么选择 YAML 菜单定义、为什么用 UUIDv7 等）没有文档记录。
