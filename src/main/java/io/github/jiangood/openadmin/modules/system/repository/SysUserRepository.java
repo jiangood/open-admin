@@ -6,7 +6,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -25,7 +25,7 @@ public interface SysUserRepository extends BaseRepository<SysUser, String> {
 
     List<SysUser> findAllByRolesContains(SysRole role);
 
-    @EntityGraph(attributePaths = "roles")
+    @Query("select u from SysUser u left join fetch u.roles")
     Page<SysUser> findAllWithRoles(Specification<SysUser> spec, Pageable pageable);
 
 }

@@ -1,24 +1,13 @@
 spring:
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+  config:
+    import: classpath:application-lib.yml
   jpa:
-    hibernate.ddl-auto: create-drop
+    hibernate:
+      ddl-auto: create-drop
     show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-
-  jackson:
-    time-zone: GMT+8
-    date-format: yyyy-MM-dd HH:mm:ss
-    locale: zh_CN
-  data:
-    web:
-      pageable:
-        one-indexed-parameters: true
 
 springdoc:
   api-docs:
@@ -27,3 +16,13 @@ springdoc:
     path: /admin/
   paths-to-match:
     - /api/**
+
+sys:
+  file:
+    store-type: local
+    upload-path: /tmp/test-uploads
+    minio:
+      url: http://localhost:9000
+      access-key: test-access-key
+      secret-key: test-secret-key
+      bucket-name: test-bucket
