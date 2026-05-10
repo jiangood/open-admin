@@ -3,6 +3,8 @@ package io.github.jiangood.openadmin.util;
 import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.annotation.RemarkTool;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jakarta.persistence.RollbackException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -63,18 +65,17 @@ public class ExceptionToMessageTool {
 
             if (ex instanceof SQLIntegrityConstraintViolationException) {
                 if (msg.startsWith("Duplicate")) {
-                    String result = RegexTool.findMatch("\\'(.*?)\\'", msg, 1);
-                    if (StrUtil.isNotBlank(result)) {
-                        return "操作失败，数据重复：" + result;
+                    Matcher m = Pattern.compile("'(.*?)'").matcher(msg);
+                    if (m.find() && StrUtil.isNotBlank(m.group(1))) {
+                        return "操作失败，数据重复：" + m.group(1);
                     }
                 }
 
                 {
                     // Column 'file_id' cannot be null
-                    String regex = "Column '(.*)' cannot be null";
-                    String fieldName = RegexTool.findMatch(regex, msg, 1);
-                    if (StrUtil.isNotEmpty(fieldName)) {
-                        return "字段" + fieldName + "不能为空";
+                    Matcher m = Pattern.compile("Column '(.*)' cannot be null").matcher(msg);
+                    if (m.find() && StrUtil.isNotEmpty(m.group(1))) {
+                        return "字段" + m.group(1) + "不能为空";
                     }
                 }
 

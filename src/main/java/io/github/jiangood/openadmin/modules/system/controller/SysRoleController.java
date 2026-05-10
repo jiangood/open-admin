@@ -6,7 +6,6 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropdownReq;
 import io.github.jiangood.openadmin.util.dto.Option;
-import io.github.jiangood.openadmin.util.CollectionTool;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -108,7 +107,7 @@ public class SysRoleController {
             if (CollUtil.isNotEmpty(menuDefinition.getPermCodes())) {
                 Set<String> menuPerms = new HashSet<>(menuDefinition.getPermCodes());
 
-                List<String> ownMenuPerms = CollectionTool.findExistingElements(rolePerms, menuPerms);
+                List<String> ownMenuPerms = menuPerms.stream().filter(rolePerms::contains).toList();
                 permsMap.put(menuDefinition.getId(), ownMenuPerms);
             }
         }

@@ -29,18 +29,6 @@
 
 ## 1. 后端 - 架构设计
 
-### 1.10 缺少统一的分页请求/响应封装 🟢 ⭐⭐
-
-**问题**: 每个 Controller 手动从 `Pageable` 提取参数，前端手动拼接页码参数。缺少统一的 `PageRequest` 和 `PageResponse` 泛型类。
-
-**建议**: 定义 `PageRequest<T>` 接收查询条件和分页参数，`PageResponse<T>` 统一返回格式，减少重复代码。
-
-### 1.11 工具类过多且分散 🟢 ⭐⭐
-
-**问题**: `util/` 包下有 40+ 工具类（`StringTool`、`ArrayTool`、`ListTool`、`MathTool`、`NumberTool`、`DecimalTool` 等），很多方法与 Hutool 或 Spring 重复。
-
-**建议**: 审视每个工具类，移除与 Hutool/Spring 完全重复的方法，只保留有业务特殊逻辑的（如 `PasswordTool`、`ExcelTool`）。减少维护成本。
-
 ### 1.12 无优雅关闭/重启机制 🟢 ⭐⭐
 
 **问题**: 应用关闭时，Quartz 任务、虚拟线程池等没有明确的关闭顺序，可能导致正在执行的任务被中断。
