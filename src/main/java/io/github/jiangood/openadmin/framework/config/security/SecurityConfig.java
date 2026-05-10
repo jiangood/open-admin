@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,6 +40,7 @@ public class SecurityConfig {
 
 
     private final SystemProperties systemProperties;
+    private final Environment environment;
 
     private final PermissionRefreshFilter permissionRefreshFilter;
     private final SecurityHolder securityHolder;
@@ -159,20 +161,31 @@ public class SecurityConfig {
     public CorsConfigurationSource apiCorsSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // 允许的源：正式环境建议指定域名，如 "https://www.yourdomain.com"
-        config.setAllowedOriginPatterns(List.of("*"));
-
         // 允许的 HTTP 方法
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
         // 允许的 Header
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
 
-        // 是否允许发送 Cookie
-        config.setAllowCredentials(true);
-
         // 预检请求（OPTIONS）的缓存时间（秒），避免频繁发送预检
         config.setMaxAge(3600L);
+
+        boolean isProd = environment.matchesProfiles("prod");
+        if (isProd) {
+            // 生产环境：必须指定具体域名，禁止通配符
+            List<String> allowedOrigins = systemProperties.getAllowedOrigins();
+            if (CollUtil.isEmpty(allowedOrigins)) {
+                log.warn("生产环境请配置 sys.allowed-origins，当前允许所有来源（不安全）");
+                config.setAllowedOriginPatterns(List.of("*"));
+            } else {
+                config.setAllowedOriginPatterns(allowedOrigins);
+            }
+            config.setAllowCredentials(false);
+        } else {
+            // 非生产环境：允许通配符，方便开发
+            config.setAllowedOriginPatterns(List.of("*"));
+            config.setAllowCredentials(true);
+        }
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);

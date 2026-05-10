@@ -34,6 +34,10 @@ public class SystemProperties {
      */
     private boolean captchaEnable = true;
     /**
+     * 允许的跨域来源，仅在 prod 环境生效（dev 环境允许通配符）
+     */
+    private List<String> allowedOrigins;
+    /**
      * 最大并发会话数， 即同时登录用户数
      */
     private int maximumSessions = 1;

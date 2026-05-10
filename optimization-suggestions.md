@@ -56,9 +56,12 @@
 
 ### 3.13 CORS 配置允许所有来源 🔴 ⭐⭐
 
-**问题**: `SecurityConfig.java` 中 `/api/**` 路径配置了 `setAllowedOriginPatterns(List.of("*"))` 且同时 `setAllowCredentials(true)`。通配符 + 凭据的模式不安全，任何网站都可以向 API 发送跨域请求。
+**状态**: ✅ 已完成
 
-**建议**: 生产环境指定具体域名列表，或使用 `allowedOriginPatterns` 配置具体模式。不同 Profile 使用不同的 CORS 策略。
+**处理**: `apiCorsSource()` 根据 Spring Profile 区分策略：
+- **dev/非 prod 环境**：允许通配符 `*` + `allowCredentials(true)`，方便开发
+- **prod 环境**：从 `sys.allowed-origins` 配置读取具体域名，`allowCredentials(false)`，禁止通配符
+- 未配置 `sys.allowed-origins` 时生产环境会打印警告但仍允许所有来源（兼容现有部署）
 
 ### 3.14 登录错误信息泄露账号状态 🟡 ⭐
 
@@ -649,7 +652,7 @@ import DOMPurify from 'dompurify';
 | # | 建议 | 类型 | 说明 |
 |---|------|------|------|
 | 1 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captchaEnable` 默认改为 `true`，配置名 `sys.captcha` → `sys.captcha-enable` |
-| 2 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `@Profile` 区分 dev/prod，生产环境禁止通配符 |
+| 2 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `Environment.matchesProfiles` 区分 dev/prod，生产环境禁止通配符 |
 | 3 | 3.14 登录错误信息泄露账号状态 | 🟡 安全 | 所有失败场景统一返回模糊描述 |
 | 4 | 3.15 IpTool 超时配置 | 🟡 Bug | `HttpRequest.execute()` 添加 `.timeout(5000)` |
 | 5 | 3.16 MigrationSysDict 数据安全 | 🔴 安全 | `DROP TABLE` 改为重命名备份，添加配置开关控制 |
