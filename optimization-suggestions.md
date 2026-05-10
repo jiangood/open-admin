@@ -155,17 +155,13 @@
 
 **状态**: ✅ 已解决。`ConcurrentHashMap` 替换为 Caffeine `Cache` 并设置 10 分钟 `expireAfterWrite`，标记过期后自动清理，无需手动维护。
 
-### 4.20 服务方法声明不匹配的异常 🟢 ⭐
+### 4.20 服务方法声明不匹配的异常 ✅ ⭐
 
-**问题**: `SysUserService.save()` 声明 `throws SQLException` 但方法体内从未抛出 SQLException，调用方的错误处理可能不准确。
+**状态**: ✅ 已解决。`SysUserService.getAll()` 移除 `throws SQLException` 声明（方法内为 JPA 操作，不抛出受检异常）。`save()` 的 `throws Exception` 此前已移除。
 
-**建议**: 移除不匹配的异常声明，或使用 `@Transactional` 声明式事务替代 checked exception。
+### 4.21 `BaseConverter` JSON 转换失败返回 null ✅ ⭐
 
-### 4.21 `BaseConverter` JSON 转换失败返回 null 🟢 ⭐
-
-**问题**: `BaseConverter` 在 JSON 解析失败时返回 null（已记录 `log.error`，并非静默），可能导致后续 NPE。
-
-**建议**: 返回空默认对象（如空列表/空字符串）替代 null。
+**状态**: ✅ 已解决。`ToMapConverter` 和 `ToMapStringObjectConverter` 覆写 `convertToEntityAttribute`，JSON 解析失败时返回 `Collections.emptyMap()` 替代 null，避免下游 NPE。`BaseConverter` 基类保持泛型中立。
 
 ### 4.22 `AesTool` 不支持密钥轮换 🟢 ⭐⭐
 

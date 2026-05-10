@@ -32,7 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.sql.SQLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -99,7 +98,7 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
 
-    public Page<UserVO> getAll(String orgId, String roleId, String searchText, Pageable pageable) throws SQLException {
+    public Page<UserVO> getAll(String orgId, String roleId, String searchText, Pageable pageable) {
         Spec<SysUser> query = Spec.of();
 
         if (StrUtil.isNotEmpty(orgId)) {
