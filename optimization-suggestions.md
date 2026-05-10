@@ -190,15 +190,21 @@
 
 ### 9.5 `guava` 引入但可能只用 `CaseFormat` 🟢 ⭐
 
-**问题**: Guava 在工具类 `StringTool` 中用于驼峰转换，这个功能 Hutool 也有。
+**状态**: ✅ 已完成 — 无需修改
 
-**建议**: 评估是否可以用 Hutool 替代 Guava，减少依赖数量。
+**处理**: Guava 的实际使用远超 CaseFormat：
+- `StringTool.java` — `CaseFormat`（驼峰转换）
+- `IpTool.java` — `Cache`/`CacheBuilder`（IP 缓存）
+- `SysDictService.java` — `LinkedListMultimap`
+- `DataPropertiesFactory.java` — `LinkedHashMultimap`/`Multimap`
+- `GoogleTool.java` — 通用集合工具
+保留该依赖。
 
 ### 9.6 `hutool-captcha` 与 `filters` 功能重叠 🟢 ⭐
 
-**问题**: 验证码既有 Hutool 的 `hutool-captcha`，又有 `com.jhlabs:filters` 做图像处理。
+**状态**: ✅ 已完成
 
-**建议**: 统一验证码依赖，减少 jar 体积。
+**处理**: `com.jhlabs:filters:2.0.235-1` 在代码中无任何引用，已移除。验证码生成已迁移至自定义 `CaptchaTool`（纯 Java 2D AWT 实现），支持渐变背景、字符旋转、彩色噪点/干扰线，不再依赖 hutool-captcha 的画图模块。
 
 ---
 

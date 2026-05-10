@@ -47,7 +47,6 @@ public class SysCommonController {
     public AjaxResult siteInfo() {
         Dict data = new Dict();
         data.put("captcha", systemProperties.isCaptcha());
-        data.put("captchaType", systemProperties.getCaptchaType());
         data.put("copyright", systemProperties.getCopyright());
         data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
         data.put("showLogo", systemProperties.isShowLogo());

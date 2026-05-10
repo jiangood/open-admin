@@ -1,12 +1,12 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.captcha.generator.CodeGenerator;
-import cn.hutool.captcha.generator.MathGenerator;
-import cn.hutool.captcha.generator.RandomGenerator;
+import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
+import io.github.jiangood.openadmin.util.RandomCodeGenerator;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeysArgumentResolver;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -95,18 +95,8 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
      * 验证码生成器
      */
     @Bean
-    public CodeGenerator getCodeGenerator() {
-        SystemProperties.CaptchaType captchaType = systemProperties.getCaptchaType();
-        if (captchaType != null) {
-            switch (captchaType) {
-                case MATH -> {
-                    return new MathGenerator(2);
-                }
-                case RANDOM -> {
-                    return new RandomGenerator(4);
-                }
-            }
-        }
-        return new RandomGenerator(4);
+    @ConditionalOnMissingBean(CaptchaCodeGenerator.class)
+    public CaptchaCodeGenerator getCodeGenerator() {
+        return new RandomCodeGenerator(4);
     }
 }

@@ -34,10 +34,6 @@ public class SystemProperties {
      */
     private boolean captcha = false;
     /**
-     * 验证码类型
-     */
-    private CaptchaType captchaType;
-    /**
      * 最大并发会话数， 即同时登录用户数
      */
     private int maximumSessions = 1;
@@ -148,10 +144,6 @@ public class SystemProperties {
             url = RequestTool.getBaseUrl(RequestTool.currentRequest());
         }
         return url;
-    }
-
-    public enum CaptchaType {
-        MATH, RANDOM
     }
 
 }

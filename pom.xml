@@ -102,12 +102,6 @@
         </dependency>
 
         <!--验证码-->
-        <!-- 图像处理滤镜 -->
-        <dependency>
-            <groupId>com.jhlabs</groupId>
-            <artifactId>filters</artifactId>
-            <version>2.0.235-1</version>
-        </dependency>
 
 
         <dependency>
@@ -167,11 +161,6 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-http</artifactId>
-            <version>${hutool.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-captcha</artifactId>
             <version>${hutool.version}</version>
         </dependency>
         <dependency>

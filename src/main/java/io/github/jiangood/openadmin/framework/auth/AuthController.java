@@ -1,8 +1,6 @@
 package io.github.jiangood.openadmin.framework.auth;
 
-import cn.hutool.captcha.CaptchaUtil;
-import cn.hutool.captcha.ICaptcha;
-import cn.hutool.captcha.generator.CodeGenerator;
+import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
@@ -39,7 +37,7 @@ public class AuthController {
 
     public static final String CAPTCHA_CODE = "captchaCode";
 
-    private final CodeGenerator codeGenerator;
+    private final CaptchaCodeGenerator captchaCodeGenerator;
     private final SecurityHolder securityHolder;
     private final LoginAttemptService loginAttemptService;
     private final SystemProperties systemProperties;
@@ -100,7 +98,7 @@ public class AuthController {
     private void checkCaptchaCode(String captchaCode, String sessionCode) {
         if (systemProperties.isCaptcha()) {
             Assert.hasText(captchaCode, "请输入验证码");
-            boolean verify = codeGenerator.verify(sessionCode, captchaCode);
+            boolean verify = captchaCodeGenerator.verify(sessionCode, captchaCode);
             Assert.state(verify, "验证码错误");
         }
     }
@@ -134,17 +132,16 @@ public class AuthController {
     public void captcha(HttpSession session, HttpServletResponse response) throws IOException {
         log.info("正在生成验证码, sessionId={}", session.getId());
         try {
-            ICaptcha captcha = CaptchaUtil.createLineCaptcha(100, 50, codeGenerator, 100);
+            var captcha = captchaCodeGenerator.createImage(100, 50);
 
-            String code = captcha.getCode();
-            session.setAttribute(CAPTCHA_CODE, code);
+            session.setAttribute(CAPTCHA_CODE, captcha.code());
 
             response.setContentType("image/png");
             response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
             captcha.write(response.getOutputStream());
             response.getOutputStream().flush();
         } catch (Exception e) {
-            log.error("生成验证码失败，将验证码参数设置为禁用");
+            log.error("生成验证码失败", e);
         }
     }
 }
