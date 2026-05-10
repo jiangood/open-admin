@@ -321,20 +321,6 @@ import DOMPurify from 'dompurify';
 ---
 
 
-### 15.5 缺少 Dockerfile 🟡 ⭐⭐
-
-**问题**: 项目没有提供 Dockerfile 和 docker-compose.yml，不利于部署。
-
-**建议**: 提供：
-- `Dockerfile`（多阶段构建，分离构建和运行环境）
-- `docker-compose.yml`（包含 MySQL、Redis、应用）
-
-### 15.6 Maven `revision` 占位符在 IDE 中不友好 🟢 ⭐
-
-**问题**: `pom.xml` 使用 `${revision}` 做版本号，IDE 中运行时可能解析失败。
-
-**建议**: 提供默认值：`<version>${revision}</version>` 改为本地开发时可以直接运行的版本号，发布时用 `-Drevision` 覆盖。
-
 ### 15.8 缺少 Prettier / ESLint 配置 🟢 ⭐
 
 **问题**: 前端项目没有统一的 ESLint 和 Prettier 配置。
@@ -354,14 +340,6 @@ import DOMPurify from 'dompurify';
 **建议**: 在 pom.xml 中集成 `spotless-maven-plugin` 或 `checkstyle-plugin`。
 
 ---
-
-## 16. 文档与可维护性
-
-### 16.3 API 文档不完整 🟢 ⭐⭐
-
-**问题**: 虽然集成了 Springdoc OpenAPI，但 Controller 和 DTO 上缺少 `@Schema` 注释。
-
-**建议**: 为所有公开接口添加完整的 OpenAPI 注释，包括请求参数说明、响应示例。
 
 
 
