@@ -29,42 +29,6 @@
 
 ## 1. 后端 - 架构设计
 
-### 1.4 `SecurityHolder` 设计不合理 🟡 ⭐
-
-**问题**: `SecurityHolder` 使用 `HashMap` 存共享对象，但 `setter` 是 public 且没有并发控制。任何地方都可以覆盖其他类设置的对象。
-
-**建议**: 改为 `ConcurrentHashMap`，或改用 Spring 的 `ObjectProvider` + 泛型注入。或者直接移除——当前没有任何地方调用 `setSharedObject`。
-
-### 1.5 菜单数据源混合模式不够清晰 🟡 ⭐⭐
-
-**问题**: YAML 定义和数据库存储两种菜单模式并存，由 `SysMenuRepositoryYamlImpl` 实现，但没有明确的切换策略。
-
-**建议**: 定义清晰的策略接口：`MenuRepository` 接口区分 `YamlMenuRepository` 和 `DatabaseMenuRepository`，通过配置切换，而不是在代码中混用。
-
-### 1.6 `@HasPermission` 缺少缓存 🟡 ⭐⭐
-
-**问题**: `PermissionAspect` 每次调用 `@HasPermission` 都遍历用户的 `GrantedAuthority` 列表。对于频繁调用的 API 来说，做了大量重复的 `stream.anyMatch`。
-
-**建议**: 在 `LoginUser` 中缓存权限的 `Set<String>`，用 `HashSet.contains()` O(1) 替代流遍历。
-
-### 1.7 无 API 版本控制 🟡 ⭐⭐
-
-**问题**: 所有接口都以 `/api/` 开头，但没有版本号。未来接口变更会导致破坏现有客户端。
-
-**建议**: 引入 URL 路径版本或 Header 版本策略：`/api/v1/xxx`。Spring 可通过 `RequestMappingHandlerMapping` 的自定义条件实现。
-
-### 1.8 缺少异步事件机制 🟡 ⭐⭐
-
-**问题**: 操作日志、通知等场景用的是同步调用（`LogAspect` 中 `logService.saveOperationLog()` 是同步的），可能阻塞主请求。
-
-**建议**: 引入 `ApplicationEventPublisher` + `@Async` 处理非核心操作（日志、通知、统计），减少请求延迟。
-
-### 1.9 `FileOperator` 策略模式可扩展性不足 🟢 ⭐
-
-**问题**: `FileConfig` 硬编码了 `LocalFileOperator` / `MinioFileOperator` 二选一，新增存储后端需要改配置类。
-
-**建议**: 用 `Map<String, FileOperator>` 注入，通过配置的 `file.store-type=local|minio|oss` 动态选择。
-
 ### 1.10 缺少统一的分页请求/响应封装 🟢 ⭐⭐
 
 **问题**: 每个 Controller 手动从 `Pageable` 提取参数，前端手动拼接页码参数。缺少统一的 `PageRequest` 和 `PageResponse` 泛型类。

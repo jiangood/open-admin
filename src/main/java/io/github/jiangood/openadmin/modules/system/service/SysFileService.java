@@ -171,7 +171,7 @@ public class SysFileService {
         }
 
         Assert.hasText(suffix, "解析后缀失败");
-        Assert.state(systemProperties.getAllowUploadFiles().contains(suffix), "文件格式" + suffix + "不允许上传");
+        Assert.state(systemProperties.getFile().getAllowUpload().contains(suffix), "文件格式" + suffix + "不允许上传");
 
         String id = IdTool.uuidV7();
 
