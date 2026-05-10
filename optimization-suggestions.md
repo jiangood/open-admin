@@ -185,38 +185,23 @@
 
 ### 5.4 `@GenerateUuidV7` 在不同数据库上的兼容性 🟢 ⭐⭐
 
-**问题**: UUIDv7 生成器依赖 Java 代码实现，但如果未来迁移到非 JPA 的数据源（如 MongoDB），ID 生成策略需要调整。
-
-**建议**: 将 ID 生成策略抽象为接口，允许按数据源切换。
+**状态**: ⏭️ 跳过。当前 Hibernate `@IdGeneratorType` 方案在 MySQL 上工作正常，非 JPA 数据源迁移为远期需求。
 
 ### 5.5 查询方法过多 🟢 ⭐⭐
 
-**问题**: `BaseRepository` 中定义了大量查询方法（`findByField` 有 3 个重载、`findAllByField` 有 2 个重载），大部分可以用 `Spec` / `Example` 替代。
-
-**建议**: 只保留最通用的方法，特殊查询由各 Repository 自行定义。
+**状态**: ⏭️ 跳过。`findByField`/`findAllByField` 重载为便捷方法，与 `Spec` 并存，无实际维护负担。
 
 ### 5.6 Auditing 字段配置 🟢 ⭐
 
 **状态**: ✅ 已实现。`BaseNoIdEntity`（`BaseEntity` 的父类）包含 `@CreatedBy createUser`、`@LastModifiedBy updateUser` 完整审计字段，`DbConfig` 已启用 `@EnableJpaAuditing` + `AuditorAwareImpl`。
 
-### 5.7 `PreDdlDataSourceScriptDatabaseInitializer` 名称不清晰 🟢 ⭐
+### 5.7 `PreDdlDataSourceScriptDatabaseInitializer` 名称不清晰 ✅ ⭐
 
-**问题**: 这个内部类名 `PreDdlDataSourceScriptDatabaseInitializer` 过长且表意不直接，同时它其实是空的初始化器（`super(dataSource, null)`）。
+**状态**: ✅ 已解决。添加类注释说明它实际执行生命周期钩子而非 SQL 脚本，不重命名以避免影响外部引用。
 
-**建议**: 改名或添加注释说明它的实际作用。
+### 5.8 JPA 默认配置生产环境风险 ✅ ⭐⭐
 
-### 5.8 JPA 默认配置生产环境风险 🟡 ⭐⭐
-
-**问题**: 框架默认配置 `spring.jpa.show-sql: true` 在生产环境会泄露 SQL 语句。`jpa.generate-ddl: true` 在非嵌入式数据库（如 MySQL）上默认不会执行 `create-drop`（Spring Boot 自动配置仅对 H2 等嵌入式数据库启用），不存在数据丢失风险。
-
-**建议**: 使用 profile 隔离：
-```yaml
-# application-dev.yml
-spring.jpa.show-sql: true
-spring.jpa.hibernate.ddl-auto: update
-# application-prod.yml  
-spring.jpa.hibernate.ddl-auto: validate
-```
+**状态**: ✅ 已解决。`show-sql` 已默认关闭（4.16）。`ddl-auto` 建议由业务项目通过 profile 隔离自行配置（框架为通用库，不适合预设 profile）。
 
 **严重程度修正**: 原标 🔴 偏高（MySQL 无 create-drop 风险），应为 🟡 中等。
 
