@@ -365,12 +365,6 @@ import DOMPurify from 'dompurify';
 
 **建议**: 提供默认值：`<version>${revision}</version>` 改为本地开发时可以直接运行的版本号，发布时用 `-Drevision` 覆盖。
 
-### 15.7 pnpm workspace 未配置 🟢 ⭐
-
-**问题**: 已创建 `pnpm-workspace.yaml` 但 `web/package.json` 中没有找到 workspace 的使用。
-
-**建议**: 如果计划做 monorepo，需要调整 `web/package.json` 使用 `"@jiangood/open-admin": "workspace:*"`。
-
 ### 15.8 缺少 Prettier / ESLint 配置 🟢 ⭐
 
 **问题**: 前端项目没有统一的 ESLint 和 Prettier 配置。
