@@ -44,9 +44,9 @@
 
 ### 3.11 验证码默认关闭 🔴 ⭐
 
-**问题**: `application.yml` 中 `sys.captcha: false` 默认关闭了验证码。用户登录接口直接暴露在暴力破解风险下。
+**状态**: ✅ 已完成
 
-**建议**: 生产环境中强制开启验证码。或至少增加基于 IP 的智能验证码触发机制。
+**处理**: `SystemProperties.captcha` 默认值从 `false` 改为 `true`，所有新项目默认开启验证码。业务项目可在 `application.yml` 中设 `sys.captcha: false` 关闭。
 
 ### 3.12 数据库密码和默认管理员密码硬编码 🟡 ⭐
 
