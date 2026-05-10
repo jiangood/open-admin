@@ -50,8 +50,18 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/admin/**", "/ureport/**")
-                .headers(cfg -> cfg.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))   // iframe 允许同域名下访问， 如嵌入ureport报表
-                .csrf(AbstractHttpConfigurer::disable) // 前后端分离项目，关闭csrf
+                .headers(cfg -> cfg
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                                "style-src 'self' 'unsafe-inline'; " +
+                                "img-src 'self' data: blob:; " +
+                                "font-src 'self' data:; " +
+                                "connect-src 'self' ws:"
+                        ))
+                )   // X-Content-Type-Options/Cache-Control 由 Spring Security 自动添加
+                .csrf(AbstractHttpConfigurer::disable) // SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
@@ -109,7 +119,7 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/**") // 只感应 /api 开头的请求
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // API 网关使用 Token 认证，无需 CSRF
                 .cors(cors -> cors.configurationSource(apiCorsSource())) // 开启跨域
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // 演示放行，可按需修改

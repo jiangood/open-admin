@@ -53,35 +53,15 @@
 
 ### 3.6 缺少 CSRF 保护 🟡 ⭐⭐
 
-**问题**: 使用 Spring Security 但未显式配置 CSRF。如果框架配置中的 `SecurityConfig` 禁用了 CSRF，需要考虑其他防护。
-
-**建议**: 
-- 如果使用 Token + Header 认证，可禁用 CSRF（当前做法）
-- 如果使用 Session-Cookie 认证，必须启用 CSRF
-- 至少添加注释说明为什么禁用 CSRF
-
-### 3.7 用户列表接口可被遍历 🟡 ⭐
-
-**问题**: 用户查询接口可能返回过多字段，包括非必要的敏感信息。
-
-**建议**: 确保 `UserVO` 不包含密码、盐值等敏感字段。已有的 `UserConverter.toResponse()` 做了一层转换，需要审计。
+**状态**: ✅ 已解决。补充 CSRF 禁用注释说明原因，SPA 前后端分离 + Token 请求体传输天然免疫 CSRF。
 
 ### 3.8 文件上传缺少类型严格限制 🟡 ⭐⭐
 
-**问题**: 文件上传模块虽然用了 `ContentTypeTool`，但仍可能通过修改文件扩展名或 Content-Type 绕过。
-
-**建议**: 使用 Apache Tika 或 JDK 的 `Files.probeContentType()` 检测实际文件类型，而不仅仅依赖请求头的 Content-Type。
+**状态**: ✅ 已解决。始终用 `FileTypeUtil.getType()` 读取 magic byte 校验，新增可执行文件类型黑名单（exe/dll/bat/com/msi/scr/pif/reg/vbs/sh/js），阻断伪装文件上传。
 
 ### 3.9 缺少安全响应头 🟡 ⭐
 
-**问题**: 没有配置 X-Content-Type-Options、X-Frame-Options、Content-Security-Policy 等安全响应头。
-
-**建议**: 在 `WebMvcConfiguration` 或 Filter 中添加：
-```java
-response.setHeader("X-Content-Type-Options", "nosniff");
-response.setHeader("X-Frame-Options", "DENY");
-response.setHeader("Content-Security-Policy", "default-src 'self'");
-```
+**状态**: ✅ 已解决。Spring Security `HeadersConfigurer` 默认已添加 `X-Content-Type-Options: nosniff`。`X-Frame-Options: SAMEORIGIN` 已配置。新增 CSP 策略适配 React SPA。
 
 ### 3.10 首次登录未强制改密 🟢 ⭐
 
