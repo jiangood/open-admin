@@ -267,12 +267,6 @@ import DOMPurify from 'dompurify';
 
 **建议**: 添加 `.eslintrc.js` 和 `.prettierrc`，统一代码风格。
 
-### 15.9 `@umijs/types` 版本与 UmiJS 版本不匹配 🟡 ⭐
-
-**问题**: `web/package.json` 中 `@umijs/types` 声明为 `^3.5.43`，但项目使用 UmiJS 4.x。类型定义不匹配可能导致 IDE 类型推断错误。
-
-**建议**: 将 `@umijs/types` 更新为 `^4.0.0`，或移除该依赖（Umi 4 推荐直接使用 Umi 内置类型）。
-
 ### 15.10 缺少 Checkstyle / PMD 配置 🟢 ⭐
 
 **问题**: 后端没有代码风格检查工具。
