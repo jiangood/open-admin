@@ -44,6 +44,9 @@ logging:
     path: ./logs
   level:
     io.github.jiangood: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
 
 sys:
   reset-admin-pwd: happy.Today@520!

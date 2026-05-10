@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.util.JsonTool;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
@@ -38,6 +39,9 @@ public class AjaxResult {
     Object data;
 
     String message;
+
+    String traceId;
+
     /**
      * 动态字段，处理实体中不包含的字段
      * 例如状态字段 status, 转成json希望动态增加字段 statusLabel
@@ -54,6 +58,7 @@ public class AjaxResult {
     public AjaxResult(boolean success) {
         this.success = success;
         this.code = success ? SUCCESS : FAILURE;
+        this.traceId = MDC.get("traceId");
     }
 
     public static AjaxResult ok() {

@@ -31,41 +31,9 @@
 
 ## 2. 后端 - 性能优化
 
-### 2.3 `PermissionAspect` 重复认证 🟡 ⭐
-
-**问题**: `PermissionAspect` 每次调用都从 `SecurityContextHolder.getContext().getAuthentication()` 获取认证信息，但 Filter 链已经认证过了。
-
-**建议**: 在 `LoginUser` 中缓存权限集合，`hasPermission` 用 `Set.contains()` 判断。同时只在方法级别做权限检查，Filter 层不做重复检查。
-
-### 2.4 字符串拼接使用 StringBuilder 不够充分 🟢 ⭐
-
-**问题**: `GlobalExceptionHandler.methodArgumentNotValidException()` 和 `getArgNotValidMessage()` 使用 `StringBuilder`，但有些地方用了 `+` 拼接。
-
-**建议**: 审计所有日志和异常消息拼接，确保使用 `StrUtil.format()` 或 `StringBuilder`。
-
-### 2.5 `ObjectMapper` 频繁创建 🟡 ⭐
-
-**问题**: `JsonTool.convert()` 方法每次调用都 `new ObjectMapper()`，而静态字段 `om` 没有被复用。
-
-**建议**: `convert()` 也应该使用静态 `om` 实例（`om.convertValue()`），避免每次创建 ObjectMapper 的开销。
-
 ### 2.6 `LogAspect` 每次创建 ObjectMapper 🟡 ⭐
 
 **问题**: `LogAspect.toJson()` 是 `static` 方法，在首次调用时创建 `ObjectMapper`，但锁粒度不够——如果有并发请求导致 `writer == null` 判断同时通过，可能创建多个。
-
-**建议**: 在静态代码块或 `@PostConstruct` 中初始化，或使用 `AtomicReference` / `DCL` 双重检查。
-
-### 2.7 `ContentCachingRequestWrapper` 缓冲区固定 10KB 🟢 ⭐
-
-**问题**: `CachingJsonRequestBodyFilter` 中 `ContentCachingRequestWrapper(request, 10240)` 固定 10KB 缓冲区，大请求体可能丢失。
-
-**建议**: 使用 `-1` 不限制大小（使用默认的 `DefaultContentCachingRequestWrapper`），或通过配置动态设置。
-
-### 2.8 无请求级别的 MDC 链路追踪 🟡 ⭐⭐
-
-**问题**: 多请求并发时，日志混杂在一起，难以追踪单个请求的完整链路。
-
-**建议**: 在 Filter 中为每个请求设置 MDC（traceId -> UUID），日志 `pattern` 中添加 `[%X{traceId}]`。推荐引入 Spring Cloud Sleuth 或 Micrometer Tracing。
 
 ### 2.9 定时任务占用线程池未隔离 🟡 ⭐⭐
 
