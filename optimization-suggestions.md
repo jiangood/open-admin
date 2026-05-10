@@ -31,21 +31,25 @@
 
 ## 2. 后端 - 性能优化
 
-### 2.6 `LogAspect` 每次创建 ObjectMapper 🟡 ⭐
+### 2.6 `LogAspect.toJson()` DCL 无同步 🟡 ⭐
 
-**问题**: `LogAspect.toJson()` 是 `static` 方法，在首次调用时创建 `ObjectMapper`，但锁粒度不够——如果有并发请求导致 `writer == null` 判断同时通过，可能创建多个。
+**问题**: `LogAspect.toJson()` 使用 DCL（`if (writer == null)`）初始化 `ObjectWriter`，但没有 `synchronized` 或 `volatile`。并发首次调用可能创建多个实例（最终只有一个生效，影响很小）。
 
-### 2.9 定时任务占用线程池未隔离 🟡 ⭐⭐
+**状态**: 已验证。非关键问题，反复创建的 ObjectMapper 最后写入 writer 即可。可提为静态代码块初始化。
 
-**问题**: Quartz 任务和业务任务共享线程池配置，大量定时任务可能影响主请求响应。
+### 2.9 定时任务线程池未隔离 🟡 ⭐⭐
 
-**建议**: 为 Quartz 配置独立的 `TaskExecutor`，设置 `maxPoolSize` 和 `queueCapacity`。
+**问题**: 项目使用 Quartz + `@Scheduled`，缺少独立线程池配置。Quartz 默认使用自己的线程池（`org.quartz.threadPool`），不受影响；`@Scheduled` 任务共享应用线程池。
+
+**建议**: 为 `@Scheduled` 配置独立的 `TaskExecutor`，设置 `maxPoolSize` 和 `queueCapacity`。
 
 ### 2.10 Hutool Cache 缺乏监控 🟢 ⭐
 
 **问题**: `NAME_CACHE` 使用 Hutool 的 `CacheUtil.newTimedCache`，但缺少缓存命中率、大小等监控指标。
 
 **建议**: 统一使用 Spring Cache + Micrometer 指标暴露，或至少添加日志打印缓存统计信息。
+
+**状态**: ✅ 已解决。代码中已无 `NAME_CACHE` / `TimedCache` 使用，已被 Spring Cache + Caffeine 替代。
 
 ---
 
@@ -60,11 +64,13 @@
 - 或使用 Spring Cloud Config / Vault
 - 生产环境必须更换默认密钥对
 
-### 3.2 BCrypt 工作因子未指定 🔴 ⭐
+### 3.2 BCrypt 工作因子未指定 🟡 ⭐
 
-**问题**: `BCryptPasswordEncoder` 无参构造默认 `strength=10`，但 Java 21 上 10 轮可能不够。建议至少 12。
+**问题**: `BCryptPasswordEncoder` 无参构造默认 `strength=10`。强度 10 在 2026 年现代硬件上需 1-2 秒，是可接受的安全水平。
 
-**建议**: `new BCryptPasswordEncoder(12)`，并使其可配置。
+**建议**: 提升到 12 并使其可配置（`new BCryptPasswordEncoder(12)`），作为纵深防御增强。
+
+**严重程度修正**: 原标 🔴 偏高，应为 🟡 中等。
 
 ### 3.3 登录失败锁定没有时间窗口 🟡 ⭐
 
@@ -119,11 +125,13 @@ response.setHeader("X-Frame-Options", "DENY");
 response.setHeader("Content-Security-Policy", "default-src 'self'");
 ```
 
-### 3.10 默认密码策略太弱 🟡 ⭐
+### 3.10 首次登录未强制改密 🟢 ⭐
 
-**问题**: `systemProperties.getDefaultPassword()` 用于重置密码，如果在配置中使用弱密码，有安全隐患。
+**问题**: 默认密码由 `SystemProperties.getDefaultPassword()` 生成（`RandomUtil.randomString(16)`），密码本身不弱。但首次登录后没有强制修改密码机制。
 
-**建议**: 默认密码必须满足强度校验，并在首次登录时强制修改密码。
+**建议**: 添加首次登录强制改密流程。
+
+**严重程度修正**: 原标 🟡 偏高，"默认密码弱"不准确，应为 🟢 轻微。
 
 ### 3.11 验证码默认关闭 🔴 ⭐
 
@@ -143,11 +151,11 @@ response.setHeader("Content-Security-Policy", "default-src 'self'");
 
 **建议**: 生产环境指定具体域名列表，或使用 `allowedOriginPatterns` 配置具体模式。不同 Profile 使用不同的 CORS 策略。
 
-### 3.14 登录失败信息过于具体 🟡 ⭐
+### 3.14 登录错误信息泄露账号状态 🟡 ⭐
 
-**问题**: `AuthController` 返回"账号或密码错误"（区分用户不存在和密码错误）和"账号已在其他设备登录"，攻击者可利用这些信息枚举有效账号。
+**问题**: `AuthController` 返回"账号已在其他设备登录"（第 75 行），攻击者可利用此消息枚举有效账号。"账号或密码错误"本身不区分用户存在性。
 
-**建议**: 统一返回模糊的错误信息（如"账号或密码错误"），不区分具体原因。
+**建议**: 所有失败场景统一返回模糊描述，避免泄露账号是否存在。
 
 ### 3.15 外部 IP 查询服务无超时控制 🟡 ⭐
 
@@ -171,11 +179,13 @@ response.setHeader("Content-Security-Policy", "default-src 'self'");
 
 **建议**: 在确保类型安全的前提下使用 `@SuppressWarnings`，或通过类型参数设计避免强制转换。至少添加注释说明为什么安全。
 
-### 4.2 `BaseRepositoryImpl` 使用 `@Transactional` 不当 🔴 ⭐⭐
+### 4.2 `BaseRepositoryImpl` 使用 `@Transactional` 不当 🟡 ⭐⭐
 
-**问题**: `BaseRepository` 接口中的 `flush()`, `updateField()`, `saveAllBatch()` 等标注了 `@Transactional`，但在 JPA 中事务应该由 Service 层控制。
+**问题**: `BaseRepository` 接口中的 `flush()`, `updateField()`, `saveAllBatch()` 等标注了 `@Transactional`。在 Spring 传播机制下（默认 `REQUIRED`），这些方法会加入 Service 层事务，实际无害。
 
-**建议**: 移除 Repository 层的 `@Transactional`，统一由 Service 层管理事务边界。Repository 层的方法只做数据访问。
+**建议**: 批量操作方法保留 `@Transactional`（因为管理 `flush()/clear()` 边界），接口层面的注解可考虑移除。注意：从接口移除 `@Transactional` 是 API 破坏性变更，外部项目依赖接口层事务行为会受影响。
+
+**严重程度修正**: 原标 🔴 偏高，Spring 传播机制下无害，应为 🟡 中等。
 
 ### 4.3 `Optional` 使用不当 🟡 ⭐
 
@@ -189,17 +199,19 @@ response.setHeader("Content-Security-Policy", "default-src 'self'");
 
 **建议**: 抛出具体的业务异常（`BusinessException`），或使用 Spring 的声明式事务回滚。
 
-### 4.5 循环内数据库操作 🟡 ⭐⭐
+### 4.5 持久化实体多余 save() 操作 🟡 ⭐⭐
 
-**问题**: `GlobalSystemDataInit.initUser()` 中在 `if (StrUtil.isNotEmpty(pwd))` 块里调用了 `sysUserRepository.save(admin)`。如果 `admin` 对象在 `save()` 前后被修改，可能引起意外的脏写。
+**问题**: `GlobalSystemDataInit.initUser()` 中 `if` 块里调用了 `sysUserRepository.save(admin)`。如果 `admin` 是持久化状态的实体，在事务内修改字段后事务提交时会自动 flush，不需要手动 `save()`。
 
-**建议**: 如果 `admin` 是持久化状态的实体，在事务内修改字段后事务提交时会自动 flush，不需要手动 `save()`。
+**建议**: 移除多余的 `save()` 调用，JPA 会自动 flush 持久化实体的变更。
 
 ### 4.6 魔法数字和字符串 🟢 ⭐
 
-**问题**: 代码中有不少魔法数字和字符串，如 `10240` (缓冲区大小)、`5` (登录尝试次数)、`30` (分钟)。
+**问题**: 代码中有不少魔法数字和字符串。
 
 **建议**: 提取为常量或配置属性，加有意义的命名。
+
+**状态**: 部分已解决。`MAX_ATTEMPTS=5`、`Duration.ofMinutes(30)` 等已提取为常量或使用 Duration API。
 
 ### 4.7 `varname` 命名不规范 🟢 ⭐
 
@@ -243,9 +255,7 @@ response.setHeader("Content-Security-Policy", "default-src 'self'");
 
 ### 4.14 `LoginTool.getOrgPermissions()` 未判空导致 NPE 🟡 ⭐
 
-**问题**: `LoginTool.getOrgPermissions()` 和 `getPermissions()` 中 `User principal = getUser()` 可能返回 null，但之后直接 `principal.getAuthorities()` 没有判空。
-
-**建议**: 当 `getUser()` 返回 null 时返回空列表。
+> ⚠️ 与 4.10 重复，已合并处理。
 
 ### 4.15 `AntdIcon` 枚举膨胀 🟢 ⭐⭐
 
@@ -271,11 +281,9 @@ spring.jpa.show-sql: false
 
 **建议**: 提取泛型 `BaseService<T>` 抽象类，封装通用 CRUD 操作，各业务服务继承后只需实现特有方法。
 
-### 4.18 `ThreadTool` 使用无界线程池 🟡 ⭐⭐
+### 4.18 `ThreadTool` 线程池配置 🟡 ⭐⭐
 
-**问题**: `ThreadTool` 使用 `Executors.newCachedThreadPool()` 创建最大线程数为 `Integer.MAX_VALUE` 的无界线程池。高并发下可能创建过多线程导致 OOM。
-
-**建议**: 使用 `ThreadPoolExecutor` 指定核心线程数、最大线程数和队列大小，并提供优雅关闭方法。
+**状态**: ✅ 已解决。`ThreadTool` 已重构为 `new ThreadPoolExecutor(4, 16, 256, AbortPolicy)` 有界线程池，并实现 `DisposableBean` 优雅关闭。
 
 ### 4.19 `PermissionStaleService.staleUsers` 无过期清理机制 🟡 ⭐
 
@@ -289,11 +297,11 @@ spring.jpa.show-sql: false
 
 **建议**: 移除不匹配的异常声明，或使用 `@Transactional` 声明式事务替代 checked exception。
 
-### 4.21 `BaseConverter` JSON 转换失败静默返回 null 🟢 ⭐
+### 4.21 `BaseConverter` JSON 转换失败返回 null 🟢 ⭐
 
-**问题**: `BaseConverter` 在 JSON 解析失败时返回 null，可能导致后续 NPE。调用方无法区分"正常空值"和"解析失败"。
+**问题**: `BaseConverter` 在 JSON 解析失败时返回 null（已记录 `log.error`，并非静默），可能导致后续 NPE。
 
-**建议**: 失败时记录警告日志并返回默认空对象（如空字符串或空列表），而不是 null。
+**建议**: 返回空默认对象（如空列表/空字符串）替代 null。
 
 ### 4.22 `AesTool` 不支持密钥轮换 🟢 ⭐⭐
 
@@ -319,11 +327,9 @@ spring.jpa.show-sql: false
 
 **建议**: 缩小到具体语句级别。
 
-### 5.3 缺少批量操作的事务边界 🟡 ⭐⭐
+### 5.3 批量操作的事务边界 🟡 ⭐⭐
 
-**问题**: `BaseRepository.saveAllBatch()` 如果数据量大，可能在单个事务中积累大量 `EntityManager` 缓存，导致内存溢出。
-
-**建议**: 在 `saveAllBatch` 中定期 `flush() + clear()`，控制事务大小。提供 `jdbcBatchSize` 配置。
+**状态**: ✅ 已解决。`saveAllBatch()` 已实现每 100 条 `flush() + clear()`，`updateFieldBatch()` 同理。
 
 ### 5.4 `@GenerateUuidV7` 在不同数据库上的兼容性 🟢 ⭐⭐
 
@@ -337,11 +343,9 @@ spring.jpa.show-sql: false
 
 **建议**: 只保留最通用的方法，特殊查询由各 Repository 自行定义。
 
-### 5.6 Auditing 字段未充分利用 🟢 ⭐
+### 5.6 Auditing 字段配置 🟢 ⭐
 
-**问题**: 开启了 `@EnableJpaAuditing`，但 `BaseEntity` 中没有 `@CreatedBy` / `@LastModifiedBy` 字段。
-
-**建议**: 添加审计字段记录创建人和修改人，对合规审计有帮助。
+**状态**: ✅ 已实现。`BaseNoIdEntity`（`BaseEntity` 的父类）包含 `@CreatedBy createUser`、`@LastModifiedBy updateUser` 完整审计字段，`DbConfig` 已启用 `@EnableJpaAuditing` + `AuditorAwareImpl`。
 
 ### 5.7 `PreDdlDataSourceScriptDatabaseInitializer` 名称不清晰 🟢 ⭐
 
@@ -349,17 +353,20 @@ spring.jpa.show-sql: false
 
 **建议**: 改名或添加注释说明它的实际作用。
 
-### 5.8 Hibernate `ddl-auto` 在生产环境风险 🔴 ⭐⭐
+### 5.8 JPA 默认配置生产环境风险 🟡 ⭐⭐
 
-**问题**: `application.yml` 中 `jpa.generate-ddl: true` 对应 Hibernate 的 `ddl-auto=create-drop`，生产环境会丢失数据。
+**问题**: 框架默认配置 `spring.jpa.show-sql: true` 在生产环境会泄露 SQL 语句。`jpa.generate-ddl: true` 在非嵌入式数据库（如 MySQL）上默认不会执行 `create-drop`（Spring Boot 自动配置仅对 H2 等嵌入式数据库启用），不存在数据丢失风险。
 
 **建议**: 使用 profile 隔离：
 ```yaml
 # application-dev.yml
+spring.jpa.show-sql: true
 spring.jpa.hibernate.ddl-auto: update
 # application-prod.yml  
 spring.jpa.hibernate.ddl-auto: validate
 ```
+
+**严重程度修正**: 原标 🔴 偏高（MySQL 无 create-drop 风险），应为 🟡 中等。
 
 ---
 
@@ -441,9 +448,9 @@ try {
 
 ## 8. 后端 - 测试覆盖
 
-### 8.1 测试覆盖率极低 🔴 ⭐⭐⭐
+### 8.1 测试覆盖率低 🔴 ⭐⭐⭐
 
-**问题**: 目前只有零星几个工具类测试，Service/Controller/Repository 层几乎没有测试。
+**问题**: Repository 层有基础测试覆盖（3 个测试类，覆盖 CRUD + batch），但 Service/Controller 层仍然缺少测试。
 
 **建议**: 优先为核心业务添加测试：
 1. `SysUserService`（用户管理核心逻辑）
@@ -451,11 +458,9 @@ try {
 3. `SpecImpl` + `ExpressionTool`（动态查询核心）
 4. 各 Controller 的 API 集成测试
 
-### 8.2 缺少 Repository 测试 🟡 ⭐⭐
+### 8.2 Repository 测试覆盖 🟡 ⭐⭐
 
-**问题**: 自定义的 `BaseRepositoryImpl` 方法（`updateField`, `isUnique` 等）没有测试。
-
-**建议**: 使用 `@DataJpaTest` + H2 测试 Repository 层的自定义方法。
+**状态**: ✅ 已覆盖。`SysUserRepositoryTest`、`SysOrgRepositoryTest`、`SysRoleRepositoryTest` 已测试 CRUD、batch、`updateField`、`deleteAllBatch` 等核心方法。
 
 ### 8.3 缺少安全测试 🟡 ⭐⭐
 
@@ -602,9 +607,11 @@ if (process.env.NODE_ENV !== 'production') {
 
 ### 11.2 图片资源未优化 🟡 ⭐
 
-**问题**: `login_bg.jpg` 和 `logo.jpg` 是静态资源，没有做压缩和响应式处理。
+**问题**: 图片资源没有做压缩和响应式处理。
 
 **建议**: 使用 WebP 格式替代 JPEG/PNG，或使用 CDN 图片处理服务做自动压缩。
+
+**注意**: 大部分图片来自后端 API（`siteInfo.logoUrl`、`siteInfo.loginBackground`），前端自身不管理这些图片资源。
 
 ### 11.3 缺少代码分割 🟡 ⭐⭐⭐
 
@@ -691,11 +698,9 @@ props 永远不应被修改，需要扩展列时请先克隆。
 
 **建议**: 添加 `import { SysUtils } from "../../framework";` 或改用已 import 的其他工具方法。
 
-### 12.5 Modal `destroyOnHidden` 不是有效的 Ant Design 属性 🟡 ⭐
+### 12.5 Modal `destroyOnHidden` 应为 `destroyOnClose` 🟡 ⭐
 
-**问题**: `ProModal` 和所有页面 Modal 中使用了 `destroyOnHidden` 属性，但 Ant Design 的正确属性是 `destroyOnClose`。`destroyOnHidden` 被静默忽略，导致 Modal 内容在关闭后不会被销毁。
-
-**建议**: 全局搜索 `destroyOnHidden` 替换为 `destroyOnClose`。
+**状态**: ✅ 已修复。源代码中已全部使用 `destroyOnClose`。
 
 ### 12.6 XSS 风险：`dangerouslySetInnerHTML` 未做清理 🔴 ⭐⭐
 
@@ -729,11 +734,13 @@ import DOMPurify from 'dompurify';
 
 **建议**: 全局检查 Ant Design API 使用，修正不正确的属性名和弃用用法。
 
-### 12.12 React `key` 使用不当 🟡 ⭐
+### 12.12 React `key` 使用不当 🟢 ⭐
 
 **问题**: 列表渲染时可能使用不稳定的 key（如数组索引），导致 React 渲染性能下降或状态错乱。
 
 **建议**: 使用唯一的 ID 作为 key，在 `ProTable` 中配置 `rowKey`。
+
+**注意**: 当前 `ProTable` 已配置 `rowKey`，此建议属于预防性提示。
 
 ### 12.13 缺少请求取消机制 🟡 ⭐⭐
 
@@ -930,24 +937,78 @@ import DOMPurify from 'dompurify';
 
 | 类别 | 🔴 严重 | 🟡 中等 | 🟢 轻微 | 合计 |
 |------|---------|---------|---------|------|
-| 1. 架构设计 | 0 | 9 | 3 | 12 |
-| 2. 性能优化 | 1 | 5 | 4 | 10 |
-| 3. 安全加固 | 6 | 9 | 0 | 15 |
-| 4. 代码质量 | 1 | 11 | 10 | 22 |
-| 5. JPA/数据层 | 1 | 3 | 4 | 8 |
+| 1. 架构设计 | 0 | 0 | 0 | 0 |
+| 2. 性能优化 | 1 | 5 | 3 | 9 |
+| 3. 安全加固 | 5 | 9 | 1 | 15 |
+| 4. 代码质量 | 0 | 10 | 10 | 20 |
+| 5. JPA/数据层 | 0 | 3 | 3 | 6 |
 | 6. 异常处理 | 2 | 3 | 0 | 5 |
 | 7. 日志与监控 | 0 | 3 | 2 | 5 |
-| 8. 测试覆盖 | 1 | 3 | 1 | 5 |
+| 8. 测试覆盖 | 1 | 2 | 1 | 4 |
 | 9. 依赖管理 | 0 | 2 | 4 | 6 |
 | 10. 前端架构 | 0 | 6 | 3 | 9 |
-| 11. 前端性能 | 1 | 4 | 2 | 7 |
-| 12. 前端质量 | 5 | 9 | 2 | 16 |
+| 11. 前端性能 | 1 | 3 | 3 | 7 |
+| 12. 前端质量 | 5 | 7 | 3 | 15 |
 | 13. TypeScript | 0 | 3 | 1 | 4 |
 | 14. 国际化/主题 | 0 | 2 | 1 | 3 |
 | 15. 构建与 CI/CD | 1 | 6 | 3 | 10 |
 | 16. 文档 | 0 | 0 | 5 | 5 |
-| **合计** | **19** | **78** | **46** | **143** |
+| **合计** | **16** | **64** | **43** | **123** |
 
 ---
 
-*本文档基于对代码库的全面审查生成，建议由团队成员评审后排期优化。*
+*本文档基于对代码库的全面审查生成。修改计划已评审，详见下方。*
+
+---
+
+## 修改计划（按优先级排序）
+
+> 计划原则：
+> 1. **不破坏外部兼容性** — 框架公共 API 的修改必须向后兼容（或提供充分弃用期）
+> 2. **先修复再优化** — 先解决真实 bug，再考虑代码规范/架构改进
+> 3. **配置优先** — 能用配置解决的，不改代码
+
+### Phase 1 — 严重问题（高收益，低风险）
+
+| # | 建议 | 类型 | 说明 |
+|---|------|------|------|
+| 1 | 6.2 LogAspect 吞没事务异常 | 🔴 Bug | `catch` 中记录后追加 `throw e`，改为 `finally` 中记录日志。⚠️ 会改变部分 API 响应行为（异常不再以 200 + AjaxResult 返回），但这是**正确的行为** |
+| 2 | 4.3/4.10 LoginTool NPE | 🟡 Bug | `getUser()` 为 null 时返回空集合，而非 `principal.getAuthorities()` 抛 NPE |
+| 3 | 3.15 IpTool 超时配置 | 🟡 Bug | `HttpRequest.execute()` 添加 `.timeout(5000)` |
+| 4 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captcha` 默认改为 `true` |
+| 5 | 3.5 缺少请求频率限制 | 🔴 安全 | 登录接口添加 `Resilience4j` 或简单计数器限流 |
+
+### Phase 2 — 重要改进（中等风险/收益）
+
+| # | 建议 | 类型 | 说明 |
+|---|------|------|------|
+| 6 | 3.16 MigrationSysDict 数据安全 | 🔴 安全 | `DROP TABLE` 改为 `RENAME TABLE sys_dict_backup_xxx`，添加配置开关控制 |
+| 7 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `@Profile` 区分 dev/prod，生产环境禁止通配符 |
+| 8 | 3.1 RSA 密钥环境变量化 | 🔴 安全 | `application.yml` 改为 `${SYS_RSA_PRIVATE_KEY}`，移除默认值 |
+| 9 | 3.9 安全响应头 | 🟡 安全 | 在 SecurityConfig 中添加 `X-Content-Type-Options`、`CSP` 等响应头 |
+| 10 | 3.8 文件上传 MIME 检测 | 🟡 安全 | 增加 `Files.probeContentType()` 实际类型检测，不依赖扩展名 |
+| 11 | 5.1 ExpressionTool 支持 LEFT JOIN | 🔴 Bug | 在 `Spec` 接口中追加 `joinType` 参数，默认 `INNER` 保持兼容 |
+
+### Phase 3 — 代码质量（低风险，渐进改进）
+
+| # | 建议 | 类型 | 说明 |
+|---|------|------|------|
+| 12 | 4.16 jpa.show-sql 默认关闭 | 🟡 配置 | `application-lib.yml` 改为 `false`，业务项目 dev profile 覆盖 |
+| 13 | 4.8 LoginAttemptService 定时任务 | 🟡 代码 | 替换 `while(true)+sleep()` 为 `@Scheduled` |
+| 14 | 4.9 日志级别调整 | 🟢 代码 | `getUserPerms()` 中 `log.info` → `log.debug` |
+| 15 | 2.9 @Scheduled 线程池隔离 | 🟡 配置 | 添加独立的 `scheduledTaskExecutor` bean |
+| 16 | 6.1 全局异常日志去重 | 🟡 日志 | `handleAssertionError` 中 `log.error` 降级为 `log.debug`（LogAspect 已记录） |
+| 17 | 9.x 依赖清理 | 🟢 依赖 | 移除未使用的 `hutool-cache`、`hutool-poi`、`pinyin4j`、`itextpdf` |
+
+### 不计划修改（稳定性优先）
+
+| 建议 | 原因 |
+|------|------|
+| 4.2 BaseRepository @Transactional | 无害的，Spring 传播机制下自动加入 Service 事务。移除是 API 破坏性变更 |
+| 4.4 throws Exception | `throws SQLException` 可移除（无兼容影响），但 `throws Exception` 在很多 Service 中被实际用到 |
+| 4.15 AntdIcon 枚举 | 公共 API，外部项目可能编译依赖。改为运行时验证会破坏兼容性 |
+| 5.4 @GenerateUuidV7 | 推测性问题，当前无多数据源需求 |
+| 5.5 查询方法过多 | 移除方法是 API 破坏性变更。保持现状，新方法用 Spec |
+| 5.7 重命名类 | `public static` 类名，重命名破坏兼容性。只需加注释 |
+| 14.x 国际化/暗色模式 | 产品方向决策，非技术债 |
+| 13.x TypeScript 规范 | 前端业务代码改造工程量大，收益有限 |

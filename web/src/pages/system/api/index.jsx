@@ -203,7 +203,7 @@ export default class extends React.Component {
                    open={this.state.formOpen}
                    onOk={() => this.formRef.current.submit()}
                    onCancel={() => this.setState({formOpen: false})}
-                   destroyOnHidden
+                   destroyOnClose
                    mask={{closable:false}}
             >
 
@@ -242,7 +242,7 @@ export default class extends React.Component {
             </Modal>
 
 
-            <Modal title='权限列表' destroyOnHidden={true} width={800}
+            <Modal title='权限列表' destroyOnClose={true} width={800}
                    open={this.state.grantFormOpen}
                    onCancel={() => this.setState({grantFormOpen: false, formValues: null})}
                    onOk={this.onGrant}

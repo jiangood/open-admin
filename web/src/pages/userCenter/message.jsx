@@ -56,7 +56,7 @@ export default class extends React.Component {
     render() {
         return <Card variant={"borderless"}>
 
-            <Tabs defaultActiveKey="0" destroyOnHidden
+            <Tabs defaultActiveKey="0" destroyOnClose
             >
                 <Tabs.TabPane key='0' tab='所有消息'>
                     <ProTable

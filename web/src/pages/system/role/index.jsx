@@ -197,7 +197,7 @@ export default class extends React.Component {
                    open={this.state.formOpen}
                    onOk={() => this.formRef.current.submit()}
                    onCancel={() => this.setState({formOpen: false})}
-                   destroyOnHidden
+                   destroyOnClose
                    maskClosable={false}
                    width={600}
             >
@@ -238,7 +238,7 @@ export default class extends React.Component {
 
             <Modal title={'角色用户' + "【" + this.state.formValues?.name + '】'}
                    open={this.state.usersModalOpen}
-                   destroyOnHidden
+                   destroyOnClose
                    maskClosable={false}
                    width={800}
                    onCancel={() => this.setState({usersModalOpen: false})}
@@ -271,7 +271,7 @@ export default class extends React.Component {
 
             <Modal title={'角色授权菜单权限' + "【" + this.state.formValues?.name + '】'}
                    open={this.state.menuOpen}
-                   destroyOnHidden
+                   destroyOnClose
                    maskClosable={false}
                    width={800}
                    onCancel={() => this.setState({menuOpen: false})}
