@@ -36,20 +36,22 @@ import java.util.Date;
 public class LogAspect {
 
 
-    private static ObjectWriter writer;
+    private static final ObjectWriter writer;
+
+    static {
+        ObjectMapper om = new ObjectMapper();
+        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        writer = om.writerWithDefaultPrettyPrinter();
+    }
+
     @Resource
     SysLogService logService;
 
     // 主要是为了不保存空字段
     @SneakyThrows
     private static String toJson(Object obj) {
-        if (writer == null) {
-            ObjectMapper om = new ObjectMapper();
-            om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-            om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            writer = om.writerWithDefaultPrettyPrinter();
-        }
         if (obj == null) {
             return null;
         }
