@@ -101,6 +101,11 @@ public class SystemProperties {
      */
     private boolean printGlobalException = true;
 
+    /**
+     * 数据迁移时是否直接删除旧表（true=删除, false=重命名备份）
+     */
+    private boolean migrationDropOldTables = false;
+
     private String defaultPassword = RandomUtil.randomString(16);
 
     /**

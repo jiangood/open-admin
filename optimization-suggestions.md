@@ -81,9 +81,9 @@
 
 ### 3.16 `MigrationSysDict` 静默删除旧表 🔴 ⭐⭐
 
-**问题**: `MigrationSysDict` 在数据库初始化前直接 `DROP TABLE IF EXISTS sys_dict`，如果业务项目还引用了旧表，会导致静默数据丢失且不可恢复。
+**状态**: ✅ 已完成
 
-**建议**: 改为重命名表（如 `sys_dict_backup_xxx`）并在确认无影响后再清理；或提供配置开关控制是否执行删除。
+**处理**: 默认改为 `RENAME TABLE` 备份（带时间戳后缀 `sys_dict_bak_yyyyMMdd_HHmmss`），通过 `sys.migration-drop-old-tables: true` 可恢复直接删除行为（opt-in 破坏性操作）。
 
 ---
 
