@@ -29,28 +29,6 @@
 
 ## 1. 后端 - 架构设计
 
-### 1.1 引入缓存抽象层 🟡 ⭐⭐⭐ ✅
-
-**状态**: 已完成。
-
-**改动**:
-- `SysUserService.getNameById()` 改用 `@Cacheable(sync=true)`，移除 Hutool `NAME_CACHE`
-- `JpaService.findAllNames()` 改用 Spring `CacheManager` 程序化缓存，移除 Hutool `cache`
-- 引入 Caffeine 作为本地缓存后端，`application-lib.yml` 中配置 `initialCapacity=50,maximumSize=10000,expireAfterWrite=5m`
-- 移除 `WebMvcConfiguration` 中重复的 `@EnableCaching`
-
-### 1.2 用户权限缓存缺少失效机制 🟡 ⭐⭐
-
-**问题**: `SysUserService.getUserPerms()` 每次调用都查数据库，没有缓存。多系统交互时（如修改角色权限），其他登录用户的权限不会刷新。
-
-**建议**: 对 `getUserPerms()` 加缓存，同时在角色/菜单变更时通过 `PermissionRefreshFilter` 或事件机制广播缓存失效。参见 `PermissionRefreshFilter` 的现有逻辑。
-
-### 1.3 `JpaService` 类扫描性能差 🟡 ⭐⭐
-
-**问题**: `JpaService.findBySuperClass()` 使用 Spring 的 `PathMatchingResourcePatternResolver` 扫描所有类路径资源，在大型项目中启动慢。
-
-**建议**: 改用 Spring 的 `EntityManager.getMetamodel().getEntities()` 获取所有 JPA 实体，或通过 `@EntityScan` 的包路径直接推断。
-
 ### 1.4 `SecurityHolder` 设计不合理 🟡 ⭐
 
 **问题**: `SecurityHolder` 使用 `HashMap` 存共享对象，但 `setter` 是 public 且没有并发控制。任何地方都可以覆盖其他类设置的对象。
