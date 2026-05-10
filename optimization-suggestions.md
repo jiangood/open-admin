@@ -217,12 +217,6 @@ import DOMPurify from 'dompurify';
 <div dangerouslySetInnerHTML={{__html: DOMPurify.sanitize(content)}} />
 ```
 
-### 12.7 `NamedIcon` 对不存在的图标静默失败 🟡 ⭐
-
-**问题**: `NamedIcon/index.tsx` 在图标名称不存在时返回 `undefined`（渲染空白），没有 fallback 也没有警告，可能导致页面区域显示异常。
-
-**建议**: 添加 fallback 机制：找不到图标时显示默认图标或警告日志。
-
 ### 12.8 登录页面加载状态永久卡死 🔴 ⭐⭐
 
 **问题**: `pages/login.jsx` 中，如果 RSA 公钥缺失，方法执行 `return` 但不重置 `this.state.logging`，登录按钮永久处于禁用状态。
@@ -452,10 +446,9 @@ import DOMPurify from 'dompurify';
 |---|------|------|------|
 | 11 | 10.1 类组件迁移函数组件 | 🟡 ⭐⭐⭐ | 逐步迁移 Class Component 为 Function Component |
 | 12 | 10.2 全局错误边界 | � ⭐⭐ | 添加 ErrorBoundary 组件 |
-| 13 | 12.4 ChangePassword import 缺失 | � Bug | 添加缺失的 SysUtils import |
-| 14 | 12.6 XSS 风险 | � 安全 | 使用 DOMPurify 清理 HTML |
-| 15 | 12.8 登录页面加载状态卡死 | 🔴 Bug | 保证 loading 状态重置 |
-| 16 | 12.13 请求取消机制 | � ⭐⭐ | 使用 AbortController 取消未完成请求 |
+| 13 | 12.6 XSS 风险 |  安全 | 使用 DOMPurify 清理 HTML |
+| 14 | 12.8 登录页面加载状态卡死 | 🔴 Bug | 保证 loading 状态重置 |
+| 15 | 12.13 请求取消机制 |  ⭐⭐ | 使用 AbortController 取消未完成请求 |
 
 ### 不计划修改（稳定性优先）
 
