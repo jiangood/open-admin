@@ -62,4 +62,8 @@ export default defineConfig({
     ],
     // 代理配置
     proxy: proxyConfig,
+    // React Compiler 配置，在构建时自动记忆组件和 Hook 的返回值
+    extraBabelPlugins: [
+        ['babel-plugin-react-compiler', { target: { kind: 'donotuse_meta_internal', runtimeModule: 'react-compiler-runtime' } }],
+    ],
 });

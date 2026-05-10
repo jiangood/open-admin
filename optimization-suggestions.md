@@ -129,29 +129,6 @@
 
 **建议**: 逐步迁移为函数组件，用 `useState` / `useEffect` / `useCallback` 替代 `setState` 和生命周期方法。函数组件更易测试和复用。
 
-### 10.2 缺少全局错误边界 🟡 ⭐⭐
-
-**问题**: 没有 `ErrorBoundary` 组件包裹应用，一个组件的渲染错误可能导致整个白屏。
-
-**建议**: 添加 `ErrorBoundary` 组件包裹 Layout 和各个页面，错误时展示友好的降级 UI。
-
-### 10.3 控制台日志未移除 🟡 ⭐
-
-**问题**: `layouts/admin/index.jsx:36` 中 `console.log('Admin Layout didMount')` 留在生产代码中。
-
-**建议**: 使用自定义 Logger（已有 `Logger.ts`）或环境变量控制日志输出：
-```javascript
-if (process.env.NODE_ENV !== 'production') {
-    console.log(...);
-}
-```
-
-### 10.4 无 Loading 状态骨架屏 🟢 ⭐⭐
-
-**问题**: 页面加载时只显示 `Spin` 组件，用户体验不够好。
-
-**建议**: 使用 Ant Design 的 `Skeleton` 组件，在数据加载时显示与真实页面结构对应的骨架屏。
-
 ### 10.5 菜单加载逻辑在 Layout 中过重 🟡 ⭐⭐
 
 **问题**: `AdminLayout` 承担了菜单加载、侧边栏渲染、Badge 轮询、水印等多重职责。
@@ -205,18 +182,6 @@ if (process.env.NODE_ENV !== 'production') {
 **建议**: 使用 WebP 格式替代 JPEG/PNG，或使用 CDN 图片处理服务做自动压缩。
 
 **注意**: 大部分图片来自后端 API（`siteInfo.logoUrl`、`siteInfo.loginBackground`），前端自身不管理这些图片资源。
-
-### 11.3 缺少代码分割 🟡 ⭐⭐⭐
-
-**问题**: 所有页面同步加载，首次加载可能包含大量不需要的组件代码。
-
-**建议**: 使用 UmiJS 的 `lazy` / `dynamicImport` 做页面级别的代码分割：
-```javascript
-export default {
-    dynamicImport: {},
-};
-```
-UMI 配置中开启 `dynamicImport`。
 
 ### 11.4 大列表渲染未虚拟化 🟡 ⭐⭐
 

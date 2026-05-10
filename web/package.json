@@ -4,6 +4,7 @@
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.0.0",
     "@umijs/plugins": "^4.3.17",
+    "babel-plugin-react-compiler": "^1.0.0",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
@@ -38,5 +39,8 @@
     "dev": "umi dev",
     "build": "umi build"
   },
-  "version": "1.0.0-beta.5"
+  "version": "1.0.0-beta.5",
+  "dependencies": {
+    "react-compiler-runtime": "^1.0.0"
+  }
 }
