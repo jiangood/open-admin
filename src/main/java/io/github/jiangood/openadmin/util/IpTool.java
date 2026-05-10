@@ -60,7 +60,7 @@ public class IpTool {
         }
 
         try {
-            String location = _getLocation(ip);
+            String location = queryLocation(ip);
             if (location != null) {
                 IP_ADDRESS_CACHE.put(ip, location);
             }
@@ -71,7 +71,7 @@ public class IpTool {
         return null;
     }
 
-    private static String _getLocation(String ip) {
+    private static String queryLocation(String ip) {
         for (IpProvider provider : PROVIDERS) {
             try {
                 String location = provider.query(ip);
