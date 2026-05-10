@@ -76,7 +76,7 @@ public class IpTool {
         try {
             HttpRequest httpRequest = HttpRequest.get("cip.cc/" + ip).header("User-Agent", "curl/7.29.0");
 
-            String body = httpRequest.execute().body();
+            String body = httpRequest.timeout(5000).execute().body();
 
             List<String> arr = StrUtil.split(body, "\n");
 
