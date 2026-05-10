@@ -42,48 +42,11 @@
 
 **严重程度修正**: 原标 🟡 偏高，"默认密码弱"不准确，应为 🟢 轻微。
 
-### 3.11 验证码默认关闭 🔴 ⭐
-
-**状态**: ✅ 已完成
-
-**处理**: `SystemProperties.captchaEnable` 默认值从 `false` 改为 `true`，配置名从 `sys.captcha` 改为 `sys.captcha-enable`。所有新项目默认开启验证码，业务项目可在 `application.yml` 中设 `sys.captcha-enable: false` 关闭。
-
 ### 3.12 数据库密码和默认管理员密码硬编码 🟡 ⭐
 
 **问题**: `application.yml` 中 `db_password: 123456` 以及 `sys.reset-admin-pwd: happy.Today@520!` 是硬编码的默认值。
 
 **建议**: 使用环境变量注入，并在文档中明确要求用户修改默认密码。
-
-### 3.13 CORS 配置允许所有来源 🔴 ⭐⭐
-
-**状态**: ✅ 已完成
-
-**处理**: `apiCorsSource()` 根据 Spring Profile 区分策略：
-- **dev/非 prod 环境**：允许通配符 `*` + `allowCredentials(true)`，方便开发
-- **prod 环境**：从 `sys.allowed-origins` 配置读取具体域名，`allowCredentials(false)`，禁止通配符
-- 未配置 `sys.allowed-origins` 时生产环境会打印警告但仍允许所有来源（兼容现有部署）
-
-### 3.14 登录错误信息泄露账号状态 🟡 ⭐
-
-**状态**: ✅ 已完成
-
-**处理**: `SessionAuthenticationException` 的返回消息从"账号已在其他设备登录，本次登录被拒绝"改为统一的"账号或密码错误"，避免泄露账号是否存在。
-
-### 3.15 外部 IP 查询服务无超时控制 🟡 ⭐
-
-**状态**: ✅ 已完成
-
-**处理**: 重构为多 Provider 架构，按序重试：
-- **ip-api.com**（主，支持中文 JSON，45次/分钟免费）
-- **cip.cc**（原服务，降级为第一个 fallback）
-- **ipinfo.io**（第二 fallback，5万次/月免费）
-所有请求统一 5s 超时。
-
-### 3.16 `MigrationSysDict` 静默删除旧表 🔴 ⭐⭐
-
-**状态**: ✅ 已完成
-
-**处理**: 默认改为 `RENAME TABLE` 备份（带时间戳后缀 `sys_dict_bak_yyyyMMdd_HHmmss`），通过 `sys.migration-drop-old-tables: true` 可恢复直接删除行为（opt-in 破坏性操作）。
 
 ---
 
@@ -113,21 +76,7 @@
 
 ## 7. 后端 - 日志与监控
 
-### 7.2 缺少健康检查端点 🟢 ⭐
-
-**状态**: ⏭️ 跳过。后续需要 K8s 部署时可引入 actuator。
-
-### 7.3 缺少 API 性能监控 🟢 ⭐⭐
-
-**状态**: ⏭️ 跳过。当前无性能监控需求。
-
-### 7.4 MDC 没有被清理 🟡 ⭐
-
-**状态**: ⏭️ 跳过。当前未出现日志污染问题。
-
-### 7.5 日志配置分散 🟢 ⭐
-
-**状态**: ⏭️ 跳过。当前配置可满足使用。
+*所有建议已评估，当前无需处理。*
 
 ---
 
@@ -168,50 +117,7 @@
 
 ## 9. 后端 - 依赖管理
 
-### 9.1 Hutool 依赖过多 🟡 ⭐⭐
-
-**状态**: ✅ 已完成
-
-**处理**: 审计了 7 个 Hutool 子模块的代码使用情况：
-- **`hutool-cache`** → 已移除。无任何代码导入
-- **`hutool-poi`** → 已移除。无任何代码导入
-- **`hutool-http`** → 保留。IpTool/SysFileService/ResponseTool 使用中
-- **`hutool-captcha`** → 保留。AuthController/WebMvcConfiguration 使用中
-- **`hutool-crypto`** → 保留。RsaTool/AesTool/AuthController 使用中
-- **`hutool-extra`** → 保留。IpTool/IdTool/OpenApiController 使用中
-- **`hutool-core`** → 保留。基础模块，广泛使用
-
-### 9.2 引入 `commons-dbutils` 但可能未被使用 🟢 ⭐
-
-**状态**: ✅ 已完成 — 无需修改
-
-**处理**: `DbTool.java` 中使用了 `org.apache.commons.dbutils.QueryRunner`/`ResultSetHandler`，该依赖确实被使用，保留。
-
-### 9.3 `pinyin4j` 依赖老旧 🟢 ⭐
-
-**状态**: ✅ 已完成
-
-### 9.4 `itextpdf` 版本过旧 🟡 ⭐
-
-**状态**: ✅ 已完成 — 已移除。**处理**: 代码中无任何 itextpdf 导入（SwaggerToWordConverter 使用 Apache POI 生成 .docx），直接移除依赖。
-
-### 9.5 `guava` 引入但可能只用 `CaseFormat` 🟢 ⭐
-
-**状态**: ✅ 已完成 — 无需修改
-
-**处理**: Guava 的实际使用远超 CaseFormat：
-- `StringTool.java` — `CaseFormat`（驼峰转换）
-- `IpTool.java` — `Cache`/`CacheBuilder`（IP 缓存）
-- `SysDictService.java` — `LinkedListMultimap`
-- `DataPropertiesFactory.java` — `LinkedHashMultimap`/`Multimap`
-- `GoogleTool.java` — 通用集合工具
-保留该依赖。
-
-### 9.6 `hutool-captcha` 与 `filters` 功能重叠 🟢 ⭐
-
-**状态**: ✅ 已完成
-
-**处理**: `com.jhlabs:filters:2.0.235-1` 在代码中无任何引用，已移除。验证码生成已迁移至自定义 `CaptchaTool`（纯 Java 2D AWT 实现），支持渐变背景、字符旋转、彩色噪点/干扰线，不再依赖 hutool-captcha 的画图模块。
+*所有建议已处理，详见历史记录。*
 
 ---
 
@@ -622,13 +528,13 @@ import DOMPurify from 'dompurify';
 |------|---------|---------|---------|------|
 | 1. 架构设计 | 0 | 0 | 0 | 0 |
 | 2. 性能优化 | 0 | 0 | 0 | 0 |
-| 3. 安全加固 | 2 | 3 | 2 | 7 |
+| 3. 安全加固 | 0 | 1 | 1 | 2 |
 | 4. 代码质量 | 0 | 0 | 2 | 2 |
 | 5. JPA/数据层 | 0 | 0 | 0 | 0 |
 | 6. 异常处理 | 0 | 0 | 0 | 0 |
-| 7. 日志与监控 | 0 | 1 | 3 | 4 |
+| 7. 日志与监控 | 0 | 0 | 0 | 0 |
 | 8. 测试覆盖 | 1 | 1 | 1 | 3 |
-| 9. 依赖管理 | 0 | 2 | 4 | 6 |
+| 9. 依赖管理 | 0 | 0 | 0 | 0 |
 | 10. 前端架构 | 0 | 6 | 3 | 9 |
 | 11. 前端性能 | 1 | 3 | 3 | 7 |
 | 12. 前端质量 | 3 | 5 | 3 | 11 |
@@ -636,7 +542,7 @@ import DOMPurify from 'dompurify';
 | 14. 国际化/主题 | 0 | 2 | 1 | 3 |
 | 15. 构建与 CI/CD | 1 | 6 | 3 | 10 |
 | 16. 文档 | 0 | 0 | 5 | 5 |
-| **合计** | **8** | **32** | **31** | **71** |
+| **合计** | **6** | **27** | **23** | **56** |
 
 ---
 
@@ -653,13 +559,7 @@ import DOMPurify from 'dompurify';
 
 ### Phase 1 — 严重问题（高收益，低风险）
 
-| # | 建议 | 类型 | 说明 |
-|---|------|------|------|
-| 1 | 3.11 验证码默认开启 | 🔴 安全 | `SystemProperties.captchaEnable` 默认改为 `true`，配置名 `sys.captcha` → `sys.captcha-enable` |
-| 2 | 3.13 CORS 多环境配置 | 🔴 安全 | 通过 `Environment.matchesProfiles` 区分 dev/prod，生产环境禁止通配符 |
-| 3 | 3.14 登录错误信息泄露账号状态 | 🟡 安全 | 所有失败场景统一返回模糊描述 |
-| 4 | 3.15 IpTool 超时配置 | 🟡 Bug | `HttpRequest.execute()` 添加 `.timeout(5000)` |
-| 5 | 3.16 MigrationSysDict 数据安全 | 🔴 安全 | `DROP TABLE` 改为重命名备份，添加配置开关控制 |
+*Phase 1 全部完成。*
 
 ### Phase 2 — 重要改进（中等风险/收益）
 
@@ -669,27 +569,54 @@ import DOMPurify from 'dompurify';
 | 7 | 4.7 varname 命名规范 | � 代码 | 统一遵循 Java 命名规范 |
 | 8 | 8.1 测试覆盖率提升 | 🔴 ⭐⭐⭐ | 为核心业务添加 Service/Controller 层测试 |
 | 9 | 8.3 安全测试 | 🟡 ⭐⭐ | 添加 Spring Security 集成测试 |
-| 10 | 9.x 依赖清理 | � 依赖 | 移除未使用的依赖库 |
 
 ### Phase 3 — 代码质量（低风险，渐进改进）
 
 | # | 建议 | 类型 | 说明 |
 |---|------|------|------|
-| 11 | 7.2 健康检查端点 | � 部署 | 后续 K8s 部署时引入 actuator |
-| 12 | 7.3 API 性能监控 | 🟢 监控 | 按需引入 |
-| 13 | 10.1 类组件迁移函数组件 | 🟡 ⭐⭐⭐ | 逐步迁移 Class Component 为 Function Component |
-| 14 | 10.2 全局错误边界 | � ⭐⭐ | 添加 ErrorBoundary 组件 |
-| 15 | 12.4 ChangePassword import 缺失 | � Bug | 添加缺失的 SysUtils import |
-| 16 | 12.6 XSS 风险 | � 安全 | 使用 DOMPurify 清理 HTML |
-| 17 | 12.8 登录页面加载状态卡死 | 🔴 Bug | 保证 loading 状态重置 |
-| 18 | 12.13 请求取消机制 | � ⭐⭐ | 使用 AbortController 取消未完成请求 |
+| 11 | 10.1 类组件迁移函数组件 | 🟡 ⭐⭐⭐ | 逐步迁移 Class Component 为 Function Component |
+| 12 | 10.2 全局错误边界 | � ⭐⭐ | 添加 ErrorBoundary 组件 |
+| 13 | 12.4 ChangePassword import 缺失 | � Bug | 添加缺失的 SysUtils import |
+| 14 | 12.6 XSS 风险 | � 安全 | 使用 DOMPurify 清理 HTML |
+| 15 | 12.8 登录页面加载状态卡死 | 🔴 Bug | 保证 loading 状态重置 |
+| 16 | 12.13 请求取消机制 | � ⭐⭐ | 使用 AbortController 取消未完成请求 |
 
 ### 不计划修改（稳定性优先）
 
 | 建议 | 原因 |
 |------|------|
 | 4.15 AntdIcon 枚举 | 公共 API，外部项目可能编译依赖。改为运行时验证会破坏兼容性 |
-| 7.4 MDC 清理 | 当前未出现日志污染问题 |
-| 7.5 日志配置分散 | 当前配置可满足使用 |
 | 14.x 国际化/暗色模式 | 产品方向决策，非技术债 |
 | 13.x TypeScript 规范 | 前端业务代码改造工程量大，收益有限 |
+
+---
+
+## 历史记录
+
+### Phase 1 ✅
+
+| # | 建议 | 提交 |
+|---|------|------|
+| 1 | 3.11 验证码默认开启 | `04e1360d` / `71f9b8b9` |
+| 2 | 3.13 CORS 多环境配置 | `b24eabba` |
+| 3 | 3.14 登录错误信息统一提示 | `041f1857` |
+| 4 | 3.15 IpTool HTTP 超时控制 | `0fc81ab4` |
+| 5 | 3.16 MigrationSysDict 数据安全 | `7d7401b8` |
+
+### 依赖清理 ✅
+
+| # | 建议 | 提交 |
+|---|------|------|
+| 6 | 9.1 移除 hutool-cache / hutool-poi | `dd247ff9` |
+| 7 | 9.3 移除 pinyin4j | `dd247ff9` |
+| 8 | 9.4 移除 itextpdf | `dd247ff9` |
+| 9 | 9.6 移除 filters，自定义 CaptchaTool | `2c9556e1` |
+
+### 已评估不处理 ⏭️
+
+| 建议 | 原因 |
+|------|------|
+| 7.2 健康检查端点 | 后续 K8s 部署时可引入 actuator |
+| 7.3 API 性能监控 | 当前无性能监控需求 |
+| 7.4 MDC 清理 | 当前未出现日志污染问题 |
+| 7.5 日志配置分散 | 当前配置可满足使用 |
