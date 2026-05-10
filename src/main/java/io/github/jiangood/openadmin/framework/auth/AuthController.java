@@ -70,7 +70,7 @@ public class AuthController {
                 loginAttemptService.onSuccess(username);
             }
             catch (SessionAuthenticationException e) {
-                return AjaxResult.err("账号已在其他设备登录，本次登录被拒绝");
+                return AjaxResult.err("账号或密码错误");
             }
             catch (AuthenticationException e) {
                 loginAttemptService.onFailed(username);
