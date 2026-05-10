@@ -32,7 +32,6 @@ export default class extends React.Component {
 
 
     componentDidMount() {
-        console.log('Admin Layout didMount')
         // 判断是否手机端，自动收起菜单
 
 
