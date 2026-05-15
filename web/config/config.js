@@ -65,7 +65,7 @@ export default defineConfig({
     // React Compiler 配置
 
     extraBabelPlugins: [
-    ['@babel/plugin-react-compiler', { target: 'react' }]
+    ['babel-plugin-react-compiler', { target: 'react' }]
   ],
 
 
