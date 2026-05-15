@@ -175,7 +175,7 @@ class _Layouts extends React.Component {
             return <PageLoading message='加载登录信息...'/>
         }
 
-        return <AdminLayout path={this.state.path} logo={this.props.logo}/>
+        return <AdminLayout/>
     };
 }
 

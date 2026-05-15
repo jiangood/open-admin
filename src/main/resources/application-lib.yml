@@ -41,4 +41,4 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
 
 sys:
-  reset-admin-pwd: happy.Today@520!
+  default-password: open-admin@1234

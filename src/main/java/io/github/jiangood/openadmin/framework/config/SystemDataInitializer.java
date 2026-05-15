@@ -19,10 +19,10 @@ import java.util.List;
  * 系统数据初始化
  */
 @Slf4j
-@Component(GlobalSystemDataInit.BEAN_NAME)
+@Component(SystemDataInitializer.BEAN_NAME)
 @Order(0)
 @RequiredArgsConstructor
-public class GlobalSystemDataInit implements CommandLineRunner {
+public class SystemDataInitializer implements CommandLineRunner {
 
     public static final String BEAN_NAME = "sys_init";
 
@@ -53,7 +53,10 @@ public class GlobalSystemDataInit implements CommandLineRunner {
 
         SysUser admin = sysUserRepository.findByAccount(account).orElse(null);
         if (admin == null) {
-            String pwd = PasswordTool.random();
+            String pwd = systemProperties.getDefaultPassword();
+            if (StrUtil.isEmpty(pwd)) {
+                throw new IllegalStateException("请在配置文件中设置 sys.default-password");
+            }
             admin = new SysUser();
             admin.setAccount(account);
             admin.setName("管理员");
@@ -62,7 +65,7 @@ public class GlobalSystemDataInit implements CommandLineRunner {
             admin.setDataPermType(DataPermType.ALL);
             admin.setPassword(PasswordTool.encode(pwd));
             admin = sysUserRepository.save(admin);
-            log.info("创建默认管理员 {}", admin.getAccount());
+            log.info("创建默认管理员 {}, 密码: {}", admin.getAccount(), pwd);
         }
         log.info("管理员登录账号:{}", admin.getAccount());
 

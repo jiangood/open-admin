@@ -102,11 +102,31 @@ public class SysCommonController {
 
     @GetMapping("menu-info")
     public AjaxResult menuInfo() {
-        String account = LoginTool.getUser().getUsername();
+        LoginUser loginUser = LoginTool.getUser();
+        if (loginUser == null) {
+            log.warn("用户未登录，无法获取菜单");
+            return AjaxResult.err("用户未登录");
+        }
+        
+        String account = loginUser.getUsername();
+        log.info("当前登录用户: {}", account);
 
         SysUser user = sysUserService.findByAccount(account).orElse(null);
+        if (user == null) {
+            log.warn("用户不存在: {}", account);
+            return AjaxResult.err("用户不存在");
+        }
+        
         Set<SysRole> roles = user.getRoles();
+        log.info("用户角色数量: {}", roles.size());
+        roles.forEach(role -> log.info("角色: {}({}) - isAdmin: {}", role.getName(), role.getCode(), role.isAdmin()));
+        
         List<MenuDefinition> menuDefinitions = roleService.ownMenu(roles);
+        log.info("获取到的菜单数量: {}", menuDefinitions.size());
+        
+        if (menuDefinitions.isEmpty()) {
+            log.warn("用户没有可用菜单");
+        }
 
         Map<String, MenuDefinition> pathMenuMap = new HashMap<>();
         Map<String, MenuDefinition> menuMap = new HashMap<>();

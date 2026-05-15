@@ -65,11 +65,13 @@ export default class extends React.Component {
             this.setState({menuTree, pathMenuMap})
 
             this.loadBadge(menuMap)
+        }).catch(err => {
+            console.error('加载菜单失败:', err)
+            // 即使菜单加载失败也不要一直处于加载状态
+            this.setState({menuTree: []})
         }).finally(()=>{
             this.setState({menuLoading: false})
         })
-
-
     }
     actionRef = React.createRef()
 
@@ -155,9 +157,7 @@ export default class extends React.Component {
 
     renderCenterContent = () => {
         const {siteInfo, loginInfo} = this.state
-        if (this.state.menuTree.length === 0) { // 加载菜单中
-            return <Skeleton active paragraph={{rows: 10}} style={{padding: 24}} />
-        }
+        // 即使菜单为空也直接显示页面内容，不要一直显示 Skeleton
         const tabPageRenderNode = <TabPageRender pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {
             return <Watermark content={[loginInfo.name, loginInfo.account]}>

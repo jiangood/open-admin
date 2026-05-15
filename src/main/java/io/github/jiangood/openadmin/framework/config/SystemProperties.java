@@ -105,7 +105,7 @@ public class SystemProperties {
      */
     private boolean migrationDropOldTables = false;
 
-    private String defaultPassword = RandomUtil.randomString(16);
+    private String defaultPassword;
 
     /**
      * 文件存储配置

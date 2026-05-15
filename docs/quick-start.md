@@ -62,7 +62,7 @@ pnpm dev
 |------|------|
 | 前端 | http://localhost:8000 |
 | 后端 API | http://localhost:8080 |
-| 默认登录 | admin / 123456 |
+| 默认登录 | admin / open-admin@1234 |
 
 ## 创建新模块
 

@@ -67,15 +67,9 @@ class _PageRender extends React.Component {
         const matchArr = matchRoutes(appData.clientRoutes, pathname)
 
         if (matchArr != null) {
-            if (pathname === '/') {
-                // 匹配结果为1，表示未定义index.jsx ，导致死循环
-                if (matchArr.length === 1) { // 如果项目中没有定义index.jsx
-                    return <Result icon={null} title='未定义首页'></Result>
-                }
-            }
             // 取最匹配的那个
             const mathResult = matchArr[matchArr.length - 1].route
-            if(mathResult){
+            if(mathResult && mathResult.element){
                 return mathResult.element;
             }
         }
