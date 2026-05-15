@@ -12,7 +12,6 @@ class AnnToolTest {
     static class TestClass {
         @Remark("Test Field")
         private String annotatedField;
-        private String nonAnnotatedField;
     }
 
     @Test
