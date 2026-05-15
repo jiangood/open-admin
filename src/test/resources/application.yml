@@ -9,14 +9,6 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
-springdoc:
-  api-docs:
-    path: /admin/api-docs
-  swagger-ui:
-    path: /admin/
-  paths-to-match:
-    - /api/**
-
 sys:
   file:
     store-type: local

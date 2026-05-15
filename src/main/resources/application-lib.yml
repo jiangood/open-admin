@@ -31,14 +31,6 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     locale: zh_CN
 
-springdoc:
-  api-docs:
-    path: /admin/api-docs
-  swagger-ui:
-    path: /admin/
-  paths-to-match:
-    - /api/**
-
 logging:
   file:
     path: ./logs
