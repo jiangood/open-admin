@@ -26,6 +26,28 @@ jobs:
         with:
           without_prefix_v: true # Remove prefix `v` from tag
 
+      - name: Validate versions
+        run: |
+          TAG_VERSION="${{ steps.tag.outputs.tag }}"
+          POM_VERSION=$(grep -oP '<revision>\K[^<]+' pom.xml)
+          NPM_VERSION=$(grep -oP '"version":\s*"\K[^"]+' web/package.json)
+          
+          echo "Tag version: $TAG_VERSION"
+          echo "POM version: $POM_VERSION"
+          echo "NPM version: $NPM_VERSION"
+          
+          if [ "$TAG_VERSION" != "$POM_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match pom.xml version ($POM_VERSION)"
+            exit 1
+          fi
+          
+          if [ "$TAG_VERSION" != "$NPM_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($NPM_VERSION)"
+            exit 1
+          fi
+          
+          echo "✓ All versions match!"
+
       - name: Publish MAVEN
         run: mvn -q  deploy -DskipTests   -Drevision=${{ steps.tag.outputs.tag }}  -P publish
         env:
