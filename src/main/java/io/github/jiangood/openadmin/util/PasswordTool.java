@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;

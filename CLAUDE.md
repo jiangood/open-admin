@@ -20,7 +20,7 @@ open-admin/
 ├── src/main/java/io/github/jiangood/openadmin/
 │   ├── OpenAdminConfiguration.java       # 自动配置入口 (@ComponentScan, @EntityScan, @EnableJpaRepositories)
 │   ├── framework/
-│   │   ├── config/            # Spring 配置 (Security, JPA, Jackson, OpenAPI, SystemProperties)
+│   │   ├── config/            # Spring 配置 (Security, JPA, Jackson, SystemProperties)
 │   │   │   ├── security/      # Spring Security 配置 + 权限刷新
 │   │   │   ├── json/          # Jackson 自定义序列化/反序列化
 │   │   │   └── datadefinition/ # 菜单/字典的数据定义 (从 YAML 加载)

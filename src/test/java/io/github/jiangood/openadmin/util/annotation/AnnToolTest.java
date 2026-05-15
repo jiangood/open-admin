@@ -12,6 +12,8 @@ class AnnToolTest {
     static class TestClass {
         @Remark("Test Field")
         private String annotatedField;
+        // 用于测试没有注解的字段场景，通过反射获取此字段，请勿删除
+        private String nonAnnotatedField;
     }
 
     @Test

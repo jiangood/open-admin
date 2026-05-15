@@ -111,7 +111,6 @@ import DOMPurify from 'dompurify';
 ### P13 Ant Design API 使用错误 🟡 ⭐
 
 **问题**: 
-- `pages/system/api/index.jsx:207`: `mask={{closable:false}}` 应该为 `maskClosable={false}`，对象形式的 `mask` 属性无效
 - `pages/system/org/index.jsx:154`: `Splitter` 直接包裹 `Card` 而没有使用 `Splitter.Panel`，可能导致布局异常
 - `userCenter/message.jsx`: 使用已废弃的 `<Tabs.TabPane>` 方法，应该使用新的 `items` prop
 

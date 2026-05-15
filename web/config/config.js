@@ -32,14 +32,6 @@ const proxyConfig = {
         target: `http://${host}`,
         changeOrigin: true,
     },
-    '/swagger-ui': {
-        target: `http://${host}`,
-        changeOrigin: true,
-    },
-    '/v3/api-docs': {
-        target: `http://${host}`,
-        changeOrigin: true,
-    },
     '/admin/ws': {
         target: `ws://${host}`,
         changeOrigin: true,

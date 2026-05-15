@@ -34,7 +34,7 @@ open-admin 采用前后端分离架构。
 open-admin/
 ├── src/main/java/io/github/jiangood/openadmin/
 │   ├── framework/              # 框架基础层
-│   │   ├── config/             # Spring 配置（Security、JPA、Jackson、OpenAPI）
+│   │   ├── config/             # Spring 配置（Security、JPA、Jackson）
 │   │   ├── data/               # JPA 基础（BaseEntity、BaseRepository、Spec）
 │   │   ├── perm/               # @HasPermission 注解 + 切面
 │   │   ├── log/                # @Log 操作日志注解 + 切面

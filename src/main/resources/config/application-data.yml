@@ -110,14 +110,6 @@ data:
           perms:
             - {name: 查看, code: query}
             - {name: 删除, code: delete}
-        - id: api
-          name: 接口管理
-          icon: ApiOutlined
-          path: /system/api
-          perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
-            - {name: 删除, code: delete}
         - id: sys-log
           name: 操作日志
           path: /system/log

@@ -507,7 +507,7 @@ public class DbTool {
             case "string":
                 return "VARCHAR(255)";
             case "date":
-                return "datetime(6)";
+                return "TIMESTAMP";
 
 
             // support collection, convert to string

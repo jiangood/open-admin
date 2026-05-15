@@ -5,7 +5,6 @@ import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.util.ArrayTool;
 import io.github.jiangood.openadmin.util.ResponseTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
-import io.github.jiangood.openadmin.modules.api.filter.OpenApiFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -43,7 +42,6 @@ public class SecurityConfig {
 
     private final PermissionRefreshFilter permissionRefreshFilter;
     private final SecurityHolder securityHolder;
-    private final OpenApiFilter openApiFilter;
 
 
     // 配置 HTTP 安全
@@ -67,12 +65,7 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
                     authz.requestMatchers("/admin/public/**", "/admin/auth/**").permitAll()
-                            .requestMatchers("/admin/**",
-                                    // 报表
-                                    "/ureport/**",
-                                    // 接口文档 springdoc的默认地址，以免暴露
-                                    "/swagger-ui/**",
-                                    "/v3/api-docs").authenticated();
+                            .requestMatchers("/admin/**", "/ureport/**").authenticated();
                     if (CollUtil.isNotEmpty(systemProperties.getLoginExcludePathPatterns())) {
                         authz.requestMatchers(ArrayTool.toStrArr(systemProperties.getLoginExcludePathPatterns())).permitAll();
                     }
@@ -112,26 +105,10 @@ public class SecurityConfig {
         return chain;
     }
 
-    /**
-     * 配置 2：业务 API 接口 (/api/**)
-     * 允许跨域。
-     */
-    @Bean
-    @Order(2)
-    public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/api/**") // 只感应 /api 开头的请求
-                .csrf(AbstractHttpConfigurer::disable) // API 网关使用 Token 认证，无需 CSRF
-                .cors(cors -> cors.configurationSource(apiCorsSource())) // 开启跨域
-                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // 演示放行，可按需修改
 
-        // 开放接口过滤器
-        http.addFilterBefore(openApiFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
 
     /**
-     * 配置 3：公共资源与文档 (Swagger/静态资源)
+     * 配置 3：公共资源
      * 兜底配置。
      */
     @Bean
@@ -156,38 +133,5 @@ public class SecurityConfig {
     }
 
 
-    @Bean
-    public CorsConfigurationSource apiCorsSource() {
-        CorsConfiguration config = new CorsConfiguration();
 
-        // 允许的 HTTP 方法
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-
-        // 允许的 Header
-        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
-
-        // 预检请求（OPTIONS）的缓存时间（秒），避免频繁发送预检
-        config.setMaxAge(3600L);
-
-        boolean isProd = environment.matchesProfiles("prod");
-        if (isProd) {
-            // 生产环境：必须指定具体域名，禁止通配符
-            List<String> allowedOrigins = systemProperties.getAllowedOrigins();
-            if (CollUtil.isEmpty(allowedOrigins)) {
-                log.warn("生产环境请配置 sys.allowed-origins，当前允许所有来源（不安全）");
-                config.setAllowedOriginPatterns(List.of("*"));
-            } else {
-                config.setAllowedOriginPatterns(allowedOrigins);
-            }
-            config.setAllowCredentials(false);
-        } else {
-            // 非生产环境：允许通配符，方便开发
-            config.setAllowedOriginPatterns(List.of("*"));
-            config.setAllowCredentials(true);
-        }
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/**", config);
-        return source;
-    }
 }

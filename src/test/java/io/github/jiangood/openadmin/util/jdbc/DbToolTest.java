@@ -63,7 +63,7 @@ class DbToolTest {
         assertEquals("VARCHAR(255)", DbTool.getSqlType(char.class));
         assertEquals("VARCHAR(255)", DbTool.getSqlType(Character.class));
         assertEquals("VARCHAR(255)", DbTool.getSqlType(String.class));
-        assertEquals("datetime(6)", DbTool.getSqlType(Date.class));
+        assertEquals("TIMESTAMP", DbTool.getSqlType(Date.class));
 
         // 测试 BigDecimal
         assertEquals("decimal(10,2)", DbTool.getSqlType(BigDecimal.class));
