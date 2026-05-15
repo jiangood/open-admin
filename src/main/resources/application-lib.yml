@@ -1,0 +1,52 @@
+# ===================================================================
+# open-admin 框架默认配置
+# 业务项目在 application.yml 中显式引入即可继承：
+#
+#   spring:
+#     config:
+#       import: classpath:application-lib.yml
+#
+# 业务项目自己的配置优先级更高，可以按需覆盖。
+# ===================================================================
+
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: initialCapacity=50,maximumSize=10000,expireAfterWrite=5m
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${db_ip}:${db_port}/${db_database}?allowPublicKeyRetrieval=true&autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&nullCatalogMeansCurrent=true
+    username: ${db_username}
+    password: ${db_password}
+  jpa:
+    generate-ddl: true
+    show-sql: false
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    locale: zh_CN
+
+springdoc:
+  api-docs:
+    path: /admin/api-docs
+  swagger-ui:
+    path: /admin/
+  paths-to-match:
+    - /api/**
+
+logging:
+  file:
+    path: ./logs
+  level:
+    io.github.jiangood: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+
+sys:
+  reset-admin-pwd: happy.Today@520!
