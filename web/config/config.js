@@ -62,11 +62,7 @@ export default defineConfig({
     ],
     // 代理配置
     proxy: proxyConfig,
-    // React Compiler 配置
-
-    extraBabelPlugins: [
-    ['babel-plugin-react-compiler', { target: 'react' }]
-  ],
+    
 
 
 });
