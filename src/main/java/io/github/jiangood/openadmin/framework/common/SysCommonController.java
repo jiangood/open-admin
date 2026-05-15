@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -73,8 +74,7 @@ public class SysCommonController {
         }
 
         LoginUser user = LoginTool.getUser();
-        boolean login = user != null;
-        if (!login) {
+        if (user == null) {
             return AjaxResult.err("未登录");
         }
         r.setLogin(true);
