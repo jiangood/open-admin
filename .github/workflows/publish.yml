@@ -51,12 +51,11 @@ jobs:
 
       - name: 发布 npm 包
         run: |
-          npm install pnpm -g 
           cd web
-          pnpm install 
-          pnpm version ${{ steps.tag.outputs.tag }}
-          pnpm run build
-          pnpm publish -r --access public --no-git-checks
+          npm install 
+          npm version ${{ steps.tag.outputs.tag }}
+          npm run build
+          npm publish -r --access public --no-git-checks
 
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_ACCESS_TOKEN}}
