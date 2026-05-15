@@ -9,7 +9,11 @@
       "Skill(superpowers:brainstorming)",
       "Bash(git *)",
       "Skill(superpowers:verification-before-completion)",
-      "Bash(python3 *)"
+      "Bash(python3 *)",
+      "Skill(superpowers:writing-skills)",
+      "Read(//c/Users/41051/.claude/**)",
+      "Read(//c/Users/41051/.claude/skills/**)",
+      "Bash(gh repo *)"
     ]
   }
 }

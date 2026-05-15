@@ -1,6 +1,7 @@
 # open-admin
 
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.jiangood/open-admin)
+![npm](https://img.shields.io/npm/v/@jiangood/open-admin)
 
 open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业务项目通过添加 Maven 和 pnpm 依赖即可获得完整的后台管理能力**，无需从零搭建用户管理、角色权限、数据字典等功能。
 
@@ -25,6 +26,14 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
 ```
 
 添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。
+
+## Claude Code 等AI工具集成
+
+在业务项目中使用 Claude Code 创建 CRUD 模块前，请先安装 open-admin skill。在 Claude Code 中执行：
+
+> 请帮我安装 skill，地址为 https://raw.githubusercontent.com/jiangood/open-admin/main/.claude/skills/open-admin.md
+
+安装后，即可使用 `/open-admin` 指令创建业务模块，Claude 会按照框架规范自动生成 Entity → Repository → Service → Controller → 前端页面 → 菜单配置。
 
 ## 核心功能
 
