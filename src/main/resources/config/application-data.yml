@@ -55,8 +55,8 @@ data:
           path: /system/user
           icon: UserOutlined
           perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
             - {name: 删除, code: delete}
             - {name: 重置密码, code: reset-password}
             - {name: 分配权限, code: grant-permission}
@@ -65,16 +65,18 @@ data:
           path: /system/org
           icon: ApartmentOutlined
           perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
+            - {name: 更新, code: update}
             - {name: 删除, code: delete}
         - id: sys-role
           name: 角色管理
           path: /system/role
           icon: IdcardOutlined
           perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
+            - {name: 更新, code: update}
             - {name: 删除, code: delete}
             - {name: 分配权限, code: grant-permission}
         - id: sys-manual
@@ -82,24 +84,24 @@ data:
           path: /system/manual
           icon: CopyOutlined
           perms:
-            - {name: 查看, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
             - {name: 删除, code: delete}
         - id: sys-dict
           name: 数据字典
           path: /system/dict
           icon: FileSearchOutlined
           perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
             - {name: 删除, code: delete}
         - id: job
           name: 定时作业
           path: /system/job
           icon: OrderedListOutlined
           perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
             - {name: 删除, code: delete}
             - {name: 执行一次, code: trigger}
             - {name: 清理日志, code: clean-log}
@@ -108,11 +110,11 @@ data:
           path: /system/file
           icon: FolderOpenOutlined
           perms:
-            - {name: 查看, code: query}
+            - {name: 读取, code: read}
             - {name: 删除, code: delete}
         - id: sys-log
           name: 操作日志
           path: /system/log
           icon: FileSearchOutlined
           perms:
-            - {name: 查看, code: query}
+            - {name: 读取, code: read}

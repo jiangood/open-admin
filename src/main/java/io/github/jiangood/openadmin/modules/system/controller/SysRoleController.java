@@ -43,7 +43,7 @@ public class SysRoleController {
 
     private final SysUserService sysUserService;
 
-    @HasPermission("sys-role:query")
+    @HasPermission("sys-role:read")
     @RequestMapping("page")
     public AjaxResult page(@PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysRole> q = Spec.of();
@@ -61,19 +61,36 @@ public class SysRoleController {
 
 
     /**
-     * 添加系统角色
+     * 创建角色
      */
-    @HasPermission("sys-role:save")
-    @PostMapping("save")
-    public AjaxResult save(@RequestBody SysRole role, RequestBodyKeys updateFields) throws Exception {
+    @Log("角色-创建")
+    @HasPermission("sys-role:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody SysRole role) throws Exception {
         role.setBuiltin(false);
+        role = sysRoleService.save(role, null);
+
+        for (SysUser user : role.getUsers()) {
+            sysUserService.markPermsStale(user.getId(), user.getAccount());
+        }
+
+        return AjaxResult.ok().data(role).msg("创建角色成功");
+    }
+
+    /**
+     * 更新角色
+     */
+    @Log("角色-更新")
+    @HasPermission("sys-role:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody SysRole role, RequestBodyKeys updateFields) throws Exception {
         role = sysRoleService.save(role, updateFields);
 
         for (SysUser user : role.getUsers()) {
             sysUserService.markPermsStale(user.getId(), user.getAccount());
         }
 
-        return AjaxResult.ok().data(role).msg("保存角色成功");
+        return AjaxResult.ok().data(role).msg("更新角色成功");
     }
 
 
@@ -93,7 +110,7 @@ public class SysRoleController {
         return AjaxResult.ok().data(treeList);
     }
 
-    @HasPermission("sys-role:query")
+    @HasPermission("sys-role:read")
     @RequestMapping("own-perms")
     public AjaxResult ownPerms(String id) {
         SysRole role = sysRoleService.findById(id).orElse(null);
@@ -130,7 +147,7 @@ public class SysRoleController {
         return AjaxResult.ok().data(tree);
     }
 
-    @HasPermission("sys-role:grant-permission")
+    @HasPermission("sys-role:update")
     @RequestMapping("save-perms")
     public AjaxResult savePerms(@RequestBody SaveRolePermReq request) {
         SysRole sysRole = sysRoleService.savePerms(request.getId(), request.getPerms(), request.getMenus());
@@ -141,7 +158,7 @@ public class SysRoleController {
     }
 
 
-    @HasPermission("sys-role:query")
+    @HasPermission("sys-role:read")
     @RequestMapping("user-list")
     public AjaxResult userList(String id) {
         List<SysUser> users = sysUserService.findAll();
@@ -157,7 +174,7 @@ public class SysRoleController {
         return AjaxResult.ok().data(data);
     }
 
-    @HasPermission("sys-role:query")
+    @HasPermission("sys-role:read")
     @GetMapping("get")
     public AjaxResult get(String id) {
         SysRole role = sysRoleService.findById(id).orElse(null);

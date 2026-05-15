@@ -30,7 +30,7 @@ public class SysFileController {
     private final SysFileService service;
 
 
-    @HasPermission("sys-file:query")
+    @HasPermission("sys-file:read")
     @RequestMapping("page")
     public AjaxResult page(String dateRange,
                            String originName,

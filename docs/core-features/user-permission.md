@@ -36,13 +36,17 @@
 ## 后端权限控制
 
 ```java
-@HasPermission("user:view")
+@HasPermission("user:read")
 @RequestMapping("page")
 public AjaxResult page(...) { ... }
 
-@HasPermission("user:save")
-@PostMapping("save")
-public AjaxResult save(@RequestBody User input) { ... }
+@HasPermission("user:create")
+@PostMapping("create")
+public AjaxResult create(@RequestBody User input) { ... }
+
+@HasPermission("user:update")
+@PostMapping("update")
+public AjaxResult update(@RequestBody User input, RequestBodyKeys updateFields) { ... }
 
 @HasPermission("user:delete")
 @RequestMapping("delete")
@@ -53,19 +57,20 @@ public AjaxResult delete(String id) { ... }
 
 ```jsx
 // 按钮级权限
-<Button perm='user:save' onClick={handleEdit}>编辑</Button>
+<Button perm='user:update' onClick={handleEdit}>编辑</Button>
 
 // 按钮组
 <ButtonList>
-  <Button perm='user:save'>编辑</Button>
+  <Button perm='user:create'>新增</Button>
+  <Button perm='user:update'>编辑</Button>
   <Popconfirm perm='user:delete' title='确定删除?' onConfirm={handleDelete}>
     <Button>删除</Button>
   </Popconfirm>
 </ButtonList>
 
 // 区块级权限
-<HasPerm perm="user:manage">
-  <高级功能 />
+<HasPerm perm="user:export">
+  <导出功能 />
 </HasPerm>
 ```
 

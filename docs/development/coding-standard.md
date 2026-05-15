@@ -184,8 +184,8 @@ public class UserService {
 |------|------|-----|--------|
 | 分页查询 | GET | `admin/xxx/page` | `page(...)` |
 | 查询详情 | GET | `admin/xxx/{id}` | `getById(@PathVariable id)` |
-| 新增 | POST | `admin/xxx/save` | `save(@RequestBody dto)` |
-| 修改 | POST | `admin/xxx/save` | `save(@RequestBody dto, RequestBodyKeys keys)` |
+| 创建 | POST | `admin/xxx/create` | `create(@RequestBody dto)` |
+| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, RequestBodyKeys keys)` |
 | 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
 | 下拉选项 | GET | `admin/xxx/type-options` | `typeOptions(...)` |
 
@@ -197,7 +197,7 @@ public class XxxController {
 
     private final XxxService service;
 
-    @HasPermission("xxx:query")
+    @HasPermission("xxx:read")
     @RequestMapping("page")
     public AjaxResult page(String searchText,
         @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
@@ -211,11 +211,18 @@ public class XxxController {
         return AjaxResult.of(service.findById(id));
     }
 
-    @HasPermission("xxx:save")
-    @PostMapping("save")
-    public AjaxResult save(@RequestBody Xxx input, RequestBodyKeys updateFields) {
+    @HasPermission("xxx:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody Xxx input) {
+        service.save(input, null);
+        return AjaxResult.ok().msg("创建成功");
+    }
+
+    @HasPermission("xxx:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody Xxx input, RequestBodyKeys updateFields) {
         service.save(input, updateFields);
-        return AjaxResult.ok().msg("保存成功");
+        return AjaxResult.ok().msg("更新成功");
     }
 
     @HasPermission("xxx:delete")
@@ -227,8 +234,8 @@ public class XxxController {
 }
 ```
 
-- URL 使用 kebab-case 复数名词，以 `admin/` 为前缀：`admin/users/page`, `admin/order-items/save`
-- 新增/修改统一使用 `save` 方法，通过 `RequestBodyKeys` 区分更新字段
+- URL 使用 kebab-case 复数名词，以 `admin/` 为前缀：`admin/users/page`, `admin/order-items/create`
+- 创建和更新分开为 `create` 和 `update` 两个方法，便于细粒度权限控制
 - Controller 不做业务逻辑，只做参数校验 + 调用 Service
 - 统一返回 `AjaxResult` 包装
 
@@ -260,15 +267,15 @@ public class XxxController {
 | 段 | 说明 | 示例 |
 |----|------|------|
 | 资源 | 业务对象/功能名，全小写 kebab-case（多词用连字符） | `sys-user`, `sys-log`, `sys-dict`, `job`, `api` |
-| 操作 | 具体操作，全小写 kebab-case 动词 | `query`, `create`, `update`, `delete`, `export`, `import` |
+| 操作 | 具体操作，全小写 kebab-case 动词 | `read`, `create`, `update`, `delete`, `export`, `import` |
 
 ##### 标准 CRUD 操作
 
 | 操作 | 说明 | 对应接口 |
 |------|------|---------|
-| `query` | 分页/列表/详情查询 | `page()`, `getById()` |
-| `create` | 新增 | `save()`（新增场景） |
-| `update` | 修改 | `save()`（修改场景） |
+| `read` | 分页/列表/详情查询 | `page()`, `getById()` |
+| `create` | 新增 | `create()` |
+| `update` | 修改 | `update()` |
 | `delete` | 删除 | `delete()` |
 
 ##### 常见扩展操作
@@ -283,13 +290,13 @@ public class XxxController {
 
 - 扩展操作使用 kebab-case（`reset-password`、`grant-permission`），不用小驼峰
 - 避免使用单一 `manage` 权限码覆盖所有操作，应拆分为细粒度权限码
-- 接口级别权限只需要 `query`，无需拆分为 `page`、`detail` 等子操作
+- 接口级别权限只需要 `read`，无需拆分为 `page`、`detail` 等子操作
 
 ##### 示例
 
 ```java
 // ✅ 使用 @HasPermission（替代 @PreAuthorize("hasAuthority(...)")）
-@HasPermission("sys-user:query")
+@HasPermission("sys-user:read")
 @HasPermission("sys-user:create")
 @HasPermission("sys-user:update")
 @HasPermission("sys-user:delete")
@@ -297,24 +304,25 @@ public class XxxController {
 @HasPermission("sys-role:grant-permission")
 
 // ✅ 非系统模块
-@HasPermission("job:query")
+@HasPermission("job:read")
 @HasPermission("job:trigger")
 
 // ❌ 避免：小驼峰、manage 一锅端
 // sysUser:resetPwd          → sys-user:reset-password
 // job:triggerJob            → job:trigger
-// sysRole:manage             → sys-role:query / sys-role:create / ...
-// sysLog:view                → sys-log:query
+// sysRole:manage             → sys-role:read / sys-role:create / ...
+// sysLog:view                → sys-log:read
 ```
 
 ##### 权限码与 URL 对照
 
 | URL | 权限码 |
 |-----|--------|
-| `admin/system/user/page` | `sys-user:query` |
-| `admin/system/user/save`（新增） | `sys-user:create` |
-| `admin/system/user/save`（修改） | `sys-user:update` |
+| `admin/system/user/page` | `sys-user:read` |
+| `admin/system/user/create` | `sys-user:create` |
+| `admin/system/user/update` | `sys-user:update` |
 | `admin/system/user/delete` | `sys-user:delete` |
+| `admin/system/role/save-perms` | `sys-role:update` |
 | `admin/system/role/grant-permission` | `sys-role:grant-permission` |
 
 ##### YAML 权限定义
@@ -327,12 +335,14 @@ data:
     - id: sys-user                    # id 即权限码前缀
       name: 用户管理
       perms:                          # 对象列表，每项一个权限
-        - {name: 查询, code: query}   # 完整码: sys-user:query
-        - {name: 新增, code: save}    # 完整码: sys-user:save
+        - {name: 读取, code: read}   # 完整码: sys-user:read
+        - {name: 创建, code: create}  # 完整码: sys-user:create
+        - {name: 更新, code: update}  # 完整码: sys-user:update
+        - {name: 删除, code: delete}  # 完整码: sys-user:delete
 ```
 
 - **前缀**：权限码前缀为菜单的 `id`（kebab-case）。驼峰 id 会自动转换（`sysUser` → `sys-user`）
-- **`code` 格式**：推荐只写 action 段（如 `query`），由 `id` + `code` 拼接出完整码。也支持直接写完整码（`sys-user:query`），便于从旧项目迁移
+- **`code` 格式**：只写 action 段（如 `read`、`create`、`update`），由 `id` + `code` 拼接出完整码
 - **对象列表**：`perm-names`/`perm-codes` 两个数组已被 `perms` 对象列表替代，避免位置耦合
 - **行内流**：每个权限按 `{name: 名称, code: action}` 行内格式书写，兼顾紧凑和可读性
 
@@ -426,12 +436,13 @@ try {
 |------|------|-----|---------|
 | 查询列表 | GET | `admin/xxx/page` | `page()` |
 | 查询详情 | GET | `admin/xxx/{id}` | `getById(@PathVariable id)` |
-| 新增/修改 | POST | `admin/xxx/save` | `save(@RequestBody dto)` |
+| 创建 | POST | `admin/xxx/create` | `create(@RequestBody dto)` |
+| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, RequestBodyKeys keys)` |
 | 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
 | 下拉选项 | GET | `admin/xxx/type-options` | `typeOptions(...)` |
 
 - URL 统一使用 kebab-case 复数名词，以 `admin/` 为前缀
-- 新增/修改统一使用 POST + save 方法，不区 PUT
+- 创建和更新分开为 `create` 和 `update` 两个方法
 - 查询参数用 `@RequestParam`，请求体用 `@RequestBody`
 
 ### 事务

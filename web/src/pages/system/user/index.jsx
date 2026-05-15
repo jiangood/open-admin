@@ -125,16 +125,16 @@ export default class extends React.Component {
             fixed: 'right',
             render: (_, record) => {
                 return <ButtonList>
-                    <Button size='small' perm='sysUser:save' onClick={() => this.handleEdit(record)}> 编辑 </Button>
+                    <Button size='small' perm='sys-user:update' onClick={() => this.handleEdit(record)}> 编辑 </Button>
 
-                    <Button size='small' perm='sysUser:grantPerm'
+                    <Button size='small' perm='sys-user:grant-permission'
                             onClick={() => this.permRef.current.show(record)}> 授权 </Button>
 
-                    <Popconfirm perm='sysUser:resetPwd' title='确认重置密码？' onConfirm={() => this.resetPwd(record)}>
+                    <Popconfirm perm='sys-user:reset-password' title='确认重置密码？' onConfirm={() => this.resetPwd(record)}>
                         <Button size='small'>重置密码</Button>
                     </Popconfirm>
 
-                    <Popconfirm perm='sysUser:delete' title={'是否确定删除用户'}
+                    <Popconfirm perm='sys-user:delete' title={'是否确定删除用户'}
                                 onConfirm={() => this.handleDelete(record)}>
                         <Button size='small'>删除</Button>
                     </Popconfirm>
@@ -144,7 +144,9 @@ export default class extends React.Component {
     ];
 
     onFinish = values => {
-        HttpUtils.post('admin/sysUser/save', values).then(rs => {
+        const isNew = !values.id;
+        const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
+        HttpUtils.post(url, values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload()
         })
@@ -178,7 +180,7 @@ export default class extends React.Component {
                         toolBarRender={() => {
                             return <ButtonList>
                                 <Button
-                                    perm='sysUser:save'
+                                    perm='sys-user:create'
                                     type="primary"
                                     onClick={this.handleAdd}>
                                     <PlusOutlined/> 新增

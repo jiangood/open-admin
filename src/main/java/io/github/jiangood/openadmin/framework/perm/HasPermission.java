@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /***
  *  简化 security 的权限注解
- *  @HasPermission("job:query")
+ *  @HasPermission("job:read")
  */
 
 @Retention(RetentionPolicy.RUNTIME)

@@ -71,10 +71,30 @@ public class SysOrgController {
     }
 
 
-    @Log("机构-保存")
-    @HasPermission("sys-org:save")
-    @PostMapping("save")
-    public AjaxResult saveOrUpdate(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
+    @Log("机构-创建")
+    @HasPermission("sys-org:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody OrgReq input) throws Exception {
+        if (input.getLeader() != null) {
+            if (StrUtil.isEmpty(input.getLeader().getId())) {
+                input.setLeader(null);
+            }
+        }
+        SysOrg input2 = BeanTool.copy(input, new SysOrg());
+        input2.setType(input.getType());
+
+        sysOrgService.save(input2, null);
+
+        var loginUser = LoginTool.getUser();
+        sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());
+
+        return AjaxResult.ok().msg("创建机构成功");
+    }
+
+    @Log("机构-更新")
+    @HasPermission("sys-org:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
         if (input.getLeader() != null) {
             if (StrUtil.isEmpty(input.getLeader().getId())) {
                 input.setLeader(null);
@@ -88,7 +108,7 @@ public class SysOrgController {
         var loginUser = LoginTool.getUser();
         sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());
 
-        return AjaxResult.ok().msg("保存机构成功");
+        return AjaxResult.ok().msg("更新机构成功");
     }
 
     @Log("机构-删除")
@@ -123,7 +143,7 @@ public class SysOrgController {
 
 
     @PostMapping("sort")
-    @HasPermission("sys-org:save")
+    @HasPermission("sys-org:create")
     public AjaxResult sort(@RequestBody DropEvent e) {
         List<SysOrg> nodes = sysOrgService.findAll();
         List<TreeOption> tree = list2Tree(nodes);

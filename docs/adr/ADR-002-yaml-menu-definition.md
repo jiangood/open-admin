@@ -40,8 +40,10 @@ data:
           path: /system/user
           icon: UserOutlined
           perms:
-            - {name: 查询, code: query}
-            - {name: 新增, code: save}
+            - {name: 读取, code: read}
+            - {name: 创建, code: create}
+            - {name: 更新, code: update}
+            - {name: 删除, code: delete}
 ```
 
 ## 理由

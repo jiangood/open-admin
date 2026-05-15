@@ -33,7 +33,9 @@ export default class extends React.Component {
     }
 
     onFinish = values => {
-        HttpUtils.post('admin/dict/save', values).then(rs => {
+        const isNew = !values.id;
+        const url = isNew ? 'admin/dict/create' : 'admin/dict/update';
+        HttpUtils.post(url, values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload()
         })
@@ -96,9 +98,9 @@ export default class extends React.Component {
 
                 return (
                     <ButtonList>
-                        <Button size='small' perm='sysDict:save'
+                        <Button size='small' perm='sys-dict:update'
                                 onClick={() => this.handleEdit(record)}> 编辑 </Button>
-                        <Popconfirm perm='sysDict:delete' title='是否确定删除字典项'
+                        <Popconfirm perm='sys-dict:delete' title='是否确定删除字典项'
                                     onConfirm={() => this.handleDelete(record)}>
                             <Button size='small'>删除</Button>
                         </Popconfirm>
@@ -115,7 +117,7 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={() => {
                     return <ButtonList>
-                        <Button perm='sysDict:save' type='primary' onClick={this.handleAdd} >
+                        <Button perm='sys-dict:create' type='primary' onClick={this.handleAdd} >
                             <PlusOutlined/> 新增
                         </Button>
                     </ButtonList>

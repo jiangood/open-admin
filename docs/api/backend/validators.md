@@ -41,9 +41,14 @@ public class User {
 ## Controller 中使用
 
 ```java
-@PostMapping("save")
-public AjaxResult save(@Validated @RequestBody User user) {
-    return AjaxResult.ok().msg("保存成功");
+@PostMapping("create")
+public AjaxResult create(@Validated @RequestBody User user) {
+    return AjaxResult.ok().msg("创建成功");
+}
+
+@PostMapping("update")
+public AjaxResult update(@Validated @RequestBody User user) {
+    return AjaxResult.ok().msg("更新成功");
 }
 ```
 
@@ -62,6 +67,9 @@ public class User {
 }
 
 // 使用
-@PostMapping("add")
-public AjaxResult add(@Validated(User.AddGroup.class) @RequestBody User user) { ... }
+@PostMapping("create")
+public AjaxResult create(@Validated(User.AddGroup.class) @RequestBody User user) { ... }
+
+@PostMapping("update")
+public AjaxResult update(@Validated(User.UpdateGroup.class) @RequestBody User user) { ... }
 ```

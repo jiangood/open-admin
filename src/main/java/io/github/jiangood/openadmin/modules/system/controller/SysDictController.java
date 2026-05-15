@@ -27,7 +27,7 @@ public class SysDictController {
 
 
 
-    @HasPermission("sys-dict:query")
+    @HasPermission("sys-dict:read")
     @RequestMapping("page")
     public AjaxResult page(String searchText) {
         List<DictItemVO> list = sysDictService.getAllItems();
@@ -37,7 +37,7 @@ public class SysDictController {
 
         return AjaxResult.ok().data(new PageImpl<>(list));
     }
-    @HasPermission("sys-dict:save")
+    @HasPermission("sys-dict:create")
     @GetMapping("type-options")
     public AjaxResult typeOptions(String searchText) {
         List<DictItemVO> list = sysDictService.getAllItems();
@@ -59,11 +59,20 @@ public class SysDictController {
         return AjaxResult.ok().data(options);
     }
 
-    @HasPermission("sys-dict:save")
-    @PostMapping("save")
-    public AjaxResult save(@RequestBody SysDictItem param, RequestBodyKeys updateFields) throws Exception {
+    @Log("字典-创建")
+    @HasPermission("sys-dict:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody SysDictItem param) throws Exception {
+        SysDictItem result = itemService.save(param, null);
+        return AjaxResult.ok().data(result.getId()).msg("创建成功");
+    }
+
+    @Log("字典-更新")
+    @HasPermission("sys-dict:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody SysDictItem param, RequestBodyKeys updateFields) throws Exception {
         SysDictItem result = itemService.save(param, updateFields);
-        return AjaxResult.ok().data(result.getId()).msg("保存成功");
+        return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
 
 

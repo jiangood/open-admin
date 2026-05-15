@@ -85,7 +85,9 @@ export default class extends React.Component {
     }
 
     onFinish = (values) => {
-        HttpUtils.post('admin/job/save', values).then(rs => {
+        const isNew = !values.id;
+        const url = isNew ? 'admin/job/create' : 'admin/job/update';
+        HttpUtils.post(url, values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload();
         })
@@ -149,9 +151,9 @@ export default class extends React.Component {
                 return (
                     <Space>
                         <Button size='small' onClick={() => this.showExecuteRecord(record)}>执行记录</Button>
-                        <Button size='small' onClick={() => this.handleTriggerJob(record)}>执行一次</Button>
-                        <Button size='small' onClick={() => this.handleEdit(record)}> 编辑 </Button>
-                        <Popconfirm title='是否确定删除?' onConfirm={() => this.handleDelete(record)}>
+                        <Button size='small' perm='job:trigger' onClick={() => this.handleTriggerJob(record)}>执行一次</Button>
+                        <Button size='small' perm='job:update' onClick={() => this.handleEdit(record)}> 编辑 </Button>
+                        <Popconfirm perm='job:delete' title='是否确定删除?' onConfirm={() => this.handleDelete(record)}>
                             <Button size='small'>删除</Button>
                         </Popconfirm>
                     </Space>

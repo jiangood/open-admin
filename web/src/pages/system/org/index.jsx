@@ -77,7 +77,9 @@ export default class extends React.Component {
 
     onFinish = (values) => {
         this.setState({submitLoading: true, formEditing: false})
-        HttpUtils.post('admin/sysOrg/save', values).then(rs => {
+        const isNew = !values.id;
+        const url = isNew ? 'admin/sysOrg/create' : 'admin/sysOrg/update';
+        HttpUtils.post(url, values).then(rs => {
             this.loadTree()
         }).finally(() => {
             this.setState({submitLoading: false})

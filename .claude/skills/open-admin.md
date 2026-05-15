@@ -69,7 +69,7 @@ spring:
 
 1. **业务实体名称**：中英文名（如"客户 / Customer"）
 2. **字段列表**：每个字段的名称、类型（String / Integer / BigDecimal / Boolean / LocalDateTime / 枚举）、是否必填、是否作为查询条件、是否为字典项
-3. **权限规划**：增删改查分别用什么权限 code（如 `bizCustomer:query`、`bizCustomer:save` 等）
+3. **权限规划**：增删改查分别用什么权限 code（如 `biz-customer:read`、`biz-customer:create`、`biz-customer:update`、`biz-customer:delete` 等）
 4. **菜单位置**：顶级菜单还是挂在现有菜单下
 
 ## 第二步：后端模块创建
@@ -83,7 +83,7 @@ spring:
 | 实体类 | `{Entity}` | `Customer` |
 | 数据库表 | 小写、下划线分隔、`biz_` 前缀 | `biz_customer` |
 | 请求路径 | `admin/{kebab-module}` | `admin/customer` |
-| 权限前缀 | `{camel-module}:{action}` | `customer:save` |
+| 权限前缀 | `{kebab-module}:{action}` | `customer:read`, `customer:create`, `customer:update`, `customer:delete` |
 
 ### Entity
 
@@ -194,12 +194,12 @@ public class CustomerService extends BaseService<Customer> {
 
 | 端点 | 方法 | URL | 权限 | 说明 |
 |------|------|-----|------|------|
-| 分页查询 | `@RequestMapping("page")` | `admin/{module}/page` | `{module}:query` | 支持 searchText 模糊搜索 + Pageable |
-| 详情 | `@GetMapping("info/{id}")` | `admin/{module}/info/{id}` | `{module}:query` | 返回单条记录 |
-| 新增 | `@PostMapping("save")` | `admin/{module}/save` | `{module}:save` | @RequestBody @Valid |
-| 修改 | `@PutMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid |
+| 分页查询 | `@RequestMapping("page")` | `admin/{module}/page` | `{module}:read` | 支持 searchText 模糊搜索 + Pageable |
+| 详情 | `@GetMapping("info/{id}")` | `admin/{module}/info/{id}` | `{module}:read` | 返回单条记录 |
+| 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid |
+| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid |
 | 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq |
-| 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:query` | 下拉框数据源（非必选） |
+| 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:read` | 下拉框数据源（非必选） |
 
 ```java
 package com.mycompany.myproject.modules.customer.controller;
@@ -228,7 +228,7 @@ public class CustomerController {
 
     private final CustomerService service;
 
-    @HasPermission("customer:query")
+    @HasPermission("customer:read")
     @RequestMapping("page")
     public AjaxResult page(String searchText,
             @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
@@ -237,7 +237,7 @@ public class CustomerController {
         return AjaxResult.ok().data(page);
     }
 
-    @HasPermission("customer:query")
+    @HasPermission("customer:read")
     @GetMapping("info/{id}")
     public AjaxResult info(@PathVariable String id) {
         return service.findById(id)
@@ -245,18 +245,18 @@ public class CustomerController {
                 .orElse(AjaxResult.fail().msg("记录不存在"));
     }
 
-    @HasPermission("customer:save")
-    @PostMapping("save")
-    public AjaxResult save(@Valid @RequestBody Customer input) {
-        service.save(input);
-        return AjaxResult.ok().msg("保存成功");
+    @HasPermission("customer:create")
+    @PostMapping("create")
+    public AjaxResult create(@Valid @RequestBody Customer input) {
+        service.save(input, null);
+        return AjaxResult.ok().msg("创建成功");
     }
 
     @HasPermission("customer:update")
-    @PutMapping("update")
+    @PostMapping("update")
     public AjaxResult update(@Valid @RequestBody Customer input) {
-        service.update(input);
-        return AjaxResult.ok().msg("修改成功");
+        service.save(input, null);
+        return AjaxResult.ok().msg("更新成功");
     }
 
     @HasPermission("customer:delete")
@@ -266,7 +266,7 @@ public class CustomerController {
         return AjaxResult.ok().msg("删除成功");
     }
 
-    @HasPermission("customer:query")
+    @HasPermission("customer:read")
     @GetMapping("options")
     public AjaxResult options(String searchText) {
         Spec<Customer> q = Spec.of().orLike(searchText, "name");
@@ -339,7 +339,7 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={() => (
                     <ButtonList>
-                        <Button perm='customer:save' type='primary' onClick={this.handleAdd}>
+                        <Button perm='customer:create' type='primary' onClick={this.handleAdd}>
                             <PlusOutlined /> 新增
                         </Button>
                     </ButtonList>
@@ -430,9 +430,9 @@ data:
       path: /customer
       icon: TeamOutlined
       perms:
-        - {name: 查询, code: query}
-        - {name: 新增, code: save}
-        - {name: 修改, code: update}
+        - {name: 读取, code: read}
+        - {name: 创建, code: create}
+        - {name: 更新, code: update}
         - {name: 删除, code: delete}
 ```
 
@@ -452,9 +452,9 @@ data:
 
 | 层级 | 配置位置 | 写法 |
 |------|---------|------|
-| 后端 | Controller `@HasPermission` | `@HasPermission("customer:save")` |
-| 前端 | Button `perm` prop | `<Button perm="customer:save">新增</Button>` |
-| 菜单 | YAML `perms` | `- {name: 新增, code: save}` |
+| 后端 | Controller `@HasPermission` | `@HasPermission("customer:create")` / `@HasPermission("customer:update")` |
+| 前端 | Button `perm` prop | `<Button perm="customer:create">新增</Button>` / `<Button perm="customer:update">编辑</Button>` |
+| 菜单 | YAML `perms` | `- {name: 创建, code: create}` / `- {name: 更新, code: update}` |
 
 框架通过 `@HasPermission` 注解 + AOP 切面拦截未授权请求。前端 `ButtonList` 和 `HasPerm` 组件根据当前用户的权限动态显示/隐藏按钮。
 

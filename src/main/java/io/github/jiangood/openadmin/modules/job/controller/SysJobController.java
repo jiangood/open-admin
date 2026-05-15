@@ -43,18 +43,27 @@ public class SysJobController {
     private final QuartzManager quartzService;
 
 
-    @HasPermission("job:query")
+    @HasPermission("job:read")
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws SchedulerException {
         return AjaxResult.ok().data(service.page(searchText, pageable));
     }
 
-    @HasPermission("job:save")
-    @PostMapping("save")
-    public AjaxResult save(@RequestBody SysJob param, RequestBodyKeys updateFields) throws Exception {
+    @Log("作业-创建")
+    @HasPermission("job:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody SysJob param) throws Exception {
         Class.forName(param.getJobClass());
+        service.save(param, null);
+        return AjaxResult.ok().msg("创建成功");
+    }
+
+    @Log("作业-更新")
+    @HasPermission("job:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody SysJob param, RequestBodyKeys updateFields) throws Exception {
         service.save(param, updateFields);
-        return AjaxResult.ok().msg("操作成功");
+        return AjaxResult.ok().msg("更新成功");
     }
 
 
@@ -161,7 +170,7 @@ public class SysJobController {
     }
 
 
-    @HasPermission("job:query")
+    @HasPermission("job:read")
     @RequestMapping("status")
     public AjaxResult info() throws SchedulerException {
         SchedulerMetaData meta = scheduler.getMetaData();

@@ -52,7 +52,7 @@ public class SysUserController {
     private final SystemProperties systemProperties;
 
 
-    @HasPermission("sys-user:query")
+    @HasPermission("sys-user:read")
     @RequestMapping("page")
     public AjaxResult page(String orgId, String roleId, String searchText, @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 
@@ -62,23 +62,24 @@ public class SysUserController {
     }
 
 
-    @Log("用户-保存")
-    @HasPermission("sys-user:save")
-    @PostMapping("save")
-    public AjaxResult save(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
-        boolean isNew = input.isNew();
-        sysUserService.save(input, updateFields);
-        String message = "更新成功";
-        if (isNew) {
-            String defaultPassword = systemProperties.getDefaultPassword();
-            message = "添加新用户成功,密码：" + defaultPassword;
-        } else {
-            sysUserService.markPermsStale(input.getId(), input.getAccount());
-        }
-
+    @Log("用户-创建")
+    @HasPermission("sys-user:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody SysUser input) throws Exception {
+        sysUserService.save(input, null);
+        String defaultPassword = systemProperties.getDefaultPassword();
+        String message = "添加新用户成功,密码：" + defaultPassword;
         return AjaxResult.ok(message);
     }
 
+    @Log("用户-更新")
+    @HasPermission("sys-user:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
+        sysUserService.save(input, updateFields);
+        sysUserService.markPermsStale(input.getId(), input.getAccount());
+        return AjaxResult.ok("更新成功");
+    }
 
     @Log("用户-删除")
     @HasPermission("sys-user:delete")

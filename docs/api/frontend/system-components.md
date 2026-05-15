@@ -10,7 +10,8 @@
 
 ```jsx
 <ButtonList>
-  <Button perm='user:save' onClick={handleEdit}>编辑</Button>
+  <Button perm='user:create' onClick={handleAdd}>新增</Button>
+  <Button perm='user:update' onClick={handleEdit}>编辑</Button>
   <Popconfirm perm='user:delete' title='确定删除?' onConfirm={handleDelete}>
     <Button>删除</Button>
   </Popconfirm>
@@ -22,8 +23,8 @@
 权限控制容器。
 
 ```jsx
-<HasPerm perm="user:manage">
-  <高级功能 />
+<HasPerm perm="user:export">
+  <导出功能 />
 </HasPerm>
 ```
 

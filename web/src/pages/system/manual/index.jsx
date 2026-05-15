@@ -23,7 +23,9 @@ export default class extends React.Component {
     }
 
     onFinish = values => {
-        HttpUtils.post('admin/sysManual/save', values).then(rs => {
+        const isNew = !values.id;
+        const url = isNew ? 'admin/sysManual/create' : 'admin/sysManual/update';
+        HttpUtils.post(url, values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload()
         })
@@ -66,8 +68,8 @@ export default class extends React.Component {
             dataIndex: 'option',
             render: (_, record) => (
                 <ButtonList>
-                    <Button size='small' perm='sysManual:save' onClick={() => this.handleEdit(record)}>编辑</Button>
-                    <Popconfirm perm='sysManual:delete' title='是否确定删除操作手册'
+                    <Button size='small' perm='sys-manual:update' onClick={() => this.handleEdit(record)}>编辑</Button>
+                    <Popconfirm perm='sys-manual:delete' title='是否确定删除操作手册'
                                 onConfirm={() => this.handleDelete(record)}>
                         <Button size='small'>删除</Button>
                     </Popconfirm>
@@ -83,7 +85,7 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={(params, {selectedRows, selectedRowKeys}) => {
                     return <ButtonList>
-                        <Button perm='sysManual:save' type='primary' onClick={this.handleAdd}>
+                        <Button perm='sys-manual:create' type='primary' onClick={this.handleAdd}>
                             <PlusOutlined/> 新增
                         </Button>
                     </ButtonList>

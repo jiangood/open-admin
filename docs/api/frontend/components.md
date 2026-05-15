@@ -24,7 +24,7 @@
   actionRef={this.tableRef}
   toolBarRender={() => (
     <ButtonList>
-      <Button perm='user:save' type='primary' onClick={handleAdd}>
+      <Button perm='user:create' type='primary' onClick={handleAdd}>
         <PlusOutlined /> 新增
       </Button>
     </ButtonList>

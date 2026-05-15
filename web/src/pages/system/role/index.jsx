@@ -45,7 +45,9 @@ export default class extends React.Component {
     }
 
     onFinish = values => {
-        HttpUtils.post('admin/sysRole/save', values).then(rs => {
+        const isNew = !values.id;
+        const url = isNew ? 'admin/sysRole/create' : 'admin/sysRole/update';
+        HttpUtils.post(url, values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload()
         })
@@ -130,15 +132,15 @@ export default class extends React.Component {
 
                 return (
                     <ButtonList>
-                        <Button size='small' perm='sysRole:manage'
+                        <Button size='small' perm='sys-role:grant-permission'
                                 onClick={() => this.handleEditUser(record)}>用户设置</Button>
 
-                        <Button size='small' perm='sysRole:manage' disabled={record.builtin}
+                        <Button size='small' perm='sys-role:grant-permission' disabled={record.builtin}
                                 onClick={() => PageUtils.open('/system/role/perm?id=' + record.id, '角色权限设置')}>权限设置</Button>
 
-                        <Button size='small' perm='sysRole:manage' disabled={record.builtin}
+                        <Button size='small' perm='sys-role:update' disabled={record.builtin}
                                 onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm perm='sysRole:manage' disabled={record.builtin} title='是否确定删除系统角色'
+                        <Popconfirm perm='sys-role:delete' disabled={record.builtin} title='是否确定删除系统角色'
                                     onConfirm={() => this.handleDelete(record)}>
                             <Button size='small'>删除</Button>
                         </Popconfirm>
@@ -183,7 +185,7 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={() => {
                     return <ButtonList>
-                        <Button perm='sysRole:manage' type='primary' onClick={this.handleAdd}>
+                        <Button perm='sys-role:create' type='primary' onClick={this.handleAdd}>
                             <PlusOutlined/> 新增
                         </Button>
                     </ButtonList>

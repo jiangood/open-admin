@@ -24,7 +24,7 @@ public class SysLogController {
     private final SysLogService service;
 
 
-    @HasPermission("sys-log:query")
+    @HasPermission("sys-log:read")
     @RequestMapping("page")
     public AjaxResult page(String dateRange, String operation, @PageableDefault(sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
         Spec<SysLog> q = Spec.of();

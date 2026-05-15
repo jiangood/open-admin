@@ -4,6 +4,7 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
+import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.modules.system.entity.SysManual;
 import io.github.jiangood.openadmin.modules.system.service.SysManualService;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class SysManualController {
 
     private final SysManualService service;
 
-    @HasPermission("sys-manual:query")
+    @HasPermission("sys-manual:read")
     @RequestMapping("page")
     public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysManual> q = Spec.of();
@@ -38,11 +39,20 @@ public class SysManualController {
     }
 
 
-    @HasPermission("sys-manual:save")
-    @PostMapping("save")
-    public AjaxResult save(@RequestBody SysManual input, RequestBodyKeys updateFields) throws Exception {
+    @Log("手册-创建")
+    @HasPermission("sys-manual:create")
+    @PostMapping("create")
+    public AjaxResult create(@RequestBody SysManual input) throws Exception {
+        service.save(input, null);
+        return AjaxResult.ok().msg("创建成功");
+    }
+
+    @Log("手册-更新")
+    @HasPermission("sys-manual:update")
+    @PostMapping("update")
+    public AjaxResult update(@RequestBody SysManual input, RequestBodyKeys updateFields) throws Exception {
         service.save(input, updateFields);
-        return AjaxResult.ok().msg("保存成功");
+        return AjaxResult.ok().msg("更新成功");
     }
 
     @HasPermission("sys-manual:delete")
