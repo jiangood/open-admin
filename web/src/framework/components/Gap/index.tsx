@@ -1,46 +1,32 @@
 import React from "react";
 
+const SizeMap = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 40,
+};
+
 /**
  * 上下间隔
  */
-export class Gap extends React.Component {
+export const Gap = ({
+  size = "md",
+  direction = "vertical",
+}: {
+  size?: keyof typeof SizeMap;
+  direction?: "horizontal" | "vertical";
+}) => {
+  const sizePx = SizeMap[size] || SizeMap.md;
+  const isHorizontal = direction === "horizontal";
 
-    static defaultProps = {
-        size: 'middle',
-        direction: 'vertical',
-    };
+  const style: React.CSSProperties = {
+    display: isHorizontal ? "inline-block" : "block",
+    width: isHorizontal ? sizePx : 0,
+    height: isHorizontal ? 0 : sizePx,
+  };
 
-    render() {
-        const {n = 0, size, direction} = this.props;
-        if (n) {
-            console.warn('参数 n 已经不被支持')
-            return
-        }
-
-        const SizeMap = {
-            x: 4,
-            small: 8,
-            middle: 16,
-            large: 24,
-            xLarge: 32,
-            xxLarge: 40,
-        };
-
-
-        const sizePx = SizeMap[size];
-        const isHorizontal = direction === 'horizontal';
-
-
-        // 水平间隔：有宽度，无高度
-        // 垂直间隔：有高度，无宽度
-        const width = isHorizontal ? sizePx : 0;
-        const height = isHorizontal ? 0 : sizePx;
-
-        // 水平间隔用 inline-block（避免换行），垂直间隔用 block
-        const display = isHorizontal ? 'inline-block' : 'block';
-
-        const style = {display, height, width}
-
-        return <div style={style}></div>
-    }
-}
+  return <div style={style} />;
+};
