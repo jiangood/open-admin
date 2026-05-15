@@ -29,7 +29,8 @@ jobs:
       - name: Validate pom.xml version
         run: |
           TAG_VERSION="${{ steps.tag.outputs.tag }}"
-          POM_VERSION=$(grep -m 1 '<version>[0-9]' pom.xml | grep -oP '<version>\K[^<]+')
+          # Extract project version (the version tag after artifactId)
+          POM_VERSION=$(awk '/<artifactId>open-admin<\/artifactId>/{found=1} found && /<version>[0-9]/{print; exit}' pom.xml | grep -oP '<version>\K[^<]+')
           
           echo "Tag version: $TAG_VERSION"
           echo "POM version: $POM_VERSION"
