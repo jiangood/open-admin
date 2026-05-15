@@ -1,13 +1,10 @@
 package io.github.jiangood.openadmin.util;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.security.SecureRandom;
-import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 /**
  * 验证码生成器

@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;

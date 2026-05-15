@@ -5,13 +5,10 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ExceptionToMessageTool;
 import io.github.jiangood.openadmin.util.HttpServletTool;
 import io.github.jiangood.openadmin.util.BusinessException;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.HttpStatus;
@@ -20,8 +17,6 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -36,7 +31,6 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
-import java.util.List;
 
 import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
 import static io.github.jiangood.openadmin.framework.MessageConst.MSG_UNAUTHORIZED;
@@ -211,31 +205,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public AjaxResult methodNotSupported(HttpRequestMethodNotSupportedException e) {
         return AjaxResult.err().msg("不支持请求方法" + e.getMethod());
-    }
-
-
-    /**
-     * 获取请求参数不正确的提示信息
-     * <p>
-     * 多个信息，拼接成用逗号分隔的形式
-     */
-    private String getArgNotValidMessage(BindingResult bindingResult) {
-        if (bindingResult == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-
-        //多个错误用逗号分隔
-        List<ObjectError> allErrors = bindingResult.getAllErrors();
-        for (ObjectError error : allErrors) {
-            if (error instanceof FieldError) {
-                sb.append(((FieldError) error).getField());
-            }
-            sb.append(error.getDefaultMessage()).append(",");
-        }
-
-        //最终把首部的逗号去掉
-        return StrUtil.removeSuffix(sb.toString(), ",");
     }
 
 

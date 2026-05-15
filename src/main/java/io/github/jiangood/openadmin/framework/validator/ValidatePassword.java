@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.validator;
 
-import cn.hutool.core.lang.Validator;
 import cn.hutool.core.text.PasswdStrength;
 import jakarta.validation.Constraint;
 import jakarta.validation.ConstraintValidator;
@@ -33,14 +32,9 @@ public @interface ValidatePassword {
         public boolean isValid(String str, ConstraintValidatorContext constraintValidatorContext) {
             if (str != null && !str.isEmpty()) {
                 PasswdStrength.PASSWD_LEVEL level = PasswdStrength.getLevel(str);
-                switch (level) {
-                    case EASY:
-                        return false;
-
-                }
-                return Validator.isCarDrivingLicence(str);
+                return level != PasswdStrength.PASSWD_LEVEL.EASY;
             }
-            return true;
+            return false;
         }
 
 

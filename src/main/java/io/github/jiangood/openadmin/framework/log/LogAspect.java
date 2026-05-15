@@ -42,7 +42,7 @@ public class LogAspect {
         ObjectMapper om = new ObjectMapper();
         om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        om.setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL));
         writer = om.writerWithDefaultPrettyPrinter();
     }
 

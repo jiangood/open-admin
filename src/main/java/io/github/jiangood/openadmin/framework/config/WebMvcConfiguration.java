@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.framework.config;
 
 import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
 import io.github.jiangood.openadmin.util.RandomCodeGenerator;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeysArgumentResolver;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -27,29 +26,6 @@ import java.util.List;
 @EnableScheduling
 @ConditionalOnClass(name = "org.springframework.web.servlet.config.annotation.WebMvcConfigurer")
 public class WebMvcConfiguration implements WebMvcConfigurer {
-    /**
-     * 放开权限校验的接口
-     */
-    private static final String[] NONE_SECURITY_URL_PATTERNS = {
-            // 前端静态文件
-            "/**.jpg",
-            "/**.png",
-            "/static/**.jpg",
-            "/static/**.png",
-            "/favicon.ico",
-            "/web/**",
-
-
-            //后端的
-            "/",
-            "/login",
-            "/logout",
-            "/oauth/**",
-            "/error",
-
-            // 接口
-            "/openApi/gateway/**"
-    };
     @Resource
     SystemProperties systemProperties;
 

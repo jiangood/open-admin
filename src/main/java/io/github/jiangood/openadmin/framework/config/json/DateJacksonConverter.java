@@ -6,7 +6,6 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.util.Date;
 
 /**
@@ -19,7 +18,7 @@ public class DateJacksonConverter extends ValueDeserializer<Date> {
 
     @Override
     public Date deserialize(JsonParser p, DeserializationContext ctxt) {
-        String originDate = p.getText();
+        String originDate = p.getValueAsString();
 
         return DateUtil.parse(originDate);
     }

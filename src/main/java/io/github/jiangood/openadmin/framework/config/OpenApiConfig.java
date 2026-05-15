@@ -3,10 +3,7 @@ package io.github.jiangood.openadmin.framework.config;
 import io.github.jiangood.openadmin.modules.api.filter.ApiConstant;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springdoc.core.configuration.SpringDocConfiguration;
 import org.springdoc.core.models.GroupedOpenApi;
-import org.springdoc.core.properties.SpringDocConfigProperties;
-import org.springdoc.core.properties.SwaggerUiConfigProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 

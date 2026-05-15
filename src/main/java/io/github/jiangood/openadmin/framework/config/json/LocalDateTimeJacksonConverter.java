@@ -7,7 +7,6 @@ import tools.jackson.core.JsonParser;
 import tools.jackson.databind.DeserializationContext;
 import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -16,7 +15,7 @@ public class LocalDateTimeJacksonConverter extends ValueDeserializer<LocalDateTi
 
     @Override
     public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) {
-        String originDate = p.getText();
+        String originDate = p.getValueAsString();
         DateTime dateTime = DateUtil.parse(originDate);
 
 
