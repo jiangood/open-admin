@@ -10,6 +10,7 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
 
 sys:
+  captcha-enable: false
   file:
     store-type: local
     upload-path: /tmp/test-uploads

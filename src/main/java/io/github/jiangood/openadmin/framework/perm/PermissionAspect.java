@@ -8,6 +8,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
 
 @Aspect
@@ -31,7 +33,11 @@ public class PermissionAspect {
         }
 
         if (authentication.getPrincipal() instanceof LoginUser loginUser) {
-            return loginUser.getPermissions().contains(permission);
+            Set<String> permissions = loginUser.getPermissions();
+            if (permissions.contains("*")) {
+                return true;
+            }
+            return permissions.contains(permission);
         }
 
         return authentication.getAuthorities().stream()

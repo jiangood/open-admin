@@ -119,4 +119,38 @@ class PermissionAspectTest {
 
         assertThrows(AccessDeniedException.class, () -> permissionAspect.checkPermission(hasPermission));
     }
+
+    @Test
+    void testCheckPermission_withWildcard_shouldPass() {
+        LoginUser loginUser = mock(LoginUser.class);
+        when(loginUser.getPermissions()).thenReturn(Set.of("*"));
+
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn(loginUser);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.value()).thenReturn("sys-user:read");
+
+        assertDoesNotThrow(() -> permissionAspect.checkPermission(hasPermission));
+    }
+
+    @Test
+    void testCheckPermission_withWildcard_andOtherPermissions_shouldPass() {
+        LoginUser loginUser = mock(LoginUser.class);
+        when(loginUser.getPermissions()).thenReturn(Set.of("user:query", "*", "admin:access"));
+
+        Authentication authentication = mock(Authentication.class);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn(loginUser);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        HasPermission hasPermission = mock(HasPermission.class);
+        when(hasPermission.value()).thenReturn("sys-user:read");
+
+        assertDoesNotThrow(() -> permissionAspect.checkPermission(hasPermission));
+    }
 }
