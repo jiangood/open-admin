@@ -47,7 +47,7 @@
         <hutool.version>5.8.44</hutool.version>
         <poi.version>5.5.0</poi.version>
         <guava.version>33.6.0-jre</guava.version>
-        <commons-io.version>2.21.0</commons-io.version>
+        <commons-io.version>2.22.0</commons-io.version>
         <springdoc-version>3.0.3</springdoc-version>
     </properties>
     <dependencies>
