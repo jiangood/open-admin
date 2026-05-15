@@ -1,0 +1,8 @@
+{
+  "presets": ["umi/babel"],
+  "plugins": [
+    ["@babel/plugin-react-compiler", {
+      "target": "react"
+    }]
+  ]
+}
