@@ -9,24 +9,34 @@ const SizeMap = {
   xxl: 40,
 };
 
+type GapProps = {
+  size?: keyof typeof SizeMap;
+  direction?: "horizontal" | "vertical";
+} & React.HTMLAttributes<HTMLDivElement>;
+
 /**
  * 上下间隔
  */
-export const Gap = ({
+export const Gap: React.FC<GapProps> = ({
   size = "md",
   direction = "vertical",
-}: {
-  size?: keyof typeof SizeMap;
-  direction?: "horizontal" | "vertical";
+  ...rest
 }) => {
-  const sizePx = SizeMap[size] || SizeMap.md;
+  if (size && !Object.hasOwn(SizeMap, size)) {
+    throw new Error(
+      `Gap: size 属性必须为 [${Object.keys(SizeMap).join(", ")}] 之一，当前传入：${size}`
+    );
+  }
+
+  const sizePx = SizeMap[size];
   const isHorizontal = direction === "horizontal";
 
   const style: React.CSSProperties = {
     display: isHorizontal ? "inline-block" : "block",
     width: isHorizontal ? sizePx : 0,
     height: isHorizontal ? 0 : sizePx,
+    ...rest.style,
   };
 
-  return <div style={style} />;
+  return <div style={style} {...rest} />;
 };
