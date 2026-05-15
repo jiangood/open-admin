@@ -5,7 +5,11 @@
       "Bash(git ls-files *)",
       "Bash(xxd \"D:/ws/open-admin/src/main/resources/config/application-data.yml\")",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Skill(superpowers:brainstorming)",
+      "Bash(git *)",
+      "Skill(superpowers:verification-before-completion)",
+      "Bash(python3 *)"
     ]
   }
 }

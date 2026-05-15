@@ -33,7 +33,7 @@ open-admin 是一个**可嵌入**的后台管理系统框架（脚手架）。�
 
 - **[编码规范](./development/coding-standard.md)** — 后端和前端编码标准
 - **[最佳实践](./development/best-practices.md)** — 开发最佳实践
-- **[智能体使用](./development/agent.md)** — AI 辅助开发指南
+- **`/open-admin` Skill** — 使用 `/open-admin` 指令创建 CRUD 业务模块
 
 ## 系统要求
 
