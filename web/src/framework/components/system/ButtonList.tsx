@@ -1,6 +1,6 @@
 import React from 'react';
 import { Space } from 'antd';
-import { PermUtils } from "../../utils";
+import { PermUtils } from '../../utils';
 
 /**
  * 带权限的按钮列表
@@ -9,21 +9,14 @@ import { PermUtils } from "../../utils";
 export function ButtonList(props) {
   const { children } = props;
 
-  // 检查权限
   const checkPerm = (element) => {
     const _props = element?.props;
-    return _props == null || _props.perm == null || PermUtils.hasPermission(_props.perm);
+    return !_props?.perm || PermUtils.hasPermission(_props.perm);
   };
 
-  // 单节点情况
-  if (!Array.isArray(children)) {
-    return checkPerm(children) ? children : null;
-  }
+  const nodes = React.Children.toArray(children).filter(
+    (child) => child != null && checkPerm(child)
+  );
 
-  const menus = [];
-  for (let child of children) {
-    if (child == null) continue;
-    if (checkPerm(child)) menus.push(child);
-  }
-  return <Space>{menus}</Space>;
+  return <Space>{nodes}</Space>;
 }
