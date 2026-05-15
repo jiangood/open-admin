@@ -26,27 +26,20 @@ jobs:
         with:
           without_prefix_v: true # Remove prefix `v` from tag
 
-      - name: Validate versions
+      - name: Validate pom.xml version
         run: |
           TAG_VERSION="${{ steps.tag.outputs.tag }}"
-          POM_VERSION=$(grep -oP '<revision>\K[^<]+' pom.xml)
-          NPM_VERSION=$(grep -oP '"version":\s*"\K[^"]+' web/package.json)
+          POM_VERSION=$(grep -m 1 '<version>[0-9]' pom.xml | grep -oP '<version>\K[^<]+')
           
           echo "Tag version: $TAG_VERSION"
           echo "POM version: $POM_VERSION"
-          echo "NPM version: $NPM_VERSION"
           
           if [ "$TAG_VERSION" != "$POM_VERSION" ]; then
             echo "::error::Tag version ($TAG_VERSION) does not match pom.xml version ($POM_VERSION)"
             exit 1
           fi
           
-          if [ "$TAG_VERSION" != "$NPM_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($NPM_VERSION)"
-            exit 1
-          fi
-          
-          echo "✓ All versions match!"
+          echo "✓ Maven version matches tag!"
 
       - name: Publish MAVEN
         run: mvn -q  deploy -DskipTests   -Drevision=${{ steps.tag.outputs.tag }}  -P publish
@@ -70,6 +63,21 @@ jobs:
         uses: aaronbarnaby/get-tag@v1.0.0
         with:
           without_prefix_v: true # Remove prefix `v` from tag
+
+      - name: Validate package.json version
+        run: |
+          TAG_VERSION="${{ steps.tag.outputs.tag }}"
+          NPM_VERSION=$(jq -r '.version' web/package.json)
+          
+          echo "Tag version: $TAG_VERSION"
+          echo "NPM version: $NPM_VERSION"
+          
+          if [ "$TAG_VERSION" != "$NPM_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($NPM_VERSION)"
+            exit 1
+          fi
+          
+          echo "✓ NPM version matches tag!"
 
       - name: 发布 npm 包
         run: |
