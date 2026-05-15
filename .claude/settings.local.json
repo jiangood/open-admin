@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(mvn compile *)",
-      "Bash(git ls-files *)"
+      "Bash(git ls-files *)",
+      "Bash(xxd \"D:/ws/open-admin/src/main/resources/config/application-data.yml\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
