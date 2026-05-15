@@ -64,16 +64,9 @@ export default defineConfig({
     proxy: proxyConfig,
     // React Compiler 配置
 
-    chainWebpack(config) {
-    // 添加React Compiler相关配置
-    config.module
-      .rule('jsx')
-      .use('react-compiler')
-      .loader('@react-compiler/webpack-loader')
-      .options({
-        // 配置项
-      })
-      .end();
-  },
+    extraBabelPlugins: [
+    ['@babel/plugin-react-compiler', { target: 'react' }]
+  ],
+
 
 });
