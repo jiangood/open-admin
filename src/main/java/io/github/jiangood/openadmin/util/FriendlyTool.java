@@ -118,7 +118,7 @@ public class FriendlyTool {
         long between = endTime - startTime;
 
 
-        return DateUtil.formatBetween(between, BetweenFormatter.Level.SECOND);
+        return DateUtil.formatBetween(between, cn.hutool.core.date.BetweenFormatter.Level.SECOND);
     }
 
 

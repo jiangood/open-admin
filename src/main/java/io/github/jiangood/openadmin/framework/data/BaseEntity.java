@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.github.jiangood.openadmin.framework.data.id.GenerateUuidV7;
 import jakarta.persistence.Column;

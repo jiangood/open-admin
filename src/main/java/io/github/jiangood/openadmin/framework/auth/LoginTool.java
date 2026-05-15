@@ -44,7 +44,7 @@ public class LoginTool {
     }
 
     public static List<String> getOrgPermissions() {
-        User principal = getUser();
+        LoginUser principal = getUser();
         if (principal == null) {
             return List.of();
         }
@@ -57,7 +57,7 @@ public class LoginTool {
     }
 
     public static List<String> getPermissions() {
-        User principal = getUser();
+        LoginUser principal = getUser();
         if (principal == null) {
             return List.of();
         }
@@ -69,7 +69,7 @@ public class LoginTool {
     }
 
     public static List<String> getRoles() {
-        User principal = getUser();
+        LoginUser principal = getUser();
         if (principal == null) {
             return List.of();
         }
