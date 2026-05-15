@@ -1,5 +1,7 @@
-declare type NamedIconProps = {
-    name: string
-};
+import React from 'react';
 
-export function NamedIcon(props:NamedIconProps);
+type NamedIconProps = {
+    name: string;
+} & React.ComponentProps<typeof import('@ant-design/icons').WarningOutlined>;
+
+export function NamedIcon(props: NamedIconProps): React.ReactElement;

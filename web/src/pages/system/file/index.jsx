@@ -127,7 +127,7 @@ export default class extends React.Component {
                        this.tableRef.current.reload()
                    }}
                    footer={null}
-                   destroyOnHidden
+                   destroyOnClose
             >
                 <Form ref={this.formRef}
                       initialValues={this.state.formValues}

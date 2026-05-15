@@ -7,7 +7,7 @@ import {Outlet, withRouter} from "umi";
 
 import AdminLayout from "./admin"
 import {
-    ArrUtils,
+    ArrayUtils,
     HttpUtils,
     MessageHolder,
     PageLoading,
@@ -33,7 +33,7 @@ function checkIsSimplePage(pathname) {
     if(pathname.startsWith("/test/")){
         return true
     }
-    return ArrUtils.contains(SIMPLE_URLS, pathname) ;
+    return ArrayUtils.contains(SIMPLE_URLS, pathname) ;
 }
 
 function checkIsPurePage(pathname){
@@ -159,7 +159,6 @@ class _Layouts extends React.Component {
         }
 
         const {params = {}} = this.props.location;
-        console.log('layout: params', params)
         if (checkIsSimplePage(pathname) || params.hasOwnProperty('_noLayout')) {
             return <Outlet/>
         }

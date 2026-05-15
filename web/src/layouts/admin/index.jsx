@@ -1,9 +1,9 @@
 import React from 'react';
-import {Badge, Layout, Menu, Spin, Watermark} from 'antd';
+import {Badge, Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import {history, Link} from 'umi';
 import "./index.less"
-import {Gap, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
+import {ErrorBoundary, Gap, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabPageRender } from "./TabPageRender";
@@ -32,7 +32,6 @@ export default class extends React.Component {
 
 
     componentDidMount() {
-        console.log('Admin Layout didMount')
         // 判断是否手机端，自动收起菜单
 
 
@@ -124,7 +123,9 @@ export default class extends React.Component {
                 </Sider>
 
                 <Content id='admin-layout-content'>
-                    {this.renderCenterContent(loginInfo)}
+                    <ErrorBoundary>
+                        {this.renderCenterContent(loginInfo)}
+                    </ErrorBoundary>
                 </Content>
 
             </Layout>
@@ -134,7 +135,7 @@ export default class extends React.Component {
 
     renderLeftMenu() {
         if(this.state.menuLoading){
-            return <Spin />
+            return <div style={{padding: 16}}><Skeleton active title={false} paragraph={{rows: 8}} /></div>;
         }
         return <Menu items={this.state.menuTree}
                      theme='dark'
@@ -155,7 +156,7 @@ export default class extends React.Component {
     renderCenterContent = () => {
         const {siteInfo, loginInfo} = this.state
         if (this.state.menuTree.length === 0) { // 加载菜单中
-            return <></>
+            return <Skeleton active paragraph={{rows: 10}} style={{padding: 24}} />
         }
         const tabPageRenderNode = <TabPageRender pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {

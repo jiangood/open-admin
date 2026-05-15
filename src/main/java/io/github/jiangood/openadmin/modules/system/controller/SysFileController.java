@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
-import io.github.jiangood.openadmin.util.enums.MaterialType;
+import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.service.SysFileService;

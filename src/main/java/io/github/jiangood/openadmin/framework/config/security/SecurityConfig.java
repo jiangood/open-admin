@@ -2,15 +2,16 @@ package io.github.jiangood.openadmin.framework.config.security;
 
 import cn.hutool.core.collection.CollUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
-import io.github.jiangood.openadmin.framework.config.security.refresh.PermissionRefreshFilter;
+import io.github.jiangood.openadmin.framework.config.security.PermissionRefreshFilter;
 import io.github.jiangood.openadmin.util.ArrayTool;
 import io.github.jiangood.openadmin.util.ResponseTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
-import io.github.jiangood.openadmin.modules.api.OpenApiFilter;
+import io.github.jiangood.openadmin.modules.api.filter.OpenApiFilter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,6 +40,7 @@ public class SecurityConfig {
 
 
     private final SystemProperties systemProperties;
+    private final Environment environment;
 
     private final PermissionRefreshFilter permissionRefreshFilter;
     private final SecurityHolder securityHolder;
@@ -50,8 +52,18 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/admin/**", "/ureport/**")
-                .headers(cfg -> cfg.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))   // iframe 允许同域名下访问， 如嵌入ureport报表
-                .csrf(AbstractHttpConfigurer::disable) // 前后端分离项目，关闭csrf
+                .headers(cfg -> cfg
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表
+                        .contentSecurityPolicy(csp -> csp.policyDirectives(
+                                "default-src 'self'; " +
+                                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                                "style-src 'self' 'unsafe-inline'; " +
+                                "img-src 'self' data: blob:; " +
+                                "font-src 'self' data:; " +
+                                "connect-src 'self' ws:"
+                        ))
+                )   // X-Content-Type-Options/Cache-Control 由 Spring Security 自动添加
+                .csrf(AbstractHttpConfigurer::disable) // SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
@@ -109,7 +121,7 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/**") // 只感应 /api 开头的请求
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable) // API 网关使用 Token 认证，无需 CSRF
                 .cors(cors -> cors.configurationSource(apiCorsSource())) // 开启跨域
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()); // 演示放行，可按需修改
@@ -149,20 +161,31 @@ public class SecurityConfig {
     public CorsConfigurationSource apiCorsSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // 允许的源：正式环境建议指定域名，如 "https://www.yourdomain.com"
-        config.setAllowedOriginPatterns(List.of("*"));
-
         // 允许的 HTTP 方法
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
         // 允许的 Header
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
 
-        // 是否允许发送 Cookie
-        config.setAllowCredentials(true);
-
         // 预检请求（OPTIONS）的缓存时间（秒），避免频繁发送预检
         config.setMaxAge(3600L);
+
+        boolean isProd = environment.matchesProfiles("prod");
+        if (isProd) {
+            // 生产环境：必须指定具体域名，禁止通配符
+            List<String> allowedOrigins = systemProperties.getAllowedOrigins();
+            if (CollUtil.isEmpty(allowedOrigins)) {
+                log.warn("生产环境请配置 sys.allowed-origins，当前允许所有来源（不安全）");
+                config.setAllowedOriginPatterns(List.of("*"));
+            } else {
+                config.setAllowedOriginPatterns(allowedOrigins);
+            }
+            config.setAllowCredentials(false);
+        } else {
+            // 非生产环境：允许通配符，方便开发
+            config.setAllowedOriginPatterns(List.of("*"));
+            config.setAllowCredentials(true);
+        }
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);

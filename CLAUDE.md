@@ -21,22 +21,20 @@ open-admin/
 │   ├── OpenAdminConfiguration.java       # 自动配置入口 (@ComponentScan, @EntityScan, @EnableJpaRepositories)
 │   ├── framework/
 │   │   ├── config/            # Spring 配置 (Security, JPA, Jackson, OpenAPI, SystemProperties)
-│   │   │   ├── security/      # Spring Security 配置: SecurityConfig, SysUserDetailsService
+│   │   │   ├── security/      # Spring Security 配置 + 权限刷新
 │   │   │   ├── json/          # Jackson 自定义序列化/反序列化
-│   │   │   ├── datadefinition/ # 菜单/字典的数据定义 (从 YAML 加载)
-│   │   │   └── init/          # 系统初始化 (GlobalSystemDataInit)
+│   │   │   └── datadefinition/ # 菜单/字典的数据定义 (从 YAML 加载)
 │   │   ├── data/              # JPA 基础层: BaseEntity, BaseRepository(BaseRepositoryImpl), Spec (动态查询)
 │   │   │   ├── converter/     # JPA AttributeConverter 集合
 │   │   │   ├── id/            # ID 生成器 (UUIDv7, 前缀序列, 日表序列)
 │   │   │   └── specification/ # 动态查询 Spec 构建器
 │   │   ├── perm/              # 权限注解 @HasPermission + 切面
 │   │   ├── log/               # 操作日志注解 @Log + 切面
-│   │   ├── filter/            # RequestBody 缓存过滤器
-│   │   ├── lifecycle/         # 应用生命周期钩子
 │   │   ├── migration/         # 数据迁移
 │   │   ├── validator/         # 自定义校验注解 (手机号, 身份证, 密码等)
 │   │   └── enums/             # 基础枚举 (YesNo, Sex, ApproveStatus)
-│   ├── common/                # 登录/认证/站点信息
+│   ├── auth/                  # 认证 (登录/登出/验证码/当前用户)
+│   ├── console/               # 控制台公共 API (站点信息/菜单)
 │   ├── util/                  # 工具类库 (BeanTool, StringTool, JsonTool, TreeTool, ExcelTool, FileTool 等)
 │   └── modules/
 │       ├── system/            # 系统管理模块 (用户/角色/菜单/组织/字典/文件/日志)
@@ -49,6 +47,10 @@ open-admin/
 │       ├── job/               # 定时任务模块 (Quartz)
 │       ├── api/               # API 开放接口模块 (对外接口管理)
 │       ├── logviewer/         # 文件日志查看
+│       │   ├── controller/
+│       │   ├── service/
+│       │   ├── config/        # Logback 配置
+│       │   └── util/          # MDC 工具
 ├── web/                       # 前端项目 (UmiJS)
 │   ├── package.json
 │   ├── src/
@@ -56,8 +58,7 @@ open-admin/
 │   │   │   ├── components/    # 通用组件 (ProTable, Page, OrgTree, RoleTree, NamedIcon 等)
 │   │   │   ├── fields/        # 表单字段组件 (FieldDictSelect, FieldRemoteSelect, FieldDate 等)
 │   │   │   ├── views/         # 展示组件 (ViewFile, ViewImage, ViewBoolean 等)
-│   │   │   ├── utils/         # 工具类 (HttpUtils, SysUtils, DictUtils, TreeUtils, ThemeUtils 等)
-│   │   │   └── pages/         # 登录页面
+│   │   │   └── utils/         # 工具类 (HttpUtils, SysUtils, DictUtils, TreeUtils, ThemeUtils 等)
 │   │   ├── layouts/           # 布局组件 (admin 后台布局含菜单/Sider/Header/TabPage)
 │   │   ├── pages/             # 业务页面
 │   │   └── config/            # UmiJS 配置

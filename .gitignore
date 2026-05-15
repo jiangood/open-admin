@@ -35,4 +35,5 @@ target/
 /.vscode/
 /.trae/
 /logs/
+/data/
 /docs/superpowers/

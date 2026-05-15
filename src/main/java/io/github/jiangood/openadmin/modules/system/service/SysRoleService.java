@@ -1,37 +1,34 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
-import io.github.jiangood.openadmin.framework.data.specification.Spec;
+import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.util.*;
-import java.util.ArrayList;
 
 /**
  * 系统角色service接口实现类
  */
 @Slf4j
-@RequiredArgsConstructor
 @Service
-public class SysRoleService {
+public class SysRoleService extends BaseService<SysRole> {
 
     private final SysRoleRepository roleRepository;
-
     private final SysMenuRepository sysMenuRepository;
+
+    public SysRoleService(SysRoleRepository roleRepository, SysMenuRepository sysMenuRepository) {
+        super(roleRepository);
+        this.roleRepository = roleRepository;
+        this.sysMenuRepository = sysMenuRepository;
+    }
 
 
     public Optional<SysRole> findByCode(String code) {
@@ -139,42 +136,13 @@ public class SysRoleService {
         return roleRepository.save(role);
     }
 
-    public List<SysRole> findAll() {
-        return roleRepository.findAll();
-    }
-
-    public Optional<SysRole> findById(String id) {
-        return roleRepository.findById(id);
-    }
-
-    // BaseService 方法
     @Transactional
-    public SysRole save(SysRole input, List<String> requestKeys) throws Exception {
+    public SysRole save(SysRole input, List<String> requestKeys) {
         if (input.isNew()) {
-            return roleRepository.save(input);
+            return repository.save(input);
         }
 
-        // 由于updateField方法不存在，我们直接使用save方法更新
-        return roleRepository.save(input);
-    }
-
-    public Page<SysRole> findAll(Specification<SysRole> spec, Pageable pageable) {
-        return roleRepository.findAll(spec, pageable);
-    }
-
-    public List<SysRole> findAll(Sort sort) {
-        return roleRepository.findAll(sort);
-    }
-
-    public List<SysRole> findAll(Specification<SysRole> s, Sort sort) {
-        return roleRepository.findAll(s, sort);
-    }
-
-    public Spec<SysRole> spec() {
-        return Spec.of();
-    }
-
-    public SysRole save(SysRole t) {
-        return roleRepository.save(t);
+        repository.updateField(input, requestKeys);
+        return repository.findById(input.getId()).orElse(null);
     }
 }

@@ -4,10 +4,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ArrayTool;
+import io.github.jiangood.openadmin.util.IpTool;
+import io.github.jiangood.openadmin.util.RequestTool;
+import io.github.jiangood.openadmin.framework.auth.LoginTool;
+import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.modules.system.service.SysLogService;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
@@ -22,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Aspect
 @Component
@@ -29,20 +36,22 @@ import java.text.SimpleDateFormat;
 public class LogAspect {
 
 
-    private static ObjectWriter writer;
+    private static final ObjectWriter writer;
+
+    static {
+        ObjectMapper om = new ObjectMapper();
+        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        writer = om.writerWithDefaultPrettyPrinter();
+    }
+
     @Resource
     SysLogService logService;
 
     // 主要是为了不保存空字段
     @SneakyThrows
     private static String toJson(Object obj) {
-        if (writer == null) {
-            ObjectMapper om = new ObjectMapper();
-            om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-            om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-            om.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-            writer = om.writerWithDefaultPrettyPrinter();
-        }
         if (obj == null) {
             return null;
         }
@@ -64,11 +73,37 @@ public class LogAspect {
         } finally {
             if (result instanceof AjaxResult rs) {
                 long duration = System.currentTimeMillis() - startTime;
-                logService.saveOperationLog(joinPoint, duration, params, rs);
+                logService.saveOperationLogAsync(buildLog(joinPoint, duration, params, rs));
             }
         }
 
         return result;
+    }
+
+    private SysLog buildLog(JoinPoint joinPoint, long duration, String params, AjaxResult result) {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+        Log methodAnn = method.getAnnotation(Log.class);
+
+        LoginUser loginUser = LoginTool.getUser();
+        HttpServletRequest request = RequestTool.currentRequest();
+        String ip = IpTool.getIp(request);
+
+        SysLog sysLog = new SysLog();
+        sysLog.setOperation(methodAnn.value());
+        sysLog.setIp(ip);
+        sysLog.setOperationTime(new Date());
+        sysLog.setDuration((int) duration);
+        sysLog.setParams(params);
+        sysLog.setSuccess(result.isSuccess());
+        if (!result.isSuccess()) {
+            sysLog.setError(result.getMessage());
+        }
+        if (loginUser != null) {
+            sysLog.setUserId(loginUser.getId());
+            sysLog.setUsername(loginUser.getName());
+        }
+        return sysLog;
     }
 
     private String getParams(JoinPoint joinPoint) {

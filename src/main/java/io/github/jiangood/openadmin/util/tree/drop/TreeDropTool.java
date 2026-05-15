@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util.tree.drop;
 
-import io.github.jiangood.openadmin.util.dto.antd.DropEvent;
-import io.github.jiangood.openadmin.util.dto.antd.TreeOption;
+import io.github.jiangood.openadmin.util.dto.DropEvent;
+import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import org.springframework.util.Assert;
 

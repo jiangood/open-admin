@@ -11,7 +11,7 @@ import cn.hutool.http.HttpUtil;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.ImgTool;
-import io.github.jiangood.openadmin.util.enums.MaterialType;
+import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.file.FileOperator;
@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -156,22 +157,29 @@ public class SysFileService {
     public SysFile uploadFile(InputStream is, String originalFilename, long size, String tradeNo) throws Exception {
         log.info("上传文件:{} 大小:{}", originalFilename, FileUtil.readableFileSize(size));
 
-        // 获取文件后缀
+        // 获取文件后缀并校验真实类型
         String suffix = null;
         if (ObjectUtil.isNotEmpty(originalFilename)) {
             suffix = StrUtil.subAfter(originalFilename, ".", true);
         }
 
-        if (StrUtil.isEmpty(suffix)) {
-            Assert.state(is.markSupported(), "输入流必须支持标记");
-            is.mark(64);
-            suffix = FileTypeUtil.getType(is);
-            is.reset();
+        Assert.state(is.markSupported(), "输入流必须支持标记");
+        is.mark(64);
+        String magicType = FileTypeUtil.getType(is);
+        is.reset();
+
+        // 始终用 magic byte 校验：阻断可执行文件伪装成图片/文档
+        if (StrUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
+            throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
+        }
+
+        if (StrUtil.isEmpty(suffix) && StrUtil.isNotEmpty(magicType)) {
+            suffix = magicType;
             originalFilename += '.' + suffix;
         }
 
         Assert.hasText(suffix, "解析后缀失败");
-        Assert.state(systemProperties.getAllowUploadFiles().contains(suffix), "文件格式" + suffix + "不允许上传");
+        Assert.state(systemProperties.getFile().getAllowUpload().contains(suffix), "文件格式" + suffix + "不允许上传");
 
         String id = IdTool.uuidV7();
 
@@ -308,6 +316,11 @@ public class SysFileService {
         }
 
         return fileOperator.exist(file.getObjectName());
+    }
+
+    private static boolean isBlockedMagicType(String magicType) {
+        return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js")
+                .contains(magicType);
     }
 
     private String genObjectName(String id, String suffix, Integer size) {

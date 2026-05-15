@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.framework.config;
 
 
-import io.github.jiangood.openadmin.framework.lifecycle.OpenLifecycleBeforeJpaInit;
 import io.github.jiangood.openadmin.util.jdbc.DbTool;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -31,6 +30,10 @@ public class DbConfig {
         return new PreDdlDataSourceScriptDatabaseInitializer(ds,db,beforeJpaInitList);
     }
 
+    /**
+     * 在 JPA DDL 之前执行 {@link OpenLifecycleBeforeJpaInit} 钩子。
+     * 不执行任何 SQL 脚本（{@code super(dataSource, null)}），仅用于生命周期回调。
+     */
     public static class PreDdlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatabaseInitializer {
         private final List<OpenLifecycleBeforeJpaInit> lifecycleBeforeJpaInitList;
         private final DbTool db;

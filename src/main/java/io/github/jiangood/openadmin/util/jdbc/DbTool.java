@@ -40,6 +40,10 @@ public class DbTool {
         return this.execute("DROP TABLE IF EXISTS " + tableName);
     }
 
+    public int renameTable(String oldName, String newName) {
+        return this.execute("ALTER TABLE " + oldName + " RENAME TO " + newName);
+    }
+
     public int createTable(Class<?> cls) {
         return this.createTable(cls, StrUtil.toUnderlineCase(cls.getSimpleName()));
     }

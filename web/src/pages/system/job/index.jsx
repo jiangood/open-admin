@@ -195,7 +195,7 @@ export default class extends React.Component {
 
             <Modal title='作业调度'
                    open={this.state.formOpen}
-                   destroyOnHidden
+                   destroyOnClose
                    width={800}
                    onOk={() => this.formRef.current.submit()}
                    onCancel={() => this.setState({formOpen: false})}
@@ -254,7 +254,7 @@ export default class extends React.Component {
                    onCancel={() => this.setState({executeRecordOpen: false})}
                    footer={null}
                    width={1024}
-                   destroyOnHidden
+                   destroyOnClose
             >
                 <ProTable columns={[{
                     title: '开始时间',

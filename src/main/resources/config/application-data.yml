@@ -79,7 +79,7 @@ data:
             - {name: 分配权限, code: grant-permission}
         - id: sys-manual
           name: 操作手册
-          path: /system/sysManual
+          path: /system/manual
           icon: CopyOutlined
           perms:
             - {name: 查看, code: query}

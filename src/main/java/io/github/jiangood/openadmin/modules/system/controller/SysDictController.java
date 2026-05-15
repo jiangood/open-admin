@@ -1,10 +1,10 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.framework.config.argument.RequestBodyKeys;
+import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.datadefinition.DictDefinition;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
-import io.github.jiangood.openadmin.util.dto.antd.Option;
+import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.modules.system.dto.DictItemVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.service.SysDictItemService;

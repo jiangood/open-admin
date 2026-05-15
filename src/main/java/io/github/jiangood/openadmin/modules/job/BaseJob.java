@@ -4,7 +4,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobExecuteRecordRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
-import io.github.jiangood.openadmin.modules.logviewer.file.FileLogTool;
+import io.github.jiangood.openadmin.modules.logviewer.util.FileLogTool;
 import jakarta.annotation.Resource;
 import org.quartz.*;
 import org.slf4j.Logger;

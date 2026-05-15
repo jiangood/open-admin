@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.perm;
 
+import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.security.access.AccessDeniedException;
@@ -29,7 +30,10 @@ public class PermissionAspect {
             return false;
         }
 
-        // 检查用户是否拥有指定权限
+        if (authentication.getPrincipal() instanceof LoginUser loginUser) {
+            return loginUser.getPermissions().contains(permission);
+        }
+
         return authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(permission));
     }

@@ -2,11 +2,9 @@ package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.util.AesTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
@@ -34,11 +32,11 @@ public class SystemProperties {
     /**
      * 是否开启验证码登录
      */
-    private boolean captcha = false;
+    private boolean captchaEnable = true;
     /**
-     * 验证码类型
+     * 允许的跨域来源，仅在 prod 环境生效（dev 环境允许通配符）
      */
-    private CaptchaType captchaType;
+    private List<String> allowedOrigins;
     /**
      * 最大并发会话数， 即同时登录用户数
      */
@@ -78,10 +76,6 @@ public class SystemProperties {
      */
     private String dataFileDir = "/data/";
     /**
-     * 允许上传文件的后缀， 如 docx
-     */
-    private String allowUploadFiles = "docx,xlsx,pdf,png,jpg,jpeg,mp3,mp4,wav";
-    /**
      * session空闲时间（分钟），超过该时间则登录失效
      */
     private int sessionIdleTime = 180;
@@ -93,10 +87,6 @@ public class SystemProperties {
      * 登录异常最大次数， 超过则锁定
      */
     private int loginLockMaxAttempts = 10;
-    /**
-     * 本地上传文件路径
-     */
-    private String fileUploadPath = "/home/files";
     /**
      * 定时任务，全局开关 , 某些情况如开发时，可按需关闭
      */
@@ -111,16 +101,49 @@ public class SystemProperties {
      */
     private boolean printGlobalException = true;
 
+    /**
+     * 数据迁移时是否直接删除旧表（true=删除, false=重命名备份）
+     */
+    private boolean migrationDropOldTables = false;
+
     private String defaultPassword = RandomUtil.randomString(16);
 
     /**
-     * AesTool的密钥，默认AesTool为随机生成
+     * 文件存储配置
      */
-    private String aesKey;
+    private FileStorage file = new FileStorage();
 
+    @Data
+    public static class FileStorage {
 
-    private String rsaPublicKey;
-    private String rsaPrivateKey;
+        /**
+         * 存储类型: local, minio
+         */
+        private String storeType = "local";
+
+        /**
+         * 本地上传文件路径
+         */
+        private String uploadPath = "/home/files";
+
+        /**
+         * 允许上传文件的后缀，如 docx
+         */
+        private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,mp3,mp4,wav";
+
+        /**
+         * Minio 配置
+         */
+        private Minio minio = new Minio();
+
+        @Data
+        public static class Minio {
+            private String url;
+            private String accessKey;
+            private String secretKey;
+            private String bucketName;
+        }
+    }
 
 
 
@@ -132,14 +155,4 @@ public class SystemProperties {
         return url;
     }
 
-    public enum CaptchaType {
-        MATH, RANDOM
-    }
-
-    @EventListener(ApplicationReadyEvent.class)
-    public void onApplicationReady() {
-        if(aesKey != null){
-            AesTool.initKey(aesKey);
-        }
-    }
 }

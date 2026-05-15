@@ -63,40 +63,16 @@ public interface XxxRepository extends BaseRepository<Xxx, String> {
 ```java
 package io.github.jiangood.openadmin.modules.xxx.service;
 
-import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.modules.xxx.repository.XxxRepository;
+import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.xxx.entity.Xxx;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import io.github.jiangood.openadmin.modules.xxx.repository.XxxRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
-@RequiredArgsConstructor
 @Service
-public class XxxService {
+public class XxxService extends BaseService<Xxx> {
 
-    private final XxxRepository xxxRepository;
-
-    public Page<Xxx> findAll(Spec<Xxx> spec, Pageable pageable) {
-        return xxxRepository.findAll(spec, pageable);
-    }
-
-    public List<Xxx> findAll(Spec<Xxx> spec, Sort sort) {
-        return xxxRepository.findAll(spec, sort);
-    }
-
-    @Transactional
-    public Xxx save(Xxx input) throws Exception {
-        return xxxRepository.save(input);
-    }
-
-    @Transactional
-    public void deleteById(String id) {
-        xxxRepository.deleteById(id);
+    public XxxService(XxxRepository xxxRepository) {
+        super(xxxRepository);
     }
 }
 ```
@@ -261,4 +237,4 @@ data:
 - 确保代码完整、可运行
 - 检查 import 是否正确
 - 框架已有功能不要重复开发
-- 使用构造器注入（`@RequiredArgsConstructor`），禁止 `@Resource` 字段注入
+- 使用构造器注入，禁止 `@Resource` 字段注入；有 `BaseService<T>` 时继承并用 `super(repository)` 传入

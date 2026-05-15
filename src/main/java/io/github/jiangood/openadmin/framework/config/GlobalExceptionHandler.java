@@ -80,6 +80,9 @@ public class GlobalExceptionHandler {
     public AjaxResult throwable(Throwable e, HttpServletRequest request) {
         log.error(">>> 服务器运行异常 ", e);
         log.info("请求地址 {}", request.getRequestURI());
+        if (!systemProperties.isPrintGlobalException()) {
+            return AjaxResult.err().msg("服务器忙，请稍后重试");
+        }
         return AjaxResult.err().msg(ExceptionToMessageTool.convert(e));
     }
 
@@ -95,7 +98,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public AjaxResult missParamException(MissingServletRequestParameterException e) {
-        log.error(">>> 请求参数异常，具体信息为：{}", e.getMessage());
+        log.warn("请求参数缺失：{}", e.getMessage());
         String parameterName = e.getParameterName();
         String message = StrUtil.format("缺少请求的参数{}", parameterName);
         return AjaxResult.err().code(500).msg(message);
@@ -103,7 +106,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public AjaxResult methodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.error(">>> 请求参数未通过校验：{}", e.getMessage());
+        log.warn("请求参数未通过校验：{}", e.getMessage());
 
         StringBuilder sb = new StringBuilder();
         for (ObjectError error : e.getAllErrors()) {
@@ -148,8 +151,7 @@ public class GlobalExceptionHandler {
         if (systemProperties.isPrintGlobalException()) {
             log.error("打印异常已开启,以下是异常详细信息", e);
         }
-
-        return AjaxResult.err().msg(e.getMessage());
+        return AjaxResult.err().msg(ExceptionToMessageTool.convert(e));
     }
 
 

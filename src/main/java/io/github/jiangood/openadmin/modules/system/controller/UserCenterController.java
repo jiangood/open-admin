@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
-import io.github.jiangood.openadmin.framework.common.LoginTool;
+import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.request.UpdatePwdReq;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterInfo;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;

@@ -8,10 +8,11 @@ import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefiniti
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.util.RsaTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
-import io.github.jiangood.openadmin.util.dto.antd.MenuItem;
+import io.github.jiangood.openadmin.util.dto.MenuItem;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
-import io.github.jiangood.openadmin.framework.common.dto.LoginDataVO;
-import io.github.jiangood.openadmin.framework.common.dto.LoginInfoVO;
+import io.github.jiangood.openadmin.framework.auth.LoginTool;
+import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
+import io.github.jiangood.openadmin.framework.auth.dto.LoginInfoVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.*;
@@ -29,7 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
 @Slf4j
 @RestController
 @RequestMapping("admin")
@@ -43,14 +43,10 @@ public class SysCommonController {
     private SysUserMessageService sysUserMessageService;
     private SysDictService sysDictService;
 
-    /**
-     * 站点信息， 非登录情况下使用
-     */
     @GetMapping("public/site-info")
     public AjaxResult siteInfo() {
         Dict data = new Dict();
-        data.put("captcha", systemProperties.isCaptcha());
-        data.put("captchaType", systemProperties.getCaptchaType());
+        data.put("captcha", systemProperties.isCaptchaEnable());
         data.put("copyright", systemProperties.getCopyright());
         data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
         data.put("showLogo", systemProperties.isShowLogo());
@@ -59,19 +55,13 @@ public class SysCommonController {
 
         data.put("waterMark", systemProperties.isWaterMark());
 
-
         data.put("rsaPublicKey", RsaTool.getPublicKey());
 
-        // 登录背景图
         data.put("loginBackground", systemProperties.getLoginBackground());
 
         return AjaxResult.ok().data(data);
     }
 
-    /**
-     * 检查是否登录
-     * 检查是否需要修改密码
-     */
     @GetMapping("public/check-login")
     public AjaxResult checkLogin(HttpServletRequest request) {
         LoginDataVO r = new LoginDataVO();
@@ -88,9 +78,8 @@ public class SysCommonController {
             return AjaxResult.err("未登录");
         }
         r.setLogin(true);
-        r.setNeedUpdatePwd(false); // TODO
+        r.setNeedUpdatePwd(false);
         r.setDictInfo(sysDictService.getAllItems());
-
 
         List<String> permissions = LoginTool.getPermissions();
         List<String> roles = LoginTool.getRoles();
@@ -111,9 +100,6 @@ public class SysCommonController {
         return AjaxResult.ok().data(r);
     }
 
-    /**
-     * 前端左侧菜单调用， 以展示顶部及左侧菜单
-     */
     @GetMapping("menu-info")
     public AjaxResult menuInfo() {
         String account = LoginTool.getUser().getUsername();
@@ -136,8 +122,6 @@ public class SysCommonController {
                     item.setIcon(def.getIcon());
                     item.setPath(StrUtil.nullToEmpty(def.getPath()));
 
-
-
                     if (def.getPath() != null) {
                         pathMenuMap.put(def.getPath(), def);
                     }
@@ -146,16 +130,12 @@ public class SysCommonController {
                     return item;
                 }).toList();
 
-        // ======== 开始转换 ===========
         List<MenuItem> tree = TreeTool.buildTree(list, MenuItem::getKey, MenuItem::getParentKey, MenuItem::getChildren, MenuItem::setChildren);
         Dict data = new Dict();
         data.put("menuTree", tree);
         data.put("menuMap", menuMap);
         data.put("pathMenuMap", pathMenuMap);
 
-
         return AjaxResult.ok().data(data);
     }
-
-
 }
