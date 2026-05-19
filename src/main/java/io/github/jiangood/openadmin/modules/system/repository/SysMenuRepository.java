@@ -11,7 +11,5 @@ public interface SysMenuRepository {
 
     List<MenuDefinition> findAll();
 
-    List<MenuDefinition> findAllEnabled();
-
     List<MenuDefinition> findAllById(List<String> ids);
 }

@@ -103,10 +103,17 @@ class YmlToolDataPropertiesTest {
         assertEquals("sys-user", user.getId());
         assertEquals("/system/user", user.getPath());
 
-        // perms 字段标注了 @JsonIgnore，解析时被 Jackson 忽略，默认空列表
-        assertTrue(user.getPerms().isEmpty());
-        assertTrue(user.getPermNames().isEmpty());
-        assertTrue(user.getPermCodes().isEmpty());
+        assertEquals(2, user.getPerms().size());
+        assertEquals("查询", user.getPerms().get(0).getName());
+        assertEquals("query", user.getPerms().get(0).getCode());
+        assertEquals("新增", user.getPerms().get(1).getName());
+        assertEquals("save", user.getPerms().get(1).getCode());
+        assertEquals(2, user.getPermNames().size());
+        assertTrue(user.getPermNames().contains("查询"));
+        assertTrue(user.getPermNames().contains("新增"));
+        assertEquals(2, user.getPermCodes().size());
+        assertEquals("sys-user:query", user.getPermCodes().get(0));
+        assertEquals("sys-user:save", user.getPermCodes().get(1));
 
         MenuDefinition role = children.get(1);
         assertEquals("sys-role", role.getId());

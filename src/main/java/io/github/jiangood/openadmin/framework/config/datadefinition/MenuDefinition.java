@@ -27,7 +27,6 @@ public class MenuDefinition {
 
     private List<MenuDefinition> children;
 
-    @JsonIgnore
     private List<PermDefinition> perms = new ArrayList<>();
 
     private String messageCountUrl;
