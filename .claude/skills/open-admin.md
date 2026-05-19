@@ -419,10 +419,10 @@ export default class extends React.Component {
 
 ### YAML 菜单定义
 
-业务项目在 `src/main/resources/config/application-data-{profile}.yml` 中定义自己的菜单。框架的 `SysMenuRepositoryYamlImpl` 支持多文件合并，框架默认菜单与业务菜单会自动合并。
+业务项目在 `src/main/resources/config/menu-lib-{profile}.yml` 中定义自己的菜单。框架的 `SysMenuRepositoryYamlImpl` 支持多文件合并，框架默认菜单与业务菜单会自动合并。
 
 ```yaml
-# src/main/resources/config/application-data-local.yml
+# src/main/resources/config/menu-lib-local.yml
 data:
   menus:
     - id: customer

@@ -13,7 +13,7 @@
 
 ## YAML 配置
 
-系统初始化时通过 `application-data.yml` 预设字典数据：
+系统初始化时通过 `dict-lib.yml` 预设字典数据：
 
 ```yaml
 data:

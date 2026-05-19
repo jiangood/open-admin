@@ -13,7 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * 测试 YmlTool 对 application-data.yml 格式（data: 前缀下的菜单和字典）的解析
+ * 测试 YmlTool 对 menu-lib.yml / dict-lib.yml 格式（data: 前缀下的菜单和字典）的解析
  */
 class YmlToolDataPropertiesTest {
 

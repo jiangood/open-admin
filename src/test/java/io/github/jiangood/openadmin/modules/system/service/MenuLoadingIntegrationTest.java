@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.framework.config.datadefinition.DataProperties;
-import io.github.jiangood.openadmin.framework.config.datadefinition.DataPropertiesFactory;
 import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -36,20 +34,6 @@ class MenuLoadingIntegrationTest {
 
     @BeforeEach
     void setUp() {
-    }
-
-    @Test
-    void testDataPropertiesFactory_loadsMenus() {
-        DataProperties props = DataPropertiesFactory.getInstance();
-        List<MenuDefinition> menus = props.getMenus();
-
-        assertNotNull(menus);
-        assertFalse(menus.isEmpty(), "菜单列表不应该为空");
-
-        System.out.println("加载的菜单数量: " + menus.size());
-        menus.forEach(menu -> {
-            System.out.println("菜单: " + menu.getId() + " - " + menu.getName());
-        });
     }
 
     @Test

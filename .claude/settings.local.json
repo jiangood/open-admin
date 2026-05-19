@@ -3,7 +3,8 @@
     "allow": [
       "Bash(mvn compile *)",
       "Bash(git ls-files *)",
-      "Bash(xxd \"D:/ws/open-admin/src/main/resources/config/application-data.yml\")",
+      "Bash(xxd \"D:/ws/open-admin/src/main/resources/config/dict-lib.yml\")",
+      "Bash(xxd \"D:/ws/open-admin/src/main/resources/config/menu-lib.yml\")",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Skill(superpowers:brainstorming)",
