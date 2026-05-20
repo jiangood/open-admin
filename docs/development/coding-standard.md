@@ -327,7 +327,7 @@ public class XxxController {
 
 ##### YAML 权限定义
 
-权限在 `menu-lib.yml` 中通过 `perms` 对象列表定义：
+权限在 `data/menu-lib.yml` 中通过 `perms` 对象列表定义：
 
 ```yaml
 data:

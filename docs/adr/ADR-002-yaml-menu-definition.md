@@ -19,7 +19,7 @@ open-admin 需要管理前端菜单树和后端权限码。传统做法是将菜
 
 ### 实现细节
 
-- 菜单定义放在 `config/menu-lib*.yml` 文件中，支持多文件通配合并。字典预设数据改用 `data/dict-init.sql` 在启动时初始化。
+- 菜单定义放在 `data/menu-lib*.yml` 文件中，支持多文件通配合并。字典预设数据改用 `data/dict-init.sql` 在启动时初始化。
 - 框架提供默认菜单（系统管理），业务项目通过同名 ID 覆盖或扩展。
 - 使用 `DataPropertiesFactory` 在应用启动时解析 YAML，合并多文件配置，缓存为 JSON。
 - 通过 `SysMenuRepositoryYamlImpl` 提供菜单查询接口，与数据库查询接口互换。
@@ -27,7 +27,7 @@ open-admin 需要管理前端菜单树和后端权限码。传统做法是将菜
 ### 关键代码
 
 ```yaml
-# config/menu-lib.yml
+# data/menu-lib.yml
 data:
   menus:
     - id: sys

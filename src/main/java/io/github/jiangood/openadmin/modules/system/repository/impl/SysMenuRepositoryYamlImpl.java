@@ -33,7 +33,7 @@ public class SysMenuRepositoryYamlImpl implements SysMenuRepository {
     private static List<MenuDefinition> loadMenus() {
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources("classpath*:config/menu*.yml");
+            Resource[] resources = resolver.getResources("classpath*:data/menu*.yml");
 
             List<MenuDefinition> allMenus = new ArrayList<>();
             YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
@@ -60,7 +60,7 @@ public class SysMenuRepositoryYamlImpl implements SysMenuRepository {
 
             return mergeMenu(allMenus);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load menu-lib*.yml", e);
+            throw new RuntimeException("Failed to load data/menu*.yml", e);
         }
     }
 
@@ -105,8 +105,5 @@ public class SysMenuRepositoryYamlImpl implements SysMenuRepository {
         return menus.stream().filter(t -> ids.contains(t.getId())).toList();
     }
 
-    public static void main(String[] args) {
-        List<MenuDefinition> menuDefinitionList = loadMenus();
-        System.out.println(menuDefinitionList);
-    }
+
 }

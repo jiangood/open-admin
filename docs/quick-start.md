@@ -80,7 +80,7 @@ pnpm dev
 
 ## 配置菜单
 
-`src/main/resources/config/menu-lib.yml`:
+`src/main/resources/data/menu-lib.yml`:
 
 ```yaml
 data:
