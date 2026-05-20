@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.util.tree.TreeTool;
-import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;

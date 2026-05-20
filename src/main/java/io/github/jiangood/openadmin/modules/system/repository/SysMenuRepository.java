@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.repository;
 
 
-import io.github.jiangood.openadmin.framework.config.datadefinition.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 
 import java.util.List;
 

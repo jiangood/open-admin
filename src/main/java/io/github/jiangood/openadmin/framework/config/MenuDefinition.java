@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.framework.config.datadefinition;
+package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;

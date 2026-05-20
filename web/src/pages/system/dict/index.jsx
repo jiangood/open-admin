@@ -92,10 +92,6 @@ export default class extends React.Component {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => {
-                if(!record.id){ // 非数据库定义的不让修改
-                    return
-                }
-
                 return (
                     <ButtonList>
                         <Button size='small' perm='sys-dict:update'

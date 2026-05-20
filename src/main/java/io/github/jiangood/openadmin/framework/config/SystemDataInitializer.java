@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
+import io.github.jiangood.openadmin.util.jdbc.DbTool;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -11,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -29,6 +32,7 @@ public class SystemDataInitializer implements CommandLineRunner {
     private final SysRoleService sysRoleService;
     private final SysUserRepository sysUserRepository;
     private final SystemProperties systemProperties;
+    private final DbTool dbTool;
     private final List<OpenLifecycle> lifecycles;
 
     @Override
@@ -38,12 +42,31 @@ public class SystemDataInitializer implements CommandLineRunner {
         log.info("执行初始化程序： {}", getClass().getName());
         long time = System.currentTimeMillis();
 
+        initDict();
         SysRole adminRole = sysRoleService.initDefaultAdmin();
         initUser(adminRole);
 
         lifecycles.forEach(OpenLifecycle::afterDataInit);
 
         log.info("系统初始化耗时：{}", System.currentTimeMillis() - time);
+    }
+
+    private void initDict() throws Exception {
+        Integer count = dbTool.findInteger("SELECT COUNT(*) FROM sys_dict_item");
+        if (count != null && count > 0) {
+            log.info("字典数据已存在，跳过初始化");
+            return;
+        }
+        log.info("初始化字典数据...");
+        ClassPathResource resource = new ClassPathResource("data/dict-init.sql");
+        String sql = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        for (String stmt : sql.split(";")) {
+            String trimmed = stmt.trim();
+            if (!trimmed.isEmpty()) {
+                dbTool.execute(trimmed);
+            }
+        }
+        log.info("字典数据初始化完成");
     }
 
     private void initUser(SysRole adminRole) {
