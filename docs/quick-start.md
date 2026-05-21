@@ -76,11 +76,9 @@ pnpm dev
 ### 前端
 
 1. 在 `web/src/pages/xxx/` 下创建页面组件
-2. 在 `menu-lib.yml` 中配置菜单和权限
+2. 在 `menu.yml` 中配置菜单和权限
 
-## 配置菜单
-
-`src/main/resources/data/menu-lib.yml`:
+`src/main/resources/data/menu.yml`:
 
 ```yaml
 data:
