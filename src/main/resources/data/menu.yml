@@ -1,4 +1,4 @@
-## 框架预设菜单结构。业务项目可在 menu-lib-{profile}.yml 中扩展或覆盖。
+## 框架预设菜单结构。业务项目可在同目录下加 menu-*.yml 扩展或覆盖。
 menus:
   - id: sys
     name: 系统管理
