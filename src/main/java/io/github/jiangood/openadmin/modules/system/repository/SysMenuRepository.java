@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.repository;
 
 
-import io.github.jiangood.openadmin.framework.config.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.SysMenuDef;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import java.util.List;
 public interface SysMenuRepository {
 
 
-    List<MenuDefinition> findAll();
+    List<SysMenuDef> findAll();
 
-    List<MenuDefinition> findAllById(List<String> ids);
+    List<SysMenuDef> findAllById(List<String> ids);
 }

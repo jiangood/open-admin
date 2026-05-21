@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.util.tree.TreeTool;
-import io.github.jiangood.openadmin.framework.config.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.SysMenuDef;
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -49,9 +49,9 @@ public class SysRoleService extends BaseService<SysRole> {
     }
 
     @Transactional
-    public List<MenuDefinition> ownMenu(String id) {
+    public List<SysMenuDef> ownMenu(String id) {
         SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
-        List<MenuDefinition> menuList;
+        List<SysMenuDef> menuList;
 
         if (role.isAdmin()) {
             menuList = sysMenuRepository.findAll();
@@ -59,21 +59,20 @@ public class SysRoleService extends BaseService<SysRole> {
             menuList = sysMenuRepository.findAllById(role.getMenus());
         }
 
-        // 去重排序
-        return menuList.stream().distinct().sorted(Comparator.comparing(MenuDefinition::getSeq)).toList();
+        return menuList.stream().distinct().sorted(Comparator.comparing(SysMenuDef::getSeq)).toList();
     }
 
     @Transactional
-    public List<MenuDefinition> ownMenu(Iterable<SysRole> roles) {
-        List<MenuDefinition> menuList = new LinkedList<>();
+    public List<SysMenuDef> ownMenu(Iterable<SysRole> roles) {
+        List<SysMenuDef> menuList = new LinkedList<>();
 
         for (SysRole role : roles) {
-            List<MenuDefinition> menus = this.ownMenu(role.getId());
+            List<SysMenuDef> menus = this.ownMenu(role.getId());
             menuList.addAll(menus);
         }
 
 
-        return menuList.stream().distinct().sorted(Comparator.comparing(MenuDefinition::getSeq)).toList();
+        return menuList.stream().distinct().sorted(Comparator.comparing(SysMenuDef::getSeq)).toList();
     }
 
 
@@ -122,10 +121,10 @@ public class SysRoleService extends BaseService<SysRole> {
     @Transactional
     public SysRole savePerms(String id, List<String> perms, List<String> menus) {
         // 菜单的目录也加进来
-        List<MenuDefinition> list = sysMenuRepository.findAll();
+        List<SysMenuDef> list = sysMenuRepository.findAll();
         List<String> finalMenus = new ArrayList<>();
         for (String menu : menus) {
-            List<String> pids = TreeTool.getPids(menu, list, MenuDefinition::getId, MenuDefinition::getPid);
+            List<String> pids = TreeTool.getPids(menu, list, SysMenuDef::getId, SysMenuDef::getPid);
             finalMenus.add(menu);
             finalMenus.addAll(pids);
         }

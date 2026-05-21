@@ -1,15 +1,11 @@
 package io.github.jiangood.openadmin.framework.common;
 
-import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
-import io.github.jiangood.openadmin.framework.config.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.SysMenuDef;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.util.RsaTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
-import io.github.jiangood.openadmin.util.dto.MenuItem;
-import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginInfoVO;
@@ -25,10 +21,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -43,6 +36,7 @@ public class SysCommonController {
     private SysOrgService sysOrgService;
     private SysUserMessageService sysUserMessageService;
     private SysDictService sysDictService;
+    private SysMenuService sysMenuService;
 
     @GetMapping("public/site-info")
     public AjaxResult siteInfo() {
@@ -107,55 +101,14 @@ public class SysCommonController {
             log.warn("用户未登录，无法获取菜单");
             return AjaxResult.err("用户未登录");
         }
-        
-        String account = loginUser.getUsername();
-        log.info("当前登录用户: {}", account);
 
-        SysUser user = sysUserService.findByAccount(account).orElse(null);
+        SysUser user = sysUserService.findByAccount(loginUser.getUsername()).orElse(null);
         if (user == null) {
-            log.warn("用户不存在: {}", account);
+            log.warn("用户不存在: {}", loginUser.getUsername());
             return AjaxResult.err("用户不存在");
         }
-        
-        Set<SysRole> roles = user.getRoles();
-        log.info("用户角色数量: {}", roles.size());
-        roles.forEach(role -> log.info("角色: {}({}) - isAdmin: {}", role.getName(), role.getCode(), role.isAdmin()));
-        
-        List<MenuDefinition> menuDefinitions = roleService.ownMenu(roles);
-        log.info("获取到的菜单数量: {}", menuDefinitions.size());
-        
-        if (menuDefinitions.isEmpty()) {
-            log.warn("用户没有可用菜单");
-        }
 
-        Map<String, MenuDefinition> pathMenuMap = new HashMap<>();
-        Map<String, MenuDefinition> menuMap = new HashMap<>();
-        List<MenuItem> list = menuDefinitions.stream()
-                .filter(def -> def.getDisabled() == null || !def.getDisabled())
-                .map(def -> {
-                    MenuItem item = new MenuItem();
-                    item.setKey(def.getId());
-                    Assert.notNull(def.getName(), "菜单名称不能为空");
-                    item.setLabel(def.getName());
-                    item.setTitle(def.getName().substring(0, 1));
-                    item.setParentKey(def.getPid());
-                    item.setIcon(def.getIcon());
-                    item.setPath(StrUtil.nullToEmpty(def.getPath()));
-
-                    if (def.getPath() != null) {
-                        pathMenuMap.put(def.getPath(), def);
-                    }
-                    menuMap.put(def.getId(), def);
-
-                    return item;
-                }).toList();
-
-        List<MenuItem> tree = TreeTool.buildTree(list, MenuItem::getKey, MenuItem::getParentKey, MenuItem::getChildren, MenuItem::setChildren);
-        Dict data = new Dict();
-        data.put("menuTree", tree);
-        data.put("menuMap", menuMap);
-        data.put("pathMenuMap", pathMenuMap);
-
-        return AjaxResult.ok().data(data);
+        List<SysMenuDef> userMenus = roleService.ownMenu(user.getRoles());
+        return AjaxResult.ok().data(sysMenuService.buildMenuInfo(userMenus));
     }
 }

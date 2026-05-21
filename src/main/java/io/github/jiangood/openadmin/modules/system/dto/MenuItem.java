@@ -1,7 +1,8 @@
-package io.github.jiangood.openadmin.util.dto;
+package io.github.jiangood.openadmin.modules.system.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import lombok.Data;
 
 import java.util.List;

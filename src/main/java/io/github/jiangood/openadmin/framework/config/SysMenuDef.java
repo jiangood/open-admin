@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class MenuDefinition {
+public class SysMenuDef {
 
     private String id;
 
@@ -25,7 +25,7 @@ public class MenuDefinition {
 
     private Boolean refreshOnTabClick;
 
-    private List<MenuDefinition> children;
+    private List<SysMenuDef> children;
 
     private List<PermDefinition> perms = new ArrayList<>();
 

@@ -7,7 +7,7 @@ import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropdownReq;
 import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
-import io.github.jiangood.openadmin.framework.config.MenuDefinition;
+import io.github.jiangood.openadmin.framework.config.SysMenuDef;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
@@ -117,16 +117,15 @@ public class SysRoleController {
         SysRole role = sysRoleService.findById(id).orElse(null);
         List<String> rolePerms = role.getPerms();
 
-        List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
+        List<SysMenuDef> menuList = sysRoleService.ownMenu(id);
 
-        // 将角色权限分散成map， 按菜单id为key, 拥有的权限为value
         Map<String, Collection<String>> permsMap = new HashMap<>();
-        for (MenuDefinition menuDefinition : menuList) {
-            if (CollUtil.isNotEmpty(menuDefinition.getPermCodes())) {
-                Set<String> menuPerms = new HashSet<>(menuDefinition.getPermCodes());
+        for (SysMenuDef menuDef : menuList) {
+            if (CollUtil.isNotEmpty(menuDef.getPermCodes())) {
+                Set<String> menuPerms = new HashSet<>(menuDef.getPermCodes());
 
                 List<String> ownMenuPerms = menuPerms.stream().filter(rolePerms::contains).toList();
-                permsMap.put(menuDefinition.getId(), ownMenuPerms);
+                permsMap.put(menuDef.getId(), ownMenuPerms);
             }
         }
 
@@ -143,7 +142,7 @@ public class SysRoleController {
     @HasPermission("sys-role:grant-permission")
     @RequestMapping("perm-tree-table")
     public AjaxResult menuTree() {
-        List<MenuDefinition> tree = sysMenuService.menuTree();
+        List<SysMenuDef> tree = sysMenuService.menuTree();
 
         return AjaxResult.ok().data(tree);
     }
