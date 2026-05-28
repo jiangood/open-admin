@@ -107,7 +107,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page padding>
+        return <Page>
             <ProTable
                 rowKey='uid'
                 actionRef={this.tableRef}
@@ -124,7 +124,6 @@ export default class extends React.Component {
                 }}
                 columns={this.columns}
                 showToolbarSearch={true}
-                scrollY={500}
             />
             <Modal
                 title='编辑数据字典项'

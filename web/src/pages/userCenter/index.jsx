@@ -17,7 +17,7 @@ export default class extends React.Component {
 
     render() {
         const {info} = this.state;
-        return <Page padding backgroundGray>
+        return <Page backgroundGray>
             <Row gutter={[16, 16]}>
                 <Col md={6} sm={24}>
                     <Card title='个人信息'>

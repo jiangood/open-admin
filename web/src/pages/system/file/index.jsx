@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
-import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, ProTable, SysUtils} from "../../../framework";
+import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, SysUtils} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -89,7 +89,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <>
+        return <Page>
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => {
@@ -140,7 +140,7 @@ export default class extends React.Component {
                 </Form>
             </Modal>
 
-        </>
+        </Page>
     }
 }
 

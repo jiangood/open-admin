@@ -1,6 +1,6 @@
-import React, {Fragment} from 'react';
+import React from 'react';
 import {Form, Input, Tag} from "antd";
-import {ViewText, FieldDateRange, HttpUtils, ProTable} from "../../../framework";
+import {ViewText, FieldDateRange, HttpUtils, Page, ProTable} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -54,7 +54,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <>
+        return <Page>
             <ProTable
                 request={(params) => HttpUtils.get('admin/sysLog/page', params)}
                 columns={this.columns}
@@ -66,8 +66,7 @@ export default class extends React.Component {
                     <FieldDateRange/>
                 </Form.Item>
             </ProTable>
-
-        </>
+        </Page>
     }
 
 

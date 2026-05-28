@@ -1,6 +1,6 @@
 import React from "react";
 import {Button, Card, Tabs, Tag} from "antd";
-import {ProTable} from "../../framework";
+import {HttpUtils, Page, ProTable} from "../../framework";
 
 export default class extends React.Component {
 
@@ -54,7 +54,8 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Card variant={"borderless"}>
+        return <Page>
+            <Card variant={"borderless"}>
 
             <Tabs defaultActiveKey="0" destroyOnClose
             >
@@ -99,5 +100,6 @@ export default class extends React.Component {
             </Tabs>
 
         </Card>
+        </Page>
     }
 }

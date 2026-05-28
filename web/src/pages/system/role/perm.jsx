@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
-import {ArrayUtils, HttpUtils, PageUtils} from "../../../framework";
+import {ArrayUtils, HttpUtils, Page, PageUtils} from "../../../framework";
 export default class extends React.Component {
 
 
@@ -89,8 +89,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <>
-
+        return <Page>
 
             <Card title='角色权限设置' loading={this.state.loading}
                   variant={"borderless"}
@@ -102,6 +101,6 @@ export default class extends React.Component {
                        expandable={{defaultExpandAllRows: true}}
                 ></Table>
             </Card>
-        </>
+        </Page>
     }
 }

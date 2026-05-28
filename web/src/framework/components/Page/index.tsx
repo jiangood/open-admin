@@ -2,29 +2,26 @@ import React from "react";
 import './index.less'
 import {ThemeUtils} from "../../utils";
 
-/**
- * 上下间隔
- */
-export class Page extends React.Component {
-
-    static defaultProps = {
-        padding: false,
-        backgroundGray:false
-    }
-
-    render() {
-        const style = {}
-        if(this.props.padding){
-            style.padding = 16
-        }
-        if(this.props.backgroundGray){
-            style.backgroundColor = ThemeUtils.getColor("background-color")
-        }
-
-
-        return <div className={'tmgg-page'}  style={style}>
-            {this.props.children}
-        </div>
-    }
-
+interface PageProps {
+    padding?: boolean;
+    backgroundGray?: boolean;
+    debug?: boolean;
+    children?: React.ReactNode;
 }
+
+export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = false, debug = false, children }) => {
+    const style: React.CSSProperties = {};
+    if (padding) {
+        style.padding = 16;
+    }
+    if (backgroundGray) {
+        style.backgroundColor = ThemeUtils.getColor("background-color");
+    }
+    if (debug) {
+        style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
+    }
+
+    return <div className={'tmgg-page'} style={style}>
+        {children}
+    </div>
+};

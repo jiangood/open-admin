@@ -112,7 +112,7 @@ export default class extends React.Component {
                 <HeaderRight/>
             </Header>
 
-            <Layout style={{height: '100%'}}>
+            <Layout style={{flex: 1, overflow: 'hidden'}}>
                 <Sider id='left-sider'
                        collapsible
                        breakpoint={'md'}

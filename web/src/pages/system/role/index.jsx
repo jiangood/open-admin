@@ -180,7 +180,7 @@ export default class extends React.Component {
     }
 
     render() {
-        return <Page padding>
+        return <Page>
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => {

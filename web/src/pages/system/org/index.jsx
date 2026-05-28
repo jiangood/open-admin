@@ -96,7 +96,7 @@ export default class extends React.Component {
         const {formValues} = this.state;
         const disabled = formValues == null;
         const params = this.state.params;
-        return <Page padding>
+        return <Page>
             <Card>
                 <Space>
 
