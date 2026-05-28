@@ -53,6 +53,15 @@ public class SysMenuService {
                 }).toList();
 
         List<MenuItem> tree = TreeTool.buildTree(list, MenuItem::getKey, MenuItem::getParentKey, MenuItem::getChildren, MenuItem::setChildren);
+
+        TreeTool.walk(tree, MenuItem::getChildren, item -> {
+            if (item.getChildren() != null && !item.getChildren().isEmpty()) {
+                item.setType("directory");
+            } else {
+                item.setType("menu");
+            }
+        });
+
         Dict data = new Dict();
         data.put("menuTree", tree);
         data.put("menuMap", menuMap);

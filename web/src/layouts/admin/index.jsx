@@ -25,6 +25,9 @@ export default class extends React.Component {
 
         currentMenuKey: null,
 
+        topMenus: [],
+        sideMenus: [],
+        activeTopMenuKey: null,
 
         siteInfo: {},
 
@@ -55,26 +58,130 @@ export default class extends React.Component {
                 item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 12}}/>
             })
 
+            const {topMenus} = this.classifyMenus(menuTree);
+
+            // 确定当前活跃的顶部菜单和侧边菜单
+            let activeTopMenuKey = null;
+            let sideMenus = [];
+            let currentMenuKey = null;
+
             if (pathname !== "" && pathname !== "/") {
-                const menu = pathMenuMap[pathname]
-                if (menu) {
-                    this.setState({currentMenuKey: menu.key})
+                const menuDef = pathMenuMap[pathname];
+                if (menuDef) {
+                    currentMenuKey = menuDef.id;
+                    const matched = this.findActiveTopMenu(topMenus, menuDef, menuMap);
+                    if (matched) {
+                        activeTopMenuKey = matched.key;
+                        sideMenus = matched.children || [];
+                    }
                 }
             }
 
-            this.setState({menuTree, pathMenuMap})
+            // 默认选中第一个顶部菜单
+            if (!activeTopMenuKey && topMenus.length > 0) {
+                activeTopMenuKey = topMenus[0].key;
+                sideMenus = topMenus[0].children || [];
+                if (!currentMenuKey && sideMenus.length > 0) {
+                    currentMenuKey = sideMenus[0].key;
+                    if (sideMenus[0].path) {
+                        history.push(sideMenus[0].path);
+                    }
+                }
+            }
+
+            this.setState({menuTree, pathMenuMap, topMenus, sideMenus, activeTopMenuKey, currentMenuKey})
 
             this.loadBadge(menuMap)
         }).catch(err => {
             console.error('加载菜单失败:', err)
-            // 即使菜单加载失败也不要一直处于加载状态
-            this.setState({menuTree: []})
+            this.setState({menuTree: [], topMenus: [], sideMenus: []})
         }).finally(()=>{
             this.setState({menuLoading: false})
         })
     }
     actionRef = React.createRef()
 
+    classifyMenus = (menuTree) => {
+        const topMenus = [];
+        const leafRootNodes = [];
+
+        (menuTree || []).forEach(node => {
+            const isDir = node.type === 'directory' || (node.children && node.children.length > 0);
+            if (isDir) {
+                topMenus.push(node);
+            } else {
+                leafRootNodes.push(node);
+            }
+        });
+
+        if (leafRootNodes.length > 0) {
+            const defaultGroup = {
+                key: '_default_group',
+                label: '默认',
+                title: '默',
+                icon: <NamedIcon name="AppstoreOutlined" style={{fontSize: 12}}/>,
+                children: leafRootNodes,
+                type: 'directory',
+            };
+            topMenus.unshift(defaultGroup);
+        }
+
+        return {topMenus};
+    }
+
+    findActiveTopMenu = (topMenus, menuDef, menuMap) => {
+        if (!menuDef) return null;
+
+        // 从 menuDef 的 pid 链向上查找匹配的 topMenu
+        let pid = menuDef.pid || menuDef.parentKey;
+        while (pid) {
+            const match = topMenus.find(t => t.key === pid);
+            if (match) return match;
+            const parent = menuMap[pid];
+            pid = parent ? (parent.pid || parent.parentKey) : null;
+        }
+        return null;
+    }
+
+    onTopMenuClick = ({key}) => {
+        const topMenu = this.state.topMenus.find(t => t.key === key);
+        if (!topMenu) return;
+
+        const sideMenus = topMenu.children || [];
+        this.setState({activeTopMenuKey: key, sideMenus});
+
+        if (sideMenus.length > 0 && sideMenus[0].path) {
+            this.setState({currentMenuKey: sideMenus[0].key});
+            history.push(sideMenus[0].path);
+        }
+    }
+
+    onLeftMenuClick = ({key}) => {
+        const menu = this.state.menuMap[key];
+        if (!menu) return;
+        const {path} = menu;
+        this.setState({currentMenuKey: key});
+        history.push(path);
+    }
+
+    renderTopMenu = () => {
+        if (this.state.menuLoading) return null;
+        const {topMenus, activeTopMenuKey} = this.state;
+        if (!topMenus || topMenus.length === 0) return null;
+        return (
+            <nav className="top-nav">
+                {topMenus.map(item => (
+                    <span
+                        key={item.key}
+                        className={'top-nav-item' + (item.key === activeTopMenuKey ? ' active' : '')}
+                        onClick={() => this.onTopMenuClick({key: item.key})}
+                    >
+                        {item.label}
+                    </span>
+                ))}
+            </nav>
+        );
+    }
 
     loadBadge = menuMap => {
         for (let id in menuMap) {
@@ -109,6 +216,7 @@ export default class extends React.Component {
                     </h3>
 
                 </div>
+                {this.renderTopMenu()}
                 <HeaderRight/>
             </Header>
 
@@ -139,17 +247,12 @@ export default class extends React.Component {
         if(this.state.menuLoading){
             return <div style={{padding: 16}}><Skeleton active title={false} paragraph={{rows: 8}} /></div>;
         }
-        return <Menu items={this.state.menuTree}
+        return <Menu items={this.state.sideMenus}
                      theme='dark'
                      mode="inline"
                      className='left-menu'
-                     onClick={({key}) => {
-                         const menu = this.state.menuMap[key]
-                         const {path} = menu;
-                         this.setState({currentMenuKey: key})
-                         history.push(path)
-                     }}
-                     selectedKeys={[this.state.currentMenuKey]}
+                     onClick={this.onLeftMenuClick}
+                     selectedKeys={this.state.currentMenuKey ? [this.state.currentMenuKey] : []}
                      inlineIndent={16}
         >
         </Menu>;

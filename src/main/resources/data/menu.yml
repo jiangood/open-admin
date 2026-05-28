@@ -3,7 +3,6 @@ menus:
   - id: sys
     name: 系统管理
     seq: 10000
-    icon: SettingOutlined
     children:
       - id: sys-user
         name: 用户管理
@@ -73,3 +72,4 @@ menus:
         icon: FileSearchOutlined
         perms:
           - {name: 读取, code: read}
+
