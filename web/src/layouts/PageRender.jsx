@@ -1,84 +1,28 @@
 import {matchRoutes, useAppData} from "umi";
 import React from "react";
 import {Result} from "antd";
-import {UrlUtils} from "../framework";
 
 /**
  * 通过指定 pathname 渲染页面
- * @param props
- * 为了规范，接收参数何router保持一致，
- * pathname： 路径 如 /flowable/task/form
- * search：搜索参数 如 /?id=1
- *
- * passLocation: 是否把location信息透传到真正页面
- *
- * @returns {React.JSX.Element|*}
- * @constructor
+ * @param {object} props
+ * @param {string} props.pathname - 路径 如 /flowable/task/form
  */
+export function PageRender({pathname}) {
+    const appData = useAppData()
+    const matchArr = matchRoutes(appData.clientRoutes, pathname)
 
-let APP_DATA_CACHE = null
-
-
-/**
- * 写函数组件主要为了使用hooks
- * @param props
- * @returns {Element}
- * @constructor
- */
-export  function PageRender(props) {
-    const {pathname, search, passLocation} = props
-
-    let appData = useAppData()
-    if(Object.keys(appData).length === 0){
-        appData = APP_DATA_CACHE
-    }else {
-        APP_DATA_CACHE = appData;
+    if (matchArr != null) {
+        const matchResult = matchArr[matchArr.length - 1].route
+        if (matchResult && matchResult.element) {
+            return matchResult.element
+        }
     }
 
-    return <_PageRender appData={appData}  pathname={pathname} search={search}
-                        passLocation={passLocation}/>
-}
-
-class _PageRender extends React.Component {
-
-    render() {
-        if (this.props.passLocation) {
-            return this.passLocationRender()
-        }
-        return this.defaultRender()
-    }
-
-    passLocationRender = () => {
-        const {pathname, search,  appData} = this.props
-
-        const map = appData.routeComponents
-        const key = pathname.substring(1); // 移除第一个斜杠
-        const componentType = map[key] || map[key + '/index']
-        if (componentType) {
-            const params =search ? UrlUtils.getParams(search): {}
-            const location = {pathname, search, params}
-            return React.createElement(componentType, {location});
-        }
-    };
-
-
-    defaultRender = () => {
-        const {pathname, appData} = this.props
-        const matchArr = matchRoutes(appData.clientRoutes, pathname)
-
-        if (matchArr != null) {
-            // 取最匹配的那个
-            const mathResult = matchArr[matchArr.length - 1].route
-            if(mathResult && mathResult.element){
-                return mathResult.element;
-            }
-        }
-
-        // 如果实在找不到页面组件，则404
-        return <Result
+    return (
+        <Result
             status={404}
             title='页面不存在！'
             subTitle={<div>路由地址：{pathname}</div>}
         />
-    };
+    )
 }
