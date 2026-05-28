@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- 外层菱形轮廓 -->
+  <polygon points="76,256 256,76 436,256 256,436"
+           fill="none" stroke="#1961AC" stroke-width="6" stroke-linejoin="round" opacity="0.25"/>
+
+  <!-- 左上三角 -->
+  <polygon points="256,128 128,256 256,256" fill="none" stroke="#1961AC" stroke-width="7" stroke-linejoin="round"/>
+  <polygon points="256,128 128,256 256,256" fill="#1961AC" opacity="0.2"/>
+
+  <!-- 右上三角 -->
+  <polygon points="256,128 384,256 256,256" fill="none" stroke="#1961AC" stroke-width="7" stroke-linejoin="round"/>
+  <polygon points="256,128 384,256 256,256" fill="#1961AC" opacity="0.12"/>
+
+  <!-- 左下三角 -->
+  <polygon points="128,256 256,384 256,256" fill="none" stroke="#1961AC" stroke-width="7" stroke-linejoin="round"/>
+  <polygon points="128,256 256,384 256,256" fill="#1961AC" opacity="0.2"/>
+
+  <!-- 右下三角 -->
+  <polygon points="384,256 256,384 256,256" fill="none" stroke="#1961AC" stroke-width="7" stroke-linejoin="round"/>
+  <polygon points="384,256 256,384 256,256" fill="#1961AC" opacity="0.12"/>
+
+  <!-- 中心点 -->
+  <circle cx="256" cy="256" r="10" fill="#1961AC"/>
+</svg>
