@@ -3,7 +3,7 @@ import {App, ConfigProvider} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {Outlet, useLocation, history} from "umi";
+import {Outlet, useLocation} from "umi";
 
 import AdminLayout from "./admin"
 import {HttpUtils, PageLoading, PageUtils, SysUtils, ThemeUtils} from "../framework";
@@ -13,12 +13,13 @@ import './index.less'
 
 dayjs.locale('zh-cn');
 
-const SIMPLE_URLS = ['/login', '/test']
+// 不需要登录和布局的页面
+const PUBLIC_PAGES = ['/login', '/test']
 
 function isPublicPage(pathname, search) {
     if (pathname === '/' || pathname === '/index') return false;
     if (pathname.startsWith("/test/")) return true;
-    if (SIMPLE_URLS.includes(pathname)) return true;
+    if (PUBLIC_PAGES.includes(pathname)) return true;
     if (search && new URLSearchParams(search).has('_noLayout')) return true;
     return false;
 }
@@ -42,21 +43,40 @@ const configProps = {
                 darkPopupBg: ThemeUtils.getColor("primary-color"),
                 darkItemSelectedBg: ThemeUtils.getColor("primary-color-click"),
                 darkItemHoverBg: ThemeUtils.getColor("primary-color-hover"),
-                darkSubMenuItemBg: ThemeUtils.getColor("primary-color")
+                darkSubMenuItemBg: ThemeUtils.getColor("primary-color"),
             },
             Layout: {
                 siderBg: ThemeUtils.getColor("primary-color"),
                 triggerBg: ThemeUtils.getColor("primary-color-click"),
                 headerBg: 'white',
-                triggerHeight: 32
-            }
-        }
-    }
+                triggerHeight: 32,
+            },
+        },
+    },
 };
 
+function initApp() {
+    return Promise.all([
+        HttpUtils.get("/admin/public/site-info"),
+        HttpUtils.get('/admin/public/check-login'),
+    ]).then(([siteInfo, loginRs]) => {
+        SysUtils.setSiteInfo(siteInfo);
+        const {needUpdatePwd, dictInfo, loginInfo} = loginRs;
+        SysUtils.setDictInfo(dictInfo);
+        SysUtils.setLoginInfo(loginInfo);
+        if (needUpdatePwd) {
+            PageUtils.open('/userCenter/ChangePassword', '修改密码');
+            return false;
+        }
+        return true;
+    }).catch(() => {
+        PageUtils.redirectToLogin();
+        return false;
+    });
+}
+
 export function Layouts() {
-    const location = useLocation();
-    const {pathname, search} = location;
+    const {pathname, search} = useLocation();
     const [ready, setReady] = useState(false);
     const loadedRef = useRef(false);
 
@@ -64,23 +84,7 @@ export function Layouts() {
         if (isPublicPage(pathname)) return;
         if (loadedRef.current) return;
         loadedRef.current = true;
-
-        Promise.all([
-            HttpUtils.get("/admin/public/site-info"),
-            HttpUtils.get('/admin/public/check-login'),
-        ]).then(([siteInfo, loginRs]) => {
-            SysUtils.setSiteInfo(siteInfo);
-            const {needUpdatePwd, dictInfo, loginInfo} = loginRs;
-            SysUtils.setDictInfo(dictInfo);
-            SysUtils.setLoginInfo(loginInfo);
-            if (needUpdatePwd) {
-                PageUtils.open('/userCenter/ChangePassword', '修改密码');
-                return;
-            }
-            setReady(true);
-        }).catch(() => {
-            PageUtils.redirectToLogin();
-        });
+        initApp().then(ok => { if (ok) setReady(true); });
     }, [pathname]);
 
     if (isPublicPage(pathname, search)) {
