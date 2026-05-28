@@ -6,6 +6,7 @@ import {MessageUtils} from "../MessageUtils";
 
 
 const axiosInstance = axios.create({
+    baseURL: (typeof SERVLET_CONTEXT !== 'undefined' && SERVLET_CONTEXT) || '',
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json'
@@ -35,7 +36,7 @@ export class HttpUtils {
         config.url = url.startsWith('admin') ? '/' + url : url;
 
         return new Promise((resolve, reject) => {
-            axios(config).then((response: AxiosResponse) => {
+            axiosInstance(config).then((response: AxiosResponse) => {
                 const body = response.data;
                 // 假设后端响应结构为 { success: boolean | null, message: string, data: any, code: number }
                 let {success, message, data} = body;

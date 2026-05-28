@@ -5,7 +5,7 @@
 - **JDK 21+**
 - **MySQL 8.0+**
 - **Node.js 18+**
-- **pnpm 9+**
+- **npm 9+**
 
 ## 项目搭建
 
@@ -52,17 +52,35 @@ java -jar target/open-admin.jar
 
 ```bash
 cd web
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 ### 4. 访问系统
 
 | 说明 | 地址 |
 |------|------|
-| 前端 | http://localhost:8000 |
-| 后端 API | http://localhost:8080 |
+| 前端 | http://localhost:3000 |
+| 后端 API | http://localhost:8080/change-this-servlet-context |
 | 默认登录 | admin / open-admin@1234 |
+
+## Servlet Context-Path 配置
+
+部署时如需自定义上下文路径，需前后端同步修改：
+
+**后端** — `src/main/resources/application.yml`:
+```yaml
+server:
+  servlet:
+    context-path: /your-context-path
+```
+
+**前端** — `web/.env`:
+```
+SERVLET_CONTEXT=/your-context-path
+```
+
+前端请求会自动带上 context-path 前缀（通过 axios `baseURL`）。对于 `<a>`、`<img>` 等不经过 axios 的硬编码 URL，需使用 `SysUtils.contextPath(path)` 手动拼接。
 
 ## 创建新模块
 

@@ -64,3 +64,20 @@ TreeUtils.walk(tree, node => console.log(node)); // 深度优先遍历
 | `ColorsUtils` | hexToRgb, rgbToHex |
 | `UuidUtils` | uuidV4 |
 | `DomUtils` | hasClass, addClass, removeClass |
+| `SysUtils` | contextPath, getSiteInfo, setSiteInfo, getLoginInfo, setLoginInfo, getHeaders |
+
+## SysUtils
+
+系统工具类，提供站点信息、登录信息、请求头等便捷方法。
+
+### contextPath
+
+拼接 servlet context-path 前缀。用于 `<a>`、`<img>`、CSS `url()` 等不经过 axios 的硬编码 URL。
+
+```js
+// 自动拼接 context-path 前缀
+SysUtils.contextPath('/admin/auth/login');   // → '/your-context/admin/auth/login'
+SysUtils.contextPath('/admin/public/logo.jpg'); // → '/your-context/admin/public/logo.jpg'
+```
+
+> **注意**：通过 `HttpUtils` 发起的请求会自动带上 context-path，无需手动调用此方法。

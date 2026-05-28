@@ -19,27 +19,22 @@ function getPluginDir() {
 
 const pluginDir = getPluginDir();
 
+const SERVLET_CONTEXT = process.env.SERVLET_CONTEXT || '/change-this-servlet-context'; // 见 .env
+
 const proxyConfig = {
-    '/admin': {
+    [SERVLET_CONTEXT]: {
         target: `http://${host}`,
         changeOrigin: true,
-    },
-    '/preview': {
-        target: `http://${host}`,
-        changeOrigin: true,
-    },
-    '/ureport': {
-        target: `http://${host}`,
-        changeOrigin: true,
-    },
-    '/admin/ws': {
-        target: `ws://${host}`,
-        changeOrigin: true,
-        ws: true,
     },
 };
 
 export default defineConfig({
+    // 注入全局变量，前端代码可直接使用 SERVLET_CONTEXT
+    define: {
+        SERVLET_CONTEXT: SERVLET_CONTEXT,
+    },
+    // 资源使用相对路径，部署到任意 context-path 下都无需重新构建
+    publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
     // 配置是否让生成的文件包含 hash 后缀，通常用于增量发布和避免浏览器加载缓存
     hash: true,
     // 使用 hash 模式的路由

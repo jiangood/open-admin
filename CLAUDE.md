@@ -10,7 +10,7 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），业务
 
 - **Backend**: Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
 - **Frontend**: React 19, Ant Design 6, UmiJS 4 (React framework, not Ant Design Pro)
-- **Build**: Maven (backend), pnpm (frontend)
+- **Build**: Maven (backend), npm (frontend)
 
 ## Project Structure
 
@@ -79,6 +79,30 @@ open-admin/
 - **工具类**: `io.github.jiangood.openadmin.util` 包下大量工具类 (BeanTool, JsonTool, TreeTool, ExcelTool 等)，可按需使用
 - **ID 生成**: 默认使用 UUIDv7 (时间排序，MySQL 友好)
 
+## Servlet Context-Path 配置
+
+支持将应用部署在自定义上下文路径下，后端和前端需要同步配置。
+
+### 配置点
+
+| 位置 | 文件 | 说明 |
+|------|------|------|
+| 后端 | `src/main/resources/application.yml` | `server.servlet.context-path` |
+| 前端环境变量 | `web/.env` | `SERVLET_CONTEXT` 构建时注入 |
+| 前端构建 | `web/config/config.js` | `define` + `proxy` |
+
+### 工作原理
+
+1. **axios 请求**（`HttpUtils`）：通过 `axiosInstance` 的 `baseURL` 自动为所有请求加上 context-path 前缀，业务代码无需改动
+2. **硬编码 URL**（`<a href>`、`<img src>`、CSS `url()`）：这些不走 axios，需手动调用 `SysUtils.contextPath(path)` 拼接前缀
+3. **开发代理**：UmiJS proxy 将 context-path 开头的请求转发到后端
+
+### 业务项目接入
+
+1. 修改 `application.yml` 中的 `context-path`
+2. 修改 `web/.env` 中的 `SERVLET_CONTEXT` 为相同值
+3. 重新构建前端即可生效
+
 ## Logo 配置
 
 配置文件 `application.yml`:
@@ -109,13 +133,13 @@ mvn package -Drevision=1.2.7
 mvn spring-boot:run
 
 # Frontend - 安装依赖
-cd web && pnpm install
+cd web && npm install
 
 # Frontend - 开发模式
-cd web && pnpm dev
+cd web && npm run dev
 
 # Frontend - 构建
-cd web && pnpm build
+cd web && npm run build
 ```
 
 ## Framework Module (web/src/framework)

@@ -40,7 +40,7 @@ open-admin 是一个**可嵌入**的后台管理系统框架（脚手架）。�
 - **JDK 21+** — 后端开发和运行环境
 - **MySQL 8.0+** — 数据存储
 - **Node.js 18+** — 前端开发环境
-- **pnpm 9+** — 前端包管理工具
+- **npm 9+** — 前端包管理工具
 
 ## 技术栈
 
@@ -49,4 +49,4 @@ open-admin 是一个**可嵌入**的后台管理系统框架（脚手架）。�
 | 前端 | React 19, Ant Design 6, UmiJS 4 |
 | 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
 | 数据库 | MySQL 8+ |
-| 构建 | Maven (后端), pnpm (前端) |
+| 构建 | Maven (后端), npm (前端) |

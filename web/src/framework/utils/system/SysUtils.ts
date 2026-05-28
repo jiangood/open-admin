@@ -89,6 +89,14 @@ export class SysUtils {
     public static getDictInfo(): DictInfo {
         return StorageUtils.get(DICT_INFO_KEY);
     }
+
+    /**
+     * 拼接 servlet context-path，例如 contextPath('/admin/auth/login') → '/open-admin/admin/auth/login'
+     */
+    public static contextPath(path: string): string {
+        const base = (typeof SERVLET_CONTEXT !== 'undefined' && SERVLET_CONTEXT) || '';
+        return base + path;
+    }
 }
 
 // 导出常量（保持不变，但通常将常量放在类内部作为 static readonly 属性更符合 class 模式，

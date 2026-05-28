@@ -99,7 +99,7 @@ mvn package -DskipTests
 java -jar target/open-admin.jar
 
 # 前端
-cd web && pnpm build
+cd web && npm run build
 # 部署 dist/ 目录到 Web 服务器
 ```
 
@@ -110,14 +110,14 @@ server {
     listen 80;
     server_name example.com;
 
+    location /your-context-path {
+        proxy_pass http://localhost:8080;
+    }
+
     location / {
         root /path/to/web;
         index index.html;
         try_files $uri $uri/ /index.html;
-    }
-
-    location /api {
-        proxy_pass http://localhost:8080;
     }
 }
 ```

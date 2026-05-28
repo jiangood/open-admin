@@ -16,7 +16,7 @@ import {
 } from 'antd'
 import {PlusOutlined} from "@ant-design/icons";
 
-import {ButtonList, HttpUtils, Page, ProTable, StringUtils, ValueType} from "../../../framework";
+import {ButtonList, HttpUtils, Page, ProTable, StringUtils, SysUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -291,7 +291,7 @@ export default class extends React.Component {
                         title: '操作',
                         dataIndex: 'option',
                         render: (_, record) => {
-                            const url = '/admin/sys/log/' + record.id;
+                            const url = SysUtils.contextPath('/admin/sys/log/' + record.id);
                             return <a href={url} target='_blank'>日志</a>;
                         },
                     }

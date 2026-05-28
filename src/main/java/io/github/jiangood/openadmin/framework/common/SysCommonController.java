@@ -39,13 +39,13 @@ public class SysCommonController {
     private SysMenuService sysMenuService;
 
     @GetMapping("public/site-info")
-    public AjaxResult siteInfo() {
+    public AjaxResult siteInfo(HttpServletRequest request) {
         Dict data = new Dict();
         data.put("captcha", systemProperties.isCaptchaEnable());
         data.put("copyright", systemProperties.getCopyright());
         data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
         data.put("showLogo", systemProperties.isShowLogo());
-        data.put("logoUrl", systemProperties.getLogoUrl());
+        data.put("logoUrl", prependContextPath(request, systemProperties.getLogoUrl()));
         data.put("title", systemProperties.getTitle());
 
         data.put("waterMark", systemProperties.isWaterMark());
@@ -55,6 +55,14 @@ public class SysCommonController {
         data.put("loginBackground", systemProperties.getLoginBackground());
 
         return AjaxResult.ok().data(data);
+    }
+
+    /** 为相对路径补上 servlet context-path，绝对 URL 保持不变 */
+    private String prependContextPath(HttpServletRequest request, String path) {
+        if (path == null || !path.startsWith("/")) {
+            return path;
+        }
+        return request.getContextPath() + path;
     }
 
     @GetMapping("public/check-login")

@@ -1,3 +1,7 @@
+server:
+  servlet:
+    context-path: /change-this-servlet-context  # TODO 业务项目按需调整
+
 spring:
   config:
     import: classpath:application-lib.yml

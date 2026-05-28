@@ -69,9 +69,11 @@ export default class extends React.Component {
     render() {
         const {siteInfo} = this.state
 
-        const pageStyle = {}
+        const pageStyle = {
+            backgroundImage: `url("${SysUtils.contextPath('/admin/public/login_bg.jpg')}")`
+        }
         if (siteInfo.loginBackground) {
-            const url = 'admin/sysFile/preview/' + siteInfo.loginBackground;
+            const url = SysUtils.contextPath('/admin/sysFile/preview/' + siteInfo.loginBackground);
             pageStyle.backgroundImage = 'url("' + url + '")'
         }
 
@@ -110,7 +112,7 @@ export default class extends React.Component {
                         <Space style={{alignItems: 'center'}}>
                             <Input size='large' placeholder='验证码' prefix={<SafetyCertificateOutlined/>}/>
                             <img height={36} width={100}
-                                 src={"/admin/auth/captcha-image?_random=" + this.state.random}
+                                 src={SysUtils.contextPath("/admin/auth/captcha-image?_random=" + this.state.random)}
                                  onClick={() => this.setState({random: Math.random()})}/>
                         </Space>
                     </Form.Item>
