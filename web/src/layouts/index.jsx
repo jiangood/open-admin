@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
-import {ConfigProvider} from "antd";
+import {App, ConfigProvider} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
@@ -9,7 +9,6 @@ import AdminLayout from "./admin"
 import {
     ArrayUtils,
     HttpUtils,
-    MessageHolder,
     PageLoading,
     PageUtils,
     SysUtils,
@@ -69,10 +68,20 @@ export function Layouts() {
     const {pathname, search} = location;
     const noLayout = search && new URLSearchParams(search).has('_noLayout');
 
-    const [messageHolderInit, setMessageHolderInit] = useState(false);
     const [siteInfoLoading, setSiteInfoLoading] = useState(true);
     const [loginInfoFinish, setLoginInfoFinish] = useState(false);
     const loginInfoFinishRef = useRef(false);
+
+    useEffect(() => {
+        if (checkIsPurePage(pathname) || checkIsSimplePage(pathname)) return;
+        loadSiteInfo();
+    }, []);
+
+    useEffect(() => {
+        if (loginInfoFinish) return;
+        if (checkIsPurePage(pathname) || checkIsSimplePage(pathname)) return;
+        loadLoginInfo();
+    }, [pathname]);
 
     const loadLoginInfo = () => {
         if (checkIsPurePage(pathname) || checkIsSimplePage(pathname) || loginInfoFinishRef.current) return;
@@ -102,49 +111,23 @@ export function Layouts() {
         });
     };
 
-    const onMessageHolderFinish = () => {
-        loadSiteInfo();
-        setMessageHolderInit(true);
-    };
-
-    useEffect(() => {
-        if (loginInfoFinish) return;
-        if (checkIsPurePage(pathname) || checkIsSimplePage(pathname)) return;
-        loadLoginInfo();
-    }, [pathname]);
-
     if (checkIsPurePage(pathname)) {
-        return <Outlet/>;
-    }
-
-    if (!messageHolderInit) {
-        return <ConfigProvider {...configProps}>
-            <MessageHolder onFinish={onMessageHolderFinish}/>
-            <PageLoading message='加载消息组件...'/>
-        </ConfigProvider>;
+        return <ConfigProvider {...configProps}><App><Outlet/></App></ConfigProvider>;
     }
 
     if (checkIsSimplePage(pathname) || noLayout) {
-        return <ConfigProvider {...configProps}>
-            <Outlet/>
-        </ConfigProvider>;
+        return <ConfigProvider {...configProps}><App><Outlet/></App></ConfigProvider>;
     }
 
     if (siteInfoLoading) {
-        return <ConfigProvider {...configProps}>
-            <PageLoading message='加载站点信息...'/>
-        </ConfigProvider>;
+        return <ConfigProvider {...configProps}><App><PageLoading message='加载站点信息...'/></App></ConfigProvider>;
     }
 
     if (!loginInfoFinish) {
-        return <ConfigProvider {...configProps}>
-            <PageLoading message='加载登录信息...'/>
-        </ConfigProvider>;
+        return <ConfigProvider {...configProps}><App><PageLoading message='加载登录信息...'/></App></ConfigProvider>;
     }
 
-    return <ConfigProvider {...configProps}>
-        <AdminLayout/>
-    </ConfigProvider>;
+    return <ConfigProvider {...configProps}><App><AdminLayout/></App></ConfigProvider>;
 }
 
 export default Layouts;

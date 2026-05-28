@@ -38,14 +38,19 @@ export default class extends React.Component {
     }
 
     async componentDidMount() {
-        if (localStorage.length === 0) {
-            MessageUtils.alert('站点数据缺失，刷新当前页面...')
-            window.location.reload()
+        const siteInfo = SysUtils.getSiteInfo()
+        if (siteInfo && siteInfo.rsaPublicKey) {
+            this.setState({siteInfo})
             return
         }
-
-        const siteInfo = SysUtils.getSiteInfo()
-        this.setState({siteInfo})
+        // localStorage 中无站点信息，从服务端重新加载
+        try {
+            const rs = await HttpUtils.get('/admin/public/site-info')
+            SysUtils.setSiteInfo(rs)
+            this.setState({siteInfo: rs})
+        } catch (e) {
+            message.error('加载站点信息失败，请刷新页面重试')
+        }
     }
 
     submit = values => {
