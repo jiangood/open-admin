@@ -180,13 +180,18 @@ public class SysFileService {
         String magicType = FileTypeUtil.getType(is);
         is.reset();
 
-        // 始终用 magic byte 校验：阻断可执行文件、WebP 图片伪装成普通图片/文档
+        // 始终用 magic byte 校验：阻断可执行文件伪装成普通图片/文档
         if (StrUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
-            String msg = "文件类型" + magicType + "不允许上传";
-            if ("webp".equals(magicType)) {
-                msg += "，请转换为 JPG/PNG 格式后上传";
+            throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
+        }
+
+        // WebP 文件：ImageIO 不支持缩略图生成，预览时自动回退原图
+        if ("webp".equals(magicType)) {
+            log.warn("上传文件真实类型为 webp，不受 ImageIO 支持，缩略图生成将回退原图");
+            if (StrUtil.isNotEmpty(suffix) && !"webp".equalsIgnoreCase(suffix)) {
+                log.info("文件后缀修正: {} -> webp (文件头检测)", suffix);
+                suffix = "webp";
             }
-            throw new IllegalArgumentException(msg);
         }
 
         if (StrUtil.isEmpty(suffix) && StrUtil.isNotEmpty(magicType)) {
@@ -355,7 +360,7 @@ public class SysFileService {
     }
 
     private static boolean isBlockedMagicType(String magicType) {
-        return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js", "webp")
+        return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js")
                 .contains(magicType);
     }
 

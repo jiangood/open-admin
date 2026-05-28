@@ -128,7 +128,7 @@ public class SystemProperties {
         /**
          * 允许上传文件的后缀，如 docx
          */
-        private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,mp3,mp4,wav,txt";
+        private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,webp,mp3,mp4,wav,txt";
 
         /**
          * Minio 配置

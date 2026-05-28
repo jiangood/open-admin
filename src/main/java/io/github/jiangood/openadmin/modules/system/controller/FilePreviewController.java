@@ -29,7 +29,7 @@ import java.util.Set;
 public class FilePreviewController {
 
     private final Set<String> allowedPreviewTypes = Set.of(
-            "jpg", "jpeg", "png", "gif", "pdf", "mp4", "avi", "mov"
+            "jpg", "jpeg", "png", "gif", "webp", "pdf", "mp4", "avi", "mov"
     );
 
 

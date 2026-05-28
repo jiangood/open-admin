@@ -113,7 +113,8 @@ class ImgToolTest {
     @Test
     void testScaleWebpAsJpg() throws IOException {
         // 测试场景：扩展名为 .jpg 但实际是 WebP 格式的图片
-        // 这种文件经过上传系统保存后，suffix 被设为 "jpg"，但 ImageIO 无法解码 WebP
+        // 上传系统会将后缀修正为 "webp"，但 ImageIO 仍然无法解码 WebP
+        // 缩略图生成会跳过，预览时自动回退原图
         File webpFile = new File("src/test/resources/test_webp_image.jpg");
         assertTrue(webpFile.exists(), "测试 WebP 图片文件必须存在");
 
