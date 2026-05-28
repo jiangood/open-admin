@@ -71,11 +71,14 @@ export function Layouts() {
     const [siteInfoLoading, setSiteInfoLoading] = useState(true);
     const [loginInfoFinish, setLoginInfoFinish] = useState(false);
     const loginInfoFinishRef = useRef(false);
+    const siteInfoLoadedRef = useRef(false);
 
     useEffect(() => {
         if (checkIsPurePage(pathname) || checkIsSimplePage(pathname)) return;
+        if (siteInfoLoadedRef.current) return;
+        siteInfoLoadedRef.current = true;
         loadSiteInfo();
-    }, []);
+    }, [pathname]);
 
     useEffect(() => {
         if (loginInfoFinish) return;
