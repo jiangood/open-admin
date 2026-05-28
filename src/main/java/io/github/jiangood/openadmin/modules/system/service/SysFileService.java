@@ -88,8 +88,18 @@ public class SysFileService {
         SysFile sysFile = sysFileRepository.findById(id).orElse(null);
         sysFileRepository.deleteById(id);
 
-        // 删除具体文件
+        // 删除原图
         fileOperator.delete(sysFile.getObjectName());
+        // 删除已缓存的缩略图
+        if (sysFile.getType() == MaterialType.IMAGE) {
+            for (int size : IMAGE_SIZE) {
+                String thumbName = getObjectName(sysFile, size);
+                try {
+                    fileOperator.delete(thumbName);
+                } catch (Exception ignored) {
+                }
+            }
+        }
     }
 
     public SysFile uploadFile(byte[] data, String originalFilename) throws Exception {
@@ -163,7 +173,9 @@ public class SysFileService {
             suffix = StrUtil.subAfter(originalFilename, ".", true);
         }
 
-        Assert.state(is.markSupported(), "输入流必须支持标记");
+        if (!is.markSupported()) {
+            is = new BufferedInputStream(is);
+        }
         is.mark(64);
         String magicType = FileTypeUtil.getType(is);
         is.reset();
@@ -205,19 +217,8 @@ public class SysFileService {
         FileUtils.copyInputStreamToFile(is, tempFile);
 
 
-        // 文件管理
+        // 保存原图，缩略图延迟到首次请求时生成
         fileOperator.saveFile(objectName, tempFile);
-        if (sysFile.getType() == MaterialType.IMAGE) {
-            for (int i = 0; i < IMAGE_SIZE.length; i++) {
-                int imageSize = IMAGE_SIZE[i];
-                File tempImageFile = ImgTool.scale(tempFile, imageSize);
-                if (tempImageFile != null) {
-                    String imageObjectName = genObjectName(id, suffix, imageSize);
-                    fileOperator.saveFile(imageObjectName, tempImageFile);
-                    FileUtil.del(tempImageFile);
-                }
-            }
-        }
         FileUtil.del(tempFile);
 
         sysFile = sysFileRepository.save(sysFile);
@@ -241,10 +242,19 @@ public class SysFileService {
 
     public InputStream getFileStream(SysFile sysFile, Integer w) throws Exception {
         String objectName = getObjectName(sysFile, w);
-        boolean exist = fileOperator.exist(objectName);
-        if (!exist) {
-            log.error("文件不存在 {}", objectName);
-            throw new FileNotFoundException("文件不存在:" + objectName);
+        if (!fileOperator.exist(objectName)) {
+            if (w != null && sysFile.getType() == MaterialType.IMAGE) {
+                generateThumbnail(sysFile, w);
+            } else {
+                log.error("文件不存在 {}", objectName);
+                throw new FileNotFoundException("文件不存在:" + objectName);
+            }
+        }
+
+        if (!fileOperator.exist(objectName)) {
+            // 缩略图生成失败，回退到原图
+            log.warn("缩略图生成失败，返回原图 {}", objectName);
+            return getFileStream(sysFile, null);
         }
 
         return fileOperator.getFileStream(objectName);
@@ -316,6 +326,27 @@ public class SysFileService {
         }
 
         return fileOperator.exist(file.getObjectName());
+    }
+
+    private void generateThumbnail(SysFile sysFile, int width) throws Exception {
+        String originalName = getObjectName(sysFile, null);
+        String thumbName = getObjectName(sysFile, width);
+
+        File originalFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
+        try {
+            fileOperator.downloadFile(originalName, originalFile);
+            File thumbFile = ImgTool.scale(originalFile, width);
+            if (thumbFile != null) {
+                try {
+                    fileOperator.saveFile(thumbName, thumbFile);
+                    log.info("缩略图已生成并缓存 {}", thumbName);
+                } finally {
+                    FileUtil.del(thumbFile);
+                }
+            }
+        } finally {
+            FileUtil.del(originalFile);
+        }
     }
 
     private static boolean isBlockedMagicType(String magicType) {

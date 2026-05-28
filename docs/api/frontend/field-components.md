@@ -56,6 +56,8 @@
 
 ## FieldUploadFile
 
+文件上传组件，上传地址为 `/admin/sysFile/upload`。
+
 | 参数 | 说明 | 类型 | 默认值 |
 |------|------|------|--------|
 | `url` | 上传地址 | `string` | — |
@@ -63,3 +65,16 @@
 | `maxCount` | 最大数量 | `number` | 1 |
 | `accept` | 接受类型 | `string` | — |
 | `cropImage` | 裁剪图片 | `boolean` | — |
+
+### 图片预览与缩略图
+
+图片上传后，可通过预览接口访问：
+
+```
+/preview/{fileId}          # 原图
+/preview/{fileId}?w=400    # 宽度 400px 缩略图
+/preview/{fileId}?w=800    # 宽度 800px 缩略图
+/preview/{fileId}?w=1200   # 宽度 1200px 缩略图
+```
+
+缩略图采用 **懒生成** 策略：上传时只保存原图，首次请求缩略图时实时生成并缓存，后续请求直接返回缓存。上传不会因图片格式兼容性问题（如 CMYK JPEG）中断。

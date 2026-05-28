@@ -31,23 +31,27 @@ public class ImgTool {
             return false;
         }
 
-        Image srcImg = ImgUtil.read(sourceFile);
-        int srcWidth = srcImg.getWidth(null);
-        int srcHeight = srcImg.getHeight(null);
+        try {
+            Image srcImg = ImgUtil.read(sourceFile);
+            int srcWidth = srcImg.getWidth(null);
+            int srcHeight = srcImg.getHeight(null);
 
-        // 计算缩放比例
-        float widthRatio = (float) maxWidth / srcWidth;
-        float heightRatio = (float) maxHeight / srcHeight;
-        float ratio = Math.min(widthRatio, heightRatio);
+            // 计算缩放比例
+            float widthRatio = (float) maxWidth / srcWidth;
+            float heightRatio = (float) maxHeight / srcHeight;
+            float ratio = Math.min(widthRatio, heightRatio);
 
-        // 如果图片比目标尺寸小，则不放大
-        if (ratio > 1) {
-            ratio = 1;
+            // 如果图片比目标尺寸小，则不放大
+            if (ratio > 1) {
+                ratio = 1;
+            }
+
+            ImgUtil.scale(sourceFile, targetFile, ratio);
+            return true;
+        } catch (Exception e) {
+            log.warn("图片缩放失败，跳过生成缩略图: {}", sourceFile.getName(), e);
+            return false;
         }
-
-
-        ImgUtil.scale(sourceFile, targetFile, ratio);
-        return true;
 
     }
 
