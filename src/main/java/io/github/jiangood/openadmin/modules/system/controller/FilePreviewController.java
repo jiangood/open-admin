@@ -96,7 +96,7 @@ public class FilePreviewController {
             log.info("预览文件失败, 文件不存在 id={}, w={}", file.getId(), w);
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            log.info("预览文件失败, id={}, w={}", file.getId(), w);
+            log.error("预览文件失败, id={}, w={}", file.getId(), w, e);
             return ResponseEntity.internalServerError().build();
         }
     }

@@ -180,9 +180,13 @@ public class SysFileService {
         String magicType = FileTypeUtil.getType(is);
         is.reset();
 
-        // 始终用 magic byte 校验：阻断可执行文件伪装成图片/文档
+        // 始终用 magic byte 校验：阻断可执行文件、WebP 图片伪装成普通图片/文档
         if (StrUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
-            throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
+            String msg = "文件类型" + magicType + "不允许上传";
+            if ("webp".equals(magicType)) {
+                msg += "，请转换为 JPG/PNG 格式后上传";
+            }
+            throw new IllegalArgumentException(msg);
         }
 
         if (StrUtil.isEmpty(suffix) && StrUtil.isNotEmpty(magicType)) {
@@ -333,6 +337,7 @@ public class SysFileService {
         String thumbName = getObjectName(sysFile, width);
 
         File originalFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
+        FileUtil.del(originalFile);
         try {
             fileOperator.downloadFile(originalName, originalFile);
             File thumbFile = ImgTool.scale(originalFile, width);
@@ -350,7 +355,7 @@ public class SysFileService {
     }
 
     private static boolean isBlockedMagicType(String magicType) {
-        return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js")
+        return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js", "webp")
                 .contains(magicType);
     }
 
