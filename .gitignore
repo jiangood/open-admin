@@ -36,5 +36,6 @@ target/
 /.trae/
 /logs/
 /data/
+/static/
 /docs/superpowers/
 .claude/settings.local.json
