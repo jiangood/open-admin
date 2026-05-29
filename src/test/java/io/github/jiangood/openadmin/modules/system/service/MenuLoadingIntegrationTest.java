@@ -9,7 +9,6 @@ import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -17,7 +16,6 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-@DirtiesContext
 @Transactional
 class MenuLoadingIntegrationTest {
 
@@ -117,7 +115,7 @@ class MenuLoadingIntegrationTest {
         }
 
         SysRole newRole = new SysRole();
-        newRole.setCode("test_role_" + System.currentTimeMillis());
+        newRole.setCode("tr" + UUID.randomUUID().toString().substring(0, 6));
         newRole.setName("测试角色");
         newRole.setBuiltin(false);
         newRole.setEnabled(true);
@@ -170,7 +168,7 @@ class MenuLoadingIntegrationTest {
         }
 
         SysRole normalRole = new SysRole();
-        normalRole.setCode("normal_test_" + System.currentTimeMillis());
+        normalRole.setCode("nt" + UUID.randomUUID().toString().substring(0, 6));
         normalRole.setName("普通测试角色");
         normalRole.setBuiltin(false);
         normalRole.setEnabled(true);

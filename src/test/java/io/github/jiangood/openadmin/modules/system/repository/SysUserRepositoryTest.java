@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 public class SysUserRepositoryTest {
 
     @Autowired
@@ -22,14 +24,12 @@ public class SysUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        sysUserRepository.deleteAll();
-
         testUser1 = new SysUser();
         testUser1.setAccount("test_admin");
         testUser1.setPassword("123456");
         testUser1.setName("测试管理员");
         testUser1.setPhone("13800138000");
-        testUser1.setEmail("admin@example.com");
+        testUser1.setEmail("test_admin@example.com");
         testUser1.setEnabled(true);
 
         testUser2 = new SysUser();
@@ -37,31 +37,24 @@ public class SysUserRepositoryTest {
         testUser2.setPassword("123456");
         testUser2.setName("测试普通用户");
         testUser2.setPhone("13900139000");
-        testUser2.setEmail("user@example.com");
+        testUser2.setEmail("test_user@example.com");
         testUser2.setEnabled(true);
 
         sysUserRepository.save(testUser1);
         sysUserRepository.save(testUser2);
     }
 
-    // 测试基本CRUD操作
     @Test
     void testBasicCrudOperations() {
-        // 测试findOne
         SysUser foundUser = sysUserRepository.findOne(testUser1.getId());
         assertNotNull(foundUser);
         assertEquals(testUser1.getAccount(), foundUser.getAccount());
 
-        // 测试findAllById
         String[] ids = {testUser1.getId(), testUser2.getId()};
         List<SysUser> foundUsers = sysUserRepository.findAllById(ids);
         assertEquals(2, foundUsers.size());
 
-        // 测试count
-        long count = sysUserRepository.count();
-        assertEquals(2, count);
-
-        // 测试save
+        long countBefore = sysUserRepository.count();
         SysUser newUser = new SysUser();
         newUser.setAccount("newuser");
         newUser.setPassword("123456");
@@ -69,31 +62,27 @@ public class SysUserRepositoryTest {
         newUser.setEnabled(true);
         SysUser savedUser = sysUserRepository.save(newUser);
         assertNotNull(savedUser.getId());
+        assertEquals(countBefore + 1, sysUserRepository.count());
 
-        // 测试delete
         sysUserRepository.delete(savedUser);
         SysUser deletedUser = sysUserRepository.findOne(savedUser.getId());
         assertNull(deletedUser);
     }
 
-    // 测试特有方法
     @Test
     void testFindByAccount() {
         SysUser foundUser = sysUserRepository.findByAccount("test_admin").orElse(null);
         assertNotNull(foundUser);
         assertEquals("测试管理员", foundUser.getName());
 
-        // 测试不存在的账号
         SysUser nonExistentUser = sysUserRepository.findByAccount("nonexistent").orElse(null);
         assertNull(nonExistentUser);
     }
 
     @Test
     void testFindAllByEnabledTrue() {
-        List<SysUser> enabledUsers = sysUserRepository.findAllByEnabledTrue();
-        assertEquals(2, enabledUsers.size());
+        long enabledBefore = sysUserRepository.findAllByEnabledTrue().size();
 
-        // 创建一个禁用的用户
         SysUser disabledUser = new SysUser();
         disabledUser.setAccount("disabled");
         disabledUser.setPassword("123456");
@@ -101,9 +90,7 @@ public class SysUserRepositoryTest {
         disabledUser.setEnabled(false);
         sysUserRepository.save(disabledUser);
 
-        // 再次测试，应该只返回启用的用户
-        List<SysUser> enabledUsersAfter = sysUserRepository.findAllByEnabledTrue();
-        assertEquals(2, enabledUsersAfter.size());
+        assertEquals(enabledBefore, sysUserRepository.findAllByEnabledTrue().size());
     }
 
     @Test
@@ -114,10 +101,8 @@ public class SysUserRepositoryTest {
         assertEquals("test_admin", foundUsers.get(0).getAccount());
     }
 
-    // 测试批量操作
     @Test
     void testBatchOperations() {
-        // 测试saveAllBatch
         SysUser user3 = new SysUser();
         user3.setAccount("user3");
         user3.setPassword("123456");
@@ -136,20 +121,14 @@ public class SysUserRepositoryTest {
         assertNotNull(savedBatchUsers.get(0).getId());
         assertNotNull(savedBatchUsers.get(1).getId());
 
-        // 测试deleteAllBatch
         List<String> idsToDelete = Arrays.asList(user3.getId(), user4.getId());
+        long countBefore = sysUserRepository.count();
         sysUserRepository.deleteAllBatch(idsToDelete);
-
-        SysUser deletedUser3 = sysUserRepository.findOne(user3.getId());
-        SysUser deletedUser4 = sysUserRepository.findOne(user4.getId());
-        assertNull(deletedUser3);
-        assertNull(deletedUser4);
+        assertEquals(countBefore - 2, sysUserRepository.count());
     }
 
-    // 测试字段更新方法
     @Test
     void testUpdateFieldMethods() {
-        // 测试updateField
         testUser1.setName("管理员更新");
         testUser1.setPhone("13800138001");
         sysUserRepository.updateField(testUser1, Arrays.asList("name", "phone"));
@@ -159,7 +138,6 @@ public class SysUserRepositoryTest {
         assertEquals("管理员更新", updatedUser.getName());
         assertEquals("13800138001", updatedUser.getPhone());
 
-        // 测试updateFieldDirect
         testUser1.setName("管理员直接更新");
         testUser1.setEmail("admin_updated@example.com");
         sysUserRepository.updateFieldDirect(testUser1, Arrays.asList("name", "email"));

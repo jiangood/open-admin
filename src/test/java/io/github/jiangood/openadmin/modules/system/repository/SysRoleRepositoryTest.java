@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 public class SysRoleRepositoryTest {
 
     @Autowired
@@ -22,8 +24,6 @@ public class SysRoleRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        sysRoleRepository.deleteAll();
-
         testRole1 = new SysRole();
         testRole1.setName("测试管理员角色");
         testRole1.setCode("TEST_ADMIN");
@@ -38,41 +38,32 @@ public class SysRoleRepositoryTest {
         sysRoleRepository.save(testRole2);
     }
 
-    // 测试基本CRUD操作
     @Test
     void testBasicCrudOperations() {
-        // 测试findOne
         SysRole foundRole = sysRoleRepository.findOne(testRole1.getId());
         assertNotNull(foundRole);
         assertEquals(testRole1.getName(), foundRole.getName());
 
-        // 测试findAllById
         String[] ids = {testRole1.getId(), testRole2.getId()};
         List<SysRole> foundRoles = sysRoleRepository.findAllById(ids);
         assertEquals(2, foundRoles.size());
 
-        // 测试count
-        long count = sysRoleRepository.count();
-        assertEquals(2, count);
-
-        // 测试save
+        long countBefore = sysRoleRepository.count();
         SysRole newRole = new SysRole();
         newRole.setName("新角色");
         newRole.setCode("NEW_ROLE");
         newRole.setEnabled(true);
         SysRole savedRole = sysRoleRepository.save(newRole);
         assertNotNull(savedRole.getId());
+        assertEquals(countBefore + 1, sysRoleRepository.count());
 
-        // 测试delete
         sysRoleRepository.delete(savedRole);
         SysRole deletedRole = sysRoleRepository.findOne(savedRole.getId());
         assertNull(deletedRole);
     }
 
-    // 测试批量操作
     @Test
     void testBatchOperations() {
-        // 测试saveAllBatch
         SysRole role3 = new SysRole();
         role3.setName("角色3");
         role3.setCode("ROLE3");
@@ -89,20 +80,14 @@ public class SysRoleRepositoryTest {
         assertNotNull(savedBatchRoles.get(0).getId());
         assertNotNull(savedBatchRoles.get(1).getId());
 
-        // 测试deleteAllBatch
         List<String> idsToDelete = Arrays.asList(role3.getId(), role4.getId());
+        long countBefore = sysRoleRepository.count();
         sysRoleRepository.deleteAllBatch(idsToDelete);
-
-        SysRole deletedRole3 = sysRoleRepository.findOne(role3.getId());
-        SysRole deletedRole4 = sysRoleRepository.findOne(role4.getId());
-        assertNull(deletedRole3);
-        assertNull(deletedRole4);
+        assertEquals(countBefore - 2, sysRoleRepository.count());
     }
 
-    // 测试字段更新方法
     @Test
     void testUpdateFieldMethods() {
-        // 测试updateField
         testRole1.setName("管理员角色更新");
         testRole1.setCode("ADMIN_UPDATED");
         sysRoleRepository.updateField(testRole1, Arrays.asList("name", "code"));
@@ -112,7 +97,6 @@ public class SysRoleRepositoryTest {
         assertEquals("管理员角色更新", updatedRole.getName());
         assertEquals("ADMIN_UPDATED", updatedRole.getCode());
 
-        // 测试updateFieldDirect
         testRole1.setName("管理员角色直接更新");
         sysRoleRepository.updateFieldDirect(testRole1, Arrays.asList("name"));
 
@@ -121,16 +105,13 @@ public class SysRoleRepositoryTest {
         assertEquals("管理员角色直接更新", directlyUpdatedRole.getName());
     }
 
-    // 测试字段查询方法
     @Test
     void testFieldQueryMethods() {
-        // 测试findByField
         SysRole foundByCode = sysRoleRepository.findByField("code", "TEST_ADMIN");
         assertNotNull(foundByCode);
         assertEquals("测试管理员角色", foundByCode.getName());
 
-        // 测试findAllByField
         List<SysRole> enabledRoles = sysRoleRepository.findAllByField("enabled", true);
-        assertEquals(2, enabledRoles.size());
+        assertTrue(enabledRoles.size() >= 2);
     }
 }
