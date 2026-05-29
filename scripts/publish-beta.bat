@@ -6,6 +6,6 @@ for /f "usebackq delims=" %%v in (`node scripts/bump-version.js npm web/package.
 echo Current npm version: %NPM_VERSION%
 
 cd web
-call pnpm version prerelease --preid=beta
-call pnpm build
-call pnpm publish -r --access public --no-git-checks --tag beta --registry https://packages.aliyun.com/62d39be70065edd3d51c1984/npm/npm-registry/
+call npm version prerelease --preid=beta
+call npm run build
+call npm publish --access public --no-git-checks --tag beta --registry https://packages.aliyun.com/62d39be70065edd3d51c1984/npm/npm-registry/
