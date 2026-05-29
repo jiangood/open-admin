@@ -26,3 +26,10 @@ sys:
       access-key: test-access-key
       secret-key: test-secret-key
       bucket-name: test-bucket
+
+# 让 application-lib.yml 中的占位符能解析（避免 CI 上报错）
+db_ip: 127.0.0.1
+db_port: 3306
+db_database: test
+db_username: sa
+db_password:
