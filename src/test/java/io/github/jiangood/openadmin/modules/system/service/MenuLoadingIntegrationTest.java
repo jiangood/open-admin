@@ -6,10 +6,10 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -17,6 +17,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@DirtiesContext
 @Transactional
 class MenuLoadingIntegrationTest {
 
@@ -31,10 +32,6 @@ class MenuLoadingIntegrationTest {
 
     @Autowired
     private SysRoleService sysRoleService;
-
-    @BeforeEach
-    void setUp() {
-    }
 
     @Test
     void testSysMenuRepository_findAll() {

@@ -22,22 +22,20 @@ public class SysOrgRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // 清空数据
         sysOrgRepository.deleteAll();
 
-        // 准备测试数据
         testOrg1 = new SysOrg();
-        testOrg1.setName("总公司");
+        testOrg1.setName("测试总公司");
         testOrg1.setEnabled(true);
-        testOrg1.setType(1); // 1 表示公司类型
+        testOrg1.setType(1);
 
         sysOrgRepository.save(testOrg1);
 
         testOrg2 = new SysOrg();
-        testOrg2.setName("技术部");
+        testOrg2.setName("测试技术部");
         testOrg2.setPid(testOrg1.getId());
         testOrg2.setEnabled(true);
-        testOrg2.setType(2); // 2 表示部门类型
+        testOrg2.setType(2);
 
         sysOrgRepository.save(testOrg2);
     }
@@ -130,9 +128,9 @@ public class SysOrgRepositoryTest {
     @Test
     void testFieldQueryMethods() {
         // 测试findByField
-        SysOrg foundByName = sysOrgRepository.findByField("name", "总公司");
+        SysOrg foundByName = sysOrgRepository.findByField("name", "测试总公司");
         assertNotNull(foundByName);
-        assertEquals("总公司", foundByName.getName());
+        assertEquals("测试总公司", foundByName.getName());
 
         // 测试findAllByField
         List<SysOrg> enabledOrgs = sysOrgRepository.findAllByField("enabled", true);

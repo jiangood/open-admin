@@ -22,22 +22,20 @@ public class SysUserRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // 清空数据
         sysUserRepository.deleteAll();
 
-        // 准备测试数据
         testUser1 = new SysUser();
-        testUser1.setAccount("admin");
+        testUser1.setAccount("test_admin");
         testUser1.setPassword("123456");
-        testUser1.setName("管理员");
+        testUser1.setName("测试管理员");
         testUser1.setPhone("13800138000");
         testUser1.setEmail("admin@example.com");
         testUser1.setEnabled(true);
 
         testUser2 = new SysUser();
-        testUser2.setAccount("user");
+        testUser2.setAccount("test_user");
         testUser2.setPassword("123456");
-        testUser2.setName("普通用户");
+        testUser2.setName("测试普通用户");
         testUser2.setPhone("13900139000");
         testUser2.setEmail("user@example.com");
         testUser2.setEnabled(true);
@@ -81,9 +79,9 @@ public class SysUserRepositoryTest {
     // 测试特有方法
     @Test
     void testFindByAccount() {
-        SysUser foundUser = sysUserRepository.findByAccount("admin").orElse(null);
+        SysUser foundUser = sysUserRepository.findByAccount("test_admin").orElse(null);
         assertNotNull(foundUser);
-        assertEquals("管理员", foundUser.getName());
+        assertEquals("测试管理员", foundUser.getName());
 
         // 测试不存在的账号
         SysUser nonExistentUser = sysUserRepository.findByAccount("nonexistent").orElse(null);
@@ -113,7 +111,7 @@ public class SysUserRepositoryTest {
         List<String> ids = Arrays.asList(testUser1.getId());
         List<SysUser> foundUsers = sysUserRepository.findAllByEnabledTrueAndIdIn(ids);
         assertEquals(1, foundUsers.size());
-        assertEquals("admin", foundUsers.get(0).getAccount());
+        assertEquals("test_admin", foundUsers.get(0).getAccount());
     }
 
     // 测试批量操作

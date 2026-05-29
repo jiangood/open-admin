@@ -22,18 +22,16 @@ public class SysRoleRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        // 清空数据
         sysRoleRepository.deleteAll();
 
-        // 准备测试数据
         testRole1 = new SysRole();
-        testRole1.setName("管理员角色");
-        testRole1.setCode("ADMIN");
+        testRole1.setName("测试管理员角色");
+        testRole1.setCode("TEST_ADMIN");
         testRole1.setEnabled(true);
 
         testRole2 = new SysRole();
-        testRole2.setName("普通用户角色");
-        testRole2.setCode("USER");
+        testRole2.setName("测试普通用户角色");
+        testRole2.setCode("TEST_USER");
         testRole2.setEnabled(true);
 
         sysRoleRepository.save(testRole1);
@@ -127,9 +125,9 @@ public class SysRoleRepositoryTest {
     @Test
     void testFieldQueryMethods() {
         // 测试findByField
-        SysRole foundByCode = sysRoleRepository.findByField("code", "ADMIN");
+        SysRole foundByCode = sysRoleRepository.findByField("code", "TEST_ADMIN");
         assertNotNull(foundByCode);
-        assertEquals("管理员角色", foundByCode.getName());
+        assertEquals("测试管理员角色", foundByCode.getName());
 
         // 测试findAllByField
         List<SysRole> enabledRoles = sysRoleRepository.findAllByField("enabled", true);
