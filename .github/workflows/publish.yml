@@ -8,6 +8,14 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # 如果配置了 npm Environment，取消下面这行的注释
+    # environment: npm-publish
+    permissions:
+      # NPM OIDC 必需
+      id-token: write
+      # 创建 Release 必需
+      contents: write
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -80,20 +88,26 @@ jobs:
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE_KEY }}
 
+      # ========== NPM 部分已修改 ==========
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4  # 升级到 v4
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+          # 不需要再配置 NODE_AUTH_TOKEN
 
-      - name: 发布 npm 包
+      - name: Build NPM package
         run: |
           cd web
-          npm install
+          npm ci  # 推荐用 ci 代替 install，更稳定快速
           npm run build
-          npm publish -r --access public --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}
+
+      - name: Publish NPM package (Trusted Publishing)
+        run: |
+          cd web
+          # npm publish 会自动通过 OIDC 完成认证
+          npm publish --access public --no-git-checks
+        # 删除了 NODE_AUTH_TOKEN env
 
       - name: 同步阿里云镜像仓库
         run: |
