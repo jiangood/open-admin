@@ -94,7 +94,6 @@ class SysRoleServiceTest {
         List<SysMenuDef> allMenus = Arrays.asList(menu1, menu2, menu3);
 
         when(roleRepository.findById("2")).thenReturn(Optional.of(normalRole));
-        when(sysMenuRepository.findAll()).thenReturn(allMenus);
         when(sysMenuRepository.findAllById(Arrays.asList("sys", "sys-user"))).thenReturn(
             Arrays.asList(menu1, menu2)
         );
