@@ -22,6 +22,10 @@
     "umi": "^4.0.0"
   },
   "name": "@jiangood/open-admin",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jiangood/open-admin"
+  },
   "description": "open-admin",
   "files": [
     "src/*",
@@ -34,5 +38,5 @@
     "dev": "umi dev",
     "build": "umi build"
   },
-  "version": "2.2.3"
+  "version": "2.2.4"
 }
