@@ -1,23 +1,16 @@
 spring:
   config:
     import: classpath:application-lib.yml
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
   jpa:
-    generate-ddl: true
-    show-sql: true
     hibernate:
       ddl-auto: create-drop
+    show-sql: true
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
 
 sys:
   captcha-enable: false
-  default-password: open-admin@1234
   file:
     store-type: local
     upload-path: /tmp/test-uploads
@@ -26,10 +19,3 @@ sys:
       access-key: test-access-key
       secret-key: test-secret-key
       bucket-name: test-bucket
-
-# 让 application-lib.yml 中的占位符能解析（避免 CI 上报错）
-db_ip: 127.0.0.1
-db_port: 3306
-db_database: test
-db_username: sa
-db_password:
