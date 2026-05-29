@@ -1,2 +1,2 @@
 @echo off
-node "%~dp0bump-version.js" bump "%~dp0pom.xml" "%~dp0web\package.json" %1
+node "%~dp0scripts\bump-version.js" bump "%~dp0pom.xml" "%~dp0web\package.json" %1
