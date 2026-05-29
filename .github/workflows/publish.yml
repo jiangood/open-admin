@@ -20,7 +20,7 @@ jobs:
       - name: Extract pom.xml version
         id: pom-version
         run: |
-          POM_VERSION=$(awk '/<artifactId>open-admin<\/artifactId>/{found=1} found && /<version>[0-9]/{print; exit}' pom.xml | grep -oP '<version>\K[^<]+')
+          POM_VERSION=$(awk '/<artifactId>open-admin<\/artifactId>/{found=1} found && /<version>[0-9]/{print; exit}' pom.xml | grep -oP '<version>\K[^<]+' | tr -d '\r')
           echo "pom_version=$POM_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Extract package.json version
