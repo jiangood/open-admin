@@ -39,3 +39,4 @@ target/
 /docs/superpowers/
 .claude/settings.local.json
 .superpowers/
+.playwright-mcp/
