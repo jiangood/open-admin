@@ -71,6 +71,7 @@ export default (api) => {
             memo.proxy[servletContext] = {
                 target: `http://127.0.0.1:${serverPort}`,
                 changeOrigin: true,
+                ws: true, // WebSocket 代理支持（http-proxy-middleware）
             };
         }
 
