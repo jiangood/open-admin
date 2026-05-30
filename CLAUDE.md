@@ -93,12 +93,15 @@ cd web && npm run build
 - **views/**: ViewFile、ViewImage、ViewBoolean、ViewApproveStatus、ViewPassword 等展示组件
 - **utils/**: HttpUtils（axios 封装，自动 context-path）、SysUtils、DictUtils、TreeUtils、ThemeUtils、DateUtils 等
 
-### Route Injection（`common-plugin.js`）
+### UmiJS Plugin（`common-plugin.js`）
 
-`web/config/common-plugin.js` 是 UmiJS 插件，功能：
-1. 扫描 `node_modules/@jiangood/open-admin/src/pages/` 下的 `.jsx` 文件，自动注册为路由
-2. 扫描业务项目 `src/forms/` 目录，自动注册自定义表单组件到 `FormRegistryUtils`
-3. 框架和业务项目的路由自动合并
+`web/config/common-plugin.js` 是 UmiJS 插件，业务项目 `config.js` 只需注册此插件即可。功能：
+
+1. **构建配置自动注入**：`SERVLET_CONTEXT`（context-path）、`publicPath`、`hash`、`history`（hash 模式）、`mfsu`、`esbuildMinifyIIFE` 等默认值
+2. **开发代理**：自动配置 proxy 到后端，支持 `SERVER_PORT` 环境变量（默认 8080），支持 WebSocket
+3. **主题配置**：读取 `THEME_*` 环境变量注入为 `OPEN_ADMIN_THEME`，框架 `ThemeUtils` 动态合并
+4. **路由自动注册**：扫描 `node_modules/@jiangood/open-admin/src/pages/` 下的 `.jsx` 文件，自动注册为路由
+5. **表单组件注册**：扫描业务项目 `src/forms/` 目录，自动注册自定义表单组件到 `FormRegistryUtils`
 
 ### Layout
 
@@ -179,5 +182,20 @@ cd web && npm run build
 | 位置 | 文件 | 说明 |
 |------|------|------|
 | 后端 | `src/main/resources/application.yml` | `server.servlet.context-path` |
-| 前端环境变量 | `web/.env` | `SERVLET_CONTEXT` 构建时注入 |
-| 前端构建 | `web/config/config.js` | `define` + `proxy` |
+| 前端环境变量 | `web/.env` | `SERVLET_CONTEXT` 环境变量 |
+| UmiJS 插件 | `web/config/common-plugin.js` | 自动读取 `.env` 注入 `define` + `proxy`（含 WebSocket） |
+
+## Theme Customization
+
+前端主题色通过 `.env` 环境变量自定义（由 `common-plugin` 自动注入，业务项目无需修改 `config.js`）：
+
+```
+# web/.env
+THEME_PRIMARY_COLOR=#1961AC        # 主色，自动派生 hover/click 变体
+THEME_SUCCESS_COLOR=#52c41a        # 成功色
+THEME_WARNING_COLOR=#faad14        # 警告色
+THEME_ERROR_COLOR=#ff4d4f          # 错误色
+THEME_BACKGROUND_COLOR=#f5f5f5     # 背景色
+```
+
+未配置时使用默认值。`THEME_PRIMARY_COLOR` 会自动通过 `ColorsUtils.lighten/darken` 计算 `primary-color-hover` 和 `primary-color-click`。

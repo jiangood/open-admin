@@ -80,6 +80,8 @@ server:
 SERVLET_CONTEXT=/your-context-path
 ```
 
+（`SERVLET_CONTEXT` 由 UmiJS 插件 `common-plugin` 自动注入 `define` 和 `proxy`，业务项目 `config.js` 只需注册插件，无需手动配置。）
+
 前端请求会自动带上 context-path 前缀（通过 axios `baseURL`）。对于 `<a>`、`<img>` 等不经过 axios 的硬编码 URL，需使用 `SysUtils.contextPath(path)` 手动拼接。
 
 ## 创建新模块
