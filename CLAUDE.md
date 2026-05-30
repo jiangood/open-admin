@@ -4,133 +4,71 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-open-admin 是一个可嵌入的后台管理系统框架（脚手架），业务项目通过 Maven/pnpm 添加依赖即可获得完整的后台管理能力，无需从零搭建用户管理、角色权限、数据字典等功能。
+open-admin 是一个可嵌入的后台管理系统框架（脚手架），业务项目通过 Maven/pnpm 添加依赖即可获得完整的后台管理能力，无需从零搭建用户管理、角色权限、数据字典等功能。框架发布在 Maven Central (`io.github.jiangood:open-admin`) 和 npm (`@jiangood/open-admin`)。
+
+同级目录 `D:\ws\open-admin-example` 是示例业务项目，修改框架后需在示例项目中验证。
 
 ## Tech Stack
 
-- **Backend**: Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
-- **Frontend**: React 19, Ant Design 6, UmiJS 4 (React framework, not Ant Design Pro)
+- **Backend**: Java 21, Spring Boot 4.0.6, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
+- **Frontend**: React 19, Ant Design 6, UmiJS 4, TypeScript
 - **Build**: Maven (backend), npm (frontend)
 
-## Project Structure
+## Two-Project Workflow
 
 ```
-open-admin/
-├── pom.xml                    # Maven 父项目
-├── src/main/java/io/github/jiangood/openadmin/
-│   ├── OpenAdminConfiguration.java       # 自动配置入口 (@ComponentScan, @EntityScan, @EnableJpaRepositories)
-│   ├── framework/
-│   │   ├── config/            # Spring 配置 (Security, JPA, Jackson, SystemProperties)
-│   │   │   ├── security/      # Spring Security 配置 + 权限刷新
-│   │   │   ├── json/          # Jackson 自定义序列化/反序列化
-│   │   │   ├── MenuYamlLoader.java # YAML 菜单加载器
-│   │   │   └── SysMenuDef.java # 菜单数据定义
-│   │   ├── data/              # JPA 基础层: BaseEntity, BaseRepository(BaseRepositoryImpl), Spec (动态查询)
-│   │   │   ├── converter/     # JPA AttributeConverter 集合
-│   │   │   ├── id/            # ID 生成器 (UUIDv7, 前缀序列, 日表序列)
-│   │   │   └── specification/ # 动态查询 Spec 构建器
-│   │   ├── perm/              # 权限注解 @HasPermission + 切面
-│   │   ├── log/               # 操作日志注解 @Log + 切面
-│   │   ├── migration/         # 数据迁移
-│   │   ├── validator/         # 自定义校验注解 (手机号, 身份证, 密码等)
-│   │   └── enums/             # 基础枚举 (YesNo, Sex, ApproveStatus)
-│   ├── auth/                  # 认证 (登录/登出/验证码/当前用户)
-│   ├── console/               # 控制台公共 API (站点信息/菜单)
-│   ├── util/                  # 工具类库 (BeanTool, StringTool, JsonTool, TreeTool, ExcelTool, FileTool 等)
-│   └── modules/
-│       ├── system/            # 系统管理模块 (用户/角色/菜单/组织/字典/文件/日志)
-│       │   ├── entity/        # JPA 实体
-│       │   ├── repository/    # Spring Data JPA Repository
-│       │   ├── service/       # 业务逻辑
-│       │   ├── controller/    # REST API
-│       │   ├── dto/           # 请求/响应 DTO
-│       │   └── file/          # 文件存储 (本地/Minio)
-│       ├── job/               # 定时任务模块 (Quartz)
-│       ├── api/               # API 开放接口模块 (对外接口管理)
-│       ├── logviewer/         # 文件日志查看
-│       │   ├── controller/
-│       │   ├── service/
-│       │   ├── config/        # Logback 配置
-│       │   └── util/          # MDC 工具
-├── web/                       # 前端项目 (UmiJS)
-│   ├── package.json
-│   ├── src/
-│   │   ├── framework/         # 框架组件库 (npm 包 @jiangood/open-admin)
-│   │   │   ├── components/    # 通用组件 (ProTable, Page, OrgTree, RoleTree, NamedIcon 等)
-│   │   │   ├── fields/        # 表单字段组件 (FieldDictSelect, FieldRemoteSelect, FieldDate 等)
-│   │   │   ├── views/         # 展示组件 (ViewFile, ViewImage, ViewBoolean 等)
-│   │   │   └── utils/         # 工具类 (HttpUtils, SysUtils, DictUtils, TreeUtils, ThemeUtils 等)
-│   │   ├── layouts/           # 布局组件 (admin 后台布局含菜单/Sider/Header/TabPage)
-│   │   ├── pages/             # 业务页面
-│   │   └── config/            # UmiJS 配置
-│   └── config/                # UmiJS 构建配置
-└── src/main/resources/
-    ├── application.yml        # 主配置文件
-    └── static/admin/public/   # 静态资源 (logo.jpg, login_bg.jpg)
+D:/ws/
+├── open-admin/              # 框架项目（本仓库）
+│   ├── src/main/java/       # 框架源码
+│   ├── web/src/framework/   # 前端框架源码 (npm publish)
+│   └── pom.xml
+└── open-admin-example/      # 示例业务项目（依赖框架）
+    ├── src/main/java/       # 极少量业务代码
+    ├── web/                 # 前端（依赖 @jiangood/open-admin）
+    └── pom.xml              # 依赖 io.github.jiangood:open-admin
 ```
 
-## Key Architecture Patterns
+修改框架后，需先在框架项目执行 `mvnw install` 或 `mvnw package`，然后在示例项目更新依赖版本验证。
 
-- **BaseEntity/BaseRepository**: 所有实体继承 `BaseEntity` (含 id, createTime, updateTime 等通用字段)，Repository 继承 `BaseRepository` 提供通用 CRUD + JpaService 通用服务层
-- **Spec 动态查询**: `Spec` + `SpecImpl` 构建 JPA 动态查询，支持 AND/OR 组合、关联查询、聚合函数，通过 `ExpressionTool` 处理多种操作符
-- **菜单定义**: 通过 YAML 文件定义菜单树 (`SysMenuRepositoryYamlImpl`)，也支持数据库存储
-- **代码生成**: 后端 JpaService 提供通用增删改查，前端 ProTable + Field 组件实现通用列表/表单。代码生成时主要关注 Entity/Repository + 前端页面
-- **权限**: `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
-- **工具类**: `io.github.jiangood.openadmin.util` 包下大量工具类 (BeanTool, JsonTool, TreeTool, ExcelTool 等)，可按需使用
-- **ID 生成**: 默认使用 UUIDv7 (时间排序，MySQL 友好)
+## Auto-Configuration Mechanism
 
-## Servlet Context-Path 配置
+框架通过 Spring Boot 自动配置机制注入：
 
-支持将应用部署在自定义上下文路径下，后端和前端需要同步配置。
+- **AutoConfiguration.imports**: `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册 `OpenAdminConfiguration` 和 `SpringTool`
+- **OpenAdminConfiguration.java**: 包含 `@ComponentScan`、`@EntityScan`、`@EnableJpaRepositories`，扫描包 `io.github.jiangood.openadmin`
+- **application-lib.yml**: 框架默认配置（框架 JAR 包内的 `src/main/resources/application-lib.yml`），业务项目通过 `spring.config.import: classpath:application-lib.yml` 引入，业务配置优先级更高可覆盖
 
-### 配置点
+## Maven Profiles
 
-| 位置 | 文件 | 说明 |
-|------|------|------|
-| 后端 | `src/main/resources/application.yml` | `server.servlet.context-path` |
-| 前端环境变量 | `web/.env` | `SERVLET_CONTEXT` 构建时注入 |
-| 前端构建 | `web/config/config.js` | `define` + `proxy` |
-
-### 工作原理
-
-1. **axios 请求**（`HttpUtils`）：通过 `axiosInstance` 的 `baseURL` 自动为所有请求加上 context-path 前缀，业务代码无需改动
-2. **硬编码 URL**（`<a href>`、`<img src>`、CSS `url()`）：这些不走 axios，需手动调用 `SysUtils.contextPath(path)` 拼接前缀
-3. **开发代理**：UmiJS proxy 将 context-path 开头的请求转发到后端
-
-### 业务项目接入
-
-1. 修改 `application.yml` 中的 `context-path`
-2. 修改 `web/.env` 中的 `SERVLET_CONTEXT` 为相同值
-3. 重新构建前端即可生效
-
-## Logo 配置
-
-配置文件 `application.yml`:
-```yaml
-sys:
-  logo-url: /admin/public/logo.jpg   # logo 图片路径
-```
-
-- 默认值: `SystemProperties.java:56` — `private String logoUrl = "/admin/public/logo.jpg"`
-- 默认图片文件: `src/main/resources/static/admin/public/logo.jpg`
-- 前端渲染: `web/src/layouts/admin/index.jsx:104` — `<img src={siteInfo.logoUrl} />`
-- 后端 API: `SysCommonController.java:56` — 通过 `/admin/public/site-info` 接口返回 `logoUrl`
-- 配置方式: 修改 `application.yml` 中的 `sys.logo-url`，或替换 logo.jpg 文件，或上传文件后使用文件预览 URL
+| Profile | Command | Purpose |
+|---------|---------|---------|
+| (default) | `mvnw package` | 编译打包框架 JAR（不含 Spring Boot 可执行，供其他项目依赖） |
+| app | `mvnw -Papp spring-boot:run` | 以独立应用运行（含 Spring Boot plugin，开发用） |
+| publish | `mvnw -Ppublish package` | 发布到 Maven Central（含 sources、javadoc、GPG signing） |
 
 ## Development Commands
 
 ```bash
-# Backend - 编译
-mvn clean compile
+# Backend - 编译（必须用 mvnw，不能用系统 mvn）
+./mvnw clean compile
 
-# Backend - 运行测试 (单个测试类)
-mvn test -Dtest=BeanToolTest
+# Backend - 运行测试（单个测试）
+./mvnw test -Dtest=BeanToolTest
 
-# Backend - 打包 (可指定版本)
-mvn package -Drevision=1.2.7
+# Backend - 运行测试（排除需要 MySQL 的集成测试）
+./mvnw test -Dtest='!*RepositoryTest,!*ServiceTest,!MenuLoadingIntegrationTest'
 
-# Backend - 运行应用
-mvn spring-boot:run
+# Backend - 打包（供业务项目依赖）
+./mvnw clean package
+
+# Backend - 以独立应用启动（含完整 Spring Boot 入口）
+./mvnw -Papp spring-boot:run
+
+# Backend - 安装到本地 Maven 仓库（供同级 open-admin-example 使用）
+./mvnw clean install -DskipTests
+
+# Backend - 发布到 Maven Central
+./mvnw -Ppublish clean package
 
 # Frontend - 安装依赖
 cd web && npm install
@@ -142,6 +80,104 @@ cd web && npm run dev
 cd web && npm run build
 ```
 
-## Framework Module (web/src/framework)
+测试使用 H2 内存数据库（配置在 `src/test/resources/application.yml`），无需 MySQL。集成测试（Repository 测试、Service 测试）需要 MySQL，默认被排除。
 
-The `web/src/framework` directory is published as an independent npm package `@jiangood/open-admin` — it's a reusable component/field/view library, not tied to specific business pages. Business pages in `web/src/pages/` import from it.
+## Frontend Architecture
+
+### Framework Module (`web/src/framework/`)
+
+`web/src/framework` 目录发布为独立 npm 包 `@jiangood/open-admin`，业务项目通过 npm 依赖引用。核心导出：
+
+- **components/**: ProTable（通用列表）、ProModal（弹窗表单）、Page、OrgTree、RoleTree、NamedIcon 等
+- **fields/**: FieldDictSelect、FieldRemoteSelect、FieldDate、FieldDateRange、FieldUploadFile、FieldBoolean 等表单字段
+- **views/**: ViewFile、ViewImage、ViewBoolean、ViewApproveStatus、ViewPassword 等展示组件
+- **utils/**: HttpUtils（axios 封装，自动 context-path）、SysUtils、DictUtils、TreeUtils、ThemeUtils、DateUtils 等
+
+### Route Injection（`common-plugin.js`）
+
+`web/config/common-plugin.js` 是 UmiJS 插件，功能：
+1. 扫描 `node_modules/@jiangood/open-admin/src/pages/` 下的 `.jsx` 文件，自动注册为路由
+2. 扫描业务项目 `src/forms/` 目录，自动注册自定义表单组件到 `FormRegistryUtils`
+3. 框架和业务项目的路由自动合并
+
+### Layout
+
+`web/src/layouts/` 包含完整后台布局：侧边菜单、顶部 Header、TabPage 多标签页、PageRender 页面渲染器。
+
+## API Response Format
+
+所有 API 统一返回 `AjaxResult`（JSON）：
+
+```json
+{"code": 200, "msg": "成功", "data": {...}}
+```
+
+异常由 `GlobalExceptionHandler` 统一处理，返回 `BusinessException` 或校验错误信息。
+
+## Key Architecture Patterns
+
+- **BaseEntity/BaseRepository**: 所有实体继承 BaseEntity（UUIDv7 id, createTime/createUser, updateTime/updateUser, delFlag），Repository 继承 BaseRepository 获得通用 CRUD + 批量操作 + 动态查询
+- **Spec 动态查询**: `Spec<T>` 链式构建 JPA Specification（eq/like/in/between/or/groupBy/having 及关联查询），通过 `SpecImpl` + `ExpressionTool` 执行
+- **PageExt**: 扩展 PageImpl，支持返回额外数据（如汇总行 summary）
+- **菜单加载**: 通过 `classpath*:data/menu*.yml` YAML 文件定义菜单树（`MenuYamlLoader`），也支持数据库存储（`SysMenuRepositoryYamlImpl`）
+- **权限控制**: `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
+- **数据字典**: 首次启动 `dict-init.sql` 自动导入初始字典数据
+- **ID 生成**: 默认 UUIDv7（时间排序，MySQL 友好），也支持前缀序列 ID 和日表序列 ID
+- **文件存储**: 支持本地文件系统和 Minio，通过 `FileOperator` 接口抽象，`sys.file.store-type` 配置
+- **操作日志**: `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`）
+
+## Built-in System Modules
+
+框架在 `io.github.jiangood.openadmin.modules.*` 中已实现完整后台管理功能：
+
+| 模块 | 包路径 | 功能 |
+|------|--------|------|
+| system | `modules/system/` | 用户/角色/菜单/组织/字典/文件/日志管理 |
+| job | `modules/job/` | Quartz 定时任务（动态创建/暂停/恢复） |
+| logviewer | `modules/logviewer/` | 运行日志在线查看 |
+
+## Utility Classes
+
+框架提供 77+ 工具类，位于 `io.github.jiangood.openadmin.util`：
+
+- **BeanTool/JsonTool/StringTool**: 常用对象/JSON/字符串操作
+- **TreeTool**: 树结构构建与操作（含拖拽排序 `TreeDropTool`）
+- **ExcelTool**: Excel 导入导出（基于 Apache POI）
+- **FileTool/FileTypeTool/FontTool/ImgTool**: 文件操作
+- **PasswordTool/AesTool**: 密码加密/AES 加解密
+- **IpTool/IpRegionTool**: IP 地址解析
+- **DateTool/RangeTool**: 日期和时间范围处理
+- **DbTool/SqlBuilder**: JDBC 工具和 SQL 构建
+- **ReflectTool/ClassTool/AnnotationTool**: 反射和注解处理
+
+## Important Configurations (`sys.*` in application.yml)
+
+| 配置 | 说明 | 默认值 |
+|------|------|--------|
+| `sys.title` | 系统标题（必填） | 管理系统 |
+| `sys.captcha-enable` | 登录验证码 | true |
+| `sys.default-password` | 默认密码 | open-admin@1234 |
+| `sys.logo-url` | Logo 路径 | /admin/public/logo.svg |
+| `sys.file.store-type` | 文件存储 (local/minio) | local |
+| `sys.file.upload-path` | 本地上传路径 | /home/files |
+| `sys.session-idle-time` | Session 超时（分钟） | 180 |
+| `sys.job-enable` | 定时任务开关 | true |
+
+完整配置项见 `SystemProperties.java`。
+
+## Adding a Business Module
+
+1. **Entity**: 继承 `BaseEntity`，JPA 自动建表
+2. **Repository**: 继承 `BaseRepository<T, String>`，获得通用 CRUD 和动态查询
+3. **Service**: 继承 `BaseService<T>`，获得通用业务逻辑
+4. **Controller**: RESTful，返回 `AjaxResult`，使用 `@HasPermission` 控制权限
+5. **菜单**: `src/main/resources/data/menu*.yml` 定义菜单树
+6. **前端**: 使用 ProTable + Field* 组件快速搭建 CRUD 页面
+
+## Context-Path Configuration
+
+| 位置 | 文件 | 说明 |
+|------|------|------|
+| 后端 | `src/main/resources/application.yml` | `server.servlet.context-path` |
+| 前端环境变量 | `web/.env` | `SERVLET_CONTEXT` 构建时注入 |
+| 前端构建 | `web/config/config.js` | `define` + `proxy` |
