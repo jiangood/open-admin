@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from "react";
+import {useState, useEffect, useRef} from "react";
 import {App, ConfigProvider} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
@@ -48,13 +48,15 @@ function AppWrapper({children}) {
     return <ConfigProvider {...configProps}><App>{children}</App></ConfigProvider>;
 }
 
+const PUBLIC_PAGES = (() => {
+    const raw = typeof OPEN_ADMIN_PUBLIC_PAGES !== 'undefined' && OPEN_ADMIN_PUBLIC_PAGES;
+    return raw ? raw.split(',').map(s => s.trim()) : ['/login', '/test'];
+})();
+
 function isPublicPage(pathname, search) {
     if (pathname === '/' || pathname === '/index') return false;
 
-    const raw = typeof OPEN_ADMIN_PUBLIC_PAGES !== 'undefined' && OPEN_ADMIN_PUBLIC_PAGES;
-    const pages = raw ? raw.split(',').map(s => s.trim()) : ['/login', '/test'];
-
-    for (const pattern of pages) {
+    for (const pattern of PUBLIC_PAGES) {
         if (pattern.endsWith('/**')) {
             if (pathname.startsWith(pattern.slice(0, -3))) return true;
         } else if (pathname === pattern) {
@@ -62,15 +64,16 @@ function isPublicPage(pathname, search) {
         }
     }
 
-    if (search && new URLSearchParams(search).has('_noLayout')) return true;
+    if (new URLSearchParams(search).has('_noLayout')) return true;
     return false;
 }
 
-function initApp() {
-    return Promise.all([
-        HttpUtils.get("/admin/public/site-info"),
-        HttpUtils.get('/admin/public/check-login'),
-    ]).then(([siteInfo, loginRs]) => {
+async function initApp() {
+    try {
+        const [siteInfo, loginRs] = await Promise.all([
+            HttpUtils.get("/admin/public/site-info"),
+            HttpUtils.get('/admin/public/check-login'),
+        ]);
         SysUtils.setSiteInfo(siteInfo);
         const {needUpdatePwd, dictInfo, loginInfo} = loginRs;
         SysUtils.setDictInfo(dictInfo);
@@ -80,22 +83,25 @@ function initApp() {
             return false;
         }
         return true;
-    }).catch(() => {
+    } catch (e) {
+        console.error('[Layout] 初始化应用失败:', e);
         PageUtils.redirectToLogin();
         return false;
-    });
+    }
 }
 
 export function Layouts() {
     const {pathname, search} = useLocation();
     const [ready, setReady] = useState(false);
-    const loadedRef = useRef(false);
+    const initPromise = useRef(null);
 
     useEffect(() => {
-        if (isPublicPage(pathname, search)) return;
-        if (loadedRef.current) return;
-        loadedRef.current = true;
-        initApp().then(ok => ok && setReady(true));
+        if (isPublicPage(pathname, search)) {
+            initPromise.current = null;
+            return;
+        }
+        if (initPromise.current) return;
+        initPromise.current = initApp().then(ok => ok && setReady(true));
     }, [pathname]);
 
     if (isPublicPage(pathname, search)) {
