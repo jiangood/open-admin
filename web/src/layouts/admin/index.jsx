@@ -207,7 +207,7 @@ export default class extends React.Component {
     render() {
         const {siteInfo, loginInfo} = this.state
 
-        return <Layout className='main-layout'>
+        return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click")}}>
             <Header className='header'>
                 <div className='header-left'>
                     {siteInfo.showLogo !== false && siteInfo.logoUrl &&

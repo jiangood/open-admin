@@ -24,36 +24,38 @@ function isPublicPage(pathname, search) {
     return false;
 }
 
-const configProps = {
-    input: {autoComplete: 'off'},
-    form: {validateMessages: {required: '必填项'}, colon: false},
-    button: {autoInsertSpace: false},
-    locale: zhCN,
-    theme: {
-        token: {
-            colorPrimary: ThemeUtils.getColor("primary-color"),
-            colorSuccess: ThemeUtils.getColor("success-color"),
-            colorWarning: ThemeUtils.getColor("warning-color"),
-            colorError: ThemeUtils.getColor("error-color"),
-            borderRadius: 4,
-        },
-        components: {
-            Menu: {
-                darkItemBg: ThemeUtils.getColor("primary-color"),
-                darkPopupBg: ThemeUtils.getColor("primary-color"),
-                darkItemSelectedBg: ThemeUtils.getColor("primary-color-click"),
-                darkItemHoverBg: ThemeUtils.getColor("primary-color-hover"),
-                darkSubMenuItemBg: ThemeUtils.getColor("primary-color"),
+function getConfigProps() {
+    return {
+        input: {autoComplete: 'off'},
+        form: {validateMessages: {required: '必填项'}, colon: false},
+        button: {autoInsertSpace: false},
+        locale: zhCN,
+        theme: {
+            token: {
+                colorPrimary: ThemeUtils.getColor("primary-color"),
+                colorSuccess: ThemeUtils.getColor("success-color"),
+                colorWarning: ThemeUtils.getColor("warning-color"),
+                colorError: ThemeUtils.getColor("error-color"),
+                borderRadius: 4,
             },
-            Layout: {
-                siderBg: ThemeUtils.getColor("primary-color"),
-                triggerBg: ThemeUtils.getColor("primary-color-click"),
-                headerBg: 'white',
-                triggerHeight: 32,
+            components: {
+                Menu: {
+                    darkItemBg: ThemeUtils.getColor("primary-color"),
+                    darkPopupBg: ThemeUtils.getColor("primary-color"),
+                    darkItemSelectedBg: ThemeUtils.getColor("primary-color-click"),
+                    darkItemHoverBg: ThemeUtils.getColor("primary-color-hover"),
+                    darkSubMenuItemBg: ThemeUtils.getColor("primary-color"),
+                },
+                Layout: {
+                    siderBg: ThemeUtils.getColor("primary-color"),
+                    triggerBg: ThemeUtils.getColor("primary-color-click"),
+                    headerBg: 'white',
+                    triggerHeight: 32,
+                },
             },
         },
-    },
-};
+    };
+}
 
 function initApp() {
     return Promise.all([
@@ -89,14 +91,14 @@ export function Layouts() {
     }, [pathname]);
 
     if (isPublicPage(pathname, search)) {
-        return <ConfigProvider {...configProps}><App><Outlet/></App></ConfigProvider>;
+        return <ConfigProvider {...getConfigProps()}><App><Outlet/></App></ConfigProvider>;
     }
 
     if (!ready) {
-        return <ConfigProvider {...configProps}><App><PageLoading message='加载中...'/></App></ConfigProvider>;
+        return <ConfigProvider {...getConfigProps()}><App><PageLoading message='加载中...'/></App></ConfigProvider>;
     }
 
-    return <ConfigProvider {...configProps}><App><AdminLayout/></App></ConfigProvider>;
+    return <ConfigProvider {...getConfigProps()}><App><AdminLayout/></App></ConfigProvider>;
 }
 
 export default Layouts;

@@ -35,6 +35,28 @@ export default (api) => {
         key: 'open-admin',
     });
 
+    // Inject build-time defines from environment variables
+    const servletContext = process.env.SERVLET_CONTEXT || '/change-this-servlet-context';
+    api.modifyConfig((memo) => {
+        memo.define = memo.define || {};
+        memo.define.SERVLET_CONTEXT = servletContext;
+        return memo;
+    });
+
+    const theme = {};
+    if (process.env.THEME_PRIMARY_COLOR) theme["primary-color"] = process.env.THEME_PRIMARY_COLOR;
+    if (process.env.THEME_SUCCESS_COLOR) theme["success-color"] = process.env.THEME_SUCCESS_COLOR;
+    if (process.env.THEME_WARNING_COLOR) theme["warning-color"] = process.env.THEME_WARNING_COLOR;
+    if (process.env.THEME_ERROR_COLOR) theme["error-color"] = process.env.THEME_ERROR_COLOR;
+    if (process.env.THEME_BACKGROUND_COLOR) theme["background-color"] = process.env.THEME_BACKGROUND_COLOR;
+
+    if (Object.keys(theme).length > 0) {
+        api.modifyConfig((memo) => {
+            memo.define.OPEN_ADMIN_THEME = theme;
+            return memo;
+        });
+    }
+
     const isFramework = api.pkg.name === pkgName;
 
     try {

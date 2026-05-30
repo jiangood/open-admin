@@ -29,10 +29,6 @@ const proxyConfig = {
 };
 
 export default defineConfig({
-    // 注入全局变量，前端代码可直接使用 SERVLET_CONTEXT
-    define: {
-        SERVLET_CONTEXT: SERVLET_CONTEXT,
-    },
     // 资源使用相对路径，部署到任意 context-path 下都无需重新构建
     publicPath: process.env.NODE_ENV === 'production' ? './' : '/',
     // 配置是否让生成的文件包含 hash 后缀，通常用于增量发布和避免浏览器加载缓存

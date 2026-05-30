@@ -42,12 +42,12 @@
         white-space: nowrap;
 
         &:hover {
-          color: #1961AC;
+          color: var(--primary-color, var(--primary-color, #1961AC));
         }
 
         &.active {
-          color: #1961AC;
-          box-shadow: inset 0 -2px 0 #1961AC;
+          color: var(--primary-color, var(--primary-color, #1961AC));
+          box-shadow: inset 0 -2px 0 var(--primary-color, var(--primary-color, #1961AC));
         }
       }
     }
@@ -63,7 +63,7 @@
         cursor: pointer;
 
         &:hover {
-          background: #063A69;
+          background: var(--primary-color-click, #124B93);
           color: white;
         }
       }
@@ -134,11 +134,11 @@
         flex-shrink: 0;
 
         &:hover {
-          color: #1961AC;
+          color: var(--primary-color, #1961AC);
         }
 
         &.active {
-          color: #1961AC;
+          color: var(--primary-color, #1961AC);
           background: #fff;
           font-weight: 500;
         }
