@@ -15,7 +15,7 @@ menus:
           - {name: 重置密码, code: reset-password}
           - {name: 分配权限, code: grant-permission}
       - id: sys-org
-        name: 机构管理
+        name: 组织架构
         path: /system/org
         icon: ApartmentOutlined
         perms:
@@ -34,7 +34,7 @@ menus:
           - {name: 删除, code: delete}
           - {name: 分配权限, code: grant-permission}
       - id: sys-manual
-        name: 操作手册
+        name: 手册管理
         path: /system/manual
         icon: CopyOutlined
         perms:
@@ -42,7 +42,7 @@ menus:
           - {name: 创建, code: create}
           - {name: 删除, code: delete}
       - id: sys-dict
-        name: 数据字典
+        name: 字典管理
         path: /system/dict
         icon: FileSearchOutlined
         perms:
@@ -50,7 +50,7 @@ menus:
           - {name: 创建, code: create}
           - {name: 删除, code: delete}
       - id: job
-        name: 定时作业
+        name: 任务调度
         path: /system/job
         icon: OrderedListOutlined
         perms:
@@ -67,7 +67,7 @@ menus:
           - {name: 读取, code: read}
           - {name: 删除, code: delete}
       - id: sys-log
-        name: 操作日志
+        name: 审计日志
         path: /system/log
         icon: FileSearchOutlined
         perms:
