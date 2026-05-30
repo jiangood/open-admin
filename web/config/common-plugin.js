@@ -55,6 +55,9 @@ export default (api) => {
         if (Object.keys(theme).length > 0) {
             memo.define.OPEN_ADMIN_THEME = theme;
         }
+        if (process.env.PUBLIC_PAGES) {
+            memo.define.OPEN_ADMIN_PUBLIC_PAGES = process.env.PUBLIC_PAGES;
+        }
 
         // Build defaults (only if not explicitly set by project config.js)
         if (memo.publicPath === undefined) {

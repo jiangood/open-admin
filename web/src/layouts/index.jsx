@@ -13,48 +13,57 @@ import './index.less'
 
 dayjs.locale('zh-cn');
 
-// 不需要登录和布局的页面
-const PUBLIC_PAGES = ['/login', '/test']
+const configProps = {
+    input: {autoComplete: 'off'},
+    form: {validateMessages: {required: '必填项'}, colon: false},
+    button: {autoInsertSpace: false},
+    locale: zhCN,
+    theme: {
+        token: {
+            colorPrimary: ThemeUtils.getColor("primary-color"),
+            colorSuccess: ThemeUtils.getColor("success-color"),
+            colorWarning: ThemeUtils.getColor("warning-color"),
+            colorError: ThemeUtils.getColor("error-color"),
+            borderRadius: 4,
+        },
+        components: {
+            Menu: {
+                darkItemBg: ThemeUtils.getColor("primary-color"),
+                darkPopupBg: ThemeUtils.getColor("primary-color"),
+                darkItemSelectedBg: ThemeUtils.getColor("primary-color-click"),
+                darkItemHoverBg: ThemeUtils.getColor("primary-color-hover"),
+                darkSubMenuItemBg: ThemeUtils.getColor("primary-color"),
+            },
+            Layout: {
+                siderBg: ThemeUtils.getColor("primary-color"),
+                triggerBg: ThemeUtils.getColor("primary-color-click"),
+                headerBg: 'white',
+                triggerHeight: 32,
+            },
+        },
+    },
+};
+
+function AppWrapper({children}) {
+    return <ConfigProvider {...configProps}><App>{children}</App></ConfigProvider>;
+}
 
 function isPublicPage(pathname, search) {
     if (pathname === '/' || pathname === '/index') return false;
-    if (pathname.startsWith("/test/")) return true;
-    if (PUBLIC_PAGES.includes(pathname)) return true;
+
+    const raw = typeof OPEN_ADMIN_PUBLIC_PAGES !== 'undefined' && OPEN_ADMIN_PUBLIC_PAGES;
+    const pages = raw ? raw.split(',').map(s => s.trim()) : ['/login', '/test'];
+
+    for (const pattern of pages) {
+        if (pattern.endsWith('/**')) {
+            if (pathname.startsWith(pattern.slice(0, -3))) return true;
+        } else if (pathname === pattern) {
+            return true;
+        }
+    }
+
     if (search && new URLSearchParams(search).has('_noLayout')) return true;
     return false;
-}
-
-function getConfigProps() {
-    return {
-        input: {autoComplete: 'off'},
-        form: {validateMessages: {required: '必填项'}, colon: false},
-        button: {autoInsertSpace: false},
-        locale: zhCN,
-        theme: {
-            token: {
-                colorPrimary: ThemeUtils.getColor("primary-color"),
-                colorSuccess: ThemeUtils.getColor("success-color"),
-                colorWarning: ThemeUtils.getColor("warning-color"),
-                colorError: ThemeUtils.getColor("error-color"),
-                borderRadius: 4,
-            },
-            components: {
-                Menu: {
-                    darkItemBg: ThemeUtils.getColor("primary-color"),
-                    darkPopupBg: ThemeUtils.getColor("primary-color"),
-                    darkItemSelectedBg: ThemeUtils.getColor("primary-color-click"),
-                    darkItemHoverBg: ThemeUtils.getColor("primary-color-hover"),
-                    darkSubMenuItemBg: ThemeUtils.getColor("primary-color"),
-                },
-                Layout: {
-                    siderBg: ThemeUtils.getColor("primary-color"),
-                    triggerBg: ThemeUtils.getColor("primary-color-click"),
-                    headerBg: 'white',
-                    triggerHeight: 32,
-                },
-            },
-        },
-    };
 }
 
 function initApp() {
@@ -71,8 +80,7 @@ function initApp() {
             return false;
         }
         return true;
-    }).catch((e) => {
-        console.error('[Layout] 初始化应用失败:', e);
+    }).catch(() => {
         PageUtils.redirectToLogin();
         return false;
     });
@@ -84,21 +92,21 @@ export function Layouts() {
     const loadedRef = useRef(false);
 
     useEffect(() => {
-        if (isPublicPage(pathname)) return;
+        if (isPublicPage(pathname, search)) return;
         if (loadedRef.current) return;
         loadedRef.current = true;
-        initApp().then(ok => { if (ok) setReady(true); });
+        initApp().then(ok => ok && setReady(true));
     }, [pathname]);
 
     if (isPublicPage(pathname, search)) {
-        return <ConfigProvider {...getConfigProps()}><App><Outlet/></App></ConfigProvider>;
+        return <AppWrapper><Outlet/></AppWrapper>;
     }
 
-    if (!ready) {
-        return <ConfigProvider {...getConfigProps()}><App><PageLoading message='加载中...'/></App></ConfigProvider>;
-    }
-
-    return <ConfigProvider {...getConfigProps()}><App><AdminLayout/></App></ConfigProvider>;
+    return (
+        <AppWrapper>
+            {ready ? <AdminLayout/> : <PageLoading message='加载中...'/>}
+        </AppWrapper>
+    );
 }
 
 export default Layouts;
