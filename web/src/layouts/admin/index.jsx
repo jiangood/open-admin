@@ -81,7 +81,7 @@ export default class extends React.Component {
             if (!activeTopMenuKey && topMenus.length > 0) {
                 activeTopMenuKey = topMenus[0].key;
                 sideMenus = topMenus[0].children || [];
-                if (!currentMenuKey && sideMenus.length > 0) {
+                if (!currentMenuKey && sideMenus.length > 0 && (pathname === '' || pathname === '/')) {
                     currentMenuKey = sideMenus[0].key;
                     if (sideMenus[0].path && (pathname === '' || pathname === '/')) {
                         history.push(sideMenus[0].path);
