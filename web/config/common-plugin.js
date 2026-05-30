@@ -35,13 +35,10 @@ export default (api) => {
         key: 'open-admin',
     });
 
-    // Inject build-time defines from environment variables
+    // Inject build-time defines and UmiJS defaults from environment variables
     const servletContext = process.env.SERVLET_CONTEXT || '/change-this-servlet-context';
-    api.modifyConfig((memo) => {
-        memo.define = memo.define || {};
-        memo.define.SERVLET_CONTEXT = servletContext;
-        return memo;
-    });
+    const isProd = process.env.NODE_ENV === 'production';
+    const devHost = process.env.DEV_HOST || '127.0.0.1:8080';
 
     const theme = {};
     if (process.env.THEME_PRIMARY_COLOR) theme["primary-color"] = process.env.THEME_PRIMARY_COLOR;
@@ -50,12 +47,35 @@ export default (api) => {
     if (process.env.THEME_ERROR_COLOR) theme["error-color"] = process.env.THEME_ERROR_COLOR;
     if (process.env.THEME_BACKGROUND_COLOR) theme["background-color"] = process.env.THEME_BACKGROUND_COLOR;
 
-    if (Object.keys(theme).length > 0) {
-        api.modifyConfig((memo) => {
+    api.modifyConfig((memo) => {
+        memo.define = memo.define || {};
+
+        // Define globals
+        memo.define.SERVLET_CONTEXT = servletContext;
+        if (Object.keys(theme).length > 0) {
             memo.define.OPEN_ADMIN_THEME = theme;
-            return memo;
-        });
-    }
+        }
+
+        // Build defaults (only if not explicitly set by project config.js)
+        if (memo.publicPath === undefined) {
+            memo.publicPath = isProd ? './' : '/';
+        }
+        if (memo.hash === undefined) memo.hash = true;
+        if (memo.history === undefined) memo.history = { type: 'hash' };
+        if (memo.mfsu === undefined) memo.mfsu = false;
+        if (memo.esbuildMinifyIIFE === undefined) memo.esbuildMinifyIIFE = true;
+
+        // Proxy dev server
+        if (memo.proxy === undefined) memo.proxy = {};
+        if (!memo.proxy[servletContext]) {
+            memo.proxy[servletContext] = {
+                target: `http://${devHost}`,
+                changeOrigin: true,
+            };
+        }
+
+        return memo;
+    });
 
     const isFramework = api.pkg.name === pkgName;
 
