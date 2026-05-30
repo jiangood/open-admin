@@ -29,7 +29,7 @@ export class OrgTree extends React.Component<any, any> {
         }
 
         if (treeData.length === 0) {
-            return <Alert type={"warning"} message={'组织机构数据为空'}/>
+            return <Alert type={"warning"} title={'组织机构数据为空'}/>
         }
 
         return <Tree

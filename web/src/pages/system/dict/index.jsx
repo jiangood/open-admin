@@ -130,7 +130,7 @@ export default class extends React.Component {
                 open={this.state.formOpen}
                 onOk={() => this.formRef.current.submit()}
                 onCancel={() => this.setState({formOpen: false})}
-                destroyOnClose
+                destroyOnHidden
             >
 
                 <Form ref={this.formRef} labelCol={{flex: '100px'}}

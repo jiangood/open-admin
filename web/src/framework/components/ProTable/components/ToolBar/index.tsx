@@ -55,7 +55,7 @@ export class Toolbar extends React.Component {
                       open={this.state.historyOpen}
                       onCancel={() => this.setState({historyOpen: false})}
                       footer={null}
-                      destroyOnClose
+                      destroyOnHidden
         >
 
             <Table

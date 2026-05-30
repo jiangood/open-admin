@@ -25,7 +25,7 @@ export class DownloadFileButton extends React.Component {
 
         return <> <Button {...rest}>{children}</Button>
 
-            <Modal title='提示' footer={null} onCancel={()=>{this.setState({open:false})}} maskClosable={false}>
+            <Modal title='提示' footer={null} mask={{closable: false}} onCancel={()=>{this.setState({open:false})}}>
                 <Spin /> 下载文件中，请勿关闭浏览器
             </Modal>
         </>

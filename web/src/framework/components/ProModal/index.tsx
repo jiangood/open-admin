@@ -51,8 +51,8 @@ export class ProModal extends React.Component<ProModalProps, any> {
   render() {
     return (
       <Modal
-        maskClosable={false}
-        destroyOnClose
+        mask={{ closable: false }}
+        destroyOnHidden
         title={this.props.title}
         open={this.state.visible}
         onCancel={this.hide}

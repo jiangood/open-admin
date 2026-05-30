@@ -199,8 +199,8 @@ export default class extends React.Component {
                    open={this.state.formOpen}
                    onOk={() => this.formRef.current.submit()}
                    onCancel={() => this.setState({formOpen: false})}
-                   destroyOnClose
-                   maskClosable={false}
+                   destroyOnHidden
+                   mask={{ closable: false }}
                    width={600}
             >
 
@@ -240,8 +240,8 @@ export default class extends React.Component {
 
             <Modal title={'角色用户' + "【" + this.state.formValues?.name + '】'}
                    open={this.state.usersModalOpen}
-                   destroyOnClose
-                   maskClosable={false}
+                   destroyOnHidden
+                   mask={{ closable: false }}
                    width={800}
                    onCancel={() => this.setState({usersModalOpen: false})}
                    onOk={this.handleSaveUsers}
@@ -249,7 +249,7 @@ export default class extends React.Component {
 
 
                 <Transfer
-                    listStyle={{height: '60vh', width: 300}}
+                    styles={{ section: { height: '60vh', width: 300 } }}
 
                     dataSource={this.state.userList} titles={["未选择", "已选择"]}
                     targetKeys={this.state.targetKeys}
@@ -273,8 +273,8 @@ export default class extends React.Component {
 
             <Modal title={'角色授权菜单权限' + "【" + this.state.formValues?.name + '】'}
                    open={this.state.menuOpen}
-                   destroyOnClose
-                   maskClosable={false}
+                   destroyOnHidden
+                   mask={{ closable: false }}
                    width={800}
                    onCancel={() => this.setState({menuOpen: false})}
                    onOk={this.handleGrantMenu}

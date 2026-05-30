@@ -76,7 +76,7 @@ export default class extends React.Component {
                                     </div>
                                 }
                             ]}
-                            tabPosition='left'
+                            tabPlacement='left'
                         >
                         </Tabs>
                     </Card>

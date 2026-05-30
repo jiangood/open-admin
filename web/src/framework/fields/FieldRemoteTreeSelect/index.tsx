@@ -23,14 +23,14 @@ export class FieldRemoteTreeSelect extends BaseRemoteSelect {
             <TreeSelect
                 style={{ width: '100%', minWidth: 200 }}
                 allowClear
-                dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
+                styles={{ popup: { root: { maxHeight: 400, overflow: 'auto' } } }}
                 treeData={data}
                 showCheckedStrategy={TreeSelect.SHOW_ALL}
                 value={value || undefined}
                 onChange={onChange}
-                filterTreeNode={(inputValue, treeNode) =>
+                showSearch={{ filterTreeNode: (inputValue, treeNode) =>
                     StringUtils.contains(treeNode.title, inputValue)
-                }
+                }}
                 treeLine={{ showLeafIcon: true }}
                 treeDefaultExpandAll={treeDefaultExpandAll}
             />

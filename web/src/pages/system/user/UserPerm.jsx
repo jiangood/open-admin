@@ -53,7 +53,7 @@ export default class UserPerm extends React.Component {
 
         return <Modal
             title="授权"
-            destroyOnClose
+            destroyOnHidden
             width={600}
             open={visible}
             confirmLoading={confirmLoading}

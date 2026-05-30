@@ -41,7 +41,7 @@ export class ViewFile extends React.Component {
         });
 
         return <div style={{height}}>
-            <Carousel dotPosition={"top"}>
+            <Carousel dotPlacement={"top"}>
                 {iframeList}
             </Carousel>
         </div>
