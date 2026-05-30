@@ -77,6 +77,11 @@ export default (api) => {
         return memo;
     });
 
+    api.logger.info(`SERVLET_CONTEXT=${servletContext}, proxy→http://127.0.0.1:${serverPort}`);
+    if (Object.keys(theme).length > 0) {
+        api.logger.info('OPEN_ADMIN_THEME:', theme);
+    }
+
     const isFramework = api.pkg.name === pkgName;
 
     try {
