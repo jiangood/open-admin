@@ -38,7 +38,7 @@ export default (api) => {
     // Inject build-time defines and UmiJS defaults from environment variables
     const servletContext = process.env.SERVLET_CONTEXT || '/change-this-servlet-context';
     const isProd = process.env.NODE_ENV === 'production';
-    const devHost = process.env.DEV_HOST || '127.0.0.1:8080';
+    const serverPort = process.env.SERVER_PORT || '8080';
 
     const theme = {};
     if (process.env.THEME_PRIMARY_COLOR) theme["primary-color"] = process.env.THEME_PRIMARY_COLOR;
@@ -69,7 +69,7 @@ export default (api) => {
         if (memo.proxy === undefined) memo.proxy = {};
         if (!memo.proxy[servletContext]) {
             memo.proxy[servletContext] = {
-                target: `http://${devHost}`,
+                target: `http://127.0.0.1:${serverPort}`,
                 changeOrigin: true,
             };
         }
