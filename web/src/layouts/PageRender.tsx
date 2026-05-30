@@ -1,13 +1,14 @@
 import {matchRoutes, useAppData} from "umi";
-import React from "react";
 import {Result} from "antd";
+
+interface PageRenderProps {
+    pathname: string;
+}
 
 /**
  * 通过指定 pathname 渲染页面
- * @param {object} props
- * @param {string} props.pathname - 路径 如 /flowable/task/form
  */
-export function PageRender({pathname}) {
+export function PageRender({pathname}: PageRenderProps) {
     const appData = useAppData()
     const matchArr = matchRoutes(appData.clientRoutes, pathname)
 
