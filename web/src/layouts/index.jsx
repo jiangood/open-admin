@@ -1,4 +1,4 @@
-import {useState, useEffect, useRef} from "react";
+import {useState, useEffect} from "react";
 import {App, ConfigProvider} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
@@ -68,49 +68,48 @@ function isPublicPage(pathname, search) {
     return false;
 }
 
-async function initApp() {
-    try {
-        const [siteInfo, loginRs] = await Promise.all([
-            HttpUtils.get("/admin/public/site-info"),
-            HttpUtils.get('/admin/public/check-login'),
-        ]);
-        SysUtils.setSiteInfo(siteInfo);
-        const {needUpdatePwd, dictInfo, loginInfo} = loginRs;
-        SysUtils.setDictInfo(dictInfo);
-        SysUtils.setLoginInfo(loginInfo);
-        if (needUpdatePwd) {
-            PageUtils.open('/userCenter/ChangePassword', '修改密码');
-            return false;
-        }
-        return true;
-    } catch (e) {
-        console.error('[Layout] 初始化应用失败:', e);
-        PageUtils.redirectToLogin();
-        return false;
-    }
-}
-
 export function Layouts() {
     const {pathname, search} = useLocation();
-    const [ready, setReady] = useState(false);
-    const initPromise = useRef(null);
+    const [siteInfoLoaded, setSiteInfoLoaded] = useState(false);
+    const [loginChecked, setLoginChecked] = useState(false);
+
+    const ready = siteInfoLoaded && loginChecked;
+    const isPublic = isPublicPage(pathname, search);
 
     useEffect(() => {
-        if (isPublicPage(pathname, search)) {
-            initPromise.current = null;
+        if (isPublic) {
+            setSiteInfoLoaded(false);
+            setLoginChecked(false);
             return;
         }
-        if (initPromise.current) return;
-        initPromise.current = initApp().then(ok => ok && setReady(true));
+        if (ready) return;
+
+        Promise.all([
+            HttpUtils.get("/admin/public/site-info").then(data => {
+                SysUtils.setSiteInfo(data);
+                setSiteInfoLoaded(true);
+            }),
+            HttpUtils.get('/admin/public/check-login').then(data => {
+                SysUtils.setDictInfo(data.dictInfo);
+                SysUtils.setLoginInfo(data.loginInfo);
+                setLoginChecked(true);
+            }),
+        ]).catch(() => {
+            console.error('[Layout] 初始化应用失败');
+            PageUtils.redirectToLogin();
+        });
     }, [pathname]);
 
-    if (isPublicPage(pathname, search)) {
-        return <AppWrapper><Outlet/></AppWrapper>;
-    }
+    if (isPublic) return <AppWrapper><Outlet/></AppWrapper>;
 
     return (
         <AppWrapper>
-            {ready ? <AdminLayout/> : <PageLoading message='加载中...'/>}
+            {ready ? <AdminLayout/> : (
+                <PageLoading messages={[
+                    !siteInfoLoaded && '加载站点信息...',
+                    !loginChecked && '检查登录中...',
+                ].filter(Boolean)}/>
+            )}
         </AppWrapper>
     );
 }
