@@ -197,7 +197,8 @@ export default class extends React.Component {
                     menu.icon = <Badge dot count={rs} size={"small"}>{menu.icon}</Badge>
                     this.setState({menuTree: [...menuTree]})
                 }
-
+            }).catch(e => {
+                console.error('[Layout] 加载消息数失败:', e);
             })
         }
     };

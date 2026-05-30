@@ -27,6 +27,7 @@ export class HeaderRight extends React.Component {
             await MessageUtils.alert('退出登录成功');
             history.replace('/login')
         }).catch(async e => {
+            console.error('[HeaderRight] 退出登录失败:', e);
             const confirm = await MessageUtils.confirm('退出登录失败，是否清空缓存');
             if (confirm) {
                 localStorage.clear();

@@ -46,6 +46,7 @@ export class HttpUtils {
                 }
 
                 if (!success) {
+                    console.error(`[HttpUtils] 请求失败: ${url}`, {code: body.code, message, data: body});
                     MessageUtils.error(message || '操作失败');
                     reject('操作失败');
                     return
@@ -58,6 +59,7 @@ export class HttpUtils {
                 resolve(transformData ? data : response);
             }).catch((e: unknown) => {
                 // 统一异常处理
+                console.error(`[HttpUtils] 请求异常: ${url}`, e);
                 let msg = '操作失败';
 
                 if (axios.isAxiosError(e)) {
@@ -239,6 +241,7 @@ export class HttpUtils {
             const response = await HttpUtils.coreRequest(downloadConfig, false) as AxiosResponse;
             await HttpUtils.handleDownloadBlob(response);
         } catch (error) {
+            console.error('[HttpUtils] 下载文件失败:', error);
             // coreRequest已经处理了401、504和通用的错误提示
             return Promise.reject(error);
         }

@@ -66,6 +66,8 @@ export default class extends React.Component {
     componentDidMount() {
         HttpUtils.get('admin/job/job-class-options').then(rs => {
             this.setState({jobClassOptions: rs})
+        }).catch(e => {
+            console.error('[Job] 加载作业类选项失败:', e);
         })
     }
 
@@ -81,6 +83,8 @@ export default class extends React.Component {
     loadJobParamFields(className, jobData) {
         HttpUtils.post("admin/job/get-job-param-fields", jobData || {}, {className}).then(rs => {
             this.setState({paramList: rs})
+        }).catch(e => {
+            console.error('[Job] 加载作业参数字段失败:', e);
         })
     }
 
@@ -90,6 +94,8 @@ export default class extends React.Component {
         HttpUtils.post(url, values).then(rs => {
             this.setState({formOpen: false})
             this.tableRef.current.reload();
+        }).catch(e => {
+            console.error('[Job] 保存作业失败:', e);
         })
     }
 
@@ -97,12 +103,17 @@ export default class extends React.Component {
         const hide = message.loading("删除作业中...")
         HttpUtils.post('admin/job/delete', {id: row.id}).then(rs => {
             this.tableRef.current.reload();
-        }).catch(hide)
+        }).catch(e => {
+            console.error('[Job] 删除作业失败:', e);
+            hide();
+        })
     }
 
     handleTriggerJob = row => {
         HttpUtils.get('admin/job/trigger-job', {id: row.id}).then(rs => {
             this.tableRef.current.reload();
+        }).catch(e => {
+            console.error('[Job] 触发作业失败:', e);
         })
     }
 
@@ -167,6 +178,8 @@ export default class extends React.Component {
         this.setState({statusOpen: true})
         HttpUtils.get('admin/job/status').then(rs => {
             this.setState({status: rs})
+        }).catch(e => {
+            console.error('[Job] 加载状态失败:', e);
         })
     };
 

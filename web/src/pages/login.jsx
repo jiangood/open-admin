@@ -24,6 +24,7 @@ function postLogin(values) {
             history.push(getRedirect())
             resolve(rs)
         }).catch(e => {
+            console.error('[Login] 登录失败:', e);
             reject(e)
         })
     })
@@ -49,6 +50,7 @@ export default class extends React.Component {
             SysUtils.setSiteInfo(rs)
             this.setState({siteInfo: rs})
         } catch (e) {
+            console.error('[Login] 加载站点信息失败:', e);
             message.error('加载站点信息失败，请刷新页面重试')
         }
     }

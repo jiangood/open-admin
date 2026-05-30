@@ -32,6 +32,7 @@ export class ViewProcessInstanceProgress extends React.Component {
             this.setState(rs)
             this.setState({data: rs})
         }).catch(e => {
+            console.error('[ViewProcessInstanceProgress] 加载流程实例失败:', e);
             this.setState({errorMsg: e})
         }).finally(() => {
             this.setState({loading: false})

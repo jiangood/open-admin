@@ -69,7 +69,8 @@ function initApp() {
             return false;
         }
         return true;
-    }).catch(() => {
+    }).catch((e) => {
+        console.error('[Layout] 初始化应用失败:', e);
         PageUtils.redirectToLogin();
         return false;
     });
