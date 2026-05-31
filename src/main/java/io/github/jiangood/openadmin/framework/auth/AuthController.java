@@ -2,12 +2,10 @@ package io.github.jiangood.openadmin.framework.auth;
 
 import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.crypto.asymmetric.KeyType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.security.SecurityHolder;
 import io.github.jiangood.openadmin.framework.ratelimit.RateLimit;
 import io.github.jiangood.openadmin.util.PasswordTool;
-import io.github.jiangood.openadmin.util.RsaTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginReq;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +26,8 @@ import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 @Slf4j
 @RestController
@@ -105,11 +105,19 @@ public class AuthController {
 
     private String decodeWebPassword(String password) {
         try {
-            password = RsaTool.decryptStr(password, KeyType.PrivateKey);
+            byte[] data = Base64.getDecoder().decode(password);
+            byte[] result = new byte[data.length];
+            for (int k = 0; k < data.length; k++) {
+                result[k] = (byte)(data[k] - k - 2);
+            }
+            password = new String(result, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.error("输入密码解密失败: {}", e.getMessage());
-            throw new IllegalStateException("页面已过期，请刷新后重试");
+            throw new IllegalStateException("密码解析失败");
         }
+        boolean strengthOk = PasswordTool.isStrengthOk(password);
+        Assert.state(strengthOk, "密码强度不够，请联系管理员重置");
+        return password;
+    }
 
         boolean strengthOk = PasswordTool.isStrengthOk(password);
         Assert.state(strengthOk, "密码强度不够，请联系管理员重置");

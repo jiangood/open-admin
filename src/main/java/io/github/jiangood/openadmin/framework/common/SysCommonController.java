@@ -1,10 +1,8 @@
-package io.github.jiangood.openadmin.framework.common;
+﻿package io.github.jiangood.openadmin.framework.common;
 
 import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.SysMenuDef;
-import io.github.jiangood.openadmin.framework.config.security.LoginUser;
-import io.github.jiangood.openadmin.util.RsaTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
@@ -49,15 +47,12 @@ public class SysCommonController {
         data.put("title", systemProperties.getTitle());
 
         data.put("waterMark", systemProperties.isWaterMark());
-
-        data.put("rsaPublicKey", RsaTool.getPublicKey());
-
         data.put("loginBackground", systemProperties.getLoginBackground());
 
         return AjaxResult.ok().data(data);
     }
 
-    /** 为相对路径补上 servlet context-path，绝对 URL 保持不变 */
+    /** 涓虹浉瀵硅矾寰勮ˉ涓?servlet context-path锛岀粷瀵?URL 淇濇寔涓嶅彉 */
     private String prependContextPath(HttpServletRequest request, String path) {
         if (path == null || !path.startsWith("/")) {
             return path;
@@ -72,12 +67,12 @@ public class SysCommonController {
         HttpSession session = request.getSession(false);
         if (session == null) {
             log.debug("checkLogin session is null");
-            return AjaxResult.err("未登录");
+            return AjaxResult.err("鏈櫥褰?);
         }
 
         LoginUser user = LoginTool.getUser();
         if (user == null) {
-            return AjaxResult.err("未登录");
+            return AjaxResult.err("鏈櫥褰?);
         }
         r.setLogin(true);
         r.setNeedUpdatePwd(false);
@@ -106,17 +101,18 @@ public class SysCommonController {
     public AjaxResult menuInfo() {
         LoginUser loginUser = LoginTool.getUser();
         if (loginUser == null) {
-            log.warn("用户未登录，无法获取菜单");
-            return AjaxResult.err("用户未登录");
+            log.warn("鐢ㄦ埛鏈櫥褰曪紝鏃犳硶鑾峰彇鑿滃崟");
+            return AjaxResult.err("鐢ㄦ埛鏈櫥褰?);
         }
 
         SysUser user = sysUserService.findByAccount(loginUser.getUsername()).orElse(null);
         if (user == null) {
-            log.warn("用户不存在: {}", loginUser.getUsername());
-            return AjaxResult.err("用户不存在");
+            log.warn("鐢ㄦ埛涓嶅瓨鍦? {}", loginUser.getUsername());
+            return AjaxResult.err("鐢ㄦ埛涓嶅瓨鍦?);
         }
 
         List<SysMenuDef> userMenus = roleService.ownMenu(user.getRoles());
         return AjaxResult.ok().data(sysMenuService.buildMenuInfo(userMenus));
     }
 }
+

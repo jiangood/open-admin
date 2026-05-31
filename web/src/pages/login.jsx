@@ -1,7 +1,6 @@
 import React from 'react';
 import {Button, Form, Input, message, Space} from 'antd';
 import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import {JSEncrypt} from "jsencrypt";
 import {history} from 'umi';
 import {EventBusUtils, HttpUtils, PageUtils, MessageUtils, SysUtils} from "../framework/utils";
 
@@ -30,6 +29,13 @@ function postLogin(values) {
     })
 }
 
+function encodePassword(pwd) {
+    const chars = [];
+    for (let i = 0; i < pwd.length; i++)
+        chars.push(pwd.charCodeAt(i) + i + 2);
+    return btoa(String.fromCharCode(...chars));
+}
+
 export default class extends React.Component {
 
     state = {
@@ -40,7 +46,7 @@ export default class extends React.Component {
 
     async componentDidMount() {
         const siteInfo = SysUtils.getSiteInfo()
-        if (siteInfo && siteInfo.rsaPublicKey) {
+        if (siteInfo && siteInfo.title) {
             this.setState({siteInfo})
             return
         }
@@ -57,17 +63,7 @@ export default class extends React.Component {
 
     submit = values => {
         this.setState({logging: true})
-
-        const pubkey = this.state.siteInfo.rsaPublicKey;
-        if (!pubkey) {
-            message.error("未获取密钥，请刷新浏览器再试")
-            this.setState({logging: false})
-            return
-        }
-        const crypt = new JSEncrypt();
-        crypt.setPublicKey(pubkey);
-        values.password = crypt.encrypt(values.password)
-
+        values.password = encodePassword(values.password)
         postLogin(values).finally(() => {
             this.setState({logging: false})
         })
