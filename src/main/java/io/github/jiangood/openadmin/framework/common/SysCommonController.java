@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.framework.common;
 
 import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
+import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.config.SysMenuDef;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
