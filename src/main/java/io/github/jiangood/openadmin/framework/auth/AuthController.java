@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.framework.auth;
+﻿package io.github.jiangood.openadmin.framework.auth;
 
 import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
@@ -114,11 +114,6 @@ public class AuthController {
         } catch (Exception e) {
             throw new IllegalStateException("密码解析失败");
         }
-        boolean strengthOk = PasswordTool.isStrengthOk(password);
-        Assert.state(strengthOk, "密码强度不够，请联系管理员重置");
-        return password;
-    }
-
         boolean strengthOk = PasswordTool.isStrengthOk(password);
         Assert.state(strengthOk, "密码强度不够，请联系管理员重置");
         return password;

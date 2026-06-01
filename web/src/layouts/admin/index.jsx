@@ -117,8 +117,8 @@ export default class extends React.Component {
         if (leafRootNodes.length > 0) {
             const defaultGroup = {
                 key: '_default_group',
-                label: '默认',
-                title: '默',
+                label: '业务模块',
+                title: '业',
                 icon: <NamedIcon name="AppstoreOutlined" style={{fontSize: 12}}/>,
                 children: leafRootNodes,
                 type: 'directory',
