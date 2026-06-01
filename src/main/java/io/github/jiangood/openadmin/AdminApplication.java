@@ -1,4 +1,4 @@
-package io.github.jiangood;
+package io.github.jiangood.openadmin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
