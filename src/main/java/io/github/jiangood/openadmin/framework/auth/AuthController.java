@@ -1,4 +1,4 @@
-﻿package io.github.jiangood.openadmin.framework.auth;
+package io.github.jiangood.openadmin.framework.auth;
 
 import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
