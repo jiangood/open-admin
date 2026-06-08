@@ -54,4 +54,10 @@ public abstract class BaseService<T> {
     public T save(T t) {
         return repository.save(t);
     }
+
+    @Transactional
+    public T update(T input, List<String> requestKeys) {
+        repository.updateField(input, requestKeys);
+        return repository.findById(((BaseEntity) input).getId()).orElse(null);
+    }
 }
