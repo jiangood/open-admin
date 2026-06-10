@@ -7,15 +7,18 @@ import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.modules.system.dto.DictItemVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
+import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.service.SysDictItemService;
 import io.github.jiangood.openadmin.modules.system.service.SysDictService;
+import io.github.jiangood.openadmin.modules.system.service.SysDictTypeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("admin/dict")
@@ -24,40 +27,61 @@ public class SysDictController {
 
     private final SysDictItemService itemService;
     private final SysDictService sysDictService;
+    private final SysDictTypeService sysDictTypeService;
 
+    @HasPermission("sys-dict:read")
+    @GetMapping("type-tree")
+    public AjaxResult typeTree() {
+        return AjaxResult.ok().data(sysDictTypeService.getTypeTree());
+    }
 
+    @HasPermission("sys-dict:create")
+    @PostMapping("type-create")
+    public AjaxResult typeCreate(@RequestBody SysDictType param) {
+        if (sysDictTypeService.isTypeCodeExist(param.getTypeCode(), null)) {
+            return AjaxResult.err("类型编码已存在");
+        }
+        SysDictType result = sysDictTypeService.save(param);
+        return AjaxResult.ok().data(result.getId()).msg("创建成功");
+    }
 
+    @HasPermission("sys-dict:update")
+    @PostMapping("type-update")
+    public AjaxResult typeUpdate(@RequestBody SysDictType param, RequestBodyKeys updateFields) throws Exception {
+        SysDictType result = sysDictTypeService.update(param, updateFields);
+        return AjaxResult.ok().data(result.getId()).msg("更新成功");
+    }
+
+    @HasPermission("sys-dict:delete")
+    @PostMapping("type-delete")
+    public AjaxResult typeDelete(@Valid @RequestBody IdReq idRequest) {
+        sysDictTypeService.deleteCascade(idRequest.getId());
+        return AjaxResult.ok().msg("删除成功");
+    }
+
+    @HasPermission("sys-dict:read")
+    @GetMapping("type-options")
+    public AjaxResult typeOptions(String searchText) {
+        List<SysDictType> all = sysDictTypeService.findAll(Sort.by(SysDictType.Fields.seq));
+        List<Option> options = all.stream()
+                .filter(t -> t.getTypeCode() != null)
+                .filter(t -> searchText == null || t.getTypeLabel().contains(searchText))
+                .map(t -> new Option(t.getTypeCode(), t.getTypeLabel()))
+                .toList();
+        return AjaxResult.ok().data(options);
+    }
 
     @HasPermission("sys-dict:read")
     @RequestMapping("page")
-    public AjaxResult page(String searchText) {
+    public AjaxResult page(String typeCode, String searchText) {
         List<DictItemVO> list = sysDictService.getAllItems();
-        if(searchText != null){
-            list = list.stream().filter(e->e.getTypeLabel().contains(searchText) || e.getTypeCode().contains(searchText)).toList();
+        if (typeCode != null) {
+            list = list.stream().filter(e -> typeCode.equals(e.getTypeCode())).toList();
         }
-
+        if (searchText != null) {
+            list = list.stream().filter(e -> e.getLabel().contains(searchText) || e.getCode().contains(searchText)).toList();
+        }
         return AjaxResult.ok().data(new PageImpl<>(list));
-    }
-    @HasPermission("sys-dict:create")
-    @GetMapping("type-options")
-    public AjaxResult typeOptions(String searchText) {
-        List<DictItemVO> list = sysDictService.getAllItems();
-        Map<String,String> map = new LinkedHashMap<>();
-        for (DictItemVO dictItemDto : list) {
-            map.put(dictItemDto.getTypeCode(), dictItemDto.getTypeLabel());
-        }
-        List<Option> options = new ArrayList<>();
-        for (Map.Entry<String, String> e : map.entrySet()) {
-            options.add(new Option(e.getKey(), e.getValue()));
-        }
-
-
-        if(searchText != null){
-            options = options.stream().filter(t->t.getLabel().contains(searchText)).toList();
-        }
-
-
-        return AjaxResult.ok().data(options);
     }
 
     @Log("字典-创建")
@@ -76,13 +100,10 @@ public class SysDictController {
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
 
-
     @HasPermission("sys-dict:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         itemService.deleteById(idRequest.getId());
         return AjaxResult.ok().msg("删除成功");
     }
-
-
 }
