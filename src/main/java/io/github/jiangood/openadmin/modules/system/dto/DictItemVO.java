@@ -18,7 +18,6 @@ public class DictItemVO {
 
 
     private String typeCode;
-    private String typeLabel;
 
     // 前端使用的唯一id，解决非数据库数据时拼接
     private String uid;
