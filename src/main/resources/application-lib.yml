@@ -10,6 +10,9 @@
 # ===================================================================
 
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration
   cache:
     type: caffeine
     caffeine:
