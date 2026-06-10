@@ -22,11 +22,6 @@ public class SysDictItem extends BaseEntity {
     @NotNull
     String typeCode;
 
-    @Remark("字典类型标签")
-    @Column(length = 50)
-    private String typeLabel;
-
-
     @NotNull
     @Remark("键")
     @Column(length = 30)

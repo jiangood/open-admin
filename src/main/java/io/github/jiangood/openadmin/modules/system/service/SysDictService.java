@@ -25,7 +25,6 @@ public class SysDictService {
             DictItemVO dto = new DictItemVO();
             dto.setId(item.getId());
             dto.setTypeCode(item.getTypeCode());
-            dto.setTypeLabel(item.getTypeLabel());
             dto.setCode(item.getCode());
             dto.setLabel(item.getLabel());
             dto.setEnabled(item.getEnabled());
