@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface SysDictItemRepository extends BaseRepository<SysDictItem, String> {
 
-
+    void deleteByTypeCode(String typeCode);
 }
