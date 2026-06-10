@@ -1,5 +1,6 @@
 import React from 'react';
 import {Modal} from 'antd';
+import {SysUtils} from '../../utils';
 
 
 export class ViewImage extends React.Component {
@@ -19,17 +20,18 @@ export class ViewImage extends React.Component {
     for (let v of vs) {
       const isId = v.indexOf('/') === -1;
       const isAbsUrl = v.startsWith('http');
-      if (isAbsUrl) {
+      const isDataUrl = v.startsWith('data:');
+      if (isAbsUrl || isDataUrl) {
         urlList.push(v);
         continue;
       }
 
       if (isId) {
-        urlList.push( 'admin/sysFile/preview/' + v);
+        urlList.push(SysUtils.contextPath('/admin/sysFile/preview/' + v));
         continue;
       }
 
-      urlList.push( v);
+      urlList.push(SysUtils.contextPath(v));
     }
 
     const imgs = urlList.map((url) => (

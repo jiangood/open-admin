@@ -1,4 +1,3 @@
-export * from './ProModal'
 export * from './system'
 export * from './PageLoading'
 export * from './ProTable'
