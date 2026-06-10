@@ -40,3 +40,4 @@ target/
 .claude/settings.local.json
 .superpowers/
 .playwright-mcp/
+/.opencode/plans/

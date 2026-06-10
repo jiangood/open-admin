@@ -58,12 +58,21 @@ public class SystemDataInitializer implements CommandLineRunner {
             return;
         }
         log.info("初始化字典数据...");
-        ClassPathResource resource = new ClassPathResource("data/dict-init.sql");
-        String sql = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
-        for (String stmt : sql.split(";")) {
-            String trimmed = stmt.trim();
-            if (!trimmed.isEmpty()) {
-                dbTool.execute(trimmed);
+
+        try {
+            dbTool.execute("ALTER TABLE sys_dict_type DROP COLUMN builtin");
+        } catch (Exception e) {
+            log.debug("builtin 列不存在或已删除: {}", e.getMessage());
+        }
+
+        for (String sqlResource : new String[]{"data/dict-type-init.sql", "data/dict-init.sql"}) {
+            ClassPathResource resource = new ClassPathResource(sqlResource);
+            String sql = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+            for (String stmt : sql.split(";")) {
+                String trimmed = stmt.trim();
+                if (!trimmed.isEmpty()) {
+                    dbTool.execute(trimmed);
+                }
             }
         }
         log.info("字典数据初始化完成");
