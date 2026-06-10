@@ -27,7 +27,7 @@
 - Spin 替换为 Skeleton 骨架屏，提升加载体验
 - 添加 ErrorBoundary 全局错误边界组件，防止页面白屏
 - 新增 @RateLimit 注解，基于滑动窗口的 IP 限流
-- 响应体增加 traceId 字段，日志格式改为 [tid=xxx]
+- 响应体增加 traceId 字段，日志格式改为 [trace-id=xxx]
 
 ### Bug 修复
 - MigrationSysDict 默认重命名备份件旧，避免静默数据丢失

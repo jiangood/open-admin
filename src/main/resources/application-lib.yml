@@ -35,8 +35,8 @@ logging:
   level:
     io.github.jiangood: debug
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [tid=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
 
 sys:
   default-password: open-admin@1234
