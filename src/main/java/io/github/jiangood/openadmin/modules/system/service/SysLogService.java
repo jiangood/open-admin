@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
-import io.github.jiangood.openadmin.modules.system.repository.SysLogRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -13,10 +12,6 @@ import java.util.List;
 @Slf4j
 @Service
 public class SysLogService extends BaseService<SysLog> {
-
-    public SysLogService(SysLogRepository sysLogRepository) {
-        super(sysLogRepository);
-    }
 
     @Async("operationLogExecutor")
     public void saveOperationLogAsync(SysLog sysLog) {

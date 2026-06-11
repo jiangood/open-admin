@@ -13,6 +13,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Sort;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 @CacheConfig(cacheNames = "sys_org")
@@ -35,12 +37,6 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     private final SysOrgRepository sysOrgRepository;
     private final SysUserRepository sysUserRepository;
-
-    public SysOrgService(SysOrgRepository sysOrgRepository, SysUserRepository sysUserRepository) {
-        super(sysOrgRepository);
-        this.sysOrgRepository = sysOrgRepository;
-        this.sysUserRepository = sysUserRepository;
-    }
 
 
     public Optional<SysOrg> findByThirdId(String thirdId) {

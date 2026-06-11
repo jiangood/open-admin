@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.framework.data;
 
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -15,11 +16,8 @@ import java.util.Optional;
  */
 public abstract class BaseService<T> {
 
-    protected final BaseRepository<T, String> repository;
-
-    protected BaseService(BaseRepository<T, String> repository) {
-        this.repository = repository;
-    }
+    @Autowired
+    protected BaseRepository<T, String> repository;
 
     public List<T> findAll() {
         return repository.findAll();

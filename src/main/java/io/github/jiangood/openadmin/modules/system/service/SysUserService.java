@@ -36,6 +36,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class SysUserService extends BaseService<SysUser> {
@@ -53,20 +54,6 @@ public class SysUserService extends BaseService<SysUser> {
     private final SystemProperties systemProperties;
 
     private final PermissionStaleService permissionStaleService;
-
-    public SysUserService(SysUserRepository sysUserRepository, SysRoleRepository roleRepository,
-                          SysOrgService sysOrgService, SysMenuRepository sysMenuRepository,
-                          UserConverter userConverter, SystemProperties systemProperties,
-                          PermissionStaleService permissionStaleService) {
-        super(sysUserRepository);
-        this.sysUserRepository = sysUserRepository;
-        this.roleRepository = roleRepository;
-        this.sysOrgService = sysOrgService;
-        this.sysMenuRepository = sysMenuRepository;
-        this.userConverter = userConverter;
-        this.systemProperties = systemProperties;
-        this.permissionStaleService = permissionStaleService;
-    }
 
 
     public UserVO findOneDto(String id) {

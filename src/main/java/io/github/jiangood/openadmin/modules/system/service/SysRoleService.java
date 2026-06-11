@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,18 +18,13 @@ import java.util.*;
 /**
  * 系统角色service接口实现类
  */
+@RequiredArgsConstructor
 @Slf4j
 @Service
 public class SysRoleService extends BaseService<SysRole> {
 
     private final SysRoleRepository roleRepository;
     private final SysMenuRepository sysMenuRepository;
-
-    public SysRoleService(SysRoleRepository roleRepository, SysMenuRepository sysMenuRepository) {
-        super(roleRepository);
-        this.roleRepository = roleRepository;
-        this.sysMenuRepository = sysMenuRepository;
-    }
 
 
     public Optional<SysRole> findByCode(String code) {
