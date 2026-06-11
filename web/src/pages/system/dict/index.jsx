@@ -236,7 +236,7 @@ export default class extends React.Component {
                     <Form.Item name='id' noStyle/>
                     <Form.Item label='父类型' name='pid'>
                         <TreeSelect treeData={this.state.typeTree}
-                                    fieldNames={{title: 'typeLabel', key: 'id', value: 'id'}}
+                                    fieldNames={{label: 'typeLabel', value: 'id'}}
                                     allowClear
                         />
                     </Form.Item>
