@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 系统数据初始化
@@ -52,18 +53,21 @@ public class SystemDataInitializer implements CommandLineRunner {
     }
 
     private void initDict() throws Exception {
-        Integer count = dbTool.findInteger("SELECT COUNT(*) FROM sys_dict_item");
+
+        Set<String> columns = dbTool.getTableColumns("sys_dict_type");
+        if(columns.contains("code")){
+            dbTool.dropTable("sys_dict_type");
+            dbTool.dropTable("sys_dict_item");
+            throw new Exception("sys_dict_type表太旧, 已删除旧表，请重新启动以自动生成新表");
+        }
+        Integer count = dbTool.findInteger("SELECT COUNT(*) FROM sys_dict_type");
         if (count != null && count > 0) {
             log.info("字典数据已存在，跳过初始化");
             return;
         }
         log.info("初始化字典数据...");
 
-        try {
-            dbTool.execute("ALTER TABLE sys_dict_type DROP COLUMN builtin");
-        } catch (Exception e) {
-            log.debug("builtin 列不存在或已删除: {}", e.getMessage());
-        }
+
 
         for (String sqlResource : new String[]{"data/dict-type-init.sql", "data/dict-init.sql"}) {
             ClassPathResource resource = new ClassPathResource(sqlResource);

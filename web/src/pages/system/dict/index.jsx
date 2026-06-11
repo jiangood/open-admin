@@ -90,11 +90,10 @@ export default class extends React.Component {
             return null
         }
         const node = findNode(this.state.typeTree, selectedKeys[0])
-        if (node && node.typeCode) {
-            this.setState({selectedType: node, selectedTypeCode: node.typeCode})
-        } else {
-            this.setState({selectedType: node, selectedTypeCode: null})
-        }
+        this.setState({
+            selectedType: node,
+            selectedTypeCode: node?.typeCode || null
+        },()=>this.tableRef.current.reload())
     }
 
     handleItemAdd = () => {
@@ -167,16 +166,6 @@ export default class extends React.Component {
                                       onClick={this.loadTree}/>
                           </Space>}
                     >
-                        <Tree
-                            treeData={this.state.typeTree}
-                            onSelect={this.onTreeSelect}
-                            fieldNames={{title: 'typeLabel', key: 'id'}}
-                            showLine
-                            defaultExpandAll
-                            blockNode
-                        />
-                        {this.state.typeTree.length === 0 && <Empty/>}
-                        <Gap/>
                         <ButtonList>
                             <Button type='primary' size='small' onClick={this.handleTypeAdd}>
                                 <PlusOutlined/> 新增类型
@@ -192,6 +181,18 @@ export default class extends React.Component {
                                 </Button>
                             </Popconfirm>
                         </ButtonList>
+                        <Gap/>
+                        <Tree
+                            treeData={this.state.typeTree}
+                            onSelect={this.onTreeSelect}
+                            fieldNames={{title: 'typeLabel', key: 'id'}}
+                            showLine
+                            defaultExpandAll
+                            blockNode
+                        />
+                        {this.state.typeTree.length === 0 && <Empty/>}
+
+
                     </Card>
                 </Splitter.Panel>
 
@@ -242,8 +243,8 @@ export default class extends React.Component {
                     <Form.Item label='类型编码' name='typeCode' rules={[{required: true}]}>
                         <Input placeholder='举例: orderStatus'/>
                     </Form.Item>
-                    <Form.Item label='类型标签' name='typeLabel' rules={[{required: true}]}>
-                        <Input/>
+                    <Form.Item label='类型名称' name='typeLabel' rules={[{required: true}]}>
+                        <Input placeholder='举例: 订单状态'/>
                     </Form.Item>
                     <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
                         <FieldBoolean/>
