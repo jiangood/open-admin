@@ -136,7 +136,7 @@ public class Spec<T> implements Specification<T> {
             };
             sel.alias(alias);
 
-            List<Selection<?>> newSections = new ArrayList<>(query.getSelection().getCompoundSelectionItems());
+            List<Selection<?>> newSections = new ArrayList<>(query.getSelection() != null ? query.getSelection().getCompoundSelectionItems() : List.of());
             newSections.add(sel);
 
             query.multiselect(newSections);
@@ -153,7 +153,7 @@ public class Spec<T> implements Specification<T> {
     public Spec<T> select(String... fields) {
         return this.add((Specification<T>) (root, query, cb) -> {
 
-            List<Selection<?>> newSections = new ArrayList<>(query.getSelection().getCompoundSelectionItems());
+            List<Selection<?>> newSections = new ArrayList<>(query.getSelection() != null ? query.getSelection().getCompoundSelectionItems() : List.of());
             for (String field : fields) {
                 newSections.add(root.get(field).alias(field));
             }
