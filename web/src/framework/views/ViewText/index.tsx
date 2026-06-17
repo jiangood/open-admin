@@ -1,5 +1,5 @@
 import React from "react";
-import {Typography, Button, Modal, Popover} from "antd";
+import {Typography, Tooltip, Modal} from "antd";
 import {StringUtils} from "../../utils";
 
 export class ViewText extends React.Component {
@@ -11,22 +11,22 @@ export class ViewText extends React.Component {
 
     render() {
         const {value, ellipsis, maxLength} = this.props;
-        
-        if(value == null){
+
+        if (value == null) {
             return null;
         }
-        
-        // 如果没有启用 ellipsis，使用普通文本显示
+
         if (!ellipsis) {
-            return <Typography.Text> {value}</Typography.Text>;
+            return <Typography.Text>{value}</Typography.Text>;
         }
-        
-        // 如果启用了 ellipsis，使用省略功能
+
         const short = StringUtils.ellipsis(value, maxLength);
         return (
-            <Popover placement="topLeft" title={'长文本'} content={<Button onClick={this.showModal}>点击查看全部内容</Button>}>
-                {short}
-            </Popover>
+            <Tooltip placement="topLeft" title={value}>
+                <span style={{cursor: 'pointer', borderBottom: '1px dashed #d9d9d9'}} onClick={this.showModal}>
+                    {short}
+                </span>
+            </Tooltip>
         );
     }
 
