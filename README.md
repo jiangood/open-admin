@@ -3,7 +3,7 @@
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.jiangood/open-admin)
 ![npm](https://img.shields.io/npm/v/@jiangood/open-admin)
 
-open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业务项目通过添加 Maven 和 pnpm 依赖即可获得完整的后台管理能力**，无需从零搭建用户管理、角色权限、数据字典等功能。
+open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业务项目通过添加 Maven 和 npm 依赖即可获得完整的后台管理能力**，无需从零搭建用户管理、角色权限、数据字典等功能。
 
 ## 快速集成
 
@@ -61,4 +61,4 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
 | 前端 | React 19, Ant Design 6, UmiJS 4 |
 | 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
 | 数据库 | MySQL 8+ |
-| 构建 | Maven (后端), pnpm (前端) |
+| 构建 | Maven (后端), npm (前端) |

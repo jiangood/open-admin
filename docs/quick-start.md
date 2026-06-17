@@ -162,7 +162,7 @@ open-admin 作为可嵌入框架，可以直接作为依赖引入现有业务项
 ### 前端依赖安装失败
 
 ```bash
-pnpm install --registry=https://registry.npmmirror.com
+npm install --registry=https://registry.npmmirror.com
 ```
 
 ### 端口被占用

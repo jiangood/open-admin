@@ -44,7 +44,7 @@
 - **JDK 21+**
 - **MySQL 8.0+**
 - **Node.js 18+**
-- **pnpm 9+**
+- **npm 9+**
 - **Git**
 
 ### 后端
@@ -76,10 +76,10 @@ mvn spring-boot:run
 cd web
 
 # 安装依赖
-pnpm install
+npm install
 
 # 启动开发服务器（默认 http://localhost:8000）
-pnpm dev
+npm run dev
 ```
 
 ### 访问系统
@@ -148,7 +148,7 @@ refactor(spec): 简化 Spec 构建逻辑
 1. **同步主仓库**：确保你的 fork 与主仓库保持同步
 2. **创建分支**：从 `master` 分支创建功能分支，命名建议 `feat/xxx`、`fix/xxx`
 3. **开发**：在功能分支上开发，保持提交信息规范
-4. **测试**：确保后端测试通过（`mvn test`），前端能正常构建（`pnpm build`）
+4. **测试**：确保后端测试通过（`mvn test`），前端能正常构建（`npm run build`）
 5. **提交 PR**：在 GitHub 上向 `master` 分支提交 Pull Request
 6. **Review**：等待维护者 review，根据反馈修改
 
@@ -158,7 +158,7 @@ refactor(spec): 简化 Spec 构建逻辑
 
 - [ ] 代码遵循项目编码规范
 - [ ] 后端测试通过（`mvn test`）
-- [ ] 前端构建通过（`pnpm build`）
+- [ ] 前端构建通过（`npm run build`）
 - [ ] 新增功能有对应测试覆盖
 - [ ] 提交信息符合 Conventional Commits 规范
 - [ ] 已同步主仓库最新代码，无冲突

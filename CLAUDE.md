@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-open-admin 是一个可嵌入的后台管理系统框架（脚手架），业务项目通过 Maven/pnpm 添加依赖即可获得完整的后台管理能力，无需从零搭建用户管理、角色权限、数据字典等功能。框架发布在 Maven Central (`io.github.jiangood:open-admin`) 和 npm (`@jiangood/open-admin`)。
+open-admin 是一个可嵌入的后台管理系统框架（脚手架），业务项目通过 Maven/npm 添加依赖即可获得完整的后台管理能力，无需从零搭建用户管理、角色权限、数据字典等功能。框架发布在 Maven Central (`io.github.jiangood:open-admin`) 和 npm (`@jiangood/open-admin`)。
 
 同级目录 `D:\ws\open-admin-example` 是示例业务项目，修改框架后需在示例项目中验证。
 

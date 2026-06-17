@@ -463,7 +463,7 @@ data:
 
 ### 编译验证
 - [ ] `mvn compile` 编译通过
-- [ ] 前端 `pnpm build` 或 `pnpm dev` 正常
+- [ ] 前端 `npm run build` 或 `npm run dev` 正常
 
 ### 后端验证
 - [ ] `GET admin/{module}/page` 返回正确分页数据
