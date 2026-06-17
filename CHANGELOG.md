@@ -5,6 +5,168 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，
 并遵循 [Semantic Versioning](https://semver.org/spec/v2.0.0.html)。
 
+## [2.4.2] - 2026-06-17
+
+### Bug 修复
+- SysUser 列表查询改用 @EntityGraph 替代 @Query，使 Specification 动态搜索生效
+- 用户编辑时 unitId 只在更新路径中写入，避免创建时字段追踪异常
+- @CacheEvict 自调用问题导致组织创建后用户权限缓存过时
+- selectFnc/select 方法添加 query.getSelection() 空值判断
+
+### 重构
+- ViewText 省略模式改为点击直接弹窗，hover Tooltip 显示全文
+
+### 杂项
+- 升级 spring-boot-starter-parent 依赖
+- 升级 okhttp-jvm 5.1.0 → 5.4.0
+- 升级 minio 9.0.1 → 9.0.2
+- 移除未使用的 @types/lodash 开发依赖
+
+## [2.4.1] - 2026-06-15
+
+### 重构
+- 重命名 QuartzInit → QuartzInitializer，移除 quartz 可选配置
+
+### CI/CD
+- 删除测试工作流配置文件
+
+## [2.4.0] - 2026-06-13
+
+### 杂项
+- 版本号占位发布，无功能变更
+
+## [2.3.2] - 2026-06-12
+
+### 新功能
+- 新增 SysDictType 实体及树形层级，字典模块重构为左树 + 右表布局
+- 新增字典类型 CRUD 及级联删除功能
+- 新增 deleteByTypeCode 和 typeCode 过滤端点
+
+### Bug 修复
+- 修复字典模块数据初始化和界面显示问题
+- 修复字典类型选择组件字段映射问题
+
+### 重构
+- 移除 SysDictItem 的冗余 typeLabel 字段及其相关 VO
+
+## [2.3.1] - 2026-06-10
+
+### Bug 修复
+- ViewImage 图片 URL 缺少 context-path 导致图片无法显示
+
+### 重构
+- 日志格式 tid= 改为 trace-id=
+
+## [2.3.0] - 2026-06-08
+
+### 新功能
+- 新增局部更新 API
+
+## [2.2.9] - 2026-06-06
+
+### 杂项
+- 升级 @types/react 依赖
+
+## [2.2.8] - 2026-06-05
+
+### 重构
+- AdminApplication 移入 openadmin 包，BeanPostProcessor 替代 @EnableJpaRepositories
+
+## [2.2.7] - 2026-06-04
+
+### 重构
+- 移除 RSA，替换为轻量 index-shift + Base64 混淆
+
+### Bug 修复
+- 补充缺失的 LoginUser 导入
+- 移除 AuthController.java BOM 字符
+
+### 杂项
+- 顶部菜单"默认"改为"业务模块"
+
+## [2.2.6] - 2026-06-03
+
+### Bug 修复
+- 完善侧边栏自动跳转保护条件
+- 侧边栏仅在根路径时自动跳转首个子菜单
+
+## [2.2.5] - 2026-06-02
+
+### 新功能
+- 支持 PUBLIC_PAGES 环境变量自定义公开页面
+- 前端错误添加 console.error 日志方便调试
+- 主题色支持通过 .env 环境变量自定义
+
+### 重构
+- 将 UmiJS 通用配置迁移至 common-plugin，config.js 精简至一行
+- PageRender.jsx 转 TypeScript
+- Layouts 初始化流程简化
+
+### 杂项
+- proxy 增加 WebSocket 代理支持
+- DEV_HOST 改为 SERVER_PORT，dev 时固定 127.0.0.1
+- 更新 CLAUDE.md，补充双项目工作流、自动配置机制
+- 修复 antd lint 废弃 API 警告
+- 清理未使用的依赖 @umijs/plugins
+- 升级 hutool 和 minio 依赖
+
+## [2.2.4] - 2026-05-30
+
+### 重构
+- 脚本迁移至 scripts/ 目录统一管理
+- bump-version 脚本用 Node.js 重写
+
+### 杂项
+- 添加发布脚本和版本号修改脚本
+- 添加 repository.url 用于 npm provenance
+- 修复 Windows 平台版本提取 \r 字符问题
+
+## [2.2.1] - 2026-05-28
+
+### 重构
+- layouts 全面重构 — 函数组件化 + 自定义 Tab 栏 + KeepAlive
+- 移除 MessageHolder，改用 antd 6 静态方法 + App 组件
+
+### Bug 修复
+- 修复退出登录后仍显示菜单的问题
+- 修复 siteInfo 在登录后不加载的问题
+
+### CI/CD
+- 添加后端冒烟测试 workflow
+
+## [2.1.0] - 2026-05-20
+
+### 新功能
+- 菜单布局改为顶部导航 + 左侧菜单模式
+- 替换 logo 为抽象折纸菱形图标 SVG
+- Servlet Context-Path 支持与文档重构
+- 通配符权限支持和验证码开关配置
+- 添加 app profile 和本地测试脚本
+
+### 重构
+- Page 组件重构 — Class 转为函数组件 + 弹性布局
+- 菜单代码重构，抽取 YAML 加载器
+- 字典预设数据从 YAML 改为 SQL 脚本初始化
+- 统一 CRUD 权限码为 create/read/update/delete 标准格式
+
+### Bug 修复
+- 文件上传修复与缩略图懒生成
+- WebP 图片上传和伪装后缀拦截
+
+### 杂项
+- 更新发布流程，先验证版本再发布
+
+## [2.0.1] - 2026-05-15
+
+### 重构
+- 多个前端组件重构为函数式组件（Gap、ButtonList、ViewRange、loading）
+- 调整文件操作配置类实现逻辑
+- 清理冗余代码并优化序列化逻辑
+
+### 杂项
+- 移除 springdoc 依赖
+- 移除 api module 相关代码
+
 ## [2.0.0] - 2026-05-10
 
 ### 文档
@@ -161,7 +323,22 @@
 - 用户/角色/机构/菜单 CRUD
 - 前后端分离架构，前端基于 React 19 + Ant Design 6 + UmiJS 4
 
-[Unreleased]: https://github.com/jiangood/open-admin/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/jiangood/open-admin/compare/v2.4.2...HEAD
+[2.4.2]: https://github.com/jiangood/open-admin/compare/v2.4.1...v2.4.2
+[2.4.1]: https://github.com/jiangood/open-admin/compare/v2.4.0...v2.4.1
+[2.4.0]: https://github.com/jiangood/open-admin/compare/v2.3.2...v2.4.0
+[2.3.2]: https://github.com/jiangood/open-admin/compare/v2.3.1...v2.3.2
+[2.3.1]: https://github.com/jiangood/open-admin/compare/v2.3.0...v2.3.1
+[2.3.0]: https://github.com/jiangood/open-admin/compare/v2.2.9...v2.3.0
+[2.2.9]: https://github.com/jiangood/open-admin/compare/v2.2.8...v2.2.9
+[2.2.8]: https://github.com/jiangood/open-admin/compare/v2.2.7...v2.2.8
+[2.2.7]: https://github.com/jiangood/open-admin/compare/v2.2.6...v2.2.7
+[2.2.6]: https://github.com/jiangood/open-admin/compare/v2.2.5...v2.2.6
+[2.2.5]: https://github.com/jiangood/open-admin/compare/v2.2.4...v2.2.5
+[2.2.4]: https://github.com/jiangood/open-admin/compare/v2.2.1...v2.2.4
+[2.2.1]: https://github.com/jiangood/open-admin/compare/v2.1.0...v2.2.1
+[2.1.0]: https://github.com/jiangood/open-admin/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/jiangood/open-admin/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/jiangood/open-admin/compare/v1.3.4...v2.0.0
 [1.3.4]: https://github.com/jiangood/open-admin/compare/v1.3.3...v1.3.4
 [1.3.3]: https://github.com/jiangood/open-admin/compare/v1.3.2...v1.3.3
