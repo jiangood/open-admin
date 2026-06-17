@@ -163,7 +163,7 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
 
-    @Cacheable(value = "userName", key = "#userId", sync = true)
+    @Cacheable(value = "userName", key = "#userId", sync = true, condition = "#userId != null")
     public String getNameById(String userId) {
         if (userId == null) {
             return null;
@@ -224,9 +224,12 @@ public class SysUserService extends BaseService<SysUser> {
         throw new IllegalStateException("有未处理的类型" + dataPermType);
     }
 
-    @Cacheable(value = "userPerms", key = "#id", sync = true)
+    @Cacheable(value = "userPerms", key = "#id", sync = true, condition = "#id != null")
     @Transactional
     public Set<String> getUserPerms(String id) {
+        if (id == null) {
+            return Collections.emptySet();
+        }
         SysUser user = sysUserRepository.findById(id).orElse(null);
 
         log.debug("获取用户权限:{}", user.getName());
