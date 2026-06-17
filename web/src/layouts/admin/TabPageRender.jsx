@@ -11,7 +11,7 @@ function getLabel(pathname, search, pathMenuMap) {
     if (params._label) return params._label;
     const menu = pathMenuMap[pathname];
     if (menu) return menu.name;
-    return '临时';
+    return '未命名';
 }
 
 export function TabPageRender({pathMenuMap}) {
