@@ -261,13 +261,9 @@ public class SysUserService extends BaseService<SysUser> {
         return result;
     }
 
-    @CacheEvict(value = "userPerms", key = "#id")
-    public void evictPermsCache(String id) {
-    }
-
+    @CacheEvict(value = "userPerms", key = "#userId")
     public void markPermsStale(String userId, String username) {
         permissionStaleService.markUserStale(username);
-        evictPermsCache(userId);
     }
 
     public GrantUserPermReq getPermInfo(String id) {
