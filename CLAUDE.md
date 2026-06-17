@@ -159,7 +159,7 @@ cd web && npm run build
 |------|------|--------|
 | `sys.title` | 系统标题（必填） | 管理系统 |
 | `sys.captcha-enable` | 登录验证码 | true |
-| `sys.default-password` | 默认密码 | open-admin@1234 |
+| `sys.default-password` | 默认密码 | Admin#2026!!! |
 | `sys.logo-url` | Logo 路径 | /admin/public/logo.svg |
 | `sys.file.store-type` | 文件存储 (local/minio) | local |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |

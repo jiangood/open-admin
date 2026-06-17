@@ -17,7 +17,7 @@ spring:
 
 sys:
   captcha-enable: false
-  default-password: open-admin@1234
+  default-password: Admin#2026!!!
   file:
     store-type: local
     upload-path: /tmp/test-uploads

@@ -62,7 +62,7 @@ npm run dev
 |------|------|
 | 前端 | http://localhost:3000 |
 | 后端 API | http://localhost:8080/change-this-servlet-context |
-| 默认登录 | admin / open-admin@1234 |
+| 默认登录 | admin / Admin#2026!!! |
 
 ## Servlet Context-Path 配置
 
