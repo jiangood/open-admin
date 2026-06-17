@@ -127,13 +127,13 @@ public class SysUserService extends BaseService<SysUser> {
             input.setUnitId(unit.getId());
         }
 
-        updateFields.add("unitId");
+
         if (isNew) {
             String password = systemProperties.getDefaultPassword();
             input.setPassword(PasswordTool.encode(password));
             return sysUserRepository.save(input);
         }
-
+        updateFields.add(SysUser.Fields.unitId);
         sysUserRepository.updateField(input, updateFields);
         return sysUserRepository.findById(input.getId()).orElse(null);
     }
