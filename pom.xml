@@ -361,6 +361,7 @@
                     <target>${compile.version}</target>
                     <compilerArgument>-Xlint:unchecked</compilerArgument>
                     <encoding>UTF-8</encoding>
+                    <parameters>true</parameters>
                 </configuration>
             </plugin>
 
