@@ -3,7 +3,7 @@
 ## 环境要求
 
 - **JDK 21+**
-- **MySQL 8.0+**
+- **MySQL 8.0+**（如使用 MySQL 5.7，需额外配置 [MySQL 5.7 兼容方言](#mysql-57-兼容方言)）
 - **Node.js 18+**
 - **npm 9+**
 
@@ -168,3 +168,24 @@ npm install --registry=https://registry.npmmirror.com
 ### 端口被占用
 
 后端默认 8080，前端默认 8000，检查端口占用情况。
+
+### MySQL 5.7 兼容方言
+
+Hibernate 7.x（Spring Boot 4.x 内置）仅支持 MySQL 8.0+。如使用 MySQL 5.7，需在 `pom.xml` 添加 `hibernate-community-dialects` 依赖：
+
+```xml
+<dependency>
+    <groupId>org.hibernate.orm</groupId>
+    <artifactId>hibernate-community-dialects</artifactId>
+</dependency>
+```
+
+并在 `application.yml` 中配置兼容方言：
+
+```yaml
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.MySQLLegacyDialect
+```

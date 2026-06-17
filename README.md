@@ -59,6 +59,6 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
 | 层级 | 技术 |
 |------|------|
 | 前端 | React 19, Ant Design 6, UmiJS 4 |
-| 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
+| 后端 | Java 21, Spring Boot 4.1, JPA (Hibernate), Spring Security, Quartz |
 | 数据库 | MySQL 8+ |
 | 构建 | Maven (后端), npm (前端) |
