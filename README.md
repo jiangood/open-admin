@@ -15,12 +15,11 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
     <version>${open-admin.version}</version>
 </dependency>
 ```
-
+前端：package.json
 ```json
-// 前端：package.json
 {
   "dependencies": {
-    "@jiangood/open-admin": "^1.0.0"
+    "@jiangood/open-admin": "版本"
   }
 }
 ```
