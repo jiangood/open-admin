@@ -1,8 +1,9 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.core.collection.IterUtil;
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.github.jiangood.openadmin.util.JsonTool;
+
+import java.util.ArrayList;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -29,7 +30,7 @@ public class RequestBodyKeysArgumentResolver implements HandlerMethodArgumentRes
 
         String content = req.getContentAsString();
         JsonNode tree = JsonTool.readTree(content);
-        List<String> fieldNames = IterUtil.toList(tree.fieldNames());
+        List<String> fieldNames = new ArrayList<>(tree.propertyNames());
 
         return new RequestBodyKeys(fieldNames);
     }

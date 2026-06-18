@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.job.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ClassUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.Option;
@@ -120,7 +120,7 @@ public class SysJobController {
     }
 
     @PostMapping("get-job-param-fields")
-    public AjaxResult getJobParamFields(String className, @RequestBody Map<String, Object> jobData) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, JsonProcessingException {
+    public AjaxResult getJobParamFields(String className, @RequestBody Map<String, Object> jobData) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, JacksonException {
         Class<?> jobCls = Class.forName(className);
         String name = jobCls.getName();
 

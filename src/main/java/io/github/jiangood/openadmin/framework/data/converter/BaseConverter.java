@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.data.converter;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import io.github.jiangood.openadmin.util.JsonTool;
 import jakarta.persistence.AttributeConverter;
 import lombok.extern.slf4j.Slf4j;

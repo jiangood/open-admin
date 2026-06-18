@@ -1,9 +1,10 @@
 package io.github.jiangood.openadmin.framework.log;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SerializationFeature;
+import tools.jackson.databind.json.JsonMapper;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ArrayTool;
@@ -36,15 +37,11 @@ import java.util.Date;
 public class LogAspect {
 
 
-    private static final ObjectWriter writer;
-
-    static {
-        ObjectMapper om = new ObjectMapper();
-        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-        om.setDefaultPropertyInclusion(JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL));
-        writer = om.writerWithDefaultPrettyPrinter();
-    }
+    private static final ObjectWriter writer = JsonMapper.builder()
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+            .changeDefaultPropertyInclusion($ -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .build().writerWithDefaultPrettyPrinter();
 
     @Resource
     SysLogService logService;

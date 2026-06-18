@@ -2,9 +2,10 @@ package io.github.jiangood.openadmin.util;
 
 
 import cn.hutool.core.collection.CollUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.*;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.*;
+import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
@@ -22,14 +23,11 @@ import java.util.Map;
 public class JsonTool {
 
     // singleton ,as to initialize need much TIME
-    private static final ObjectMapper om = new ObjectMapper();
-
-    static {
-        om.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false);
-        om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        om.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        om.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-    }
+    private static final ObjectMapper om = JsonMapper.builder()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+            .build();
 
     /**
      * 将对象转换为指定类型
@@ -80,9 +78,9 @@ public class JsonTool {
      *
      * @param o 要转换的对象
      * @return JSON字符串
-     * @throws JsonProcessingException 如果转换失败
+     * @throws JacksonException 如果转换失败
      */
-    public static String toJson(Object o) throws JsonProcessingException {
+    public static String toJson(Object o) throws JacksonException {
         if (o == null) {
             return null;
         }
@@ -101,7 +99,7 @@ public class JsonTool {
         }
         try {
             return toJson(o);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("JSON序列化失败", e);
         }
         return null;
@@ -119,7 +117,7 @@ public class JsonTool {
         }
         try {
             return om.writerWithDefaultPrettyPrinter().writeValueAsString(o);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             log.error("JSON格式化输出失败", e);
         }
         return null;
@@ -295,7 +293,7 @@ public class JsonTool {
         try {
             return om.readValue(json, new TypeReference<HashMap<String, String>>() {
             });
-        } catch (IOException e) {
+        } catch (JacksonException e) {
             log.error("JSON转Map<String,String>失败", e);
         }
         return null;
@@ -306,9 +304,9 @@ public class JsonTool {
      *
      * @param json JSON字符串
      * @return JsonNode对象
-     * @throws JsonProcessingException 如果解析失败
+     * @throws JacksonException 如果解析失败
      */
-    public static JsonNode readTree(String json) throws JsonProcessingException {
+    public static JsonNode readTree(String json) throws JacksonException {
         JsonNode node = om.reader().readTree(json);
         return node;
     }
