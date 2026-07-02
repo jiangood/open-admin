@@ -15,9 +15,6 @@ spring:
       hibernate:
         dialect: org.hibernate.community.dialect.MySQLLegacyDialect
 
-sys:
-  captcha-enable: false
-
 db_ip: 127.0.0.1
 db_port: 3306
 db_database: open-admin

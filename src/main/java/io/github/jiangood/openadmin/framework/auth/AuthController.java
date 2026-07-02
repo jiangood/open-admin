@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.auth;
 
-import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
 import cn.hutool.core.thread.ThreadUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.security.SecurityHolder;
@@ -10,7 +9,6 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginReq;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +23,6 @@ import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -35,23 +32,17 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class AuthController {
 
-    public static final String CAPTCHA_CODE = "captchaCode";
-
-    private final CaptchaCodeGenerator captchaCodeGenerator;
     private final SecurityHolder securityHolder;
     private final LoginAttemptService loginAttemptService;
     private final SystemProperties systemProperties;
 
     @PostMapping("login")
     @RateLimit(count = 10, duration = 60)
-    public AjaxResult login(@RequestBody @Valid LoginReq loginRequest, HttpServletRequest request, HttpServletResponse response, HttpSession session) {
+    public AjaxResult login(@RequestBody @Valid LoginReq loginRequest, HttpServletRequest request, HttpServletResponse response) {
         String username = loginRequest.getUsername();
         String password = loginRequest.getPassword();
-        String captchaCode = loginRequest.getCaptchaCode();
-        String sessionCode = (String) session.getAttribute(CAPTCHA_CODE);
         password = this.decodeWebPassword(password);
 
-        checkCaptchaCode(captchaCode, sessionCode);
         checkAttempts(username);
 
         {
@@ -95,14 +86,6 @@ public class AuthController {
         Assert.state(!locked, "账户已被锁定，请" + systemProperties.getLoginLockMinutes() + "分钟后再试");
     }
 
-    private void checkCaptchaCode(String captchaCode, String sessionCode) {
-        if (systemProperties.isCaptchaEnable()) {
-            Assert.hasText(captchaCode, "请输入验证码");
-            boolean verify = captchaCodeGenerator.verify(sessionCode, captchaCode);
-            Assert.state(verify, "验证码错误");
-        }
-    }
-
     private String decodeWebPassword(String password) {
         try {
             byte[] data = Base64.getDecoder().decode(password);
@@ -130,21 +113,4 @@ public class AuthController {
         return AjaxResult.ok();
     }
 
-    @GetMapping("captcha-image")
-    @RateLimit(count = 30, duration = 60)
-    public void captcha(HttpSession session, HttpServletResponse response) throws IOException {
-        log.info("正在生成验证码, sessionId={}", session.getId());
-        try {
-            var captcha = captchaCodeGenerator.createImage(100, 50);
-
-            session.setAttribute(CAPTCHA_CODE, captcha.code());
-
-            response.setContentType("image/png");
-            response.setHeader("Cache-Control", "no-cache, no-store, max-age=0, must-revalidate");
-            captcha.write(response.getOutputStream());
-            response.getOutputStream().flush();
-        } catch (Exception e) {
-            log.error("生成验证码失败", e);
-        }
-    }
 }

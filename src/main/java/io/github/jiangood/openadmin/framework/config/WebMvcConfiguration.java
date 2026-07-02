@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import io.github.jiangood.openadmin.util.CaptchaCodeGenerator;
-import io.github.jiangood.openadmin.util.RandomCodeGenerator;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -67,12 +65,4 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
                 .defaultContentType(MediaType.APPLICATION_JSON);
     }
 
-    /**
-     * 验证码生成器
-     */
-    @Bean
-    @ConditionalOnMissingBean(CaptchaCodeGenerator.class)
-    public CaptchaCodeGenerator getCodeGenerator() {
-        return new RandomCodeGenerator(4);
-    }
 }

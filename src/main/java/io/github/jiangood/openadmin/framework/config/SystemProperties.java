@@ -29,10 +29,6 @@ public class SystemProperties {
 
 
     /**
-     * 是否开启验证码登录
-     */
-    private boolean captchaEnable = true;
-    /**
      * 允许的跨域来源，仅在 prod 环境生效（dev 环境允许通配符）
      */
     private List<String> allowedOrigins;

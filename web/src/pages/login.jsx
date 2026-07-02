@@ -1,8 +1,8 @@
 import React from 'react';
-import {Button, Form, Input, message, Space} from 'antd';
-import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
+import {Button, Form, Input, message} from 'antd';
+import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
 import {history} from 'umi';
-import {EventBusUtils, HttpUtils, PageUtils, MessageUtils, SysUtils} from "../framework/utils";
+import {EventBusUtils, HttpUtils, PageUtils, SysUtils} from "../framework/utils";
 
 import "./login.less"
 
@@ -40,8 +40,7 @@ export default class extends React.Component {
 
     state = {
         logging: false,
-        siteInfo: {},
-        random: Math.random()
+        siteInfo: {}
     }
 
     async componentDidMount() {
@@ -109,17 +108,6 @@ export default class extends React.Component {
                            size='large'
                     />
                 </Form.Item>
-
-                {siteInfo.captcha && (
-                    <Form.Item name='captchaCode' rules={[{required: true}]}>
-                        <Space style={{alignItems: 'center'}}>
-                            <Input size='large' placeholder='验证码' prefix={<SafetyCertificateOutlined/>}/>
-                            <img height={36} width={100}
-                                 src={SysUtils.contextPath("/admin/auth/captcha-image?_random=" + this.state.random)}
-                                 onClick={() => this.setState({random: Math.random()})}/>
-                        </Space>
-                    </Form.Item>
-                )}
 
                 <Form.Item style={{marginTop: 10}}>
                     <Button loading={this.state.logging} type="primary" htmlType="submit"
