@@ -7,13 +7,14 @@ export default class extends React.Component {
 
     columns = [
         {
-            title: '操作',
-            dataIndex: 'operation',
-        },
-        {
             title: '操作者',
             dataIndex: 'username'
         },
+        {
+            title: '操作',
+            dataIndex: 'operation',
+        },
+
 
         {
             title: 'ip',
