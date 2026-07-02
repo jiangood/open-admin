@@ -35,5 +35,5 @@
     "dev": "umi dev",
     "build": "umi build"
   },
-  "version": "2.4.5"
+  "version": "2.4.6"
 }
