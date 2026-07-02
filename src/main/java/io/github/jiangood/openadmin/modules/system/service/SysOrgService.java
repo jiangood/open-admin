@@ -351,8 +351,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         if (id == null) {
             return null;
         }
-        SysOrg org = this.findById(id).orElse(null);
-        return org.getName();
+        return this.findById(id).map(SysOrg::getName).orElse(null);
     }
 
     /**

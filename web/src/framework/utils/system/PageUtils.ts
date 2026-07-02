@@ -112,7 +112,7 @@ export class PageUtils {
      * @param path 要跳转的路径。
      * @param label 可选，用于在 URL 中添加一个 '_label' 参数。
      */
-    static open(path: string, label: string = '临时'): void {
+    static open(path: string, label: string = '未命名'): void {
         let targetPath = path;
         if (label) {
             // 假设 UrlUtil.setParam(url, key, value) 存在并返回设置参数后的 URL
