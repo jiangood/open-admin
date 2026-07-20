@@ -49,9 +49,9 @@ public class SysRoleController {
     public AjaxResult page(String name, String code, Boolean builtin,
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysRole> q = Spec.of();
-        q.like("name", name);
-        q.like("code", code);
-        q.eq("builtin", builtin);
+        q.like(SysRole.Fields.name, name);
+        q.like(SysRole.Fields.code, code);
+        q.eq(SysRole.Fields.builtin, builtin);
         Page<SysRole> page = sysRoleService.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }
