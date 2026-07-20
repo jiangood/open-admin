@@ -85,23 +85,18 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
 
-    public Page<UserVO> getAll(String orgId, String roleId, String searchText, Pageable pageable) {
+    public Page<UserVO> getAll(String orgId, String roleId, String name, String account, String phone, Boolean enabled, Pageable pageable) {
         Spec<SysUser> query = Spec.of();
+        query.like(SysUser.Fields.name, name);
+        query.like(SysUser.Fields.account, account);
+        query.like(SysUser.Fields.phone, phone);
+        query.eq(SysUser.Fields.enabled, enabled);
 
         if (StrUtil.isNotEmpty(orgId)) {
             query.or(Spec.<SysUser>of().eq(SysUser.Fields.unitId, orgId), Spec.<SysUser>of().eq(SysUser.Fields.deptId, orgId));
         }
         if (StrUtil.isNotEmpty(roleId)) {
             query.isMember(SysUser.Fields.roles, new SysRole(roleId));
-        }
-
-        if (StrUtil.isNotEmpty(searchText)) {
-            query.or(
-                    Spec.<SysUser>of().like(SysUser.Fields.name, searchText),
-                    Spec.<SysUser>of().like(SysUser.Fields.phone, searchText),
-                    Spec.<SysUser>of().like(SysUser.Fields.account, searchText),
-                    Spec.<SysUser>of().like(SysUser.Fields.email, searchText)
-            );
         }
 
         Page<SysUser> page = sysUserRepository.findAll(query, pageable);

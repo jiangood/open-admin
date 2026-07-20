@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Form, Input, Modal, Popconfirm, Splitter, Tabs} from 'antd';
+import {Button, Form, Input, Modal, Popconfirm, Select, Splitter, Tabs} from 'antd';
 import React from 'react';
 import {
     ButtonList,
@@ -185,20 +185,30 @@ export default class extends React.Component {
                                     onClick={this.handleAdd}>
                                     <PlusOutlined/> 新增
                                 </Button>
-
-
                             </ButtonList>
                         }}
-                        showToolbarSearch
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
                             params.roleId = this.state.currentRoleId
                             return HttpUtils.get('admin/sysUser/page', params)
-                        }
-                        }
+                        }}
                         columns={this.columns}
                     >
-
+                        <Form.Item label='姓名' name='name'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='登录账号' name='account'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='手机号' name='phone'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='状态' name='enabled'>
+                            <Select allowClear placeholder='全部'>
+                                <Select.Option value={true}>启用</Select.Option>
+                                <Select.Option value={false}>停用</Select.Option>
+                            </Select>
+                        </Form.Item>
                     </ProTable>
                 </Splitter.Panel>
             </Splitter>

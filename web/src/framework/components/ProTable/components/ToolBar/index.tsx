@@ -2,7 +2,7 @@
  * 工具栏
  */
 import {HistoryOutlined, ReloadOutlined} from '@ant-design/icons';
-import {Button, Input, message, Modal, Table} from 'antd';
+import {Button, message, Modal, Table} from 'antd';
 import React from 'react';
 import './index.less';
 import {DateUtils, PageUtils, StorageUtils} from "../../../../utils";
@@ -19,22 +19,15 @@ export class Toolbar extends React.Component {
             onRefresh,
             toolBarRender,
             loading,
-            showSearch
         } = this.props;
 
         return <div className='pro-table-toolbar'>
 
             <div className='pro-table-toolbar-left'>
-                {showSearch && <Input.Search placeholder='搜索...'
-                                             allowClear
-                                             onSearch={e=>{
-                                                 this.props.onSearch({searchText: e})
-                                             }}
-                />}
+                {toolBarRender}
             </div>
 
             <div className='pro-table-toolbar-option'>
-                {toolBarRender}
                 <Button title='刷新' size='small' icon={<ReloadOutlined/>} onClick={onRefresh} loading={loading}/>
                 <Button title='查询历史' size='small' icon={<HistoryOutlined/>} onClick={this.onClickHistory}/>
             </div>

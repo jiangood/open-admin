@@ -73,13 +73,16 @@ public class SysDictController {
 
     @HasPermission("sys-dict:read")
     @RequestMapping("page")
-    public AjaxResult page(String typeCode, String searchText) {
+    public AjaxResult page(String typeCode, String code, String label) {
         List<DictItemVO> list = sysDictService.getAllItems();
         if (typeCode != null) {
             list = list.stream().filter(e -> typeCode.equals(e.getTypeCode())).toList();
         }
-        if (searchText != null) {
-            list = list.stream().filter(e -> e.getLabel().contains(searchText) || e.getCode().contains(searchText)).toList();
+        if (code != null) {
+            list = list.stream().filter(e -> code.equals(e.getCode())).toList();
+        }
+        if (label != null) {
+            list = list.stream().filter(e -> e.getLabel().contains(label)).toList();
         }
         return AjaxResult.ok().data(new PageImpl<>(list));
     }

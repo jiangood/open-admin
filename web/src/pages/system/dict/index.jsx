@@ -216,8 +216,14 @@ export default class extends React.Component {
                                     return HttpUtils.get('admin/dict/page', params)
                                 }}
                                 columns={this.columns}
-                                showToolbarSearch
-                            />
+                            >
+                                <Form.Item label='编码' name='code'>
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item label='标签' name='label'>
+                                    <Input/>
+                                </Form.Item>
+                            </ProTable>
                         }
                     </Card>
                 </Splitter.Panel>

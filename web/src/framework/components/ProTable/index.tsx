@@ -46,7 +46,6 @@ export class ProTable extends React.Component {
             this.state.pageSize = props.defaultPageSize
         }
         this.id = StringUtils.random(32)
-        this.showToolbarSearch = this.props.showToolbarSearch
     }
 
     formRef = React.createRef()
@@ -128,15 +127,11 @@ export class ProTable extends React.Component {
         return <div className={'tmgg-pro-table '} id={this.id}>
             {this.renderForm()}
                 {toolbarOptions !== false && <Toolbar
-                    actionRef={actionRef}
                     toolBarRender={this.getToolBarRenderNode(toolBarRender)}
 
                     onRefresh={() => this.loadData()}
-                    onSearch={this.onSearch}
                     loading={this.state.loading}
                     params={this.state.params}
-                    showSearch={this.showToolbarSearch}
-                    changeFormValues={this.changeFormValues}
                 />}
 
 

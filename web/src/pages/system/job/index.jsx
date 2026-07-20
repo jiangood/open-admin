@@ -204,8 +204,14 @@ export default class extends React.Component {
                 }}
                 request={(params) => HttpUtils.get('admin/job/page', params)}
                 columns={this.columns}
-                showToolbarSearch
-            />
+            >
+                <Form.Item label='名称' name='name'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='执行类' name='jobClass'>
+                    <Input/>
+                </Form.Item>
+            </ProTable>
 
 
             <Modal title='作业调度'

@@ -50,7 +50,6 @@ export class FieldTableSelect extends React.Component {
                         }}>选择</Button>;
                 }
             }]}
-            showToolbarSearch
             request={(params) => {
                 params.selected = this.props.value;
                 return HttpUtils.get(this.props.url, params);

@@ -67,8 +67,8 @@ public class SysJobService {
         return sysJobExecuteRecordRepository.findAll(q, pageable);
     }
 
-    public Page<SysJob> page(String searchText, Pageable pageable) throws SchedulerException {
-        return sysJobRepository.findAll(Spec.<SysJob>of().orLike(searchText, SysJob.Fields.name, SysJob.Fields.jobClass), pageable);
+    public Page<SysJob> page(String name, String jobClass, Pageable pageable) throws SchedulerException {
+        return sysJobRepository.findAll(Spec.<SysJob>of().like(SysJob.Fields.name, name).like(SysJob.Fields.jobClass, jobClass), pageable);
     }
 
     // BaseService 方法
