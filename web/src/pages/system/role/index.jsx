@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal, Popconfirm, Transfer, Tree} from 'antd'
+import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Transfer, Tree} from 'antd'
 import React from 'react'
 import {ButtonList, FieldBoolean, HttpUtils, Page, PageUtils, ProTable, ViewText} from "../../../framework";
 
@@ -192,8 +192,20 @@ export default class extends React.Component {
                 }}
                 request={(params) => HttpUtils.get('admin/sysRole/page', params)}
                 columns={this.columns}
-
-            />
+            >
+                <Form.Item label='角色名称' name='name'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='角色编码' name='code'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='是否内置' name='builtin'>
+                    <Select allowClear placeholder='全部'>
+                        <Select.Option value={true}>是</Select.Option>
+                        <Select.Option value={false}>否</Select.Option>
+                    </Select>
+                </Form.Item>
+            </ProTable>
 
             <Modal title='系统角色'
                    open={this.state.formOpen}
