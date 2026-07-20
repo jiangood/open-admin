@@ -1,5 +1,5 @@
-import {DeleteOutlined, EditOutlined, PlusOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Checkbox, Empty, Form, Input, Popconfirm, Space, Splitter, Switch, Tree} from 'antd';
+import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
+import {Button, Card, Checkbox, Empty, Form, Input, Popconfirm, Popover, Space, Splitter, Switch, Tree} from 'antd';
 import React from 'react';
 import {
     FieldBoolean,
@@ -97,45 +97,38 @@ export default class extends React.Component {
         const disabled = formValues == null;
         const params = this.state.params;
         return <Page>
-            <Card>
-                <Space>
-
-                    <Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
-                        params.searchText = e.target.value
-                        this.setState({params}, this.loadTree)
-                    }}/>
-                    <Checkbox checked={params.onlyShowEnabled}
-                              onChange={e => {
-                                  params.onlyShowEnabled = e.target.checked;
-                                  this.setState({params}, this.loadTree);
-                              }}>仅显示启用</Checkbox>
-
-                    <Checkbox checked={params.onlyShowUnit}
-                              onChange={e => {
-                                  params.onlyShowUnit = e.target.checked;
-                                  this.setState({params}, this.loadTree);
-                              }}>仅显示单位</Checkbox>
-
-
-                </Space>
-            </Card>
-            <Gap/>
             <Splitter>
                 <Splitter.Panel defaultSize={500}>
                     <Card loading={this.state.treeLoading}
-                          title='组织机构'
-                          extra={<Space>
-
-                              <div>
-                                  拖拽排序&nbsp;<Switch
-                                  value={this.state.draggable}
-                                  onChange={this.onDraggableChange}/>
-                              </div>
-                              <Button size='small' shape={"round"} icon={<SyncOutlined/>}
-                                      onClick={this.loadTree}></Button>
-                          </Space>}>
-
-
+                          title={<Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
+    params.searchText = e.target.value
+    this.setState({params}, this.loadTree)
+}} style={{width: 200}}/>}
+                          extra={<Popover
+                              trigger='click'
+                              placement='bottomRight'
+                              title='设置'
+                              content={<Space direction='vertical'>
+                                  <Checkbox checked={params.onlyShowEnabled}
+                                        onChange={e => {
+                                            params.onlyShowEnabled = e.target.checked;
+                                            this.setState({params}, this.loadTree);
+                                        }}>仅显示启用</Checkbox>
+                                  <Checkbox checked={params.onlyShowUnit}
+                                        onChange={e => {
+                                            params.onlyShowUnit = e.target.checked;
+                                            this.setState({params}, this.loadTree);
+                                        }}>仅显示单位</Checkbox>
+                                  <div>
+                                      拖拽排序&nbsp;<Switch
+                                      value={this.state.draggable}
+                                      onChange={this.onDraggableChange}/>
+                                  </div>
+                                  <Button size='small' shape='round' icon={<SyncOutlined/>} onClick={this.loadTree}>刷新</Button>
+                              </Space>}
+                          >
+                              <Button size='small' icon={<SettingOutlined/>}>设置</Button>
+                          </Popover>}>
                         <Tree ref={this.treeRef}
                               treeData={this.state.treeData}
                               onSelect={this.onSelect}
