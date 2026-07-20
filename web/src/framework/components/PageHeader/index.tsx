@@ -8,6 +8,7 @@ export interface BreadcrumbItem {
 
 interface PageHeaderProps {
     title?: React.ReactNode;
+    description?: React.ReactNode;
     breadcrumb?: BreadcrumbItem[];
     extra?: React.ReactNode;
     children?: React.ReactNode;
@@ -17,6 +18,7 @@ interface PageHeaderProps {
 
 export const PageHeader: React.FC<PageHeaderProps> = ({
     title,
+    description,
     breadcrumb,
     extra,
     children,
@@ -25,29 +27,30 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
     const showBreadcrumb = breadcrumb && breadcrumb.length > 0;
 
-    return <div className={'tmgg-page-header' + (className ? ' ' + className : '')} style={style}>
-        <div className="tmgg-page-header-top">
-            <div className="tmgg-page-header-left">
+    return <div className={'oa-page-header' + (className ? ' ' + className : '')} style={style}>
+        <div className="oa-page-header-top">
+            <div className="oa-page-header-left">
                 {showBreadcrumb && (
-                    <div className="tmgg-page-header-breadcrumb">
+                    <div className="oa-page-header-breadcrumb">
                         {breadcrumb.map((item, idx) => {
                             const isLast = idx === breadcrumb.length - 1;
                             return <React.Fragment key={idx}>
-                                {idx > 0 && <span className="tmgg-page-header-breadcrumb-sep">/</span>}
+                                {idx > 0 && <span className="oa-page-header-breadcrumb-sep">/</span>}
                                 {isLast
-                                    ? <span className="tmgg-page-header-breadcrumb-current">{item.title}</span>
+                                    ? <span className="oa-page-header-breadcrumb-current">{item.title}</span>
                                     : item.href
-                                        ? <a className="tmgg-page-header-breadcrumb-link" href={item.href}>{item.title}</a>
-                                        : <span className="tmgg-page-header-breadcrumb-item">{item.title}</span>
+                                        ? <a className="oa-page-header-breadcrumb-link" href={item.href}>{item.title}</a>
+                                        : <span className="oa-page-header-breadcrumb-item">{item.title}</span>
                                 }
                             </React.Fragment>
                         })}
                     </div>
                 )}
-                {title && <h2 className="tmgg-page-header-title">{title}</h2>}
+                {title && <h2 className="oa-page-header-title">{title}</h2>}
+                {description && <p className="oa-page-header-desc">{description}</p>}
             </div>
-            {extra && <div className="tmgg-page-header-extra">{extra}</div>}
+            {extra && <div className="oa-page-header-extra">{extra}</div>}
         </div>
-        {children && <div className="tmgg-page-header-content">{children}</div>}
+        {children && <div className="oa-page-header-content">{children}</div>}
     </div>
 }

@@ -21,7 +21,7 @@ export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = fal
         style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
     }
 
-    return <div className={'tmgg-page'} style={style}>
+    return <div className={'oa-page'} style={style}>
         {children}
     </div>
 };

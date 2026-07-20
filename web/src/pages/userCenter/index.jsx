@@ -27,7 +27,7 @@ export default class extends React.Component {
                         </div>
 
 
-                        <table className='tmgg-table'>
+                        <table className='oa-table'>
                             <tbody>
                             <tr>
                                 <td>用户名称</td>

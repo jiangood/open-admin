@@ -124,7 +124,7 @@ export class ProTable extends React.Component {
         } = this.props
 
 
-        return <div className={'tmgg-pro-table '} id={this.id}>
+        return <div className={'oa-pro-table '} id={this.id}>
             {this.renderForm()}
             <div className="pro-table-wrapper">
                 {toolbarOptions !== false && <Toolbar
