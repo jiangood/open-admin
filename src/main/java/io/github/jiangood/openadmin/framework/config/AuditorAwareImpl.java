@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.framework.config;
 
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +11,6 @@ import java.util.Optional;
 @Component
 public class AuditorAwareImpl implements AuditorAware<String> {
 
-    @NotNull
     @Override
     public Optional<String> getCurrentAuditor() {
         LoginUser user = LoginTool.getUser();
