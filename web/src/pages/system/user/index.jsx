@@ -1,3 +1,4 @@
+import {PlusOutlined} from '@ant-design/icons';
 import {Button, Form, Input, Modal, Popconfirm, Select, Splitter, Tabs} from 'antd';
 import React from 'react';
 import {
@@ -155,7 +156,7 @@ export default class extends React.Component {
 
         return <Page>
             <Splitter>
-                <Splitter.Panel defaultSize={400}>
+                <Splitter.Panel defaultSize={250}>
                     <Tabs
                         type='card'
                         size='small'
@@ -175,13 +176,14 @@ export default class extends React.Component {
                 </Splitter.Panel>
                 <Splitter.Panel style={{paddingLeft: 16}}>
                     <ProTable
-                        searchColumns={2}
+                        searchColumns={3}
                         actionRef={this.tableRef}
                         toolBarRender={() => {
                             return <ButtonList>
                                 <Button
                                     perm='sys-user:create'
                                     type="primary"
+                                    icon={<PlusOutlined/>}
                                     onClick={this.handleAdd}>
                                     新增
                                 </Button>

@@ -1,4 +1,4 @@
-import {DeleteOutlined, EditOutlined, SyncOutlined} from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, PlusOutlined, SyncOutlined} from '@ant-design/icons';
 import {Button, Card, Empty, Form, Input, InputNumber, Modal, Popconfirm, Space, Splitter, Tree, Tag, TreeSelect} from 'antd';
 import React from 'react';
 import {
@@ -167,7 +167,7 @@ export default class extends React.Component {
                           </Space>}
                     >
                         <ButtonList>
-                            <Button type='primary' size='small' onClick={this.handleTypeAdd}>
+                            <Button type='primary' size='small' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>
                                 新增类型
                             </Button>
                             <Button size='small' disabled={!selectedType} onClick={this.handleTypeEdit}>
@@ -200,9 +200,9 @@ export default class extends React.Component {
                     <Card title={hasTypeSelected ? `${selectedType.typeLabel} 的字典项` : '字典项'}
                           extra={
                               hasTypeSelected
-                                  ? <Button type='primary' onClick={this.handleItemAdd}>
-                                      新增
-                                  </Button>
+                                   ? <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>
+                                       新增
+                                   </Button>
                                   : null
                           }
                     >

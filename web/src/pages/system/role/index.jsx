@@ -1,3 +1,4 @@
+import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Transfer, Tree} from 'antd'
 import React from 'react'
 import {ButtonList, FieldBoolean, HttpUtils, Page, PageUtils, ProTable, ViewText} from "../../../framework";
@@ -184,7 +185,7 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={() => {
                     return <ButtonList>
-                        <Button perm='sys-role:create' type='primary' onClick={this.handleAdd}>
+                        <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>
                             新增
                         </Button>
                     </ButtonList>

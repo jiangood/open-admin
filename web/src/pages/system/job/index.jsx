@@ -14,6 +14,7 @@ import {
     Switch,
     Tag
 } from 'antd'
+import {PlusOutlined} from "@ant-design/icons";
 import {ButtonList, HttpUtils, Page, ProTable, StringUtils, SysUtils, ValueType} from "../../../framework";
 
 
@@ -192,7 +193,7 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={() => {
                     return <ButtonList>
-                        <Button type='primary' onClick={() => this.handleAdd()}>
+                        <Button type='primary' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>
                             新增
                         </Button>
                         <Button onClick={this.showStatus}>
