@@ -1,6 +1,5 @@
 import React from "react";
 import {Button, Form, Table} from 'antd';
-import {SearchOutlined} from "@ant-design/icons";
 
 import { Toolbar } from './components/ToolBar';
 import {StringUtils} from "../../utils";
@@ -188,7 +187,7 @@ export class ProTable extends React.Component {
             >
                 {this.props.children}
                 <div className="filter-actions">
-                    <Button type='primary' htmlType="submit" icon={<SearchOutlined/>}>查询</Button>
+                    <Button type='primary' htmlType="submit">查询</Button>
                     <Button onClick={() => {
                         this.formRef.current?.resetFields();
                         this.formRef.current?.submit();
