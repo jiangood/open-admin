@@ -175,37 +175,27 @@ export class ProTable extends React.Component {
 
 
     renderForm = () => {
-        if (!this.props.children) {
-            return
-        }
-        if (this.props["searchFormItemsRender"]) {
-            throw new Error('不再支持 searchFormItemsRender，请直接放到ProTable的子节点')
-        }
+        if (!this.props.children) return
 
-        return <div style={{marginBottom: '16px'}}>
-                <Form
-                    layout="inline"
-                    onFinish={(values) => this.onSearch(values)}
-                    ref={(instance) => {
-                        this.formRef.current = instance;
-                        if (this.props.formRef != null) {
-                            this.props.formRef.current = instance;
-                        }
-                    }}
-                    style={{gap: '8px 0px'}}
-                    labelCol={{flex: '80px'}}
-                    wrapperCol={{flex: '200px'}}
-                    className='search-form'
-                >
-
-                    {this.props.children}
-                    <div style={{marginLeft: '16px'}}>
-                        <Button type='primary' htmlType="submit" icon={<SearchOutlined/>}> 查询
-                        </Button>
-                    </div>
-
-                </Form>
-        </div>;
+        return (
+            <Form
+                className="filter-bar"
+                onFinish={(values) => this.onSearch(values)}
+                ref={(instance) => {
+                    this.formRef.current = instance;
+                    if (this.props.formRef) this.props.formRef.current = instance;
+                }}
+            >
+                {this.props.children}
+                <div className="filter-actions">
+                    <Button type='primary' htmlType="submit" icon={<SearchOutlined/>}>查询</Button>
+                    <Button onClick={() => {
+                        this.formRef.current?.resetFields();
+                        this.formRef.current?.submit();
+                    }}>重置</Button>
+                </div>
+            </Form>
+        )
     };
 
     getToolBarRenderNode(toolBarRender) {
