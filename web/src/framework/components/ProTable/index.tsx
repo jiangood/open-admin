@@ -176,6 +176,7 @@ export class ProTable extends React.Component {
         return (
             <Form
                 className="filter-bar"
+                style={{gridTemplateColumns: `repeat(${this.props.searchColumns ?? 4}, 1fr)`}}
                 onFinish={(values) => this.onSearch(values)}
                 ref={(instance) => {
                     this.formRef.current = instance;

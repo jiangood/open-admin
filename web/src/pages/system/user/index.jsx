@@ -176,6 +176,7 @@ export default class extends React.Component {
                 </Splitter.Panel>
                 <Splitter.Panel style={{paddingLeft: 16}}>
                     <ProTable
+                        searchColumns={2}
                         actionRef={this.tableRef}
                         toolBarRender={() => {
                             return <ButtonList>
