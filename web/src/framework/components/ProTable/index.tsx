@@ -132,7 +132,6 @@ export class ProTable extends React.Component {
 
                     onRefresh={() => this.loadData()}
                     loading={this.state.loading}
-                    params={this.state.params}
                 />}
 
 
