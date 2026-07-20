@@ -77,7 +77,7 @@ TreeUtils.walk(tree, node => console.log(node)); // 深度优先遍历
 ```js
 // 自动拼接 context-path 前缀
 SysUtils.contextPath('/admin/auth/login');   // → '/your-context/admin/auth/login'
-SysUtils.contextPath('/admin/public/logo.jpg'); // → '/your-context/admin/public/logo.jpg'
+SysUtils.contextPath('/admin/auth/login'); // → '/your-context/admin/auth/login'
 ```
 
 > **注意**：通过 `HttpUtils` 发起的请求会自动带上 context-path，无需手动调用此方法。

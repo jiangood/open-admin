@@ -41,22 +41,8 @@ public class SystemProperties {
      */
     @NotBlank(message = "请配置系统标题")
     private String title = "管理系统";
-    /**
-     * 是否显示logo
-     */
-    private boolean showLogo = true;
-    /**
-     * logo图片地址,
-     * 可简单放到目录 static/admin/public/
-     * public 表示不用认证也能访问，如 /admin/public/logo.jpg
-     */
-    private String logoUrl = "/admin/public/logo.svg";
     private String loginBoxBottomTip = "当前非涉密网络，严禁传输处理涉密信息";
     private String copyright = "Copyright © 2023-2024  All Rights Reserved";
-    /**
-     * 登录背景图
-     */
-    private String loginBackground;
     /**
      * 是否开启水印
      */

@@ -72,11 +72,7 @@ export default class extends React.Component {
         const {siteInfo} = this.state
 
         const pageStyle = {
-            backgroundImage: `url("${SysUtils.contextPath('/admin/public/login_bg.jpg')}")`
-        }
-        if (siteInfo.loginBackground) {
-            const url = SysUtils.contextPath('/admin/sysFile/preview/' + siteInfo.loginBackground);
-            pageStyle.backgroundImage = 'url("' + url + '")'
+            backgroundImage: `url("./login_bg.jpg")`
         }
 
         return (

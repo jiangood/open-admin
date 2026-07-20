@@ -7,7 +7,6 @@ import {ErrorBoundary, Gap, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtil
 
 import { HeaderRight } from "./HeaderRight";
 import { TabPageRender } from "./TabPageRender";
-
 const {Header, Sider, Content} = Layout;
 /**
  * 带菜单的布局，主要处理布局宇框架结构
@@ -199,8 +198,7 @@ export default class extends React.Component {
         return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click")}}>
             <Header className='header'>
                 <div className='header-left'>
-                    {siteInfo.showLogo !== false && siteInfo.logoUrl &&
-                        <img className='logo-img' src={siteInfo.logoUrl} onClick={() => history.push('/')} alt='logo'/>}
+                    <img className='logo-img' src="./logo.svg" onClick={() => history.push('/')} alt='logo'/>
                     <h3 className='hide-on-mobile'>
                         <Link to="/" style={{color: ThemeUtils.getColor("primary-color")}}>{siteInfo.title} </Link>
                     </h3>
