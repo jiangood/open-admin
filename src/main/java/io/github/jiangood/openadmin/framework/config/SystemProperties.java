@@ -111,10 +111,14 @@ public class SystemProperties {
     @Data
     public static class FileStorage {
 
+        public enum StoreType {
+            local, s3, custom
+        }
+
         /**
-         * 存储类型: local, minio
+         * 存储类型: local, s3, custom（自定义实现需注册 FileOperator bean）
          */
-        private String storeType = "local";
+        private StoreType storeType = StoreType.local;
 
         /**
          * 本地上传文件路径
@@ -127,16 +131,18 @@ public class SystemProperties {
         private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,webp,mp3,mp4,wav,txt";
 
         /**
-         * Minio 配置
+         * S3 兼容存储配置（支持 AWS S3 / Minio / Cloudflare R2 等）
          */
-        private Minio minio = new Minio();
+        private S3 s3 = new S3();
 
         @Data
-        public static class Minio {
-            private String url;
+        public static class S3 {
+            private String endpoint;
+            private String region = "us-east-1";
             private String accessKey;
             private String secretKey;
             private String bucketName;
+            private Boolean pathStyleAccess = true;
         }
     }
 

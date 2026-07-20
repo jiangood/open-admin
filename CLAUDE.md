@@ -126,7 +126,7 @@ cd web && npm run build
 - **权限控制**: `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
 - **数据字典**: 首次启动 `dict-init.sql` 自动导入初始字典数据
 - **ID 生成**: 默认 UUIDv7（时间排序，MySQL 友好），也支持前缀序列 ID 和日表序列 ID
-- **文件存储**: 支持本地文件系统和 Minio，通过 `FileOperator` 接口抽象，`sys.file.store-type` 配置
+- **文件存储**: 支持本地文件系统 (`local`)、S3 兼容存储 (`s3`)、自定义实现 (`custom`)，通过 `FileOperator` 接口抽象，`sys.file.store-type` 配置
 - **操作日志**: `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`）
 
 ## Built-in System Modules
@@ -161,10 +161,23 @@ cd web && npm run build
 | `sys.captcha-enable` | 登录验证码 | true |
 | `sys.default-password` | 默认密码 | Admin#2026!!! |
 | `sys.logo-url` | Logo 路径 | /admin/public/logo.svg |
-| `sys.file.store-type` | 文件存储 (local/minio) | local |
+| `sys.file.store-type` | 文件存储 (`local`/`s3`/`custom`) | local |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
+| `sys.file.s3.*` | S3 兼容存储配置（endpoint/region/accessKey/secretKey/bucketName/pathStyleAccess） | — |
 | `sys.session-idle-time` | Session 超时（分钟） | 180 |
 | `sys.job-enable` | 定时任务开关 | true |
+
+`store-type` 说明：
+- `local` — 本地文件系统，保存到 `sys.file.upload-path`
+- `s3` — S3 兼容对象存储（Minio / AWS S3 / Cloudflare R2 / 阿里云 OSS 等），配置项见 `sys.file.s3.*`
+- `custom` — 用户自定义实现，需在项目中注册 `FileOperator` bean：
+  ```java
+  @Bean
+  @Primary
+  public FileOperator myFileOperator() {
+      return new MyCustomFileOperator();
+  }
+  ```
 
 完整配置项见 `SystemProperties.java`。
 
