@@ -1,4 +1,4 @@
-import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
+import {DeleteOutlined, EditOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
 import {Button, Card, Checkbox, Empty, Form, Input, Popconfirm, Popover, Space, Splitter, Switch, Tree} from 'antd';
 import React from 'react';
 import {
@@ -161,7 +161,7 @@ export default class extends React.Component {
                                     this.setState({formLoading: false})
                                 })
                             }}>
-                                <PlusOutlined/> 新增
+                                新增
                             </Button>
                             <Button disabled={disabled} onClick={() => {
                                 this.setState({

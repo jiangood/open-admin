@@ -1,4 +1,3 @@
-import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import React from 'react'
 import {ButtonList, FieldUploadFile, HttpUtils, Page, ProTable} from "../../../framework";
@@ -86,7 +85,7 @@ export default class extends React.Component {
                 toolBarRender={(params, {selectedRows, selectedRowKeys}) => {
                     return <ButtonList>
                         <Button perm='sys-manual:create' type='primary' onClick={this.handleAdd}>
-                            <PlusOutlined/> 新增
+                            新增
                         </Button>
                     </ButtonList>
                 }}

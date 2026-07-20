@@ -19,7 +19,7 @@ export class Toolbar extends React.Component {
             </div>
 
             <div className='pro-table-toolbar-option'>
-                <Button title='刷新' size='small' icon={<ReloadOutlined/>} onClick={onRefresh} loading={loading}/>
+                <Button type='text' title='刷新' size='small' icon={<ReloadOutlined/>} onClick={onRefresh} loading={loading}/>
             </div>
         </div>
     };

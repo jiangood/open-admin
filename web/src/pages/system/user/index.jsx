@@ -1,4 +1,3 @@
-import {PlusOutlined} from '@ant-design/icons';
 import {Button, Form, Input, Modal, Popconfirm, Select, Splitter, Tabs} from 'antd';
 import React from 'react';
 import {
@@ -184,7 +183,7 @@ export default class extends React.Component {
                                     perm='sys-user:create'
                                     type="primary"
                                     onClick={this.handleAdd}>
-                                    <PlusOutlined/> 新增
+                                    新增
                                 </Button>
                             </ButtonList>
                         }}
