@@ -232,6 +232,7 @@ public class DataSyncJob extends BaseJob {
 
 | 组件 | 用途 |
 |------|------|
+| `PageHeader` | 页面头部组件（面包屑导航/页面标题/右侧操作区/自定义内容） |
 | `ProTable` | 数据表格，分页/筛选/工具栏，`request`/`columns`/`toolBarRender` |
 | `Page` | 页面容器 |
 | `Ellipsis` | 文本省略 |
