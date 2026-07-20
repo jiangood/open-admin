@@ -1,6 +1,7 @@
 export * from './system'
 export * from './PageLoading'
 export * from './ProTable'
+export * from './PageHeader'
 export * from './DownloadFileButton'
 export * from './NamedIcon'
 export * from './LinkButton'
