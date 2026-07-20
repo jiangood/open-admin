@@ -98,12 +98,12 @@ export default class extends React.Component {
         const params = this.state.params;
         return <Page>
             <Splitter>
-                <Splitter.Panel defaultSize={500}>
+                <Splitter.Panel defaultSize={400}>
                     <Card loading={this.state.treeLoading}
                           title={<Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
     params.searchText = e.target.value
     this.setState({params}, this.loadTree)
-}} style={{width: 200}}/>}
+}} style={{width: '90%'}}/>}
                           extra={<Popover
                               trigger='click'
                               placement='bottomRight'
@@ -127,7 +127,7 @@ export default class extends React.Component {
                                   <Button size='small' shape='round' icon={<SyncOutlined/>} onClick={this.loadTree}>刷新</Button>
                               </Space>}
                           >
-                              <Button size='small' icon={<SettingOutlined/>}>设置</Button>
+                              <Button type='text' size='small' icon={<SettingOutlined/>}></Button>
                           </Popover>}>
                         <Tree ref={this.treeRef}
                               treeData={this.state.treeData}
