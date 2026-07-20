@@ -54,7 +54,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page>
+        return <Page title="消息中心">
             <Card variant={"borderless"}>
 
             <Tabs defaultActiveKey="0" destroyOnClose

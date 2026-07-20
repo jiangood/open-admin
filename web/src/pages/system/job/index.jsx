@@ -188,7 +188,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page>
+        return <Page title="作业调度">
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => {

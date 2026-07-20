@@ -96,7 +96,7 @@ export default class extends React.Component {
         const {formValues} = this.state;
         const disabled = formValues == null;
         const params = this.state.params;
-        return <Page>
+        return <Page title="组织机构">
             <Splitter>
                 <Splitter.Panel defaultSize={400}>
                     <Card loading={this.state.treeLoading}

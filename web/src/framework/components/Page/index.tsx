@@ -1,4 +1,5 @@
 import React from "react";
+import { Space, Typography } from "antd";
 import './index.less'
 import {ThemeUtils} from "../../utils";
 
@@ -6,12 +7,17 @@ interface PageProps {
     padding?: boolean;
     backgroundGray?: boolean;
     debug?: boolean;
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    extra?: React.ReactNode;
     children?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = false, debug = false, children }) => {
+export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = false, debug = false, title, description, extra, children }) => {
+    const hasHeader = title != null;
     const style: React.CSSProperties = {};
-    if (padding) {
+
+    if (!hasHeader && padding) {
         style.padding = 16;
     }
     if (backgroundGray) {
@@ -22,6 +28,19 @@ export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = fal
     }
 
     return <div className={'oa-page'} style={style}>
-        {children}
+        {hasHeader && (
+            <div className="oa-page-header">
+                <div className="oa-page-header-top">
+                    <div className="oa-page-header-left">
+                        <div>
+                            {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
+                            {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
+                        </div>
+                    </div>
+                    {extra && <Space>{extra}</Space>}
+                </div>
+            </div>
+        )}
+        {hasHeader && padding ? <div style={{ padding: 16 }}>{children}</div> : children}
     </div>
 };

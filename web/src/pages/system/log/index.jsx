@@ -55,7 +55,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page>
+        return <Page title="操作日志">
             <ProTable
                 request={(params) => HttpUtils.get('admin/sysLog/page', params)}
                 columns={this.columns}

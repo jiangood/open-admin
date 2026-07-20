@@ -1,5 +1,5 @@
-import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, Modal, Popconfirm} from 'antd'
+import {CloudDownloadOutlined, PlusOutlined} from '@ant-design/icons'
+import {Button, Form, Input, Modal, Popconfirm, Tag} from 'antd'
 import React from 'react'
 import {ButtonList, FieldUploadFile, HttpUtils, Page, ProTable} from "../../../framework";
 
@@ -8,7 +8,7 @@ export default class extends React.Component {
 
     state = {
         formValues: {},
-        formOpen: false
+        formOpen: false,
     }
 
     formRef = React.createRef()
@@ -80,7 +80,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page>
+        return <Page title="操作手册">
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={(params, {selectedRows, selectedRowKeys}) => {

@@ -154,7 +154,7 @@ export default class extends React.Component {
 
     render() {
 
-        return <Page>
+        return <Page title="用户管理">
             <Splitter>
                 <Splitter.Panel defaultSize={250}>
                     <Tabs

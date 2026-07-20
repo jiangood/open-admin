@@ -89,7 +89,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page>
+        return <Page title="文件管理">
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => {
