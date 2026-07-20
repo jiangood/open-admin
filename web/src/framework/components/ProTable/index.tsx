@@ -126,6 +126,7 @@ export class ProTable extends React.Component {
 
         return <div className={'tmgg-pro-table '} id={this.id}>
             {this.renderForm()}
+            <div className="pro-table-wrapper">
                 {toolbarOptions !== false && <Toolbar
                     toolBarRender={this.getToolBarRenderNode(toolBarRender)}
 
@@ -161,8 +162,9 @@ export class ProTable extends React.Component {
                     }}
 
                     footer={this.state.extData.summary ? () => this.state.extData.summary : null}
-                    bordered={this.props.bordered ?? true}
+                    bordered={this.props.bordered ?? false}
                 />
+            </div>
         </div>
 
     }
