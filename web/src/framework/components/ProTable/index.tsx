@@ -120,14 +120,14 @@ export class ProTable extends React.Component {
             columns,
             rowSelection,
             rowKey = "id",
-            toolbarOptions,
+            toolbarOptions = false,
         } = this.props
 
 
         return <div className={'oa-pro-table '} id={this.id}>
             {this.renderForm()}
             <div className="pro-table-wrapper">
-                {toolbarOptions !== false && <Toolbar
+                {toolbarOptions && <Toolbar
                     toolBarRender={this.getToolBarRenderNode(toolBarRender)}
 
                     onRefresh={() => this.loadData()}
