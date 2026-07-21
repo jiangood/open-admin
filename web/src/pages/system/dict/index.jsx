@@ -194,7 +194,7 @@ export default class extends React.Component {
                                             onClick={this.handleTypeEdit} style={{marginRight: 4}}>编辑</Button>
                                     <Popconfirm perm='sys-dict:delete' title='是否确定删除此类型及其所有子类型和字典项？'
                                                 onConfirm={this.handleTypeDelete}>
-                                        <Button size='small' danger icon={<DeleteOutlined/>}>删除</Button>
+                                        <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
                                     </Popconfirm>
                                 </span>
                             )}
