@@ -3,7 +3,6 @@ import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Modal, Popc
 import React from 'react';
 import {
     ButtonList,
-    ContextMenu,
     FieldBoolean,
     FieldDictSelect,
     HttpUtils,
@@ -25,7 +24,6 @@ export default class extends React.Component {
         typeFormOpen: false,
         typeFormValues: {},
 
-        contextMenu: null,
     }
 
     formRef = React.createRef();
@@ -65,27 +63,6 @@ export default class extends React.Component {
             this.setState({selectedType: null, selectedTypeCode: null})
             this.loadTree()
         })
-    }
-
-    handleTypeRightClick = ({event, node}) => {
-        event.preventDefault()
-        this.onTreeSelect([node.key])
-        this.setState({contextMenu: {x: event.clientX, y: event.clientY}})
-    }
-
-    handleContextMenuClick = ({key}) => {
-        const {selectedType} = this.state
-        this.setState({contextMenu: null})
-        if (key === 'edit') {
-            this.handleTypeEdit()
-        } else if (key === 'delete') {
-            if (!selectedType) return
-            Modal.confirm({
-                title: '确认删除',
-                content: '是否确定删除此类型及其所有子类型和字典项？',
-                onOk: () => this.handleTypeDelete(),
-            })
-        }
     }
 
     handleTypeFormFinish = values => {
@@ -198,24 +175,11 @@ export default class extends React.Component {
                         <Tree
                             treeData={this.state.typeTree}
                             onSelect={this.onTreeSelect}
-                            onRightClick={this.handleTypeRightClick}
                             fieldNames={{title: 'typeLabel', key: 'id'}}
                             showLine
                             defaultExpandAll
                             blockNode
                         />
-                        {this.state.contextMenu && (
-                            <ContextMenu
-                                x={this.state.contextMenu.x}
-                                y={this.state.contextMenu.y}
-                                items={[
-                                    {key: 'edit', icon: <EditOutlined/>, label: '编辑'},
-                                    {key: 'delete', icon: <DeleteOutlined/>, label: '删除', danger: true},
-                                ]}
-                                onClick={this.handleContextMenuClick}
-                                onClose={() => this.setState({contextMenu: null})}
-                            />
-                        )}
                         {this.state.typeTree.length === 0 && <Empty/>}
                     </Card>
                 </Splitter.Panel>
