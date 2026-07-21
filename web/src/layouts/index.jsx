@@ -27,16 +27,7 @@ const configProps = {
             borderRadius: 4,
         },
         components: {
-            Menu: {
-                darkItemBg: ThemeUtils.getColor("primary-color"),
-                darkPopupBg: ThemeUtils.getColor("primary-color"),
-                darkItemSelectedBg: ThemeUtils.getColor("primary-color-click"),
-                darkItemHoverBg: ThemeUtils.getColor("primary-color-hover"),
-                darkSubMenuItemBg: ThemeUtils.getColor("primary-color"),
-            },
             Layout: {
-                siderBg: ThemeUtils.getColor("primary-color"),
-                triggerBg: ThemeUtils.getColor("primary-color-click"),
                 headerBg: 'white',
                 triggerHeight: 32,
             },

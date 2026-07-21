@@ -39,7 +39,7 @@ public class SysMenuService {
                     item.setKey(def.getId());
                     Assert.notNull(def.getName(), "菜单名称不能为空");
                     item.setLabel(def.getName());
-                    item.setTitle(def.getName().substring(0, 1));
+
                     item.setParentKey(def.getPid());
                     item.setIcon(def.getIcon());
                     item.setPath(StrUtil.nullToEmpty(def.getPath()));

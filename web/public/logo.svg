@@ -1,24 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <!-- 外层方形轮廓 -->
   <polygon points="84,84 428,84 428,428 84,428"
-           fill="none" stroke="#1961AC" stroke-width="8" stroke-linejoin="round" opacity="0.25"/>
+           fill="none" stroke="#ffffff" stroke-width="8" stroke-linejoin="round" opacity="0.25"/>
 
   <!-- 上方三角 -->
-  <polygon points="378,134 134,134 256,256" fill="none" stroke="#1961AC" stroke-width="10" stroke-linejoin="round"/>
-  <polygon points="378,134 134,134 256,256" fill="#1961AC" opacity="0.2"/>
+  <polygon points="378,134 134,134 256,256" fill="none" stroke="#ffffff" stroke-width="10" stroke-linejoin="round"/>
+  <polygon points="378,134 134,134 256,256" fill="#ffffff" opacity="0.2"/>
 
   <!-- 右侧三角 -->
-  <polygon points="378,134 378,378 256,256" fill="none" stroke="#1961AC" stroke-width="10" stroke-linejoin="round"/>
-  <polygon points="378,134 378,378 256,256" fill="#1961AC" opacity="0.12"/>
+  <polygon points="378,134 378,378 256,256" fill="none" stroke="#ffffff" stroke-width="10" stroke-linejoin="round"/>
+  <polygon points="378,134 378,378 256,256" fill="#ffffff" opacity="0.12"/>
 
   <!-- 左侧三角 -->
-  <polygon points="134,134 134,378 256,256" fill="none" stroke="#1961AC" stroke-width="10" stroke-linejoin="round"/>
-  <polygon points="134,134 134,378 256,256" fill="#1961AC" opacity="0.2"/>
+  <polygon points="134,134 134,378 256,256" fill="none" stroke="#ffffff" stroke-width="10" stroke-linejoin="round"/>
+  <polygon points="134,134 134,378 256,256" fill="#ffffff" opacity="0.2"/>
 
   <!-- 下方三角 -->
-  <polygon points="378,378 134,378 256,256" fill="none" stroke="#1961AC" stroke-width="10" stroke-linejoin="round"/>
-  <polygon points="378,378 134,378 256,256" fill="#1961AC" opacity="0.12"/>
+  <polygon points="378,378 134,378 256,256" fill="none" stroke="#ffffff" stroke-width="10" stroke-linejoin="round"/>
+  <polygon points="378,378 134,378 256,256" fill="#ffffff" opacity="0.12"/>
 
   <!-- 中心点 -->
-  <circle cx="256" cy="256" r="13" fill="#1961AC"/>
+  <circle cx="256" cy="256" r="13" fill="#ffffff"/>
 </svg>

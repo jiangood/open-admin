@@ -3,7 +3,7 @@ import {Badge, Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import {history, Link} from 'umi';
 import "./index.less"
-import {ErrorBoundary, Gap, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
+import {ErrorBoundary, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabPageRender } from "./TabPageRender";
@@ -111,7 +111,6 @@ export default class extends React.Component {
             const defaultGroup = {
                 key: '_default_group',
                 label: '业务模块',
-                title: '业',
                 icon: <NamedIcon name="AppstoreOutlined" style={{fontSize: 12}}/>,
                 children: leafRootNodes,
                 type: 'directory',
@@ -196,29 +195,25 @@ export default class extends React.Component {
         const {siteInfo, loginInfo} = this.state
 
         return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click")}}>
-            <Header className='header'>
-                <div className='header-left'>
+            <Sider id='left-sider'
+                   collapsible
+                   breakpoint={'md'}
+            >
+                <div className='sider-header'>
                     <img className='logo-img' src="./logo.svg" onClick={() => history.push('/')} alt='logo'/>
                     <h3 className='hide-on-mobile'>
-                        <Link to="/" style={{color: ThemeUtils.getColor("primary-color")}}>{siteInfo.title} </Link>
+                        <Link to="/" style={{color: 'rgba(255,255,255,0.85)'}}>{siteInfo.title}</Link>
                     </h3>
-
                 </div>
-                {this.renderTopMenu()}
-                <HeaderRight/>
-            </Header>
+                {this.renderLeftMenu()}
+
+            </Sider>
 
             <Layout style={{flex: 1, overflow: 'hidden'}}>
-                <Sider id='left-sider'
-                       collapsible
-                       breakpoint={'md'}
-                >
-                    <Gap/>
-
-
-                    {this.renderLeftMenu()}
-
-                </Sider>
+                <Header className='header'>
+                    {this.renderTopMenu()}
+                    <HeaderRight/>
+                </Header>
 
                 <Content id='admin-layout-content'>
                     <ErrorBoundary>

@@ -17,7 +17,6 @@ public class MenuItem implements Cloneable {
     private AntdIcon icon;
     private String key;
     private String label;
-    private String title;
 
     private List<MenuItem> children;
 
