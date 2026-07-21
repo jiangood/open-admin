@@ -184,9 +184,9 @@ export default class extends React.Component {
             <Splitter>
                 <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
-                          title='字典类型'
-
+                          size='small'
                     >
+                        <div style={{fontWeight: 600, marginBottom: 8}}>字典类型</div>
                         <Tree
                             treeData={this.state.typeTree}
                             onSelect={this.onTreeSelect}
@@ -209,21 +209,15 @@ export default class extends React.Component {
                             />
                         )}
                         {this.state.typeTree.length === 0 && <Empty/>}
-
-
                     </Card>
                 </Splitter.Panel>
 
                 <Splitter.Panel style={{paddingLeft: 8}}>
-                    <Card title={hasTypeSelected ? `${selectedType.typeLabel} 的字典项` : '字典项'}
-                          extra={
-                              hasTypeSelected
-                                   ? <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>
-                                       新增
-                                   </Button>
-                                  : null
-                          }
-                    >
+                    <Card size='small'>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
+                            <span style={{fontWeight: 600}}>{hasTypeSelected ? `${selectedType.typeLabel} 的字典项` : '字典项'}</span>
+                            {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
+                        </div>
                         {!hasTypeSelected
                             ? <Empty description='请在左侧选择一个字典类型'/>
                             : <ProTable
