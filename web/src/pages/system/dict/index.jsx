@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect} from 'antd';
+import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect} from 'antd';
 import React from 'react';
 import {
     ButtonList,
@@ -218,6 +218,13 @@ export default class extends React.Component {
                             <span style={{fontWeight: 600}}>{hasTypeSelected ? `${selectedType.typeLabel} 的字典项` : '字典项'}</span>
                             {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
                         </div>
+                        {hasTypeSelected && (
+                            <Descriptions size='small' column={2} style={{marginBottom: 8}}>
+                                <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
+                                <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
+                                <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedType.enabled}/></Descriptions.Item>
+                            </Descriptions>
+                        )}
                         {!hasTypeSelected
                             ? <Empty description='请在左侧选择一个字典类型'/>
                             : <ProTable
