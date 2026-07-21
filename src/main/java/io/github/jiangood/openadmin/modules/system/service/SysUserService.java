@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
-import io.github.jiangood.openadmin.framework.config.SysMenuDef;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.BaseService;
@@ -236,8 +236,8 @@ public class SysUserService extends BaseService<SysUser> {
             log.info("角色权限 {}", rolePerm);
 
             if (role.isAdmin()) {
-                List<SysMenuDef> menus = sysMenuRepository.findAll();
-                for (SysMenuDef menu : menus) {
+                List<MenuDefinition> menus = sysMenuRepository.findAll();
+                for (MenuDefinition menu : menus) {
                     List<String> perms = menu.getPermCodes();
                     CollUtil.addAll(result, perms);
                 }

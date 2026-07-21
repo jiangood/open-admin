@@ -3,9 +3,10 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.framework.config.SysMenuDef;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.dto.MenuItem;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
+import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,18 +21,23 @@ public class SysMenuService {
 
     private final SysMenuRepository sysMenuRepository;
 
-    public List<SysMenuDef> findAll() {
+    public List<MenuDefinition> findAll() {
         return sysMenuRepository.findAll();
     }
 
-    public List<SysMenuDef> menuTree() {
-        List<SysMenuDef> all = sysMenuRepository.findAll();
-        return TreeTool.buildTree(all, SysMenuDef::getId, SysMenuDef::getPid, SysMenuDef::getChildren, SysMenuDef::setChildren);
+    public List<TreeOption> menuTree() {
+        List<MenuDefinition> all = sysMenuRepository.findAll();
+        List<TreeOption> items = all.stream().map(def -> {
+            TreeOption node = new TreeOption(def.getName(), def.getId(), def.getPid());
+            node.setDisabled(def.getDisabled());
+            return node;
+        }).toList();
+        return TreeTool.buildTree(items);
     }
 
-    public Dict buildMenuInfo(List<SysMenuDef> menuDefs) {
-        Map<String, SysMenuDef> pathMenuMap = new HashMap<>();
-        Map<String, SysMenuDef> menuMap = new HashMap<>();
+    public Dict buildMenuInfo(List<MenuDefinition> menuDefs) {
+        Map<String, MenuDefinition> pathMenuMap = new HashMap<>();
+        Map<String, MenuDefinition> menuMap = new HashMap<>();
         List<MenuItem> list = menuDefs.stream()
                 .filter(def -> def.getDisabled() == null || !def.getDisabled())
                 .map(def -> {

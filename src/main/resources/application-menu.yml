@@ -1,0 +1,72 @@
+## 框架预设菜单结构。业务项目可在 resources/ 下加 application-menu-*.yml 扩展或覆盖。
+menus:
+  sys:
+    name: 系统管理
+    seq: 10000
+  sys-user:
+    pid: sys
+    name: 用户管理
+    path: /system/user
+    icon: UserOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 删除, code: delete}
+      - {name: 重置密码, code: reset-password}
+      - {name: 分配权限, code: grant-permission}
+  sys-org:
+    pid: sys
+    name: 组织机构
+    path: /system/org
+    icon: ApartmentOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 更新, code: update}
+      - {name: 删除, code: delete}
+  sys-role:
+    pid: sys
+    name: 角色管理
+    path: /system/role
+    icon: IdcardOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 更新, code: update}
+      - {name: 删除, code: delete}
+      - {name: 分配权限, code: grant-permission}
+  sys-dict:
+    pid: sys
+    name: 字典管理
+    path: /system/dict
+    icon: FileSearchOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 更新, code: update}
+      - {name: 删除, code: delete}
+  job:
+    name: 任务调度
+    path: /system/job
+    icon: OrderedListOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 删除, code: delete}
+      - {name: 执行一次, code: trigger}
+      - {name: 清理日志, code: clean-log}
+  sys-file:
+    pid: sys
+    name: 文件管理
+    path: /system/file
+    icon: FolderOpenOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 删除, code: delete}
+  sys-log:
+    pid: sys
+    name: 审计日志
+    path: /system/log
+    icon: FileSearchOutlined
+    perms:
+      - {name: 读取, code: read}

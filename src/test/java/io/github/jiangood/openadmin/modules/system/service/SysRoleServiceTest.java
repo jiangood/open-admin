@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.framework.config.SysMenuDef;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
@@ -42,23 +42,23 @@ class SysRoleServiceTest {
         adminRole.setCode("admin");
         adminRole.setBuiltin(true);
 
-        SysMenuDef menu1 = new SysMenuDef();
+        MenuDefinition menu1 = new MenuDefinition();
         menu1.setId("sys");
         menu1.setName("系统管理");
         menu1.setSeq(1);
 
-        SysMenuDef menu2 = new SysMenuDef();
+        MenuDefinition menu2 = new MenuDefinition();
         menu2.setId("sys-user");
         menu2.setName("用户管理");
         menu2.setPid("sys");
         menu2.setSeq(2);
 
-        List<SysMenuDef> allMenus = Arrays.asList(menu1, menu2);
+        List<MenuDefinition> allMenus = Arrays.asList(menu1, menu2);
 
         when(roleRepository.findById("1")).thenReturn(Optional.of(adminRole));
         when(sysMenuRepository.findAll()).thenReturn(allMenus);
 
-        List<SysMenuDef> result = sysRoleService.ownMenu("1");
+        List<MenuDefinition> result = sysRoleService.ownMenu("1");
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -74,31 +74,31 @@ class SysRoleServiceTest {
         normalRole.setBuiltin(false);
         normalRole.setMenus(Arrays.asList("sys", "sys-user"));
 
-        SysMenuDef menu1 = new SysMenuDef();
+        MenuDefinition menu1 = new MenuDefinition();
         menu1.setId("sys");
         menu1.setName("系统管理");
         menu1.setSeq(1);
 
-        SysMenuDef menu2 = new SysMenuDef();
+        MenuDefinition menu2 = new MenuDefinition();
         menu2.setId("sys-user");
         menu2.setName("用户管理");
         menu2.setPid("sys");
         menu2.setSeq(2);
 
-        SysMenuDef menu3 = new SysMenuDef();
+        MenuDefinition menu3 = new MenuDefinition();
         menu3.setId("sys-role");
         menu3.setName("角色管理");
         menu3.setPid("sys");
         menu3.setSeq(3);
 
-        List<SysMenuDef> allMenus = Arrays.asList(menu1, menu2, menu3);
+        List<MenuDefinition> allMenus = Arrays.asList(menu1, menu2, menu3);
 
         when(roleRepository.findById("2")).thenReturn(Optional.of(normalRole));
         when(sysMenuRepository.findAllById(Arrays.asList("sys", "sys-user"))).thenReturn(
             Arrays.asList(menu1, menu2)
         );
 
-        List<SysMenuDef> result = sysRoleService.ownMenu("2");
+        List<MenuDefinition> result = sysRoleService.ownMenu("2");
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -117,7 +117,7 @@ class SysRoleServiceTest {
         when(roleRepository.findById("3")).thenReturn(Optional.of(normalRole));
         when(sysMenuRepository.findAllById(Arrays.asList())).thenReturn(Arrays.asList());
 
-        List<SysMenuDef> result = sysRoleService.ownMenu("3");
+        List<MenuDefinition> result = sysRoleService.ownMenu("3");
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -136,7 +136,7 @@ class SysRoleServiceTest {
         role2.setBuiltin(false);
         role2.setMenus(Arrays.asList("sys"));
 
-        SysMenuDef menu1 = new SysMenuDef();
+        MenuDefinition menu1 = new MenuDefinition();
         menu1.setId("sys");
         menu1.setName("系统管理");
 
@@ -145,7 +145,7 @@ class SysRoleServiceTest {
         when(sysMenuRepository.findAll()).thenReturn(Arrays.asList(menu1));
 
         Set<SysRole> roles = new HashSet<>(Arrays.asList(role1, role2));
-        List<SysMenuDef> result = sysRoleService.ownMenu(roles);
+        List<MenuDefinition> result = sysRoleService.ownMenu(roles);
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
@@ -226,11 +226,11 @@ class SysRoleServiceTest {
         role.setCode("test");
         role.setBuiltin(false);
 
-        SysMenuDef menu1 = new SysMenuDef();
+        MenuDefinition menu1 = new MenuDefinition();
         menu1.setId("sys");
         menu1.setName("系统管理");
 
-        SysMenuDef menu2 = new SysMenuDef();
+        MenuDefinition menu2 = new MenuDefinition();
         menu2.setId("sys-user");
         menu2.setName("用户管理");
         menu2.setPid("sys");

@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.framework.common;
 import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
-import io.github.jiangood.openadmin.framework.config.SysMenuDef;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
@@ -100,7 +100,7 @@ public class SysCommonController {
             return AjaxResult.err("用户不存在");
         }
 
-        List<SysMenuDef> userMenus = roleService.ownMenu(user.getRoles());
+        List<MenuDefinition> userMenus = roleService.ownMenu(user.getRoles());
         return AjaxResult.ok().data(sysMenuService.buildMenuInfo(userMenus));
     }
 }

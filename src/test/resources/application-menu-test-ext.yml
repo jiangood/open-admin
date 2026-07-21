@@ -1,0 +1,10 @@
+# 测试专用菜单扩展——验证多文件合并
+menus:
+  sys-user:
+    perms:
+      - {name: 导出, code: export}
+  test-dev:
+    name: 开发者工具
+    icon: ToolOutlined
+    path: /dev/tools
+    seq: 90000

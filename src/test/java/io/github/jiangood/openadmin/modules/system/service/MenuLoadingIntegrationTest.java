@@ -1,11 +1,12 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.framework.config.SysMenuDef;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
+import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,7 +34,7 @@ class MenuLoadingIntegrationTest {
 
     @Test
     void testSysMenuRepository_findAll() {
-        List<SysMenuDef> menus = sysMenuRepository.findAll();
+        List<MenuDefinition> menus = sysMenuRepository.findAll();
 
         assertNotNull(menus);
         assertFalse(menus.isEmpty(), "菜单列表不应该为空");
@@ -43,11 +44,11 @@ class MenuLoadingIntegrationTest {
 
     @Test
     void testSysMenuRepository_findAllById() {
-        List<SysMenuDef> allMenus = sysMenuRepository.findAll();
+        List<MenuDefinition> allMenus = sysMenuRepository.findAll();
         assertFalse(allMenus.isEmpty());
 
         List<String> menuIds = Arrays.asList(allMenus.get(0).getId());
-        List<SysMenuDef> filteredMenus = sysMenuRepository.findAllById(menuIds);
+        List<MenuDefinition> filteredMenus = sysMenuRepository.findAllById(menuIds);
 
         assertNotNull(filteredMenus);
         assertFalse(filteredMenus.isEmpty());
@@ -64,7 +65,7 @@ class MenuLoadingIntegrationTest {
         }
 
         SysRole adminRole = adminRoleOpt.get();
-        List<SysMenuDef> menus = sysRoleService.ownMenu(adminRole.getId());
+        List<MenuDefinition> menus = sysRoleService.ownMenu(adminRole.getId());
 
         assertNotNull(menus);
         assertFalse(menus.isEmpty(), "admin角色的菜单列表不应该为空");
@@ -94,7 +95,7 @@ class MenuLoadingIntegrationTest {
             System.out.println("  角色: " + role.getCode() + " - " + role.getName());
         });
 
-        List<SysMenuDef> menus = sysRoleService.ownMenu(roles);
+        List<MenuDefinition> menus = sysRoleService.ownMenu(roles);
 
         assertNotNull(menus);
         assertFalse(menus.isEmpty(), "通过用户角色获取的菜单列表不应该为空");
@@ -109,7 +110,7 @@ class MenuLoadingIntegrationTest {
             fail("admin角色不存在");
         }
 
-        List<SysMenuDef> allMenus = sysMenuRepository.findAll();
+        List<MenuDefinition> allMenus = sysMenuRepository.findAll();
         if (allMenus.isEmpty()) {
             fail("没有可用的菜单");
         }
@@ -127,7 +128,7 @@ class MenuLoadingIntegrationTest {
         SysRole savedRole = sysRoleRepository.save(newRole);
         assertNotNull(savedRole.getId());
 
-        List<SysMenuDef> menus = sysRoleService.ownMenu(savedRole.getId());
+        List<MenuDefinition> menus = sysRoleService.ownMenu(savedRole.getId());
         assertNotNull(menus);
         assertFalse(menus.isEmpty());
 
@@ -145,8 +146,8 @@ class MenuLoadingIntegrationTest {
         SysRole adminRole = adminRoleOpt.get();
         assertTrue(adminRole.isAdmin(), "admin角色应该被识别为管理员");
 
-        List<SysMenuDef> adminMenus = sysRoleService.ownMenu(adminRole.getId());
-        List<SysMenuDef> allMenus = sysMenuRepository.findAll();
+        List<MenuDefinition> adminMenus = sysRoleService.ownMenu(adminRole.getId());
+        List<MenuDefinition> allMenus = sysMenuRepository.findAll();
 
         assertEquals(allMenus.size(), adminMenus.size(),
             "admin角色应该拥有所有菜单");
@@ -162,7 +163,7 @@ class MenuLoadingIntegrationTest {
             fail("admin角色不存在");
         }
 
-        List<SysMenuDef> allMenus = sysMenuRepository.findAll();
+        List<MenuDefinition> allMenus = sysMenuRepository.findAll();
         if (allMenus.size() < 2) {
             fail("需要至少2个菜单来测试");
         }
@@ -178,12 +179,37 @@ class MenuLoadingIntegrationTest {
 
         SysRole savedRole = sysRoleRepository.save(normalRole);
 
-        List<SysMenuDef> roleMenus = sysRoleService.ownMenu(savedRole.getId());
+        List<MenuDefinition> roleMenus = sysRoleService.ownMenu(savedRole.getId());
 
         assertEquals(1, roleMenus.size(),
             "普通角色应该只有分配的一个菜单");
         assertEquals(allMenus.get(0).getId(), roleMenus.get(0).getId());
 
         sysRoleRepository.deleteById(savedRole.getId());
+    }
+
+    @Test
+    void testMultiFileMerge() {
+        // 验证 src/test/resources/ 下的 application-menu-test-ext.yml 和
+        // application-menu-test-extra.yml 已正确合并到菜单列表中
+        List<MenuDefinition> all = sysMenuRepository.findAll();
+
+        // test-dev 来自 test-ext 文件
+        MenuDefinition dev = all.stream()
+                .filter(m -> "test-dev".equals(m.getId()))
+                .findFirst().orElse(null);
+        assertNotNull(dev, "test-dev 应该来自 application-menu-test-ext.yml 的合并");
+        assertEquals("开发者工具", dev.getName());
+        assertEquals(AntdIcon.ToolOutlined, dev.getIcon());
+
+        // test-extra 来自 test-extra 文件
+        MenuDefinition extra = all.stream()
+                .filter(m -> "test-extra".equals(m.getId()))
+                .findFirst().orElse(null);
+        assertNotNull(extra, "test-extra 应该来自 application-menu-test-extra.yml 的合并");
+        assertEquals("test-dev", extra.getPid());
+
+        // sys-user 被两个文件定义，最后加载的文件覆盖——具体值取决于 classpath 顺序不做断言
+        assertNotNull(all.stream().filter(m -> "sys-user".equals(m.getId())).findFirst().orElse(null));
     }
 }

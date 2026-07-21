@@ -6,8 +6,8 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropdownReq;
 import io.github.jiangood.openadmin.util.dto.Option;
+import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
-import io.github.jiangood.openadmin.framework.config.SysMenuDef;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
@@ -121,10 +121,10 @@ public class SysRoleController {
         SysRole role = sysRoleService.findById(id).orElse(null);
         List<String> rolePerms = role.getPerms();
 
-        List<SysMenuDef> menuList = sysRoleService.ownMenu(id);
+        List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
 
         Map<String, Collection<String>> permsMap = new HashMap<>();
-        for (SysMenuDef menuDef : menuList) {
+        for (MenuDefinition menuDef : menuList) {
             if (CollUtil.isNotEmpty(menuDef.getPermCodes())) {
                 Set<String> menuPerms = new HashSet<>(menuDef.getPermCodes());
 
@@ -146,9 +146,7 @@ public class SysRoleController {
     @HasPermission("sys-role:grant-permission")
     @RequestMapping("perm-tree-table")
     public AjaxResult menuTree() {
-        List<SysMenuDef> tree = sysMenuService.menuTree();
-
-        return AjaxResult.ok().data(tree);
+        return AjaxResult.ok().data(sysMenuService.menuTree());
     }
 
     @HasPermission("sys-role:update")
