@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Modal, Popconfirm, Popover, Space, Splitter, Switch, Tree} from 'antd';
+import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Modal, Popconfirm, Popover, Space, Splitter, Switch, Tree, Typography} from 'antd';
 import React from 'react';
 import {
     FieldBoolean,
@@ -154,7 +154,7 @@ export default class extends React.Component {
                 <Splitter.Panel style={{paddingLeft: 8}}>
                     <Card size='small' style={{marginBottom: 8}}>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
-                            <span style={{fontWeight: 600}}>机构信息</span>
+                            <Typography.Text strong>机构信息</Typography.Text>
                             {selectedOrg && (
                                 <span>
                                     <Button size='small' icon={<EditOutlined/>} perm='sys-org:update'

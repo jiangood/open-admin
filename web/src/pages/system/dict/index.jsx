@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect} from 'antd';
+import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
 import React from 'react';
 import {
     ButtonList,
@@ -171,7 +171,7 @@ export default class extends React.Component {
                     <Card loading={this.state.treeLoading}
                           size='small'
                     >
-                        <div style={{fontWeight: 600, marginBottom: 8}}>字典类型</div>
+                        <Typography.Text strong style={{marginBottom: 8, display: 'block'}}>字典类型</Typography.Text>
                         <Tree
                             treeData={this.state.typeTree}
                             onSelect={this.onTreeSelect}
@@ -187,7 +187,7 @@ export default class extends React.Component {
                 <Splitter.Panel style={{paddingLeft: 8}}>
                     <Card size='small' style={{marginBottom: 8}}>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
-                            <span style={{fontWeight: 600}}>类型信息</span>
+                            <Typography.Text strong>类型信息</Typography.Text>
                             {hasTypeSelected && (
                                 <span>
                                     <Button size='small' icon={<EditOutlined/>} perm='sys-dict:update'
@@ -209,7 +209,7 @@ export default class extends React.Component {
                     </Card>
                     <Card size='small'>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
-                            <span style={{fontWeight: 600}}>字典项</span>
+                            <Typography.Text strong>字典项</Typography.Text>
                             {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增字典项</Button>}
                         </div>
                         {hasTypeSelected && <ProTable
