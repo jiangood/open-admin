@@ -121,7 +121,6 @@ export default class extends React.Component {
             return
         }
         const node = this.findNode(this.state.typeTree, selectedKeys[0])
-        const node = findNode(this.state.typeTree, selectedKeys[0])
         this.setState({
             selectedType: node,
             selectedTypeCode: node?.typeCode || null
@@ -222,20 +221,23 @@ export default class extends React.Component {
                 </Splitter.Panel>
 
                 <Splitter.Panel style={{paddingLeft: 8}}>
-                    <Card size='small'>
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
-                            <span style={{fontWeight: 600}}>{hasTypeSelected ? `${selectedType.typeLabel} 的字典项` : '字典项'}</span>
-                            {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
-                        </div>
-                        {hasTypeSelected && (
-                            <Descriptions size='small' column={3} style={{marginBottom: 8}}>
+                    {hasTypeSelected && (
+                        <Card size='small' style={{marginBottom: 8}}>
+                            <div style={{fontWeight: 600, marginBottom: 8}}>类型信息</div>
+                            <Descriptions size='small' column={3}>
                                 <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
                                 <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
                                 <Descriptions.Item label="分类">{this.getParentLabel() || '-'}</Descriptions.Item>
                                 <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
                                 <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedType.enabled}/></Descriptions.Item>
                             </Descriptions>
-                        )}
+                        </Card>
+                    )}
+                    <Card size='small'>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
+                            <span style={{fontWeight: 600}}>字典项</span>
+                            {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
+                        </div>
                         {!hasTypeSelected
                             ? <Empty description='请在左侧选择一个字典类型'/>
                             : <ProTable
