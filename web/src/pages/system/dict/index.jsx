@@ -1,5 +1,5 @@
-import {DeleteOutlined, EditOutlined, PlusOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Empty, Form, Input, InputNumber, Modal, Popconfirm, Space, Splitter, Tree, Tag, TreeSelect} from 'antd';
+import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
+import {Button, Card, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect} from 'antd';
 import React from 'react';
 import {
     ButtonList,
@@ -185,10 +185,7 @@ export default class extends React.Component {
                 <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
                           title='字典类型'
-                          extra={<Space>
-                              <Button size='small' shape='round' icon={<SyncOutlined/>}
-                                      onClick={this.loadTree}/>
-                          </Space>}
+
                     >
                         <Tree
                             treeData={this.state.typeTree}
