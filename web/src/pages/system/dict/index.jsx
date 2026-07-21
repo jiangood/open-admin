@@ -223,7 +223,17 @@ export default class extends React.Component {
                 <Splitter.Panel style={{paddingLeft: 8}}>
                     {hasTypeSelected && (
                         <Card size='small' style={{marginBottom: 8}}>
-                            <div style={{fontWeight: 600, marginBottom: 8}}>类型信息</div>
+                            <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
+                                <span style={{fontWeight: 600}}>类型信息</span>
+                                <span>
+                                    <Button size='small' icon={<EditOutlined/>} perm='sys-dict:update'
+                                            onClick={this.handleTypeEdit} style={{marginRight: 4}}>编辑</Button>
+                                    <Popconfirm perm='sys-dict:delete' title='是否确定删除此类型及其所有子类型和字典项？'
+                                                onConfirm={this.handleTypeDelete}>
+                                        <Button size='small' danger icon={<DeleteOutlined/>}>删除</Button>
+                                    </Popconfirm>
+                                </span>
+                            </div>
                             <Descriptions size='small' column={3}>
                                 <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
                                 <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
