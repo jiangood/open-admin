@@ -33,14 +33,6 @@ menus:
           - {name: 更新, code: update}
           - {name: 删除, code: delete}
           - {name: 分配权限, code: grant-permission}
-      - id: sys-manual
-        name: 手册管理
-        path: /system/manual
-        icon: CopyOutlined
-        perms:
-          - {name: 读取, code: read}
-          - {name: 创建, code: create}
-          - {name: 删除, code: delete}
       - id: sys-dict
         name: 字典管理
         path: /system/dict
