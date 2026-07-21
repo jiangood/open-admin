@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Checkbox, Descriptions, Form, Input, Modal, Popconfirm, Popover, Space, Splitter, Switch, Tree} from 'antd';
+import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Modal, Popconfirm, Popover, Space, Splitter, Switch, Tree} from 'antd';
 import React from 'react';
 import {
     FieldBoolean,
@@ -199,6 +199,9 @@ export default class extends React.Component {
                     </Form.Item>
                     <Form.Item label='名称' name='name' rules={[{required: true}]}>
                         <Input/>
+                    </Form.Item>
+                    <Form.Item label='序号' name='seq'>
+                        <InputNumber/>
                     </Form.Item>
                     <Form.Item label='类型' name='type' rules={[{required: true}]}>
                         <FieldDictSelect typeCode='orgType'/>
