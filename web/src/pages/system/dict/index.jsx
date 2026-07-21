@@ -199,25 +199,20 @@ export default class extends React.Component {
                                 </span>
                             )}
                         </div>
-                        {hasTypeSelected
-                            ? <Descriptions size='small' column={3}>
-                                <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
-                                <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
-                                <Descriptions.Item label="分类">{this.getParentLabel() || '-'}</Descriptions.Item>
-                                <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
-                                <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedType.enabled}/></Descriptions.Item>
-                            </Descriptions>
-                            : <Empty description='请在左侧选择一个字典类型'/>
-                        }
+                        {hasTypeSelected && <Descriptions size='small' column={3}>
+                            <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
+                            <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
+                            <Descriptions.Item label="分类">{this.getParentLabel() || '-'}</Descriptions.Item>
+                            <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
+                            <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedType.enabled}/></Descriptions.Item>
+                        </Descriptions>}
                     </Card>
                     <Card size='small'>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
                             <span style={{fontWeight: 600}}>字典项</span>
                             {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
                         </div>
-                        {!hasTypeSelected
-                            ? <Empty description='请在左侧选择一个字典类型'/>
-                            : <ProTable
+                        {hasTypeSelected && <ProTable
                                 rowKey='uid'
                                 actionRef={this.tableRef}
                                 request={(params) => {
