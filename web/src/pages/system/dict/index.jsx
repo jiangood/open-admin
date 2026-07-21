@@ -180,7 +180,7 @@ export default class extends React.Component {
         const hasTypeSelected = selectedType != null && selectedTypeCode != null
 
         return <Page title="数据字典" description="管理数据字典类型和字典项"
-                    actions={<Button type='primary' perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>}>
+                    actions={<Button perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>}>
             <Splitter>
                 <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
@@ -237,14 +237,7 @@ export default class extends React.Component {
                                     return HttpUtils.get('admin/dict/page', params)
                                 }}
                                 columns={this.columns}
-                            >
-                                <Form.Item label='编码' name='code'>
-                                    <Input/>
-                                </Form.Item>
-                                <Form.Item label='标签' name='label'>
-                                    <Input/>
-                                </Form.Item>
-                            </ProTable>
+                            />
                         }
                     </Card>
                 </Splitter.Panel>
