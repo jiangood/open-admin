@@ -195,10 +195,11 @@ export default class extends React.Component {
         const {siteInfo, loginInfo} = this.state
 
         return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click")}}>
-            <Sider id='left-sider'
+             <Sider id='left-sider'
+                   width={180}
                    collapsible
                    breakpoint={'md'}
-            >
+             >
                 <div className='sider-header'>
                     <img className='logo-img' src="./logo.svg" onClick={() => history.push('/')} alt='logo'/>
                     <h3 className='hide-on-mobile'>
