@@ -2,7 +2,6 @@ import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutline
 import {Button, Card, Checkbox, Descriptions, Form, Input, Modal, Popconfirm, Popover, Space, Splitter, Switch, Tree} from 'antd';
 import React from 'react';
 import {
-    DictUtils,
     FieldBoolean,
     FieldDictSelect,
     FieldRemoteTreeSelect,
@@ -92,24 +91,6 @@ export default class extends React.Component {
         })
     }
 
-    findNode = (nodes, key) => {
-        for (const n of nodes) {
-            if (n.key === key) return n
-            if (n.children) {
-                const found = this.findNode(n.children, key)
-                if (found) return found
-            }
-        }
-        return null
-    }
-
-    getParentLabel = () => {
-        const {selectedOrg, treeData} = this.state
-        if (!selectedOrg?.pid) return null
-        const parent = this.findNode(treeData, selectedOrg.pid)
-        return parent?.title || null
-    }
-
     onDraggableChange = e => {
         this.setState({draggable: e})
     };
@@ -188,8 +169,8 @@ export default class extends React.Component {
                         {selectedOrg && (
                             <Descriptions size='small' column={2}>
                                 <Descriptions.Item label="名称">{selectedOrg.name}</Descriptions.Item>
-                                <Descriptions.Item label="类型">{DictUtils.dictLabel('orgType', selectedOrg.type) || selectedOrg.type}</Descriptions.Item>
-                                <Descriptions.Item label="上级机构">{this.getParentLabel() || '-'}</Descriptions.Item>
+                                <Descriptions.Item label="类型">{selectedOrg.typeLabel}</Descriptions.Item>
+                                <Descriptions.Item label="上级机构">{selectedOrg.parentName || '-'}</Descriptions.Item>
                                 <Descriptions.Item label="序号">{selectedOrg.seq ?? '-'}</Descriptions.Item>
                                 <Descriptions.Item label="部门领导">{selectedOrg.leader?.name || '-'}</Descriptions.Item>
                                 <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedOrg.enabled}/></Descriptions.Item>

@@ -13,6 +13,7 @@ import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
+import io.github.jiangood.openadmin.modules.system.dto.SysOrgVO;
 import io.github.jiangood.openadmin.modules.system.dto.request.OrgReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
@@ -124,7 +125,25 @@ public class SysOrgController {
     @GetMapping("detail")
     public AjaxResult detail(String id) {
         SysOrg org = sysOrgService.findById(id).orElse(null);
-        return AjaxResult.ok().data(org);
+        if (org == null) {
+            return AjaxResult.ok().data(null);
+        }
+        SysOrgVO vo = new SysOrgVO();
+        vo.setId(org.getId());
+        vo.setPid(org.getPid());
+        vo.setName(org.getName());
+        vo.setSeq(org.getSeq());
+        vo.setEnabled(org.getEnabled());
+        vo.setType(org.getType());
+        vo.setTypeLabel(SysOrgVO.resolveTypeLabel(org.getType()));
+        if (org.getPid() != null) {
+            vo.setParentName(sysOrgService.getNameById(org.getPid()));
+        }
+        vo.setLeader(org.getLeader());
+        vo.setExtra1(org.getExtra1());
+        vo.setExtra2(org.getExtra2());
+        vo.setExtra3(org.getExtra3());
+        return AjaxResult.ok().data(vo);
     }
 
 
