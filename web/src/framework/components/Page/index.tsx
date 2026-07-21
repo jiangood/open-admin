@@ -41,6 +41,6 @@ export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = fal
                 </div>
             </div>
         )}
-        {hasHeader && padding ? <div style={{ padding: 16 }}>{children}</div> : children}
+        {hasHeader && padding ? <div style={{ padding: 16, background: '#fff' }}>{children}</div> : children}
     </div>
 };
