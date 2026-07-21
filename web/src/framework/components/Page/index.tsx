@@ -27,20 +27,28 @@ export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = fal
         style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
     }
 
-    return <div className={'oa-page'} style={style}>
-        {hasHeader && (
-            <div className="oa-page-header">
-                <div className="oa-page-header-top">
-                    <div className="oa-page-header-left">
-                        <div>
-                            {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
-                            {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
+    if (hasHeader) {
+        return <div className={'oa-page'} style={style}>
+            <div className="oa-page-card">
+                <div className="oa-page-header">
+                    <div className="oa-page-header-top">
+                        <div className="oa-page-header-left">
+                            <div>
+                                {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
+                                {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
+                            </div>
                         </div>
+                        {extra && <Space>{extra}</Space>}
                     </div>
-                    {extra && <Space>{extra}</Space>}
+                </div>
+                <div className="oa-page-body">
+                    {children}
                 </div>
             </div>
-        )}
-        {hasHeader && padding ? <div style={{ padding: 16, background: '#fff' }}>{children}</div> : children}
+        </div>
+    }
+
+    return <div className={'oa-page'} style={style}>
+        {children}
     </div>
 };
