@@ -15,7 +15,7 @@ menus:
           - {name: 重置密码, code: reset-password}
           - {name: 分配权限, code: grant-permission}
       - id: sys-org
-        name: 组织架构
+        name: 组织机构
         path: /system/org
         icon: ApartmentOutlined
         perms:

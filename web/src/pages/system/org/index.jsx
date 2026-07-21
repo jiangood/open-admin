@@ -98,7 +98,7 @@ export default class extends React.Component {
         const params = this.state.params;
         return <Page title="组织机构" description="管理组织机构树">
             <Splitter>
-                <Splitter.Panel defaultSize={400}>
+                <Splitter.Panel defaultSize={400} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
                           title={<Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
     params.searchText = e.target.value
@@ -146,7 +146,7 @@ export default class extends React.Component {
                     </Card>
                 </Splitter.Panel>
 
-                <Splitter>
+                <Splitter style={{paddingLeft: 8}}>
                     <Card
                         loading={this.state.formLoading}
                         extra={<Space>

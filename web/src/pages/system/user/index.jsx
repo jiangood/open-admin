@@ -1,16 +1,16 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Form, Input, Modal, Popconfirm, Select, Splitter, Tabs} from 'antd';
+import {Button, Card, Form, Input, Modal, Popconfirm, Select, Splitter} from 'antd';
 import React from 'react';
 import {
     ButtonList,
     DictUtils,
     FieldBoolean,
+    FieldRemoteSelect,
     FieldSysOrgTreeSelect,
     HttpUtils,
     OrgTree,
     Page,
     ProTable,
-    RoleTree
 } from "../../../framework";
 import UserPerm from "./UserPerm";
 
@@ -22,7 +22,6 @@ export default class extends React.Component {
         formValues: {},
 
         currentOrgId: null,
-        currentRoleId: null,
     }
     permRef = React.createRef();
 
@@ -46,10 +45,6 @@ export default class extends React.Component {
 
     onSelectOrg = (key) => {
         this.setState({currentOrgId: key}, () => this.tableRef.current.reload())
-    }
-
-    onSelectRole = (key) => {
-        this.setState({currentRoleId: key}, () => this.tableRef.current.reload())
     }
 
     handleAdd = () => {
@@ -156,31 +151,17 @@ export default class extends React.Component {
 
         return <Page title="用户管理" description="管理系统用户" actions={<Button perm='sys-user:create' type="primary" icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
             <Splitter>
-                <Splitter.Panel defaultSize={250}>
-                    <Tabs
-                        type='card'
-                        size='small'
-                        items={[
-                            {
-                                key: 'org',
-                                label: '按组织机构',
-                                children: <OrgTree onChange={this.onSelectOrg}/>
-                            },
-                            {
-                                key: 'role',
-                                label: '按角色',
-                                children: <RoleTree onSelect={this.onSelectRole}/>
-                            }
-                        ]}/>
-
+                <Splitter.Panel defaultSize={350} style={{paddingRight: 8}}>
+                    <Card size='small'>
+                        <OrgTree onChange={this.onSelectOrg}/>
+                    </Card>
                 </Splitter.Panel>
-                <Splitter.Panel style={{paddingLeft: 16}}>
+                <Splitter.Panel style={{paddingLeft: 8}}>
                     <ProTable
                         searchColumns={3}
                         actionRef={this.tableRef}
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
-                            params.roleId = this.state.currentRoleId
                             return HttpUtils.get('admin/sysUser/page', params)
                         }}
                         columns={this.columns}
@@ -193,6 +174,9 @@ export default class extends React.Component {
                         </Form.Item>
                         <Form.Item label='手机号' name='phone'>
                             <Input/>
+                        </Form.Item>
+                        <Form.Item label='角色' name='roleId'>
+                            <FieldRemoteSelect url='admin/sysRole/options' placeholder='请选择角色'/>
                         </Form.Item>
                         <Form.Item label='状态' name='enabled'>
                             <Select allowClear placeholder='全部'>
