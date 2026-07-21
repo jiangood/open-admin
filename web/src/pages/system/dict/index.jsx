@@ -210,7 +210,7 @@ export default class extends React.Component {
                     <Card size='small'>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
                             <span style={{fontWeight: 600}}>字典项</span>
-                            {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
+                            {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增字典项</Button>}
                         </div>
                         {hasTypeSelected && <ProTable
                                 rowKey='uid'
