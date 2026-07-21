@@ -80,7 +80,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page title="操作手册" actions={<Button perm='sys-manual:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
+        return <Page title="操作手册" description="管理系统操作手册文档" actions={<Button perm='sys-manual:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
             <ProTable
                 actionRef={this.tableRef}
                 request={(params) => HttpUtils.get('admin/sysManual/page', params)}

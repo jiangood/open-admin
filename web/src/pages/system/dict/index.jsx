@@ -156,7 +156,7 @@ export default class extends React.Component {
         const {selectedType, selectedTypeCode} = this.state
         const hasTypeSelected = selectedType != null && selectedTypeCode != null
 
-        return <Page title="数据字典">
+        return <Page title="数据字典" description="管理数据字典类型和字典项">
             <Splitter>
                 <Splitter.Panel defaultSize={300}>
                     <Card loading={this.state.treeLoading}

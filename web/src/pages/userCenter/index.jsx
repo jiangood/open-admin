@@ -17,7 +17,7 @@ export default class extends React.Component {
 
     render() {
         const {info} = this.state;
-        return <Page backgroundGray title="个人中心">
+        return <Page backgroundGray title="个人中心" description="查看和编辑个人资料">
 
             <Row gutter={[16, 16]}>
                 <Col md={6} sm={24}>

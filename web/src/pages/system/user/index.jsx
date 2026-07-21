@@ -154,7 +154,7 @@ export default class extends React.Component {
 
     render() {
 
-        return <Page title="用户管理" actions={<Button perm='sys-user:create' type="primary" icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
+        return <Page title="用户管理" description="管理系统用户" actions={<Button perm='sys-user:create' type="primary" icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
             <Splitter>
                 <Splitter.Panel defaultSize={250}>
                     <Tabs

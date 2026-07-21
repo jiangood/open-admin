@@ -54,7 +54,7 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page title="消息中心">
+        return <Page title="消息中心" description="查看系统消息通知">
             <Card variant={"borderless"}>
 
             <Tabs defaultActiveKey="0" destroyOnClose

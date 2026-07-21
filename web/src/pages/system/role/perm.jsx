@@ -89,7 +89,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page title="角色权限设置">
+        return <Page title="角色权限设置" description="设置角色的菜单和权限">
             <Card title='角色权限设置' loading={this.state.loading}
                   variant={"borderless"}
                   extra={<Button type='primary' icon={<SaveOutlined/>} onClick={this.savePerms}>保存权限</Button>}>

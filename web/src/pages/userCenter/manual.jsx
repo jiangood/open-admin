@@ -42,7 +42,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page title="操作手册">
+        return <Page title="操作手册" description="查看系统操作手册">
             <ProTable
                 actionRef={this.tableRef}
                 request={(params) => HttpUtils.get('admin/sysManual/page-for-user', params)}

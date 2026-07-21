@@ -188,7 +188,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page title="作业调度" actions={<><Button type='primary' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button><Button onClick={this.showStatus}>查看状态</Button></>}>
+        return <Page title="作业调度" description="管理定时作业任务" actions={<><Button type='primary' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button><Button onClick={this.showStatus}>查看状态</Button></>}>
             <ProTable
                 actionRef={this.tableRef}
                 request={(params) => HttpUtils.get('admin/job/page', params)}
