@@ -3,9 +3,9 @@ import {Button, Card, Empty, Form, Input, InputNumber, Modal, Popconfirm, Space,
 import React from 'react';
 import {
     ButtonList,
+    ContextMenu,
     FieldBoolean,
     FieldDictSelect,
-    Gap,
     HttpUtils,
     Page,
     ProTable,
@@ -24,6 +24,8 @@ export default class extends React.Component {
         formValues: {},
         typeFormOpen: false,
         typeFormValues: {},
+
+        contextMenu: null,
     }
 
     formRef = React.createRef();
@@ -63,6 +65,27 @@ export default class extends React.Component {
             this.setState({selectedType: null, selectedTypeCode: null})
             this.loadTree()
         })
+    }
+
+    handleTypeRightClick = ({event, node}) => {
+        event.preventDefault()
+        this.onTreeSelect([node.key])
+        this.setState({contextMenu: {x: event.clientX, y: event.clientY}})
+    }
+
+    handleContextMenuClick = ({key}) => {
+        const {selectedType} = this.state
+        this.setState({contextMenu: null})
+        if (key === 'edit') {
+            this.handleTypeEdit()
+        } else if (key === 'delete') {
+            if (!selectedType) return
+            Modal.confirm({
+                title: '确认删除',
+                content: '是否确定删除此类型及其所有子类型和字典项？',
+                onOk: () => this.handleTypeDelete(),
+            })
+        }
     }
 
     handleTypeFormFinish = values => {
@@ -156,9 +179,10 @@ export default class extends React.Component {
         const {selectedType, selectedTypeCode} = this.state
         const hasTypeSelected = selectedType != null && selectedTypeCode != null
 
-        return <Page title="数据字典" description="管理数据字典类型和字典项">
+        return <Page title="数据字典" description="管理数据字典类型和字典项"
+                    actions={<Button type='primary' perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>}>
             <Splitter>
-                <Splitter.Panel defaultSize={300}>
+                <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
                           title='字典类型'
                           extra={<Space>
@@ -166,37 +190,34 @@ export default class extends React.Component {
                                       onClick={this.loadTree}/>
                           </Space>}
                     >
-                        <ButtonList>
-                            <Button type='primary' size='small' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>
-                                新增类型
-                            </Button>
-                            <Button size='small' disabled={!selectedType} onClick={this.handleTypeEdit}>
-                                <EditOutlined/> 编辑
-                            </Button>
-                            <Popconfirm title='是否确定删除此类型及其所有子类型和字典项？'
-                                        disabled={!selectedType}
-                                        onConfirm={this.handleTypeDelete}>
-                                <Button size='small' disabled={!selectedType}>
-                                    <DeleteOutlined/> 删除
-                                </Button>
-                            </Popconfirm>
-                        </ButtonList>
-                        <Gap/>
                         <Tree
                             treeData={this.state.typeTree}
                             onSelect={this.onTreeSelect}
+                            onRightClick={this.handleTypeRightClick}
                             fieldNames={{title: 'typeLabel', key: 'id'}}
                             showLine
                             defaultExpandAll
                             blockNode
                         />
+                        {this.state.contextMenu && (
+                            <ContextMenu
+                                x={this.state.contextMenu.x}
+                                y={this.state.contextMenu.y}
+                                items={[
+                                    {key: 'edit', icon: <EditOutlined/>, label: '编辑'},
+                                    {key: 'delete', icon: <DeleteOutlined/>, label: '删除', danger: true},
+                                ]}
+                                onClick={this.handleContextMenuClick}
+                                onClose={() => this.setState({contextMenu: null})}
+                            />
+                        )}
                         {this.state.typeTree.length === 0 && <Empty/>}
 
 
                     </Card>
                 </Splitter.Panel>
 
-                <Splitter.Panel>
+                <Splitter.Panel style={{paddingLeft: 8}}>
                     <Card title={hasTypeSelected ? `${selectedType.typeLabel} 的字典项` : '字典项'}
                           extra={
                               hasTypeSelected
