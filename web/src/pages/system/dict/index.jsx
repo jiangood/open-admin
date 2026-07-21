@@ -164,7 +164,8 @@ export default class extends React.Component {
         const {selectedType, selectedTypeCode} = this.state
         const hasTypeSelected = selectedType != null && selectedTypeCode != null
 
-        return <Page title="数据字典" description="管理数据字典类型和字典项">
+        return <Page title="数据字典" description="管理数据字典类型和字典项"
+                    actions={<Button perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>}>
             <Splitter>
                 <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
@@ -187,20 +188,16 @@ export default class extends React.Component {
                     <Card size='small' style={{marginBottom: 8}}>
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
                             <span style={{fontWeight: 600}}>类型信息</span>
-                            <span>
-                                <Button size='small' icon={<PlusOutlined/>} perm='sys-dict:create'
-                                        onClick={this.handleTypeAdd} style={{marginRight: 4}}>新增类型</Button>
-                                {hasTypeSelected && (
-                                    <>
-                                        <Button size='small' icon={<EditOutlined/>} perm='sys-dict:update'
-                                                onClick={this.handleTypeEdit} style={{marginRight: 4}}>编辑</Button>
-                                        <Popconfirm perm='sys-dict:delete' title='是否确定删除此类型及其所有子类型和字典项？'
-                                                    onConfirm={this.handleTypeDelete}>
-                                            <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
-                                        </Popconfirm>
-                                    </>
-                                )}
-                            </span>
+                            {hasTypeSelected && (
+                                <span>
+                                    <Button size='small' icon={<EditOutlined/>} perm='sys-dict:update'
+                                            onClick={this.handleTypeEdit} style={{marginRight: 4}}>编辑</Button>
+                                    <Popconfirm perm='sys-dict:delete' title='是否确定删除此类型及其所有子类型和字典项？'
+                                                onConfirm={this.handleTypeDelete}>
+                                        <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
+                                    </Popconfirm>
+                                </span>
+                            )}
                         </div>
                         {hasTypeSelected && <Descriptions size='small' column={3}>
                             <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
