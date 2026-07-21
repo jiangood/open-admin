@@ -100,7 +100,7 @@ export default class extends React.Component {
         const params = this.state.params
 
         return <Page title="组织机构" description="管理组织机构树"
-                     actions={<Button perm='sys-org:create' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
+                     actions={<Button type='primary' perm='sys-org:create' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
             <Splitter>
                 <Splitter.Panel defaultSize={400} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
