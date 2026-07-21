@@ -1,7 +1,6 @@
 import React from "react";
 import {Button, Form, Table} from 'antd';
 
-import { Toolbar } from './components/ToolBar';
 import {StringUtils} from "../../utils";
 
 import './index.less'
@@ -120,19 +119,17 @@ export class ProTable extends React.Component {
             columns,
             rowSelection,
             rowKey = "id",
-            toolbarOptions = false,
         } = this.props
 
 
         return <div className={'oa-pro-table '} id={this.id}>
             {this.renderForm()}
             <div className="pro-table-wrapper">
-                {toolbarOptions && <Toolbar
-                    toolBarRender={this.getToolBarRenderNode(toolBarRender)}
-
-                    onRefresh={() => this.loadData()}
-                    loading={this.state.loading}
-                />}
+                {toolBarRender && <div className="pro-table-toolbar">
+                    <div className="pro-table-toolbar-left">
+                        {this.getToolBarRenderNode(toolBarRender)}
+                    </div>
+                </div>}
 
 
                 <Table

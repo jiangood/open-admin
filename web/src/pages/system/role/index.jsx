@@ -142,7 +142,7 @@ export default class extends React.Component {
                                 onClick={() => this.handleEdit(record)}>编辑</Button>
                         <Popconfirm perm='sys-role:delete' disabled={record.builtin} title='是否确定删除系统角色'
                                     onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small'>删除</Button>
+                            <Button size='small' disabled={record.builtin}>删除</Button>
                         </Popconfirm>
                     </ButtonList>
                 );
