@@ -180,16 +180,13 @@ export default class extends React.Component {
     }
 
     render() {
-        return <Page title="角色管理">
+        return <Page
+            title="角色管理"
+            description="管理系统角色，包括角色权限分配、用户设置等"
+            actions={<Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}
+        >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => {
-                    return <ButtonList>
-                        <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>
-                            新增
-                        </Button>
-                    </ButtonList>
-                }}
                 request={(params) => HttpUtils.get('admin/sysRole/page', params)}
                 columns={this.columns}
             >

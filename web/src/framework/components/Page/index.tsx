@@ -1,7 +1,8 @@
 import React from "react";
-import { Space, Typography } from "antd";
+import { Typography } from "antd";
 import './index.less'
 import {ThemeUtils} from "../../utils";
+import { ButtonList } from "../system/ButtonList";
 
 interface PageProps {
     padding?: boolean;
@@ -9,15 +10,15 @@ interface PageProps {
     debug?: boolean;
     title?: React.ReactNode;
     description?: React.ReactNode;
-    extra?: React.ReactNode;
+    actions?: React.ReactNode;
     children?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = false, debug = false, title, description, extra, children }) => {
+export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = false, debug = false, title, description, actions, children }) => {
     const hasHeader = title != null;
     const style: React.CSSProperties = {};
 
-    if (!hasHeader && padding) {
+    if (padding) {
         style.padding = 16;
     }
     if (backgroundGray) {
@@ -27,28 +28,20 @@ export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = fal
         style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
     }
 
-    if (hasHeader) {
-        return <div className={'oa-page'} style={style}>
-            <div className="oa-page-card">
-                <div className="oa-page-header">
-                    <div className="oa-page-header-top">
-                        <div className="oa-page-header-left">
-                            <div>
-                                {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
-                                {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
-                            </div>
+    return <div className={'oa-page'} style={style}>
+        {hasHeader && (
+            <div className="oa-page-header">
+                <div className="oa-page-header-top">
+                    <div className="oa-page-header-left">
+                        <div>
+                            {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
+                            {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
                         </div>
-                        {extra && <Space>{extra}</Space>}
                     </div>
-                </div>
-                <div className="oa-page-body">
-                    {children}
+                    {actions && <ButtonList>{actions}</ButtonList>}
                 </div>
             </div>
-        </div>
-    }
-
-    return <div className={'oa-page'} style={style}>
+        )}
         {children}
     </div>
 };
