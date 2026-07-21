@@ -97,21 +97,30 @@ export default class extends React.Component {
         })
     }
 
+    findNode = (nodes, key) => {
+        for (const n of nodes) {
+            if (n.id === key) return n
+            if (n.children) {
+                const found = this.findNode(n.children, key)
+                if (found) return found
+            }
+        }
+        return null
+    }
+
+    getParentLabel = () => {
+        const {selectedType, typeTree} = this.state
+        if (!selectedType?.pid) return null
+        const parent = this.findNode(typeTree, selectedType.pid)
+        return parent?.typeLabel || null
+    }
+
     onTreeSelect = (selectedKeys) => {
         if (selectedKeys.length === 0) {
             this.setState({selectedType: null, selectedTypeCode: null})
             return
         }
-        const findNode = (nodes, key) => {
-            for (const n of nodes) {
-                if (n.id === key) return n
-                if (n.children) {
-                    const found = findNode(n.children, key)
-                    if (found) return found
-                }
-            }
-            return null
-        }
+        const node = this.findNode(this.state.typeTree, selectedKeys[0])
         const node = findNode(this.state.typeTree, selectedKeys[0])
         this.setState({
             selectedType: node,
@@ -219,8 +228,10 @@ export default class extends React.Component {
                             {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增</Button>}
                         </div>
                         {hasTypeSelected && (
-                            <Descriptions size='small' column={2} style={{marginBottom: 8}}>
+                            <Descriptions size='small' column={3} style={{marginBottom: 8}}>
+                                <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
                                 <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
+                                <Descriptions.Item label="分类">{this.getParentLabel() || '-'}</Descriptions.Item>
                                 <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
                                 <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedType.enabled}/></Descriptions.Item>
                             </Descriptions>
