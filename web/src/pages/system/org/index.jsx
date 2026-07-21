@@ -157,8 +157,6 @@ export default class extends React.Component {
                             <span style={{fontWeight: 600}}>机构信息</span>
                             {selectedOrg && (
                                 <span>
-                                    <Button size='small' icon={<PlusOutlined/>} perm='sys-org:create'
-                                            onClick={this.handleAdd} style={{marginRight: 4}}>新增下级</Button>
                                     <Button size='small' icon={<EditOutlined/>} perm='sys-org:update'
                                             onClick={this.handleEdit} style={{marginRight: 4}}>编辑</Button>
                                     <Popconfirm perm='sys-org:delete' title='是否确定删除组织机构'
