@@ -106,11 +106,11 @@ export default class extends React.Component {
                     <Card loading={this.state.treeLoading}
                           size='small'
                     >
-                        <Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
-                            params.searchText = e.target.value
-                            this.setState({params}, this.loadTree)
-                        }} style={{width: '90%', marginBottom: 8}}/>
-                        <div style={{textAlign: 'right', marginBottom: 4}}>
+                        <div style={{display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8}}>
+                            <Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
+                                params.searchText = e.target.value
+                                this.setState({params}, this.loadTree)
+                            }} style={{flex: 1}}/>
                             <Popover
                                 trigger='click'
                                 placement='bottomRight'
