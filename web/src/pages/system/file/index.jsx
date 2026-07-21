@@ -89,15 +89,9 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page title="文件管理">
+        return <Page title="文件管理" actions={<Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>}>
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => {
-                    return <Button type='primary' icon={<CloudUploadOutlined/>}
-                                   onClick={() => this.setState({formOpen: true})}>
-                        上传文件
-                    </Button>
-                }}
                 request={(params) => {
                     return HttpUtils.get('admin/sysFile/page', params);
                 }}

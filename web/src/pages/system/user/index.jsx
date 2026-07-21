@@ -154,7 +154,7 @@ export default class extends React.Component {
 
     render() {
 
-        return <Page title="用户管理">
+        return <Page title="用户管理" actions={<Button perm='sys-user:create' type="primary" icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
             <Splitter>
                 <Splitter.Panel defaultSize={250}>
                     <Tabs
@@ -178,17 +178,6 @@ export default class extends React.Component {
                     <ProTable
                         searchColumns={3}
                         actionRef={this.tableRef}
-                        toolBarRender={() => {
-                            return <ButtonList>
-                                <Button
-                                    perm='sys-user:create'
-                                    type="primary"
-                                    icon={<PlusOutlined/>}
-                                    onClick={this.handleAdd}>
-                                    新增
-                                </Button>
-                            </ButtonList>
-                        }}
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
                             params.roleId = this.state.currentRoleId

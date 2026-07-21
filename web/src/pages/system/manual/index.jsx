@@ -1,4 +1,4 @@
-import {CloudDownloadOutlined, PlusOutlined} from '@ant-design/icons'
+import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, Modal, Popconfirm, Tag} from 'antd'
 import React from 'react'
 import {ButtonList, FieldUploadFile, HttpUtils, Page, ProTable} from "../../../framework";
@@ -80,16 +80,9 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page title="操作手册">
+        return <Page title="操作手册" actions={<Button perm='sys-manual:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={(params, {selectedRows, selectedRowKeys}) => {
-                    return <ButtonList>
-                        <Button perm='sys-manual:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>
-                            新增
-                        </Button>
-                    </ButtonList>
-                }}
                 request={(params) => HttpUtils.get('admin/sysManual/page', params)}
                 columns={this.columns}
 
