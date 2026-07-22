@@ -85,7 +85,7 @@ jobs:
 
       - name: Check if Maven version already published
         id: check-maven
-        uses: ./.github/actions/check-maven-published
+        uses: jiangood/maven-central-check-action@v1
         with:
           version: ${{ steps.tag.outputs.tag }}
           maven-username: ${{ secrets.MAVEN_USERNAME }}
