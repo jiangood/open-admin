@@ -34,7 +34,7 @@ mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 排除需要 MySQL 
 mvn clean package                                          # 打包
 mvn -Papp spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
-mvn -Ppublish clean package                                # 发布到 Maven Central
+node scripts/bump-version.js <新版本号>                     # 升级 pom.xml + web/package.json 版本号
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
