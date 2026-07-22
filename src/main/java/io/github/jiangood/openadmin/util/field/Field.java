@@ -14,6 +14,8 @@ public class Field {
 
     boolean required;
 
+    String placeholder;
+
     String defaultValue;
 
     String valueType;

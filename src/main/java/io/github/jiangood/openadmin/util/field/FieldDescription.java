@@ -17,13 +17,20 @@ public @interface FieldDescription {
     String label();
 
     /**
-     * 示例值
+     * 占位提示
      *
      * @return
      */
-    String demo() default "";
+    String placeholder() default "";
 
     int len() default -1;
+
+    /**
+     * 默认值
+     *
+     * @return
+     */
+    String defaultValue() default "";
 
     /**
      * 字段类型

@@ -141,6 +141,8 @@ public class SysJobController {
                 d.setName(param.name());
                 d.setLabel(param.label());
                 d.setRequired(param.required());
+                d.setPlaceholder(param.placeholder());
+                d.setDefaultValue(param.defaultValue());
                 result.add(d);
             }
 

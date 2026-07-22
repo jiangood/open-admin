@@ -241,8 +241,12 @@ export default class extends React.Component {
                             <Form.Item label={p.label}
                                        name={['jobData', p.name]}
                                        key={p.name}
+                                       initialValue={p.defaultValue}
                                        rules={[{required: p.required}]}>
-                                {ValueType.renderField(p.componentType, p.componentProps)}
+                                {ValueType.renderField(p.componentType, {
+                                    ...p.componentProps,
+                                    placeholder: p.placeholder || '请输入'
+                                })}
                             </Form.Item>
                         </div>
                     ))}
