@@ -23,18 +23,18 @@ D:/ws/
 └── open-admin-example/      # 示例业务项目（依赖框架）
 ```
 
-修改框架后需先执行 `./mvnw clean install -DskipTests`，然后在示例项目更新版本验证。
+修改框架后需先执行 `mvn clean install -DskipTests`，然后在示例项目更新版本验证。
 
 ## Development Commands
 
 ```bash
-./mvnw clean compile                                          # 编译
-./mvnw test -Dtest=BeanToolTest                               # 运行单个测试
-./mvnw test -Dtest='!*RepositoryTest,!*ServiceTest'           # 排除需要 MySQL 的测试
-./mvnw clean package                                          # 打包
-./mvnw -Papp spring-boot:run                                  # 独立应用启动
-./mvnw clean install -DskipTests                              # 安装到本地仓库
-./mvnw -Ppublish clean package                                # 发布到 Maven Central
+mvn clean compile                                          # 编译
+mvn test -Dtest=BeanToolTest                               # 运行单个测试
+mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 排除需要 MySQL 的测试
+mvn clean package                                          # 打包
+mvn -Papp spring-boot:run                                  # 独立应用启动
+mvn clean install -DskipTests                              # 安装到本地仓库
+mvn -Ppublish clean package                                # 发布到 Maven Central
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
