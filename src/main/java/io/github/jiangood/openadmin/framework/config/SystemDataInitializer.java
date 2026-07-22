@@ -34,11 +34,11 @@ public class SystemDataInitializer implements CommandLineRunner {
     private final SysUserRepository sysUserRepository;
     private final SystemProperties systemProperties;
     private final DbTool dbTool;
-    private final List<OpenLifecycle> lifecycles;
+    private final List<StartupHook> startupHooks;
 
     @Override
     public void run(String... args) throws Exception {
-        lifecycles.forEach(OpenLifecycle::onDataInit);
+        startupHooks.forEach(StartupHook::beforeSystemDataInitialize);
 
         log.info("执行初始化程序： {}", getClass().getName());
         long time = System.currentTimeMillis();
@@ -47,7 +47,7 @@ public class SystemDataInitializer implements CommandLineRunner {
         SysRole adminRole = sysRoleService.initDefaultAdmin();
         initUser(adminRole);
 
-        lifecycles.forEach(OpenLifecycle::afterDataInit);
+        startupHooks.forEach(StartupHook::afterSystemDataInitialize);
 
         log.info("系统初始化耗时：{}", System.currentTimeMillis() - time);
     }

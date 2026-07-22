@@ -26,27 +26,27 @@ public class DbConfig {
 
 
     @Bean
-    public PreDdlDataSourceScriptDatabaseInitializer myData(DataSource ds, DbTool db, List<OpenLifecycleBeforeJpaInit> beforeJpaInitList) {
-        return new PreDdlDataSourceScriptDatabaseInitializer(ds,db,beforeJpaInitList);
+    public PreDdlDataSourceScriptDatabaseInitializer myData(DataSource ds, DbTool db, List<StartupHook> startupHooks) {
+        return new PreDdlDataSourceScriptDatabaseInitializer(ds, db, startupHooks);
     }
 
     /**
-     * 在 JPA DDL 之前执行 {@link OpenLifecycleBeforeJpaInit} 钩子。
+     * 在 JPA 自动建表之前执行 {@link StartupHook#beforeJpaSchemaInitialize(DbTool)} 钩子。
      * 不执行任何 SQL 脚本（{@code super(dataSource, null)}），仅用于生命周期回调。
      */
     public static class PreDdlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatabaseInitializer {
-        private final List<OpenLifecycleBeforeJpaInit> lifecycleBeforeJpaInitList;
+        private final List<StartupHook> startupHooks;
         private final DbTool db;
-        public PreDdlDataSourceScriptDatabaseInitializer(DataSource dataSource, DbTool db, List<OpenLifecycleBeforeJpaInit> lifecycleBeforeJpaInitList) {
+        public PreDdlDataSourceScriptDatabaseInitializer(DataSource dataSource, DbTool db, List<StartupHook> startupHooks) {
             super(dataSource, null);
-            this.lifecycleBeforeJpaInitList = lifecycleBeforeJpaInitList;
+            this.startupHooks = startupHooks;
             this.db = db;
         }
 
         @Override
         public boolean initializeDatabase() {
-            for (OpenLifecycleBeforeJpaInit lf : lifecycleBeforeJpaInitList) {
-                lf.process(db);
+            for (StartupHook hook : startupHooks) {
+                hook.beforeJpaSchemaInitialize(db);
             }
             return true;
         }
