@@ -87,15 +87,20 @@ jobs:
         id: check-maven
         run: |
           VERSION="${{ steps.tag.outputs.tag }}"
-          RESPONSE=$(curl -s "https://search.maven.org/solrsearch/select?q=g:io.github.jiangood+AND+a:open-admin+AND+v:${VERSION}&rows=1&wt=json")
-          COUNT=$(echo "$RESPONSE" | jq -r '.response.numFound')
-          if [ "$COUNT" = "0" ]; then
-            echo "published=false" >> "$GITHUB_OUTPUT"
-            echo "✓ Maven Central 未发现 v${VERSION}，准备发布"
-          else
+          AUTH=$(echo -n "$MAVEN_USERNAME:$MAVEN_PASSWORD" | base64 -w0)
+          RESPONSE=$(curl -s "https://central.sonatype.com/api/v1/publisher/deployments?namespace=io.github.jiangood&page=0&size=20&sortField=createTimestamp&sortDirection=desc" \
+            -H "accept: application/json" -H "Authorization: Basic $AUTH")
+          PUBLISHED=$(echo "$RESPONSE" | jq --arg ver "$VERSION" '[.deployments[] | select(.deploymentState == "PUBLISHED" and ([.deploymentComponents[] | .purl | test($ver)] | any))] | length')
+          if [ "$PUBLISHED" -gt 0 ]; then
             echo "published=true" >> "$GITHUB_OUTPUT"
             echo "✓ Maven Central 已存在 v${VERSION}，跳过发布"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "✓ Maven Central 未发现 v${VERSION}，准备发布"
           fi
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
 
       - name: Publish MAVEN
         if: steps.check-maven.outputs.published != 'true'
