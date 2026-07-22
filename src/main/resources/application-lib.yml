@@ -1,0 +1,44 @@
+# ===================================================================
+# open-admin 框架默认配置
+# 业务项目在 application.yml 中显式引入即可继承：
+#
+#   spring:
+#     config:
+#       import: classpath:application-lib.yml
+#
+# 业务项目自己的配置优先级更高，可以按需覆盖。
+# ===================================================================
+
+spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration
+  cache:
+    type: caffeine
+    caffeine:
+      spec: initialCapacity=50,maximumSize=10000,expireAfterWrite=5m
+  jpa:
+    generate-ddl: true
+    show-sql: false
+    # 注意：如果使用 MySQL 5.7，请添加以下配置覆盖默认的 Hibernate 方言：
+    # spring.jpa.properties.hibernate.dialect: org.hibernate.community.dialect.MySQLLegacyDialect
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+    locale: zh_CN
+
+logging:
+  file:
+    path: ./logs
+  level:
+    io.github.jiangood: debug
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
+
+sys:
+  default-password: Admin#2026!!!

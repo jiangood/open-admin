@@ -1,0 +1,240 @@
+import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
+import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Modal, Popconfirm, Popover, Space, Splitter, Switch, Tree, Typography} from 'antd';
+import React from 'react';
+import {
+    FieldBoolean,
+    FieldDictSelect,
+    FieldRemoteTreeSelect,
+    FieldUserSelect,
+    HttpUtils,
+    NamedIcon,
+    Page,
+    ViewBooleanEnableDisable,
+} from "../../../framework";
+
+export default class extends React.Component {
+
+    state = {
+        selectedOrg: null,
+        params: {
+            onlyShowEnabled: true,
+            onlyShowUnit: false,
+            searchText: null,
+        },
+        treeData: [],
+        treeLoading: false,
+        draggable: false,
+
+        modalOpen: false,
+        modalValues: {},
+        modalLoading: false,
+    }
+    formRef = React.createRef();
+    treeRef = React.createRef();
+
+    componentDidMount() {
+        this.loadTree()
+    }
+
+    loadTree = () => {
+        this.setState({treeLoading: true})
+        HttpUtils.get('admin/sysOrg/tree', this.state.params).then(rs => {
+            this.setState({treeData: rs})
+        }).finally(() => {
+            this.setState({treeLoading: false});
+        })
+    }
+
+    handleDelete = () => {
+        const {selectedOrg} = this.state
+        if (!selectedOrg) return
+        HttpUtils.post('admin/sysOrg/delete', {id: selectedOrg.id}).then(() => {
+            this.setState({selectedOrg: null})
+            this.loadTree()
+        })
+    }
+
+    onSelect = (selectedKeys) => {
+        if (selectedKeys.length === 0) {
+            this.setState({selectedOrg: null})
+            return
+        }
+        HttpUtils.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
+            this.setState({selectedOrg: rs})
+        })
+    }
+
+    handleAdd = () => {
+        const {selectedOrg} = this.state
+        this.setState({
+            modalOpen: true,
+            modalValues: {pid: selectedOrg?.id, enabled: true},
+        })
+    }
+
+    handleEdit = () => {
+        this.setState({
+            modalOpen: true,
+            modalValues: {...this.state.selectedOrg},
+        })
+    }
+
+    handleModalFinish = (values) => {
+        this.setState({modalLoading: true})
+        const isNew = !values.id
+        const url = isNew ? 'admin/sysOrg/create' : 'admin/sysOrg/update'
+        HttpUtils.post(url, values).then(() => {
+            this.setState({modalOpen: false})
+            this.loadTree()
+        }).finally(() => {
+            this.setState({modalLoading: false})
+        })
+    }
+
+    onDraggableChange = e => {
+        this.setState({draggable: e})
+    };
+
+    render() {
+        const {selectedOrg} = this.state
+        const params = this.state.params
+
+        return <Page title="组织机构" description="管理组织机构树"
+                     actions={<Button type='primary' perm='sys-org:create' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
+            <Splitter>
+                <Splitter.Panel defaultSize={400} style={{paddingRight: 8}}>
+                    <Card loading={this.state.treeLoading}
+                          size='small'
+                    >
+                        <div style={{display: 'flex', alignItems: 'center', gap: 4, marginBottom: 8}}>
+                            <Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
+                                params.searchText = e.target.value
+                                this.setState({params}, this.loadTree)
+                            }} style={{flex: 1}}/>
+                            <Popover
+                                trigger='click'
+                                placement='bottomRight'
+                                title='设置'
+                                content={<Space direction='vertical'>
+                                    <Checkbox checked={params.onlyShowEnabled}
+                                              onChange={e => {
+                                                  params.onlyShowEnabled = e.target.checked;
+                                                  this.setState({params}, this.loadTree);
+                                              }}>仅显示启用</Checkbox>
+                                    <Checkbox checked={params.onlyShowUnit}
+                                              onChange={e => {
+                                                  params.onlyShowUnit = e.target.checked;
+                                                  this.setState({params}, this.loadTree);
+                                              }}>仅显示单位</Checkbox>
+                                    <div>
+                                        拖拽排序&nbsp;<Switch
+                                        value={this.state.draggable}
+                                        onChange={this.onDraggableChange}/>
+                                    </div>
+                                    <Button size='small' shape='round' icon={<SyncOutlined/>} onClick={this.loadTree}>刷新</Button>
+                                </Space>}
+                            >
+                                <Button type='text' size='small' icon={<SettingOutlined/>}/>
+                            </Popover>
+                        </div>
+                        <Tree ref={this.treeRef}
+                              treeData={this.state.treeData}
+                              onSelect={this.onSelect}
+                              showIcon
+                              blockNode
+                              icon={item => <NamedIcon name={item.data.iconName}/>}
+                              draggable={this.state.draggable}
+                              onDrop={this.onDrop}
+                              showLine
+                              defaultExpandAll
+                        />
+                    </Card>
+                </Splitter.Panel>
+
+                <Splitter.Panel style={{paddingLeft: 8}}>
+                    <Card size='small' style={{marginBottom: 8}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
+                            <Typography.Text strong>机构信息</Typography.Text>
+                            {selectedOrg && (
+                                <span>
+                                    <Button size='small' icon={<EditOutlined/>} perm='sys-org:update'
+                                            onClick={this.handleEdit} style={{marginRight: 4}}>编辑</Button>
+                                    <Popconfirm perm='sys-org:delete' title='是否确定删除组织机构'
+                                                onConfirm={this.handleDelete}>
+                                        <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
+                                    </Popconfirm>
+                                </span>
+                            )}
+                        </div>
+                        {selectedOrg && (
+                            <Descriptions size='small' column={2}>
+                                <Descriptions.Item label="名称">{selectedOrg.name}</Descriptions.Item>
+                                <Descriptions.Item label="类型">{selectedOrg.typeLabel}</Descriptions.Item>
+                                <Descriptions.Item label="上级机构">{selectedOrg.parentName || '-'}</Descriptions.Item>
+                                <Descriptions.Item label="序号">{selectedOrg.seq ?? '-'}</Descriptions.Item>
+                                <Descriptions.Item label="部门领导">{selectedOrg.leader?.name || '-'}</Descriptions.Item>
+                                <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedOrg.enabled}/></Descriptions.Item>
+                                {selectedOrg.extra1 && <Descriptions.Item label="扩展字段1">{selectedOrg.extra1}</Descriptions.Item>}
+                                {selectedOrg.extra2 && <Descriptions.Item label="扩展字段2">{selectedOrg.extra2}</Descriptions.Item>}
+                                {selectedOrg.extra3 && <Descriptions.Item label="扩展字段3">{selectedOrg.extra3}</Descriptions.Item>}
+                            </Descriptions>
+                        )}
+                    </Card>
+                </Splitter.Panel>
+            </Splitter>
+
+            <Modal title={this.state.modalValues?.id ? '编辑组织机构' : '新增组织机构'}
+                   open={this.state.modalOpen}
+                   onOk={() => this.formRef.current.submit()}
+                   onCancel={() => this.setState({modalOpen: false})}
+                   destroyOnClose
+            >
+                <Form ref={this.formRef} labelCol={{flex: '120px'}}
+                      initialValues={this.state.modalValues}
+                      onFinish={this.handleModalFinish}
+                >
+                    <Form.Item name='id' noStyle/>
+                    <Form.Item label='父节点' name='pid'>
+                        <FieldRemoteTreeSelect url='admin/sysOrg/tree'/>
+                    </Form.Item>
+                    <Form.Item label='名称' name='name' rules={[{required: true}]}>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item label='序号' name='seq'>
+                        <InputNumber/>
+                    </Form.Item>
+                    <Form.Item label='类型' name='type' rules={[{required: true}]}>
+                        <FieldDictSelect typeCode='orgType'/>
+                    </Form.Item>
+                    <Form.Item label='部门领导' name={['leader', 'id']}>
+                        <FieldUserSelect/>
+                    </Form.Item>
+                    <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
+                        <FieldBoolean/>
+                    </Form.Item>
+                    <Form.Item label='扩展字段1' name='extra1'>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item label='扩展字段2' name='extra2'>
+                        <Input/>
+                    </Form.Item>
+                    <Form.Item label='扩展字段3' name='extra3'>
+                        <Input/>
+                    </Form.Item>
+                </Form>
+            </Modal>
+        </Page>
+    }
+
+    onDrop = (e) => {
+        const {dragNode, dropToGap, node} = e;
+        const dropKey = node.key;
+        const dragKey = dragNode.key;
+        const dropPos = e.node.pos.split('-');
+        const dropPosition = e.dropPosition - Number(dropPos[dropPos.length - 1]);
+        HttpUtils.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}).then(this.loadTree)
+    };
+}
+
+
+

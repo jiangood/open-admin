@@ -1,0 +1,105 @@
+import React from "react";
+import {Button, Card, Checkbox, Table, Typography} from "antd";
+import {SaveOutlined} from "@ant-design/icons";
+import {ArrayUtils, HttpUtils, Page, PageUtils} from "../../../framework";
+export default class extends React.Component {
+
+
+    state = {
+        loading: false,
+        roleInfo: {},
+
+        dataSource: [],
+        rowSelectedKeys: {},
+    }
+
+    columns = [
+        {
+            title: '菜单',
+            dataIndex: 'name',
+        },
+
+        {
+            title: '权限',
+            dataIndex: 'permCodes',
+            render: (permCodes, record) => {
+                if (permCodes == null) {
+                    return
+                }
+                const {permNames} = record
+                const options = [];
+                for (let i = 0; i < permCodes.length; i++) {
+                    const label = permNames[i];
+                    const value = permCodes[i];
+                    options.push({label, value});
+                }
+
+
+                const rowSelectedKey = this.state.rowSelectedKeys[record.id];
+                return <Checkbox.Group options={options}
+                                       value={rowSelectedKey}
+                                       onChange={(ks) => {
+                                           const rowSelectedKeys = this.state.rowSelectedKeys;
+                                           rowSelectedKeys[record.id] = ks;
+                                           this.setState({rowSelectedKeys})
+                                       }}/>
+            }
+        }
+    ]
+
+    componentDidMount() {
+        this.roleId = PageUtils.currentParams().id;
+        this.loadData();
+    }
+
+
+    loadData() {
+        this.setState({loading: true})
+        Promise.all([
+            HttpUtils.get('admin/sysRole/get', {id: this.roleId}).then(rs => {
+                this.setState({roleInfo: rs})
+            }),
+            HttpUtils.get('admin/sysRole/perm-tree-table', {id: this.roleId}).then(rs => {
+                this.setState({dataSource: rs})
+            }),
+            HttpUtils.get('admin/sysRole/own-perms', {id: this.roleId}).then(rs => {
+                this.setState({rowSelectedKeys: rs})
+            })
+        ]).then(rs => {
+            this.setState({loading: false})
+        })
+    }
+
+    savePerms = () => {
+        const {rowSelectedKeys} = this.state;
+        const perms = [];
+        const menus = []
+        for (let menuId in rowSelectedKeys) {
+            const ks = rowSelectedKeys[menuId];
+            if (ks == null || ks.length === 0) {
+                continue;
+            }
+            menus.push(menuId)
+            ArrayUtils.addAll(perms, ks)
+        }
+        HttpUtils.post('admin/sysRole/save-perms', {id: this.roleId, perms, menus}).then(rs => {
+            //  Page.open(PageUtils.currentPathname(), PageUtils.currentLabel())
+        })
+    };
+
+
+    render() {
+        return <Page title="角色权限设置" description="设置角色的菜单和权限">
+            <Card title='角色权限设置' loading={this.state.loading}
+                  variant={"borderless"}
+                  extra={<Button type='primary' icon={<SaveOutlined/>} onClick={this.savePerms}>保存权限</Button>}>
+                <Typography.Text>角色名称：{this.state.roleInfo.name}， 编码：{this.state.roleInfo.code} </Typography.Text>
+                <Table dataSource={this.state.dataSource}
+                       columns={this.columns}
+                       size='small' bordered pagination={false} rowKey='id'
+                       expandable={{defaultExpandAllRows: true}}
+                ></Table>
+            </Card>
+        </Page>
+    }
+}

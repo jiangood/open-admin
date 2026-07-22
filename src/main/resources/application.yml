@@ -1,0 +1,24 @@
+server:
+  servlet:
+    context-path: /change-this-servlet-context  # TODO 业务项目按需调整
+
+spring:
+  config:
+    import: classpath:application-lib.yml
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${db_ip}:${db_port}/${db_database}?allowPublicKeyRetrieval=true&autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&nullCatalogMeansCurrent=true
+    username: ${db_username}
+    password: ${db_password}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.MySQLLegacyDialect
+
+db_ip: 127.0.0.1
+db_port: 3306
+db_database: open-admin
+db_username: root
+db_password: 123456
+
+

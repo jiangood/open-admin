@@ -1,0 +1,50 @@
+package io.github.jiangood.openadmin;
+
+import io.github.jiangood.openadmin.framework.data.impl.BaseRepositoryBeanPostProcessor;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+
+import java.util.concurrent.Executor;
+
+@Configuration
+@ComponentScan(basePackages = OpenAdminConfiguration.PKG)
+@AutoConfigurationPackage
+@EnableCaching
+@EnableAsync
+@EnableScheduling
+public class OpenAdminConfiguration {
+
+    public static final String PKG =  "io.github.jiangood.openadmin";
+
+    @Bean
+    public static BaseRepositoryBeanPostProcessor baseRepositoryBeanPostProcessor() {
+        return new BaseRepositoryBeanPostProcessor();
+    }
+
+    @Bean("operationLogExecutor")
+    public Executor operationLogExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(1000);
+        executor.setThreadNamePrefix("oplog-");
+        executor.setDaemon(true);
+        return executor;
+    }
+
+    @Bean
+    public ThreadPoolTaskScheduler taskScheduler() {
+        ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+        scheduler.setPoolSize(5);
+        scheduler.setThreadNamePrefix("sched-");
+        scheduler.setDaemon(true);
+        return scheduler;
+    }
+}

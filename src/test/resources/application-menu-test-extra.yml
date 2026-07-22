@@ -1,0 +1,8 @@
+# 测试专用菜单扩展——新增一个独立条目
+menus:
+  test-extra:
+    pid: test-dev
+    name: 额外工具
+    path: /dev/tools/extra
+    icon: StarOutlined
+    seq: 90010
