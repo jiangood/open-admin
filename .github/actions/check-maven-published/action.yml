@@ -1,0 +1,48 @@
+name: Check Maven Central Published
+description: >
+  通过 Sonatype Central API 检查指定的 Maven 构件版本是否已发布到 Maven Central。
+  常用于 CI 流程中跳过已发布版本的重复部署。
+
+inputs:
+  version:
+    description: 要检查的版本号，例如 '2.5.5'
+    required: true
+  maven-username:
+    description: Maven Central (Sonatype) 用户名
+    required: true
+  maven-password:
+    description: Maven Central (Sonatype) 密码/Token
+    required: true
+  namespace:
+    description: Maven Group/Namespace，默认 io.github.jiangood
+    required: false
+    default: io.github.jiangood
+
+outputs:
+  published:
+    description: 版本是否已发布（true / false）
+    value: ${{ steps.check.outputs.published }}
+
+runs:
+  using: composite
+  steps:
+    - id: check
+      shell: bash
+      env:
+        MAVEN_USERNAME: ${{ inputs.maven-username }}
+        MAVEN_PASSWORD: ${{ inputs.maven-password }}
+      run: |
+        AUTH=$(echo -n "$MAVEN_USERNAME:$MAVEN_PASSWORD" | base64 -w0)
+        RESPONSE=$(curl -s \
+          "https://central.sonatype.com/api/v1/publisher/deployments?namespace=${{ inputs.namespace }}&page=0&size=20&sortField=createTimestamp&sortDirection=desc" \
+          -H "accept: application/json" \
+          -H "Authorization: Basic $AUTH")
+        PUBLISHED=$(echo "$RESPONSE" | jq --arg ver "${{ inputs.version }}" \
+          '[.deployments[] | select(.deploymentState == "PUBLISHED" and ([.deploymentComponents[] | .purl | test($ver)] | any))] | length')
+        if [ "$PUBLISHED" -gt 0 ]; then
+          echo "published=true" >> "$GITHUB_OUTPUT"
+          echo "✓ Maven Central 已存在 v${{ inputs.version }}，跳过发布"
+        else
+          echo "published=false" >> "$GITHUB_OUTPUT"
+          echo "✓ Maven Central 未发现 v${{ inputs.version }}，准备发布"
+        fi
