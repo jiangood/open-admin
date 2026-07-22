@@ -201,7 +201,7 @@ export default class extends React.Component {
                    breakpoint={'md'}
              >
                 <div className='sider-header'>
-                    <img className='logo-img' src="./logo.svg" onClick={() => history.push('/')} alt='logo'/>
+                    <img className='logo-img' src="./logo.png" onClick={() => history.push('/')} alt='logo'/>
                     <h3 className='hide-on-mobile'>
                         <Link to="/" style={{color: 'rgba(255,255,255,0.85)'}}>{siteInfo.title}</Link>
                     </h3>
