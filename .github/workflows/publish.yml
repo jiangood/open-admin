@@ -83,7 +83,22 @@ jobs:
       - name: Maven Test
         run: mvn test -q
 
+      - name: Check if Maven version already published
+        id: check-maven
+        run: |
+          VERSION="${{ steps.tag.outputs.tag }}"
+          RESPONSE=$(curl -s "https://search.maven.org/solrsearch/select?q=g:io.github.jiangood+AND+a:open-admin+AND+v:${VERSION}&rows=1&wt=json")
+          COUNT=$(echo "$RESPONSE" | jq -r '.response.numFound')
+          if [ "$COUNT" = "0" ]; then
+            echo "published=false" >> "$GITHUB_OUTPUT"
+            echo "✓ Maven Central 未发现 v${VERSION}，准备发布"
+          else
+            echo "published=true" >> "$GITHUB_OUTPUT"
+            echo "✓ Maven Central 已存在 v${VERSION}，跳过发布"
+          fi
+
       - name: Publish MAVEN
+        if: steps.check-maven.outputs.published != 'true'
         run: mvn -q deploy -DskipTests -P publish
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
