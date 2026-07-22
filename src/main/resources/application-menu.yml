@@ -46,7 +46,8 @@ menus:
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
   job:
-    name: 任务调度
+    pid: sys
+    name: 定时任务
     path: /system/job
     icon: OrderedListOutlined
     perms:
