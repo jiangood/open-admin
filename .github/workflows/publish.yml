@@ -98,21 +98,43 @@ jobs:
           npm ci
           npm run build
 
-      - name: Publish NPM package (Trusted Publishing)
+      - name: Publish NPM package (if not exists)
         run: |
-          cd web
-          npm publish --access public --no-git-checks
+          VERSION="${{ steps.tag.outputs.tag }}"
+          if npm view "@jiangood/open-admin@$VERSION" version &>/dev/null; then
+            echo "npm 上 @jiangood/open-admin@$VERSION 已存在，跳过发布"
+          else
+            cd web
+            npm publish --access public --no-git-checks
+          fi
 
       - name: 同步阿里云镜像仓库
         run: |
           npm install -g cnpm --registry=https://registry.npmmirror.com
           cnpm sync @jiangood/open-admin
 
-      - name: Create Release
+  create-release:
+    needs: [maven-publish, npm-publish]
+    if: always() && needs.maven-publish.result != 'failure' && needs.npm-publish.result != 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Extract Tag
+        id: tag
+        uses: aaronbarnaby/get-tag@v1.0.0
+        with:
+          without_prefix_v: true
+      - name: Create Release (if not exists)
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "Release v${{ steps.tag.outputs.tag }}" \
-            --latest \
-            --generate-notes
+          if gh release view "${{ github.ref_name }}" &>/dev/null; then
+            echo "Release ${{ github.ref_name }} 已存在，跳过"
+          else
+            gh release create "${{ github.ref_name }}" \
+              --title "Release v${{ steps.tag.outputs.tag }}" \
+              --latest \
+              --generate-notes
+          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
