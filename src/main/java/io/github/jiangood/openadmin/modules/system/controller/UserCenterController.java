@@ -7,7 +7,9 @@ import io.github.jiangood.openadmin.modules.system.dto.request.UpdatePwdReq;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterInfo;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,9 +44,11 @@ public class UserCenterController {
 
 
     @PostMapping("update-pwd")
-    public AjaxResult updatePwd(@RequestBody UpdatePwdReq request) {
+    public AjaxResult updatePwd(@RequestBody UpdatePwdReq request, HttpServletRequest servletRequest) {
         String newPassword = request.getNewPassword();
         sysUserService.updatePwd(LoginTool.getUserId(), newPassword);
+        SecurityContextHolder.clearContext();
+        servletRequest.getSession().invalidate();
         return AjaxResult.ok();
     }
 }
