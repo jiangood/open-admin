@@ -1,5 +1,4 @@
 import axios from "axios";
-import {Modal} from "antd";
 import qs from 'qs';
 import {PageUtils} from "./PageUtils";
 import {MessageUtils} from "../MessageUtils";
@@ -67,50 +66,6 @@ export class HttpUtils {
         return defaultMsg;
     }
 
-    static handleDownloadBlob(res) {
-        return new Promise((resolve, reject) => {
-            const {data: blob, headers} = res;
-            if (blob.type === 'application/json') {
-                const reader = new FileReader();
-                reader.readAsText(blob, 'utf-8');
-                reader.onload = function () {
-                    try {
-                        let rs = JSON.parse(reader.result);
-                        Modal.error({title: '下载文件失败', content: rs.message || '不支持下载'});
-                        reject(new Error(rs.message || '下载错误'));
-                    } catch (e) {
-                        Modal.error({title: '下载文件失败', content: '解析错误响应失败'});
-                        reject(e);
-                    }
-                };
-                return;
-            }
-            const contentDisposition = headers['content-disposition'] || headers['Content-Disposition'];
-            if (!contentDisposition) {
-                Modal.error({title: '获取文件名称失败', content: "缺少Content-Disposition响应头"});
-                reject(new Error("缺少Content-Disposition响应头"));
-                return;
-            }
-            const match = /filename\*?=(?:['"]?)(?:UTF-8''|)(.+?)(?:['"]?$|;)/i.exec(contentDisposition);
-            let filename = match && match[1] ? match[1].trim() : 'download.file';
-            try {
-                filename = decodeURIComponent(filename.replace(/"/g, ''));
-            } catch (e) {
-                filename = filename.replace(/"/g, '');
-            }
-            const url = window.URL.createObjectURL(new Blob([blob]));
-            const link = document.createElement('a');
-            link.style.display = 'none';
-            link.href = url;
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
-            resolve();
-        });
-    }
-
     static get(url, params = null, options = {}) {
         return HttpUtils.coreRequest({...options, url, method: 'GET', params});
     }
@@ -129,14 +84,4 @@ export class HttpUtils {
         });
     }
 
-    static async downloadFile(url, data = null, params = null, method = 'GET', options = {}) {
-        const downloadConfig = {responseType: 'blob', ...options, url, method, params, data};
-        try {
-            const response = await HttpUtils.coreRequest(downloadConfig, false);
-            await HttpUtils.handleDownloadBlob(response);
-        } catch (error) {
-            console.error('[HttpUtils] 下载文件失败:', error);
-            return Promise.reject(error);
-        }
-    }
 }

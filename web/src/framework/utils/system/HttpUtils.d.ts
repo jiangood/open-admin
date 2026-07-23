@@ -1,4 +1,4 @@
-import {AxiosRequestConfig, AxiosResponse, Method} from "axios";
+import {AxiosRequestConfig} from "axios";
 
 declare const SERVLET_CONTEXT: string | undefined;
 
@@ -11,5 +11,4 @@ export class HttpUtils {
     static get<T = any>(url: string, params?: any, options?: Partial<RequestOptions>): Promise<T>;
     static post<T = any>(url: string, data?: any, params?: any, options?: Partial<RequestOptions>): Promise<T>;
     static postForm<T = any>(url: string, data: any, options?: Partial<RequestOptions>): Promise<T>;
-    static downloadFile(url: string, data?: any, params?: any, method?: Method, options?: Partial<RequestOptions>): Promise<void>;
 }
