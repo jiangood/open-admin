@@ -16,7 +16,6 @@ build.version=${version}
 build.time=${new Date().toISOString()}
 `;
 
-const outDir = path.resolve(ROOT, 'src/main/resources/META-INF');
-fs.mkdirSync(outDir, { recursive: true });
-fs.writeFileSync(path.join(outDir, 'build-info.properties'), props);
+const outFile = path.resolve(ROOT, 'src/main/resources/build-info.properties');
+fs.writeFileSync(outFile, props);
 console.log(`build-info.properties generated (version=${version})`);
