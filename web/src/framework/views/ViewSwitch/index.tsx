@@ -1,7 +1,7 @@
 import React from 'react';
 import { Tag } from 'antd';
 
-export class ViewBooleanEnableDisable extends React.Component {
+export class ViewSwitch extends React.Component {
 
     render() {
         const { value } = this.props;

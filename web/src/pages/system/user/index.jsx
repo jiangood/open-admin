@@ -12,7 +12,7 @@ import {
     Page,
     ProTable,
 } from "../../../framework";
-import UserPerm from "./UserPerm";
+import UserPerm from "./userPerm";
 
 export default class extends React.Component {
 

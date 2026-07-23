@@ -8,7 +8,7 @@ import {
     HttpUtils,
     Page,
     ProTable,
-    ViewBooleanEnableDisable,
+    ViewSwitch,
 } from "../../../framework";
 
 export default class extends React.Component {
@@ -139,7 +139,7 @@ export default class extends React.Component {
         {
             title: '启用', dataIndex: 'enabled',
             render(v) {
-                return <ViewBooleanEnableDisable value={v}/>
+                return <ViewSwitch value={v}/>
             }
         },
         {title: '序号', dataIndex: 'seq'},
@@ -204,7 +204,7 @@ export default class extends React.Component {
                             <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
                             <Descriptions.Item label="分类">{this.getParentLabel() || '-'}</Descriptions.Item>
                             <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
-                            <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedType.enabled}/></Descriptions.Item>
+                            <Descriptions.Item label="启用"><ViewSwitch value={selectedType.enabled}/></Descriptions.Item>
                         </Descriptions>}
                     </Card>
                     <Card size='small'>

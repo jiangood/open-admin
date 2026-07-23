@@ -9,7 +9,7 @@ import {
     HttpUtils,
     NamedIcon,
     Page,
-    ViewBooleanEnableDisable,
+    ViewSwitch,
 } from "../../../framework";
 
 export default class extends React.Component {
@@ -173,7 +173,7 @@ export default class extends React.Component {
                                 <Descriptions.Item label="上级机构">{selectedOrg.parentName || '-'}</Descriptions.Item>
                                 <Descriptions.Item label="序号">{selectedOrg.seq ?? '-'}</Descriptions.Item>
                                 <Descriptions.Item label="部门领导">{selectedOrg.leader?.name || '-'}</Descriptions.Item>
-                                <Descriptions.Item label="启用"><ViewBooleanEnableDisable value={selectedOrg.enabled}/></Descriptions.Item>
+                                <Descriptions.Item label="启用"><ViewSwitch value={selectedOrg.enabled}/></Descriptions.Item>
                                 {selectedOrg.extra1 && <Descriptions.Item label="扩展字段1">{selectedOrg.extra1}</Descriptions.Item>}
                                 {selectedOrg.extra2 && <Descriptions.Item label="扩展字段2">{selectedOrg.extra2}</Descriptions.Item>}
                                 {selectedOrg.extra3 && <Descriptions.Item label="扩展字段3">{selectedOrg.extra3}</Descriptions.Item>}

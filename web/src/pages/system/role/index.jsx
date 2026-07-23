@@ -136,7 +136,7 @@ export default class extends React.Component {
                                 onClick={() => this.handleEditUser(record)}>用户设置</Button>
 
                         <Button size='small' perm='sys-role:grant-permission' disabled={record.builtin}
-                                onClick={() => PageUtils.open('/system/role/perm?id=' + record.id, '角色权限设置')}>权限设置</Button>
+                                onClick={() => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')}>权限设置</Button>
 
                         <Button size='small' perm='sys-role:update' disabled={record.builtin}
                                 onClick={() => this.handleEdit(record)}>编辑</Button>
