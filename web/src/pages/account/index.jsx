@@ -71,11 +71,7 @@ export default class extends React.Component {
                                         <ChangePassword/>
                                     </div>
                                 },
-                                {
-                                    label: '消息订阅', key: 'topic', children: <div>
-                                        当账号管理邮箱后，系统消息会发送邮件给您
-                                    </div>
-                                }
+
                             ]}
                             tabPlacement='left'
                         >

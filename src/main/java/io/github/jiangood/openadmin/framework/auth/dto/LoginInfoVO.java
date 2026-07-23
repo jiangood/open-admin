@@ -13,5 +13,4 @@ public class LoginInfoVO {
     private List<String> permissions;
     private String account;
     private String roleNames;
-    private long messageCount;
 }

@@ -10,7 +10,11 @@ import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginInfoVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.service.*;
+import io.github.jiangood.openadmin.modules.system.service.SysDictService;
+import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
+import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
+import io.github.jiangood.openadmin.modules.system.service.SysRoleService;
+import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
@@ -33,7 +37,6 @@ public class SysCommonController {
     private SystemProperties systemProperties;
     private SysUserService sysUserService;
     private SysOrgService sysOrgService;
-    private SysUserMessageService sysUserMessageService;
     private SysDictService sysDictService;
     private SysMenuService sysMenuService;
 
@@ -81,7 +84,6 @@ public class SysCommonController {
         userResponse.setPermissions(permissions);
         userResponse.setAccount(user.getUsername());
         userResponse.setRoleNames(roleNames);
-        userResponse.setMessageCount(sysUserMessageService.countUnReadByUser(user.getId()));
         r.setLoginInfo(userResponse);
 
         return AjaxResult.ok().data(r);

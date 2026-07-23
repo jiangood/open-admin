@@ -1,5 +1,4 @@
-import {Avatar, Badge, Dropdown} from "antd";
-import {NotificationOutlined} from "@ant-design/icons";
+import {Avatar, Dropdown} from "antd";
 import React from "react";
 import {history} from "umi";
 import {DeviceUtils, HttpUtils, MessageUtils,  PageUtils, GlobalData} from "../../framework";
@@ -78,12 +77,6 @@ export class HeaderRight extends React.Component {
                     <span style={{marginLeft: 8}}>{info.name}</span>
                 </div>
             </Dropdown>
-
-            <div className='item' onClick={() => PageUtils.open('/account/message', '我的消息')}>
-                <Badge count={info.messageCount} size="small">
-                    <NotificationOutlined/>
-                </Badge>
-            </div>
 
         </div>
     }

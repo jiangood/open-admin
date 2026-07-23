@@ -1,5 +1,5 @@
 import React from 'react';
-import {Badge, Layout, Menu, Skeleton, Watermark} from 'antd';
+import {Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import {history, Link} from 'umi';
 import "./index.less"
@@ -84,7 +84,6 @@ export default class extends React.Component {
 
             this.setState({menuTree, pathMenuMap, topMenus, sideMenus, activeTopMenuKey, currentMenuKey})
 
-            this.loadBadge(menuMap)
         }).catch(err => {
             console.error('加载菜单失败:', err)
             this.setState({menuTree: [], topMenus: [], sideMenus: []})
@@ -169,27 +168,6 @@ export default class extends React.Component {
             </nav>
         );
     }
-
-    loadBadge = menuMap => {
-        for (let id in menuMap) {
-            const item = menuMap[id]
-            const {messageCountUrl} = item;
-            if (!messageCountUrl) {
-                continue
-            }
-            HttpUtils.get(messageCountUrl).then(rs => {
-                const {menuTree} = this.state
-                const menu = TreeUtils.findByKey(id, menuTree, 'key')
-                if (menu) {
-                    menu.icon = <Badge dot count={rs} size={"small"}>{menu.icon}</Badge>
-                    this.setState({menuTree: [...menuTree]})
-                }
-            }).catch(e => {
-                console.error('[Layout] 加载消息数失败:', e);
-            })
-        }
-    };
-
 
     render() {
         const {siteInfo, loginInfo} = this.state
