@@ -2,12 +2,15 @@ package io.github.jiangood.openadmin.framework.config;
 
 
 import io.github.jiangood.openadmin.util.jdbc.DbTool;
+import org.flywaydb.core.Flyway;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration;
 import org.springframework.boot.jdbc.init.DataSourceScriptDatabaseInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.sql.DataSource;
@@ -28,6 +31,23 @@ public class DbConfig {
     @Bean
     public PreDdlDataSourceScriptDatabaseInitializer myData(DataSource ds, DbTool db, List<StartupHook> startupHooks) {
         return new PreDdlDataSourceScriptDatabaseInitializer(ds, db, startupHooks);
+    }
+
+    @Bean
+    @Order(-1)
+    CommandLineRunner flywaySeedRunner(DataSource dataSource, List<StartupHook> startupHooks) {
+        return args -> {
+            startupHooks.forEach(StartupHook::beforeSeedDataInitialize);
+
+            Flyway flyway = Flyway.configure()
+                    .dataSource(dataSource)
+                    .locations("classpath:db/migration/open-admin", "classpath:db/migration")
+                    .baselineOnMigrate(true)
+                    .load();
+            flyway.migrate();
+
+            startupHooks.forEach(StartupHook::afterSeedDataInitialize);
+        };
     }
 
     /**
