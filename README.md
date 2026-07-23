@@ -54,7 +54,7 @@ npm run dev                    # 默认 http://localhost:3000
 
 | 账号 | 密码 |
 |------|------|
-| admin | Admin#2026!!! |
+| admin | Open@1234 |
 
 ### 集成到已有项目
 
@@ -303,7 +303,7 @@ DownloadModal.download({
 |------|------|--------|
 | `sys.title` | 系统标题（必填） | 管理系统 |
 | `sys.captcha-enable` | 登录验证码 | true |
-| `sys.default-password` | 默认密码 | Admin#2026!!! |
+| `sys.default-password` | 默认密码 | Open@1234 |
 | `sys.show-logo` | 是否显示 Logo | true |
 | `sys.file.store-type` | 文件存储 (`local`/`s3`/`custom`) | local |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |

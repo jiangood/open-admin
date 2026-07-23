@@ -41,4 +41,4 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
 
 sys:
-  default-password: Admin#2026!!!
+  default-password: Open@1234
