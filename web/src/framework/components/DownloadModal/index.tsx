@@ -1,7 +1,6 @@
 import React from "react";
 import {Button, Modal, Progress, Tag} from "antd";
 import {
-  CloseOutlined,
   DownloadOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
@@ -62,6 +61,8 @@ export class DownloadModal extends React.Component<{}, ModalState> {
     const instance = DownloadModal.instance;
     if (instance) {
       instance.startDownload(options);
+    } else {
+      console.warn('[DownloadModal] 组件未挂载，download() 调用被忽略');
     }
   }
 
@@ -117,7 +118,10 @@ export class DownloadModal extends React.Component<{}, ModalState> {
       if (blob.type === 'application/json') {
         const reader = new FileReader();
         reader.readAsText(blob, 'utf-8');
-        reader.onload = function () {
+        reader.onerror = function () {
+        reject(new Error('读取下载数据失败'));
+      };
+      reader.onload = function () {
           try {
             const rs = JSON.parse(reader.result as string);
             reject(new Error(rs.message || '下载失败'));
@@ -243,6 +247,7 @@ export class DownloadModal extends React.Component<{}, ModalState> {
       if (error.message) {
         msg = error.message;
       }
+      console.error('[DownloadModal] 下载失败:', msg);
       this.setState({
         status: 'failed',
         errorMessage: msg,

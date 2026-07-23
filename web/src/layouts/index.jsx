@@ -6,7 +6,7 @@ import 'dayjs/locale/zh-cn';
 import {Outlet, useLocation} from "umi";
 
 import AdminLayout from "./admin"
-import {HttpUtils, PageLoading, PageUtils, GlobalData, ThemeUtils} from "../framework";
+import {HttpUtils, PageLoading, PageUtils, GlobalData, ThemeUtils, DownloadModal} from "../framework";
 import {ErrorBoundary} from "../framework";
 
 import '../style/global.less'
@@ -37,7 +37,7 @@ const configProps = {
 };
 
 function AppWrapper({children}) {
-    return <ConfigProvider {...configProps}><App>{children}</App></ConfigProvider>;
+    return <ConfigProvider {...configProps}><App><DownloadModal />{children}</App></ConfigProvider>;
 }
 
 const PUBLIC_PAGES = (() => {
