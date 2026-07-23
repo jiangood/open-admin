@@ -81,7 +81,7 @@ export function Layouts() {
                 GlobalData.setSiteInfo(data);
                 setSiteInfoLoaded(true);
             }),
-            HttpUtils.get('/admin/public/check-login').then(data => {
+            HttpUtils.get('/admin/public/user-info').then(data => {
                 GlobalData.setDictInfo(data.dictInfo);
                 GlobalData.setLoginInfo(data.loginInfo);
 

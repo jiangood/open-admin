@@ -49,7 +49,7 @@ public class SysCommonController {
         return AjaxResult.ok().data(data);
     }
 
-    @GetMapping("public/check-login")
+    @GetMapping("public/user-info")
     public AjaxResult checkLogin(HttpServletRequest request) {
         LoginDataVO r = new LoginDataVO();
 

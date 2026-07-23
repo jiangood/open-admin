@@ -11,7 +11,7 @@ export default class extends React.Component {
 
     async componentDidMount() {
         try {
-            const rs = await HttpUtils.get('/admin/public/check-login', null, {showError: false});
+            const rs = await HttpUtils.get('/admin/public/user-info', null, {showError: false});
             if (!rs.login) {
                 PageUtils.redirectToLogin();
                 return;
