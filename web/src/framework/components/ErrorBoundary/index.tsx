@@ -6,6 +6,8 @@ interface Props {
     children: React.ReactNode;
     /** 自定义降级 UI */
     fallback?: React.ReactNode;
+    /** 最小化模式（仅显示标题和刷新按钮，不显示错误详情） */
+    minimal?: boolean;
     /** 错误回调，可用于上报 */
     onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
 }
@@ -44,6 +46,22 @@ export default class ErrorBoundary extends React.Component<Props, State> {
 
         if (this.props.fallback) {
             return this.props.fallback;
+        }
+
+        // minimal 模式：简洁降级，只引导刷新
+        if (this.props.minimal) {
+            return (
+                <Result
+                    status="error"
+                    title="应用出现异常"
+                    subTitle="页面渲染时发生错误，请尝试刷新页面。"
+                    extra={[
+                        <Button key="refresh" onClick={() => window.location.reload()}>
+                            刷新页面
+                        </Button>,
+                    ]}
+                />
+            );
         }
 
         const detailStyle: React.CSSProperties = {

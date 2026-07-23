@@ -7,6 +7,7 @@ import {Outlet, useLocation} from "umi";
 
 import AdminLayout from "./admin"
 import {HttpUtils, PageLoading, PageUtils, SysUtils, ThemeUtils} from "../framework";
+import {ErrorBoundary} from "../framework";
 
 import '../style/global.less'
 import './index.less'
@@ -91,17 +92,19 @@ export function Layouts() {
         });
     }, [pathname]);
 
-    if (isPublic) return <AppWrapper><Outlet/></AppWrapper>;
+    if (isPublic) return <ErrorBoundary minimal><AppWrapper><Outlet/></AppWrapper></ErrorBoundary>;
 
     return (
-        <AppWrapper>
-            {ready ? <AdminLayout/> : (
-                <PageLoading messages={[
-                    !siteInfoLoaded && '加载站点信息...',
-                    !loginChecked && '检查登录中...',
-                ].filter(Boolean)}/>
-            )}
-        </AppWrapper>
+        <ErrorBoundary minimal>
+            <AppWrapper>
+                {ready ? <AdminLayout/> : (
+                    <PageLoading messages={[
+                        !siteInfoLoaded && '加载站点信息...',
+                        !loginChecked && '检查登录中...',
+                    ].filter(Boolean)}/>
+                )}
+            </AppWrapper>
+        </ErrorBoundary>
     );
 }
 

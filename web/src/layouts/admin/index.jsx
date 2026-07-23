@@ -3,7 +3,7 @@ import {Badge, Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import {history, Link} from 'umi';
 import "./index.less"
-import {ErrorBoundary, HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
+import {HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabPageRender } from "./TabPageRender";
@@ -217,9 +217,7 @@ export default class extends React.Component {
                 </Header>
 
                 <Content id='admin-layout-content'>
-                    <ErrorBoundary>
-                        {this.renderCenterContent(loginInfo)}
-                    </ErrorBoundary>
+                    {this.renderCenterContent(loginInfo)}
                 </Content>
 
             </Layout>
