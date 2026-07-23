@@ -3,7 +3,7 @@ import {App, ConfigProvider} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {Outlet, useLocation} from "umi";
+import {Outlet, useLocation, history} from "umi";
 
 import AdminLayout from "./admin"
 import {HttpUtils, PageLoading, PageUtils, GlobalData, ThemeUtils, DownloadModal} from "../framework";
@@ -42,7 +42,7 @@ function AppWrapper({children}) {
 
 const PUBLIC_PAGES = (() => {
     const raw = typeof OPEN_ADMIN_PUBLIC_PAGES !== 'undefined' && OPEN_ADMIN_PUBLIC_PAGES;
-    return raw ? raw.split(',').map(s => s.trim()) : ['/login', '/test'];
+    return raw ? raw.split(',').map(s => s.trim()) : ['/login', '/test', '/forceUpdatePwd'];
 })();
 
 function isPublicPage(pathname, search) {
@@ -84,6 +84,12 @@ export function Layouts() {
             HttpUtils.get('/admin/public/check-login').then(data => {
                 GlobalData.setDictInfo(data.dictInfo);
                 GlobalData.setLoginInfo(data.loginInfo);
+
+                if (data.needUpdatePwd && pathname !== '/forceUpdatePwd') {
+                    history.push('/forceUpdatePwd');
+                    return;
+                }
+
                 setLoginChecked(true);
             }),
         ]).catch(() => {
