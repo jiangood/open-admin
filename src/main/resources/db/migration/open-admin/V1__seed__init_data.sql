@@ -9,10 +9,10 @@
 -- 字典类型
 -- ---------------------------------------------------------------------------
 
-INSERT IGNORE INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_time, update_time) VALUES
 ('1', NULL, NULL, '系统数据', TRUE, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT IGNORE INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_time, update_time) VALUES
 ('2', '1', 'orgType', '机构类型', TRUE, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('3', '1', 'approveStatus', '审核状态', TRUE, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('4', '1', 'sex', '性别', TRUE, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -25,37 +25,37 @@ INSERT IGNORE INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, 
 -- ---------------------------------------------------------------------------
 
 -- 机构类型
-INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
 ('1', 'orgType', '10', '单位', TRUE, 'SUCCESS', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('2', 'orgType', '20', '部门', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 审核状态
-INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
 ('3', 'approveStatus', 'DRAFT', '待提交', TRUE, 'DEFAULT', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('4', 'approveStatus', 'PENDING', '审核中', TRUE, 'WARNING', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('5', 'approveStatus', 'APPROVED', '审核通过', TRUE, 'SUCCESS', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('6', 'approveStatus', 'REJECTED', '审核未通过', TRUE, 'ERROR', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 性别
-INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
 ('7', 'sex', 'MALE', '男', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('8', 'sex', 'FEMALE', '女', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('9', 'sex', 'UNKNOWN', '保密', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 是否
-INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
 ('10', 'yesNo', 'Y', '是', TRUE, 'SUCCESS', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('11', 'yesNo', 'N', '否', TRUE, 'ERROR', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 数据权限
-INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
 ('12', 'dataPermType', 'ALL', '所有', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('13', 'dataPermType', 'LEVEL', '本级', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('14', 'dataPermType', 'CHILDREN', '本级和子级', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('15', 'dataPermType', 'CUSTOM', '自定义', TRUE, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 状态颜色
-INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
 ('16', 'statusColor', 'SUCCESS', '成功', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('17', 'statusColor', 'PROCESSING', '处理中', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('18', 'statusColor', 'ERROR', '错误', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
@@ -70,18 +70,18 @@ INSERT IGNORE INTO sys_dict_item (id, type_code, code, label, enabled, color, se
 -- 管理员角色
 -- ---------------------------------------------------------------------------
 
-INSERT IGNORE INTO sys_role (id, code, name, perms, builtin, enabled, remark, create_time, update_time)
+INSERT INTO sys_role (id, code, name, perms, builtin, enabled, remark, create_time, update_time)
 VALUES ('1', 'admin', '管理员', '*', TRUE, TRUE, '系统生成', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 管理员用户（密码：Open@1234）
 -- ---------------------------------------------------------------------------
 
-INSERT IGNORE INTO sys_user (id, account, name, password, data_perm_type, enabled, create_time, update_time)
+INSERT INTO sys_user (id, account, name, password, data_perm_type, enabled, create_time, update_time)
 VALUES ('1', 'admin', '管理员', '$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG', 'ALL', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 管理员用户-角色关联
 -- ---------------------------------------------------------------------------
 
-INSERT IGNORE INTO sys_user_role (user_id, role_id) VALUES ('1', '1');
+INSERT INTO sys_user_role (user_id, role_id) VALUES ('1', '1');
