@@ -45,7 +45,6 @@
         <poi.version>5.5.1</poi.version>
         <guava.version>33.6.0-jre</guava.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <exec-maven-plugin.version>3.6.3</exec-maven-plugin.version>
 
     </properties>
     <dependencies>
@@ -356,27 +355,6 @@
                     <encoding>UTF-8</encoding>
                     <parameters>true</parameters>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>${exec-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>exec</goal>
-                        </goals>
-                        <configuration>
-                            <executable>node</executable>
-                            <arguments>
-                                <argument>scripts/generate-info.js</argument>
-                                <argument>${project.version}</argument>
-                            </arguments>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
         </plugins>
