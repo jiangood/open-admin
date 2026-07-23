@@ -43,6 +43,7 @@ public class DbConfig {
                     .dataSource(dataSource)
                     .locations("classpath:db/migration/open-admin", "classpath:db/migration")
                     .baselineOnMigrate(true)
+                    .baselineVersion("0")
                     .load();
             flyway.migrate();
 
