@@ -1,5 +1,5 @@
 import React from 'react';
-import { Spin, message } from 'antd';
+import { Spin } from 'antd';
 import { debounce } from 'lodash';
 import { HttpUtils } from '../../utils';
 
@@ -80,8 +80,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
                 this.setState({ data: data || [] });
             }
         } catch (error) {
-            console.error('远程加载失败:', error);
-            message.error('加载失败，请重试');
+            console.warn('[BaseRemoteSelect] 加载失败:', error);
             if (fetchId === this.fetchIdRef) {
                 this.setState({ data: [] });
             }

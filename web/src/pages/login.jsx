@@ -51,7 +51,7 @@ export default class extends React.Component {
         }
         // localStorage 中无站点信息，从服务端重新加载
         try {
-            const rs = await HttpUtils.get('/admin/public/site-info')
+            const rs = await HttpUtils.get('/admin/public/site-info', null, { showError: false })
             SysUtils.setSiteInfo(rs)
             this.setState({siteInfo: rs})
         } catch (e) {
