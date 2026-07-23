@@ -6,16 +6,10 @@ on:
       - 'v*'
 
 jobs:
-  publish:
+  maven-publish:
     runs-on: ubuntu-latest
-    # 如果配置了 npm Environment，取消下面这行的注释
-    # environment: npm-publish
     permissions:
-      # NPM OIDC 必需
-      id-token: write
-      # 创建 Release 必需
       contents: write
-    
     steps:
       - uses: actions/checkout@v4
 
@@ -25,47 +19,20 @@ jobs:
         with:
           without_prefix_v: true
 
-      - name: Extract pom.xml version
-        id: pom-version
-        run: |
-          POM_VERSION=$(awk '/<artifactId>open-admin<\/artifactId>/{found=1} found && /<version>[0-9]/{print; exit}' pom.xml | grep -oP '<version>\K[^<]+' | tr -d '\r')
-          echo "pom_version=$POM_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Extract package.json version
-        id: npm-version
-        run: |
-          NPM_VERSION=$(jq -r '.version' web/package.json)
-          echo "npm_version=$NPM_VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Validate pom.xml version
         run: |
           TAG_VERSION="${{ steps.tag.outputs.tag }}"
-          POM_VERSION="${{ steps.pom-version.outputs.pom_version }}"
-          
+          POM_VERSION=$(awk '/<artifactId>open-admin<\/artifactId>/{found=1} found && /<version>[0-9]/{print; exit}' pom.xml | grep -oP '<version>\K[^<]+' | tr -d '\r')
+
           echo "Tag version: $TAG_VERSION"
           echo "POM version: $POM_VERSION"
-          
+
           if [ "$TAG_VERSION" != "$POM_VERSION" ]; then
             echo "::error::Tag version ($TAG_VERSION) does not match pom.xml version ($POM_VERSION)"
             exit 1
           fi
-          
-          echo "✓ Maven version matches tag!"
 
-      - name: Validate package.json version
-        run: |
-          TAG_VERSION="${{ steps.tag.outputs.tag }}"
-          NPM_VERSION="${{ steps.npm-version.outputs.npm_version }}"
-          
-          echo "Tag version: $TAG_VERSION"
-          echo "NPM version: $NPM_VERSION"
-          
-          if [ "$TAG_VERSION" != "$NPM_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($NPM_VERSION)"
-            exit 1
-          fi
-          
-          echo "✓ NPM version matches tag!"
+          echo "✓ Maven version matches tag!"
 
       - name: Set up JDK
         uses: actions/setup-java@v4
@@ -83,42 +50,58 @@ jobs:
       - name: Maven Test
         run: mvn test -q
 
-      - name: Check if Maven version already published
-        id: check-maven
-        uses: jiangood/maven-central-check-action@v1
-        with:
-          version: ${{ steps.tag.outputs.tag }}
-          maven-username: ${{ secrets.MAVEN_USERNAME }}
-          maven-password: ${{ secrets.MAVEN_PASSWORD }}
-
       - name: Publish MAVEN
-        if: steps.check-maven.outputs.published != 'true'
         run: mvn -q deploy -DskipTests -P publish
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE_KEY }}
 
-      # ========== NPM 部分已修改 ==========
+  npm-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Tag
+        id: tag
+        uses: aaronbarnaby/get-tag@v1.0.0
+        with:
+          without_prefix_v: true
+
+      - name: Validate package.json version
+        run: |
+          TAG_VERSION="${{ steps.tag.outputs.tag }}"
+          NPM_VERSION=$(jq -r '.version' web/package.json)
+
+          echo "Tag version: $TAG_VERSION"
+          echo "NPM version: $NPM_VERSION"
+
+          if [ "$TAG_VERSION" != "$NPM_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($NPM_VERSION)"
+            exit 1
+          fi
+
+          echo "✓ NPM version matches tag!"
+
       - name: Set up Node.js
-        uses: actions/setup-node@v4  # 升级到 v4
+        uses: actions/setup-node@v4
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          # 不需要再配置 NODE_AUTH_TOKEN
 
       - name: Build NPM package
         run: |
           cd web
-          npm ci  # 推荐用 ci 代替 install，更稳定快速
+          npm ci
           npm run build
 
       - name: Publish NPM package (Trusted Publishing)
         run: |
           cd web
-          # npm publish 会自动通过 OIDC 完成认证
           npm publish --access public --no-git-checks
-        # 删除了 NODE_AUTH_TOKEN env
 
       - name: 同步阿里云镜像仓库
         run: |
