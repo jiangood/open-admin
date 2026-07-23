@@ -13,6 +13,7 @@ import lombok.experimental.FieldNameConstants;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -87,6 +88,8 @@ public class SysUser extends BaseEntity {
     @Column(length = DBConstants.LEN_NAME)
     private String thirdAccount;
 
+    @Remark("上次密码修改时间")
+    private Date lastPasswordChangeTime;
 
     public SysUser() {
     }
