@@ -196,8 +196,6 @@ repository.findAll(spec, pageable);
 
 | 注解 | 用途 |
 |------|------|
-| `@GenerateUuidV7` | UUIDv7 ID 生成（默认） |
-| `@GeneratePrefixedSequence(prefix = "USER")` | 前缀序列 ID |
 | `@HasPermission("resource:action")` | 权限控制 |
 | `@Log` | 操作日志 |
 | `@RateLimit(count=10, duration=60)` | IP 限流 |
@@ -241,6 +239,31 @@ public class DataSyncJob extends BaseJob {
 | `ButtonList` | 权限控制按钮组 |
 | `HasPerm` | 权限控制容器 |
 | `ViewEllipsis` / `ViewFile` / `ViewImage` / `ViewBooleanEnableDisable` | 展示组件 |
+| `DownloadModal` | 下载弹框，提供静态 `download()` 方法，支持进度追踪/取消/重试 |
+
+#### 下载弹框
+
+通过静态方法 `DownloadModal.download(options)` 调用，弹框自动管理显隐和状态：
+
+```jsx
+import { DownloadModal } from '@jiangood/open-admin';
+
+// 默认 GET
+DownloadModal.download({
+  url: '/admin/report/export',
+  params: { type: 'monthly', year: 2026, month: 7 },
+});
+
+// POST 请求，指定文件名
+DownloadModal.download({
+  url: '/admin/report/export',
+  method: 'POST',
+  data: { ids: ['1', '2', '3'] },
+  fileName: '批量导出.xlsx',
+});
+```
+
+弹框展示三种状态：下载中（进度条 + 已下载/总计 + 速度）、已完成（✅ + 文件大小）、失败（❌ + 错误消息）。下载中不可关闭弹框，失败后可重试。
 
 #### 字段组件
 
@@ -264,7 +287,8 @@ public class DataSyncJob extends BaseJob {
 
 | 类 | 主要方法 |
 |----|---------|
-| `HttpUtils` | `get` / `post` / `postForm` / `downloadFile`（axios 封装，自动 context-path） |
+| `HttpUtils` | `get` / `post` / `postForm`（axios 封装，自动 context-path） |
+| `DownloadModal` | `download` 静态方法，弹框显示下载进度和状态，支持取消/重试 |
 | `SysUtils` | `contextPath` / `getSiteInfo` / `setSiteInfo` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `buildTree` / `treeToList` / `walk` |
@@ -334,6 +358,18 @@ THEME_BACKGROUND_COLOR=#f5f5f5
 | logviewer | `modules/logviewer/` | 运行日志在线查看 |
 
 ## FAQ
+
+**种子数据如何管理？** 框架使用 Flyway 管理种子数据的版本化迁移。框架内置的字典种子数据位于 `classpath:db/migration/open-admin/`，首次启动时自动执行。
+
+**业务项目如何添加自己的种子数据？** 在 `src/main/resources/db/migration/` 目录下放置 Flyway 迁移脚本即可：
+
+```
+src/main/resources/
+└── db/migration/
+    └── V1__seed__init_biz_data.sql
+```
+
+脚本使用 `INSERT IGNORE` 确保幂等性。框架的 seed 脚本与业务项目的脚本互不干扰（不同目录）。
 
 **MySQL 5.7 兼容？** 添加 `hibernate-community-dialects` 依赖，配置 `spring.jpa.properties.hibernate.dialect=org.hibernate.community.dialect.MySQLLegacyDialect`。
 
