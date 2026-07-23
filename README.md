@@ -359,7 +359,7 @@ THEME_BACKGROUND_COLOR=#f5f5f5
 
 ## FAQ
 
-**种子数据如何管理？** 框架使用 Flyway 管理种子数据的版本化迁移。框架内置的字典种子数据位于 `classpath:db/migration/open-admin/`，首次启动时自动执行。
+**种子数据如何管理？** 框架使用 Flyway 管理种子数据的版本化迁移。框架内置的种子数据位于 `classpath:db/migration/open-admin/V1__seed__init_data.sql`，首次启动时自动执行。
 
 **业务项目如何添加自己的种子数据？** 在 `src/main/resources/db/migration/` 目录下放置 Flyway 迁移脚本即可：
 
