@@ -4,6 +4,11 @@ import qs from 'qs';
 import {PageUtils} from "./PageUtils";
 import {MessageUtils} from "../MessageUtils";
 
+/** HTTP 请求扩展选项 */
+interface RequestOptions extends AxiosRequestConfig {
+    /** 请求失败时是否自动弹出错误提示，默认 true */
+    showError?: boolean;
+}
 
 const axiosInstance = axios.create({
     baseURL: (typeof SERVLET_CONTEXT !== 'undefined' && SERVLET_CONTEXT) || '',
@@ -31,7 +36,7 @@ export class HttpUtils {
      * @returns Promise<any>
      */
     // ... existing code ...
-    private static coreRequest(config: AxiosRequestConfig, transformData: boolean = true): Promise<any> {
+    private static coreRequest(config: RequestOptions, transformData: boolean = true): Promise<any> {
         const url = config.url;
         config.url = url.startsWith('admin') ? '/' + url : url;
 
@@ -47,7 +52,9 @@ export class HttpUtils {
 
                 if (!success) {
                     console.error(`[HttpUtils] 请求失败: ${url}`, {code: body.code, message, data: body});
-                    MessageUtils.error(message || '操作失败');
+                    if (config.showError !== false) {
+                        MessageUtils.error(message || '操作失败');
+                    }
                     reject(message || '操作失败');
                     return
                 }
@@ -175,7 +182,7 @@ export class HttpUtils {
      * @param options 自定义配置 (transformData等)
      * @returns Promise<any> 后端返回的 data 字段
      */
-    public static get(url: string, params: any = null, options: Partial<AxiosRequestConfig> = {}): Promise<any> {
+    public static get(url: string, params: any = null, options: Partial<RequestOptions> = {}): Promise<any> {
         return HttpUtils.coreRequest({
             ...options,
             url,
@@ -209,7 +216,7 @@ export class HttpUtils {
      * @param options 自定义配置
      * @returns Promise<any> 后端返回的 data 字段
      */
-    public static postForm(url: string, data: any, options: Partial<AxiosRequestConfig> = {}): Promise<any> {
+    public static postForm(url: string, data: any, options: Partial<RequestOptions> = {}): Promise<any> {
         return HttpUtils.coreRequest({
             ...options,
             url,
@@ -230,7 +237,7 @@ export class HttpUtils {
      * @param options 自定义配置
      * @returns Promise<void>
      */
-    public static async downloadFile(url: string, data: any = null, params: any = null, method: Method = 'GET', options: Partial<AxiosRequestConfig> = {}): Promise<void> {
+    public static async downloadFile(url: string, data: any = null, params: any = null, method: Method = 'GET', options: Partial<RequestOptions> = {}): Promise<void> {
 
         // 下载请求默认设置：不转换数据，响应类型为 blob
         const downloadConfig: AxiosRequestConfig = {
