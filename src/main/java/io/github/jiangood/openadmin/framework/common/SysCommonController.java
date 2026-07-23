@@ -64,7 +64,8 @@ public class SysCommonController {
             return AjaxResult.err("未登录");
         }
         r.setLogin(true);
-        r.setNeedUpdatePwd(false);
+        SysUser sysUser = sysUserService.findByAccount(user.getUsername()).orElse(null);
+        r.setNeedUpdatePwd(sysUser != null && sysUser.getLastPasswordChangeTime() == null);
         r.setDictInfo(sysDictService.getAllItems());
 
         List<String> permissions = LoginTool.getPermissions();
