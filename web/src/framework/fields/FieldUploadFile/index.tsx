@@ -3,7 +3,7 @@ import ImgCrop from "antd-img-crop";
 import {Modal, Upload, message} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import {ViewFile} from "../../views";
-import {ObjectUtils, SysUtils} from "../../utils";
+import {ObjectUtils, UrlUtils} from "../../utils";
 
 /**
  * 上传图片前裁切， 单张图片
@@ -33,7 +33,7 @@ export class FieldUploadFile extends React.Component {
         if (value && value.length > 0) {
             const arr = value.split(",");
             for (const id of arr) {
-                const url = SysUtils.contextPath('/admin/sysFile/preview/' + id);
+                const url = UrlUtils.contextPath('/admin/sysFile/preview/' + id);
                 const file = {id, url, uid: id, name: id, status: 'done', fileName: id};
                 list.push(file);
             }
@@ -113,7 +113,7 @@ export class FieldUploadFile extends React.Component {
         const {accept, fileList, maxCount} = this.state;
 
         return <Upload
-            action={SysUtils.contextPath('/admin/sysFile/upload')}
+            action={UrlUtils.contextPath('/admin/sysFile/upload')}
             listType={this.props.listType || 'picture-card'}
             fileList={fileList}
             onChange={this.handleChange}

@@ -2,7 +2,7 @@ import React from 'react';
 import {Button, Form, Input, message} from 'antd';
 import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
 import {history} from 'umi';
-import {EventBusUtils, HttpUtils, PageUtils, SysUtils} from "../framework/utils";
+import {EventBus, HttpUtils, PageUtils, GlobalData} from "../framework";
 
 import "./login.less"
 
@@ -19,7 +19,7 @@ function getRedirect() {
 function postLogin(values) {
     return new Promise((resolve, reject) => {
         HttpUtils.post('/admin/auth/login', values).then(rs => {
-            EventBusUtils.emit('loginSuccess')
+            EventBus.emit('loginSuccess')
             history.push(getRedirect())
             resolve(rs)
         }).catch(e => {
@@ -44,7 +44,7 @@ export default class extends React.Component {
     }
 
     async componentDidMount() {
-        const siteInfo = SysUtils.getSiteInfo()
+        const siteInfo = GlobalData.getSiteInfo()
         if (siteInfo && siteInfo.title) {
             this.setState({siteInfo})
             return
@@ -52,7 +52,7 @@ export default class extends React.Component {
         // localStorage 中无站点信息，从服务端重新加载
         try {
             const rs = await HttpUtils.get('/admin/public/site-info', null, { showError: false })
-            SysUtils.setSiteInfo(rs)
+            GlobalData.setSiteInfo(rs)
             this.setState({siteInfo: rs})
         } catch (e) {
             console.error('[Login] 加载站点信息失败:', e);

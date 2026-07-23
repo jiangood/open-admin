@@ -2,7 +2,6 @@ import {Button, Input, Table} from 'antd'
 import React from 'react'
 import {DeleteOutlined, PlusOutlined} from "@ant-design/icons";
 import './styles.less'
-import {ArrayUtils} from "../../utils";
 
 /**
  * 可编辑表格
@@ -79,8 +78,7 @@ export class FieldTable extends React.Component {
 
     remove = (record) => {
         const {dataSource} = this.state;
-        ArrayUtils.remove(dataSource, record);
-        this.setState({dataSource: [...dataSource]}, this.notifyParent);
+        this.setState({dataSource: dataSource.filter(item => item !== record)}, this.notifyParent);
     };
 
     notifyParent = () => {

@@ -3,7 +3,7 @@ import {Badge, Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import {history, Link} from 'umi';
 import "./index.less"
-import {HttpUtils, NamedIcon, PageUtils, SysUtils, ThemeUtils, TreeUtils} from "../../framework";
+import {HttpUtils, NamedIcon, PageUtils, GlobalData, ThemeUtils, TreeUtils} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabPageRender } from "./TabPageRender";
@@ -37,8 +37,8 @@ export default class extends React.Component {
         // 判断是否手机端，自动收起菜单
 
 
-        const siteInfo = SysUtils.getSiteInfo();
-        const loginInfo = SysUtils.getLoginInfo()
+        const siteInfo = GlobalData.getSiteInfo();
+        const loginInfo = GlobalData.getLoginInfo()
         this.setState({siteInfo, loginInfo})
 
         this.initMenu()

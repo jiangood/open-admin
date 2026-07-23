@@ -2,7 +2,7 @@ import {Badge, Dropdown} from "antd";
 import {NotificationOutlined, SettingOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
 import {history} from "umi";
-import {DeviceUtils, HttpUtils, MessageUtils,  PageUtils, SysUtils} from "../../framework";
+import {DeviceUtils, HttpUtils, MessageUtils,  PageUtils, GlobalData} from "../../framework";
 
 
 const ID = 'header-right';
@@ -41,7 +41,7 @@ export class HeaderRight extends React.Component {
     }
 
     render() {
-        const info = SysUtils.getLoginInfo()
+        const info = GlobalData.getLoginInfo()
 
         if (this.state.isMobileDevice) {
             return <div className='header-right'>

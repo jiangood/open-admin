@@ -23,8 +23,6 @@ target/
 /web/config/dist/
 
 # 自动生成的
-/web/src/framework/utils/*.d.ts
-/web/src/framework/system/*.d.ts
 /web/spring-shell.log
 
 /.env

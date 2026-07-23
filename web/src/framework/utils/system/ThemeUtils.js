@@ -1,9 +1,5 @@
-import {ColorsUtils} from '../ColorsUtils';
-
-declare const OPEN_ADMIN_THEME: Record<string, string> | undefined;
-
 export class ThemeUtils {
-    private static readonly defaultTheme: Record<string, string> = {
+    static defaultTheme = {
         "primary-color": "#1961AC",
         "success-color": "#52c41a",
         "warning-color": "#faad14",
@@ -13,40 +9,44 @@ export class ThemeUtils {
         "primary-color-click": "#124B93"
     };
 
-    private static cachedTheme: Record<string, string> | null = null;
+    static cachedTheme = null;
 
-    static get theme(): Record<string, string> {
+    static get theme() {
         if (this.cachedTheme) return this.cachedTheme;
         this.cachedTheme = this.loadTheme();
         return this.cachedTheme;
     }
 
-    private static loadTheme(): Record<string, string> {
-        let custom: Record<string, string> = {};
+    /** 调亮/调暗十六进制颜色 */
+    static _lightenHex(hex, percent) {
+        const num = parseInt(hex.replace('#', ''), 16);
+        const r = num >> 16 & 255, g = num >> 8 & 255, b = num & 255;
+        const t = percent < 0 ? 0 : 255;
+        const p = Math.abs(percent) / 100;
+        return '#' + (0x1000000 + (Math.round((t - r) * p) + r) * 0x10000
+            + (Math.round((t - g) * p) + g) * 0x100 + (Math.round((t - b) * p) + b)).toString(16).slice(1);
+    }
+
+    static loadTheme() {
+        let custom = {};
         try {
             if (typeof OPEN_ADMIN_THEME !== 'undefined' && OPEN_ADMIN_THEME) {
                 custom = OPEN_ADMIN_THEME;
             }
-        } catch {}
-
+        } catch (e) {}
         const result = {...this.defaultTheme, ...custom};
-
-        // Auto-derive hover/click from primary if not explicitly set
         if (custom["primary-color"]) {
             if (!custom["primary-color-hover"]) {
-                result["primary-color-hover"] = ColorsUtils.lighten(result["primary-color"], 20);
+                result["primary-color-hover"] = ThemeUtils._lightenHex(result["primary-color"], 20);
             }
             if (!custom["primary-color-click"]) {
-                result["primary-color-click"] = ColorsUtils.lighten(result["primary-color"], -10);
+                result["primary-color-click"] = ThemeUtils._lightenHex(result["primary-color"], -10);
             }
         }
-
         return result;
     }
 
-    public static getColor(key: string): string | undefined {
+    static getColor(key) {
         return ThemeUtils.theme[key];
     }
 }
-
-

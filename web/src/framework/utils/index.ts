@@ -2,14 +2,10 @@ export * from "./DateUtils";
 export * from "./ArrayUtils";
 export * from "./UrlUtils"
 export * from "./StringUtils"
-export * from "./EventBusUtils";
-export * from "./ColorsUtils"
-export * from "./DomUtils"
-export * from "./UuidUtils";
+export * from "./EventBus";
 export * from "./TreeUtils";
 export * from './StorageUtils'
 export * from './DeviceUtils'
 export * from './ObjectUtils'
-export * from './ValidateUtils'
 export * from './system'
 export * from './MessageUtils'

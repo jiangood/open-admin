@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
-import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, SysUtils} from "../../../framework";
+import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -59,7 +59,7 @@ export default class extends React.Component {
             title: '预览',
             dataIndex: 'id',
             render(id, record) {
-                const nodes = [<a href={SysUtils.contextPath('/admin/sysFile/preview/' + record.id)} target='_blank'>预览</a>]
+                const nodes = [<a href={UrlUtils.contextPath('/admin/sysFile/preview/' + record.id)} target='_blank'>预览</a>]
 
 
                 if (record.imageUrls?.length > 0) {

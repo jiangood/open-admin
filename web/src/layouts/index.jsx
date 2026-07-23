@@ -6,7 +6,7 @@ import 'dayjs/locale/zh-cn';
 import {Outlet, useLocation} from "umi";
 
 import AdminLayout from "./admin"
-import {HttpUtils, PageLoading, PageUtils, SysUtils, ThemeUtils} from "../framework";
+import {HttpUtils, PageLoading, PageUtils, GlobalData, ThemeUtils} from "../framework";
 import {ErrorBoundary} from "../framework";
 
 import '../style/global.less'
@@ -78,12 +78,12 @@ export function Layouts() {
 
         Promise.all([
             HttpUtils.get("/admin/public/site-info").then(data => {
-                SysUtils.setSiteInfo(data);
+                GlobalData.setSiteInfo(data);
                 setSiteInfoLoaded(true);
             }),
             HttpUtils.get('/admin/public/check-login').then(data => {
-                SysUtils.setDictInfo(data.dictInfo);
-                SysUtils.setLoginInfo(data.loginInfo);
+                GlobalData.setDictInfo(data.dictInfo);
+                GlobalData.setLoginInfo(data.loginInfo);
                 setLoginChecked(true);
             }),
         ]).catch(() => {

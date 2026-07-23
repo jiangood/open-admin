@@ -1,6 +1,6 @@
 import React from 'react';
 import {Editor as TinyMceEditor} from '@tinymce/tinymce-react';
-import {SysUtils} from '../../utils';
+import {UrlUtils} from '../../utils';
 
 /**
  * 富文本编辑器
@@ -9,8 +9,8 @@ import {SysUtils} from '../../utils';
  */
 export class FieldEditor extends React.Component {
     render() {
-        const uploadUrl = SysUtils.contextPath('/admin/sysFile/upload');
-        const jsUrl = SysUtils.contextPath('/admin/tinymce/tinymce.min.js');
+        const uploadUrl = UrlUtils.contextPath('/admin/sysFile/upload');
+        const jsUrl = UrlUtils.contextPath('/admin/tinymce/tinymce.min.js');
         const {value, onChange, height} = this.props;
 
         return (
