@@ -9,13 +9,21 @@ if (!version) {
   process.exit(1);
 }
 
-const props = `build.artifact=open-admin
-build.group=io.github.jiangood
-build.name=open-admin
-build.version=${version}
-build.time=${new Date().toISOString()}
+const buildTime = new Date().toISOString();
+const targetFile = path.resolve(ROOT, 'src/main/java/io/github/jiangood/openadmin/framework/common/BuildVersion.java');
+
+const content = `package io.github.jiangood.openadmin.framework.common;
+
+public class BuildVersion {
+    public static final String VERSION = "${version}";
+    public static final String BUILD_TIME = "${buildTime}";
+    public static final String ARTIFACT = "open-admin";
+    public static final String GROUP = "io.github.jiangood";
+    public static final String NAME = "open-admin";
+
+    private BuildVersion() {}
+}
 `;
 
-const outFile = path.resolve(ROOT, 'src/main/resources/build-info.properties');
-fs.writeFileSync(outFile, props);
-console.log(`build-info.properties generated (version=${version})`);
+fs.writeFileSync(targetFile, content);
+console.log(`BuildVersion.java generated (version=${version})`);
