@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("admin")
 public class AboutController {
 
-    @GetMapping("lib-build-info")
+    @GetMapping("lib-info")
     public AjaxResult buildInfo() {
         return AjaxResult.ok().data(Dict.of(
-            "version", LibBuildConfig.VERSION,
-            "buildTime", LibBuildConfig.BUILD_TIME
+            "version", LibInfo.VERSION,
+            "buildTime", LibInfo.BUILD_TIME
         ));
     }
 }

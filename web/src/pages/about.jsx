@@ -8,7 +8,7 @@ export default class extends React.Component {
     }
 
     componentDidMount() {
-        HttpUtils.get('/admin/lib-build-info').then(data => {
+        HttpUtils.get('/admin/lib-info').then(data => {
             this.setState({buildInfo: data})
         }).catch(e => {
             console.error('[About] 加载版本信息失败:', e);

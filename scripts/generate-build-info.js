@@ -10,17 +10,17 @@ if (!version) {
 }
 
 const buildTime = new Date().toISOString();
-const targetFile = path.resolve(ROOT, 'src/main/java/io/github/jiangood/openadmin/framework/common/LibBuildConfig.java');
+const targetFile = path.resolve(ROOT, 'src/main/java/io/github/jiangood/openadmin/framework/common/LibInfo.java');
 
 const content = `package io.github.jiangood.openadmin.framework.common;
 
-public class LibBuildConfig {
+public class LibInfo {
     public static final String VERSION = "${version}";
     public static final String BUILD_TIME = "${buildTime}";
 
-    private LibBuildConfig() {}
+    private LibInfo() {}
 }
 `;
 
 fs.writeFileSync(targetFile, content);
-console.log(`LibBuildConfig.java generated (version=${version})`);
+console.log(`LibInfo.java generated (version=${version})`);
