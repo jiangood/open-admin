@@ -39,7 +39,7 @@ CREATE DATABASE open_admin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode
 git clone https://github.com/jiangood/open-admin.git
 cd open-admin
 mvn clean compile
-mvn -Papp spring-boot:run   # 开发模式启动
+mvn -Pdev spring-boot:run   # 开发模式启动
 ```
 
 ### 前端启动

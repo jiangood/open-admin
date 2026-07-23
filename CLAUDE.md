@@ -32,7 +32,7 @@ mvn clean compile                                          # 编译
 mvn test -Dtest=BeanToolTest                               # 运行单个测试
 mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 排除需要 MySQL 的测试
 mvn clean package                                          # 打包
-mvn -Papp spring-boot:run                                  # 独立应用启动
+mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
 node scripts/bump-version.js <新版本号>                     # 升级 pom.xml + web/package.json 版本号
 cd web && npm install                                         # 前端安装依赖

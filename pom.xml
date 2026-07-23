@@ -314,7 +314,7 @@
         </profile>
 
     <profile>
-        <id>app</id>
+        <id>dev</id>
         <build>
             <plugins>
                 <plugin>
