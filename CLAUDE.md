@@ -35,7 +35,7 @@ mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
 node scripts/bump-version.js <新版本号>                     # 升级 pom.xml + web/package.json 版本号
-node scripts/generate-build-info.js <版本号>                # 生成构建版本信息（发布前执行）
+node scripts/generate-build-info.js <版本号>                # 生成 BuildConfig 构建版本信息（发布前执行）
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建

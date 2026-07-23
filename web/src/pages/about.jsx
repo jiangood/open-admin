@@ -32,9 +32,6 @@ export default class extends React.Component {
                             <Descriptions.Item label="构建时间">
                                 {buildInfo.buildTime}
                             </Descriptions.Item>
-                            <Descriptions.Item label="组件">
-                                {buildInfo.group}:{buildInfo.artifact}
-                            </Descriptions.Item>
                         </Descriptions>
                     </Card>
                 )}

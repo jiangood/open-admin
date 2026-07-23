@@ -10,18 +10,15 @@ if (!version) {
 }
 
 const buildTime = new Date().toISOString();
-const targetFile = path.resolve(ROOT, 'src/main/java/io/github/jiangood/openadmin/framework/common/BuildVersion.java');
+const targetFile = path.resolve(ROOT, 'src/main/java/io/github/jiangood/openadmin/framework/common/BuildConfig.java');
 
 const content = `package io.github.jiangood.openadmin.framework.common;
 
-public class BuildVersion {
+public class BuildConfig {
     public static final String VERSION = "${version}";
     public static final String BUILD_TIME = "${buildTime}";
-    public static final String ARTIFACT = "open-admin";
-    public static final String GROUP = "io.github.jiangood";
-    public static final String NAME = "open-admin";
 
-    private BuildVersion() {}
+    private BuildConfig() {}
 }
 `;
 

@@ -13,11 +13,8 @@ public class AboutController {
     @GetMapping("build-info")
     public AjaxResult buildInfo() {
         return AjaxResult.ok().data(Dict.of(
-            "version", BuildVersion.VERSION,
-            "buildTime", BuildVersion.BUILD_TIME,
-            "artifact", BuildVersion.ARTIFACT,
-            "group", BuildVersion.GROUP,
-            "name", BuildVersion.NAME
+            "version", BuildConfig.VERSION,
+            "buildTime", BuildConfig.BUILD_TIME
         ));
     }
 }
