@@ -282,7 +282,7 @@ export class DownloadModal extends React.Component<{}, ModalState> {
           {/* 下载中 */}
           {status === 'downloading' && (
             <>
-              <Progress percent={progress} status="active" strokeColor="#1677ff"/>
+              <Progress percent={progress} status="active" strokeColor="var(--ant-color-primary)"/>
               <div style={{marginTop: 8, fontSize: 13, color: '#999'}}>
                 <span>{this.formatSize(loaded)}</span>
                 {total > 0 && <span> / {this.formatSize(total)}</span>}
