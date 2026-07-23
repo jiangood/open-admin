@@ -77,27 +77,6 @@ export class FieldDate extends React.Component {
 
     }
 
-    static getDefaultValue(type) {
-        const year = dayjs().format("YYYY");
-        const month = dayjs().format("YYYY-MM");
-        const quarter = dayjs().format("YYYY-QQ");
-
-        switch (type) {
-            case 'YYYY':
-            case 'YEAR':
-                return year;
-            case 'YYYY-MM':
-            case 'YEAR_MONTH':
-                return month;
-            case 'YYYY-QQ':
-            case 'YEAR_QUARTER':
-                return quarter;
-            default:
-                return null;
-        }
-
-    }
-
     strToDate(value, fmt) {
         if (value != null && value !== '') {
             const type = typeof value;

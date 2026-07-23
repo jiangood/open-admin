@@ -125,7 +125,7 @@ export default (api) => {
         api.logger.info('formRegistryPath', importFrom);
         api.addEntryImports(() => ({
             source: importFrom,
-            specifier: '{FormRegistryUtils}'
+            specifier: '{FormRegistry}'
         }));
 
         Utils.findFilesSync(api.paths.absSrcPath, /forms\/.*\.jsx$/).forEach(file => {
@@ -136,7 +136,7 @@ export default (api) => {
                 specifier: name
             }));
 
-            api.addEntryCodeAhead(() => `FormRegistryUtils.register("${name}", ${name});`);
+            api.addEntryCodeAhead(() => `FormRegistry.register("${name}", ${name});`);
             api.logger.info('新版本 formRegistry.register: ', name, file);
         });
     } catch (error) {

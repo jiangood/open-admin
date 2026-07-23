@@ -15,7 +15,7 @@ export class FieldEditor extends React.Component {
 
         return (
             <TinyMceEditor
-                initialValue={value}
+                value={value}
                 tinymceScriptSrc={jsUrl}
                 init={{
                     min_height: 300,
@@ -40,9 +40,9 @@ export class FieldEditor extends React.Component {
                         });
                     },
                 }}
-                onChange={e => {
+                onEditorChange={content => {
                     if (onChange) {
-                        onChange(e.target.getContent());
+                        onChange(content);
                     }
                 }}
             />

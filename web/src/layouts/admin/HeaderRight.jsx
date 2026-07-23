@@ -1,10 +1,8 @@
 import {Avatar, Dropdown} from "antd";
 import React from "react";
 import {history} from "umi";
-import {DeviceUtils, HttpUtils, MessageUtils,  PageUtils, GlobalData} from "../../framework";
+import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData} from "../../framework";
 
-
-const ID = 'header-right';
 export class HeaderRight extends React.Component {
 
     state = {
@@ -12,7 +10,6 @@ export class HeaderRight extends React.Component {
     };
 
     componentDidMount() {
-        document.dispatchEvent(new CustomEvent('componentDidMount', {detail: ID}))
         if (DeviceUtils.isMobileDevice()) {
             this.setState({isMobileDevice: true})
         }

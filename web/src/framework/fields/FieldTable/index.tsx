@@ -56,7 +56,7 @@ export class FieldTable extends React.Component {
     };
 
     onCellChange = (index, dataIndex, e) => {
-        let {dataSource} = this.state;
+        const {dataSource} = this.state;
         const row = dataSource[index];
 
         let v = e;
@@ -64,10 +64,9 @@ export class FieldTable extends React.Component {
             v = e.target.value;
         }
 
-        row[dataIndex] = v;
-
-        dataSource = [...dataSource];
-        this.setState({dataSource}, this.notifyParent);
+        const next = [...dataSource];
+        next[index] = {...row, [dataIndex]: v};
+        this.setState({dataSource: next}, this.notifyParent);
     };
 
     add = () => {

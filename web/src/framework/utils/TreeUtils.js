@@ -20,11 +20,12 @@ export class TreeUtils {
         return undefined;
     }
 
-    static _getChild(treeNode, buffer) {
+    /** @private */
+    static getChildRecursive(treeNode, buffer) {
         if (treeNode.children != null && treeNode.children.length > 0) {
             treeNode.children.forEach((c) => {
                 buffer.push(c);
-                TreeUtils._getChild(c, buffer);
+                TreeUtils.getChildRecursive(c, buffer);
             });
         }
         return buffer;
@@ -35,7 +36,7 @@ export class TreeUtils {
         if (treeNodeList != null) {
             treeNodeList.forEach((t) => {
                 buffer.push(t);
-                TreeUtils._getChild(t, buffer);
+                TreeUtils.getChildRecursive(t, buffer);
             });
         }
         return buffer;

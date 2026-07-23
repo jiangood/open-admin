@@ -61,7 +61,8 @@ function isPublicPage(pathname, search) {
 }
 
 export function Layouts() {
-    const {pathname, search} = useLocation();
+    const location = useLocation();
+    const {pathname, search} = location;
     const [siteInfoLoaded, setSiteInfoLoaded] = useState(false);
     const [loginChecked, setLoginChecked] = useState(false);
 
@@ -96,7 +97,7 @@ export function Layouts() {
             console.error('[Layout] 初始化应用失败');
             PageUtils.redirectToLogin();
         });
-    }, [pathname]);
+    }, [location]);
 
     if (isPublic) return <ErrorBoundary minimal><AppWrapper><Outlet/></AppWrapper></ErrorBoundary>;
 

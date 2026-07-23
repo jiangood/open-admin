@@ -28,6 +28,13 @@ export class FieldUploadFile extends React.Component {
         this.state.fileList = this.convertInputToComponentValue(this.state.value);
     }
 
+    componentDidUpdate(prevProps) {
+        const next = {};
+        if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
+        if (this.props.cropImage !== prevProps.cropImage) next.cropImage = this.props.cropImage;
+        if (Object.keys(next).length > 0) this.setState(next);
+    }
+
     convertInputToComponentValue(value) {
         const list = [];
         if (value && value.length > 0) {

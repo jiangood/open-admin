@@ -25,10 +25,9 @@ export class FieldBoolean extends React.Component {
 
         switch (type) {
             case 'radio':
-                return <Radio.Group value={v} onChange={onChange}>
+                return <Radio.Group value={v} onChange={e => onChange && onChange(e.target.value)}>
                     <Radio value={true}>是</Radio>
                     <Radio value={false}>否</Radio>
-                    <Radio value={undefined}>不确定</Radio>
                 </Radio.Group>;
             case 'checkbox':
                 return <Checkbox
@@ -43,7 +42,7 @@ export class FieldBoolean extends React.Component {
                     {value: false, label: '否'},
                 ]}
                                value={v}
-                               onChange={onChange}
+                               onChange={value => onChange && onChange(value)}
                                style={{width: '100%'}}
                                allowClear={true}
                                placeholder={'请选择'}
@@ -51,7 +50,7 @@ export class FieldBoolean extends React.Component {
             case 'switch':
                 return <Switch
                     checked={v}
-                    onChange={onChange}
+                    onChange={checked => onChange && onChange(checked)}
                 />;
             default:
                 return null;

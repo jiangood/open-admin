@@ -21,17 +21,25 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ x, y, items, onClick, 
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const handler = (e: MouseEvent) => {
+        const handleMouseDown = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
                 onClose();
             }
         };
+        const handleScroll = () => onClose();
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') onClose();
+        };
         const timer = setTimeout(() => {
-            document.addEventListener('mousedown', handler);
+            document.addEventListener('mousedown', handleMouseDown);
+            document.addEventListener('scroll', handleScroll, true);
+            document.addEventListener('keydown', handleKeyDown);
         }, 0);
         return () => {
             clearTimeout(timer);
-            document.removeEventListener('mousedown', handler);
+            document.removeEventListener('mousedown', handleMouseDown);
+            document.removeEventListener('scroll', handleScroll, true);
+            document.removeEventListener('keydown', handleKeyDown);
         };
     }, [onClose]);
 
