@@ -157,6 +157,7 @@ class SysUserServiceTest {
 
         verify(sysUserRepository).save(user);
         assertTrue(passwordEncoder.matches("NewP@ss123", user.getPassword()));
+        assertNotNull(user.getLastPasswordChangeTime());
     }
 
     @Test
@@ -178,6 +179,8 @@ class SysUserServiceTest {
 
         verify(sysUserRepository).save(user);
         assertTrue(passwordEncoder.matches(defaultPwd, user.getPassword()));
+        assertNull(user.getLastPasswordChangeTime());
+        verify(permissionStaleService).markUserStale(user.getAccount());
     }
 
     @Test

@@ -154,6 +154,7 @@ public class SysUserService extends BaseService<SysUser> {
         PasswordTool.validateStrength(newPassword);
 
         sysUser.setPassword(PasswordTool.encode(newPassword));
+        sysUser.setLastPasswordChangeTime(new Date());
         sysUserRepository.save(sysUser);
     }
 
@@ -182,6 +183,8 @@ public class SysUserService extends BaseService<SysUser> {
         PasswordTool.validateStrength(plainPassword);
 
         sysUser.setPassword(PasswordTool.encode(plainPassword));
+        sysUser.setLastPasswordChangeTime(null);
+        permissionStaleService.markUserStale(sysUser.getAccount());
         sysUserRepository.save(sysUser);
     }
 
