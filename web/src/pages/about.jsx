@@ -1,5 +1,4 @@
 import React from "react";
-import {Card, Descriptions} from "antd";
 import {HttpUtils, Page} from "../framework";
 
 export default class extends React.Component {
@@ -22,18 +21,10 @@ export default class extends React.Component {
         return (
             <Page title="关于" description="了解系统版本与相关信息">
                 <h1>关于</h1>
-
                 {buildInfo && (
-                    <Card title="版本信息" size="small" style={{maxWidth: 500, marginTop: 16}}>
-                        <Descriptions column={1} size="small">
-                            <Descriptions.Item label="框架版本">
-                                {buildInfo.version}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="构建时间">
-                                {buildInfo.buildTime}
-                            </Descriptions.Item>
-                        </Descriptions>
-                    </Card>
+                    <div style={{marginTop: '3em', color: 'rgba(0,0,0,0.45)', fontSize: 12}}>
+                        依赖库版本 v{buildInfo.version} / {buildInfo.buildTime}
+                    </div>
                 )}
             </Page>
         );
