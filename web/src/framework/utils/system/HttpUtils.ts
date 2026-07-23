@@ -76,7 +76,9 @@ export class HttpUtils {
                 }
 
                 const msg = HttpUtils.extractErrorMessage(e);
-                MessageUtils.error(msg);
+                if (config.showError !== false) {
+                    MessageUtils.error(msg);
+                }
                 reject(e);
             });
         })
