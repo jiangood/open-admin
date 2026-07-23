@@ -1,5 +1,5 @@
-import {Badge, Dropdown} from "antd";
-import {NotificationOutlined, SettingOutlined, UserOutlined} from "@ant-design/icons";
+import {Avatar, Badge, Dropdown} from "antd";
+import {NotificationOutlined} from "@ant-design/icons";
 import React from "react";
 import {history} from "umi";
 import {DeviceUtils, HttpUtils, MessageUtils,  PageUtils, GlobalData} from "../../framework";
@@ -36,8 +36,8 @@ export class HeaderRight extends React.Component {
         })
     }
 
-    userCenter = () => {
-        PageUtils.open('/userCenter', '个人中心')
+    account = () => {
+        PageUtils.open('/account', '个人中心')
     }
 
     render() {
@@ -51,43 +51,38 @@ export class HeaderRight extends React.Component {
 
         return <div className='header-right'>
 
-            <div className='item'>
-                <UserOutlined/> {info.name}
-            </div>
+            <Dropdown menu={{
+                onClick: ({key}) => {
+                    switch (key) {
+                        case 'account':
+                            this.account()
+                            break;
+                        case 'logout':
+                            this.logout();
+                            break;
+                        case 'about':
+                            this.about()
+                            break
+                    }
+                },
+                items: [
+                    {key: 'account', label: '个人中心'},
+                    {key: 'about', label: '关于系统'},
+                    {key: 'logout', label: '退出登录'},
+                ]
+            }}>
+                <div className='item' style={{cursor: 'pointer'}}>
+                    <Avatar size="small" style={{backgroundColor: '#1677ff', verticalAlign: 'middle'}}>
+                        {info.name?.charAt(0)}
+                    </Avatar>
+                    <span style={{marginLeft: 8}}>{info.name}</span>
+                </div>
+            </Dropdown>
 
-
-            <div className='item' onClick={() => PageUtils.open('/userCenter/message', '我的消息')}>
+            <div className='item' onClick={() => PageUtils.open('/account/message', '我的消息')}>
                 <Badge count={info.messageCount} size="small">
                     <NotificationOutlined/>
                 </Badge>
-            </div>
-
-            <div className='item'>
-
-                <Dropdown menu={{
-                    onClick: ({key}) => {
-                        switch (key) {
-                            case 'userCenter':
-                                this.userCenter()
-                                break;
-                            case 'logout':
-                                this.logout();
-                                break;
-                            case 'about':
-                                this.about()
-                                break
-                        }
-                    },
-                    items: [
-                        {key: 'userCenter', label: '个人中心'},
-                        {key: 'about', label: '关于系统'},
-                        {key: 'logout', label: '退出登录'},
-
-                    ]
-                }}><SettingOutlined/>
-
-                </Dropdown>
-
             </div>
 
         </div>
