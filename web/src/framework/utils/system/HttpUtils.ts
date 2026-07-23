@@ -48,7 +48,7 @@ export class HttpUtils {
                 if (!success) {
                     console.error(`[HttpUtils] 请求失败: ${url}`, {code: body.code, message, data: body});
                     MessageUtils.error(message || '操作失败');
-                    reject('操作失败');
+                    reject(message || '操作失败');
                     return
                 }
 
@@ -58,42 +58,48 @@ export class HttpUtils {
                 }
                 resolve(transformData ? data : response);
             }).catch((e: unknown) => {
-                // 统一异常处理
                 console.error(`[HttpUtils] 请求异常: ${url}`, e);
-                let msg = '操作失败';
 
-                if (axios.isAxiosError(e)) {
-                    const status = e.response?.status;
-                    const responseData = e.response?.data;
-
-                    if (status === 401) {
-                        // 登录过期处理
-                        MessageUtils.confirm('登录已过期，请重新登录').then(() => {
-                            PageUtils.redirectToLogin();
-                        });
-                        // 阻止后续的错误提示，返回一个特殊 Promise.reject
-                         reject('登录过期');
-                        return
-                    }
-                    if (status === 504) {
-                        msg = '504 请求后端服务失败';
-                    } else if (responseData && responseData.message) {
-                        msg = responseData.message;
-                    } else if (e.message) {
-                        msg = e.message;
-                    }
-                } else if (e instanceof Error) {
-                    // 可能是后端success=false抛出的自定义错误
-                    msg = e.message;
+                if (axios.isAxiosError(e) && e.response?.status === 401) {
+                    MessageUtils.confirm('登录已过期，请重新登录').then(() => {
+                        PageUtils.redirectToLogin();
+                    });
+                    reject('登录过期');
+                    return
                 }
 
+                const msg = HttpUtils.extractErrorMessage(e);
                 MessageUtils.error(msg);
-
-                // 将原始错误或处理后的错误信息向外抛出
                 reject(e);
             });
         })
 
+    }
+
+
+    /**
+     * 从异常对象中提取用户友好的错误消息
+     */
+    private static extractErrorMessage(e: unknown, defaultMsg: string = '操作失败'): string {
+        if (axios.isAxiosError(e)) {
+            const responseData = e.response?.data;
+            const status = e.response?.status;
+
+            if (status === 504) {
+                return '504 请求后端服务失败';
+            }
+            if (responseData && responseData.message) {
+                return responseData.message;
+            }
+            if (e.message) {
+                return e.message;
+            }
+            return defaultMsg;
+        }
+        if (e instanceof Error) {
+            return e.message || defaultMsg;
+        }
+        return defaultMsg;
     }
 
 
