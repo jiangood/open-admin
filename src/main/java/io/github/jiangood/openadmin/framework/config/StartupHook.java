@@ -8,8 +8,8 @@ import io.github.jiangood.openadmin.util.jdbc.DbTool;
  * <p>按执行顺序：
  * <ol>
  *   <li>{@link #beforeJpaSchemaInitialize(DbTool)} — JPA 自动建表之前</li>
- *   <li>{@link #beforeSystemDataInitialize()} — 系统数据初始化之前</li>
- *   <li>{@link #afterSystemDataInitialize()} — 系统数据初始化之后</li>
+ *   <li>{@link #beforeSeedDataInitialize()} — Flyway 种子数据迁移之前</li>
+ *   <li>{@link #afterSeedDataInitialize()} — Flyway 种子数据迁移之后</li>
  * </ol>
  *
  * @see SystemDataInitializer
@@ -24,11 +24,11 @@ public interface StartupHook {
     default void beforeJpaSchemaInitialize(DbTool db) {
     }
 
-    /** 系统数据初始化（字典、默认角色等）之前执行 */
-    default void beforeSystemDataInitialize() {
+    /** Flyway 种子数据迁移之前执行 */
+    default void beforeSeedDataInitialize() {
     }
 
-    /** 系统数据初始化之后执行 */
-    default void afterSystemDataInitialize() {
+    /** Flyway 种子数据迁移之后执行 */
+    default void afterSeedDataInitialize() {
     }
 }
