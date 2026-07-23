@@ -14,27 +14,27 @@ export class FieldTable extends React.Component {
         super(props);
 
         this.columns = this.props.columns.map(col => {
-            if (col.render == null) {
-                col.render = (v, record, index) => {
-                    return <Input value={v} onChange={(e) => this.onCellChange(index, col.dataIndex, e)}/>;
+            const newCol = { ...col };
+            const origRender = newCol.render;
+
+            if (origRender) {
+                newCol.render = (v, record, index) => {
+                    const cmp = origRender(v, record, index);
+                    return React.createElement(cmp.type, {
+                        ...cmp.props,
+                        value: v,
+                        onChange: (e) => {
+                            this.onCellChange(index, newCol.dataIndex, e);
+                        }
+                    });
                 };
             } else {
-                if (!col._oldRender) {
-                    col._oldRender = col.render;
-                    col.render = (v, record, index) => {
-                        const cmp = col._oldRender(v, record, index);
-                        return React.createElement(cmp.type,
-                            {
-                                ...cmp.props,
-                                value: v,
-                                onChange: (e) => {
-                                    this.onCellChange(index, col.dataIndex, e);
-                                }
-                            });
-                    };
-                }
+                newCol.render = (v, record, index) => {
+                    return <Input value={v} onChange={(e) => this.onCellChange(index, newCol.dataIndex, e)}/>;
+                };
             }
-            return col;
+
+            return newCol;
         });
 
         this.columns.push({
@@ -60,7 +60,7 @@ export class FieldTable extends React.Component {
         const row = dataSource[index];
 
         let v = e;
-        if (e != null && e.hasOwnProperty('target')) {
+        if (e != null && typeof e === 'object' && 'target' in e) {
             v = e.target.value;
         }
 

@@ -1,9 +1,19 @@
 import {Alert, Skeleton, Tree} from 'antd';
 import React from 'react';
 import * as Icons from '@ant-design/icons';
-import {HttpUtils} from "../../utils";
+import {HttpUtils} from "../utils";
 
-export class OrgTree extends React.Component<any, any> {
+interface OrgTreeProps {
+    onChange?: (orgId: string | null) => void;
+}
+
+interface OrgTreeState {
+    treeDataLoading: boolean;
+    treeData: any[];
+    currentOrgId: string | null;
+}
+
+export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
 
     state = {
         treeDataLoading: true,

@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin;
 
-import io.github.jiangood.openadmin.framework.data.impl.BaseRepositoryBeanPostProcessor;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackage;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
@@ -22,11 +21,6 @@ import java.util.concurrent.Executor;
 public class OpenAdminConfiguration {
 
     public static final String PKG =  "io.github.jiangood.openadmin";
-
-    @Bean
-    public static BaseRepositoryBeanPostProcessor baseRepositoryBeanPostProcessor() {
-        return new BaseRepositoryBeanPostProcessor();
-    }
 
     @Bean("operationLogExecutor")
     public Executor operationLogExecutor() {

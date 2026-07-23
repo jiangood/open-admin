@@ -88,7 +88,7 @@ spring:
 ### Entity
 
 - 包：`{base}.modules.{module}.entity.{Entity}`
-- 继承 `io.github.jiangood.openadmin.framework.data.BaseEntity`（自带 id/UUIDv7、createTime、updateTime、createBy、updateBy、delFlag、remark）
+- 继承 `io.github.jiangood.openadmin.framework.data.BaseEntity`（自带 id/UUIDv7、createTime、updateTime、createUser、updateUser）
 - `@Table(name = "biz_xxx")` 指定物理表名
 - `@Getter` `@Setter` `@FieldNameConstants`（Lombok）
 - Java 21 的 `String` 类型字段不需要 `@Column`（Hibernate 自动驼峰转下划线），除非需要指定 `length` 或 `nullable`

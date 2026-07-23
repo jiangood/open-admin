@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
-import {ButtonList, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils} from "../../../framework";
+import {PermActions, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -78,12 +78,12 @@ export default class extends React.Component {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => (
-                <ButtonList>
+                <PermActions>
                     <Popconfirm perm='sys-file:delete' title='是否确定删除文件信息'
                                 onConfirm={() => this.handleDelete(record)}>
                         <a>删除</a>
                     </Popconfirm>
-                </ButtonList>
+                </PermActions>
             ),
         },
     ]

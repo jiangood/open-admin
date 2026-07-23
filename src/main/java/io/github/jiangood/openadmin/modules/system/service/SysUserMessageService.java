@@ -39,7 +39,7 @@ public class SysUserMessageService extends BaseService<SysUserMessage> {
     }
 
     public void read(String id) {
-        SysUserMessage db = repository.findOne(id);
+        SysUserMessage db = repository.findById(id).orElse(null);
         db.setReadTime(new Date());
         db.setRead(true);
         repository.save(db);
@@ -51,8 +51,8 @@ public class SysUserMessageService extends BaseService<SysUserMessage> {
             return repository.save(input);
         }
 
-        repository.updateField(input, requestKeys);
-        return repository.findOne(input.getId());
+        this.updateField(input, requestKeys);
+        return repository.findById(input.getId()).orElse(null);
     }
 
     @Transactional
@@ -61,11 +61,11 @@ public class SysUserMessageService extends BaseService<SysUserMessage> {
     }
 
     public SysUserMessage detail(String id) {
-        return repository.findOne(id);
+        return repository.findById(id).orElse(null);
     }
 
     public SysUserMessage get(String id) {
-        return repository.findOne(id);
+        return repository.findById(id).orElse(null);
     }
 
 }

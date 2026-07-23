@@ -2,7 +2,7 @@ import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
 import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
 import React from 'react';
 import {
-    ButtonList,
+    PermActions,
     FieldBoolean,
     FieldDictSelect,
     HttpUtils,
@@ -147,14 +147,14 @@ export default class extends React.Component {
             title: '操作', dataIndex: 'option',
             render: (_, record) => {
                 return (
-                    <ButtonList>
+                    <PermActions>
                         <Button size='small' perm='sys-dict:update'
                                 onClick={() => this.handleItemEdit(record)}>编辑</Button>
                         <Popconfirm perm='sys-dict:delete' title='是否确定删除字典项'
                                     onConfirm={() => this.handleItemDelete(record)}>
                             <Button size='small'>删除</Button>
                         </Popconfirm>
-                    </ButtonList>
+                    </PermActions>
                 );
             },
         },

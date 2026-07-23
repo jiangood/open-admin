@@ -20,7 +20,7 @@ export class FieldRemoteTree extends BaseRemoteSelect {
             <Tree
                 multiple
                 checkable
-                onCheck={(e) => this.props.onChange && this.props.onChange(e.checked)}
+                onCheck={(checkedInfo) => this.props.onChange && this.props.onChange(checkedInfo.checked)}
                 checkedKeys={this.props.value}
                 treeData={this.state.data}
                 defaultExpandAll

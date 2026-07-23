@@ -34,9 +34,9 @@ export class FieldNumberRange extends React.Component {
     }
 
     componentDidMount() {
-        const {value, defaultValue} = this.props;
+        const {value, defaultValue, onChange} = this.props;
         if (value == null && defaultValue) {
-            this.props.onChange && this.props.onChange(defaultValue);
+            onChange && onChange(defaultValue);
         }
     }
 

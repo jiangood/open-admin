@@ -1,18 +1,17 @@
 package io.github.jiangood.openadmin.modules.job.service;
 
+import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobExecuteRecordRepository;
-import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,9 +22,8 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class SysJobService {
+public class SysJobService extends BaseService<SysJob> {
 
-    private final SysJobRepository sysJobRepository;
     private final QuartzManager quartzService;
     private final SysJobExecuteRecordRepository sysJobExecuteRecordRepository;
     private final Scheduler scheduler;
@@ -35,10 +33,10 @@ public class SysJobService {
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {
         SysJob db;
         if (input.isNew()) {
-            db = sysJobRepository.save(input);
+            db = repository.save(input);
         } else {
-            sysJobRepository.updateField(input, requestKeys);
-            db = sysJobRepository.findById(input.getId()).orElse(null);
+            this.updateField(input, requestKeys);
+            db = repository.findById(input.getId()).orElse(null);
         }
 
         quartzService.deleteJob(db);
@@ -53,13 +51,13 @@ public class SysJobService {
     @Transactional
     public void deleteJob(String id) throws SchedulerException {
         log.info("删除定时任务 {}", id);
-        SysJob job = sysJobRepository.findById(id).orElse(null);
+        SysJob job = repository.findById(id).orElse(null);
         Assert.notNull(job, "该任务已被删除，请勿重复操作");
         quartzService.deleteJob(job);
 
         sysJobExecuteRecordRepository.deleteBySysJobId(id);
 
-        sysJobRepository.deleteById(id);
+        deleteById(id);
     }
 
 
@@ -68,40 +66,6 @@ public class SysJobService {
     }
 
     public Page<SysJob> page(String name, String jobClass, Pageable pageable) throws SchedulerException {
-        return sysJobRepository.findAll(Spec.<SysJob>of().like(SysJob.Fields.name, name).like(SysJob.Fields.jobClass, jobClass), pageable);
-    }
-
-    // BaseService 方法
-    public java.util.Optional<SysJob> findById(String id) {
-        return sysJobRepository.findById(id);
-    }
-
-    public Page<SysJob> findAll(Specification<SysJob> spec, Pageable pageable) {
-        return sysJobRepository.findAll(spec, pageable);
-    }
-
-    public List<SysJob> findAll() {
-        return sysJobRepository.findAll();
-    }
-
-    public List<SysJob> findAll(Sort sort) {
-        return sysJobRepository.findAll(sort);
-    }
-
-    public List<SysJob> findAll(Specification<SysJob> s, Sort sort) {
-        return sysJobRepository.findAll(s, sort);
-    }
-
-    public Spec<SysJob> spec() {
-        return Spec.of();
-    }
-
-    public SysJob save(SysJob t) {
-        return sysJobRepository.save(t);
-    }
-
-    @Transactional
-    public void deleteById(String id) {
-        sysJobRepository.deleteById(id);
+        return repository.findAll(Spec.<SysJob>of().like(SysJob.Fields.name, name).like(SysJob.Fields.jobClass, jobClass), pageable);
     }
 }

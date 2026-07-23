@@ -73,11 +73,6 @@ public class SystemProperties {
      */
     private boolean jobEnable = true;
     /**
-     * 重置管理员密码
-     */
-    private String resetAdminPwd;
-
-    /**
      *  是否打印全局捕获的异常， 通常指web请求异常
      */
     private boolean printGlobalException = true;

@@ -144,9 +144,9 @@ class DownloadModal extends React.Component {
 
 | 状态 | 弹框行为 | 底部按钮 |
 |------|---------|---------|
-| downloading | maskClosable=false，无 X 关闭按钮，防止误中断 | footer=null，无按钮 |
+| downloading | maskClosable=false，无 X 关闭按钮，防止误中断 | 取消按钮（调用 AbortController.abort()） |
 | completed | maskClosable=false，显示 X 关闭按钮，用户手动关闭 | 无额外按钮 |
-| failed | maskClosable=false，显示 X 关闭按钮 | 重试按钮 + 关闭按钮 |
+| failed | maskClosable=false，显示 X 关闭按钮 | 重试按钮 |
 
 ## 文件变更清单
 
@@ -163,5 +163,4 @@ class DownloadModal extends React.Component {
 ## 未涉及的范围
 
 - 批量队列下载：设计定位为单次下载，批量需求后续再扩展
-- 取消按钮：为简化交互，下载中不提供取消按钮或关闭操作。下载中弹框不可关闭
 - 下载速度平滑：采用简单滑动窗口计算，不做复杂平滑处理

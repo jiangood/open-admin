@@ -1,5 +1,5 @@
 import {ReactNode} from "react";
-import {PermUtils} from "../../utils";
+import {PermUtils} from "../utils";
 
 /**
  * 使用该组件，可以判断权限

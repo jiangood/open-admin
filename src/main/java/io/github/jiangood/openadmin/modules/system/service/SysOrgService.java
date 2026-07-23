@@ -107,7 +107,7 @@ public class SysOrgService extends BaseService<SysOrg> {
             return sysOrgRepository.save(input);
         }
 
-        sysOrgRepository.updateField(input, requestKeys);
+        this.updateField(input, requestKeys);
         return sysOrgRepository.findById(input.getId()).orElse(null);
     }
 

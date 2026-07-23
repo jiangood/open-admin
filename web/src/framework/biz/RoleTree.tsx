@@ -1,9 +1,19 @@
 import {Skeleton, Tree} from 'antd';
 import React from 'react';
 import {SolutionOutlined} from '@ant-design/icons';
-import {HttpUtils} from "../../utils";
+import {HttpUtils} from "../utils";
 
-export class RoleTree extends React.Component<any, any> {
+interface RoleTreeProps {
+    onSelect?: (orgId: string | null) => void;
+}
+
+interface RoleTreeState {
+    treeDataLoading: boolean;
+    treeData: any[];
+    currentOrgId: string | null;
+}
+
+export class RoleTree extends React.Component<RoleTreeProps, RoleTreeState> {
 
     state = {
         treeDataLoading: true,
@@ -25,7 +35,7 @@ export class RoleTree extends React.Component<any, any> {
     render() {
         const {treeData, treeDataLoading} = this.state
         if (treeDataLoading) {
-            return <Skeleton title='加载中...'/>
+            return <Skeleton active title={{ width: '60%' }} paragraph={{ rows: 6 }} />;
         }
 
         return <Tree

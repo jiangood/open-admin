@@ -1,7 +1,7 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Transfer, Tree} from 'antd'
 import React from 'react'
-import {ButtonList, FieldBoolean, HttpUtils, Page, PageUtils, ProTable, ViewText} from "../../../framework";
+import {PermActions, FieldBoolean, HttpUtils, Page, PageUtils, ProTable, ViewText} from "../../../framework";
 
 
 export default class extends React.Component {
@@ -131,7 +131,7 @@ export default class extends React.Component {
             render: (_, record) => {
 
                 return (
-                    <ButtonList>
+                    <PermActions>
                         <Button size='small' perm='sys-role:grant-permission'
                                 onClick={() => this.handleEditUser(record)}>用户设置</Button>
 
@@ -144,7 +144,7 @@ export default class extends React.Component {
                                     onConfirm={() => this.handleDelete(record)}>
                             <Button size='small' disabled={record.builtin}>删除</Button>
                         </Popconfirm>
-                    </ButtonList>
+                    </PermActions>
                 );
             },
         },

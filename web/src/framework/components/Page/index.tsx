@@ -2,7 +2,7 @@ import React from "react";
 import { Typography } from "antd";
 import './index.less'
 import {ThemeUtils} from "../../utils";
-import { ButtonList } from "../system/ButtonList";
+import { PermActions } from "../../biz/PermActions";
 
 interface PageProps {
     padding?: boolean;
@@ -38,7 +38,7 @@ export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = fal
                             {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
                         </div>
                     </div>
-                    {actions && <ButtonList>{actions}</ButtonList>}
+                    {actions && <PermActions>{actions}</PermActions>}
                 </div>
             </div>
         )}

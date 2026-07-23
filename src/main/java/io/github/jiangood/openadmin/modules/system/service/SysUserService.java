@@ -74,7 +74,7 @@ public class SysUserService extends BaseService<SysUser> {
 
 
     public Optional<SysUser> findByPhone(String phoneNumber) {
-        return Optional.ofNullable(sysUserRepository.findByField(SysUser.Fields.phone, phoneNumber));
+        return Optional.ofNullable(this.findByField(SysUser.Fields.phone, phoneNumber));
     }
 
 
@@ -108,7 +108,7 @@ public class SysUserService extends BaseService<SysUser> {
     public SysUser save(SysUser input, List<String> updateFields) {
         boolean isNew = input.isNew();
         // 校验
-        boolean accountUnique = sysUserRepository.isUnique(input.getId(), SysUser.Fields.account, input.getAccount());
+        boolean accountUnique = this.isUnique(input.getId(), SysUser.Fields.account, input.getAccount());
         Assert.state(accountUnique, "用户名已存在");
 
         String inputOrgId = input.getDeptId();
@@ -129,7 +129,7 @@ public class SysUserService extends BaseService<SysUser> {
             return sysUserRepository.save(input);
         }
         updateFields.add(SysUser.Fields.unitId);
-        sysUserRepository.updateField(input, updateFields);
+        this.updateField(input, updateFields);
         return sysUserRepository.findById(input.getId()).orElse(null);
     }
 

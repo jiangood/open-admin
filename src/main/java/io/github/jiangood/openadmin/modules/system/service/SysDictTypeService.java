@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.data.BaseService;
+import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
@@ -29,13 +30,13 @@ public class SysDictTypeService extends BaseService<SysDictType> {
         SysDictType type = repository.findById(id).orElse(null);
         if (type == null) return;
 
-        List<SysDictType> children = repository.findAllByField(SysDictType.Fields.pid, id);
+        List<SysDictType> children = this.findAllByField(SysDictType.Fields.pid, id);
         for (SysDictType child : children) {
             deleteCascade(child.getId());
         }
 
         if (type.getTypeCode() != null) {
-            List<SysDictItem> items = itemRepository.findAllByField(SysDictItem.Fields.typeCode, type.getTypeCode());
+            List<SysDictItem> items = itemRepository.findAll(Spec.<SysDictItem>of().eq(SysDictItem.Fields.typeCode, type.getTypeCode()));
             itemRepository.deleteAll(items);
         }
 
@@ -43,6 +44,6 @@ public class SysDictTypeService extends BaseService<SysDictType> {
     }
 
     public boolean isTypeCodeExist(String typeCode, String excludeId) {
-        return repository.isFieldExist(excludeId, SysDictType.Fields.typeCode, typeCode);
+        return this.isFieldExist(excludeId, SysDictType.Fields.typeCode, typeCode);
     }
 }

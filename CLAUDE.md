@@ -48,12 +48,12 @@ cd web && npm run build                                       # 前端构建
 
 ## Key Architecture Patterns
 
-- **BaseEntity/BaseRepository**: 所有实体继承 BaseEntity（UUIDv7 id, createTime/createUser, updateTime/updateUser, delFlag），Repository 继承 BaseRepository
+- **BaseEntity**: 所有实体继承 BaseEntity（UUIDv7 id — @PrePersist 自动生成, createTime/createUser, updateTime/updateUser）
 - **Spec 动态查询**: `Spec<T>` 链式构建 JPA Specification（eq/like/in/between/or 等），通过 `SpecImpl` + `ExpressionTool` 执行
 - **PageExt**: 扩展 PageImpl，支持返回额外数据（如汇总行）
 - **菜单加载**: `classpath*:application-menu*.yml` YAML 定义菜单（Map 格式，key 为菜单 id），也支持数据库存储
 - **权限控制**: `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
-- **ID 生成**: 默认 UUIDv7（时间排序，MySQL 友好），也支持前缀序列 ID 和日表序列 ID
+- **ID 生成**: 默认 UUIDv7（时间排序，MySQL 友好）
 - **文件存储**: 支持 `local` / `s3` / `custom`，通过 `FileOperator` 接口抽象
 - **操作日志**: `@Log` 注解 + AOP 切面，异步记录
 

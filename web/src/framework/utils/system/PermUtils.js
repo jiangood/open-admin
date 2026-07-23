@@ -1,4 +1,4 @@
-import {GlobalData} from '../GlobalData';
+import {GlobalData} from '../../GlobalData';
 import {ArrayUtils} from '../ArrayUtils';
 
 export class PermUtils {

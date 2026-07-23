@@ -12,7 +12,6 @@ import io.github.jiangood.openadmin.util.jdbc.DbTool;
  *   <li>{@link #afterSeedDataInitialize()} — Flyway 种子数据迁移之后</li>
  * </ol>
  *
- * @see SystemDataInitializer
  * @see DbConfig
  */
 public interface StartupHook {

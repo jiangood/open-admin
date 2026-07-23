@@ -1,4 +1,4 @@
-import {StorageUtils} from '../StorageUtils';
+import {StorageUtils} from './utils/StorageUtils';
 
 const SITE_INFO_KEY = "siteInfo";
 const LOGIN_INFO_KEY = "loginInfo";

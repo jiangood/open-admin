@@ -1,4 +1,4 @@
-import {GlobalData} from '../GlobalData';
+import {GlobalData} from '../../GlobalData';
 import {Tag} from 'antd';
 import React from 'react';
 

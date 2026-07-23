@@ -2,7 +2,7 @@ import {PlusOutlined} from '@ant-design/icons';
 import {Button, Card, Form, Input, Modal, Popconfirm, Select, Splitter} from 'antd';
 import React from 'react';
 import {
-    ButtonList,
+    PermActions,
     DictUtils,
     FieldBoolean,
     FieldRemoteSelect,
@@ -119,7 +119,7 @@ export default class extends React.Component {
             dataIndex: 'option',
             fixed: 'right',
             render: (_, record) => {
-                return <ButtonList>
+                return <PermActions>
                     <Button size='small' perm='sys-user:update' onClick={() => this.handleEdit(record)}> 编辑 </Button>
 
                     <Button size='small' perm='sys-user:grant-permission'
@@ -133,7 +133,7 @@ export default class extends React.Component {
                                 onConfirm={() => this.handleDelete(record)}>
                         <Button size='small'>删除</Button>
                     </Popconfirm>
-                </ButtonList>;
+                </PermActions>;
             },
         },
     ];

@@ -29,9 +29,8 @@ export class ViewFile extends React.Component {
 
         // 多个文件则用走马灯
         const iframeList = urlList.map((url) => {
-            return <div style={{height}}>
+            return <div key={url} style={{height}}>
                 <iframe
-                    key={url}
                     src={url}
                     width='99%'
                     frameBorder={0}

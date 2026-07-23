@@ -98,17 +98,10 @@ export class ProTable extends React.Component {
     updateSelectedRows = list => {
         const {rowKey = "id"} = this.props
         const {selectedRows} = this.state
-        for (let i = 0; i < selectedRows.length; i++) {
-            for (let newItem of list) {
-                const oldItem = selectedRows[i];
-                if (oldItem[rowKey] === newItem[rowKey]) {
-                    selectedRows[i] = newItem;
-                    break
-                }
-            }
-        }
+        const rowMap = new Map(list.map(item => [item[rowKey], item]))
+        const updated = selectedRows.map(old => rowMap.get(old[rowKey]) || old)
 
-        this.setState({selectedRows: [...selectedRows]})
+        this.setState({selectedRows: updated})
     };
 
 

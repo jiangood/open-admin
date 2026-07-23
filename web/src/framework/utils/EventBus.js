@@ -6,15 +6,19 @@ export class EventBus {
             EventBus.__stack[name] = [];
         }
         EventBus.__stack[name].push({ fn: callback, ctx });
+        return () => EventBus.off(name, callback);
     }
 
     static once(name, callback, ctx) {
+        const unsubscribe = () => EventBus.off(name, callback);
         const listener = (...args) => {
             EventBus.off(name, listener);
             callback.apply(ctx, args);
         };
         listener.__callback = callback;
-        return EventBus.on(name, listener, ctx);
+        EventBus.__stack[name] = EventBus.__stack[name] || [];
+        EventBus.__stack[name].push({ fn: listener, ctx });
+        return unsubscribe;
     }
 
     static emit(name, ...args) {

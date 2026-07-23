@@ -137,7 +137,7 @@ public class SysRoleService extends BaseService<SysRole> {
             return repository.save(input);
         }
 
-        repository.updateField(input, requestKeys);
+        this.updateField(input, requestKeys);
         return repository.findById(input.getId()).orElse(null);
     }
 }

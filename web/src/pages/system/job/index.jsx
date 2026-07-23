@@ -15,7 +15,7 @@ import {
     Tag
 } from 'antd'
 import {PlusOutlined} from "@ant-design/icons";
-import {ButtonList, HttpUtils, Page, ProTable, StringUtils, UrlUtils, ValueType} from "../../../framework";
+import {HttpUtils, Page, ProTable, StringUtils, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
