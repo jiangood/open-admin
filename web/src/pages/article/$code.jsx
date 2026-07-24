@@ -1,5 +1,5 @@
 import React from "react";
-import {HttpUtils, Page} from "../../framework";
+import {HttpUtils, Page, PageUtils} from "../../framework";
 
 export default class extends React.Component {
 
@@ -9,7 +9,7 @@ export default class extends React.Component {
     }
 
     componentDidMount() {
-        const code = this.props.match.params.code
+        const code = PageUtils.currentPathnameLastPart()
         if (code) {
             HttpUtils.get('admin/article/getByCode', {code}).then(rs => {
                 this.setState({article: rs, loading: false})
