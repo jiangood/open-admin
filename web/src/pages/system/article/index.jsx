@@ -1,7 +1,7 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select} from 'antd'
 import React from 'react'
-import {FieldBoolean, HttpUtils, Page, ProTable} from "../../../framework";
+import {FieldBoolean, HttpUtils, Page, PermActions, ProTable} from "../../../framework";
 
 const {TextArea} = Input;
 
@@ -71,12 +71,12 @@ export default class extends React.Component {
             dataIndex: 'option',
             render: (_, record) => {
                 return (
-                    <>
-                        <Button size='small' onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm title='确定删除?' onConfirm={() => this.handleDelete(record)}>
+                    <PermActions>
+                        <Button size='small' perm='article:update' onClick={() => this.handleEdit(record)}>编辑</Button>
+                        <Popconfirm perm='article:delete' title='确定删除?' onConfirm={() => this.handleDelete(record)}>
                             <Button size='small'>删除</Button>
                         </Popconfirm>
-                    </>
+                    </PermActions>
                 );
             },
         },
