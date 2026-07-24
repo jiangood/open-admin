@@ -1,6 +1,5 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import {loadEnv} from 'vite';
 
 const VIRTUAL_ID = 'virtual:open-admin/routes';
 const RESOLVED_ID = '\0open-admin:routes';
@@ -71,27 +70,6 @@ export default function openAdmin() {
     let root;
     return {
         name: 'open-admin',
-
-        config(config, {mode, command}) {
-            const env = loadEnv(mode, process.cwd(), '');
-            const servletContext = env.VITE_SERVLET_CONTEXT || '/change-this-servlet-context';
-            const serverPort = env.SERVER_PORT || '8080';
-
-            return {
-                base: command === 'build' ? './' : '/',
-                optimizeDeps: {exclude: ['@jiangood/open-admin']},
-                server: {
-                    port: env.PORT ? Number(env.PORT) : undefined,
-                    proxy: {
-                        [servletContext]: {
-                            target: `http://127.0.0.1:${serverPort}`,
-                            changeOrigin: true,
-                            ws: true,
-                        },
-                    },
-                },
-            };
-        },
 
         configResolved(resolved) {
             root = resolved.root;
