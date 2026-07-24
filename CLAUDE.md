@@ -9,7 +9,7 @@ open-admin 是一个可嵌入的后台管理系统框架。业务项目通过 Ma
 ## Tech Stack
 
 - **Backend**: Java 21, Spring Boot 4.0.6, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
-- **Frontend**: React 19, Ant Design 6, UmiJS 4, TypeScript
+- **Frontend**: React 19, Ant Design 6, Vite 8（自研 hash 路由 + PageFrame）, TypeScript
 - **Build**: Maven (backend), npm (frontend)
 
 ## Two-Project Workflow

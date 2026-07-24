@@ -60,7 +60,7 @@ npm run dev                    # 默认 http://localhost:3000
 
 **后端**：业务项目 `pom.xml` 添加依赖，`application.yml` 配置数据源，通过 `spring.config.import: classpath:application-lib.yml` 引入框架默认配置。
 
-**前端**：业务项目 `package.json` 添加依赖，`config.js` 注册 `common-plugin.js`（详见 `web/config/common-plugin.js`），自动获得路由注册、代理、主题等功能。
+**前端**：业务项目 `package.json` 添加依赖，`vite.config` 注册 `@jiangood/open-admin/vite-plugin`（详见 `web/vite-plugin/index.js`），自动获得路由注册、代理、主题等功能。
 
 **按需使用**：可只加后端依赖（REST API 访问管理功能），或只加前端依赖（对接自有后端 API）。
 
@@ -68,7 +68,7 @@ npm run dev                    # 默认 http://localhost:3000
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  前端: React 19 + Ant Design 6 + UmiJS 4            │
+│  前端: React 19 + Ant Design 6 + Vite 8             │
 │  ┌─────────────────────────────────────────────┐    │
 │  │ @jiangood/open-admin (组件库 + 管理页面)     │    │
 │  └─────────────────────────────────────────────┘    │
@@ -111,7 +111,7 @@ web/
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | React 19, Ant Design 6, UmiJS 4, TypeScript |
+| 前端 | React 19, Ant Design 6, Vite 8, TypeScript |
 | 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
 | 数据库 | MySQL 8+ |
 | 构建 | Maven (后端), npm (前端) |
@@ -172,7 +172,7 @@ web/
 
 ### 前端要点
 
-- 组件大驼峰，页面文件 kebab-case（UmiJS 路由约定）
+- 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）
 - 使用 ES6+，强制 `const`/`let`，解构赋值
 - 优先使用框架组件：`ProTable`、`Page`、`FieldDictSelect` 等
 - 权限控制：`<Button perm="...">`、`<HasPerm perm="...">`、`<ButtonList>`

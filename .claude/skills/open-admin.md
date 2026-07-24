@@ -44,14 +44,18 @@ spring:
 ```json
 "dependencies": {
     "@jiangood/open-admin": "^2.0.0",
-    "umi": "^4.0.0",
     "antd": "^6.0.0",
     "react": "^19.0.0",
+    ...
+},
+"devDependencies": {
+    "vite": "^8.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
     ...
 }
 ```
 
-并确认 `config/config.js` 通过 `getPluginDir()` 机制使用了框架插件（即引用了 `@jiangood/open-admin/config`）。
+并确认 `vite.config.ts` 使用了框架插件（`import openAdmin from '@jiangood/open-admin/vite-plugin'`）。
 
 ### 目录结构检查
 
@@ -281,9 +285,9 @@ public class CustomerController {
 
 ### 路由机制说明
 
-框架的 `common-plugin.js`（UmiJS 插件）在构建时自动扫描 `src/pages/` 目录和 `node_modules/@jiangood/open-admin/src/pages/` 目录，根据文件名和目录结构自动注册路由。**只需在 `src/pages/{模块}/index.jsx` 创建页面文件，无需手动配置路由。**
+框架的 `@jiangood/open-admin/vite-plugin`（Vite 插件）在构建时自动扫描 `src/pages/` 目录和 `node_modules/@jiangood/open-admin/src/pages/` 目录，根据文件名和目录结构生成虚拟路由模块 `virtual:open-admin/routes`。**只需在 `src/pages/{模块}/index.jsx` 创建页面文件，无需手动配置路由。**
 
-业务项目的 `config/config.js` 应使用 `@jiangood/open-admin/config` 作为配置源（通过 `getPluginDir()` 自动检测）。
+业务项目的 `vite.config.ts` 应注册 `@jiangood/open-admin/vite-plugin`。
 
 ### 页面模板
 
