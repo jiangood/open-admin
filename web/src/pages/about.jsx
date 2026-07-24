@@ -1,11 +1,16 @@
 import React from "react";
+import {history} from "umi";
 import {Page} from "../framework";
 
 export default class extends React.Component {
 
+    componentDidMount() {
+        history.push('/article/about')
+    }
+
     render() {
-        return <Page title="关于" description="了解系统版本与相关信息">
-            <h1>关于</h1>
+        return <Page title="关于系统">
+            <div>跳转中...</div>
         </Page>
     }
 }
