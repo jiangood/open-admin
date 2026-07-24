@@ -13,8 +13,10 @@ function getLabel(pathname, search, pathMenuMap) {
 
 export function TabPageRender({pathMenuMap}) {
     const initUrl = history.location.pathname + history.location.search;
-    const initKey = initUrl;
-    const initLabel = initUrl === '/' ? '首页' : '未命名';
+    const qIndex = initUrl.indexOf('?');
+    const initPathname = qIndex === -1 ? initUrl : initUrl.substring(0, qIndex);
+    const initSearch = qIndex === -1 ? '' : initUrl.substring(qIndex);
+    const initLabel = getLabel(initPathname, initSearch, pathMenuMap);
     const [tabs, setTabs] = useState([{key: initUrl, label: initLabel, refreshKey: 0}]);
     const [activeKey, setActiveKey] = useState(initUrl);
     const [contextMenu, setContextMenu] = useState(null);
