@@ -1,6 +1,5 @@
 import React from "react";
-import {history} from "umi";
-import {Page} from "../framework";
+import {Page, history} from "../framework";
 
 export default class extends React.Component {
 

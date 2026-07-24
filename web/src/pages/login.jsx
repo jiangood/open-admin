@@ -1,13 +1,12 @@
 import React from 'react';
 import {Button, Form, Input, message} from 'antd';
 import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import {history} from 'umi';
-import {EventBus, HttpUtils, PageUtils, GlobalData} from "../framework";
+import {EventBus, HttpUtils, GlobalData, history} from "../framework";
 
 import "./login.less"
 
-function getRedirect() {
-    let redirect = PageUtils.currentParams()['redirect'];
+function getRedirect(query) {
+    let redirect = query?.redirect;
     if (redirect) {
         redirect = decodeURIComponent(redirect)
     } else {
@@ -16,11 +15,11 @@ function getRedirect() {
     return redirect;
 }
 
-function postLogin(values) {
+function postLogin(values, query) {
     return new Promise((resolve, reject) => {
         HttpUtils.post('/admin/auth/login', values).then(rs => {
             EventBus.emit('loginSuccess')
-            history.push(getRedirect())
+            history.push(getRedirect(query))
             resolve(rs)
         }).catch(e => {
             console.error('[Login] 登录失败:', e);
@@ -63,7 +62,7 @@ export default class extends React.Component {
     submit = values => {
         this.setState({logging: true})
         values.password = encodePassword(values.password)
-        postLogin(values).finally(() => {
+        postLogin(values, this.props.location?.query).finally(() => {
             this.setState({logging: false})
         })
     }

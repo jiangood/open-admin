@@ -1,7 +1,6 @@
 import React from "react";
 import {Button, Form, Input, Modal} from "antd";
-import {history} from 'umi'
-import {HttpUtils} from "../../framework";
+import {HttpUtils, history} from "../../framework";
 
 export default class extends React.Component {
 
