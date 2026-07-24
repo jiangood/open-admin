@@ -35,13 +35,13 @@ public class DbConfig {
 
     @Bean
     @Order(-1)
-    CommandLineRunner flywaySeedRunner(DataSource dataSource, List<StartupHook> startupHooks) {
+    CommandLineRunner flywayRunner(DataSource dataSource, List<StartupHook> startupHooks) {
         return args -> {
             startupHooks.forEach(StartupHook::beforeSeedDataInitialize);
 
             Flyway flyway = Flyway.configure()
                     .dataSource(dataSource)
-                    .locations("classpath:db/migration/open-admin", "classpath:db/migration")
+                    .locations( "classpath:db/migration")
                     .baselineOnMigrate(true)
                     .baselineVersion("0")
                     .load();
