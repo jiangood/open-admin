@@ -6,16 +6,26 @@ import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData, ThemeUtils}
 export class HeaderRight extends React.Component {
 
     state = {
-        isMobileDevice: false
+        isMobileDevice: false,
+        dropdownArticles: [],
+        headerArticles: [],
     };
 
     componentDidMount() {
         if (DeviceUtils.isMobileDevice()) {
             this.setState({isMobileDevice: true})
         }
+        this.loadArticles()
     }
 
-
+    loadArticles = () => {
+        HttpUtils.get('admin/article/listByPosition', {position: 'dropdown'}).then(rs => {
+            this.setState({dropdownArticles: rs || []})
+        })
+        HttpUtils.get('admin/article/listByPosition', {position: 'header'}).then(rs => {
+            this.setState({headerArticles: rs || []})
+        })
+    }
 
     logout = () => {
         HttpUtils.post('admin/auth/logout').then(async () => {
@@ -36,8 +46,13 @@ export class HeaderRight extends React.Component {
         PageUtils.open('/account', '个人中心')
     }
 
+    openArticle = (code, title) => {
+        PageUtils.open('/article/' + code, title)
+    }
+
     render() {
         const info = GlobalData.getLoginInfo()
+        const {dropdownArticles, headerArticles} = this.state
 
         if (this.state.isMobileDevice) {
             return <div className='header-right'>
@@ -45,27 +60,38 @@ export class HeaderRight extends React.Component {
             </div>
         }
 
+        const articleItems = dropdownArticles.map(a => ({
+            key: 'article:' + a.code,
+            label: a.title,
+        }))
+
+        const menuItems = [
+            {key: 'account', label: '个人中心'},
+            ...articleItems,
+            {key: 'logout', label: '退出登录'},
+        ]
+
         return <div className='header-right'>
+            {headerArticles.map(a => (
+                <div key={a.code} className='item' style={{cursor: 'pointer'}}
+                     onClick={() => this.openArticle(a.code, a.title)}>
+                    {a.title}
+                </div>
+            ))}
 
             <Dropdown menu={{
                 onClick: ({key}) => {
-                    switch (key) {
-                        case 'account':
-                            this.account()
-                            break;
-                        case 'logout':
-                            this.logout();
-                            break;
-                        case 'about':
-                            this.about()
-                            break
+                    if (key === 'account') {
+                        this.account()
+                    } else if (key === 'logout') {
+                        this.logout();
+                    } else if (key.startsWith('article:')) {
+                        const code = key.substring(8)
+                        const article = dropdownArticles.find(a => a.code === code)
+                        this.openArticle(code, article ? article.title : code)
                     }
                 },
-                items: [
-                    {key: 'account', label: '个人中心'},
-                    {key: 'about', label: '关于系统'},
-                    {key: 'logout', label: '退出登录'},
-                ]
+                items: menuItems,
             }}>
                 <div className='item' style={{cursor: 'pointer'}}>
                     <Avatar size="default" style={{backgroundColor: ThemeUtils.getColor('primary-color')}}>
@@ -74,12 +100,6 @@ export class HeaderRight extends React.Component {
                     <span style={{marginLeft: 8}}>{info.name}</span>
                 </div>
             </Dropdown>
-
         </div>
-    }
-
-
-    about = () => {
-        history.push("/about")
     }
 }
