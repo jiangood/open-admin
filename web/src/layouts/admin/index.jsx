@@ -172,7 +172,7 @@ export default class extends React.Component {
     render() {
         const {siteInfo, loginInfo} = this.state
 
-        return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click")}}>
+        return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click"), '--primary-color-hover': ThemeUtils.getColor("primary-color-hover")}}>
              <Sider id='left-sider'
                    width={180}
                    collapsible

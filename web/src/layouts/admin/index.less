@@ -7,6 +7,7 @@
     display: flex;
     align-items: center;
     background-color: #fff;
+    border-bottom: 1px solid #e8e8e8;
 
     .top-nav {
       flex: 1;
@@ -45,11 +46,13 @@
       flex-shrink: 0;
 
       .item {
+        display: inline-flex;
+        align-items: center;
         padding: 0 0.5rem;
         cursor: pointer;
 
         &:hover {
-          background: var(--primary-color-click, #124B93);
+          background: var(--primary-color-hover, #4990CD);
           color: white;
         }
       }

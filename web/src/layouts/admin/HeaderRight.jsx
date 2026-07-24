@@ -1,7 +1,7 @@
 import {Avatar, Dropdown} from "antd";
 import React from "react";
 import {history} from "umi";
-import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData} from "../../framework";
+import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData, ThemeUtils} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -68,7 +68,7 @@ export class HeaderRight extends React.Component {
                 ]
             }}>
                 <div className='item' style={{cursor: 'pointer'}}>
-                    <Avatar size="small" style={{backgroundColor: '#1677ff', verticalAlign: 'middle'}}>
+                    <Avatar size="default" style={{backgroundColor: ThemeUtils.getColor('primary-color')}}>
                         {info.name?.charAt(0)}
                     </Avatar>
                     <span style={{marginLeft: 8}}>{info.name}</span>
