@@ -12,8 +12,11 @@ function getLabel(pathname, search, pathMenuMap) {
 }
 
 export function TabPageRender({pathMenuMap}) {
-    const [tabs, setTabs] = useState([]);
-    const [activeKey, setActiveKey] = useState(null);
+    const initUrl = history.location.pathname + history.location.search;
+    const initKey = initUrl;
+    const initLabel = initUrl === '/' ? '首页' : '未命名';
+    const [tabs, setTabs] = useState([{key: initUrl, label: initLabel, refreshKey: 0}]);
+    const [activeKey, setActiveKey] = useState(initUrl);
     const [contextMenu, setContextMenu] = useState(null);
     const activeKeyRef = useRef(activeKey);
     activeKeyRef.current = activeKey;
@@ -30,7 +33,6 @@ export function TabPageRender({pathMenuMap}) {
             setActiveKey(url);
         };
         const unlisten = history.listen(({location}) => openTab(location.pathname + location.search));
-        openTab(history.location.pathname + history.location.search);
         return unlisten;
     }, []);
 
@@ -80,8 +82,6 @@ export function TabPageRender({pathMenuMap}) {
             setTimeout(() => history.push('/'), 0);
         }
     };
-
-    if (tabs.length === 0) return null;
 
     return (
         <>

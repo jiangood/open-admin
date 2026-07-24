@@ -1,3 +1,7 @@
+function safeDecodeURIComponent(s) {
+    try { return decodeURIComponent(s); } catch { return s; }
+}
+
 const routes = [];
 
 function compile(path) {
@@ -23,7 +27,7 @@ export function matchRoute(pathname) {
         for (let i = 0; i < segs.length; i++) {
             const seg = route.segments[i];
             if (seg.param) {
-                params[seg.param] = decodeURIComponent(segs[i]);
+                params[seg.param] = safeDecodeURIComponent(segs[i]);
                 dynamic = true;
             } else if (seg.name !== segs[i]) {
                 ok = false;
