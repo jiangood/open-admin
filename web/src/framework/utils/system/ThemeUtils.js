@@ -28,21 +28,23 @@ export class ThemeUtils {
     }
 
     static loadTheme() {
-        let custom = {};
+        const result = {...this.defaultTheme};
         try {
-            if (typeof OPEN_ADMIN_THEME !== 'undefined' && OPEN_ADMIN_THEME) {
-                custom = OPEN_ADMIN_THEME;
+            const primaryColor = import.meta.env.VITE_THEME_PRIMARY_COLOR;
+            const successColor = import.meta.env.VITE_THEME_SUCCESS_COLOR;
+            const warningColor = import.meta.env.VITE_THEME_WARNING_COLOR;
+            const errorColor = import.meta.env.VITE_THEME_ERROR_COLOR;
+            const backgroundColor = import.meta.env.VITE_THEME_BACKGROUND_COLOR;
+            if (primaryColor) {
+                result["primary-color"] = primaryColor;
+                result["primary-color-hover"] = ThemeUtils._lightenHex(primaryColor, 20);
+                result["primary-color-click"] = ThemeUtils._lightenHex(primaryColor, -10);
             }
+            if (successColor) result["success-color"] = successColor;
+            if (warningColor) result["warning-color"] = warningColor;
+            if (errorColor) result["error-color"] = errorColor;
+            if (backgroundColor) result["background-color"] = backgroundColor;
         } catch (e) {}
-        const result = {...this.defaultTheme, ...custom};
-        if (custom["primary-color"]) {
-            if (!custom["primary-color-hover"]) {
-                result["primary-color-hover"] = ThemeUtils._lightenHex(result["primary-color"], 20);
-            }
-            if (!custom["primary-color-click"]) {
-                result["primary-color-click"] = ThemeUtils._lightenHex(result["primary-color"], -10);
-            }
-        }
         return result;
     }
 

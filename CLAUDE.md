@@ -71,6 +71,6 @@ cd web && npm run build                                       # 前端构建
 | 位置 | 文件 | 配置 |
 |------|------|------|
 | 后端 | `application.yml` | `server.servlet.context-path` |
-| 前端 | `web/.env` | `SERVLET_CONTEXT` / `THEME_PRIMARY_COLOR` / `THEME_SUCCESS_COLOR` / ... |
+| 前端 | `web/.env` | `VITE_SERVLET_CONTEXT` / `VITE_THEME_PRIMARY_COLOR` / `VITE_THEME_SUCCESS_COLOR` / ... |
 
 完整配置和 API 参考请查看 [README.md](README.md)。

@@ -324,7 +324,7 @@ DownloadModal.download({
 | 位置 | 配置 |
 |------|------|
 | 后端 `application.yml` | `server.servlet.context-path` |
-| 前端 `web/.env` | `SERVLET_CONTEXT` |
+| 前端 `web/.env` | `VITE_SERVLET_CONTEXT` |
 
 前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `SysUtils.contextPath(path)` 拼接。
 
@@ -333,11 +333,11 @@ DownloadModal.download({
 `web/.env` 配置：
 
 ```
-THEME_PRIMARY_COLOR=#1961AC
-THEME_SUCCESS_COLOR=#52c41a
-THEME_WARNING_COLOR=#faad14
-THEME_ERROR_COLOR=#ff4d4f
-THEME_BACKGROUND_COLOR=#f5f5f5
+VITE_THEME_PRIMARY_COLOR=#1961AC
+VITE_THEME_SUCCESS_COLOR=#52c41a
+VITE_THEME_WARNING_COLOR=#faad14
+VITE_THEME_ERROR_COLOR=#ff4d4f
+VITE_THEME_BACKGROUND_COLOR=#f5f5f5
 ```
 
 ## 添加业务模块

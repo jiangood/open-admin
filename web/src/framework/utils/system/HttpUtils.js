@@ -4,7 +4,7 @@ import {PageUtils} from "./PageUtils";
 import {MessageUtils} from "../MessageUtils";
 
 const axiosInstance = axios.create({
-    baseURL: (typeof SERVLET_CONTEXT !== 'undefined' && SERVLET_CONTEXT) || '',
+    baseURL: import.meta.env.VITE_SERVLET_CONTEXT || '',
     withCredentials: true,
     headers: { 'Content-Type': 'application/json' },
     paramsSerializer: (params) => qs.stringify(params, {indices: false})

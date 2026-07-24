@@ -74,28 +74,11 @@ export default function openAdmin() {
 
         config(config, {mode, command}) {
             const env = loadEnv(mode, process.cwd(), '');
-            const servletContext = env.SERVLET_CONTEXT || '/change-this-servlet-context';
+            const servletContext = env.VITE_SERVLET_CONTEXT || '/change-this-servlet-context';
             const serverPort = env.SERVER_PORT || '8080';
-
-            const define = {
-                SERVLET_CONTEXT: JSON.stringify(servletContext),
-            };
-            const theme = {};
-            if (env.THEME_PRIMARY_COLOR) theme['primary-color'] = env.THEME_PRIMARY_COLOR;
-            if (env.THEME_SUCCESS_COLOR) theme['success-color'] = env.THEME_SUCCESS_COLOR;
-            if (env.THEME_WARNING_COLOR) theme['warning-color'] = env.THEME_WARNING_COLOR;
-            if (env.THEME_ERROR_COLOR) theme['error-color'] = env.THEME_ERROR_COLOR;
-            if (env.THEME_BACKGROUND_COLOR) theme['background-color'] = env.THEME_BACKGROUND_COLOR;
-            if (Object.keys(theme).length > 0) {
-                define.OPEN_ADMIN_THEME = JSON.stringify(theme);
-            }
-            if (env.PUBLIC_PAGES) {
-                define.OPEN_ADMIN_PUBLIC_PAGES = JSON.stringify(env.PUBLIC_PAGES);
-            }
 
             return {
                 base: command === 'build' ? './' : '/',
-                define,
                 optimizeDeps: {exclude: ['@jiangood/open-admin']},
                 server: {
                     port: env.PORT ? Number(env.PORT) : undefined,

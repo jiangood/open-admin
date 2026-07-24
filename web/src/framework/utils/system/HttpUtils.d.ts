@@ -1,7 +1,5 @@
 import {AxiosRequestConfig} from "axios";
 
-declare const SERVLET_CONTEXT: string | undefined;
-
 interface RequestOptions extends AxiosRequestConfig {
     showError?: boolean;
 }

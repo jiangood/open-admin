@@ -65,7 +65,7 @@ export class UrlUtils {
      * 为路径添加 SERVLET_CONTEXT 前缀
      */
     static contextPath(path) {
-        const base = (typeof SERVLET_CONTEXT !== 'undefined' && SERVLET_CONTEXT) || '';
+        const base = import.meta.env.VITE_SERVLET_CONTEXT || '';
         return base + path;
     }
 }

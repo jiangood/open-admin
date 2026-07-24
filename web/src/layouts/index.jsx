@@ -41,7 +41,7 @@ function AppWrapper({children}) {
 }
 
 const PUBLIC_PAGES = (() => {
-    const raw = typeof OPEN_ADMIN_PUBLIC_PAGES !== 'undefined' && OPEN_ADMIN_PUBLIC_PAGES;
+    const raw = import.meta.env.VITE_PUBLIC_PAGES;
     return raw ? raw.split(',').map(s => s.trim()) : ['/login', '/test', '/forceUpdatePwd'];
 })();
 

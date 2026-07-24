@@ -1,6 +1,4 @@
-declare const SERVLET_CONTEXT: string;
-declare const OPEN_ADMIN_THEME: Record<string, string> | undefined;
-declare const OPEN_ADMIN_PUBLIC_PAGES: string | undefined;
+/// <reference types="vite/client" />
 
 declare module 'virtual:open-admin/routes' {
     import type {ComponentType} from 'react';
