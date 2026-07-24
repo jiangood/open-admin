@@ -1,7 +1,16 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Popconfirm} from 'antd'
 import React from 'react'
-import {DictUtils, FieldBoolean, FieldDictSelect, HttpUtils, Page, PermActions, ProTable} from "../../../framework";
+import {
+    DictUtils,
+    FieldBoolean,
+    FieldDictSelect,
+    FieldEditor,
+    HttpUtils,
+    Page,
+    PermActions,
+    ProTable
+} from "../../../framework";
 
 const {TextArea} = Input;
 
@@ -122,7 +131,7 @@ export default class extends React.Component {
                     </Form.Item>
 
                     <Form.Item label='内容' name='content'>
-                        <TextArea rows={12}/>
+                        <FieldEditor />
                     </Form.Item>
 
                     <Form.Item label='显示位置' name='position' rules={[{required: true}]}>
