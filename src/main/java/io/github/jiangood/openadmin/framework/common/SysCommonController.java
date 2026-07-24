@@ -10,6 +10,7 @@ import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginInfoVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
+import io.github.jiangood.openadmin.modules.system.service.ArticleService;
 import io.github.jiangood.openadmin.modules.system.service.SysDictService;
 import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
@@ -39,6 +40,7 @@ public class SysCommonController {
     private SysOrgService sysOrgService;
     private SysDictService sysDictService;
     private SysMenuService sysMenuService;
+    private ArticleService articleService;
 
     @GetMapping("public/site-info")
     public AjaxResult siteInfo() {
@@ -70,6 +72,7 @@ public class SysCommonController {
         SysUser sysUser = sysUserService.findByAccount(user.getUsername()).orElse(null);
         r.setNeedUpdatePwd(sysUser != null && sysUser.getLastPasswordChangeTime() == null);
         r.setDictInfo(sysDictService.getAllItems());
+        r.setSiteArticles(articleService.listGroupedByPosition());
 
         List<String> permissions = LoginTool.getPermissions();
         List<String> roles = LoginTool.getRoles();

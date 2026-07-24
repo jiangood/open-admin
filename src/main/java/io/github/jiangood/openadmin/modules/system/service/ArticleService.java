@@ -2,12 +2,15 @@ package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.system.entity.Article;
+import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.repository.ArticleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -31,7 +34,15 @@ public class ArticleService extends BaseService<Article> {
         return articleRepository.findByCode(code);
     }
 
-    public List<Article> listByPosition(String position) {
+    public List<Article> listByPosition(ArticlePosition position) {
         return articleRepository.findByPositionAndEnabledTrueOrderBySeqAsc(position);
+    }
+
+    public Map<String, List<Article>> listGroupedByPosition() {
+        List<Article> articles = articleRepository.findByEnabledTrueOrderBySeqAsc();
+        return articles.stream().collect(Collectors.groupingBy(
+                a -> a.getPosition().name(),
+                Collectors.toList()
+        ));
     }
 }

@@ -5,4 +5,6 @@ export class GlobalData {
     static getLoginInfo(): object;
     static setDictInfo(data: object | null): void;
     static getDictInfo(): object | null;
+    static setSiteArticles(data: object): void;
+    static getSiteArticles(): object;
 }

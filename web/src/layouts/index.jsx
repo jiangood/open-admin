@@ -85,6 +85,7 @@ export function Layouts() {
             HttpUtils.get('/admin/public/user-info').then(data => {
                 GlobalData.setDictInfo(data.dictInfo);
                 GlobalData.setLoginInfo(data.loginInfo);
+                GlobalData.setSiteArticles(data.siteArticles);
 
                 if (data.needUpdatePwd && pathname !== '/forceUpdatePwd') {
                     history.push('/forceUpdatePwd');

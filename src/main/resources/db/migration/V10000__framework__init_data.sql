@@ -18,7 +18,8 @@ INSERT INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_
 ('4', '1', 'sex', '性别', TRUE, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('5', '1', 'yesNo', '是否', TRUE, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('6', '1', 'dataPermType', '数据权限', TRUE, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('7', '1', 'statusColor', '状态颜色', TRUE, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('7', '1', 'statusColor', '状态颜色', TRUE, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('8', '1', 'articlePosition', '文章显示位置', TRUE, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 字典项
@@ -66,6 +67,13 @@ INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, crea
 ('23', 'statusColor', 'GREEN', '绿色', TRUE, NULL, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('24', 'statusColor', 'GRAY', '灰色', TRUE, NULL, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+-- 文章显示位置
+INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
+('25', 'articlePosition', 'HEADER_AVATAR_DROPDOWN', '顶部导航-头像-下拉菜单', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('26', 'articlePosition', 'HEADER_LEFT', '顶部导航-左侧', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('27', 'articlePosition', 'HEADER_RIGHT', '顶部导航-右侧', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+('28', 'articlePosition', 'NONE', '不显示', TRUE, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- ---------------------------------------------------------------------------
 -- 管理员角色
 -- ---------------------------------------------------------------------------
@@ -91,7 +99,7 @@ INSERT INTO sys_user_role (user_id, role_id) VALUES ('1', '1');
 -- ---------------------------------------------------------------------------
 
 INSERT INTO sys_article (id, code, title, content, position, seq, enabled, create_time, update_time) VALUES
-('article_about', 'about', '关于系统', '<h1>关于系统</h1><p>欢迎使用本系统。</p>', 'header-avatar-dropdown', 10, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('article_about', 'about', '关于系统', '<h1>关于系统</h1><p>欢迎使用本系统。</p>', 'HEADER_AVATAR_DROPDOWN', 10, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 INSERT INTO sys_article (id, code, title, content, position, seq, enabled, create_time, update_time) VALUES
-('article_help', 'help', '系统帮助', '<h1>系统帮助</h1><p>系统使用帮助。</p>', 'header-avatar-dropdown', 20, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('article_help', 'help', '系统帮助', '<h1>系统帮助</h1><p>系统使用帮助。</p>', 'HEADER_AVATAR_DROPDOWN', 20, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

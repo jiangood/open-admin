@@ -44,9 +44,8 @@ export default class extends React.Component {
 
         this.initMenu()
 
-        HttpUtils.get('admin/article/listByPosition', {position: 'header-left'}).then(rs => {
-            this.setState({headerLeftArticles: rs || []})
-        })
+        const siteArticles = GlobalData.getSiteArticles();
+        this.setState({headerLeftArticles: siteArticles['HEADER_LEFT'] || []})
     }
 
 

@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.framework.config;
 
 import io.github.jiangood.openadmin.util.jdbc.DbTool;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.pattern.ValidatePattern;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.CommandLineRunner;
@@ -44,6 +45,7 @@ public class DbConfig {
                     .locations( "classpath:db/migration")
                     .baselineOnMigrate(true)
                     .baselineVersion("0")
+                    .ignoreMigrationPatterns(ValidatePattern.fromPattern("*:*"))
                     .load();
             flyway.migrate();
 

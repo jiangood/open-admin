@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -25,8 +26,9 @@ public class Article extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(length = 20, nullable = false)
-    private String position;
+    @Enumerated(EnumType.STRING)
+    @Column(length = 50, nullable = false)
+    private ArticlePosition position;
 
     private Integer seq;
 
@@ -35,7 +37,7 @@ public class Article extends BaseEntity {
     @PrePersist
     public void prePersist() {
         if (position == null) {
-            position = "none";
+            position = ArticlePosition.NONE;
         }
         if (seq == null) {
             seq = 0;

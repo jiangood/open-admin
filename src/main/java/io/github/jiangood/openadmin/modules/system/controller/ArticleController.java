@@ -4,6 +4,7 @@ import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.system.entity.Article;
+import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.service.ArticleService;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
@@ -70,7 +71,7 @@ public class ArticleController {
     }
 
     @GetMapping("listByPosition")
-    public AjaxResult listByPosition(String position) {
+    public AjaxResult listByPosition(ArticlePosition position) {
         List<Article> list = articleService.listByPosition(position);
         return AjaxResult.ok().data(list);
     }

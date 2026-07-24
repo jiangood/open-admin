@@ -3,6 +3,7 @@ import {StorageUtils} from './utils/StorageUtils';
 const SITE_INFO_KEY = "siteInfo";
 const LOGIN_INFO_KEY = "loginInfo";
 const DICT_INFO_KEY = "dictInfo";
+const SITE_ARTICLES_KEY = "siteArticles";
 
 export class GlobalData {
     static setSiteInfo(data) {
@@ -28,6 +29,14 @@ export class GlobalData {
     static getDictInfo() {
         return StorageUtils.get(DICT_INFO_KEY);
     }
+
+    static setSiteArticles(data) {
+        StorageUtils.set(SITE_ARTICLES_KEY, data);
+    }
+
+    static getSiteArticles() {
+        return StorageUtils.get(SITE_ARTICLES_KEY) || {};
+    }
 }
 
-export { SITE_INFO_KEY, LOGIN_INFO_KEY, DICT_INFO_KEY };
+export { SITE_INFO_KEY, LOGIN_INFO_KEY, DICT_INFO_KEY, SITE_ARTICLES_KEY };
