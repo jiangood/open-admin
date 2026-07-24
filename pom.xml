@@ -78,15 +78,10 @@
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
         </dependency>
-        <!-- MySQL 5.7 兼容：Hibernate 7.x 已移除 MySQL 5.7 支持，
-             如使用 MySQL 5.7，取消此依赖的 optional 或消费者自行引入，
-             并在 application.yml 配置 MySQLLegacyDialect -->
         <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-community-dialects</artifactId>
-            <optional>true</optional>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-mysql</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
@@ -105,9 +100,6 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
         </dependency>
-
-<!--验证码-->
-
 
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
