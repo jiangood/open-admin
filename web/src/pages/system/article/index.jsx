@@ -51,7 +51,7 @@ export default class extends React.Component {
             title: '显示位置',
             dataIndex: 'position',
             render(v) {
-                const map = {dropdown: '用户菜单', header: '顶栏导航', none: '不显示'}
+                const map = {'header-avatar-dropdown': '头像下拉菜单', 'header-left': '顶部导航-左侧', 'header-right': '顶部导航-右侧', none: '不显示'}
                 return map[v] || v
             },
         },
@@ -128,8 +128,9 @@ export default class extends React.Component {
 
                     <Form.Item label='显示位置' name='position' rules={[{required: true}]}>
                         <Select>
-                            <Select.Option value='dropdown'>用户菜单</Select.Option>
-                            <Select.Option value='header'>顶栏导航</Select.Option>
+                            <Select.Option value='header-avatar-dropdown'>头像下拉菜单</Select.Option>
+                            <Select.Option value='header-left'>顶部导航-左侧</Select.Option>
+                            <Select.Option value='header-right'>顶部导航-右侧</Select.Option>
                             <Select.Option value='none'>不显示</Select.Option>
                         </Select>
                     </Form.Item>

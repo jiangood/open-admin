@@ -30,6 +30,7 @@ export default class extends React.Component {
 
         siteInfo: {},
 
+        headerLeftArticles: [],
     }
 
 
@@ -42,6 +43,10 @@ export default class extends React.Component {
         this.setState({siteInfo, loginInfo})
 
         this.initMenu()
+
+        HttpUtils.get('admin/article/listByPosition', {position: 'header-left'}).then(rs => {
+            this.setState({headerLeftArticles: rs || []})
+        })
     }
 
 
@@ -191,6 +196,10 @@ export default class extends React.Component {
             <Layout style={{flex: 1, overflow: 'hidden'}}>
                 <Header className='header'>
                     {this.renderTopMenu()}
+                    {this.state.headerLeftArticles.map(a => (
+                        <div key={a.code} className='item' style={{cursor: 'pointer', padding: '0 12px', whiteSpace: 'nowrap'}}
+                             onClick={() => PageUtils.open('/article/' + a.code, a.title)}>{a.title}</div>
+                    ))}
                     <HeaderRight/>
                 </Header>
 

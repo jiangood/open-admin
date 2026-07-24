@@ -19,10 +19,10 @@ export class HeaderRight extends React.Component {
     }
 
     loadArticles = () => {
-        HttpUtils.get('admin/article/listByPosition', {position: 'dropdown'}).then(rs => {
+        HttpUtils.get('admin/article/listByPosition', {position: 'header-avatar-dropdown'}).then(rs => {
             this.setState({dropdownArticles: rs || []})
         })
-        HttpUtils.get('admin/article/listByPosition', {position: 'header'}).then(rs => {
+        HttpUtils.get('admin/article/listByPosition', {position: 'header-right'}).then(rs => {
             this.setState({headerArticles: rs || []})
         })
     }
