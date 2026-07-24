@@ -2,14 +2,13 @@ package io.github.jiangood.openadmin.modules.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jiangood.openadmin.util.annotation.Remark;
-import io.github.jiangood.openadmin.framework.data.converter.ToListConverter;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
-import org.springframework.data.annotation.Transient;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -50,13 +49,13 @@ public class SysRole extends BaseEntity {
     private Boolean enabled;
 
     @Remark("权限码")
-    @Convert(converter = ToListConverter.class)
-    @Lob
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "TEXT")
     private List<String> perms;
 
     @Remark("菜单")
-    @Convert(converter = ToListConverter.class)
-    @Lob
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "TEXT")
     private List<String> menus;
 
 

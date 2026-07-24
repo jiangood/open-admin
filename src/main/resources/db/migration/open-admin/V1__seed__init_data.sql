@@ -71,7 +71,7 @@ INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, crea
 -- ---------------------------------------------------------------------------
 
 INSERT INTO sys_role (id, code, name, perms, builtin, enabled, remark, create_time, update_time)
-VALUES ('1', 'admin', '管理员', '*', TRUE, TRUE, '系统生成', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES ('1', 'admin', '管理员', '["*"]', TRUE, TRUE, '系统生成', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 管理员用户（密码：Open@1234）

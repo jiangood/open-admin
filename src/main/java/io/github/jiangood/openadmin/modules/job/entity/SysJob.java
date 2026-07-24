@@ -2,9 +2,9 @@ package io.github.jiangood.openadmin.modules.job.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jiangood.openadmin.util.annotation.Remark;
-import io.github.jiangood.openadmin.framework.data.DBConstants;
-import io.github.jiangood.openadmin.framework.data.converter.ToMapConverter;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -33,9 +33,8 @@ public class SysJob extends BaseEntity {
     @NotNull
     String jobClass;
     // 参数
-    @Lob
-    @Column(columnDefinition = DBConstants.TYPE_BLOB)
-    @Convert(converter = ToMapConverter.class)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "TEXT")
     Map<String, Object> jobData;
     // 扩展字段
     String extraInfo;
