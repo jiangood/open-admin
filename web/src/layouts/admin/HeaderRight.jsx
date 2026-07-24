@@ -1,7 +1,6 @@
 import {Avatar, Dropdown} from "antd";
 import React from "react";
-import {history} from "umi";
-import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData, ThemeUtils} from "../../framework";
+import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData, ThemeUtils, history} from "../../framework";
 
 export class HeaderRight extends React.Component {
 

@@ -3,7 +3,7 @@ import {App, ConfigProvider} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {Outlet, useLocation, history} from "umi";
+import {history, PageFrame} from "../framework";
 
 import AdminLayout from "./admin"
 import {HttpUtils, PageLoading, PageUtils, GlobalData, ThemeUtils, DownloadModal} from "../framework";
@@ -61,7 +61,8 @@ function isPublicPage(pathname, search) {
 }
 
 export function Layouts() {
-    const location = useLocation();
+    const [location, setLocation] = useState(() => history.location);
+    useEffect(() => history.listen(({location}) => setLocation(location)), []);
     const {pathname, search} = location;
     const [siteInfoLoaded, setSiteInfoLoaded] = useState(false);
     const [loginChecked, setLoginChecked] = useState(false);
@@ -100,7 +101,7 @@ export function Layouts() {
         });
     }, [location]);
 
-    if (isPublic) return <ErrorBoundary minimal><AppWrapper><Outlet/></AppWrapper></ErrorBoundary>;
+    if (isPublic) return <ErrorBoundary minimal><AppWrapper><PageFrame url={pathname + search}/></AppWrapper></ErrorBoundary>;
 
     return (
         <ErrorBoundary minimal>
@@ -117,4 +118,3 @@ export function Layouts() {
 }
 
 export default Layouts;
-export * from './PageRender'

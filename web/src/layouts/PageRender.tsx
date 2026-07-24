@@ -1,4 +1,4 @@
-import {matchRoutes, useAppData} from "umi";
+import {matchRoute} from "../framework";
 import {Result} from "antd";
 
 interface PageRenderProps {
@@ -9,14 +9,11 @@ interface PageRenderProps {
  * 通过指定 pathname 渲染页面
  */
 export function PageRender({pathname}: PageRenderProps) {
-    const appData = useAppData()
-    const matchArr = matchRoutes(appData.clientRoutes, pathname)
+    const matched = matchRoute(pathname);
 
-    if (matchArr != null) {
-        const matchResult = matchArr[matchArr.length - 1].route
-        if (matchResult && matchResult.element) {
-            return matchResult.element
-        }
+    if (matched) {
+        const {component: Comp, params} = matched;
+        return <Comp params={params}/>;
     }
 
     return (

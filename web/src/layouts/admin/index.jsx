@@ -1,9 +1,8 @@
 import React from 'react';
 import {Layout, Menu, Skeleton, Watermark} from 'antd';
 
-import {history, Link} from 'umi';
 import "./index.less"
-import {HttpUtils, NamedIcon, PageUtils, GlobalData, ThemeUtils, TreeUtils} from "../../framework";
+import {HttpUtils, NamedIcon, PageUtils, GlobalData, ThemeUtils, TreeUtils, history, Link} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabPageRender } from "./TabPageRender";

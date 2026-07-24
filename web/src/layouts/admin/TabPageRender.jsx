@@ -1,5 +1,5 @@
 import React, {useState, useEffect, useRef} from "react";
-import {history} from "umi";
+import {history} from "../../framework";
 import {PageRender} from "../PageRender";
 import {UrlUtils, ContextMenu} from "../../framework";
 

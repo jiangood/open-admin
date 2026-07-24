@@ -1,4 +1,4 @@
-import {history} from "umi";
+import {history} from '../../router';
 import {StringUtils} from "../StringUtils";
 import {UrlUtils} from "../UrlUtils";
 import {MessageUtils} from "../MessageUtils";

@@ -1,5 +1,3 @@
-import {history} from "umi";
-
 export class PageUtils {
     static redirectToLogin(): void;
     static currentParams(): Record<string, string | undefined>;
