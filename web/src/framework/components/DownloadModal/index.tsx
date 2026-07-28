@@ -9,7 +9,7 @@ import axios from "axios";
 import qs from 'qs';
 
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_SERVLET_CONTEXT || '',
+  baseURL: import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH,
   withCredentials: true,
   headers: {'Content-Type': 'application/json'},
   paramsSerializer: (params) => qs.stringify(params, {indices: false})

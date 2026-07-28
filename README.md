@@ -65,10 +65,8 @@ npm run dev                    # 默认 http://localhost:3000
 1. `package.json` 添加 `@jiangood/open-admin` 及 peer 依赖（react / react-dom / antd / @ant-design/icons / axios / dayjs / lodash / qs）
 2. `vite.config.js`：
    - 注册插件 `openAdmin()`（来自 `@jiangood/open-admin/vite-plugin`，负责扫描 `src/pages` 生成路由）
-   - `resolve.dedupe: ['react', 'react-dom']`（避免依赖链接导致双 React 实例）
-   - `optimizeDeps.exclude: ['@jiangood/open-admin']`（框架以源码发布，由业务项目 Vite 直接编译）
-   - 按 `VITE_SERVLET_CONTEXT` 配置开发代理
-3. `.env` 配置 `VITE_SERVLET_CONTEXT`（必须与后端 `server.servlet.context-path` 一致）
+
+3. `.env` 配置 `VITE_SERVER_SERVLET_CONTEXT_PATH`（必须与后端 `server.servlet.context-path` 一致）
 4. 入口 `main.jsx` 引入虚拟路由表并渲染布局：
 
 ```jsx
@@ -373,7 +371,7 @@ class ReportPage extends React.Component {
 | 位置 | 配置 |
 |------|------|
 | 后端 `application.yml` | `server.servlet.context-path` |
-| 前端 `web/.env` | `VITE_SERVLET_CONTEXT` |
+| 前端 `web/.env` | `VITE_SERVER_SERVLET_CONTEXT_PATH` |
 
 前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `UrlUtils.contextPath(path)` 拼接。
 

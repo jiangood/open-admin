@@ -66,11 +66,5 @@ cd web && npm run build                                       # 前端构建
 5. **菜单**: `src/main/resources/application-menu*.yml` 定义菜单（Map 结构，key 为菜单 id，pid 表达父子关系）
 6. **前端**: 使用 ProTable + Field* 组件快速搭建 CRUD 页面
 
-## Context-Path & Theme
-
-| 位置 | 文件 | 配置 |
-|------|------|------|
-| 后端 | `application.yml` | `server.servlet.context-path` |
-| 前端 | `web/.env` | `VITE_SERVLET_CONTEXT` / `VITE_THEME_PRIMARY_COLOR` / `VITE_THEME_SUCCESS_COLOR` / ... |
 
 完整配置和 API 参考请查看 [README.md](README.md)。

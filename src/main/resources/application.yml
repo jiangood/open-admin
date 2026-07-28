@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /change-this-servlet-context  # TODO 业务项目按需调整
+    context-path: /example
 
 spring:
   config:

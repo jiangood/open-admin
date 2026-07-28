@@ -10,7 +10,7 @@ interface RequestOptions extends AxiosRequestConfig {
 }
 
 const axiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_SERVLET_CONTEXT || '',
+    baseURL: import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH,
     withCredentials: true,
     headers: { 'Content-Type': 'application/json' },
     paramsSerializer: (params: Record<string, unknown>) => qs.stringify(params, {indices: false})

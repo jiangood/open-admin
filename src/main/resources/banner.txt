@@ -2,6 +2,8 @@ Spring Boot:  ${spring-boot.formatted-version}
 spring.application.name: ${spring.application.name}
 spring.profiles.active: ${spring.profiles.active}
 server.port: ${server.port}
+server.servlet.context-path:${server.servlet.context-path}
+
 spring.datasource.url: ${spring.datasource.url}
 spring.datasource.username: ${spring.datasource.username}
 hibernate.ddl-auto: ${spring.jpa.hibernate.ddl-auto}
