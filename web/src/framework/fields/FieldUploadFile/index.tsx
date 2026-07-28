@@ -1,18 +1,48 @@
 import React from "react";
 import ImgCrop from "antd-img-crop";
-import {Modal, Upload, message} from "antd";
+import type {ImgCropProps} from "antd-img-crop";
+import {message, Modal, Upload} from "antd";
+import type {UploadChangeParam, UploadFile, UploadProps} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import {ViewFile} from "../../views";
 import {ObjectUtils, UrlUtils} from "../../utils";
+import type {FieldProps} from '../types';
+
+/** 框架内使用的上传文件对象，额外携带 sysFile 的 id */
+export type SysUploadFile = UploadFile & { id?: string };
+
+export interface FieldUploadFileProps extends FieldProps<string> {
+    /** 最大上传数量，默认 1 */
+    maxCount?: number;
+    /** 是否启用上传前裁切图片 */
+    cropImage?: boolean;
+    /** 裁切配置（antd-img-crop 的 cropperProps） */
+    cropperProps?: ImgCropProps['cropperProps'];
+    /** 上传列表的内建样式，默认 picture-card */
+    listType?: UploadProps['listType'];
+    /** 接受的文件类型，如 image/* */
+    accept?: string;
+    /** 文件列表变化回调（新增文件上传成功后才触发） */
+    onFileChange?: (fileList: SysUploadFile[]) => void;
+}
+
+interface FieldUploadFileState {
+    maxCount: number;
+    cropImage: boolean;
+    fileList: SysUploadFile[];
+    /** 逗号分隔的文件 id */
+    value: string | null;
+    accept?: string;
+}
 
 /**
  * 上传图片前裁切， 单张图片
  *
  * 可参考 react-easy-crop
  */
-export class FieldUploadFile extends React.Component {
+export class FieldUploadFile extends React.Component<FieldUploadFileProps, FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewFileId?: string }> {
 
-    state = {
+    state: FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewFileId?: string } = {
         // 传入的参数
         maxCount: 1,
         cropImage: false,
@@ -22,26 +52,34 @@ export class FieldUploadFile extends React.Component {
         value: null, // 都好分隔的文件id
     };
 
-    constructor(props) {
+    constructor(props: FieldUploadFileProps) {
         super(props);
         ObjectUtils.copyPropertyIfPresent(props, this.state);
         this.state.fileList = this.convertInputToComponentValue(this.state.value);
     }
 
-    componentDidUpdate(prevProps) {
-        const next = {};
+    componentDidUpdate(prevProps: FieldUploadFileProps) {
+        const next: Partial<FieldUploadFileState> = {};
         if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
         if (this.props.cropImage !== prevProps.cropImage) next.cropImage = this.props.cropImage;
+
+        const prevValue = prevProps.value ?? null;
+        const curValue = this.props.value ?? null;
+        if (curValue !== prevValue && curValue !== this.state.value) {
+            next.fileList = this.convertInputToComponentValue(curValue);
+            next.value = curValue;
+        }
+
         if (Object.keys(next).length > 0) this.setState(next);
     }
 
-    convertInputToComponentValue(value) {
-        const list = [];
+    convertInputToComponentValue(value: string | null | undefined): SysUploadFile[] {
+        const list: SysUploadFile[] = [];
         if (value && value.length > 0) {
             const arr = value.split(",");
             for (const id of arr) {
                 const url = UrlUtils.contextPath('/admin/sysFile/preview/' + id);
-                const file = {id, url, uid: id, name: id, status: 'done', fileName: id};
+                const file = {id, url, uid: id, name: id, status: 'done', fileName: id} as SysUploadFile;
                 list.push(file);
             }
         }
@@ -49,8 +87,8 @@ export class FieldUploadFile extends React.Component {
         return list;
     }
 
-    convertComponentValueToOutput(fileList) {
-        const fileIds = [];
+    convertComponentValueToOutput(fileList: SysUploadFile[]): string[] {
+        const fileIds: string[] = [];
         for (const f of fileList) {
             if (f.status === 'done') {
                 if (f.response) { // 新上传的
@@ -60,23 +98,20 @@ export class FieldUploadFile extends React.Component {
                         f.id = id;
                         fileIds.push(id);
                     } else {
-                        Modal.error({title: '上传文件失败', content: ajaxResult.message});
+                        this.setState({errorTitle: '上传文件失败', errorContent: ajaxResult.message});
                     }
                 } else { // 老的
-                    fileIds.push(f.id);
+                    fileIds.push(f.id as string);
                 }
             }
         }
         return fileIds;
     }
 
-    handleChange = ({fileList, event, file}) => {
+    handleChange = ({fileList, event, file}: UploadChangeParam<SysUploadFile>) => {
         const rs = file.response;
         if (rs != null && rs.success === false) {
-            Modal.error({
-                title: '上传失败',
-                content: rs.message,
-            });
+            this.setState({errorTitle: '上传失败', errorContent: rs.message});
             return;
         }
 
@@ -84,26 +119,21 @@ export class FieldUploadFile extends React.Component {
             message.success(`文件「${rs.data?.name || ''}」上传成功`);
         }
 
-        this.setState({fileList});
-
         const newIds = this.convertComponentValueToOutput(fileList);
+        const value = newIds.join(',');
+        this.setState({fileList, value});
+
         if (newIds.length > 0 && this.props.onFileChange) {
             this.props.onFileChange(fileList);
         }
         if (this.props.onChange) {
-            const value = newIds.join(',');
             this.props.onChange(value);
         }
 
     };
 
     handlePreview = (file) => {
-        Modal.info({
-            title: '文件预览',
-            width: '80vw',
-            content: <ViewFile value={file.id} height='70vh'/>
-        });
-
+        this.setState({previewFileId: file.id});
     };
 
     render() {
@@ -113,7 +143,18 @@ export class FieldUploadFile extends React.Component {
             </ImgCrop>;
         }
 
-        return this.getUpload();
+        return <>
+            {this.getUpload()}
+            <Modal open={!!this.state.errorTitle} title={this.state.errorTitle} okText="确定"
+                   onCancel={() => this.setState({errorTitle: undefined})}
+                   onOk={() => this.setState({errorTitle: undefined})}>
+                {this.state.errorContent}
+            </Modal>
+            <Modal open={!!this.state.previewFileId} title="文件预览" width="80vw" footer={null}
+                   onCancel={() => this.setState({previewFileId: undefined})}>
+                {this.state.previewFileId && <ViewFile value={this.state.previewFileId} height='70vh'/>}
+            </Modal>
+        </>
     }
 
     getUpload = () => {

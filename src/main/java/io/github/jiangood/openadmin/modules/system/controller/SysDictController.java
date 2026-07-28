@@ -41,7 +41,7 @@ public class SysDictController {
         if (sysDictTypeService.isTypeCodeExist(param.getTypeCode(), null)) {
             return AjaxResult.err("类型编码已存在");
         }
-        SysDictType result = sysDictTypeService.save(param);
+        SysDictType result = sysDictTypeService.create(param);
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
 

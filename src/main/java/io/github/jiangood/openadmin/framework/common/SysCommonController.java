@@ -54,7 +54,7 @@ public class SysCommonController {
         return AjaxResult.ok().data(data);
     }
 
-    @GetMapping("public/user-info")
+    @GetMapping("public/login-info")
     public AjaxResult checkLogin(HttpServletRequest request) {
         LoginDataVO r = new LoginDataVO();
 

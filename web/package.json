@@ -1,10 +1,14 @@
 {
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@types/qs": "^6.15.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
     "babel-plugin-react-compiler": "^1.0.0",
-    "typescript": "^6.0.3"
+    "less": "^4.2.0",
+    "typescript": "^7.0.0",
+    "vite": "^8.0.0"
   },
   "peerDependencies": {
     "@ant-design/icons": "^6.0.0",
@@ -16,8 +20,7 @@
     "lodash": "^4.17.23",
     "qs": "^6.14.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "umi": "^4.0.0"
+    "react-dom": "^19.0.0"
   },
   "name": "@jiangood/open-admin",
   "repository": {
@@ -25,16 +28,25 @@
     "url": "https://github.com/jiangood/open-admin"
   },
   "description": "open-admin",
+  "type": "module",
   "files": [
     "src/*",
-    "config/*",
-    "!src/.umi",
+    "vite-plugin/*",
     "!src/pages/test/*"
   ],
   "main": "src/index.ts",
-  "scripts": {
-    "dev": "umi dev",
-    "build": "umi build"
+  "exports": {
+    ".": "./src/index.ts",
+    "./vite-plugin": "./vite-plugin/index.js",
+    "./src/*": "./src/*",
+    "./package.json": "./package.json"
   },
-  "version": "2.5.9"
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "version": "3.0.0"
 }

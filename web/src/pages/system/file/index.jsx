@@ -89,30 +89,36 @@ export default class extends React.Component {
     ]
 
     render() {
-        return <Page title="文件管理" description="管理系统上传文件" actions={<Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>}>
+        return <Page title="文件管理" description="管理系统上传文件">
             <ProTable
                 actionRef={this.tableRef}
+                toolBarRender={() => (
+                    <PermActions>
+                        <Button type='primary' perm='sys-file:upload' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
+                    </PermActions>
+                )}
                 request={(params) => {
                     return HttpUtils.get('admin/sysFile/page', params);
                 }}
 
                 columns={this.columns}
-
-            >
-                <Form.Item label='文件名' name='originName'>
-                    <Input/>
-                </Form.Item>
-                <Form.Item label='对象名称' name='objectName'>
-                    <Input/>
-                </Form.Item>
-                <Form.Item label='类型' name='type'>
-                    <FieldDictSelect typeCode='materialType'/>
-                </Form.Item>
-
-                <Form.Item label='上传时间' name='dateRange'>
-                    <FieldDateRange/>
-                </Form.Item>
-            </ProTable>
+                searchFormRender={() => (
+                    <>
+                        <Form.Item label='文件名' name='originName'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='对象名称' name='objectName'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='类型' name='type'>
+                            <FieldDictSelect typeCode='materialType'/>
+                        </Form.Item>
+                        <Form.Item label='上传时间' name='dateRange'>
+                            <FieldDateRange/>
+                        </Form.Item>
+                    </>
+                )}
+            />
 
             <Modal open={this.state.formOpen} title='上传文件'
                    width={800}

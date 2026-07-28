@@ -122,6 +122,7 @@ public class Spec<T> implements Specification<T> {
      * @param alias 别名，用于在结果 Dict 中获取值
      * @return this
      */
+    @SuppressWarnings("deprecation")
     public Spec<T> selectFnc(AggregateFunctionType type, String field, String alias) {
         return this.add((Specification<T>) (root, query, cb) -> {
 
@@ -150,6 +151,7 @@ public class Spec<T> implements Specification<T> {
      * @param fields 字段名列表
      * @return this
      */
+    @SuppressWarnings("deprecation")
     public Spec<T> select(String... fields) {
         return this.add((Specification<T>) (root, query, cb) -> {
 
@@ -321,7 +323,8 @@ public class Spec<T> implements Specification<T> {
      * @param <I>    值类型
      * @return this
      */
-    public <I> Spec<T> in(String field, I... values) {
+    @SafeVarargs
+    public final <I> Spec<T> in(String field, I... values) {
         List<I> list = List.of(values);
         return this.in(field, list);
     }

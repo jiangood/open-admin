@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.modules.system.dto.converter.UserConverter;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
@@ -19,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -36,8 +36,6 @@ class SysUserServiceTest {
     @Mock
     private UserConverter userConverter;
     @Mock
-    private SystemProperties systemProperties;
-    @Mock
     private PermissionStaleService permissionStaleService;
 
     private SysUserService sysUserService;
@@ -45,9 +43,9 @@ class SysUserServiceTest {
 
     @BeforeEach
     void setUp() {
-        sysUserService = new SysUserService(sysUserRepository, roleRepository, sysOrgService,
-                sysMenuRepository, userConverter, systemProperties, permissionStaleService);
         passwordEncoder = new BCryptPasswordEncoder();
+        sysUserService = new SysUserService(sysUserRepository, roleRepository, sysOrgService,
+                sysMenuRepository, userConverter, permissionStaleService, passwordEncoder);
     }
 
     @Test
@@ -153,7 +151,7 @@ class SysUserServiceTest {
         when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
         when(sysUserRepository.save(any(SysUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        sysUserService.updatePwd("1", "NewP@ss123");
+        sysUserService.updatePwd("1", "oldPassword", "NewP@ss123");
 
         verify(sysUserRepository).save(user);
         assertTrue(passwordEncoder.matches("NewP@ss123", user.getPassword()));
@@ -162,23 +160,32 @@ class SysUserServiceTest {
 
     @Test
     void testUpdatePwd_withEmptyPassword_shouldThrow() {
-        assertThrows(IllegalArgumentException.class, () -> sysUserService.updatePwd("1", ""));
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.updatePwd("1", "oldPassword", ""));
+    }
+
+    @Test
+    void testUpdatePwd_withWrongOldPassword_shouldThrow() {
+        SysUser user = new SysUser();
+        user.setId("1");
+        user.setPassword(passwordEncoder.encode("correctOldPassword"));
+        when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalStateException.class, () -> sysUserService.updatePwd("1", "wrongOldPassword", "NewP@ss123"));
     }
 
     @Test
     void testResetPwd() {
         SysUser user = new SysUser();
         user.setId("1");
-        String defaultPwd = "DefaultP@ss123";
+        String newPwd = "NewP@ss123";
 
         when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
-        when(systemProperties.getDefaultPassword()).thenReturn(defaultPwd);
         when(sysUserRepository.save(any(SysUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        sysUserService.resetPwd("1");
+        sysUserService.resetPwd("1", newPwd);
 
         verify(sysUserRepository).save(user);
-        assertTrue(passwordEncoder.matches(defaultPwd, user.getPassword()));
+        assertTrue(passwordEncoder.matches(newPwd, user.getPassword()));
         assertNull(user.getLastPasswordChangeTime());
         verify(permissionStaleService).markUserStale(user.getAccount());
     }

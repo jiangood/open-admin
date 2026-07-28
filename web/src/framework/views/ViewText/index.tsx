@@ -4,6 +4,10 @@ import {StringUtils} from "../../utils";
 
 export class ViewText extends React.Component {
 
+    state = {
+        modalOpen: false,
+    };
+
     static defaultProps = {
         ellipsis: false,
         maxLength: 15
@@ -23,20 +27,14 @@ export class ViewText extends React.Component {
         const short = StringUtils.ellipsis(value, maxLength);
         return (
             <Tooltip placement="topLeft" title={value}>
-                <span style={{cursor: 'pointer', borderBottom: '1px dashed #d9d9d9'}} onClick={this.showModal}>
+                <span style={{cursor: 'pointer', borderBottom: '1px dashed #d9d9d9'}} onClick={() => this.setState({modalOpen: true})}>
                     {short}
                 </span>
+                <Modal open={this.state.modalOpen} title="长文本内容" width={700} footer={null}
+                       onCancel={() => this.setState({modalOpen: false})}>
+                    <div style={{height: 500, overflowY: 'auto'}}>{value}</div>
+                </Modal>
             </Tooltip>
         );
     }
-
-    showModal = () => {
-        const {value} = this.props;
-        Modal.info({
-            icon: null,
-            title: '长文本内容',
-            content: <div style={{height: 500, overflowY: 'auto'}}>{value}</div>,
-            width: 700
-        });
-    };
 }

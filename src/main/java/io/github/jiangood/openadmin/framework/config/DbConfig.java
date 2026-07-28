@@ -1,7 +1,8 @@
 package io.github.jiangood.openadmin.framework.config;
 
 
-import io.github.jiangood.openadmin.util.jdbc.DbTool;
+import io.github.jiangood.openadmin.framework.data.JdbcRunner;
+import io.github.jiangood.openadmin.framework.data.impl.JdbcRunnerImpl;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.pattern.ValidatePattern;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -23,14 +24,14 @@ import java.util.List;
 public class DbConfig {
 
     @Bean
-    @ConditionalOnMissingBean(value = DbTool.class)
-    public DbTool dbTool(DataSource dataSource) {
-        return new DbTool(dataSource);
+    @ConditionalOnMissingBean(value = JdbcRunner.class)
+    public JdbcRunner jdbcRunner(DataSource dataSource) {
+        return new JdbcRunnerImpl(dataSource);
     }
 
 
     @Bean
-    public PreDdlDataSourceScriptDatabaseInitializer myData(DataSource ds, DbTool db, List<StartupHook> startupHooks) {
+    public PreDdlDataSourceScriptDatabaseInitializer myData(DataSource ds, JdbcRunner db, List<StartupHook> startupHooks) {
         return new PreDdlDataSourceScriptDatabaseInitializer(ds, db, startupHooks);
     }
 
@@ -54,13 +55,13 @@ public class DbConfig {
     }
 
     /**
-     * 在 JPA 自动建表之前执行 {@link StartupHook#beforeJpaSchemaInitialize(DbTool)} 钩子。
+     * 在 JPA 自动建表之前执行 {@link StartupHook#beforeJpaSchemaInitialize(JdbcRunner)} 钩子。
      * 不执行任何 SQL 脚本（{@code super(dataSource, null)}），仅用于生命周期回调。
      */
     public static class PreDdlDataSourceScriptDatabaseInitializer extends DataSourceScriptDatabaseInitializer {
         private final List<StartupHook> startupHooks;
-        private final DbTool db;
-        public PreDdlDataSourceScriptDatabaseInitializer(DataSource dataSource, DbTool db, List<StartupHook> startupHooks) {
+        private final JdbcRunner db;
+        public PreDdlDataSourceScriptDatabaseInitializer(DataSource dataSource, JdbcRunner db, List<StartupHook> startupHooks) {
             super(dataSource, null);
             this.startupHooks = startupHooks;
             this.db = db;

@@ -100,7 +100,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         if (!isNew) {
             Assert.state(!input.getId().equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
             List<String> childIdListById = this.findChildIdListById(input.getId());
-            Assert.state(!childIdListById.contains(input.getId()), "父节点不能为本节点的子节点，请重新选择父节点");
+            Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
         }
 
         if (input.isNew()) {

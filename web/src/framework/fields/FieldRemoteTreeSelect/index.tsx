@@ -14,13 +14,14 @@ export class FieldRemoteTreeSelect extends BaseRemoteSelect {
     }
 
     render() {
-        const { value, onChange, treeDefaultExpandAll } = this.props;
+        const { value, onChange, treeDefaultExpandAll, ...rest } = this.props;
         const { data, loading } = this.state;
 
         if (loading) return <Spin />;
 
         return (
             <TreeSelect
+                {...rest}
                 style={{ width: '100%', minWidth: 200 }}
                 allowClear
                 styles={{ popup: { root: { maxHeight: 400, overflow: 'auto' } } }}

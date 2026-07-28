@@ -1,7 +1,6 @@
-import {Avatar, Dropdown} from "antd";
+import {Avatar, Dropdown, Modal} from "antd";
 import React from "react";
-import {history} from "umi";
-import {DeviceUtils, HttpUtils, MessageUtils, PageUtils, GlobalData, ThemeUtils} from "../../framework";
+import {DeviceUtils, HttpUtils, PageUtils, GlobalData, getToken, history, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -9,6 +8,8 @@ export class HeaderRight extends React.Component {
         isMobileDevice: false,
         dropdownArticles: [],
         headerArticles: [],
+        alertVisible: false,
+        confirmVisible: false,
     };
 
     componentDidMount() {
@@ -21,23 +22,18 @@ export class HeaderRight extends React.Component {
     loadArticles = () => {
         const siteArticles = GlobalData.getSiteArticles();
         this.setState({
-            dropdownArticles: siteArticles['HEADER_AVATAR_DROPDOWN'] || [],
-            headerArticles: siteArticles['HEADER_RIGHT'] || [],
+            dropdownArticles: siteArticles[ARTICLE_HEADER_AVATAR_DROPDOWN] || [],
+            headerArticles: siteArticles[ARTICLE_HEADER_RIGHT] || [],
         })
     }
 
     logout = () => {
         HttpUtils.post('admin/auth/logout').then(async () => {
             localStorage.clear()
-            await MessageUtils.alert('退出登录成功');
-            history.replace('/login')
+            this.setState({alertVisible: true})
         }).catch(async e => {
             console.error('[HeaderRight] 退出登录失败:', e);
-            const confirm = await MessageUtils.confirm('退出登录失败，是否清空缓存');
-            if (confirm) {
-                localStorage.clear();
-                history.replace('/login')
-            }
+            this.setState({confirmVisible: true})
         })
     }
 
@@ -93,12 +89,30 @@ export class HeaderRight extends React.Component {
                 items: menuItems,
             }}>
                 <div className='item' style={{cursor: 'pointer'}}>
-                    <Avatar size="default" style={{backgroundColor: ThemeUtils.getColor('primary-color')}}>
+                    <Avatar size="default" style={{backgroundColor: getToken().colorPrimary}}>
                         {info.name?.charAt(0)}
                     </Avatar>
                     <span style={{marginLeft: 8}}>{info.name}</span>
                 </div>
             </Dropdown>
+
+            <Modal open={this.state.alertVisible} title="提示" okText="确定"
+                   onCancel={() => this.setState({alertVisible: false})}
+                   onOk={() => {
+                       this.setState({alertVisible: false});
+                        history.replace('/public/login')
+                    }}>
+                 退出登录成功
+            </Modal>
+            <Modal open={this.state.confirmVisible} title="确认操作" okText="确定" cancelText="取消"
+                   onCancel={() => this.setState({confirmVisible: false})}
+                   onOk={() => {
+                       this.setState({confirmVisible: false});
+                       localStorage.clear();
+                       history.replace('/public/login')
+                   }}>
+                退出登录失败，是否清空缓存
+            </Modal>
         </div>
     }
 }

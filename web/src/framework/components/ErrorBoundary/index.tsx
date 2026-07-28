@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, Collapse, Result} from 'antd';
-import {ThemeUtils} from '../../utils';
+import {getToken} from '../../config';
 
 interface Props {
     children: React.ReactNode;
@@ -69,7 +69,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             fontSize: 12, fontFamily: 'monospace',
             whiteSpace: 'pre-wrap', wordBreak: 'break-all',
             background: '#f5f5f5', padding: 12, borderRadius: 4,
-            color: ThemeUtils.getColor('error-color') || '#ff4d4f',
+            color: getToken().colorError,
         };
 
         return (

@@ -118,7 +118,6 @@ class MenuLoadingIntegrationTest {
         SysRole newRole = new SysRole();
         newRole.setCode("tr" + UUID.randomUUID().toString().substring(0, 6));
         newRole.setName("测试角色");
-        newRole.setBuiltin(false);
         newRole.setEnabled(true);
         newRole.setPerms(Arrays.asList("query", "save"));
 
@@ -171,7 +170,6 @@ class MenuLoadingIntegrationTest {
         SysRole normalRole = new SysRole();
         normalRole.setCode("nt" + UUID.randomUUID().toString().substring(0, 6));
         normalRole.setName("普通测试角色");
-        normalRole.setBuiltin(false);
         normalRole.setEnabled(true);
         normalRole.setPerms(Arrays.asList("query"));
 

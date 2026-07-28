@@ -1,16 +1,45 @@
 import {Button, Input, Table} from 'antd'
 import React from 'react'
 import {DeleteOutlined, PlusOutlined} from "@ant-design/icons";
+import type {FieldProps} from '../types';
 import './styles.less'
+
+/**
+ * 可编辑表格的列配置。
+ * render 返回的组件元素会被注入 value / onChange，用于编辑单元格。
+ */
+export interface FieldTableColumn {
+    /** 列标题 */
+    title?: React.ReactNode;
+    /** 字段名 */
+    dataIndex?: string;
+    /** 列宽 */
+    width?: number | string;
+    /** 自定义渲染（返回的组件会被注入 value/onChange） */
+    render?: (value: any, record: Record<string, any>, index: number) => React.ReactElement;
+    /** 其余 antd Table 列属性 */
+    [key: string]: any;
+}
+
+export interface FieldTableProps extends FieldProps<Record<string, any>[]> {
+    /** 列配置（操作列由组件自动追加） */
+    columns: FieldTableColumn[];
+    /** 容器样式 */
+    style?: React.CSSProperties;
+}
+
+interface FieldTableState {
+    dataSource: Record<string, any>[];
+}
 
 /**
  * 可编辑表格
  */
-export class FieldTable extends React.Component {
+export class FieldTable extends React.Component<FieldTableProps, FieldTableState> {
 
-    columns = [];
+    columns: FieldTableColumn[] = [];
 
-    constructor(props) {
+    constructor(props: FieldTableProps) {
         super(props);
 
         this.columns = this.props.columns.map(col => {
@@ -55,7 +84,7 @@ export class FieldTable extends React.Component {
         dataSource: []
     };
 
-    onCellChange = (index, dataIndex, e) => {
+    onCellChange = (index: number, dataIndex: string | undefined, e: any) => {
         const {dataSource} = this.state;
         const row = dataSource[index];
 
@@ -65,7 +94,7 @@ export class FieldTable extends React.Component {
         }
 
         const next = [...dataSource];
-        next[index] = {...row, [dataIndex]: v};
+        next[index] = {...row, [dataIndex as string]: v};
         this.setState({dataSource: next}, this.notifyParent);
     };
 
@@ -75,7 +104,7 @@ export class FieldTable extends React.Component {
         this.setState({dataSource}, this.notifyParent);
     };
 
-    remove = (record) => {
+    remove = (record: Record<string, any>) => {
         const {dataSource} = this.state;
         this.setState({dataSource: dataSource.filter(item => item !== record)}, this.notifyParent);
     };

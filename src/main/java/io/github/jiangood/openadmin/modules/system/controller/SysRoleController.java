@@ -46,12 +46,11 @@ public class SysRoleController {
 
     @HasPermission("sys-role:read")
     @RequestMapping("page")
-    public AjaxResult page(String name, String code, Boolean builtin,
+    public AjaxResult page(String name, String code,
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysRole> q = Spec.of();
         q.like(SysRole.Fields.name, name);
         q.like(SysRole.Fields.code, code);
-        q.eq(SysRole.Fields.builtin, builtin);
         Page<SysRole> page = sysRoleService.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }
@@ -72,7 +71,6 @@ public class SysRoleController {
     @HasPermission("sys-role:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody SysRole role) throws Exception {
-        role.setBuiltin(false);
         role = sysRoleService.save(role, null);
 
         for (SysUser user : role.getUsers()) {
@@ -187,9 +185,19 @@ public class SysRoleController {
     @HasPermission("sys-role:grant-permission")
     @RequestMapping("grant-users")
     public AjaxResult saveUserList(@RequestBody GrantUserToRoleReq request) {
+        List<String> oldUserIds = sysRoleService.findUsers(request.getId())
+            .stream().map(BaseEntity::getId).toList();
         SysRole sysRole = sysRoleService.grantUsers(request.getId(), request.getUserIdList());
-        for (SysUser user : sysRole.getUsers()) {
-            sysUserService.markPermsStale(user.getId(), user.getAccount());
+
+        Set<String> affected = new HashSet<>(oldUserIds);
+        if (request.getUserIdList() != null) {
+            affected.addAll(request.getUserIdList());
+        }
+        for (String userId : affected) {
+            SysUser user = sysUserService.findById(userId).orElse(null);
+            if (user != null) {
+                sysUserService.markPermsStale(user.getId(), user.getAccount());
+            }
         }
         return AjaxResult.ok().msg("授权用户成功");
     }

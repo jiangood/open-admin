@@ -1,31 +1,46 @@
-import {FieldRemoteSelect, FieldRemoteSelectMultiple, FieldRemoteTreeSelect} from "../fields";
-import React from "react";
+import {FieldRemoteSelect, FieldRemoteTreeSelect} from "../fields";
+import React, {type ComponentProps} from "react";
 
 export * from './PermActions'
-export * from './HasPerm'
+export * from './Perm'
 export * from './OrgTree'
 export * from './RoleTree'
 
-export function FieldUserSelect(props) {
-    return <FieldRemoteSelect url="admin/sysUser/options" {...props} />;
+class InnerFieldUserSelect extends React.Component<ComponentProps<typeof FieldRemoteSelect>> {
+    render() {
+        return <FieldRemoteSelect url="admin/sysUser/options" {...this.props} />;
+    }
 }
-export function FieldUserSelectMultiple(props) {
-    return <FieldRemoteSelectMultiple url="admin/sysUser/options" {...props} />;
+class InnerFieldUserSelectMultiple extends React.Component<ComponentProps<typeof FieldRemoteSelect>> {
+    render() {
+        return <FieldRemoteSelect url="admin/sysUser/options" multiple {...this.props} />;
+    }
+}
+class InnerFieldUnitTreeSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
+    render() {
+        return <FieldRemoteTreeSelect url="admin/sysOrg/unit-tree" {...this.props} />;
+    }
+}
+class InnerFieldDeptTreeSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
+    render() {
+        return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...this.props} />;
+    }
+}
+class InnerFieldOrgTreeSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
+    render() {
+        return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...this.props} />;
+    }
+}
+class InnerFieldOrgTreeMultipleSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
+    render() {
+        return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" multiple {...this.props} />;
+    }
 }
 
-export function FieldUnitTreeSelect(props) {
-    return <FieldRemoteTreeSelect url="admin/sysOrg/unit-tree" {...props} />;
-}
-
-export function FieldDeptTreeSelect(props) {
-    return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...props} />;
-}
-
-export function FieldOrgTreeSelect(props) {
-    return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...props} />;
-}
-
-export function FieldOrgTreeMultipleSelect(props) {
-    return <FieldRemoteSelectMultiple url="/sysOrg/dept-tree" {...props} />;
-}
+export const FieldUserSelect = InnerFieldUserSelect;
+export const FieldUserSelectMultiple = InnerFieldUserSelectMultiple;
+export const FieldUnitTreeSelect = InnerFieldUnitTreeSelect;
+export const FieldDeptTreeSelect = InnerFieldDeptTreeSelect;
+export const FieldOrgTreeSelect = InnerFieldOrgTreeSelect;
+export const FieldOrgTreeMultipleSelect = InnerFieldOrgTreeMultipleSelect;
 

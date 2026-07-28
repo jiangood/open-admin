@@ -82,20 +82,6 @@ public class BeanTool {
 
 
     /**
-     * 将源列表转换为目标列表（已废弃，建议使用copyToList方法）
-     *
-     * @param sourceList 源列表
-     * @param converter 转换函数
-     * @param <T> 源类型
-     * @param <R> 目标类型
-     * @return 目标列表
-     */
-    @Deprecated
-    public static <T, R> List<R> convertList(Iterable<T> sourceList, Function<T, R> converter) {
-        return copyToList(sourceList, converter);
-    }
-
-    /**
      * 将源列表转换为目标列表
      *
      * @param sourceList 源列表

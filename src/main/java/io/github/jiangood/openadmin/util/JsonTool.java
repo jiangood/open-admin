@@ -219,6 +219,7 @@ public class JsonTool {
      * @param <T> 泛型类型
      * @return 转换后的列表，如果转换失败返回null
      */
+    @SuppressWarnings("unchecked")
     public static <T> List<T> jsonToListQuietly(String json) {
         if (json == null) {
             return null;

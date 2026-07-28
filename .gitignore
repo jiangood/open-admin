@@ -39,3 +39,6 @@ target/
 .superpowers/
 .playwright-mcp/
 /.opencode/plans/
+*.log
+/web/test-results/*
+/web/e2e/.auth/

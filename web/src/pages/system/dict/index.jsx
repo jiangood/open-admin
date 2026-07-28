@@ -1,10 +1,11 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Modal, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
+import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
 import React from 'react';
 import {
     PermActions,
     FieldBoolean,
     FieldDictSelect,
+    FormModal,
     HttpUtils,
     Page,
     ProTable,
@@ -18,16 +19,10 @@ export default class extends React.Component {
         treeLoading: false,
         selectedType: null,
         selectedTypeCode: null,
-
-        formOpen: false,
-        formValues: {},
-        typeFormOpen: false,
-        typeFormValues: {},
-
     }
 
-    formRef = React.createRef();
-    typeFormRef = React.createRef();
+    modalRef = React.createRef();
+    typeModalRef = React.createRef();
     tableRef = React.createRef();
 
     componentDidMount() {
@@ -44,16 +39,13 @@ export default class extends React.Component {
     }
 
     handleTypeAdd = () => {
-        this.setState({
-            typeFormOpen: true,
-            typeFormValues: {pid: this.state.selectedType?.id, enabled: true},
-        })
+        this.typeModalRef.current.open({pid: this.state.selectedType?.id, enabled: true})
     }
 
     handleTypeEdit = () => {
         const {selectedType} = this.state
         if (!selectedType) return
-        this.setState({typeFormOpen: true, typeFormValues: {...selectedType}})
+        this.typeModalRef.current.open({...selectedType})
     }
 
     handleTypeDelete = () => {
@@ -65,13 +57,11 @@ export default class extends React.Component {
         })
     }
 
-    handleTypeFormFinish = values => {
+    handleTypeFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/type-create' : 'admin/dict/type-update'
-        HttpUtils.post(url, values).then(rs => {
-            this.setState({typeFormOpen: false})
-            this.loadTree()
-        })
+        await HttpUtils.post(url, values)
+        this.loadTree()
     }
 
     findNode = (nodes, key) => {
@@ -105,11 +95,11 @@ export default class extends React.Component {
     }
 
     handleItemAdd = () => {
-        this.setState({formOpen: true, formValues: {typeCode: this.state.selectedTypeCode}})
+        this.modalRef.current.open({typeCode: this.state.selectedTypeCode})
     }
 
     handleItemEdit = record => {
-        this.setState({formOpen: true, formValues: record})
+        this.modalRef.current.open(record)
     }
 
     handleItemDelete = row => {
@@ -118,13 +108,11 @@ export default class extends React.Component {
         })
     }
 
-    onItemFormFinish = values => {
+    onItemFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/create' : 'admin/dict/update'
-        HttpUtils.post(url, values).then(rs => {
-            this.setState({formOpen: false})
-            this.tableRef.current.reload()
-        })
+        await HttpUtils.post(url, values)
+        this.tableRef.current.reload()
     }
 
     columns = [
@@ -164,14 +152,16 @@ export default class extends React.Component {
         const {selectedType, selectedTypeCode} = this.state
         const hasTypeSelected = selectedType != null && selectedTypeCode != null
 
-        return <Page title="数据字典" description="管理数据字典类型和字典项"
-                    actions={<Button perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>}>
+        return <Page title="数据字典" description="管理数据字典类型和字典项">
             <Splitter>
                 <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
                     <Card loading={this.state.treeLoading}
                           size='small'
+                          title={<div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                              <Typography.Text strong>字典类型</Typography.Text>
+                              <Button size='small' perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>
+                          </div>}
                     >
-                        <Typography.Text strong style={{marginBottom: 8, display: 'block'}}>字典类型</Typography.Text>
                         <Tree
                             treeData={this.state.typeTree}
                             onSelect={this.onTreeSelect}
@@ -226,69 +216,48 @@ export default class extends React.Component {
                 </Splitter.Panel>
             </Splitter>
 
-            <Modal title={this.state.typeFormValues?.id ? '编辑字典类型' : '新增字典类型'}
-                   open={this.state.typeFormOpen}
-                   onOk={() => this.typeFormRef.current.submit()}
-                   onCancel={() => this.setState({typeFormOpen: false})}
-                   destroyOnClose
-            >
-                <Form ref={this.typeFormRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.typeFormValues}
-                      onFinish={this.handleTypeFormFinish}
-                >
-                    <Form.Item name='id' noStyle/>
-                    <Form.Item label='父类型' name='pid'>
-                        <TreeSelect treeData={this.state.typeTree}
-                                    fieldNames={{label: 'typeLabel', value: 'id'}}
-                                    allowClear
-                        />
-                    </Form.Item>
-                    <Form.Item label='类型编码' name='typeCode' rules={[{required: true}]}>
-                        <Input placeholder='举例: orderStatus'/>
-                    </Form.Item>
-                    <Form.Item label='类型名称' name='typeLabel' rules={[{required: true}]}>
-                        <Input placeholder='举例: 订单状态'/>
-                    </Form.Item>
-                    <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
-                        <FieldBoolean/>
-                    </Form.Item>
-                    <Form.Item label='序号' name='seq'>
-                        <InputNumber/>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            <FormModal ref={this.typeModalRef} title='编辑字典类型'
+                       onFinish={this.handleTypeFormFinish}>
+                <Form.Item label='父类型' name='pid'>
+                    <TreeSelect treeData={this.state.typeTree}
+                                fieldNames={{label: 'typeLabel', value: 'id'}}
+                                allowClear/>
+                </Form.Item>
+                <Form.Item label='类型编码' name='typeCode' rules={[{required: true}]}>
+                    <Input placeholder='举例: orderStatus'/>
+                </Form.Item>
+                <Form.Item label='类型名称' name='typeLabel' rules={[{required: true}]}>
+                    <Input placeholder='举例: 订单状态'/>
+                </Form.Item>
+                <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
+                    <FieldBoolean/>
+                </Form.Item>
+                <Form.Item label='序号' name='seq'>
+                    <InputNumber/>
+                </Form.Item>
+            </FormModal>
 
-            <Modal title='编辑字典项'
-                   open={this.state.formOpen}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-                   destroyOnClose
-            >
-                <Form ref={this.formRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.formValues}
-                      onFinish={this.onItemFormFinish}
-                >
-                    <Form.Item name='id' noStyle/>
-                    <Form.Item label='类型编码' name='typeCode'>
-                        <Input disabled/>
-                    </Form.Item>
-                    <Form.Item label='编码' name='code' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item label='标签' name='label' rules={[{required: true}]} help='显示文本'>
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item label='颜色' name='color'>
-                        <FieldDictSelect typeCode='statusColor'/>
-                    </Form.Item>
-                    <Form.Item label='序号' name='seq'>
-                        <InputNumber/>
-                    </Form.Item>
-                    <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
-                        <FieldBoolean/>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            <FormModal ref={this.modalRef} title='编辑字典项'
+                       onFinish={this.onItemFormFinish}>
+                <Form.Item label='类型编码' name='typeCode'>
+                    <Input disabled/>
+                </Form.Item>
+                <Form.Item label='编码' name='code' rules={[{required: true}]}>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='标签' name='label' rules={[{required: true}]} help='显示文本'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='颜色' name='color'>
+                    <FieldDictSelect typeCode='statusColor'/>
+                </Form.Item>
+                <Form.Item label='序号' name='seq'>
+                    <InputNumber/>
+                </Form.Item>
+                <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
+                    <FieldBoolean/>
+                </Form.Item>
+            </FormModal>
         </Page>
     }
 }

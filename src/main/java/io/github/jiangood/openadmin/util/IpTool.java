@@ -10,8 +10,8 @@ import com.google.common.cache.CacheBuilder;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Duration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 public class IpTool {
@@ -19,7 +19,7 @@ public class IpTool {
     private static final String LOCAL_IP = "127.0.0.1";
     private static final String LOCAL_REMOTE_HOST = "0:0:0:0:0:0:0:1";
 
-    public static Cache<String, String> IP_ADDRESS_CACHE = CacheBuilder.newBuilder().maximumSize(500).expireAfterAccess(5, TimeUnit.DAYS).build();
+    public static Cache<String, String> IP_ADDRESS_CACHE = CacheBuilder.newBuilder().maximumSize(500).expireAfterAccess(Duration.ofDays(5)).build();
 
     private static final IpProvider[] PROVIDERS = {
             new IpApiProvider(),

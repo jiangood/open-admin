@@ -22,12 +22,6 @@ import java.util.Set;
 @FieldNameConstants
 public class SysRole extends BaseEntity {
 
-    /**
-     * 是否内置，内置的不让修改
-     */
-    @Remark("是否内置")
-    @Column(nullable = false)
-    Boolean builtin;
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "sys_user_role",
@@ -76,9 +70,6 @@ public class SysRole extends BaseEntity {
     public void prePersist() {
         if (enabled == null) {
             enabled = true;
-        }
-        if (builtin == null) {
-            builtin = false;
         }
     }
 }

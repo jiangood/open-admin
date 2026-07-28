@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
+import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
     private final SysRoleRepository roleRepository;
     private final SysMenuRepository sysMenuRepository;
+    private final SysUserRepository sysUserRepository;
 
 
     public Optional<SysRole> findByCode(String code) {
@@ -35,7 +37,6 @@ public class SysRoleService extends BaseService<SysRole> {
     @Transactional
     public void deleteById(String id) {
         SysRole db = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
-        Assert.state(!db.getBuiltin(), "内置角色不能删除");
         roleRepository.deleteById(id);
     }
 
@@ -94,7 +95,6 @@ public class SysRoleService extends BaseService<SysRole> {
         sysRole.setCode(roleCode);
         sysRole.setName("管理员");
         sysRole.setPerms(List.of("*"));
-        sysRole.setBuiltin(true);
         sysRole.setRemark("系统生成");
 
         return roleRepository.save(sysRole);
@@ -109,7 +109,10 @@ public class SysRoleService extends BaseService<SysRole> {
     public SysRole grantUsers(String id, List<String> userIdList) {
         SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         role.getUsers().clear();
-
+        if (userIdList != null && !userIdList.isEmpty()) {
+            List<SysUser> userList = sysUserRepository.findAllById(userIdList);
+            role.getUsers().addAll(userList);
+        }
         return role;
     }
 

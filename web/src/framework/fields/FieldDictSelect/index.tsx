@@ -18,6 +18,7 @@ export class FieldDictSelect extends React.Component<FieldDictSelectProps> {
                        onChange={this.props.onChange}
                        style={{width: '100%', minWidth: 200}}
                        options={options}
+                       notFoundContent={options.length === 0 ? '暂无字典数据' : undefined}
         />;
     }
 }

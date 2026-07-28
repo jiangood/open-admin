@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Set;
 import java.util.Date;
 import java.util.List;
@@ -200,7 +201,8 @@ public class SysFileService {
         }
 
         Assert.hasText(suffix, "解析后缀失败");
-        Assert.state(systemProperties.getFile().getAllowUpload().contains(suffix), "文件格式" + suffix + "不允许上传");
+        Set<String> allowSet = Set.of(systemProperties.getFile().getAllowUpload().split(","));
+        Assert.state(allowSet.contains(suffix.toLowerCase()), "文件格式" + suffix + "不允许上传");
 
         String id = IdTool.uuidV7();
 
@@ -250,6 +252,9 @@ public class SysFileService {
     }
 
     public InputStream getFileStream(SysFile sysFile, Integer w) throws Exception {
+        if (w != null && Arrays.stream(IMAGE_SIZE).noneMatch(s -> s == w)) {
+            throw new IllegalArgumentException("不支持的缩略图尺寸：" + w);
+        }
         String objectName = getObjectName(sysFile, w);
         if (!fileOperator.exist(objectName)) {
             if (w != null && sysFile.getType() == MaterialType.IMAGE) {

@@ -11,8 +11,17 @@
  */
 import React from 'react';
 import {Checkbox, Radio, Select, Switch} from 'antd';
+import type {FieldProps} from '../types';
 
-export class FieldBoolean extends React.Component {
+/** 布尔值的展示类型 */
+export type FieldBooleanType = 'select' | 'radio' | 'checkbox' | 'switch';
+
+export interface FieldBooleanProps extends FieldProps<boolean> {
+    /** 展示类型，默认 select */
+    type?: FieldBooleanType;
+}
+
+export class FieldBoolean extends React.Component<FieldBooleanProps> {
 
     static defaultProps = {
         type: 'select'
@@ -58,7 +67,7 @@ export class FieldBoolean extends React.Component {
 
     }
 
-    parseBoolean(v) {
+    parseBoolean(v: any): boolean | undefined {
         if (v === null || v === undefined) {
             return undefined;
         }

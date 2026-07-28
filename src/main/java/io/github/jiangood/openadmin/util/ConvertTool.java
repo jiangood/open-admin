@@ -40,7 +40,9 @@ public class ConvertTool {
                 TypeReference<List<Integer>> typeRef = new TypeReference<>() {
                 };
                 List<Integer> list = Convert.convert(typeRef, value);
-                return (T) list;
+                @SuppressWarnings("unchecked")
+                T result = (T) list;
+                return result;
             }
         }
 

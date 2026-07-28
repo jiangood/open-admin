@@ -16,6 +16,7 @@ public class QuartzManager {
     @Resource
     private Scheduler scheduler;
 
+    @SuppressWarnings("unchecked")
     private static JobDetail getJobDetail(SysJob job) throws ClassNotFoundException {
         String jobClass = job.getJobClass();
         Class<? extends Job> cls = (Class<? extends Job>) Class.forName(jobClass);

@@ -38,5 +38,5 @@ export const Gap: React.FC<GapProps> = ({
     ...rest.style,
   };
 
-  return <div style={style} {...rest} />;
+  return <div {...rest} style={style} />;
 };

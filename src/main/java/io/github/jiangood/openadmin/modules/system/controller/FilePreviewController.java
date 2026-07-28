@@ -39,17 +39,11 @@ public class FilePreviewController {
      * 文件预览入口
      */
     @GetMapping({
-            "preview/{id}",
             "admin/preview/{id}",
-
-            // 兼容老系统
-            "sysFile/preview/{id}",
-            "admin/sysFile/preview/{id}",
-            "sysFile/preview/{id}.{suffix}"})
+            "admin/sysFile/preview/{id}"})
     public ResponseEntity<StreamingResponseBody> previewFile(@PathVariable String id,
-                                                             HttpServletRequest request,
-                                                             Integer w, // 图片宽度
-                                                             @PathVariable(required = false) String suffix) {
+                                                              HttpServletRequest request,
+                                                              Integer w) { // 图片宽度
         SysFile file = sysFileService.findById(id).orElse(null);
         if (file == null) {
             return ResponseEntity.notFound().build();

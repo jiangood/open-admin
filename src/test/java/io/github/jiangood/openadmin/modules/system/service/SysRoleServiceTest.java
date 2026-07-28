@@ -4,6 +4,7 @@ import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
+import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,11 +29,14 @@ class SysRoleServiceTest {
     @Mock
     private SysMenuRepository sysMenuRepository;
 
+    @Mock
+    private SysUserRepository sysUserRepository;
+
     private SysRoleService sysRoleService;
 
     @BeforeEach
     void setUp() {
-        sysRoleService = new SysRoleService(roleRepository, sysMenuRepository);
+        sysRoleService = new SysRoleService(roleRepository, sysMenuRepository, sysUserRepository);
     }
 
     @Test
@@ -40,8 +44,6 @@ class SysRoleServiceTest {
         SysRole adminRole = new SysRole();
         adminRole.setId("1");
         adminRole.setCode("admin");
-        adminRole.setBuiltin(true);
-
         MenuDefinition menu1 = new MenuDefinition();
         menu1.setId("sys");
         menu1.setName("系统管理");
@@ -71,7 +73,6 @@ class SysRoleServiceTest {
         SysRole normalRole = new SysRole();
         normalRole.setId("2");
         normalRole.setCode("normal");
-        normalRole.setBuiltin(false);
         normalRole.setMenus(Arrays.asList("sys", "sys-user"));
 
         MenuDefinition menu1 = new MenuDefinition();
@@ -111,7 +112,6 @@ class SysRoleServiceTest {
         SysRole normalRole = new SysRole();
         normalRole.setId("3");
         normalRole.setCode("emptymenu");
-        normalRole.setBuiltin(false);
         normalRole.setMenus(Arrays.asList());
 
         when(roleRepository.findById("3")).thenReturn(Optional.of(normalRole));
@@ -128,12 +128,9 @@ class SysRoleServiceTest {
         SysRole role1 = new SysRole();
         role1.setId("1");
         role1.setCode("admin");
-        role1.setBuiltin(true);
-
         SysRole role2 = new SysRole();
         role2.setId("2");
         role2.setCode("normal");
-        role2.setBuiltin(false);
         role2.setMenus(Arrays.asList("sys"));
 
         MenuDefinition menu1 = new MenuDefinition();
@@ -199,7 +196,6 @@ class SysRoleServiceTest {
         assertNotNull(result);
         assertEquals("admin", result.getCode());
         assertEquals("管理员", result.getName());
-        assertTrue(result.getBuiltin());
         verify(roleRepository, times(1)).save(any(SysRole.class));
     }
 
@@ -224,8 +220,6 @@ class SysRoleServiceTest {
         SysRole role = new SysRole();
         role.setId("1");
         role.setCode("test");
-        role.setBuiltin(false);
-
         MenuDefinition menu1 = new MenuDefinition();
         menu1.setId("sys");
         menu1.setName("系统管理");

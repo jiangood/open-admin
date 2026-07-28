@@ -53,7 +53,7 @@ public class SysJobController {
     @HasPermission("job:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody SysJob param) throws Exception {
-        Class.forName(param.getJobClass());
+        validateJobClass(param.getJobClass());
         service.save(param, null);
         return AjaxResult.ok().msg("创建成功");
     }
@@ -77,9 +77,9 @@ public class SysJobController {
 
     @Log("作业-执行一次")
     @HasPermission("job:trigger")
-    @GetMapping("trigger-job")
-    public AjaxResult triggerJob(String id) throws SchedulerException, ClassNotFoundException {
-        SysJob job = service.findById(id).orElse(null);
+    @PostMapping("trigger-job")
+    public AjaxResult triggerJob(@Valid @RequestBody IdReq req) throws SchedulerException, ClassNotFoundException {
+        SysJob job = service.findById(req.getId()).orElse(null);
         quartzService.triggerJob(job);
 
         return AjaxResult.ok().msg("执行一次命令已发送");
@@ -121,7 +121,7 @@ public class SysJobController {
 
     @PostMapping("get-job-param-fields")
     public AjaxResult getJobParamFields(String className, @RequestBody Map<String, Object> jobData) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, JacksonException {
-        Class<?> jobCls = Class.forName(className);
+        Class<?> jobCls = validateJobClass(className);
         String name = jobCls.getName();
 
         Option option = new Option();
@@ -241,6 +241,18 @@ public class SysJobController {
         return AjaxResult.ok().data(str.toString());
     }
 
+
+    private static Class<?> validateJobClass(String className) throws ClassNotFoundException {
+        Class<?> cls = Class.forName(className);
+        if (!Job.class.isAssignableFrom(cls)) {
+            throw new IllegalArgumentException("类 " + className + " 未实现 org.quartz.Job 接口");
+        }
+        int mod = cls.getModifiers();
+        if (Modifier.isAbstract(mod) || Modifier.isInterface(mod)) {
+            throw new IllegalArgumentException("类 " + className + " 是抽象类或接口，不能作为定时任务");
+        }
+        return cls;
+    }
 
     @ExceptionHandler(JobPersistenceException.class)
     public AjaxResult ex(JobPersistenceException e) {

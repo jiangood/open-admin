@@ -82,8 +82,6 @@ public class SystemProperties {
      */
     private boolean migrationDropOldTables = false;
 
-    private String defaultPassword;
-
     /**
      * 文件存储配置
      */

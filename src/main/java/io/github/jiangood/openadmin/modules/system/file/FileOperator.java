@@ -35,7 +35,7 @@ public interface FileOperator {
 
     boolean exist(String key);
 
-    default <T> T getClient() {
+    default Object getClient() {
         throw new UnsupportedOperationException();
     }
 

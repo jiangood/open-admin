@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.RegExUtils;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
@@ -62,7 +61,7 @@ public class ResponseTool {
     private static String removeImgPrefix(String content) {
         String reg = "(<img.*?)(https?://.*?)(/sysFile/preview.*?>)";
 
-        String result = RegExUtils.replacePattern(content, reg, "$1$3");
+        String result = content.replaceAll(reg, "$1$3");
 
         return result;
     }

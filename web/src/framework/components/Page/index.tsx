@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from "antd";
 import './index.less'
-import {ThemeUtils} from "../../utils";
+import {getToken} from "../../config";
 import { PermActions } from "../../biz/PermActions";
 
 interface PageProps {
@@ -14,34 +14,41 @@ interface PageProps {
     children?: React.ReactNode;
 }
 
-export const Page: React.FC<PageProps> = ({ padding = true, backgroundGray = false, debug = false, title, description, actions, children }) => {
-    const hasHeader = title != null;
-    const style: React.CSSProperties = {};
+export class Page extends React.Component<PageProps> {
+    render() {
+        const { padding = true, backgroundGray = false, debug = false, title, description, actions, children } = this.props;
+        const hasHeader = title != null || description != null || actions != null;
+        const style: React.CSSProperties = {};
 
-    if (padding) {
-        style.padding = 16;
-    }
-    if (backgroundGray) {
-        style.backgroundColor = ThemeUtils.getColor("background-color");
-    }
-    if (debug) {
-        style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
-    }
+        if (padding) {
+            style.padding = 16;
+        }
+        const token = getToken();
+        if (backgroundGray) {
+            style.backgroundColor = token.colorBgLayout;
+        }
+        if (debug) {
+            style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
+        }
+        if (!style.backgroundColor) {
+            style.backgroundColor = token.colorBgLayout;
+        }
 
-    return <div className={'oa-page'} style={style}>
-        {hasHeader && (
-            <div className="oa-page-header">
-                <div className="oa-page-header-top">
-                    <div className="oa-page-header-left">
-                        <div>
-                            {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
-                            {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
+        return <div className={'oa-page'} style={style}>
+            {hasHeader && (
+                <div className="oa-page-header">
+                    <div className="oa-page-header-top">
+                        <div className="oa-page-header-left">
+                            <div>
+                                {title && <Typography.Title level={5} style={{ margin: 0 }}>{title}</Typography.Title>}
+                                {description && <div><Typography.Text type="secondary">{description}</Typography.Text></div>}
+                            </div>
                         </div>
+                        {actions && <PermActions>{actions}</PermActions>}
                     </div>
-                    {actions && <PermActions>{actions}</PermActions>}
                 </div>
-            </div>
-        )}
-        {children}
-    </div>
-};
+            )}
+            {children}
+        </div>;
+    }
+}

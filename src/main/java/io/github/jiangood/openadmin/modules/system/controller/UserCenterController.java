@@ -45,8 +45,7 @@ public class UserCenterController {
 
     @PostMapping("update-pwd")
     public AjaxResult updatePwd(@RequestBody UpdatePwdReq request, HttpServletRequest servletRequest) {
-        String newPassword = request.getNewPassword();
-        sysUserService.updatePwd(LoginTool.getUserId(), newPassword);
+        sysUserService.updatePwd(LoginTool.getUserId(), request.getOldPassword(), request.getNewPassword());
         SecurityContextHolder.clearContext();
         servletRequest.getSession().invalidate();
         return AjaxResult.ok();

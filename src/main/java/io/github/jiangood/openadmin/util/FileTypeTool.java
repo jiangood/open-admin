@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.util;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class FileTypeTool {
 
     public static boolean isImage(String name) {
@@ -9,7 +7,8 @@ public class FileTypeTool {
             return false;
         }
 
-        return StringUtils.endsWithAny(name.toLowerCase(), ".png", ".jpg", ".git", ".jpeg");
+        String lower = name.toLowerCase();
+        return lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".git") || lower.endsWith(".jpeg");
     }
 
     public static boolean isOffice(String name) {
@@ -17,7 +16,8 @@ public class FileTypeTool {
             return false;
         }
 
-        return StringUtils.endsWithAny(name.toLowerCase(), ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx");
+        String lower = name.toLowerCase();
+        return lower.endsWith(".doc") || lower.endsWith(".docx") || lower.endsWith(".xls") || lower.endsWith(".xlsx") || lower.endsWith(".ppt") || lower.endsWith(".pptx");
     }
 
 }

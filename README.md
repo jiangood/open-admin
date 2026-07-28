@@ -60,7 +60,40 @@ npm run dev                    # 默认 http://localhost:3000
 
 **后端**：业务项目 `pom.xml` 添加依赖，`application.yml` 配置数据源，通过 `spring.config.import: classpath:application-lib.yml` 引入框架默认配置。
 
-**前端**：业务项目 `package.json` 添加依赖，`config.js` 注册 `common-plugin.js`（详见 `web/config/common-plugin.js`），自动获得路由注册、代理、主题等功能。
+**前端**：按以下清单配置（完整可运行示例见 [open-admin-example](https://github.com/jiangood/open-admin-example)）：
+
+1. `package.json` 添加 `@jiangood/open-admin` 及 peer 依赖（react / react-dom / antd / @ant-design/icons / axios / dayjs / lodash / qs）
+2. `vite.config.js`：
+   - 注册插件 `openAdmin()`（来自 `@jiangood/open-admin/vite-plugin`，负责扫描 `src/pages` 生成路由）
+   - `resolve.dedupe: ['react', 'react-dom']`（避免依赖链接导致双 React 实例）
+   - `optimizeDeps.exclude: ['@jiangood/open-admin']`（框架以源码发布，由业务项目 Vite 直接编译）
+   - 按 `VITE_SERVLET_CONTEXT` 配置开发代理
+3. `.env` 配置 `VITE_SERVLET_CONTEXT`（必须与后端 `server.servlet.context-path` 一致）
+4. 入口 `main.jsx` 引入虚拟路由表并渲染布局：
+
+```jsx
+import routes from 'virtual:open-admin/routes';
+import {registerRoutes, PageLoading, Layouts} from '@jiangood/open-admin';
+
+registerRoutes(routes);
+createRoot(document.getElementById('root')).render(
+    <React.Suspense fallback={<PageLoading/>}><Layouts/></React.Suspense>
+);
+```
+
+**页面约定**（vite-plugin 扫描规则）：
+
+- 页面文件放在 `src/pages/` 下，扩展名 `.jsx` 或 `.tsx`，文件名首字母小写（大写开头视为普通组件不注册路由）
+- `src/pages/product/index.jsx` → 路由 `/product`；`$code.jsx` → 动态段 `/:code`
+- 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
+
+**目录约定**（无需配置，自动识别）：
+
+| 目录 | 路由前缀 | 是否需要登录 | 是否需要 AdminLayout |
+|------|---------|-------------|-------------------|
+| `pages/` | `/` | ✅ 是 | ✅ 是 |
+| `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
+| `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
 
 **按需使用**：可只加后端依赖（REST API 访问管理功能），或只加前端依赖（对接自有后端 API）。
 
@@ -68,7 +101,7 @@ npm run dev                    # 默认 http://localhost:3000
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│  前端: React 19 + Ant Design 6 + UmiJS 4            │
+│  前端: React 19 + Ant Design 6 + Vite 8             │
 │  ┌─────────────────────────────────────────────┐    │
 │  │ @jiangood/open-admin (组件库 + 管理页面)     │    │
 │  └─────────────────────────────────────────────┘    │
@@ -111,7 +144,7 @@ web/
 
 | 层级 | 技术 |
 |------|------|
-| 前端 | React 19, Ant Design 6, UmiJS 4, TypeScript |
+| 前端 | React 19, Ant Design 6, Vite 8, TypeScript |
 | 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
 | 数据库 | MySQL 8+ |
 | 构建 | Maven (后端), npm (前端) |
@@ -122,9 +155,9 @@ web/
 
 - **用户管理**：列表/创建/编辑/重置密码/授权数据
 - **角色管理**：列表/创建/编辑/分配权限（菜单 + 按钮）
-- **权限控制**：后端 `@HasPermission("resource:action")` 注解 + AOP 切面，支持 SpEL；前端 `<Button perm="xxx:yyy" />` 和 `<HasPerm perm="xxx">` 组件
+- **权限控制**：后端 `@HasPermission("resource:action")` 注解 + AOP 切面，支持 SpEL；前端 `<Button perm="xxx:yyy" />`（配合 `PermActions`）和 `<Perm code="xxx">` 组件
 - **权限码格式**：全小写两段式 `{资源}:{操作}`，资源 kebab-case（如 `sys-user:read`、`sys-role:grant-permission`）
-- **YAML 定义**：`data/menu.yml` 中用 `perms` 对象列表定义
+- **YAML 定义**：`application-menu*.yml` 中用 `perms` 对象列表定义
 
 ### 数据字典
 
@@ -172,10 +205,12 @@ web/
 
 ### 前端要点
 
-- 组件大驼峰，页面文件 kebab-case（UmiJS 路由约定）
+- 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）
 - 使用 ES6+，强制 `const`/`let`，解构赋值
 - 优先使用框架组件：`ProTable`、`Page`、`FieldDictSelect` 等
-- 权限控制：`<Button perm="...">`、`<HasPerm perm="...">`、`<ButtonList>`
+- 权限控制：`<PermActions>` 包裹 `<Button perm="...">`、`<Perm code="...">`
+- 跨组件通信使用 `EventBus`（`emit` / `on` / `once` / `off`），不要使用 `document.dispatchEvent`
+- 对话框优先使用 `<Modal>` 组件（state 控制 `open`），避免 `Modal.info()` / `Modal.confirm()` 等静态方法
 
 ## API 参考
 
@@ -207,7 +242,7 @@ repository.findAll(spec, pageable);
 | 类 | 主要方法 |
 |----|---------|
 | `ExcelTool` | `importExcel` / `exportExcel` |
-| `DbTool` (JdbcUtils) | `findOne` / `findAll` / `insert` / `updateById` |
+| `JdbcRunner` (framework.data) | `findById` / `findAll` / `save` / `deleteById` / `count` |
 | `LoginTool` | `getUserId` / `getUser` / `getPermissions` / `isAdmin` |
 | `TreeTool` | `buildTree` / `walk` / `treeToList` / `getLeafs` |
 | `BeanTool` / `JsonTool` / `StringTool` | 常用对象/JSON/字符串操作 |
@@ -230,37 +265,51 @@ public class DataSyncJob extends BaseJob {
 
 | 组件 | 用途 |
 |------|------|
-| `PageHeader` | 页面头部组件（面包屑导航/页面标题/右侧操作区/自定义内容） |
+| `Page` | 页面容器（标题/描述/右侧操作区） |
 | `ProTable` | 数据表格，分页/筛选/工具栏，`request`/`columns`/`toolBarRender` |
-| `Page` | 页面容器 |
-| `Ellipsis` | 文本省略 |
 | `LinkButton` | 链接跳转按钮 |
 | `NamedIcon` | 通过名称渲染 Ant Design 图标 |
-| `ButtonList` | 权限控制按钮组 |
-| `HasPerm` | 权限控制容器 |
-| `ViewEllipsis` / `ViewFile` / `ViewImage` / `ViewBooleanEnableDisable` | 展示组件 |
-| `DownloadModal` | 下载弹框，提供静态 `download()` 方法，支持进度追踪/取消/重试 |
+| `PermActions` | 按子元素 `perm` 属性过滤的权限操作区 |
+| `Perm` | 权限控制容器（`code` 属性） |
+| `ViewText` / `ViewBoolean` / `ViewFile` / `ViewImage` 等 | 展示组件 |
+| `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
 
 #### 下载弹框
 
-通过静态方法 `DownloadModal.download(options)` 调用，弹框自动管理显隐和状态：
+通过 ref 调用 `download()` 方法触发下载，`title` 可自定义对话框标题，`onFinish` 在下载完成后回调：
 
 ```jsx
 import { DownloadModal } from '@jiangood/open-admin';
 
-// 默认 GET
-DownloadModal.download({
-  url: '/admin/report/export',
-  params: { type: 'monthly', year: 2026, month: 7 },
-});
+class ReportPage extends React.Component {
+  dlRef = React.createRef();
 
-// POST 请求，指定文件名
-DownloadModal.download({
-  url: '/admin/report/export',
-  method: 'POST',
-  data: { ids: ['1', '2', '3'] },
-  fileName: '批量导出.xlsx',
-});
+  handleExport = () => {
+    this.dlRef.current.download({
+      url: '/admin/report/export',
+      params: { type: 'monthly', year: 2026, month: 7 },
+    });
+  };
+
+  // POST 请求，指定文件名
+  handleBatchExport = () => {
+    this.dlRef.current.download({
+      url: '/admin/report/export',
+      method: 'POST',
+      data: { ids: ['1', '2', '3'] },
+      fileName: '批量导出.xlsx',
+    });
+  };
+
+  render() {
+    return (
+      <>
+        <Button onClick={this.handleExport}>导出报表</Button>
+        <DownloadModal ref={this.dlRef} title="导出报表" onFinish={() => this.tableRef.refresh()} />
+      </>
+    );
+  }
+}
 ```
 
 弹框展示三种状态：下载中（进度条 + 已下载/总计 + 速度）、已完成（✅ + 文件大小）、失败（❌ + 错误消息）。下载中不可关闭弹框，失败后可重试。
@@ -288,12 +337,12 @@ DownloadModal.download({
 | 类 | 主要方法 |
 |----|---------|
 | `HttpUtils` | `get` / `post` / `postForm`（axios 封装，自动 context-path） |
-| `DownloadModal` | `download` 静态方法，弹框显示下载进度和状态，支持取消/重试 |
-| `SysUtils` | `contextPath` / `getSiteInfo` / `setSiteInfo` |
+| `DownloadModal` | `download` 实例方法，弹框显示下载进度和状态，支持取消/重试 |
+| `UrlUtils` | `contextPath(path)` 拼接 context-path / URL 参数处理 |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `buildTree` / `treeToList` / `walk` |
 | `DateUtils` | `formatDate` / `formatTime` / `formatDateTime` |
-| `MessageUtils` | `success` / `error` / `confirm` |
+| `EventBus` | `on` / `once` / `emit` / `off` — 跨组件通信，优先使用，替代 `document.dispatchEvent` |
 
 ## 配置参考
 
@@ -324,20 +373,20 @@ DownloadModal.download({
 | 位置 | 配置 |
 |------|------|
 | 后端 `application.yml` | `server.servlet.context-path` |
-| 前端 `web/.env` | `SERVLET_CONTEXT` |
+| 前端 `web/.env` | `VITE_SERVLET_CONTEXT` |
 
-前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `SysUtils.contextPath(path)` 拼接。
+前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `UrlUtils.contextPath(path)` 拼接。
 
 ### 主题定制
 
 `web/.env` 配置：
 
 ```
-THEME_PRIMARY_COLOR=#1961AC
-THEME_SUCCESS_COLOR=#52c41a
-THEME_WARNING_COLOR=#faad14
-THEME_ERROR_COLOR=#ff4d4f
-THEME_BACKGROUND_COLOR=#f5f5f5
+VITE_THEME_PRIMARY_COLOR=#1961AC
+VITE_THEME_SUCCESS_COLOR=#52c41a
+VITE_THEME_WARNING_COLOR=#faad14
+VITE_THEME_ERROR_COLOR=#ff4d4f
+VITE_THEME_BACKGROUND_COLOR=#f5f5f5
 ```
 
 ## 添加业务模块
@@ -346,7 +395,7 @@ THEME_BACKGROUND_COLOR=#f5f5f5
 2. **Repository** — 继承 `BaseRepository<T, String>`，通用 CRUD + 动态查询
 3. **Service** — 继承 `BaseService<T>`，通用业务逻辑
 4. **Controller** — RESTful，返回 `AjaxResult`，`@HasPermission` 控制权限
-5. **菜单** — `src/main/resources/data/menu*.yml` 定义菜单树
+5. **菜单** — `src/main/resources/application-menu*.yml` 定义菜单树
 6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
 
 ## 内置模块

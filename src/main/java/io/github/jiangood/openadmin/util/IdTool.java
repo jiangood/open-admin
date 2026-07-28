@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util;
 
 import cn.hutool.extra.spring.SpringUtil;
-import io.github.jiangood.openadmin.util.jdbc.DbTool;
+import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -30,7 +30,7 @@ public class IdTool implements Serializable {
     private static synchronized int getIdByDb(String tableName, String prefix) {
         int codeIndex = prefix.length() + 2; // mysql substr，
         String sql = "select max(CAST(SUBSTR(id,?) as signed)) as seq  from " + tableName + " where id like ?";
-        Map<String, Object> map = SpringUtil.getBean(DbTool.class).findOne(sql, codeIndex, prefix + "%");
+        Map<String, Object> map = SpringUtil.getBean(JdbcRunner.class).findOne(sql, codeIndex, prefix + "%");
         Object seq = map.get("seq");
         if (seq == null) {
             return 0;

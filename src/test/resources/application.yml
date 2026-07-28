@@ -16,7 +16,6 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
 
 sys:
-  default-password: Open@1234
   file:
     store-type: local
     upload-path: /tmp/test-uploads

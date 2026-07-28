@@ -1,17 +1,14 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Transfer, Tree} from 'antd'
 import React from 'react'
-import {PermActions, FieldBoolean, HttpUtils, Page, PageUtils, ProTable, ViewText} from "../../../framework";
+import {FieldBoolean, FormModal, HttpUtils, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
 
 
 export default class extends React.Component {
 
     state = {
-        formValues: {},
-        formOpen: false,
-
         usersModalOpen: false,
-
+        selectedRecord: null,
 
         userList: [],
         targetKeys: [],
@@ -24,33 +21,29 @@ export default class extends React.Component {
         menuHalfChecked: []
     }
 
-    formRef = React.createRef()
+    modalRef = React.createRef()
     tableRef = React.createRef()
 
     handleAdd = () => {
-        this.setState({formOpen: true, formValues: {}})
+        this.modalRef.current.open({})
     }
 
     handleEdit = record => {
-        this.setState({formOpen: true, formValues: record}, () => {
-
-        })
+        this.modalRef.current.open(record)
     }
 
     handleEditUser = record => {
-        this.setState({usersModalOpen: true, formValues: record})
+        this.setState({usersModalOpen: true, selectedRecord: record})
         HttpUtils.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
             this.setState({userList: rs.list, targetKeys: rs.selectedKeys})
         })
     }
 
-    onFinish = values => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysRole/create' : 'admin/sysRole/update';
-        HttpUtils.post(url, values).then(rs => {
-            this.setState({formOpen: false})
-            this.tableRef.current.reload()
-        })
+        await HttpUtils.post(url, values)
+        this.tableRef.current.reload()
     }
 
     handleDelete = record => {
@@ -101,18 +94,6 @@ export default class extends React.Component {
 
         },
         {
-            title: '是否内置',
-            dataIndex: 'builtin',
-
-
-            render(v) {
-                return v == null ? null : (v ? '是' : '否')
-            },
-
-
-        },
-
-        {
             title: '权限码',
             dataIndex: 'perms',
             width: 300,
@@ -135,14 +116,14 @@ export default class extends React.Component {
                         <Button size='small' perm='sys-role:grant-permission'
                                 onClick={() => this.handleEditUser(record)}>用户设置</Button>
 
-                        <Button size='small' perm='sys-role:grant-permission' disabled={record.builtin}
+                        <Button size='small' perm='sys-role:grant-permission'
                                 onClick={() => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')}>权限设置</Button>
 
-                        <Button size='small' perm='sys-role:update' disabled={record.builtin}
+                        <Button size='small' perm='sys-role:update'
                                 onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm perm='sys-role:delete' disabled={record.builtin} title='是否确定删除系统角色'
+                        <Popconfirm perm='sys-role:delete' title='是否确定删除系统角色'
                                     onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small' disabled={record.builtin}>删除</Button>
+                            <Button size='small'>删除</Button>
                         </Popconfirm>
                     </PermActions>
                 );
@@ -152,7 +133,7 @@ export default class extends React.Component {
 
     handleSaveUsers = () => {
         const params = {
-            id: this.state.formValues.id,
+            id: this.state.selectedRecord.id,
             userIdList: this.state.targetKeys
         }
         HttpUtils.post('admin/sysRole/grant-users', params).then(rs => {
@@ -161,7 +142,7 @@ export default class extends React.Component {
     }
 
     handleEditMenu = (record) => {
-        this.setState({menuOpen: true, formValues: record, menuTreeLoading: true})
+        this.setState({menuOpen: true, selectedRecord: record, menuTreeLoading: true})
         HttpUtils.get('admin/sysRole/ownMenu', {id: record.id}).then(rs => {
             this.setState({menuChecked: rs.checked, menuHalfChecked: rs.halfChecked})
         })
@@ -171,7 +152,7 @@ export default class extends React.Component {
     }
     handleGrantMenu = () => {
         const params = {
-            id: this.state.formValues.id,
+            id: this.state.selectedRecord.id,
             menuIds: [...this.state.menuChecked, ...this.state.menuHalfChecked]
         }
         HttpUtils.post('admin/sysRole/grantMenu', params).then(rs => {
@@ -183,71 +164,54 @@ export default class extends React.Component {
         return <Page
             title="角色管理"
             description="管理系统角色，包括角色权限分配、用户设置等"
-            actions={<Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}
         >
             <ProTable
                 actionRef={this.tableRef}
+                toolBarRender={() => (
+                    <PermActions>
+                        <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
+                    </PermActions>
+                )}
                 request={(params) => HttpUtils.get('admin/sysRole/page', params)}
                 columns={this.columns}
-            >
-                <Form.Item label='角色名称' name='name'>
+                searchFormRender={() => (
+                    <>
+                        <Form.Item label='角色名称' name='name'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='角色编码' name='code'>
+                            <Input/>
+                        </Form.Item>
+                    </>
+                )}
+            />
+
+            <FormModal ref={this.modalRef} title='系统角色' onFinish={this.onFinish}>
+
+                <Form.Item label='名称' name='name' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
-                <Form.Item label='角色编码' name='code'>
+
+                <Form.Item label='编码' name='code' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
-                <Form.Item label='是否内置' name='builtin'>
-                    <Select allowClear placeholder='全部'>
-                        <Select.Option value={true}>是</Select.Option>
-                        <Select.Option value={false}>否</Select.Option>
-                    </Select>
+
+                <Form.Item label='排序' name='seq'>
+                    <InputNumber/>
                 </Form.Item>
-            </ProTable>
 
-            <Modal title='系统角色'
-                   open={this.state.formOpen}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-                   destroyOnHidden
-                   mask={{ closable: false }}
-                   width={600}
-            >
+                <Form.Item label='备注' name='remark'>
+                    <Input/>
+                </Form.Item>
 
-                <Form ref={this.formRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.formValues}
-                      onFinish={this.onFinish}
-                >
-                    <Form.Item name='id' noStyle></Form.Item>
+                <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
+                    <FieldBoolean/>
+                </Form.Item>
+
+            </FormModal>
 
 
-                    <Form.Item label='名称' name='name' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item label='编码' name='code' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-
-
-                    <Form.Item label='排序' name='seq'>
-                        <InputNumber/>
-                    </Form.Item>
-
-
-                    <Form.Item label='备注' name='remark'>
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
-                        <FieldBoolean/>
-                    </Form.Item>
-
-
-                </Form>
-            </Modal>
-
-
-            <Modal title={'角色用户' + "【" + this.state.formValues?.name + '】'}
+            <Modal title={'角色用户' + "【" + this.state.selectedRecord?.name + '】'}
                    open={this.state.usersModalOpen}
                    destroyOnHidden
                    mask={{ closable: false }}
@@ -280,7 +244,7 @@ export default class extends React.Component {
 
             </Modal>
 
-            <Modal title={'角色授权菜单权限' + "【" + this.state.formValues?.name + '】'}
+            <Modal title={'角色授权菜单权限' + "【" + this.state.selectedRecord?.name + '】'}
                    open={this.state.menuOpen}
                    destroyOnHidden
                    mask={{ closable: false }}

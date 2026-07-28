@@ -44,14 +44,18 @@ spring:
 ```json
 "dependencies": {
     "@jiangood/open-admin": "^2.0.0",
-    "umi": "^4.0.0",
     "antd": "^6.0.0",
     "react": "^19.0.0",
+    ...
+},
+"devDependencies": {
+    "vite": "^8.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
     ...
 }
 ```
 
-并确认 `config/config.js` 通过 `getPluginDir()` 机制使用了框架插件（即引用了 `@jiangood/open-admin/config`）。
+并确认 `vite.config.ts` 使用了框架插件（`import openAdmin from '@jiangood/open-admin/vite-plugin'`）。
 
 ### 目录结构检查
 
@@ -281,9 +285,9 @@ public class CustomerController {
 
 ### 路由机制说明
 
-框架的 `common-plugin.js`（UmiJS 插件）在构建时自动扫描 `src/pages/` 目录和 `node_modules/@jiangood/open-admin/src/pages/` 目录，根据文件名和目录结构自动注册路由。**只需在 `src/pages/{模块}/index.jsx` 创建页面文件，无需手动配置路由。**
+框架的 `@jiangood/open-admin/vite-plugin`（Vite 插件）在构建时自动扫描 `src/pages/` 目录和 `node_modules/@jiangood/open-admin/src/pages/` 目录，根据文件名和目录结构生成虚拟路由模块 `virtual:open-admin/routes`。**只需在 `src/pages/{模块}/index.jsx`（也支持 `.tsx`）创建页面文件，无需手动配置路由。**
 
-业务项目的 `config/config.js` 应使用 `@jiangood/open-admin/config` 作为配置源（通过 `getPluginDir()` 自动检测）。
+业务项目的 `vite.config.ts` 应注册 `@jiangood/open-admin/vite-plugin`。
 
 ### 页面模板
 
@@ -293,7 +297,7 @@ public class CustomerController {
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, Modal, Popconfirm} from 'antd'
 import React from 'react'
-import {ButtonList, HttpUtils, Page, ProTable} from "@jiangood/open-admin";
+import {PermActions, HttpUtils, Page, ProTable} from "@jiangood/open-admin";
 
 export default class extends React.Component {
 
@@ -309,12 +313,12 @@ export default class extends React.Component {
         { title: '创建时间', dataIndex: 'createTime', valueType: 'date' },
         { title: '操作', dataIndex: 'option',
             render: (_, record) => (
-                <ButtonList>
+                <PermActions>
                     <Button size='small' perm='customer:update' onClick={() => this.handleEdit(record)}>编辑</Button>
                     <Popconfirm perm='customer:delete' title='确定删除？' onConfirm={() => this.handleDelete(record)}>
                         <Button size='small'>删除</Button>
                     </Popconfirm>
-                </ButtonList>
+                </PermActions>
             ),
         },
     ]
@@ -338,11 +342,11 @@ export default class extends React.Component {
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => (
-                    <ButtonList>
+                    <PermActions>
                         <Button perm='customer:create' type='primary' onClick={this.handleAdd}>
                             <PlusOutlined /> 新增
                         </Button>
-                    </ButtonList>
+                    </PermActions>
                 )}
                 request={(params) => HttpUtils.get('admin/customer/page', params)}
                 columns={this.columns}
@@ -384,7 +388,7 @@ export default class extends React.Component {
 
 | 业务需求 | 组件 | import |
 |---------|------|--------|
-| 字典下拉 | `FieldDictSelect dict="dict_type"` | `@jiangood/open-admin` |
+| 字典下拉 | `FieldDictSelect typeCode="dict_type"` | `@jiangood/open-admin` |
 | 远程搜索下拉 | `FieldRemoteSelect url="admin/xxx/options"` | `@jiangood/open-admin` |
 | 远程树选择 | `FieldRemoteTreeSelect url="..."` | `@jiangood/open-admin` |
 | 组织树选择 | `FieldSysOrgTreeSelect` | `@jiangood/open-admin` |
@@ -407,7 +411,7 @@ export default class extends React.Component {
 | 场景 | 组件 | import |
 |------|------|--------|
 | 布尔值（是/否） | `ViewBoolean` | `@jiangood/open-admin` |
-| 布尔值（启用/停用） | `ViewBooleanEnableDisable` | `@jiangood/open-admin` |
+| 布尔值（启用/停用开关） | `ViewSwitch` | `@jiangood/open-admin` |
 | 审批状态 | `ViewApproveStatus` | `@jiangood/open-admin` |
 | 图片预览 | `ViewImage` | `@jiangood/open-admin` |
 | 文件下载 | `ViewFile` / `ViewFileButton` | `@jiangood/open-admin` |
@@ -419,30 +423,32 @@ export default class extends React.Component {
 
 ### YAML 菜单定义
 
-业务项目在 `src/main/resources/data/menu-lib-{profile}.yml` 中定义自己的菜单。框架的 `SysMenuRepositoryImpl` 支持多文件合并，框架默认菜单与业务菜单会自动合并。
-
-# src/main/resources/data/menu-lib-local.yml
-data:
-  menus:
-    - id: customer
-      name: 客户管理
-      path: /customer
-      icon: TeamOutlined
-      perms:
-        - {name: 读取, code: read}
-        - {name: 创建, code: create}
-        - {name: 更新, code: update}
-        - {name: 删除, code: delete}
-```
-
-如需要将菜单挂在框架已有菜单下（如挂在"系统管理"下），在 YAML 中指定 `parentId`：
+业务项目在 `src/main/resources/application-menu*.yml` 中定义自己的菜单（Map 格式，key 为菜单 id，`pid` 表达父子关系）。框架的 `SysMenuRepositoryImpl` 扫描 `classpath*:application-menu*.yml` 自动合并，框架默认菜单与业务菜单互不干扰。
 
 ```yaml
-    - id: customer
-      parentId: system   # 挂在系统管理菜单下
-      name: 客户管理
-      path: /system/customer
-      icon: TeamOutlined
+# src/main/resources/application-menu-customer.yml
+menus:
+  customer:
+    name: 客户管理
+    icon: TeamOutlined
+  customer-list:
+    pid: customer
+    name: 客户列表
+    path: /customer
+    perms:
+      - {name: 读取, code: customer:read}
+      - {name: 创建, code: customer:create}
+      - {name: 更新, code: customer:update}
+      - {name: 删除, code: customer:delete}
+```
+
+如需要将菜单挂在框架已有菜单下（如挂在"系统管理"下），将 `pid` 指定为框架菜单 id：
+
+```yaml
+  customer-list:
+    pid: system   # 挂在系统管理菜单下
+    name: 客户管理
+    path: /customer
 ```
 
 ### 权限对应关系
@@ -453,9 +459,9 @@ data:
 |------|---------|------|
 | 后端 | Controller `@HasPermission` | `@HasPermission("customer:create")` / `@HasPermission("customer:update")` |
 | 前端 | Button `perm` prop | `<Button perm="customer:create">新增</Button>` / `<Button perm="customer:update">编辑</Button>` |
-| 菜单 | YAML `perms` | `- {name: 创建, code: create}` / `- {name: 更新, code: update}` |
+| 菜单 | YAML `perms` | `- {name: 创建, code: customer:create}` / `- {name: 更新, code: customer:update}` |
 
-框架通过 `@HasPermission` 注解 + AOP 切面拦截未授权请求。前端 `ButtonList` 和 `HasPerm` 组件根据当前用户的权限动态显示/隐藏按钮。
+框架通过 `@HasPermission` 注解 + AOP 切面拦截未授权请求。前端 `PermActions` 和 `Perm` 组件根据当前用户的权限动态显示/隐藏按钮。
 
 ## 第五步：验证清单
 

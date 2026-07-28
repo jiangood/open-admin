@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ import java.util.Optional;
 /**
  * 通用 CRUD Service 基类
  */
-public abstract class BaseService<T> {
+public abstract class BaseService<T extends Persistable<String>> {
 
     @Autowired
     protected BaseRepository<T, String> repository;
@@ -57,6 +58,12 @@ public abstract class BaseService<T> {
     @Transactional
     public T save(T t) {
         return repository.save(t);
+    }
+
+    @Transactional
+    public T create(T entity) {
+        Assert.state(entity.isNew(), "新增时不能携带id");
+        return repository.save(entity);
     }
 
     @Transactional

@@ -1,12 +1,11 @@
 import React from 'react';
 import {Layout, Menu, Skeleton, Watermark} from 'antd';
 
-import {history, Link} from 'umi';
 import "./index.less"
-import {HttpUtils, NamedIcon, PageUtils, GlobalData, ThemeUtils, TreeUtils} from "../../framework";
+import {HttpUtils, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
-import { TabPageRender } from "./TabPageRender";
+import { TabLayout } from "./TabLayout";
 const {Header, Sider, Content} = Layout;
 /**
  * 带菜单的布局，主要处理布局宇框架结构
@@ -45,7 +44,7 @@ export default class extends React.Component {
         this.initMenu()
 
         const siteArticles = GlobalData.getSiteArticles();
-        this.setState({headerLeftArticles: siteArticles['HEADER_LEFT'] || []})
+        this.setState({headerLeftArticles: siteArticles[ARTICLE_HEADER_LEFT] || []})
     }
 
 
@@ -176,7 +175,7 @@ export default class extends React.Component {
     render() {
         const {siteInfo, loginInfo} = this.state
 
-        return <Layout className='main-layout' style={{'--primary-color': ThemeUtils.getColor("primary-color"), '--primary-color-click': ThemeUtils.getColor("primary-color-click"), '--primary-color-hover': ThemeUtils.getColor("primary-color-hover")}}>
+return <Layout className='main-layout'>
              <Sider id='left-sider'
                    width={180}
                    collapsible
@@ -229,7 +228,7 @@ export default class extends React.Component {
     renderCenterContent = () => {
         const {siteInfo, loginInfo} = this.state
         // 即使菜单为空也直接显示页面内容，不要一直显示 Skeleton
-        const tabPageRenderNode = <TabPageRender pathMenuMap={this.state.pathMenuMap}/>;
+        const tabPageRenderNode = <TabLayout pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {
             return <Watermark content={[loginInfo.name, loginInfo.account]}>
                 {tabPageRenderNode}

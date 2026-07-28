@@ -66,7 +66,10 @@ public class LogAspect {
         try {
             result = joinPoint.proceed();
         } catch (Exception e) {
-            result = AjaxResult.err(e.getMessage());
+            log.error("日志切面捕获异常: {}", joinPoint.getSignature(), e);
+            long duration = System.currentTimeMillis() - startTime;
+            logService.saveOperationLogAsync(buildLog(joinPoint, duration, params, AjaxResult.err(e.getMessage())));
+            throw e;
         } finally {
             if (result instanceof AjaxResult rs) {
                 long duration = System.currentTimeMillis() - startTime;

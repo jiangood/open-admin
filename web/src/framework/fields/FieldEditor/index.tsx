@@ -1,13 +1,19 @@
 import React from 'react';
 import {Editor as TinyMceEditor} from '@tinymce/tinymce-react';
 import {UrlUtils} from '../../utils';
+import type {FieldProps} from '../types';
+
+export interface FieldEditorProps extends FieldProps<string> {
+    /** 编辑器高度，默认 300 */
+    height?: number;
+}
 
 /**
  * 富文本编辑器
  *
  * 图片上传相关配置 https://www.tiny.cloud/docs/tinymce/7/image/
  */
-export class FieldEditor extends React.Component {
+export class FieldEditor extends React.Component<FieldEditorProps> {
     render() {
         const uploadUrl = UrlUtils.contextPath('/admin/sysFile/upload');
         const jsUrl = UrlUtils.contextPath('/admin/tinymce/tinymce.min.js');

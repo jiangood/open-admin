@@ -1,26 +1,22 @@
 import React from "react";
 import {Button, Form, Input, Modal} from "antd";
-import {history} from 'umi'
-import {HttpUtils} from "../../framework";
+import {HttpUtils, history} from "../../framework";
 
 export default class extends React.Component {
 
+    state = {
+        successModalOpen: false,
+    };
 
     onFinish = (values) => {
         HttpUtils.post('admin/userCenter/update-pwd', values).then(() => {
-            Modal.success({
-                title: '提示',
-                content: '修改密码成功',
-                onOk: () => {
-                    history.push('/login')
-                }
-            })
+            this.setState({successModalOpen: true});
         })
     }
 
     validator = (rule, value) => {
         return new Promise((resolve, reject) => {
-            HttpUtils.get("admin/sysUser/pwd-strength", {password: value}).then(response => {
+            HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false}).then(response => {
                 const rs = response.data
                 if (!rs.success) {
                     reject(rs.message)
@@ -33,6 +29,14 @@ export default class extends React.Component {
 
     render() {
         return <div>
+            <Modal open={this.state.successModalOpen} title="提示" okText="确定"
+                   onCancel={() => this.setState({successModalOpen: false})}
+                   onOk={() => {
+                       this.setState({successModalOpen: false});
+                       history.push('/public/login');
+                   }}>
+                修改密码成功
+            </Modal>
 
             <Form onFinish={this.onFinish} style={{maxWidth: 400}}>
 

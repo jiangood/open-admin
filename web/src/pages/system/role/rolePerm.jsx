@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
-import {HttpUtils, Page, PageUtils} from "../../../framework";
+import {HttpUtils, Page} from "../../../framework";
 export default class extends React.Component {
 
 
@@ -48,7 +48,7 @@ export default class extends React.Component {
     ]
 
     componentDidMount() {
-        this.roleId = PageUtils.currentParams().id;
+        this.roleId = this.props.location?.query?.id;
         this.loadData();
     }
 

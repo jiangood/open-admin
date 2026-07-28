@@ -12,9 +12,9 @@ public class MapTool {
             return map;
         }
 
-        Iterator iter = map.entrySet().iterator();
+        Iterator<Map.Entry<K, V>> iter = map.entrySet().iterator();
         while (iter.hasNext()) {
-            Map.Entry<K, V> entry = (Map.Entry) iter.next();
+            Map.Entry<K, V> entry = iter.next();
             if (entry.getValue() == null || "".equals(entry.getValue().toString())) {
                 iter.remove();
             }
@@ -23,7 +23,7 @@ public class MapTool {
         return map;
     }
 
-    public static void putIfValue(Map map, Object k, Object v) {
+    public static <K, V> void putIfValue(Map<K, V> map, K k, V v) {
         if (map != null && v != null) {
             map.put(k, v);
         }

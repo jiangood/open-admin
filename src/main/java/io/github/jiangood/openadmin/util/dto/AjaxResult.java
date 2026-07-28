@@ -118,7 +118,7 @@ public class AjaxResult {
     }
 
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public AjaxResult data(String key, Object value) {
         if (data == null) {
             this.data = new HashMap<>();

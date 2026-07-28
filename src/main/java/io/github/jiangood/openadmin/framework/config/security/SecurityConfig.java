@@ -41,14 +41,15 @@ public class SecurityConfig {
     private final SystemProperties systemProperties;
     private final Environment environment;
 
-    private final PermissionRefreshFilter permissionRefreshFilter;
     private final SecurityHolder securityHolder;
 
 
     // 配置 HTTP 安全
+    // 注意：PermissionRefreshFilter 必须作为方法参数注入，不能构造注入，
+    // 否则会形成循环依赖：SecurityConfig -> PermissionRefreshFilter -> UserDetailsService -> SysUserService -> passwordEncoder(SecurityConfig)
     @Bean
     @Order(1)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, PermissionRefreshFilter permissionRefreshFilter) throws Exception {
         http.securityMatcher("/admin/**", "/ureport/**")
                 .headers(cfg -> cfg
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表

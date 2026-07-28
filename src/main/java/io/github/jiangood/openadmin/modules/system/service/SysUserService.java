@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
-import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -28,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -51,9 +51,9 @@ public class SysUserService extends BaseService<SysUser> {
 
     private final UserConverter userConverter;
 
-    private final SystemProperties systemProperties;
-
     private final PermissionStaleService permissionStaleService;
+
+    private final PasswordEncoder passwordEncoder;
 
 
     public UserVO findOneDto(String id) {
@@ -105,12 +105,29 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
     @Transactional
-    public SysUser save(SysUser input, List<String> updateFields) {
-        boolean isNew = input.isNew();
-        // 校验
-        boolean accountUnique = this.isUnique(input.getId(), SysUser.Fields.account, input.getAccount());
-        Assert.state(accountUnique, "用户名已存在");
+    @Override
+    public SysUser create(SysUser input) {
+        Assert.state(this.isUnique(null, SysUser.Fields.account, input.getAccount()), "用户名已存在");
+        resolveOrg(input);
+        input.setPassword(PasswordTool.encode(input.getPassword()));
+        return super.create(input);
+    }
 
+    @Transactional
+    @Override
+    public SysUser update(SysUser input, List<String> fieldsToUpdate) {
+        Assert.state(this.isUnique(input.getId(), SysUser.Fields.account, input.getAccount()), "用户名已存在");
+        resolveOrg(input);
+        fieldsToUpdate.removeAll(List.of(
+            SysUser.Fields.password,
+            SysUser.Fields.dataPermType,
+            SysUser.Fields.lastPasswordChangeTime
+        ));
+        fieldsToUpdate.add(SysUser.Fields.unitId);
+        return super.update(input, fieldsToUpdate);
+    }
+
+    private void resolveOrg(SysUser input) {
         String inputOrgId = input.getDeptId();
         SysOrg org = sysOrgService.findById(inputOrgId).orElse(null);
         if (org.getType() == OrgType.TYPE_UNIT) {
@@ -121,16 +138,6 @@ public class SysUserService extends BaseService<SysUser> {
             Assert.notNull(unit, "部门%s没有所属单位".formatted(org.getName()));
             input.setUnitId(unit.getId());
         }
-
-
-        if (isNew) {
-            String password = systemProperties.getDefaultPassword();
-            input.setPassword(PasswordTool.encode(password));
-            return sysUserRepository.save(input);
-        }
-        updateFields.add(SysUser.Fields.unitId);
-        this.updateField(input, updateFields);
-        return sysUserRepository.findById(input.getId()).orElse(null);
     }
 
 
@@ -146,10 +153,11 @@ public class SysUserService extends BaseService<SysUser> {
 
 
     @Transactional
-    public void updatePwd(String userId, String newPassword) {
+    public void updatePwd(String userId, String oldPassword, String newPassword) {
         Assert.hasText(newPassword, "请输入新密码");
         SysUser sysUser = sysUserRepository.findById(userId).orElse(null);
-
+        Assert.notNull(sysUser, "用户不存在");
+        Assert.state(passwordEncoder.matches(oldPassword, sysUser.getPassword()), "旧密码不正确");
 
         PasswordTool.validateStrength(newPassword);
 
@@ -170,12 +178,6 @@ public class SysUserService extends BaseService<SysUser> {
                 .orElse(null);
     }
 
-
-    @Transactional
-    public void resetPwd(String id) {
-        String password = systemProperties.getDefaultPassword();
-        this.resetPwd(id, password);
-    }
 
     @Transactional
     public void resetPwd(String id, String plainPassword) {

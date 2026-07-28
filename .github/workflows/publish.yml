@@ -8,6 +8,19 @@ on:
 jobs:
   maven-publish:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+          MYSQL_DATABASE: open-admin
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 3306:3306
     permissions:
       contents: write
     steps:
@@ -47,8 +60,11 @@ jobs:
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE_KEY }}
 
-      - name: Maven Test
+      - name: Maven Test (H2)
         run: mvn test -q
+
+      - name: Maven Test (MySQL)
+        run: mvn test -q -Dspring.profiles.active=mysql
 
       - name: Publish MAVEN
         run: mvn -q deploy -DskipTests -P publish

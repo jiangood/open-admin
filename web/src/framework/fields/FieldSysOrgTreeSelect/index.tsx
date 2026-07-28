@@ -3,8 +3,13 @@
  */
 import React from "react";
 import {FieldRemoteTreeSelect} from "../FieldRemoteTreeSelect";
+import type {FieldProps} from '../types';
 
-export class FieldSysOrgTreeSelect extends React.Component {
+interface FieldSysOrgTreeSelectProps extends FieldProps<string | string[]> {
+    type?: string;
+}
+
+export class FieldSysOrgTreeSelect extends React.Component<FieldSysOrgTreeSelectProps> {
 
     static defaultProps = {
         type: 'dept',

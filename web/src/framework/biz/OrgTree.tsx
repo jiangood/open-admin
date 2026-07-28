@@ -1,7 +1,7 @@
 import {Alert, Skeleton, Tree} from 'antd';
 import React from 'react';
-import * as Icons from '@ant-design/icons';
 import {HttpUtils} from "../utils";
+import {NamedIcon} from "../components/NamedIcon";
 
 interface OrgTreeProps {
     onChange?: (orgId: string | null) => void;
@@ -48,12 +48,7 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
             onSelect={this.onSelectOrg}
             showIcon
             blockNode
-            icon={item => {
-                const icon = Icons[item.iconName]
-                if (icon) {
-                    return React.createElement(icon)
-                }
-            }}
+            icon={item => item.iconName ? <NamedIcon name={item.iconName}/> : null}
         />
     }
 }

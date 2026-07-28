@@ -8,8 +8,8 @@ open-admin 是一个可嵌入的后台管理系统框架。业务项目通过 Ma
 
 ## Tech Stack
 
-- **Backend**: Java 21, Spring Boot 4.0.6, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
-- **Frontend**: React 19, Ant Design 6, UmiJS 4, TypeScript
+- **Backend**: Java 21, Spring Boot 4.1.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
+- **Frontend**: React 19, Ant Design 6, Vite 8（自研 hash 路由 + PageFrame）, TypeScript
 - **Build**: Maven (backend), npm (frontend)
 
 ## Two-Project Workflow
@@ -30,7 +30,7 @@ D:/ws/
 ```bash
 mvn clean compile                                          # 编译
 mvn test -Dtest=BeanToolTest                               # 运行单个测试
-mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 排除需要 MySQL 的测试
+mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅运行纯单元测试，跳过 SpringBootTest 集成测试（更快）
 mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
@@ -40,7 +40,7 @@ cd web && npm run dev                                         # 前端开发模�
 cd web && npm run build                                       # 前端构建
 ```
 
-测试使用 H2 内存数据库，无需 MySQL。集成测试需要 MySQL，默认被排除。
+测试使用 H2 内存数据库，无需 MySQL。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
 
 ## Auto-Configuration Mechanism
 
@@ -71,6 +71,6 @@ cd web && npm run build                                       # 前端构建
 | 位置 | 文件 | 配置 |
 |------|------|------|
 | 后端 | `application.yml` | `server.servlet.context-path` |
-| 前端 | `web/.env` | `SERVLET_CONTEXT` / `THEME_PRIMARY_COLOR` / `THEME_SUCCESS_COLOR` / ... |
+| 前端 | `web/.env` | `VITE_SERVLET_CONTEXT` / `VITE_THEME_PRIMARY_COLOR` / `VITE_THEME_SUCCESS_COLOR` / ... |
 
 完整配置和 API 参考请查看 [README.md](README.md)。

@@ -59,14 +59,17 @@ export default class extends React.Component {
             <ProTable
                 request={(params) => HttpUtils.get('admin/sysLog/page', params)}
                 columns={this.columns}
-            >
-                <Form.Item label='操作' name='operation'>
-                    <Input/>
-                </Form.Item>
-                <Form.Item label='时间' name='dateRange'>
-                    <FieldDateRange/>
-                </Form.Item>
-            </ProTable>
+                searchFormRender={() => (
+                    <>
+                        <Form.Item label='操作' name='operation'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='时间' name='dateRange'>
+                            <FieldDateRange/>
+                        </Form.Item>
+                    </>
+                )}
+            />
         </Page>
     }
 

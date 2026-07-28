@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Form, Input, Modal, Popconfirm, Select, Splitter} from 'antd';
+import {Button, Card, Form, Input, Modal, Popconfirm, Select, Splitter, message} from 'antd';
 import React from 'react';
 import {
     PermActions,
@@ -7,34 +7,39 @@ import {
     FieldBoolean,
     FieldRemoteSelect,
     FieldSysOrgTreeSelect,
+    FormModal,
     HttpUtils,
     OrgTree,
     Page,
     ProTable,
+    ViewText,
 } from "../../../framework";
 import UserPerm from "./userPerm";
 
 export default class extends React.Component {
 
     state = {
-        showAddForm: false,
-        showEditForm: false,
-        formValues: {},
-
         currentOrgId: null,
+        addResultModal: { open: false, account: '', password: '' },
+        resetPwdUser: null,
     }
     permRef = React.createRef();
 
-    formRef = React.createRef()
+    modalRef = React.createRef()
     tableRef = React.createRef()
+    resetPwdRef = React.createRef()
 
     resetPwd(row) {
-        HttpUtils.post('admin/sysUser/reset-pwd', {id: row.id}).then(rs => {
-            Modal.success({
-                title: '重置密码成功',
-                content: rs
-            })
+        this.setState({resetPwdUser: row}, () => {
+            this.resetPwdRef.current.open()
         })
+    }
+
+    onFinishResetPwd = async values => {
+        await HttpUtils.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
+        message.success('重置密码成功')
+        this.setState({resetPwdUser: null})
+        this.tableRef.current?.reload()
     }
 
     handleDelete = r => {
@@ -48,12 +53,11 @@ export default class extends React.Component {
     }
 
     handleAdd = () => {
-        this.setState({formOpen: true, formValues: {}})
+        this.modalRef.current.open({})
     }
 
     handleEdit = record => {
-        record.deptId = record.deptId || record.unitId
-        this.setState({formOpen: true, formValues: record})
+        this.modalRef.current.open({...record, deptId: record.deptId || record.unitId})
     }
 
     columns = [
@@ -125,9 +129,7 @@ export default class extends React.Component {
                     <Button size='small' perm='sys-user:grant-permission'
                             onClick={() => this.permRef.current.show(record)}> 授权 </Button>
 
-                    <Popconfirm perm='sys-user:reset-password' title='确认重置密码？' onConfirm={() => this.resetPwd(record)}>
-                        <Button size='small'>重置密码</Button>
-                    </Popconfirm>
+                    <Button size='small' perm='sys-user:reset-password' onClick={() => this.resetPwd(record)}>重置密码</Button>
 
                     <Popconfirm perm='sys-user:delete' title={'是否确定删除用户'}
                                 onConfirm={() => this.handleDelete(record)}>
@@ -138,18 +140,25 @@ export default class extends React.Component {
         },
     ];
 
-    onFinish = values => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
-        HttpUtils.post(url, values).then(rs => {
-            this.setState({formOpen: false})
-            this.tableRef.current.reload()
-        })
+        const result = await HttpUtils.post(url, values)
+        if (result && result.password) {
+            this.setState({
+                addResultModal: {
+                    open: true,
+                    account: values.account,
+                    password: result.password,
+                }
+            })
+        }
+        this.tableRef.current.reload()
     }
 
     render() {
 
-        return <Page title="用户管理" description="管理系统用户" actions={<Button perm='sys-user:create' type="primary" icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
+        return <Page title="用户管理" description="管理系统用户">
             <Splitter>
                 <Splitter.Panel defaultSize={350} style={{paddingRight: 8}}>
                     <Card size='small'>
@@ -158,75 +167,113 @@ export default class extends React.Component {
                 </Splitter.Panel>
                 <Splitter.Panel style={{paddingLeft: 8}}>
                     <ProTable
-                        searchColumns={3}
+                        searchFormCols={3}
                         actionRef={this.tableRef}
+                        toolBarRender={() => (
+                            <PermActions>
+                                <Button perm='sys-user:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
+                            </PermActions>
+                        )}
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
                             return HttpUtils.get('admin/sysUser/page', params)
                         }}
                         columns={this.columns}
-                    >
-                        <Form.Item label='姓名' name='name'>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item label='登录账号' name='account'>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item label='手机号' name='phone'>
-                            <Input/>
-                        </Form.Item>
-                        <Form.Item label='角色' name='roleId'>
-                            <FieldRemoteSelect url='admin/sysRole/options' placeholder='请选择角色'/>
-                        </Form.Item>
-                        <Form.Item label='状态' name='enabled'>
-                            <Select allowClear placeholder='全部'>
-                                <Select.Option value={true}>启用</Select.Option>
-                                <Select.Option value={false}>停用</Select.Option>
-                            </Select>
-                        </Form.Item>
-                    </ProTable>
+                        searchFormRender={() => (
+                            <>
+                                <Form.Item label='姓名' name='name'>
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item label='登录账号' name='account'>
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item label='手机号' name='phone'>
+                                    <Input/>
+                                </Form.Item>
+                                <Form.Item label='角色' name='roleId'>
+                                    <FieldRemoteSelect url='admin/sysRole/options' placeholder='请选择角色'/>
+                                </Form.Item>
+                                <Form.Item label='状态' name='enabled'>
+                                    <Select allowClear placeholder='全部' options={[{value: true, label: '启用'}, {value: false, label: '停用'}]}/>
+                                </Form.Item>
+                            </>
+                        )}
+                    />
                 </Splitter.Panel>
             </Splitter>
 
 
-            <Modal title='系统用户'
-                   open={this.state.formOpen}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-                   destroyOnHidden
+            <FormModal ref={this.modalRef} title='系统用户' onFinish={this.onFinish}>
+
+                <Form.Item label='所属机构' name='deptId' rules={[{required: true}]}>
+                    <FieldSysOrgTreeSelect/>
+                </Form.Item>
+
+                <Form.Item label='姓名' name='name' rules={[{required: true}]}>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='账号' name='account' rules={[{required: true}]}>
+                    <Input/>
+                </Form.Item>
+
+                <Form.Item label='电话' name='phone'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='邮箱' name='email'>
+                    <Input/>
+                </Form.Item>
+
+                <Form.Item label='启用状态' name='enabled' rules={[{required: true}]}>
+                    <FieldBoolean/>
+
+                </Form.Item>
+
+
+
+            </FormModal>
+
+
+            <Modal
+                title="添加用户成功"
+                open={this.state.addResultModal.open}
+                onOk={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}
+                onCancel={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}
+                width={420}
+                footer={
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: 8}}>
+                        <Button onClick={() => {
+                            navigator.clipboard.writeText(`账号：${this.state.addResultModal.account}\n密码：${this.state.addResultModal.password}`);
+                            message.success('复制成功')
+                        }}>复制</Button>
+                        <Button type="primary" onClick={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}>确定</Button>
+                    </div>
+                }
             >
-
-                <Form ref={this.formRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.formValues}
-                      onFinish={this.onFinish}>
-                    <Form.Item name='id' noStyle></Form.Item>
-
-                    <Form.Item label='所属机构' name='deptId' rules={[{required: true}]}>
-                        <FieldSysOrgTreeSelect/>
-                    </Form.Item>
-
-                    <Form.Item label='姓名' name='name' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item label='账号' name='account' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-
-
-                    <Form.Item label='电话' name='phone'>
-                        <Input/>
-                    </Form.Item>
-                    <Form.Item label='邮箱' name='email'>
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item label='启用状态' name='enabled' rules={[{required: true}]}>
-                        <FieldBoolean/>
-                    </Form.Item>
-
-                </Form>
+                <div>
+                    <div style={{marginBottom: 8}}>
+                        账号：{this.state.addResultModal.account}
+                    </div>
+                    <div>
+                        密码：{this.state.addResultModal.password}
+                    </div>
+                </div>
             </Modal>
 
+            <FormModal ref={this.resetPwdRef} title='重置密码' onFinish={this.onFinishResetPwd} width={420}>
+                {this.state.resetPwdUser && (
+                    <>
+                        <Form.Item label="账号">
+                            <ViewText value={this.state.resetPwdUser.account}/>
+                        </Form.Item>
+                        <Form.Item label="姓名">
+                            <ViewText value={this.state.resetPwdUser.name}/>
+                        </Form.Item>
+                    </>
+                )}
+                <Form.Item label="新密码" name="password" rules={[{required: true, message: '请输入新密码'}]}>
+                    <Input.Password placeholder="请输入新密码"/>
+                </Form.Item>
+            </FormModal>
 
             <UserPerm ref={this.permRef} onOk={() => this.tableRef.current.reload()}/>
 

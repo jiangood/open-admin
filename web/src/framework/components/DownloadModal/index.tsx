@@ -9,7 +9,7 @@ import axios from "axios";
 import qs from 'qs';
 
 const axiosInstance = axios.create({
-  baseURL: (typeof SERVLET_CONTEXT !== 'undefined' && SERVLET_CONTEXT) || '',
+  baseURL: import.meta.env.VITE_SERVLET_CONTEXT || '',
   withCredentials: true,
   headers: {'Content-Type': 'application/json'},
   paramsSerializer: (params) => qs.stringify(params, {indices: false})
@@ -34,15 +34,19 @@ interface ModalState {
   errorMessage: string;
 }
 
-export class DownloadModal extends React.Component<{}, ModalState> {
-  static instance: DownloadModal | null = null;
+export interface DownloadModalProps {
+  title?: string;
+  onFinish?: () => void;
+}
+
+export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
   private abortController: AbortController | null = null;
   private lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;
   private lastLoaded: number = 0;
   private speedTimer: ReturnType<typeof setInterval> | null = null;
 
-  constructor(props: {}) {
+  constructor(props: DownloadModalProps) {
     super(props);
     this.state = {
       open: false,
@@ -54,21 +58,14 @@ export class DownloadModal extends React.Component<{}, ModalState> {
       speed: '',
       errorMessage: '',
     };
-    DownloadModal.instance = this;
   }
 
-  static download(options: DownloadOptions) {
-    const instance = DownloadModal.instance;
-    if (instance) {
-      instance.startDownload(options);
-    } else {
-      console.warn('[DownloadModal] 组件未挂载，download() 调用被忽略');
-    }
-  }
+  download = (options: DownloadOptions) => {
+    this.startDownload(options);
+  };
 
   componentWillUnmount() {
     this.clearSpeedTimer();
-    DownloadModal.instance = null;
   }
 
   private clearSpeedTimer() {
@@ -236,6 +233,7 @@ export class DownloadModal extends React.Component<{}, ModalState> {
         speed: '',
         loaded: total || this.state.loaded,
       });
+      this.props.onFinish?.();
     }).catch((error: any) => {
       this.clearSpeedTimer();
       if (axios.isCancel(error)) {
@@ -260,9 +258,9 @@ export class DownloadModal extends React.Component<{}, ModalState> {
 
     return (
       <Modal
-        title={<span><DownloadOutlined style={{marginRight: 8}}/>文件下载</span>}
+        title={<span><DownloadOutlined style={{marginRight: 8}}/>{this.props.title || '文件下载'}</span>}
         open={open}
-        maskClosable={false}
+        mask={{closable: false}}
         closable={status !== 'downloading'}
         onCancel={this.handleClose}
         footer={
@@ -275,7 +273,7 @@ export class DownloadModal extends React.Component<{}, ModalState> {
             </>
           ) : null
         }
-        destroyOnClose
+        destroyOnHidden
       >
         <div style={{padding: '20px 0'}}>
           {/* 文件名 */}

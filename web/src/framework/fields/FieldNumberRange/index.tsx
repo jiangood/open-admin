@@ -1,21 +1,30 @@
 import React from "react";
 import {InputNumber} from "antd";
 import {StringUtils} from "../../utils";
+import type {FieldProps} from '../types';
 
 const SP = StringUtils.ISO_SPLITTER;
 
-export class FieldNumberRange extends React.Component {
-    onChangeA = (a) => {
+/** 数字范围值，形如 "1/100"（起止以 / 分隔） */
+export type FieldNumberRangeValue = string;
+
+export interface FieldNumberRangeProps extends FieldProps<FieldNumberRangeValue> {
+    /** 默认值（形如 "1/100"），value 为空时挂载后回填 */
+    defaultValue?: string;
+}
+
+export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
+    onChangeA = (a: number | string | null) => {
         const {b} = this.parse(this.props.value);
         this.props.onChange && this.props.onChange(this.merge(a, b));
     };
 
-    onChangeB = (b) => {
+    onChangeB = (b: number | string | null) => {
         const {a} = this.parse(this.props.value);
         this.props.onChange && this.props.onChange(this.merge(a, b));
     };
 
-    merge(a, b) {
+    merge(a: number | string | null, b: number | string | null): string {
         if (a == null) {
             a = '';
         }
@@ -25,7 +34,7 @@ export class FieldNumberRange extends React.Component {
         return a + SP + b;
     }
 
-    parse(v) {
+    parse(v: string | null | undefined): { a: number | null; b: number | null } {
         if (v == null) {
             return {a: null, b: null};
         }

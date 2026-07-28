@@ -3,11 +3,11 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.StrUtil;
-import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.DropdownReq;
 import io.github.jiangood.openadmin.util.dto.IdReq;
@@ -49,8 +49,6 @@ public class SysUserController {
 
     private final SysOrgService sysOrgService;
 
-    private final SystemProperties systemProperties;
-
 
     @HasPermission("sys-user:read")
     @RequestMapping("page")
@@ -67,17 +65,17 @@ public class SysUserController {
     @HasPermission("sys-user:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody SysUser input) throws Exception {
-        sysUserService.save(input, null);
-        String defaultPassword = systemProperties.getDefaultPassword();
-        String message = "添加新用户成功,密码：" + defaultPassword;
-        return AjaxResult.ok(message);
+        String plain = PasswordTool.random();
+        input.setPassword(plain);
+        sysUserService.create(input);
+        return AjaxResult.ok("添加新用户成功").data("password", plain);
     }
 
     @Log("用户-更新")
     @HasPermission("sys-user:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
-        sysUserService.save(input, updateFields);
+        sysUserService.update(input, updateFields);
         sysUserService.markPermsStale(input.getId(), input.getAccount());
         return AjaxResult.ok("更新成功");
     }
@@ -119,10 +117,9 @@ public class SysUserController {
     @HasPermission("sys-user:reset-password")
     @PostMapping("reset-pwd")
     public AjaxResult resetPwd(@RequestBody SysUser user) {
-        String defaultPassWord = systemProperties.getDefaultPassword();
-        Assert.hasText(defaultPassWord, "未配置默认密码，请再配置sys.default-password");
-        sysUserService.resetPwd(user.getId());
-        return AjaxResult.ok().msg("重置成功,新密码为：" + defaultPassWord).data("新密码：" + defaultPassWord);
+        Assert.hasText(user.getPassword(), "请输入新密码");
+        sysUserService.resetPwd(user.getId(), user.getPassword());
+        return AjaxResult.ok().msg("重置成功");
     }
 
 

@@ -1,11 +1,12 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal, Popconfirm} from 'antd'
+import {Button, Form, Input, InputNumber, Popconfirm} from 'antd'
 import React from 'react'
 import {
     DictUtils,
     FieldBoolean,
     FieldDictSelect,
     FieldEditor,
+    FormModal,
     HttpUtils,
     Page,
     PermActions,
@@ -17,28 +18,27 @@ const {TextArea} = Input;
 export default class extends React.Component {
 
     state = {
-        formValues: {},
-        formOpen: false,
+        editing: false,
     }
 
-    formRef = React.createRef()
+    modalRef = React.createRef()
     tableRef = React.createRef()
 
     handleAdd = () => {
-        this.setState({formOpen: true, formValues: {}})
+        this.setState({editing: false})
+        this.modalRef.current.open({})
     }
 
     handleEdit = record => {
-        this.setState({formOpen: true, formValues: record})
+        this.setState({editing: true})
+        this.modalRef.current.open(record)
     }
 
-    onFinish = values => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/article/create' : 'admin/article/update';
-        HttpUtils.post(url, values).then(rs => {
-            this.setState({formOpen: false})
-            this.tableRef.current.reload()
-        })
+        await HttpUtils.post(url, values)
+        this.tableRef.current.reload()
     }
 
     handleDelete = record => {
@@ -94,59 +94,54 @@ export default class extends React.Component {
         return <Page
             title="文章管理"
             description="管理系统文章，如关于、帮助等页面"
-            actions={<Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}
         >
             <ProTable
                 actionRef={this.tableRef}
+                toolBarRender={() => (
+                    <PermActions>
+                        <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
+                    </PermActions>
+                )}
                 request={(params) => HttpUtils.get('admin/article/page', params)}
                 columns={this.columns}
-            >
-                <Form.Item label='编码' name='code'>
+                searchFormRender={() => (
+                    <>
+                        <Form.Item label='编码' name='code'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='标题' name='title'>
+                            <Input/>
+                        </Form.Item>
+                    </>
+                )}
+            />
+
+            <FormModal ref={this.modalRef} title='文章' width={800} onFinish={this.onFinish}>
+
+                <Form.Item label='编码' name='code' rules={[{required: true}]}>
+                    <Input disabled={this.state.editing}/>
+                </Form.Item>
+
+                <Form.Item label='标题' name='title' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
-                <Form.Item label='标题' name='title'>
-                    <Input/>
+
+                <Form.Item label='内容' name='content'>
+                    <FieldEditor />
                 </Form.Item>
-            </ProTable>
 
-            <Modal title='文章'
-                   open={this.state.formOpen}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-                   destroyOnHidden
-                   width={800}
-            >
-                <Form ref={this.formRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.formValues}
-                      onFinish={this.onFinish}
-                >
-                    <Form.Item name='id' noStyle></Form.Item>
+                <Form.Item label='显示位置' name='position' rules={[{required: true}]}>
+                    <FieldDictSelect typeCode='articlePosition'/>
+                </Form.Item>
 
-                    <Form.Item label='编码' name='code' rules={[{required: true}]}>
-                        <Input disabled={!!this.state.formValues.id}/>
-                    </Form.Item>
+                <Form.Item label='排序' name='seq'>
+                    <InputNumber/>
+                </Form.Item>
 
-                    <Form.Item label='标题' name='title' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item label='内容' name='content'>
-                        <FieldEditor />
-                    </Form.Item>
-
-                    <Form.Item label='显示位置' name='position' rules={[{required: true}]}>
-                        <FieldDictSelect typeCode='articlePosition'/>
-                    </Form.Item>
-
-                    <Form.Item label='排序' name='seq'>
-                        <InputNumber/>
-                    </Form.Item>
-
-                    <Form.Item label='启用' name='enabled'>
-                        <FieldBoolean/>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                <Form.Item label='启用' name='enabled'>
+                    <FieldBoolean/>
+                </Form.Item>
+            </FormModal>
         </Page>
     }
 }

@@ -38,11 +38,17 @@ public class S3FileOperator implements FileOperator {
 
     @Override
     public void save(String key, InputStream inputStream) throws Exception {
-        s3Client.putObject(PutObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(key)
-                        .build(),
-                RequestBody.fromInputStream(inputStream, inputStream.available()));
+        File tempFile = FileUtil.createTempFile();
+        try {
+            FileUtil.writeFromStream(inputStream, tempFile, true);
+            s3Client.putObject(PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(key)
+                            .build(),
+                    RequestBody.fromFile(tempFile));
+        } finally {
+            FileUtil.del(tempFile);
+        }
     }
 
     @Override

@@ -1,15 +1,81 @@
 import React from "react";
 import {Button, Form, Table} from 'antd';
+import type {FormInstance, TableProps} from 'antd';
 
 import {StringUtils} from "../../utils";
 
 import './index.less'
 
+/** 通过 actionRef 暴露的表格操作 */
+export interface ProTableActionRef {
+    reload: () => void;
+}
 
-export class ProTable extends React.Component {
+/** request 返回结构（Spring Data Page 序列化 + 扩展数据） */
+export interface ProTableRequestResult<T = any> {
+    content: T[];
+    totalElements: number | string;
+    size: number;
+    extData?: {
+        summary?: React.ReactNode;
+        [key: string]: any;
+    };
+}
+
+export interface ProTableProps<T = any> {
+    /** 数据请求，框架自动注入 page/size/sort 参数 */
+    request: (params: Record<string, any>) => Promise<ProTableRequestResult<T>>;
+    /** antd Table 列定义 */
+    columns: TableProps<T>['columns'];
+    /** 获取表格操作句柄（reload） */
+    actionRef?: React.MutableRefObject<ProTableActionRef | undefined>;
+    /** 获取搜索表单实例 */
+    formRef?: React.MutableRefObject<FormInstance | undefined>;
+    /** 工具栏渲染，参数为当前搜索值与行选择状态 */
+    toolBarRender?: (params: Record<string, any>, selection: {
+        selectedRows: T[];
+        selectedRowKeys: React.Key[];
+    }) => React.ReactNode;
+    rowKey?: string;
+    /** 行选择：true 为默认 checkbox，对象可覆盖 type/onChange */
+    rowSelection?: boolean | {
+        type?: 'checkbox' | 'radio';
+        onChange?: (selectedRowKeys: React.Key[], selectedRows: T[]) => void;
+    };
+    defaultPageSize?: number;
+    /** 搜索栏每行列数，默认 4 */
+    searchFormCols?: number;
+    /** 搜索表单渲染函数，返回 Form.Item 列表 */
+    searchFormRender?: () => React.ReactNode;
+    scrollY?: number | string;
+    bordered?: boolean;
+}
+
+interface ProTableState<T = any> {
+    selectedRowKeys: React.Key[];
+    selectedRows: T[];
+    tableSize: 'small' | 'middle' | 'large';
+    loading: boolean;
+    params: Record<string, any>;
+    dataSource: T[];
+    total: number;
+    current: number;
+    pageSize: number;
+    sorter: {
+        field?: string;
+        order?: 'ascend' | 'descend' | null;
+    };
+    extData: {
+        summary?: React.ReactNode;
+        [key: string]: any;
+    };
+    scrollY: number | string | null;
+}
+
+export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTableState<T>> {
 
 
-    state = {
+    state: ProTableState<T> = {
         selectedRowKeys: [],
         selectedRows: [],
 
@@ -39,15 +105,16 @@ export class ProTable extends React.Component {
     }
 
 
-    constructor(props) {
+    id: string;
+    formRef: React.RefObject<FormInstance | null> = React.createRef();
+
+    constructor(props: ProTableProps<T>) {
         super(props);
         if (props.defaultPageSize) {
             this.state.pageSize = props.defaultPageSize
         }
         this.id = StringUtils.random(32)
     }
-
-    formRef = React.createRef()
 
     componentDidMount() {
         this.loadData()
@@ -72,7 +139,7 @@ export class ProTable extends React.Component {
         const {sorter} = this.state
 
         const {field, order} = sorter
-        if (field) {
+        if (field && order) {
             params.sort = field + "," + (order === 'ascend' ? 'asc' : 'desc')
         }
 
@@ -82,7 +149,7 @@ export class ProTable extends React.Component {
             const {content, totalElements, size,extData} = rs;
 
 
-            this.setState({dataSource: content, total: parseInt(totalElements),pageSize:size})
+            this.setState({dataSource: content, total: Number(totalElements),pageSize:size})
             if (extData) {
                 this.setState({extData})
             }
@@ -160,19 +227,23 @@ export class ProTable extends React.Component {
 
 
     renderForm = () => {
-        if (!this.props.children) return
+        if (this.props.children) {
+            throw new Error('[ProTable] children 已废弃，请使用 searchFormRender prop 替代')
+        }
+        const searchContent = this.props.searchFormRender?.()
+        if (!searchContent) return
 
         return (
             <Form
                 className="filter-bar"
-                style={{gridTemplateColumns: `repeat(${this.props.searchColumns ?? 4}, 1fr)`}}
+                style={{gridTemplateColumns: `repeat(${this.props.searchFormCols ?? 4}, 1fr)`}}
                 onFinish={(values) => this.onSearch(values)}
                 ref={(instance) => {
                     this.formRef.current = instance;
                     if (this.props.formRef) this.props.formRef.current = instance;
                 }}
             >
-                {this.props.children}
+                {searchContent}
                 <div className="filter-actions">
                     <Button type='primary' htmlType="submit">查询</Button>
                     <Button onClick={() => {
@@ -184,7 +255,7 @@ export class ProTable extends React.Component {
         )
     };
 
-    getToolBarRenderNode(toolBarRender) {
+    getToolBarRenderNode(toolBarRender: NonNullable<ProTableProps<T>['toolBarRender']>) {
         if (!toolBarRender) {
             return
         }
@@ -195,7 +266,7 @@ export class ProTable extends React.Component {
         });
     }
 
-    getRowSelectionProps = rowSelection => {
+    getRowSelectionProps = (rowSelection: ProTableProps<T>['rowSelection']) => {
         if (rowSelection == null || rowSelection === false) {
             return null
         }
@@ -217,11 +288,11 @@ export class ProTable extends React.Component {
         };
     };
 
-    onSearch = (values) => {
-        this.setState({params: values, current: 1}, this.loadData)
+    onSearch = (values: Record<string, any>) => {
+        this.setState({params: values, current: 1, sorter: {}}, this.loadData)
     }
 
-    changeFormValues = (values) => {
+    changeFormValues = (values: Record<string, any>) => {
         if (this.formRef.current) {
             this.formRef.current.resetFields()
             this.formRef.current.setFieldsValue(values)

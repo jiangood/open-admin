@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import lombok.Data;
 
@@ -62,10 +61,8 @@ public class MenuDefinition {
         }).toList();
     }
 
-    /** 兼容旧项目中的驼峰 id（sysUser→sys-user） */
     private String resolvedPermPrefix() {
-        if (id == null) return null;
-        return StrUtil.toSymbolCase(id, '-');
+        return id;
     }
 
 }

@@ -15,7 +15,7 @@ import {
     Tag
 } from 'antd'
 import {PlusOutlined} from "@ant-design/icons";
-import {HttpUtils, Page, ProTable, StringUtils, UrlUtils, ValueType} from "../../../framework";
+import {FormModal, HttpUtils, Page, PermActions, ProTable, StringUtils, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -45,9 +45,6 @@ const cronOptions = [
 export default class extends React.Component {
 
     state = {
-        formValues: {},
-        formOpen: false,
-
         selectedRowKeys: [],
 
         jobClassOptions: [],
@@ -60,7 +57,7 @@ export default class extends React.Component {
         executeRecordOpen: false,
     }
     tableRef = React.createRef()
-    formRef = React.createRef()
+    modalRef = React.createRef()
 
     componentDidMount() {
         HttpUtils.get('admin/job/job-class-options').then(rs => {
@@ -71,12 +68,13 @@ export default class extends React.Component {
     }
 
     handleAdd = () => {
-        this.setState({formOpen: true, formValues: {}, paramList: []})
+        this.setState({paramList: []})
+        this.modalRef.current.open({})
     }
 
     handleEdit = (record) => {
         this.loadJobParamFields(record.jobClass, record.jobData)
-        this.setState({formOpen: true, formValues: record,})
+        this.modalRef.current.open(record)
     }
 
     loadJobParamFields(className, jobData) {
@@ -87,20 +85,17 @@ export default class extends React.Component {
         })
     }
 
-    onFinish = (values) => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/job/create' : 'admin/job/update';
-        HttpUtils.post(url, values).then(rs => {
-            this.setState({formOpen: false})
-            this.tableRef.current.reload();
-        }).catch(e => {
-            console.error('[Job] 保存作业失败:', e);
-        })
+        await HttpUtils.post(url, values)
+        this.tableRef.current.reload()
     }
 
     handleDelete = row => {
         const hide = message.loading("删除作业中...")
         HttpUtils.post('admin/job/delete', {id: row.id}).then(rs => {
+            hide();
             this.tableRef.current.reload();
         }).catch(e => {
             console.error('[Job] 删除作业失败:', e);
@@ -109,7 +104,7 @@ export default class extends React.Component {
     }
 
     handleTriggerJob = row => {
-        HttpUtils.get('admin/job/trigger-job', {id: row.id}).then(rs => {
+        HttpUtils.post('admin/job/trigger-job', {id: row.id}).then(rs => {
             this.tableRef.current.reload();
         }).catch(e => {
             console.error('[Job] 触发作业失败:', e);
@@ -183,75 +178,71 @@ export default class extends React.Component {
     };
 
     showExecuteRecord(record) {
-        this.setState({executeRecordOpen: true, formValues: record})
+        this.setState({executeRecordOpen: true, selectedRecord: record})
     }
 
 
     render() {
-        return <Page title="作业调度" description="管理定时作业任务" actions={<><Button type='primary' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button><Button onClick={this.showStatus}>查看状态</Button></>}>
+        return <Page title="作业调度" description="管理定时作业任务">
             <ProTable
                 actionRef={this.tableRef}
+                toolBarRender={() => (
+                    <PermActions>
+                        <Button type='primary' perm='job:create' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button>
+                        <Button perm='job:read' onClick={this.showStatus}>查看状态</Button>
+                    </PermActions>
+                )}
                 request={(params) => HttpUtils.get('admin/job/page', params)}
                 columns={this.columns}
-            >
-                <Form.Item label='名称' name='name'>
+                searchFormRender={() => (
+                    <>
+                        <Form.Item label='名称' name='name'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='执行类' name='jobClass'>
+                            <Input/>
+                        </Form.Item>
+                    </>
+                )}
+            />
+
+
+            <FormModal ref={this.modalRef} title='作业调度' width={800}
+                       onFinish={this.onFinish}
+                       onValuesChange={this.onValuesChange}>
+                <Form.Item label='执行类' name='jobClass' rules={[{required: true}]}
+                           tooltip='org.quartz.Job接口，参考io.tmgg.job.builtin.DemoJob'>
+                    <Select options={this.state.jobClassOptions}/>
+                </Form.Item>
+                <Form.Item label='名称' name='name' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
-                <Form.Item label='执行类' name='jobClass'>
-                    <Input/>
+
+                <Form.Item label='cron表达式' name='cron' help='格式：秒分时日月周,留空表示手动执行'
+                           rules={[{required: true}]}>
+                    <AutoComplete placeholder='如 0 */5 * * * ?' options={cronOptions}/>
                 </Form.Item>
-            </ProTable>
 
+                <Form.Item label='启用' name='enabled' valuePropName='checked' rules={[{required: true}]}>
+                    <Switch/>
+                </Form.Item>
 
-            <Modal title='作业调度'
-                   open={this.state.formOpen}
-                   destroyOnHidden
-                   width={800}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-            >
-
-                <Form ref={this.formRef} labelCol={{flex: '100px'}}
-                      initialValues={this.state.formValues}
-                      onValuesChange={this.onValuesChange}
-                      onFinish={this.onFinish}>
-                    <Form.Item name='id' noStyle>
-                    </Form.Item>
-                    <Form.Item label='执行类' name='jobClass' rules={[{required: true}]}
-                               tooltip='org.quartz.Job接口，参考io.tmgg.job.builtin.DemoJob'>
-                        <Select options={this.state.jobClassOptions}/>
-                    </Form.Item>
-                    <Form.Item label='名称' name='name' rules={[{required: true}]}>
-                        <Input/>
-                    </Form.Item>
-
-                    <Form.Item label='cron表达式' name='cron' help='格式：秒分时日月周,留空表示手动执行'
-                               rules={[{required: true}]}>
-                        <AutoComplete placeholder='如 0 */5 * * * ?' options={cronOptions}/>
-                    </Form.Item>
-
-                    <Form.Item label='启用' name='enabled' valuePropName='checked' rules={[{required: true}]}>
-                        <Switch/>
-                    </Form.Item>
-
-
-                    {this.state.paramList?.map(p => (
-                        <div key={p.name}>
-                            <Divider>作业参数</Divider>
-                            <Form.Item label={p.label}
-                                       name={['jobData', p.name]}
-                                       key={p.name}
-                                       initialValue={p.defaultValue}
-                                       rules={[{required: p.required}]}>
-                                {ValueType.renderField(p.componentType, {
-                                    ...p.componentProps,
-                                    placeholder: p.placeholder || '请输入'
-                                })}
-                            </Form.Item>
-                        </div>
-                    ))}
-                </Form>
-            </Modal>
+                {this.state.paramList?.map(p => (
+                    <div key={p.name}>
+                        <Divider>作业参数</Divider>
+                        <Form.Item label={p.label}
+                                   name={['jobData', p.name]}
+                                   key={p.name}
+                                   initialValue={p.defaultValue}
+                                   rules={[{required: p.required}]}>
+                            {ValueType.renderField(p.componentType, {
+                                ...p.componentProps,
+                                placeholder: p.placeholder || '请输入'
+                            })}
+                        </Form.Item>
+                    </div>
+                ))}
+            </FormModal>
 
             <Modal title='作业调度状态'
                    open={this.state.statusOpen}
@@ -308,7 +299,7 @@ export default class extends React.Component {
                         },
                     }
                 ]} request={params => {
-                    params.jobId = this.state.formValues.id
+                    params.jobId = this.state.selectedRecord.id
                     return HttpUtils.get('admin/job/execute-record', params);
                 }}></ProTable>
 
@@ -323,7 +314,7 @@ export default class extends React.Component {
             if (option) {
                 const {label} = option;
                 if (StringUtils.contains(label, " ")) { // 取中文名部门设置为name
-                    this.formRef.current.setFieldValue("name", label.split(" ")[1])
+                    this.modalRef.current.formInstance.setFieldValue("name", label.split(" ")[1])
                 }
             }
         }

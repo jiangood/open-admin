@@ -4,9 +4,10 @@ import {BaseRemoteSelect} from '../BaseRemoteSelect';
 import type {SelectProps} from "antd/es/select";
 import type {FieldProps} from '../types';
 
-interface FieldRemoteSelectProps extends Omit<SelectProps, 'value' | 'onChange'>, FieldProps<any> {
+interface FieldRemoteSelectProps extends Omit<SelectProps, 'value' | 'onChange' | 'mode'>, FieldProps<any> {
     url: string;
     debounceTime?: number;
+    multiple?: boolean;
     paramsProcessor?: (params: any) => any;
     responseProcessor?: (response: any) => any;
 }
@@ -17,7 +18,7 @@ export class FieldRemoteSelect extends BaseRemoteSelect<FieldRemoteSelectProps> 
     };
 
     render() {
-        const {value, placeholder, ...rest} = this.props;
+        const {value, placeholder, multiple, ...rest} = this.props;
         const {data, loading} = this.state;
 
         return (
@@ -30,6 +31,7 @@ export class FieldRemoteSelect extends BaseRemoteSelect<FieldRemoteSelectProps> 
                 loading={loading}
                 value={value}
                 placeholder={placeholder}
+                mode={multiple ? 'multiple' : undefined}
                 {...rest}
             />
         );

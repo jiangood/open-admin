@@ -11,6 +11,7 @@ menus:
     perms:
       - {name: 读取, code: read}
       - {name: 创建, code: create}
+      - {name: 更新, code: update}
       - {name: 删除, code: delete}
       - {name: 重置密码, code: reset-password}
       - {name: 分配权限, code: grant-permission}
@@ -53,9 +54,9 @@ menus:
     perms:
       - {name: 读取, code: read}
       - {name: 创建, code: create}
+      - {name: 更新, code: update}
       - {name: 删除, code: delete}
       - {name: 执行一次, code: trigger}
-      - {name: 清理日志, code: clean-log}
   sys-file:
     pid: sys
     name: 文件管理

@@ -13,6 +13,7 @@ public class ClassTool {
 
     private static final CachingMetadataReaderFactory cachingMetadataReaderFactory = new CachingMetadataReaderFactory();
 
+    @SuppressWarnings("unchecked")
     public static <T> Set<Class<T>> scanPackageBySuper(String basePackage, Class<T> javaDelegateClass) throws IOException, ClassNotFoundException {
         Set<Class<T>> ret = new HashSet<>();
 

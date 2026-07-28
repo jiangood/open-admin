@@ -1,20 +1,36 @@
 import React from "react";
 import {Button, Select} from "antd";
+import type {TableColumnsType} from "antd";
 import {ProTable} from "../../components";
 import {HttpUtils} from "../../utils";
+import type {FieldProps} from '../types';
+
+export interface FieldTableSelectProps extends FieldProps<string> {
+    /** 数据加载地址 */
+    url: string;
+    /** 表格列配置（操作列由组件自动追加） */
+    columns: TableColumnsType<Record<string, any>>;
+    /** 占位文本，默认 请搜索选择 */
+    placeholder?: string;
+}
+
+interface FieldTableSelectState {
+    open: boolean;
+    label: string;
+}
 
 /**
  * 下拉表格
  *
  * 后端参考接口：
  */
-export class FieldTableSelect extends React.Component {
+export class FieldTableSelect extends React.Component<FieldTableSelectProps, FieldTableSelectState> {
 
     static defaultProps = {
         placeholder: '请搜索选择',
     };
 
-    state = {
+    state: FieldTableSelectState = {
         open: false,
         label: '',
     };
