@@ -43,7 +43,7 @@ spring:
 
 ```json
 "dependencies": {
-    "@jiangood/open-admin": "^2.0.0",
+    "@jiangood/open-admin": "^3.0.1",
     "antd": "^6.0.0",
     "react": "^19.0.0",
     ...
@@ -97,7 +97,7 @@ spring:
 - `@Getter` `@Setter` `@FieldNameConstants`（Lombok）
 - Java 21 的 `String` 类型字段不需要 `@Column`（Hibernate 自动驼峰转下划线），除非需要指定 `length` 或 `nullable`
 - 校验用 `jakarta.validation` 注解（`@NotBlank`、`@NotNull`、`@Size`）
-- 枚举字段使用框架 `BaseEnum` 接口 + `EnumConverter`（参考 `io.github.jiangood.openadmin.framework.enums`）
+- 枚举字段使用 `@Enumerated(EnumType.STRING)` + 普通 Java enum
 - 可选：`@Remark("字段说明")` 来自 `io.github.jiangood.openadmin.util.annotation.Remark`
 
 ```java
@@ -165,9 +165,11 @@ public interface CustomerRepository extends BaseRepository<Customer, String> {
 
 - 包：`{base}.modules.{module}.service.{Entity}Service`
 - 继承 `io.github.jiangood.openadmin.framework.data.BaseService<Entity>`
-- 构造器注入 Repository（`super(repository)`）
-- 通用方法由 BaseService 提供：`page()`、`list()`、`get()`、`save()`、`update()`、`deleteById()` 等
+- 使用 `@RequiredArgsConstructor` 注入 Repository
+- 通用方法由 BaseService 提供：`findAll()`、`findById()`、`save()`、`create()`、`update()`、`updateField()`、`deleteById()`、`findByField()`、`isFieldExist()`、`isUnique()` 等
 - 自定义业务逻辑在此层添加
+
+**简单 CRUD（无额外逻辑）：**
 
 ```java
 package com.mycompany.myproject.modules.customer.service;
@@ -175,13 +177,36 @@ package com.mycompany.myproject.modules.customer.service;
 import com.mycompany.myproject.modules.customer.entity.Customer;
 import com.mycompany.myproject.modules.customer.repository.CustomerRepository;
 import io.github.jiangood.openadmin.framework.data.BaseService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class CustomerService extends BaseService<Customer> {
 
-    public CustomerService(CustomerRepository customerRepository) {
-        super(customerRepository);
+    private final CustomerRepository repository;
+}
+```
+
+**需要自定义 save 逻辑（如唯一性校验）：**
+
+```java
+@RequiredArgsConstructor
+@Service
+public class CustomerService extends BaseService<Customer> {
+
+    private final CustomerRepository repository;
+
+    @Transactional
+    public Customer save(Customer input, List<String> requestKeys) throws Exception {
+        if (input.isNew()) {
+            if (repository.existsByCode(input.getCode())) {
+                throw new RuntimeException("编码已存在");
+            }
+            return repository.save(input);
+        }
+        this.updateField(input, requestKeys);
+        return repository.findById(input.getId()).orElse(null);
     }
 }
 ```
@@ -200,9 +225,9 @@ public class CustomerService extends BaseService<Customer> {
 |------|------|-----|------|------|
 | 分页查询 | `@RequestMapping("page")` | `admin/{module}/page` | `{module}:read` | 支持 searchText 模糊搜索 + Pageable |
 | 详情 | `@GetMapping("info/{id}")` | `admin/{module}/info/{id}` | `{module}:read` | 返回单条记录 |
-| 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid |
-| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid |
-| 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq |
+| 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid + @Log |
+| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + RequestBodyKeys + @Log |
+| 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq + @Log |
 | 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:read` | 下拉框数据源（非必选） |
 
 ```java
@@ -210,10 +235,13 @@ package com.mycompany.myproject.modules.customer.controller;
 
 import com.mycompany.myproject.modules.customer.entity.Customer;
 import com.mycompany.myproject.modules.customer.service.CustomerService;
+import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
+import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
+import io.github.jiangood.openadmin.util.dto.Option;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -223,7 +251,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import io.github.jiangood.openadmin.util.dto.antd.Option;
 
 @RestController
 @RequestMapping("admin/customer")
@@ -249,20 +276,23 @@ public class CustomerController {
                 .orElse(AjaxResult.fail().msg("记录不存在"));
     }
 
+    @Log("客户-创建")
     @HasPermission("customer:create")
     @PostMapping("create")
-    public AjaxResult create(@Valid @RequestBody Customer input) {
+    public AjaxResult create(@Valid @RequestBody Customer input) throws Exception {
         service.save(input, null);
         return AjaxResult.ok().msg("创建成功");
     }
 
+    @Log("客户-更新")
     @HasPermission("customer:update")
     @PostMapping("update")
-    public AjaxResult update(@Valid @RequestBody Customer input) {
-        service.save(input, null);
+    public AjaxResult update(@Valid @RequestBody Customer input, RequestBodyKeys updateFields) throws Exception {
+        service.save(input, updateFields);
         return AjaxResult.ok().msg("更新成功");
     }
 
+    @Log("客户-删除")
     @HasPermission("customer:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq req) {
@@ -275,7 +305,7 @@ public class CustomerController {
     public AjaxResult options(String searchText) {
         Spec<Customer> q = Spec.of().orLike(searchText, "name");
         List<Customer> list = service.findAll(q, Sort.by("name"));
-        List<Option> options = list.stream().map(a -> Option.of(a.getId(), a.getName())).toList();
+        List<Option> options = list.stream().map(a -> new Option(a.getId(), a.getName())).toList();
         return AjaxResult.ok().data(options);
     }
 }
@@ -295,14 +325,13 @@ public class CustomerController {
 
 ```jsx
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, Modal, Popconfirm} from 'antd'
+import {Button, Form, Input, Popconfirm} from 'antd'
 import React from 'react'
-import {PermActions, HttpUtils, Page, ProTable} from "@jiangood/open-admin";
+import {FormModal, HttpUtils, Page, PermActions, ProTable} from "@jiangood/open-admin";
 
 export default class extends React.Component {
 
-    state = { formValues: {}, formOpen: false }
-    formRef = React.createRef()
+    modalRef = React.createRef()
     tableRef = React.createRef()
 
     columns = [
@@ -310,7 +339,7 @@ export default class extends React.Component {
         { title: '联系人', dataIndex: 'contact' },
         { title: '联系电话', dataIndex: 'phone' },
         { title: '状态', dataIndex: 'enabled', render: (v) => v ? '启用' : '停用' },
-        { title: '创建时间', dataIndex: 'createTime', valueType: 'date' },
+        { title: '创建时间', dataIndex: 'createTime' },
         { title: '操作', dataIndex: 'option',
             render: (_, record) => (
                 <PermActions>
@@ -323,18 +352,14 @@ export default class extends React.Component {
         },
     ]
 
-    handleAdd = () => this.setState({formOpen: true, formValues: {}})
-    handleEdit = record => this.setState({formOpen: true, formValues: record})
+    handleAdd = () => this.modalRef.current.open({})
+    handleEdit = record => this.modalRef.current.open({...record})
     handleSubmit = values => {
-        HttpUtils.post('admin/customer/save', values).then(() => {
-            this.setState({formOpen: false})
-            this.tableRef.current.reload()
-        })
+        const url = values.id ? 'admin/customer/update' : 'admin/customer/create'
+        return HttpUtils.post(url, values).then(() => this.tableRef.current.reload())
     }
     handleDelete = record => {
-        HttpUtils.post('admin/customer/delete', {id: record.id}).then(() => {
-            this.tableRef.current.reload()
-        })
+        HttpUtils.post('admin/customer/delete', {id: record.id}).then(() => this.tableRef.current.reload())
     }
 
     render() {
@@ -343,40 +368,31 @@ export default class extends React.Component {
                 actionRef={this.tableRef}
                 toolBarRender={() => (
                     <PermActions>
-                        <Button perm='customer:create' type='primary' onClick={this.handleAdd}>
-                            <PlusOutlined /> 新增
-                        </Button>
+                        <Button perm='customer:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
                 request={(params) => HttpUtils.get('admin/customer/page', params)}
                 columns={this.columns}
-                search={{
-                    name: { label: '名称', type: 'text' },
-                }}
+                searchFormRender={() => (
+                    <Form.Item label='名称' name='name'>
+                        <Input/>
+                    </Form.Item>
+                )}
             />
-            <Modal title='信息'
-                   open={this.state.formOpen}
-                   onOk={() => this.formRef.current.submit()}
-                   onCancel={() => this.setState({formOpen: false})}
-                   destroyOnClose maskClosable={false}>
-                <Form ref={this.formRef}
-                      initialValues={this.state.formValues}
-                      onFinish={this.handleSubmit}>
-                    <Form.Item name='id' noStyle />
-                    <Form.Item label='名称' name='name' rules={[{required: true}]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='联系人' name='contact'>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='联系电话' name='phone'>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item label='状态' name='enabled' valuePropName='checked'>
-                        <Switch />
-                    </Form.Item>
-                </Form>
-            </Modal>
+            <FormModal ref={this.modalRef} title='客户信息' onFinish={this.handleSubmit}>
+                <Form.Item label='名称' name='name' rules={[{required: true}]}>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='联系人' name='contact'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='联系电话' name='phone'>
+                    <Input/>
+                </Form.Item>
+                <Form.Item label='状态' name='enabled'>
+                    <Switch/>
+                </Form.Item>
+            </FormModal>
         </Page>
     }
 }
@@ -390,9 +406,16 @@ export default class extends React.Component {
 |---------|------|--------|
 | 字典下拉 | `FieldDictSelect typeCode="dict_type"` | `@jiangood/open-admin` |
 | 远程搜索下拉 | `FieldRemoteSelect url="admin/xxx/options"` | `@jiangood/open-admin` |
+| 远程树 | `FieldRemoteTree url="..."` | `@jiangood/open-admin` |
 | 远程树选择 | `FieldRemoteTreeSelect url="..."` | `@jiangood/open-admin` |
+| 远程树级联 | `FieldRemoteTreeCascader url="..."` | `@jiangood/open-admin` |
 | 组织树选择 | `FieldSysOrgTreeSelect` | `@jiangood/open-admin` |
-| 部门/单位树 | `FieldDeptTreeSelect` / `FieldUnitTreeSelect` | `@jiangood/open-admin` |
+| 组织树 | `FieldSysOrgTree` | `@jiangood/open-admin` |
+| 部门树 | `FieldDeptTreeSelect` | `@jiangood/open-admin` |
+| 单位树 | `FieldUnitTreeSelect` | `@jiangood/open-admin` |
+| 用户选择 | `FieldUserSelect` | `@jiangood/open-admin` |
+| 用户多选 | `FieldUserSelectMultiple` | `@jiangood/open-admin` |
+| 组织多选 | `FieldOrgTreeMultipleSelect` | `@jiangood/open-admin` |
 | 布尔开关 | `FieldBoolean` | `@jiangood/open-admin` |
 | 日期选择 | `FieldDate` / `FieldDateRange` | `@jiangood/open-admin` |
 | 数字范围 | `FieldNumberRange` | `@jiangood/open-admin` |
@@ -400,9 +423,7 @@ export default class extends React.Component {
 | 文件上传 | `FieldUploadFile` | `@jiangood/open-admin` |
 | 表格选择 | `FieldTableSelect` | `@jiangood/open-admin` |
 | 百分比 | `FieldPercent` | `@jiangood/open-admin` |
-| 多选 | `FieldRemoteSelectMultiple` | `@jiangood/open-admin` |
-
-详情参考 `docs/api/frontend/field-components.md`。
+| 表格内嵌 | `FieldTable` | `@jiangood/open-admin` |
 
 ### 展示视图组件选用指南
 
@@ -416,8 +437,8 @@ export default class extends React.Component {
 | 图片预览 | `ViewImage` | `@jiangood/open-admin` |
 | 文件下载 | `ViewFile` / `ViewFileButton` | `@jiangood/open-admin` |
 | 密码脱敏 | `ViewPassword` | `@jiangood/open-admin` |
-
-详情参考 `docs/api/frontend/system-components.md`。
+| 纯文本展示 | `ViewText` | `@jiangood/open-admin` |
+| 范围展示 | `ViewRange` | `@jiangood/open-admin` |
 
 ## 第四步：菜单与权限配置
 
@@ -431,15 +452,16 @@ menus:
   customer:
     name: 客户管理
     icon: TeamOutlined
+    seq: 20000
   customer-list:
     pid: customer
     name: 客户列表
     path: /customer
     perms:
-      - {name: 读取, code: customer:read}
-      - {name: 创建, code: customer:create}
-      - {name: 更新, code: customer:update}
-      - {name: 删除, code: customer:delete}
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 更新, code: update}
+      - {name: 删除, code: delete}
 ```
 
 如需要将菜单挂在框架已有菜单下（如挂在"系统管理"下），将 `pid` 指定为框架菜单 id：
@@ -457,9 +479,11 @@ menus:
 
 | 层级 | 配置位置 | 写法 |
 |------|---------|------|
-| 后端 | Controller `@HasPermission` | `@HasPermission("customer:create")` / `@HasPermission("customer:update")` |
-| 前端 | Button `perm` prop | `<Button perm="customer:create">新增</Button>` / `<Button perm="customer:update">编辑</Button>` |
-| 菜单 | YAML `perms` | `- {name: 创建, code: customer:create}` / `- {name: 更新, code: customer:update}` |
+| 后端 | Controller `@HasPermission` | `@HasPermission("customer:create")` |
+| 前端 | Button `perm` prop | `<Button perm="customer:create">新增</Button>` |
+| 菜单 | YAML `perms` | `- {name: 创建, code: read}`（框架自动拼接为 `{menuId}:{code}` 即 `customer-list:read`） |
+
+> 注意：菜单 YAML 中 `code` 填写短名称（如 `read`、`create`），框架的 `MenuDefinition.getPermCodes()` 会自动拼接为 `{菜单id}:{code}`。如需跨菜单复用权限码，可直接填写完整码（包含冒号）。
 
 框架通过 `@HasPermission` 注解 + AOP 切面拦截未授权请求。前端 `PermActions` 和 `Perm` 组件根据当前用户的权限动态显示/隐藏按钮。
 
@@ -474,8 +498,8 @@ menus:
 ### 后端验证
 - [ ] `GET admin/{module}/page` 返回正确分页数据
 - [ ] `GET admin/{module}/info/{id}` 返回单条数据
-- [ ] `POST admin/{module}/save` 新增成功
-- [ ] `PUT admin/{module}/update` 修改成功
+- [ ] `POST admin/{module}/create` 新增成功
+- [ ] `POST admin/{module}/update` 修改成功
 - [ ] `POST admin/{module}/delete` 删除成功
 
 ### 前端验证
@@ -491,23 +515,27 @@ menus:
 
 ## 代码规范约束
 
-- 使用构造器注入（`@RequiredArgsConstructor` + `final`），禁止 `@Resource` 字段注入
-- 有 `BaseService<T>` 时继承并用 `super(repository)` 传入
+- 业务 Service 使用构造器注入（`@RequiredArgsConstructor` + `private final`），禁止 `@Resource` / `@Autowired` 字段注入
+- 有 `BaseService<T>` 时继承，使用 `@RequiredArgsConstructor` 注入 repository
 - Controller 统一返回 `AjaxResult`
+- 需要操作日志的端点加 `@Log("业务-操作描述")`
+- 敏感端点加 `@RateLimit` 限流（如登录、短信验证码）
 - Java import 使用框架的全限定名（参见上文模板）
 - 前端 import 使用 `@jiangood/open-admin` 包名（框架组件位于此包中）
 - 直接输出代码，避免冗余说明；确保代码完整可运行
 
-## 参考文档
+## 参考
 
-框架已有以下文档，需要时查阅：
+需要时查阅框架源码：
 
-- `docs/api/backend/data-spec.md` — Spec 动态查询 API（所有操作符用法）
-- `docs/api/backend/validators.md` — 校验注解列表（@ValidateMobile 等）
-- `docs/api/backend/annotations.md` — 框架注解（ID 生成器、@RateLimit 等）
-- `docs/api/frontend/components.md` — 前端组件 API
-- `docs/api/frontend/field-components.md` — 字段组件完整文档
-- `docs/api/frontend/system-components.md` — 视图/系统组件
-- `docs/development/best-practices.md` — 最佳实践
-- `docs/core-features/user-permission.md` — 权限系统详解
-- `docs/core-features/data-dict.md` — 数据字典
+- `io.github.jiangood.openadmin.framework.data.specification.Spec` — 动态查询构建器
+- `io.github.jiangood.openadmin.framework.data.BaseEntity` — 实体基类
+- `io.github.jiangood.openadmin.framework.data.BaseRepository` — Repository 基类
+- `io.github.jiangood.openadmin.framework.data.BaseService` — Service 基类（含 `save`、`create`、`update`、`updateField`、`deleteById`、`findByField`、`isUnique` 等方法）
+- `io.github.jiangood.openadmin.framework.validator` — 自定义校验注解包（`@ValidateMobile`、`@ValidateIdNum`、`@ValidatePassword` 等）
+- `io.github.jiangood.openadmin.framework.log.Log` — 操作日志注解
+- `io.github.jiangood.openadmin.framework.ratelimit.RateLimit` — 接口限流注解
+- `io.github.jiangood.openadmin.util.dto.AjaxResult` — 统一响应体
+- `io.github.jiangood.openadmin.util.dto.Option` — 下拉选项 DTO
+- `web/src/framework/components/ProTable/` — 表格组件源码
+- `web/src/framework/components/FormModal/` — 弹窗表单组件源码
