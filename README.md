@@ -453,10 +453,19 @@ src/main/resources/
 
 **端口被占用？** 后端默认 8080，前端默认 8000，可通过环境变量 `SERVER_PORT` 修改后端端口。
 
-## Opencode 集成
+## Opencode Skills
 
-在业务项目中使用 Opencode 创建 CRUD 模块前，请先安装 open-admin skill：
+在业务项目目录下运行以下命令安装 skill：
 
-> 请帮我安装 skill，地址为 https://raw.githubusercontent.com/jiangood/open-admin/main/.opencode/skills/oa-crud.md
+```bash
+# 安装 CRUD 创建 skill
+npx opencode install skill https://raw.githubusercontent.com/jiangood/open-admin/main/skills/oa-crud.md
 
-安装后使用 `/open-admin` 指令创建业务模块，Opencode 会按框架规范自动生成 Entity → Repository → Service → Controller → 前端页面 → 菜单配置。
+# 安装框架升级 skill
+npx opencode install skill https://raw.githubusercontent.com/jiangood/open-admin/main/skills/oa-upgrade.md
+```
+
+| Skill | 用途 |
+|-------|------|
+| `oa-crud` | 创建 CRUD 业务模块 |
+| `oa-upgrade` | 升级框架版本 |
