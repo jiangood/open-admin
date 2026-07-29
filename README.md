@@ -464,13 +464,4 @@ src/main/resources/
 
 ### 安装到业务项目
 
-在业务项目根目录执行以下 PowerShell 命令安装内置 skills：
-
-```powershell
-mkdir -Force .opencode\skills\oa-crud
-wget -O .opencode\skills\oa-crud\SKILL.md https://raw.githubusercontent.com/jiangood/open-admin/main/.opencode/skills/oa-crud/SKILL.md
-mkdir -Force .opencode\skills\oa-upgrade
-wget -O .opencode\skills\oa-upgrade\SKILL.md https://raw.githubusercontent.com/jiangood/open-admin/main/.opencode/skills/oa-upgrade/SKILL.md
-```
-
-
+复制 .opencode/skills 目录到业务项目
