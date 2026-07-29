@@ -49,6 +49,8 @@ export interface ProTableProps<T = any> {
     searchFormRender?: () => React.ReactNode;
     scrollY?: number | string;
     bordered?: boolean;
+    /** 树形数据模式，关闭分页且不传 page/size 参数 */
+    treeMode?: boolean;
 }
 
 interface ProTableState<T = any> {
@@ -131,10 +133,12 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
     }
 
     loadData = () => {
-        const {request} = this.props
+        const {request, treeMode} = this.props
         const params = {...this.state.params}
-        params.size = this.state.pageSize
-        params.page = this.state.current
+        if (!treeMode) {
+            params.size = this.state.pageSize
+            params.page = this.state.current
+        }
 
         const {sorter} = this.state
 
@@ -200,7 +204,7 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
                     size={this.state.tableSize}
                     rowSelection={this.getRowSelectionProps(rowSelection)}
                     scroll={{x: 'max-content', y: this.state.scrollY}}
-                    pagination={{
+                    pagination={this.props.treeMode ? false : {
                         showSizeChanger: true,
                         total: this.state.total,
                         pageSize: this.state.pageSize,
@@ -210,11 +214,15 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
                     }}
 
                     onChange={(pagination, filters, sorter, extra) => {
-                        this.setState({
-                            current: pagination.current,
-                            pageSize: pagination.pageSize,
-                            sorter
-                        }, this.loadData)
+                        if (this.props.treeMode) {
+                            this.setState({sorter}, this.loadData)
+                        } else {
+                            this.setState({
+                                current: pagination.current,
+                                pageSize: pagination.pageSize,
+                                sorter
+                            }, this.loadData)
+                        }
                     }}
 
                     footer={this.state.extData.summary ? () => this.state.extData.summary : null}

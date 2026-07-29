@@ -266,7 +266,7 @@ public class DataSyncJob extends BaseJob {
 | 组件 | 用途 |
 |------|------|
 | `Page` | 页面容器（标题/描述/右侧操作区） |
-| `ProTable` | 数据表格，分页/筛选/工具栏，`request`/`columns`/`toolBarRender` |
+| `ProTable` | 数据表格，分页/筛选/工具栏/树形模式，`request`/`columns`/`treeMode`/`toolBarRender` |
 | `LinkButton` | 链接跳转按钮 |
 | `NamedIcon` | 通过名称渲染 Ant Design 图标 |
 | `PermActions` | 按子元素 `perm` 属性过滤的权限操作区 |
