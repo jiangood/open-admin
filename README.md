@@ -459,4 +459,4 @@ src/main/resources/
 
 > 请帮我安装 skill，地址为 https://raw.githubusercontent.com/jiangood/open-admin/main/.claude/skills/open-admin.md
 
-安装后使用 `/open-admin` 指令创建业务模块，Claude 会按框架规范自动生成 Entity → Repository → Service → Controller → 前端页面 → 菜单配置。更详细的 AI 指引见 [CLAUDE.md](CLAUDE.md)。
+安装后使用 `/open-admin` 指令创建业务模块，Claude 会按框架规范自动生成 Entity → Repository → Service → Controller → 前端页面 → 菜单配置。

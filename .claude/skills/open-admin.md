@@ -398,6 +398,33 @@ export default class extends React.Component {
 }
 ```
 
+### 页面生命周期
+
+多 Tab 布局中，所有页面保持 mounted（仅 `display` 切换）。框架提供 `onShow()` 生命周期方法，在页面首次加载或从其他 Tab 切回时自动调用：
+
+```jsx
+export default class extends React.Component {
+  tableRef = React.createRef()
+
+  onShow() {
+    this.tableRef.current?.reload()
+  }
+
+  render() {
+    return <ProTable actionRef={this.tableRef} ... />
+  }
+}
+```
+
+| 触发场景 | onShow 是否调用 |
+|---------|:--------------:|
+| 首次打开 Tab | ✅ |
+| 切换到其他 Tab 再切回来 | ✅ |
+| 右键「刷新」Tab | ✅（组件重建后立即调用） |
+| Tab 始终激活（无切换） | ❌ |
+
+> 仅 class 组件支持，方法名固定为 `onShow`。
+
 ### 字段组件选用指南
 
 当字段需要特殊业务组件时，从 `@jiangood/open-admin` 引入并替换模板中的 `Input`：
