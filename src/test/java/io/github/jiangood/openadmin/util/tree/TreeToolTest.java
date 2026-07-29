@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.util.tree;
 
-import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
@@ -116,28 +115,6 @@ class TreeToolTest {
         assertEquals(2, map.size());
         assertNotNull(map.get("1"));
         assertNotNull(map.get("2"));
-    }
-
-    @Test
-    void testBuildTreeByDict() {
-        // 构建测试数据
-        List<Dict> dicts = new ArrayList<>();
-        Dict dict1 = Dict.create().set("key", "1").set("parentKey", null);
-        dicts.add(dict1);
-
-        Dict dict2 = Dict.create().set("key", "2").set("parentKey", "1");
-        dicts.add(dict2);
-
-        // 测试通过Dict构建树
-        List<Dict> tree = TreeTool.buildTreeByDict(dicts);
-        assertNotNull(tree);
-        assertEquals(1, tree.size());
-        Dict root = tree.get(0);
-        assertEquals("1", root.get("key"));
-        List<Dict> children = (List<Dict>) root.get("children");
-        assertNotNull(children);
-        assertEquals(1, children.size());
-        assertEquals("2", children.get(0).get("key"));
     }
 
     @Test

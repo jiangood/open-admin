@@ -5,7 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
-import io.github.jiangood.openadmin.util.tree.TreeManager;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.util.tree.drop.DropResult;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
@@ -127,7 +127,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
 
     public List<String> findChildIdListById(String id) {
-        List<SysOrg> list = getTreeManager().getAllChildren(id);
+        List<SysOrg> list = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
         return list.stream().map(BaseEntity::getId).toList();
     }
 
@@ -232,21 +232,13 @@ public class SysOrgService extends BaseService<SysOrg> {
      * 根据节点id获取所有子节点id集合
      */
     public List<String> findChildIdListById(String id, boolean containsDept) {
-        List<SysOrg> result = getTreeManager().getAllChildren(id);
+        List<SysOrg> result = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
 
         if (!containsDept) {
             result = result.stream().filter(o -> !o.isDept()).collect(Collectors.toList());
         }
 
         return result.stream().map(BaseEntity::getId).collect(Collectors.toList());
-    }
-
-    /**
-     * TODO 也不能一直放内存，虽然消耗少，考虑缓存10分钟
-     */
-    public TreeManager<SysOrg> getTreeManager() {
-        List<SysOrg> list = findAll();
-        return TreeManager.of(list);
     }
 
     /**
@@ -261,7 +253,8 @@ public class SysOrgService extends BaseService<SysOrg> {
      * @param id
      */
     public boolean checkIsLeaf(String id) {
-        return getTreeManager().isLeaf(id);
+        SysOrg org = findById(id).orElse(null);
+        return TreeTool.isLeaf(org, SysOrg::getChildren);
     }
 
     /**
@@ -290,7 +283,12 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
     public int findLevelById(String id) {
-        return getTreeManager().getLevelById(id);
+        List<SysOrg> all = findAll();
+        List<SysOrg> tree = TreeTool.buildTree(all, SysOrg::getId, SysOrg::getPid, SysOrg::getChildren, SysOrg::setChildren);
+        Map<String, Integer> levelMap = TreeTool.buildLevelMap(tree, SysOrg::getId, SysOrg::getChildren);
+        Integer level = levelMap.get(id);
+        Assert.state(level != null, "id not found:" + id);
+        return level;
     }
 
     /**
@@ -300,14 +298,15 @@ public class SysOrgService extends BaseService<SysOrg> {
      * @param targetLevel
      */
     public SysOrg findParentUnit(SysOrg org, int targetLevel) {
-        Map<String, Integer> lm = getTreeManager().buildLevelMap();
+        List<SysOrg> all = findAll();
+        List<SysOrg> tree = TreeTool.buildTree(all, SysOrg::getId, SysOrg::getPid, SysOrg::getChildren, SysOrg::setChildren);
+        Map<String, SysOrg> map = TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
+        Map<String, Integer> levelMap = TreeTool.buildLevelMap(tree, SysOrg::getId, SysOrg::getChildren);
 
-        SysOrg parent = getTreeManager().getParent(org, o -> {
-            Integer level = lm.get(o.getId());
+        return TreeTool.getParent(map, org, SysOrg::getPid, o -> {
+            Integer level = levelMap.get(o.getId());
             return level == targetLevel;
         });
-
-        return parent;
     }
 
     public String findParentUnitId(SysOrg org, int targetLevel) {
@@ -323,7 +322,10 @@ public class SysOrgService extends BaseService<SysOrg> {
      * 获得上级单位。 如当前类型为部门，则先找到公司，再找公司父公司
      */
     public SysOrg findParentUnit(SysOrg org) {
-        return getTreeManager().getParent(org, o -> !o.isDept());
+        List<SysOrg> all = findAll();
+        List<SysOrg> tree = TreeTool.buildTree(all, SysOrg::getId, SysOrg::getPid, SysOrg::getChildren, SysOrg::setChildren);
+        Map<String, SysOrg> map = TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
+        return TreeTool.getParent(map, org, SysOrg::getPid, o -> !o.isDept());
     }
 
     /**
@@ -340,11 +342,13 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
     public List<String> getParentIdListById(String id) {
-        return getTreeManager().getParentIdListById(id);
+        return TreeTool.getPids(id, findAll(), SysOrg::getId, SysOrg::getPid);
     }
 
     public Map<String, SysOrg> dict() {
-        return getTreeManager().getMap();
+        List<SysOrg> all = findAll();
+        List<SysOrg> tree = TreeTool.buildTree(all, SysOrg::getId, SysOrg::getPid, SysOrg::getChildren, SysOrg::setChildren);
+        return TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
     }
 
     public String getNameById(String id) {

@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.util.tree;
 
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 
 import java.util.*;
@@ -12,9 +11,97 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
- * 将列表转换为树,请使用TreeManager
+ * 树工具类，提供树构建、遍历、查询等静态方法
  */
 public class TreeTool {
+
+    /**
+     * 判断节点是否为叶子
+     */
+    public static <E> boolean isLeaf(E node, Function<E, List<E>> getChildren) {
+        return node == null || CollUtil.isEmpty(getChildren.apply(node));
+    }
+
+    /**
+     * 从平铺列表中获取某个节点的所有子孙节点
+     */
+    public static <E> List<E> getAllChildren(List<E> list, String id, Function<E, String> keyFn, Function<E, String> pkeyFn) {
+        if (CollUtil.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        Map<String, List<E>> childrenMap = new HashMap<>();
+        for (E e : list) {
+            String pid = pkeyFn.apply(e);
+            if (pid != null) {
+                childrenMap.computeIfAbsent(pid, k -> new ArrayList<>()).add(e);
+            }
+        }
+        List<E> result = new ArrayList<>();
+        collectChildren(childrenMap, keyFn, id, result);
+        return result;
+    }
+
+    private static <E> void collectChildren(Map<String, List<E>> childrenMap, Function<E, String> keyFn, String parentId, List<E> result) {
+        List<E> children = childrenMap.get(parentId);
+        if (children != null) {
+            for (E child : children) {
+                result.add(child);
+                collectChildren(childrenMap, keyFn, keyFn.apply(child), result);
+            }
+        }
+    }
+
+    /**
+     * 从 map 中查找父节点
+     */
+    public static <E> E getParent(Map<String, E> map, E node, Function<E, String> pkeyFn) {
+        if (node == null) {
+            return null;
+        }
+        String pid = pkeyFn.apply(node);
+        return pid == null ? null : map.get(pid);
+    }
+
+    /**
+     * 向上查找匹配 predicate 的祖先节点
+     */
+    public static <E> E getParent(Map<String, E> map, E node, Function<E, String> pkeyFn, Predicate<E> predicate) {
+        E parent = getParent(map, node, pkeyFn);
+        while (parent != null) {
+            if (predicate.test(parent)) {
+                return parent;
+            }
+            parent = getParent(map, parent, pkeyFn);
+        }
+        return null;
+    }
+
+    /**
+     * 从树构建层级 Map（根节点 level = 1）
+     */
+    public static <E> Map<String, Integer> buildLevelMap(List<E> tree, Function<E, String> keyFn, Function<E, List<E>> getChildren) {
+        Map<String, Integer> levelMap = new HashMap<>();
+        if (CollUtil.isEmpty(tree)) {
+            return levelMap;
+        }
+        for (E root : tree) {
+            String id = keyFn.apply(root);
+            levelMap.put(id, 1);
+            setChildLevel(root, keyFn, getChildren, levelMap);
+        }
+        return levelMap;
+    }
+
+    private static <E> void setChildLevel(E parent, Function<E, String> keyFn, Function<E, List<E>> getChildren, Map<String, Integer> levelMap) {
+        List<E> children = getChildren.apply(parent);
+        if (children != null) {
+            for (E child : children) {
+                String cid = keyFn.apply(child);
+                levelMap.put(cid, levelMap.get(keyFn.apply(parent)) + 1);
+                setChildLevel(child, keyFn, getChildren, levelMap);
+            }
+        }
+    }
 
     public static List<TreeOption> buildTree(List<TreeOption> list) {
         return buildTree(list, TreeOption::getKey, TreeOption::getParentKey, TreeOption::getChildren, TreeOption::setChildren);
@@ -36,21 +123,6 @@ public class TreeTool {
         });
         return map;
     }
-
-    public static List<Dict> buildTreeByDict(List<Dict> list) {
-        return buildTree(list, e -> e.getStr("key"), e -> e.getStr("parentKey"), 
-            (e) -> {
-                List<Dict> children = e.get("children", null);
-                if (children == null) {
-                    children = new ArrayList<>();
-                    e.set("children", children);
-                }
-                return children;
-            }, 
-            (e, children) -> e.set("children", children)
-        );
-    }
-
 
     /**
      * 构造树
@@ -86,6 +158,7 @@ public class TreeTool {
             parentChildren.add(e);
         }
 
+        cleanEmptyChildren(tree, getChildren, setChildren);
         return tree;
     }
 

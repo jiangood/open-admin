@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.util.annotation.Remark;
-import io.github.jiangood.openadmin.util.tree.TreeNode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +15,7 @@ import java.util.List;
 @Entity
 @Table(name = "sys_dict_type")
 @FieldNameConstants
-public class SysDictType extends BaseEntity implements TreeNode<SysDictType> {
+public class SysDictType extends BaseEntity {
 
     @Transient
     List<SysDictType> children;

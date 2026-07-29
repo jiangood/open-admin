@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.modules.system.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jiangood.openadmin.util.annotation.Remark;
-import io.github.jiangood.openadmin.util.tree.TreeNode;
 import io.github.jiangood.openadmin.framework.data.DBConstants;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.modules.system.enums.OrgType;
@@ -23,7 +22,7 @@ import java.util.List;
 @Entity
 @Table(name = "sys_org")
 @FieldNameConstants
-public class SysOrg extends BaseEntity implements TreeNode<SysOrg> {
+public class SysOrg extends BaseEntity {
 
 
     @Transient
