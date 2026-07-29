@@ -5,6 +5,7 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropEvent;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
+import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.util.BeanTool;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.util.tree.drop.DropResult;
@@ -16,7 +17,7 @@ import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.SysOrgVO;
 import io.github.jiangood.openadmin.modules.system.dto.request.OrgReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
+import io.github.jiangood.openadmin.modules.system.provider.OrgTypeProvider;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;
@@ -27,11 +28,7 @@ import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-/**
- * 组织机构控制器
- */
 @RestController
 @RequestMapping("admin/sysOrg")
 @Slf4j
@@ -39,16 +36,11 @@ import java.util.stream.Collectors;
 public class SysOrgController {
 
     private final SysOrgService sysOrgService;
-
     private final SysUserService sysUserService;
+    private final List<OrgTypeProvider> orgTypeProviders;
 
-    /**
-     * 管理页面的树，包含禁用的
-     *
-     * @return
-     */
     @RequestMapping("tree")
-    public AjaxResult tree(boolean onlyShowEnabled, boolean onlyShowUnit, String searchText) {
+    public AjaxResult tree(boolean onlyShowEnabled, boolean onlyShowUnit, String searchText, Integer type) {
         Spec<SysOrg> q = Spec.of();
 
         if (onlyShowEnabled) {
@@ -56,21 +48,22 @@ public class SysOrgController {
         }
 
         if (onlyShowUnit) {
-            q.eq(SysOrg.Fields.type, OrgType.TYPE_UNIT);
+            q.eq(SysOrg.Fields.type, 1);
         }
-        q.orLike(searchText, SysOrg.Fields.name);
 
-        // 权限过滤
+        if (type != null) {
+            q.eq(SysOrg.Fields.type, type);
+        }
+
+        q.orLike(searchText, SysOrg.Fields.name);
 
         List<String> orgPermissions = LoginTool.getOrgPermissions();
         q.in("id", orgPermissions);
 
         List<SysOrg> list = sysOrgService.findAll(q, Sort.by("seq"));
 
-
         return AjaxResult.ok().data(list2Tree(list));
     }
-
 
     @Log("机构-创建")
     @HasPermission("sys-org:create")
@@ -85,7 +78,6 @@ public class SysOrgController {
         input2.setType(input.getType());
 
         sysOrgService.save(input2, null);
-
         var loginUser = LoginTool.getUser();
         sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());
 
@@ -105,7 +97,6 @@ public class SysOrgController {
         input2.setType(input.getType());
 
         sysOrgService.save(input2, requestBodyKeys);
-
         var loginUser = LoginTool.getUser();
         sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());
 
@@ -135,7 +126,7 @@ public class SysOrgController {
         vo.setSeq(org.getSeq());
         vo.setEnabled(org.getEnabled());
         vo.setType(org.getType());
-        vo.setTypeLabel(SysOrgVO.resolveTypeLabel(org.getType()));
+        vo.setTypeLabel(resolveTypeLabel(org.getType()));
         if (org.getPid() != null) {
             vo.setParentName(sysOrgService.getNameById(org.getPid()));
         }
@@ -146,20 +137,30 @@ public class SysOrgController {
         return AjaxResult.ok().data(vo);
     }
 
-
-    private String getIconByType(int type) {
-        switch (type) {
-            case OrgType.TYPE_UNIT -> {
-                return "ApartmentOutlined";
-            }
-            case OrgType.TYPE_DEPT -> {
-                return "HomeOutlined";
-            }
-
-        }
-        return "";
+    @GetMapping("type-options")
+    public AjaxResult typeOptions() {
+        List<Option> options = orgTypeProviders.stream()
+                .map(p -> new Option(p.getType().toString(), p.getLabel()))
+                .toList();
+        return AjaxResult.ok().data(options);
     }
 
+    private String resolveTypeLabel(Integer type) {
+        if (type == null) return null;
+        return orgTypeProviders.stream()
+                .filter(p -> p.getType().equals(type))
+                .findFirst()
+                .map(OrgTypeProvider::getLabel)
+                .orElse("未知");
+    }
+
+    private String getIconByType(int type) {
+        return orgTypeProviders.stream()
+                .filter(p -> p.getType() == type)
+                .findFirst()
+                .map(OrgTypeProvider::getIcon)
+                .orElse("");
+    }
 
     @PostMapping("sort")
     @HasPermission("sys-org:create")
@@ -168,39 +169,28 @@ public class SysOrgController {
         List<TreeOption> tree = list2Tree(nodes);
 
         DropResult dropResult = TreeDropTool.onDrop(e, tree);
-
         sysOrgService.sort(e.getDragKey(), dropResult);
-
 
         return AjaxResult.ok().msg("排序成功");
     }
 
-
     @GetMapping("all-tree")
     public AjaxResult allTree() {
-        List<SysOrg> list = this.sysOrgService.findByLoginUser(true, true);
-
+        List<SysOrg> list = this.sysOrgService.findByLoginUserDisabled();
         return AjaxResult.ok().data(list2Tree(list));
     }
 
-
     @GetMapping("unit-tree")
-    public AjaxResult unitTree() throws Exception {
-        List<SysOrg> list = this.sysOrgService.findByLoginUser(false, false);
-
-        list = list.stream().filter((o) -> !o.isDept()).collect(Collectors.toList());
-
-
+    public AjaxResult unitTree() {
+        List<SysOrg> list = this.sysOrgService.findByLoginUser(1);
         return AjaxResult.ok().data(list2Tree(list));
     }
 
     @GetMapping("dept-tree")
     public AjaxResult deptTree() {
-        List<SysOrg> list = this.sysOrgService.findByLoginUser(true, false);
-
+        List<SysOrg> list = this.sysOrgService.findByLoginUserEnabled();
         return AjaxResult.ok().data(list2Tree(list));
     }
-
 
     public List<TreeOption> list2Tree(List<SysOrg> orgList) {
         List<TreeOption> list = orgList.stream().map(o -> {
@@ -218,9 +208,6 @@ public class SysOrgController {
             return item;
         }).toList();
 
-        List<TreeOption> tree = TreeTool.buildTree(list, TreeOption::getKey, TreeOption::getParentKey, TreeOption::getChildren, TreeOption::setChildren);
-
-        return tree;
+        return TreeTool.buildTree(list, TreeOption::getKey, TreeOption::getParentKey, TreeOption::getChildren, TreeOption::setChildren);
     }
-
 }

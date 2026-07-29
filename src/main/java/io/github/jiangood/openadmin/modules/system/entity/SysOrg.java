@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import io.github.jiangood.openadmin.framework.data.DBConstants;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -42,9 +41,7 @@ public class SysOrg extends BaseEntity {
     private Integer seq;
     @Column(nullable = false)
     private Boolean enabled;
-    /***
-     * 为了扩展OrgType,这里就不用枚举了，需要扩展时，覆盖OrgType枚举类即可
-     */
+    /** 机构类型：1=单位, 2=部门, 3=店铺。扩展类型用 OrgTypeProvider */
     @NotNull
     private Integer type;
     // 部门领导
@@ -84,15 +81,6 @@ public class SysOrg extends BaseEntity {
     public SysOrg(String id) {
         this.setId(id);
     }
-
-    @Transient
-    public boolean isDept() {
-        if (type == null) {
-            return false;
-        }
-        return type == OrgType.TYPE_DEPT;
-    }
-
 
     @Override
     public String toString() {

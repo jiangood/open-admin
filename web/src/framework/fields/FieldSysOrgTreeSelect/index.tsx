@@ -1,6 +1,3 @@
-/**
- * 组织机构树选择器
- */
 import React from "react";
 import {FieldRemoteTreeSelect} from "../FieldRemoteTreeSelect";
 import type {FieldProps} from '../types';
@@ -17,11 +14,13 @@ export class FieldSysOrgTreeSelect extends React.Component<FieldSysOrgTreeSelect
 
     render() {
         const {type, ...rest} = this.props;
-        const url = type === 'dept'?
-            '/admin/sysOrg/dept-tree':
-            '/admin/sysOrg/unit-tree';
+        let url = '/admin/sysOrg/dept-tree';
+        if (type === 'unit') {
+            url = '/admin/sysOrg/unit-tree';
+        } else if (type === 'shop') {
+            url = '/admin/sysOrg/tree?type=3';
+        }
 
         return <FieldRemoteTreeSelect url={url} {...rest}/>;
     }
-
 }

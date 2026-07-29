@@ -9,7 +9,7 @@ public class LoginInfoVO {
     private String id;
     private String name;
     private String orgName;
-    private String deptName;
+    private String orgName;
     private List<String> permissions;
     private String account;
     private String roleNames;

@@ -27,10 +27,10 @@ public class UserVO {
 
     private String unitLabel;
 
-    @Remark("所属部门")
-    private String deptId;
+    @Remark("所属机构节点")
+    private String orgId;
 
-    private String deptLabel;
+    private String orgLabel;
 
     private String account;
 
@@ -46,9 +46,7 @@ public class UserVO {
 
     private String dataPermType;
 
-    // 扩展字段1
     private String extra1;
     private String extra2;
     private String extra3;
-
 }

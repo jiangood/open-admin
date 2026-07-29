@@ -26,7 +26,6 @@ public class SysUserDetailsService implements UserDetailsService {
     private SysUserService userService;
     private SysOrgService sysOrgService;
 
-
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -39,7 +38,6 @@ public class SysUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("用户被禁用: " + username);
         }
 
-        // 构造权限列表，比如 ROLE_ADMIN, USER_READ
         List<GrantedAuthority> authorities = new ArrayList<>();
         Set<String> permissions = userService.getUserPerms(user.getId());
         for (String permission : permissions) {
@@ -50,21 +48,19 @@ public class SysUserDetailsService implements UserDetailsService {
 
         UserVO dto = userService.findOneDto(user.getId());
         loginUser.setId(dto.getId());
-        loginUser.setDeptId(dto.getDeptId());
-        loginUser.setDeptName(dto.getDeptLabel());
+        loginUser.setOrgId(dto.getOrgId());
+        loginUser.setOrgName(dto.getOrgLabel());
         loginUser.setUnitId(dto.getUnitId());
         loginUser.setUnitName(dto.getUnitLabel());
         loginUser.setName(dto.getName());
 
-
         SysUser deptLeader = sysOrgService.getDeptLeader(user.getId());
         if (deptLeader != null) {
-            log.debug("登录用户 {} 的部门领导为：{}", user.getName(), deptLeader.getId());
+            log.debug("登录用户 {} 的上级领导为：{}", user.getName(), deptLeader.getId());
             loginUser.setDeptLeaderId(deptLeader.getId());
         } else {
-            log.debug("登录用户 {} 无部门领导", user.getName());
+            log.debug("登录用户 {} 无上级领导", user.getName());
         }
-
 
         return loginUser;
     }

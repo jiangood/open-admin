@@ -17,8 +17,8 @@ public class LoginUser extends User {
     private String name;
     private String unitId;
     private String unitName;
-    private String deptId;
-    private String deptName;
+    private String orgId;
+    private String orgName;
 
     private String deptLeaderId;
 

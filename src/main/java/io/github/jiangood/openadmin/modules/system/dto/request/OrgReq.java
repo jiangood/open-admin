@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.dto.request;
 
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import lombok.Data;
 
 @Data

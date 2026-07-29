@@ -31,7 +31,7 @@ public class UserCenterController {
 
         UserCenterInfo info = new UserCenterInfo();
         info.setName(sysUser.getName());
-        info.setDept(user.getDeptLabel());
+        info.setOrg(user.getOrgLabel());
         info.setEmail(user.getEmail());
         info.setAccount(user.getAccount());
         info.setPhone(user.getPhone());

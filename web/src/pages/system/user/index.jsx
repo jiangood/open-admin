@@ -57,7 +57,7 @@ export default class extends React.Component {
     }
 
     handleEdit = record => {
-        this.modalRef.current.open({...record, deptId: record.deptId || record.unitId})
+        this.modalRef.current.open({...record, orgId: record.orgId || record.unitId})
     }
 
     columns = [
@@ -66,8 +66,8 @@ export default class extends React.Component {
             dataIndex: 'unitLabel',
         },
         {
-            title: '部门',
-            dataIndex: 'deptLabel',
+            title: '机构',
+            dataIndex: 'orgLabel',
         },
         {
             title: '姓名',
@@ -205,7 +205,7 @@ export default class extends React.Component {
 
             <FormModal ref={this.modalRef} title='系统用户' onFinish={this.onFinish}>
 
-                <Form.Item label='所属机构' name='deptId' rules={[{required: true}]}>
+                <Form.Item label='所属机构' name='orgId' rules={[{required: true}]}>
                     <FieldSysOrgTreeSelect/>
                 </Form.Item>
 

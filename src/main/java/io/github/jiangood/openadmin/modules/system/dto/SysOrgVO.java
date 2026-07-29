@@ -1,9 +1,11 @@
 package io.github.jiangood.openadmin.modules.system.dto;
 
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
+import io.github.jiangood.openadmin.modules.system.provider.OrgTypeProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,12 +23,12 @@ public class SysOrgVO {
     private String extra2;
     private String extra3;
 
-    public static String resolveTypeLabel(Integer type) {
+    public static String resolveTypeLabel(Integer type, List<OrgTypeProvider> providers) {
         if (type == null) return null;
-        return switch (type) {
-            case OrgType.TYPE_UNIT -> "单位";
-            case OrgType.TYPE_DEPT -> "部门";
-            default -> "未知";
-        };
+        return providers.stream()
+                .filter(p -> p.getType().equals(type))
+                .findFirst()
+                .map(OrgTypeProvider::getLabel)
+                .orElse("未知");
     }
 }

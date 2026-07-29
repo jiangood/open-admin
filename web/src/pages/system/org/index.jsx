@@ -3,7 +3,7 @@ import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Popconfi
 import React from 'react';
 import {
     FieldBoolean,
-    FieldDictSelect,
+    FieldRemoteSelect,
     FieldRemoteTreeSelect,
     FieldUserSelect,
     FormModal, Gap,
@@ -185,7 +185,7 @@ export default class extends React.Component {
                     <InputNumber/>
                 </Form.Item>
                 <Form.Item label='类型' name='type' rules={[{required: true}]}>
-                    <FieldDictSelect typeCode='orgType'/>
+                    <FieldRemoteSelect url='admin/sysOrg/type-options' placeholder='请选择类型'/>
                 </Form.Item>
                 <Form.Item label='部门领导' name={['leader', 'id']}>
                     <FieldUserSelect/>

@@ -22,7 +22,7 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
     }
 
     componentDidMount() {
-        HttpUtils.get('admin/sysOrg/dept-tree').then(tree => {
+        HttpUtils.get('admin/sysOrg/tree').then(tree => {
             this.setState({treeData: tree, treeDataLoading: false})
         })
     }

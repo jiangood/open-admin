@@ -18,7 +18,7 @@ import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -96,7 +96,7 @@ public class SysUserService extends BaseService<SysUser> {
         query.eq(SysUser.Fields.enabled, enabled);
 
         if (StrUtil.isNotEmpty(orgId)) {
-            query.or(Spec.<SysUser>of().eq(SysUser.Fields.unitId, orgId), Spec.<SysUser>of().eq(SysUser.Fields.deptId, orgId));
+            query.or(Spec.<SysUser>of().eq(SysUser.Fields.unitId, orgId), Spec.<SysUser>of().eq(SysUser.Fields.orgId, orgId));
         }
         if (StrUtil.isNotEmpty(roleId)) {
             query.isMember(SysUser.Fields.roles, new SysRole(roleId));
@@ -131,16 +131,9 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
     private void resolveOrg(SysUser input) {
-        String inputOrgId = input.getDeptId();
-        SysOrg org = sysOrgService.findById(inputOrgId).orElse(null);
-        if (org.getType() == OrgType.TYPE_UNIT) {
-            input.setUnitId(inputOrgId);
-            input.setDeptId(null);
-        } else {
-            SysOrg unit = sysOrgService.findParentUnit(org);
-            Assert.notNull(unit, "部门%s没有所属单位".formatted(org.getName()));
-            input.setUnitId(unit.getId());
-        }
+        String inputOrgId = input.getOrgId();
+        if (inputOrgId == null) return;
+        input.setUnitId(inputOrgId);
     }
 
 
@@ -219,7 +212,7 @@ public class SysUserService extends BaseService<SysUser> {
             case LEVEL:
                 return orgId == null ? Collections.emptyList() : Collections.singletonList(orgId);
             case CHILDREN:
-                return sysOrgService.findChildIdListWithSelfById(orgId, true);
+                return sysOrgService.findChildIdListWithSelfById(orgId);
             case CUSTOM:
                 return user.getDataPerms().stream().map(BaseEntity::getId).collect(Collectors.toList());
         }

@@ -10,7 +10,6 @@ import io.github.jiangood.openadmin.util.tree.drop.DropResult;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.enums.OrgType;
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-
 @RequiredArgsConstructor
 @Slf4j
 @Service
@@ -37,7 +35,6 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     private final SysOrgRepository sysOrgRepository;
     private final SysUserRepository sysUserRepository;
-
 
     public Optional<SysOrg> findByThirdId(String thirdId) {
         return sysOrgRepository.findByThirdId(thirdId);
@@ -61,37 +58,46 @@ public class SysOrgService extends BaseService<SysOrg> {
     public void deleteById(String id) {
         long count = sysOrgRepository.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
-
         sysOrgRepository.deleteById(id);
     }
 
-    public List<SysOrg> findByLoginUser(boolean containsDept) {
-        return this.findByLoginUser(containsDept, false);
+    public List<SysOrg> findByLoginUserEnabled() {
+        return findByLoginUser(false);
     }
 
-    /**
-     * @param containsDisabled 是否显示禁用
-     */
-    public List<SysOrg> findByLoginUser(boolean containsDept, boolean containsDisabled) {
+    public List<SysOrg> findByLoginUserDisabled() {
+        return findByLoginUser(true);
+    }
+
+    public List<SysOrg> findByLoginUser(boolean containsDisabled) {
         List<String> orgPermissions = LoginTool.getOrgPermissions();
         if (CollUtil.isEmpty(orgPermissions)) {
             return Collections.emptyList();
         }
 
-
         Spec<SysOrg> q = spec().in("id", orgPermissions);
 
-        // 如果不显示全部，则只显示启用的
         if (!containsDisabled) {
             q.eq(SysOrg.Fields.enabled, true);
         }
-        if (!containsDept) {
-            q.ne(SysOrg.Fields.type, OrgType.TYPE_DEPT);
-        }
 
-        return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.type, SysOrg.Fields.seq));
+        return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.seq));
     }
 
+    public List<SysOrg> findByLoginUser(Integer type) {
+        List<String> orgPermissions = LoginTool.getOrgPermissions();
+        if (CollUtil.isEmpty(orgPermissions)) {
+            return Collections.emptyList();
+        }
+
+        Spec<SysOrg> q = spec().in("id", orgPermissions);
+        q.eq(SysOrg.Fields.enabled, true);
+        if (type != null) {
+            q.eq(SysOrg.Fields.type, type);
+        }
+
+        return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.seq));
+    }
 
     @Transactional
     public SysOrg save(SysOrg input, List<String> requestKeys) throws Exception {
@@ -111,12 +117,6 @@ public class SysOrgService extends BaseService<SysOrg> {
         return sysOrgRepository.findById(input.getId()).orElse(null);
     }
 
-
-    /**
-     * 获得叶子节点
-     *
-     * @param orgs
-     */
     public List<SysOrg> getLeafs(Collection<SysOrg> orgs) {
         return orgs.stream().filter(o -> this.checkIsLeaf(o.getId())).collect(Collectors.toList());
     }
@@ -125,69 +125,44 @@ public class SysOrgService extends BaseService<SysOrg> {
         return orgs.stream().filter(this::checkIsLeaf).collect(Collectors.toList());
     }
 
-
     public List<String> findChildIdListById(String id) {
         List<SysOrg> list = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
-        return list.stream().map(BaseEntity::getId).toList();
+        return list.stream().map(BaseEntity::getId).collect(Collectors.toList());
     }
 
-    /**
-     * 直接下级公司
-     *
-     * @param id
-     */
     public List<SysOrg> findDirectChildUnit(String id) {
         return this.findDirectChildUnit(id, null);
     }
-
 
     public List<String> findDirectChildUnitIdArr(String id) {
         return this.findDirectChildUnitId(id);
     }
 
-
-    public List<SysOrg> findByType(OrgType type) {
+    public List<SysOrg> findByType(Integer type) {
         return sysOrgRepository.findAll(spec().eq(SysOrg.Fields.type, type).eq(SysOrg.Fields.enabled, true), Sort.by(SysOrg.Fields.seq));
     }
 
-
-    public List<SysOrg> findByTypeAndLevel(OrgType orgType, int orgLevel) {
-        List<SysOrg> all = sysOrgRepository.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, orgType), Sort.by(SysOrg.Fields.seq));
-
+    public List<SysOrg> findByTypeAndLevel(Integer type, int orgLevel) {
+        List<SysOrg> all = sysOrgRepository.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, type), Sort.by(SysOrg.Fields.seq));
         return all.stream().filter(o -> this.findLevelById(o.getId()) == orgLevel).collect(Collectors.toList());
     }
 
-
-    /**
-     * 组织机构分一般分部门和公司，如果orgId属于部门，则返回该部门对于的公司
-     *
-     * @param orgId
-     */
-    public SysOrg findUnitByOrgId(String orgId) {
-        SysOrg org = sysOrgRepository.findById(orgId).orElse(null);
-
-        return this.findUnit(org);
-    }
-
-
     public SysUser getDeptLeader(String userId) {
         SysUser user = sysUserRepository.findById(userId).orElse(null);
-        String deptId = user.getDeptId();
+        String orgId = user.getOrgId();
 
-        // 如果没有找到部门领导，则机构树的上一级部门找
-        while (deptId != null) {
-            SysOrg dept = sysOrgRepository.findById(deptId).orElse(null);
-            if (dept == null || dept.getType() != OrgType.TYPE_DEPT) {
+        while (orgId != null) {
+            SysOrg org = sysOrgRepository.findById(orgId).orElse(null);
+            if (org == null) {
                 break;
             }
-            SysUser leader = dept.getLeader();
+            SysUser leader = org.getLeader();
             if (leader != null) {
                 return leader;
             }
 
-            deptId = dept.getPid();
+            orgId = org.getPid();
         }
-
 
         return null;
     }
@@ -198,14 +173,11 @@ public class SysOrgService extends BaseService<SysOrg> {
             return deptLeader.getId();
         }
         return null;
-
-
     }
 
     public List<SysOrg> findAll() {
         return repository.findAll(Sort.by(SysOrg.Fields.seq));
     }
-
 
     @Transactional
     public void sort(String dragKey, DropResult result) {
@@ -215,55 +187,31 @@ public class SysOrgService extends BaseService<SysOrg> {
         List<String> sortedKeys = result.getSortedKeys();
         for (int i = 0; i < sortedKeys.size(); i++) {
             String sortedKey = sortedKeys.get(i);
-            // 组织机构一般少，这里遍历获取
             SysOrg org = sysOrgRepository.findById(sortedKey).orElse(null);
             org.setSeq(i);
         }
-
     }
 
-    public List<String> findChildIdListWithSelfById(String id, boolean containsDept) {
-        List<String> childIdListById = this.findChildIdListById(id, containsDept);
-        List<String> resultList = CollectionUtil.newArrayList(childIdListById);
-        resultList.add(id);
-        return resultList;
-    }
-    /**
-     * 根据节点id获取所有子节点id集合
-     */
-    public List<String> findChildIdListById(String id, boolean containsDept) {
+    public List<String> findChildIdListById(String id, Integer type) {
         List<SysOrg> result = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
 
-        if (!containsDept) {
-            result = result.stream().filter(o -> !o.isDept()).collect(Collectors.toList());
+        if (type != null) {
+            result = result.stream().filter(o -> type.equals(o.getType())).collect(Collectors.toList());
         }
 
         return result.stream().map(BaseEntity::getId).collect(Collectors.toList());
     }
 
-    /**
-     * 友元函数，供aop调用
-     */
     public void cleanCache() {
     }
 
-    /**
-     * 判断是否节点
-     *
-     * @param id
-     */
     public boolean checkIsLeaf(String id) {
         SysOrg org = findById(id).orElse(null);
         return TreeTool.isLeaf(org, SysOrg::getChildren);
     }
 
-    /**
-     * 直接下级公司
-     *
-     * @param id
-     */
     public List<SysOrg> findDirectChildUnit(String id, Boolean enabled) {
-        Spec<SysOrg> q = spec().eq(SysOrg.Fields.type, OrgType.TYPE_UNIT).eq(SysOrg.Fields.pid, id);
+        Spec<SysOrg> q = spec().eq(SysOrg.Fields.pid, id);
         if (enabled != null) {
             q.eq(SysOrg.Fields.enabled, enabled);
         }
@@ -271,12 +219,6 @@ public class SysOrgService extends BaseService<SysOrg> {
         return sysOrgRepository.findAll(q);
     }
 
-
-    /**
-     * 直接下级公司
-     *
-     * @param id
-     */
     public List<String> findDirectChildUnitId(String id) {
         List<SysOrg> list = this.findDirectChildUnit(id, null);
         return list.stream().map(BaseEntity::getId).collect(Collectors.toList());
@@ -289,56 +231,6 @@ public class SysOrgService extends BaseService<SysOrg> {
         Integer level = levelMap.get(id);
         Assert.state(level != null, "id not found:" + id);
         return level;
-    }
-
-    /**
-     * 查询所属公司
-     *
-     * @param org
-     * @param targetLevel
-     */
-    public SysOrg findParentUnit(SysOrg org, int targetLevel) {
-        List<SysOrg> all = findAll();
-        List<SysOrg> tree = TreeTool.buildTree(all, SysOrg::getId, SysOrg::getPid, SysOrg::getChildren, SysOrg::setChildren);
-        Map<String, SysOrg> map = TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
-        Map<String, Integer> levelMap = TreeTool.buildLevelMap(tree, SysOrg::getId, SysOrg::getChildren);
-
-        return TreeTool.getParent(map, org, SysOrg::getPid, o -> {
-            Integer level = levelMap.get(o.getId());
-            return level == targetLevel;
-        });
-    }
-
-    public String findParentUnitId(SysOrg org, int targetLevel) {
-        SysOrg parentUnit = findParentUnit(org, targetLevel);
-        if (parentUnit != null) {
-            return parentUnit.getId();
-        }
-        return null;
-    }
-
-
-    /**
-     * 获得上级单位。 如当前类型为部门，则先找到公司，再找公司父公司
-     */
-    public SysOrg findParentUnit(SysOrg org) {
-        List<SysOrg> all = findAll();
-        List<SysOrg> tree = TreeTool.buildTree(all, SysOrg::getId, SysOrg::getPid, SysOrg::getChildren, SysOrg::setChildren);
-        Map<String, SysOrg> map = TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
-        return TreeTool.getParent(map, org, SysOrg::getPid, o -> !o.isDept());
-    }
-
-    /**
-     * 获得机构， 如果是部门，则向上查询
-     *
-     * @param org
-     */
-    public SysOrg findUnit(SysOrg org) {
-        if (!org.isDept()) {
-            return org;
-        }
-
-        return findParentUnit(org);
     }
 
     public List<String> getParentIdListById(String id) {
@@ -358,12 +250,8 @@ public class SysOrgService extends BaseService<SysOrg> {
         return this.findById(id).map(SysOrg::getName).orElse(null);
     }
 
-    /**
-     * 查早所有正常的机构
-     */
     public List<SysOrg> findAllValid() {
         Spec<SysOrg> q = spec().eq(SysOrg.Fields.enabled, true);
-
         return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.seq));
     }
 
@@ -377,6 +265,4 @@ public class SysOrgService extends BaseService<SysOrg> {
     public List<SysOrg> findAllById(List<String> orgIdList) {
         return sysOrgRepository.findAllById(orgIdList);
     }
-
-
 }

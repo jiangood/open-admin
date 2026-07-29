@@ -22,7 +22,7 @@ public class UserConverter {
         UserVO r = new UserVO();
         BeanUtil.copyProperties(input, r);
         r.setUnitLabel(sysOrgService.getNameById(input.getUnitId()));
-        r.setDeptLabel(sysOrgService.getNameById(input.getDeptId()));
+        r.setOrgLabel(sysOrgService.getNameById(input.getOrgId()));
         r.setRoleNames(input.getRoles().stream().map(SysRole::getName).toList());
         return r;
     }
@@ -30,5 +30,4 @@ public class UserConverter {
     public List<UserVO> toResponse(List<SysUser> list) {
         return list.stream().map(this::toResponse).toList();
     }
-
 }

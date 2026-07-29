@@ -45,8 +45,8 @@ public class SysUser extends BaseEntity {
      */
     @Remark("所属机构")
     private String unitId;
-    @Remark("所属部门")
-    private String deptId;
+    @Remark("所属机构节点")
+    private String orgId;
     @Remark("账号")
     @NotNull(message = "账号不能为空")
     @Column(unique = true, length = 50)

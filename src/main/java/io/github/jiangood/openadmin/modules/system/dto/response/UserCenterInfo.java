@@ -10,7 +10,7 @@ public class UserCenterInfo {
 
     private String name;
     private String phone;
-    private String dept;
+    private String org;
     private String unit;
     private List<String> roles;
     private String email;

@@ -137,7 +137,7 @@ public class SysUserController {
         if (CollUtil.isNotEmpty(orgIds)) {
             query.or(
                     Spec.<SysUser>of().in(SysUser.Fields.unitId, orgIds),
-                    Spec.<SysUser>of().in(SysUser.Fields.deptId, orgIds)
+                    Spec.<SysUser>of().in(SysUser.Fields.orgId, orgIds)
             );
 
         }
@@ -147,8 +147,8 @@ public class SysUserController {
 
         Map<String, SysOrg> dict = sysOrgService.dict();
         List<Option> options = Option.convertList(page.getContent(), BaseEntity::getId, t -> {
-            if (t.getDeptId() != null) {
-                SysOrg sysOrg = dict.get(t.getDeptId());
+            if (t.getOrgId() != null) {
+                SysOrg sysOrg = dict.get(t.getOrgId());
                 if (sysOrg != null) {
                     return t.getName() + " (" + sysOrg.getName() + ")";
 
@@ -194,7 +194,7 @@ public class SysUserController {
      */
     @GetMapping("tree")
     public AjaxResult tree() {
-        List<SysOrg> orgList = sysOrgService.findByLoginUser(true, false);
+        List<SysOrg> orgList = sysOrgService.findByLoginUserEnabled();
         if (orgList.isEmpty()) {
             return AjaxResult.ok().data(Collections.emptyList());
         }
@@ -203,7 +203,7 @@ public class SysUserController {
         List<SysUser> userList = sysUserService.findByUnit(orgPermissions);
 
         List<TreeOption> orgOptions = orgList.stream().map(o -> new TreeOption(o.getName(), o.getId(), o.getPid())).toList();
-        List<TreeOption> userOptions = userList.stream().map(u -> new TreeOption(u.getName(), u.getId(), StrUtil.emptyToDefault(u.getDeptId(), u.getUnitId()))).toList();
+        List<TreeOption> userOptions = userList.stream().map(u -> new TreeOption(u.getName(), u.getId(), StrUtil.emptyToDefault(u.getOrgId(), u.getUnitId()))).toList();
         List<TreeOption> allOptions = ListUtils.union(orgOptions, userOptions);
 
         List<TreeOption> tree = TreeTool.buildTree(allOptions);
