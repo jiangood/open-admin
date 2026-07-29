@@ -13,4 +13,7 @@ public class ShopOrgTypeProvider implements OrgTypeProvider {
 
     @Override
     public String getIcon() { return "ShopOutlined"; }
+
+    @Override
+    public int getOrder() { return 3; }
 }

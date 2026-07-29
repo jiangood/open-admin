@@ -13,4 +13,7 @@ public class DeptOrgTypeProvider implements OrgTypeProvider {
 
     @Override
     public String getIcon() { return "HomeOutlined"; }
+
+    @Override
+    public int getOrder() { return 2; }
 }

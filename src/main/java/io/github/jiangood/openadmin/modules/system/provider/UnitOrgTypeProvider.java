@@ -13,4 +13,7 @@ public class UnitOrgTypeProvider implements OrgTypeProvider {
 
     @Override
     public String getIcon() { return "ApartmentOutlined"; }
+
+    @Override
+    public int getOrder() { return 1; }
 }
