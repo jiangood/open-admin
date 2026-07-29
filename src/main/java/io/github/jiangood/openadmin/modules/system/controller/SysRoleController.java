@@ -193,11 +193,9 @@ public class SysRoleController {
         if (request.getUserIdList() != null) {
             affected.addAll(request.getUserIdList());
         }
-        for (String userId : affected) {
-            SysUser user = sysUserService.findById(userId).orElse(null);
-            if (user != null) {
-                sysUserService.markPermsStale(user.getId(), user.getAccount());
-            }
+        List<SysUser> affectedUsers = sysUserService.findAllById(affected);
+        for (SysUser user : affectedUsers) {
+            sysUserService.markPermsStale(user.getId(), user.getAccount());
         }
         return AjaxResult.ok().msg("授权用户成功");
     }

@@ -84,6 +84,7 @@ createRoot(document.getElementById('root')).render(
 - 页面文件放在 `src/pages/` 下，扩展名 `.jsx` 或 `.tsx`，文件名首字母小写（大写开头视为普通组件不注册路由）
 - `src/pages/product/index.jsx` → 路由 `/product`；`$code.jsx` → 动态段 `/:code`
 - 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
+- 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](#页面生命周期)）
 
 **目录约定**（无需配置，自动识别）：
 
@@ -209,6 +210,7 @@ web/
 - 权限控制：`<PermActions>` 包裹 `<Button perm="...">`、`<Perm code="...">`
 - 跨组件通信使用 `EventBus`（`emit` / `on` / `once` / `off`），不要使用 `document.dispatchEvent`
 - 对话框优先使用 `<Modal>` 组件（state 控制 `open`），避免 `Modal.info()` / `Modal.confirm()` 等静态方法
+- 页面生命周期：页面组件实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用，详见[页面生命周期](#页面生命周期)
 
 ## API 参考
 
@@ -271,6 +273,33 @@ public class DataSyncJob extends BaseJob {
 | `Perm` | 权限控制容器（`code` 属性） |
 | `ViewText` / `ViewBoolean` / `ViewFile` / `ViewImage` 等 | 展示组件 |
 | `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
+
+#### 页面生命周期
+
+多 Tab 布局中，所有页面保持 mounted（仅 `display` 切换）。框架提供 `onShow()` 生命周期方法，在页面首次加载或从其他 Tab 切回时自动调用。
+
+```jsx
+export default class extends React.Component {
+  tableRef = React.createRef()
+
+  onShow() {
+    this.tableRef.current?.reload()
+  }
+
+  render() {
+    return <ProTable actionRef={this.tableRef} ... />
+  }
+}
+```
+
+| 触发场景 | onShow 是否调用 |
+|---------|:--------------:|
+| 首次打开 Tab | ✅ |
+| 切换到其他 Tab 再切回来 | ✅ |
+| 右键「刷新」Tab | ✅（组件重建后立即调用） |
+| Tab 始终激活（无切换） | ❌ |
+
+> 注：仅 class 组件支持，方法名固定为 `onShow`。
 
 #### 下载弹框
 

@@ -56,6 +56,7 @@ cd web && npm run build                                       # 前端构建
 - **ID 生成**: 默认 UUIDv7（时间排序，MySQL 友好）
 - **文件存储**: 支持 `local` / `s3` / `custom`，通过 `FileOperator` 接口抽象
 - **操作日志**: `@Log` 注解 + AOP 切面，异步记录
+- **页面生命周期**: 多 Tab 下页面保持 mounted，通过 `PageFrame` 的 `show` prop + ref 机制自动调用组件 `onShow()` 方法（首次打开 / Tab 切回时触发）
 
 ## Adding a Business Module
 

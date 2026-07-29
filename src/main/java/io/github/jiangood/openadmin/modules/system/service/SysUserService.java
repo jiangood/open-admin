@@ -84,6 +84,9 @@ public class SysUserService extends BaseService<SysUser> {
                 .orElse(Collections.emptySet());
     }
 
+    public List<SysUser> findAllById(Collection<String> ids) {
+        return sysUserRepository.findAllById(ids);
+    }
 
     public Page<UserVO> getAll(String orgId, String roleId, String name, String account, String phone, Boolean enabled, Pageable pageable) {
         Spec<SysUser> query = Spec.of();

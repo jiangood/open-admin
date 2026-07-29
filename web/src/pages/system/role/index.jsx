@@ -8,6 +8,7 @@ export default class extends React.Component {
 
     state = {
         usersModalOpen: false,
+        usersModalLoading: false,
         selectedRecord: null,
 
         userList: [],
@@ -132,12 +133,15 @@ export default class extends React.Component {
     ]
 
     handleSaveUsers = () => {
+        this.setState({usersModalLoading: true})
         const params = {
             id: this.state.selectedRecord.id,
             userIdList: this.state.targetKeys
         }
         HttpUtils.post('admin/sysRole/grant-users', params).then(rs => {
-            this.setState({usersModalOpen: false})
+            this.setState({usersModalOpen: false, usersModalLoading: false})
+        }).catch(() => {
+            this.setState({usersModalLoading: false})
         })
     }
 
@@ -213,6 +217,7 @@ export default class extends React.Component {
 
             <Modal title={'角色用户' + "【" + this.state.selectedRecord?.name + '】'}
                    open={this.state.usersModalOpen}
+                   confirmLoading={this.state.usersModalLoading}
                    destroyOnHidden
                    mask={{ closable: false }}
                    width={800}

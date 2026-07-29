@@ -113,7 +113,7 @@ export class TabLayout extends React.Component {
                 <div style={{flex: 1, overflow: 'hidden'}}>
                     {tabs.map(t => (
                         <div key={t.key} style={{display: t.key === activeKey ? 'block' : 'none', height: '100%'}}>
-                            <PageFrame key={t.refreshKey} url={t.key}/>
+                            <PageFrame key={t.refreshKey} url={t.key} show={t.key === activeKey}/>
                         </div>
                     ))}
                 </div>
