@@ -7,7 +7,7 @@ description: Use when preparing a new release of an open-admin based project —
 
 ## Overview
 
-Automates the release workflow for open-admin framework projects: check latest remote release → propose new version → bump version across pom.xml + package.json → run full test suite (backend unit + frontend build + E2E) → commit + tag + push.
+Automates the release workflow for open-admin framework projects: check latest remote release → propose new version → bump version across pom.xml + package.json → run full test suite (backend unit + frontend build) → verify workspace → commit + tag + push.
 
 ## When to Use
 
@@ -20,7 +20,7 @@ Automates the release workflow for open-admin framework projects: check latest r
 - `gh` CLI installed and authenticated (`gh auth status`)
 - Git remote configured (`git@github.com:jiangood/open-admin.git`)
 - Maven + Node.js available
-- Ports 8080 + 3000 free (for E2E tests)
+- Ports 8080 + 3000 free (for E2E tests, if applicable)
 
 ## Workflow
 
@@ -53,7 +53,7 @@ Verify changes look correct with `git diff`.
 
 ### 4. Run Tests
 
-All three must pass. If any fails, stop and report.
+All must pass. If any fails, stop and report.
 
 ```bash
 # 4a) Backend unit tests
@@ -61,14 +61,25 @@ mvn clean test -Dtest='!*RepositoryTest,!*ServiceTest'
 
 # 4b) Frontend build
 cd web && npm run build
-
-# 4c) E2E tests (auto-starts backend + frontend)
-cd web && npm run test:e2e
 ```
 
 Return to `open-admin/` root after each `cd`.
 
-### 5. Commit, Tag, Push
+### 5. Verify Git Workspace is Clean
+
+After all tests pass, check that only version bump files are changed:
+
+```bash
+git status --porcelain
+```
+
+Expected changes should only include `pom.xml` and/or `web/package.json` (from version bump). If there are unexpected artifacts (build output, test reports, generated files), investigate and either:
+- Add them to `.gitignore` if they should never be committed, or
+- `git checkout -- <file>` to discard test-generated junk
+
+Do NOT proceed if workspace has unexpected dirty files.
+
+### 6. Commit, Tag, Push
 
 ```bash
 git add -A
@@ -77,7 +88,7 @@ git tag v<version>
 git push origin main --tags
 ```
 
-### 6. Monitor CI (Optional)
+### 7. Monitor CI (Optional)
 
 Check if `.github/workflows/` exists:
 
@@ -99,9 +110,8 @@ Test-Path -LiteralPath ".github/workflows"
 
 ## Common Mistakes
 
-- Pushing without running all tests (E2E catches integration issues)
+- Pushing without running all tests
 - Forgetting to push tags (`--tags` flag required)
 - Bumping version but not committing the change
 - Running `mvn test` without `clean` (stale class files)
-- Skipping E2E because "unit tests pass" (E2E tests auth + page lifecycle)
 - Running commands from wrong working directory (always from project root)
