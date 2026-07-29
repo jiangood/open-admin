@@ -1,9 +1,9 @@
 ---
-name: open-admin
+name: oa-crud
 description: 在业务项目中创建 CRUD 业务模块，遵循 open-admin 框架的 Entity→Repository→Service→Controller→前端页面→菜单配置的完整模式。适用于以 Maven JAR + npm 包方式引入 open-admin 的业务项目。
 ---
 
-# open-admin — 业务模块创建指南
+# oa-crud — 业务模块创建指南
 
 ## 适用范围
 

@@ -453,10 +453,10 @@ src/main/resources/
 
 **端口被占用？** 后端默认 8080，前端默认 8000，可通过环境变量 `SERVER_PORT` 修改后端端口。
 
-## Claude Code 集成
+## Opencode 集成
 
-在业务项目中使用 Claude Code 创建 CRUD 模块前，请先安装 open-admin skill：
+在业务项目中使用 Opencode 创建 CRUD 模块前，请先安装 open-admin skill：
 
-> 请帮我安装 skill，地址为 https://raw.githubusercontent.com/jiangood/open-admin/main/.claude/skills/open-admin.md
+> 请帮我安装 skill，地址为 https://raw.githubusercontent.com/jiangood/open-admin/main/.opencode/skills/oa-crud.md
 
-安装后使用 `/open-admin` 指令创建业务模块，Claude 会按框架规范自动生成 Entity → Repository → Service → Controller → 前端页面 → 菜单配置。
+安装后使用 `/open-admin` 指令创建业务模块，Opencode 会按框架规范自动生成 Entity → Repository → Service → Controller → 前端页面 → 菜单配置。
