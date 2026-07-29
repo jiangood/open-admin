@@ -120,6 +120,7 @@ createRoot(document.getElementById('root')).render(
 ```
 src/main/java/io/github/jiangood/openadmin/
 ├── framework/          # 框架基础层
+│   ├── spi/            # 扩展点接口（OrgTypeProvider, FileOperator, StartupHook）
 │   ├── config/         # Spring 配置（Security, JPA, Jackson）
 │   ├── data/           # BaseEntity, BaseRepository, Spec
 │   ├── perm/           # @HasPermission 注解 + 切面
@@ -138,6 +139,18 @@ web/
 ### 自动配置机制
 
 框架通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册 `OpenAdminConfiguration`（含 `@ComponentScan` / `@EntityScan` / `@EnableJpaRepositories`，扫描包 `io.github.jiangood.openadmin`）。默认配置在 `application-lib.yml`，业务项目通过 `spring.config.import` 引入。
+
+### 框架扩展点 (`framework.spi`)
+
+`io.github.jiangood.openadmin.framework.spi` 包集中存放框架的 SPI 接口，业务项目通过实现这些接口来扩展框架行为：
+
+| 接口 | 用途 | 注册方式 |
+|------|------|---------|
+| `OrgTypeProvider` | 自定义机构类型（如新增"门店"类型） | `@Component` |
+| `FileOperator` | 自定义文件存储后端（注册 `@Bean @Primary FileOperator` 覆盖默认） | `@ConditionalOnMissingBean` |
+| `StartupHook` | 系统启动钩子（JPA 建表前/种子数据前后） | `@Component` |
+
+实现类被 `@ComponentScan` 自动发现，无需手动注册。
 
 ## 技术栈
 
@@ -389,9 +402,11 @@ class ReportPage extends React.Component {
 
 ### 文件存储
 
+通过 `sys.file.store-type` 选择后端（`local` / `s3` / `custom`）：
+
 - `local` — 本地文件系统，保存到 `sys.file.upload-path`
 - `s3` — S3 兼容存储（Minio / AWS S3 / R2 / 阿里云 OSS 等），配置 `sys.file.s3.{endpoint,region,accessKey,secretKey,bucketName,pathStyleAccess}`
-- `custom` — 自定义实现，注册 `FileOperator` bean
+- 自定义 — 实现 `framework.spi.FileOperator` 接口并注册 `@Bean @Primary FileOperator`，框架自动跳过默认创建
 
 完整配置项见 `SystemProperties.java`。
 

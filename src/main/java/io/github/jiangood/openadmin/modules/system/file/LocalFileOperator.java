@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.modules.system.file;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;

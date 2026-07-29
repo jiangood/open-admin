@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.provider;
 
+import io.github.jiangood.openadmin.framework.spi.OrgTypeProvider;
 import org.springframework.stereotype.Component;
 
 @Component

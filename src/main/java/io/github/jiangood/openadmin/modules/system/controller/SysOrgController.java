@@ -17,7 +17,7 @@ import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.SysOrgVO;
 import io.github.jiangood.openadmin.modules.system.dto.request.OrgReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
-import io.github.jiangood.openadmin.modules.system.provider.OrgTypeProvider;
+import io.github.jiangood.openadmin.framework.spi.OrgTypeProvider;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import lombok.RequiredArgsConstructor;

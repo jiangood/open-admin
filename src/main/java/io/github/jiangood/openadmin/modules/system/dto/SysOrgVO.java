@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.dto;
 
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.provider.OrgTypeProvider;
+import io.github.jiangood.openadmin.framework.spi.OrgTypeProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

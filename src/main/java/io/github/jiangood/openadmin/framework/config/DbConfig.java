@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.framework.config;
 
 import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import io.github.jiangood.openadmin.framework.data.impl.JdbcRunnerImpl;
+import io.github.jiangood.openadmin.framework.spi.StartupHook;
 import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.pattern.ValidatePattern;
 import org.springframework.boot.autoconfigure.AutoConfiguration;

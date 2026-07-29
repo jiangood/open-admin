@@ -14,7 +14,7 @@ import io.github.jiangood.openadmin.util.ImgTool;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
-import io.github.jiangood.openadmin.modules.system.file.FileOperator;
+import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

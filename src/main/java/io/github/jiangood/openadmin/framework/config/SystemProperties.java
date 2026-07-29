@@ -95,7 +95,7 @@ public class SystemProperties {
         }
 
         /**
-         * 存储类型: local, s3, custom（自定义实现需注册 FileOperator bean）
+         * 存储类型: local / s3；自定义实现请注册 @Bean @Primary FileOperator
          */
         private StoreType storeType = StoreType.local;
 

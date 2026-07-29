@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.modules.system.provider;
+package io.github.jiangood.openadmin.framework.spi;
 
 public interface OrgTypeProvider {
     Integer getType();
