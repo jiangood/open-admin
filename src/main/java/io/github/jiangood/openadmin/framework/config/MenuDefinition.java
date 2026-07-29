@@ -17,25 +17,31 @@ import java.util.List;
 @Data
 public class MenuDefinition {
 
+    /** 菜单唯一标识，来自 YAML Map key 自动回填 */
     private String id;
 
+    /** 父菜单 id，为空表示根节点 */
     private String pid;
 
+    /** 菜单显示名称 */
     private String name;
 
+    /** Ant Design 图标组件名 */
     private AntdIcon icon;
 
+    /** 前端路由路径 */
     private String path;
 
+    /** 同级排序序号 */
     private int seq;
-
-    private Boolean refreshOnTabClick;
 
     /** 权限定义列表 */
     private List<PermDefinition> perms = new ArrayList<>();
 
+    /** 未读消息数拉取 URL */
     private String messageCountUrl;
 
+    /** 是否禁用（禁用时菜单不显示） */
     private Boolean disabled;
 
     @Data
