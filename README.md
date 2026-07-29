@@ -453,13 +453,24 @@ src/main/resources/
 
 **端口被占用？** 后端默认 8080，前端默认 8000，可通过环境变量 `SERVER_PORT` 修改后端端口。
 
-## AI Skills
+## Skills (opencode)
 
-在项目目录下对 AI 助手说：
-
-> 安装 [open-admin skills](https://github.com/jiangood/open-admin/tree/main/skills) 到 skills 目录
+### 内置 skills
 
 | Skill | 用途 |
 |-------|------|
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
+
+### 安装到业务项目
+
+在业务项目根目录执行以下 PowerShell 命令安装内置 skills：
+
+```powershell
+mkdir -Force .opencode\skills\oa-crud
+wget -O .opencode\skills\oa-crud\SKILL.md https://raw.githubusercontent.com/jiangood/open-admin/main/.opencode/skills/oa-crud/SKILL.md
+mkdir -Force .opencode\skills\oa-upgrade
+wget -O .opencode\skills\oa-upgrade\SKILL.md https://raw.githubusercontent.com/jiangood/open-admin/main/.opencode/skills/oa-upgrade/SKILL.md
+```
+
+
