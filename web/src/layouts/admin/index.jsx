@@ -153,6 +153,12 @@ export default class extends React.Component {
         PageUtils.open(path, menu.name);
     }
 
+    getActiveTopMenu() {
+        const {topMenus, activeTopMenuKey} = this.state;
+        if (!activeTopMenuKey || !topMenus) return null;
+        return topMenus.find(t => t.key === activeTopMenuKey) || null;
+    }
+
     renderTopMenu = () => {
         if (this.state.menuLoading) return null;
         const {topMenus, activeTopMenuKey} = this.state;
@@ -198,6 +204,10 @@ return <Layout className='main-layout'>
                         <div key={a.code} className='item' style={{cursor: 'pointer', padding: '0 12px', whiteSpace: 'nowrap'}}
                              onClick={() => PageUtils.open('/article/' + a.code, a.title)}>{a.title}</div>
                     ))}
+                    {this.props.headerExtra?.({
+                        activeTopMenu: this.getActiveTopMenu(),
+                        loginInfo: this.props.loginInfo,
+                    })}
                     <HeaderRight/>
                 </Header>
 

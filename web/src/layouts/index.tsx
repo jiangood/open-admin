@@ -22,7 +22,16 @@ const configProps = {
     theme: getThemeConfig(),
 };
 
-export class Layouts extends React.Component {
+export interface HeaderExtraContext {
+    activeTopMenu: { key: string; label: string } | null;
+    loginInfo: { id: string; name: string; account: string };
+}
+
+interface LayoutsProps {
+    headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
+}
+
+export class Layouts extends React.Component<LayoutsProps> {
     state = {
         location: history.location,
         siteInfoLoaded: false,
@@ -119,7 +128,7 @@ export class Layouts extends React.Component {
         return (
             <ErrorBoundary minimal>
                 <ConfigProvider {...configProps}>
-                    {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout/> : (
+                    {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout headerExtra={this.props.headerExtra} loginInfo={GlobalData.getLoginInfo()}/> : (
                         <PageLoading messages={[
                             !siteInfoLoaded && '加载站点信息...',
                             !loginChecked && '检查登录中...',
