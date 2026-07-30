@@ -5,8 +5,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class UnitOrgTypeProvider implements OrgTypeProvider {
+
+    public static final int TYPE_UNIT = 1;
+
     @Override
-    public Integer getType() { return 1; }
+    public Integer getType() { return TYPE_UNIT; }
 
     @Override
     public String getLabel() { return "单位"; }

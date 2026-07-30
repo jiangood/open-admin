@@ -5,8 +5,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DeptOrgTypeProvider implements OrgTypeProvider {
+
+    public static final int TYPE_DEPT = 2;
+
     @Override
-    public Integer getType() { return 2; }
+    public Integer getType() { return TYPE_DEPT; }
 
     @Override
     public String getLabel() { return "部门"; }
