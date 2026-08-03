@@ -1,20 +1,22 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.URLUtil;
-import io.github.jiangood.openadmin.util.ContentTypeTool;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.service.SysFileService;
+import io.github.jiangood.openadmin.util.ContentTypeTool;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
 import java.io.FileNotFoundException;
@@ -23,28 +25,31 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Set;
 
+/**
+ * 文件预览（全局文件访问）
+ * <p>
+ * 统一走 /file 前缀，C 端可复用；可通过 nginx 将该前缀代理到真实对象存储
+ * /file/public/xxx 免登录；/file/private/xxx 需登录（由 SecurityConfig 控制）
+ */
 @Slf4j
-@Controller
+@RestController
 @RequiredArgsConstructor
 public class FilePreviewController {
+
+    private final SysFileService service;
 
     private final Set<String> allowedPreviewTypes = Set.of(
             "jpg", "jpeg", "png", "gif", "webp", "pdf", "mp4", "avi", "mov"
     );
 
-
-    private final SysFileService sysFileService;
-
     /**
-     * 文件预览入口
+     * 预览文件
      */
-    @GetMapping({
-            "admin/preview/{id}",
-            "admin/sysFile/preview/{id}"})
-    public ResponseEntity<StreamingResponseBody> previewFile(@PathVariable String id,
-                                                              HttpServletRequest request,
-                                                              Integer w) { // 图片宽度
-        SysFile file = sysFileService.findById(id).orElse(null);
+    @GetMapping("/file/{*objectName}")
+    public ResponseEntity<StreamingResponseBody> preview(@PathVariable String objectName,
+                                                         HttpServletRequest request) {
+        objectName = stripLeadingSlash(objectName);
+        SysFile file = service.findByObjectName(objectName);
         if (file == null) {
             return ResponseEntity.notFound().build();
         }
@@ -54,13 +59,12 @@ public class FilePreviewController {
             return ResponseEntity.badRequest().build();
         }
         try {
-            InputStream inputStream = sysFileService.getFileStream(file, w);
+            InputStream inputStream = service.getFileStream(file);
 
             boolean video = ContentTypeTool.isVideo(file.getContentType());
-            String disposition = "inline; filename=\"" + URLUtil.encode(id + "." + file.getSuffix()) + "\"";
+            String disposition = "inline; filename=\"" + URLUtil.encode(FileNameUtil.mainName(objectName)) + "\"";
             if (video) {
                 String rangeHeader = request.getHeader("Range");
-                // 支持视频流传输（兼容HTML5 video标签）
                 if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
                     log.trace("视频预览范围 {}", rangeHeader);
                     return handlePartialContent(inputStream, file, rangeHeader);
@@ -74,31 +78,21 @@ public class FilePreviewController {
                         .body(new MyStreamingResponseBody(inputStream));
             }
 
-            // 非视频的文件
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
                     .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
-
-                    // 去掉文件大小的响应头，原因：图片尺寸参数存在时（如?w=400）文件大小不准
-                    // .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSize()))
-
-                    // 添加缓存头
-                    .eTag(id)
+                    .eTag(objectName)
                     .lastModified(file.getUpdateTime().getTime())
                     .body(new MyStreamingResponseBody(inputStream));
         } catch (FileNotFoundException fe) {
-            log.info("预览文件失败, 文件不存在 id={}, w={}", file.getId(), w);
+            log.info("预览文件失败, 文件不存在 objectName={}", objectName);
             return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            log.error("预览文件失败, id={}, w={}", file.getId(), w, e);
+            log.error("预览文件失败, objectName={}", objectName, e);
             return ResponseEntity.internalServerError().build();
         }
     }
 
-
-    /**
-     * 处理部分内容请求（如视频播放）
-     */
     private ResponseEntity<StreamingResponseBody> handlePartialContent(InputStream inputStream, SysFile file, String rangeHeader) {
         log.trace("处理断点下载");
         long fileSize = file.getSize();
@@ -120,13 +114,16 @@ public class FilePreviewController {
                 .body(new MyStreamingResponseBody(inputStream, rangeStart, contentLength));
     }
 
+    private static String stripLeadingSlash(String objectName) {
+        return objectName.startsWith("/") ? objectName.substring(1) : objectName;
+    }
+
     @ExceptionHandler(Throwable.class)
     public void throwable(Throwable e, HttpServletRequest request) {
         log.error("预览文件时，连接出错 {} {} {}", request.getRequestURI(), e.getClass().getSimpleName(), e.getMessage());
     }
 
     private static class MyStreamingResponseBody implements StreamingResponseBody {
-
 
         InputStream inputStream;
 
@@ -147,12 +144,9 @@ public class FilePreviewController {
         public void writeTo(OutputStream outputStream) throws IOException {
             try {
                 if (start > 0) {
-                    // 跳过起始字节
                     IOUtils.skipFully(inputStream, start);
-                    // 复制指定范围的字节
                     IOUtils.copyLarge(inputStream, outputStream, 0, contentLength);
                 } else {
-                    // 复制指定范围的字节
                     IOUtils.copyLarge(inputStream, outputStream);
                 }
             } finally {

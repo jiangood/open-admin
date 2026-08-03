@@ -3,9 +3,9 @@ package io.github.jiangood.openadmin.modules.job.service;
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
-import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
+import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
-import io.github.jiangood.openadmin.modules.job.repository.SysJobExecuteRecordRepository;
+import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
@@ -25,7 +25,7 @@ import java.util.List;
 public class SysJobService extends BaseService<SysJob> {
 
     private final QuartzManager quartzService;
-    private final SysJobExecuteRecordRepository sysJobExecuteRecordRepository;
+    private final SysJobLogRepository sysJobLogRepository;
     private final Scheduler scheduler;
 
 
@@ -55,14 +55,14 @@ public class SysJobService extends BaseService<SysJob> {
         Assert.notNull(job, "该任务已被删除，请勿重复操作");
         quartzService.deleteJob(job);
 
-        sysJobExecuteRecordRepository.deleteBySysJobId(id);
+        sysJobLogRepository.deleteBySysJobId(id);
 
         deleteById(id);
     }
 
 
-    public Page<SysJobExecuteRecord> findAllExecuteRecord(Specification<SysJobExecuteRecord> q, Pageable pageable) {
-        return sysJobExecuteRecordRepository.findAll(q, pageable);
+    public Page<SysJobLog> findAllExecuteRecord(Specification<SysJobLog> q, Pageable pageable) {
+        return sysJobLogRepository.findAll(q, pageable);
     }
 
     public Page<SysJob> page(String name, String jobClass, Pageable pageable) throws SchedulerException {

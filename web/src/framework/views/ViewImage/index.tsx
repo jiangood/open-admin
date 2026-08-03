@@ -23,16 +23,16 @@ export class ViewImage extends React.Component {
 
     const urlList = [];
     for (let v of vs) {
-      const isId = v.indexOf('/') === -1;
       const isAbsUrl = v.startsWith('http');
       const isDataUrl = v.startsWith('data:');
+      const isObjectName = v.startsWith('public/') || v.startsWith('private/');
       if (isAbsUrl || isDataUrl) {
         urlList.push(v);
         continue;
       }
 
-      if (isId) {
-        urlList.push(UrlUtils.contextPath('/admin/sysFile/preview/' + v));
+      if (isObjectName) {
+        urlList.push(UrlUtils.contextPath('/file/' + v));
         continue;
       }
 

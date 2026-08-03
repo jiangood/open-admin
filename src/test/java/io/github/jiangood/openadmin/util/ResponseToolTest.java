@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.util;
 
+import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -207,7 +208,7 @@ class ResponseToolTest {
     @Test
     void testResponseHtmlBlockWithImgContent() throws IOException {
         String title = "Test Title";
-        String content = "<p>Test Content</p><img src=\"https://example.com/sysFile/preview/test.jpg\" alt=\"Test\" />";
+        String content = "<p>Test Content</p><img src=\"https://example.com" + SysFileConstants.FILE_URL_PATTERN.replace("{id}", "") + "test.jpg\" alt=\"Test\" />";
         
         // 调用方法
         ResponseTool.responseHtmlBlock(mockResponse, title, content);
@@ -219,7 +220,7 @@ class ResponseToolTest {
         String responseContent = responseWriter.toString();
         assertNotNull(responseContent);
         assertTrue(responseContent.contains(title));
-        assertTrue(responseContent.contains("<img src=\"/sysFile/preview/test.jpg\" alt=\"Test\" />"));
+        assertTrue(responseContent.contains("<img src=\"" + SysFileConstants.FILE_URL_PATTERN.replace("{id}", "") + "test.jpg\" alt=\"Test\" />"));
     }
 
     @Test

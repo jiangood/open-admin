@@ -31,9 +31,13 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     locale: zh_CN
 
+sys:
+  file:
+    upload-path: /data/upload
+
 logging:
   file:
-    path: ./logs
+    path: /data/logs
   level:
     io.github.jiangood: debug
   pattern:

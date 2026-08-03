@@ -16,7 +16,7 @@ import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import io.github.jiangood.openadmin.modules.job.JobParamFieldProvider;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
-import io.github.jiangood.openadmin.modules.job.entity.SysJobExecuteRecord;
+import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.service.SysJobService;
 import lombok.RequiredArgsConstructor;
@@ -164,10 +164,10 @@ public class SysJobController {
 
     @RequestMapping("execute-record")
     public AjaxResult executeRecordPage(@RequestParam String jobId, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
-        Spec<SysJobExecuteRecord> q = Spec.of();
-        q.eq(SysJobExecuteRecord.Fields.sysJob + ".id", jobId);
+        Spec<SysJobLog> q = Spec.of();
+        q.eq(SysJobLog.Fields.sysJob + ".id", jobId);
 
-        Page<SysJobExecuteRecord> page = service.findAllExecuteRecord(q, pageable);
+        Page<SysJobLog> page = service.findAllExecuteRecord(q, pageable);
         return AjaxResult.ok().data(page);
     }
 

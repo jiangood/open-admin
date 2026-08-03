@@ -1,16 +1,18 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Popconfirm} from 'antd'
+import {Button, Form, Input, InputNumber, Modal, Popconfirm} from 'antd'
 import React from 'react'
 import {
     DictUtils,
     FieldBoolean,
     FieldDictSelect,
     FieldEditor,
+    FieldUploadFile,
     FormModal,
     HttpUtils,
     Page,
     PermActions,
-    ProTable
+    ProTable,
+    UrlUtils
 } from "../../../framework";
 
 const {TextArea} = Input;
@@ -19,6 +21,7 @@ export default class extends React.Component {
 
     state = {
         editing: false,
+        previewArticle: null,
     }
 
     modalRef = React.createRef()
@@ -32,6 +35,10 @@ export default class extends React.Component {
     handleEdit = record => {
         this.setState({editing: true})
         this.modalRef.current.open(record)
+    }
+
+    handlePreview = record => {
+        this.setState({previewArticle: record})
     }
 
     onFinish = async values => {
@@ -80,6 +87,7 @@ export default class extends React.Component {
             render: (_, record) => {
                 return (
                     <PermActions>
+                        <Button size='small' onClick={() => this.handlePreview(record)}>预览</Button>
                         <Button size='small' perm='article:update' onClick={() => this.handleEdit(record)}>编辑</Button>
                         <Popconfirm perm='article:delete' title='确定删除?' onConfirm={() => this.handleDelete(record)}>
                             <Button size='small'>删除</Button>
@@ -91,6 +99,7 @@ export default class extends React.Component {
     ]
 
     render() {
+        const {previewArticle} = this.state
         return <Page
             title="文章管理"
             description="管理系统文章，如关于、帮助等页面"
@@ -126,6 +135,10 @@ export default class extends React.Component {
                     <Input/>
                 </Form.Item>
 
+                <Form.Item label='主图' name='mainImage'>
+                    <FieldUploadFile maxCount={1} cropImage accept='image/*'/>
+                </Form.Item>
+
                 <Form.Item label='内容' name='content'>
                     <FieldEditor />
                 </Form.Item>
@@ -142,6 +155,21 @@ export default class extends React.Component {
                     <FieldBoolean/>
                 </Form.Item>
             </FormModal>
+
+            <Modal
+                open={!!previewArticle}
+                title={previewArticle?.title}
+                width={800}
+                footer={null}
+                onCancel={() => this.setState({previewArticle: null})}
+            >
+                {previewArticle?.mainImage && (
+                    <div style={{marginBottom: 16}}>
+                        <img src={UrlUtils.contextPath('/file/' + previewArticle.mainImage)} style={{maxWidth: '100%'}} alt='主图'/>
+                    </div>
+                )}
+                <div dangerouslySetInnerHTML={{__html: previewArticle?.content || ''}}/>
+            </Modal>
         </Page>
     }
 }

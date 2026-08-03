@@ -4,6 +4,7 @@ import cn.hutool.core.io.FileUtil;
 import io.github.jiangood.openadmin.util.ContentTypeTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
+import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,15 +21,12 @@ import java.io.InputStream;
 @Getter
 @Setter
 @Entity
-@Table(name = "sys_file")
+@Table(name = "sys_file", indexes = {
+        @Index(name = "idx_sys_file_unclaimed", columnList = "join_table, join_id, create_time")
+})
 @FieldNameConstants
 public class SysFile extends BaseEntity {
 
-    /**
-     * 交易号，由业务方指定
-     */
-    @Column(length = 32)
-    private String tradeNo;
     /**
      * 文件名称（上传时候的文件名）
      */
@@ -58,6 +56,17 @@ public class SysFile extends BaseEntity {
      * 原始路径，针对那种互联网地址上传的
      */
     private String origUrl;
+    /**
+     * 关联表名
+     */
+    @Column(length = 100)
+    private String joinTable;
+
+    /**
+     * 关联记录ID
+     */
+    @Column(length = 32)
+    private String joinId;
     // 预留字段
     private String extra1;
     private String extra2;
@@ -95,7 +104,8 @@ public class SysFile extends BaseEntity {
         HttpServletRequest request = RequestTool.currentRequest();
         if (request != null) {
             String baseUrl = RequestTool.getBaseUrl(request);
-            return baseUrl + "/sysFile/preview/" + getId();
+            return baseUrl + request.getContextPath()
+                    + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", getObjectName());
         }
 
         return null;

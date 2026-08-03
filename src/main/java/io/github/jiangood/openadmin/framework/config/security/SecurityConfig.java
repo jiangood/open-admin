@@ -50,7 +50,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http, PermissionRefreshFilter permissionRefreshFilter) throws Exception {
-        http.securityMatcher("/admin/**", "/ureport/**")
+        http.securityMatcher("/admin/**", "/file/**", "/ureport/**")
                 .headers(cfg -> cfg
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
@@ -67,6 +67,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
                     authz.requestMatchers("/admin/public/**", "/admin/auth/**").permitAll()
+                            .requestMatchers("/file/public/**").permitAll()
+                            .requestMatchers("/file/**").authenticated()
                             .requestMatchers("/admin/**", "/ureport/**").authenticated();
                     if (CollUtil.isNotEmpty(systemProperties.getLoginExcludePathPatterns())) {
                         authz.requestMatchers(ArrayTool.toStrArr(systemProperties.getLoginExcludePathPatterns())).permitAll();

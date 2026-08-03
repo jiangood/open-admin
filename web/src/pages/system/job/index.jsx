@@ -294,7 +294,7 @@ export default class extends React.Component {
                         title: '操作',
                         dataIndex: 'option',
                         render: (_, record) => {
-                            const url = UrlUtils.contextPath('/admin/sys/log/' + record.id);
+                            const url = UrlUtils.contextPath('/admin/sys/log/job/' + record.id);
                             return <a href={url} target='_blank'>日志</a>;
                         },
                     }

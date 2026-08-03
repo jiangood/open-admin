@@ -126,7 +126,7 @@ public class SysOrgController {
         vo.setSeq(org.getSeq());
         vo.setEnabled(org.getEnabled());
         vo.setType(org.getType());
-        vo.setTypeLabel(resolveTypeLabel(org.getType()));
+        vo.setTypeLabel(OrgTypeProvider.resolveTypeLabel(org.getType(), orgTypeProviders));
         if (org.getPid() != null) {
             vo.setParentName(sysOrgService.getNameById(org.getPid()));
         }
@@ -144,15 +144,6 @@ public class SysOrgController {
                 .map(p -> new Option(p.getType().toString(), p.getLabel()))
                 .toList();
         return AjaxResult.ok().data(options);
-    }
-
-    private String resolveTypeLabel(Integer type) {
-        if (type == null) return null;
-        return orgTypeProviders.stream()
-                .filter(p -> p.getType().equals(type))
-                .findFirst()
-                .map(OrgTypeProvider::getLabel)
-                .orElse("未知");
     }
 
     private String getIconByType(int type) {

@@ -41,8 +41,8 @@ public class SystemProperties {
      */
     @NotBlank(message = "请配置系统标题")
     private String title = "管理系统";
-    private String loginBoxBottomTip = "当前非涉密网络，严禁传输处理涉密信息";
-    private String copyright = "Copyright © 2023-2024  All Rights Reserved";
+    private String loginBoxBottomTip; // "当前非涉密网络，严禁传输处理涉密信息";
+    private String copyright; // = "Copyright © 2023-2024  All Rights Reserved";
     /**
      * 是否开启水印
      */
@@ -108,6 +108,11 @@ public class SystemProperties {
          * 允许上传文件的后缀，如 docx
          */
         private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,webp,mp3,mp4,wav,txt";
+
+        /**
+         * 未认领文件自动清理时间（分钟），默认 120（2 小时）
+         */
+        private int cleanUnclaimedMinutes = 120;
 
         /**
          * S3 兼容存储配置（支持 AWS S3 / Minio / Cloudflare R2 等）

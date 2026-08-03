@@ -8,8 +8,8 @@ import {ViewFile} from "../../views";
 import {ObjectUtils, UrlUtils} from "../../utils";
 import type {FieldProps} from '../types';
 
-/** 框架内使用的上传文件对象，额外携带 sysFile 的 id */
-export type SysUploadFile = UploadFile & { id?: string };
+/** 框架内使用的上传文件对象，额外携带 sysFile 的 objectName */
+export type SysUploadFile = UploadFile & { objectName?: string };
 
 export interface FieldUploadFileProps extends FieldProps<string> {
     /** 最大上传数量，默认 1 */
@@ -22,6 +22,8 @@ export interface FieldUploadFileProps extends FieldProps<string> {
     listType?: UploadProps['listType'];
     /** 接受的文件类型，如 image/* */
     accept?: string;
+    /** 文件可见性，默认 public */
+    visibility?: 'public' | 'private';
     /** 文件列表变化回调（新增文件上传成功后才触发） */
     onFileChange?: (fileList: SysUploadFile[]) => void;
 }
@@ -30,9 +32,10 @@ interface FieldUploadFileState {
     maxCount: number;
     cropImage: boolean;
     fileList: SysUploadFile[];
-    /** 逗号分隔的文件 id */
+    /** 逗号分隔的文件 objectName */
     value: string | null;
     accept?: string;
+    visibility?: 'public' | 'private';
 }
 
 /**
@@ -40,16 +43,17 @@ interface FieldUploadFileState {
  *
  * 可参考 react-easy-crop
  */
-export class FieldUploadFile extends React.Component<FieldUploadFileProps, FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewFileId?: string }> {
+export class FieldUploadFile extends React.Component<FieldUploadFileProps, FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewObjectName?: string }> {
 
-    state: FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewFileId?: string } = {
+    state: FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewObjectName?: string } = {
         // 传入的参数
         maxCount: 1,
         cropImage: false,
+        visibility: 'public',
 
         // 内部参数
         fileList: [],
-        value: null, // 都好分隔的文件id
+        value: null, // 逗号分隔的文件objectName
     };
 
     constructor(props: FieldUploadFileProps) {
@@ -62,6 +66,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         const next: Partial<FieldUploadFileState> = {};
         if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
         if (this.props.cropImage !== prevProps.cropImage) next.cropImage = this.props.cropImage;
+        if (this.props.visibility !== prevProps.visibility) next.visibility = this.props.visibility;
 
         const prevValue = prevProps.value ?? null;
         const curValue = this.props.value ?? null;
@@ -77,9 +82,9 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         const list: SysUploadFile[] = [];
         if (value && value.length > 0) {
             const arr = value.split(",");
-            for (const id of arr) {
-                const url = UrlUtils.contextPath('/admin/sysFile/preview/' + id);
-                const file = {id, url, uid: id, name: id, status: 'done', fileName: id} as SysUploadFile;
+            for (const objectName of arr) {
+                const url = UrlUtils.contextPath('/file/' + objectName);
+                const file = {objectName, url, uid: objectName, name: objectName, status: 'done', fileName: objectName} as SysUploadFile;
                 list.push(file);
             }
         }
@@ -88,24 +93,24 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
     }
 
     convertComponentValueToOutput(fileList: SysUploadFile[]): string[] {
-        const fileIds: string[] = [];
+        const objectNames: string[] = [];
         for (const f of fileList) {
             if (f.status === 'done') {
                 if (f.response) { // 新上传的
                     const ajaxResult = f.response;
                     if (ajaxResult.success) {
-                        const {id, name} = ajaxResult.data;
-                        f.id = id;
-                        fileIds.push(id);
+                        const {objectName, name} = ajaxResult.data;
+                        f.objectName = objectName;
+                        objectNames.push(objectName);
                     } else {
                         this.setState({errorTitle: '上传文件失败', errorContent: ajaxResult.message});
                     }
                 } else { // 老的
-                    fileIds.push(f.id as string);
+                    objectNames.push(f.objectName as string);
                 }
             }
         }
-        return fileIds;
+        return objectNames;
     }
 
     handleChange = ({fileList, event, file}: UploadChangeParam<SysUploadFile>) => {
@@ -133,7 +138,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
     };
 
     handlePreview = (file) => {
-        this.setState({previewFileId: file.id});
+        this.setState({previewObjectName: file.objectName});
     };
 
     render() {
@@ -150,9 +155,9 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
                    onOk={() => this.setState({errorTitle: undefined})}>
                 {this.state.errorContent}
             </Modal>
-            <Modal open={!!this.state.previewFileId} title="文件预览" width="80vw" footer={null}
-                   onCancel={() => this.setState({previewFileId: undefined})}>
-                {this.state.previewFileId && <ViewFile value={this.state.previewFileId} height='70vh'/>}
+            <Modal open={!!this.state.previewObjectName} title="文件预览" width="80vw" footer={null}
+                   onCancel={() => this.setState({previewObjectName: undefined})}>
+                {this.state.previewObjectName && <ViewFile value={this.state.previewObjectName} height='70vh'/>}
             </Modal>
         </>
     }
@@ -162,6 +167,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
 
         return <Upload
             action={UrlUtils.contextPath('/admin/sysFile/upload')}
+            data={{visibility: this.state.visibility}}
             listType={this.props.listType || 'picture-card'}
             fileList={fileList}
             onChange={this.handleChange}

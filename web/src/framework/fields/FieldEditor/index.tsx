@@ -6,6 +6,8 @@ import type {FieldProps} from '../types';
 export interface FieldEditorProps extends FieldProps<string> {
     /** 编辑器高度，默认 300 */
     height?: number;
+    /** 图片上传可见性，默认 public（富文本图片需公开访问） */
+    visibility?: 'public' | 'private';
 }
 
 /**
@@ -15,7 +17,8 @@ export interface FieldEditorProps extends FieldProps<string> {
  */
 export class FieldEditor extends React.Component<FieldEditorProps> {
     render() {
-        const uploadUrl = UrlUtils.contextPath('/admin/sysFile/upload');
+        const visibility = this.props.visibility || 'public';
+        const uploadUrl = UrlUtils.contextPath('/admin/sysFile/upload') + '?visibility=' + visibility;
         const jsUrl = UrlUtils.contextPath('/admin/tinymce/tinymce.min.js');
         const {value, onChange, height} = this.props;
 

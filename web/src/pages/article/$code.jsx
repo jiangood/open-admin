@@ -1,5 +1,5 @@
 import React from "react";
-import {HttpUtils, Page} from "../../framework";
+import {HttpUtils, Page, UrlUtils} from "../../framework";
 
 export default class extends React.Component {
 
@@ -37,6 +37,11 @@ export default class extends React.Component {
         }
 
         return <Page title={article.title}>
+            {article.mainImage && (
+                <div style={{marginBottom: 16}}>
+                    <img src={UrlUtils.contextPath('/file/' + article.mainImage)} style={{maxWidth: '100%'}} alt='主图'/>
+                </div>
+            )}
             <div dangerouslySetInnerHTML={{__html: article.content}}/>
         </Page>
     }

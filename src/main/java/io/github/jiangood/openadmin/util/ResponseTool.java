@@ -4,6 +4,7 @@ package io.github.jiangood.openadmin.util;
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.URLUtil;
 import cn.hutool.http.ContentType;
+import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -59,7 +60,7 @@ public class ResponseTool {
     }
 
     private static String removeImgPrefix(String content) {
-        String reg = "(<img.*?)(https?://.*?)(/sysFile/preview.*?>)";
+        String reg = "(<img.*?)(https?://.*?)(" + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", "") + ".*?>)";
 
         String result = content.replaceAll(reg, "$1$3");
 

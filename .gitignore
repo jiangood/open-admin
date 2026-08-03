@@ -40,5 +40,6 @@ target/
 .playwright-mcp/
 /.opencode/plans/
 *.log
+*.tgz
 /web/test-results/*
 /web/e2e/.auth/

@@ -12,11 +12,11 @@ import lombok.experimental.FieldNameConstants;
 import java.util.Date;
 
 @Entity
-@Table(name = "sys_job_execute_record")
+@Table(name = "sys_job_log")
 @Getter
 @Setter
 @FieldNameConstants
-public class SysJobExecuteRecord extends BaseEntity {
+public class SysJobLog extends BaseEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)

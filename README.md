@@ -182,7 +182,7 @@ web/
 | 功能 | 说明 |
 |------|------|
 | 作业调度 | 基于 Quartz，动态创建/暂停/恢复，继承 `BaseJob` + `@JobDescription` |
-| 文件管理 | `sys.file.store-type` 配置（`local` / `s3` / `custom`），统一上传下载预览 |
+| 文件管理 | `sys.file.store-type` 配置（`local` / `s3` / `custom`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
 | 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
 | 运行日志查看 | 在线查看日志文件 |
 
@@ -259,7 +259,7 @@ repository.findAll(spec, pageable);
 | `LoginTool` | `getUserId` / `getUser` / `getPermissions` / `isAdmin` |
 | `TreeTool` | `buildTree` / `walk` / `treeToList` / `getLeafs` |
 | `BeanTool` / `JsonTool` / `StringTool` | 常用对象/JSON/字符串操作 |
-| `PasswordTool` / `AesTool` | 密码加密 / AES 加解密 |
+| `PasswordTool` | 密码加密 |
 
 #### 定时任务
 
@@ -370,7 +370,31 @@ class ReportPage extends React.Component {
 
 #### 文件上传预览
 
-`/preview/{fileId}` 原图，`/preview/{fileId}?w=400` 缩略图（懒生成 + 缓存）。
+文件按可见性分为公共/私有，objectName 前缀即目录（`public/` / `private/`），URL 与磁盘路径保持一致：
+
+- `/file/{objectName}` 预览，如 `/file/public/202607/xxx.jpg`（公共，免登录）、`/file/private/202607/xxx.pdf`（私有，需登录）
+
+上传/下载接口（需登录）：
+- `POST /admin/sysFile/upload` — 上传，表单参数 `visibility`（`public` / `private`，默认 `public`）
+- `GET /admin/sysFile/download/{objectName}` — 下载
+
+上传文件默认标记为临时，保存业务数据后后端自动确认（详见[临时文件自动清理](#临时文件自动清理)）。
+
+前端字段直接存储文件 `objectName`（如 `public/202607/xxx.jpg`），`ViewImage` / `ViewFile` / `FieldUploadFile` 自动拼接 `/file/{objectName}` 展示；上传组件通过 `visibility` prop 指定可见性，默认 `public`（私有文件显式传 `visibility='private'`）：
+
+##### nginx 直连公共文件
+
+公共文件可通过 nginx 直接代理，完全绕过 Spring（`sys.file.upload-path` 对应磁盘目录，注意 nginx 配置需与 `alias` 前缀一致）：
+
+```nginx
+# 公共文件直连（磁盘路径 = {upload-path}/public/...）
+location /file/public/ {
+    alias /home/files/;
+    expires 7d;
+    add_header Cache-Control "public";
+}
+# /file/private/ 不配置 location，继续走 Spring 鉴权
+```
 
 #### 工具类
 
@@ -396,6 +420,7 @@ class ReportPage extends React.Component {
 | `sys.show-logo` | 是否显示 Logo | true |
 | `sys.file.store-type` | 文件存储 (`local`/`s3`/`custom`) | local |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
+| `sys.file.clean-unclaimed-minutes` | 未认领文件自动清理时间（分钟） | 120 |
 | `sys.file.s3.*` | S3 兼容存储配置 | — |
 | `sys.session-idle-time` | Session 超时（分钟） | 180 |
 | `sys.job-enable` | 定时任务开关 | true |
@@ -404,9 +429,20 @@ class ReportPage extends React.Component {
 
 通过 `sys.file.store-type` 选择后端（`local` / `s3` / `custom`）：
 
-- `local` — 本地文件系统，保存到 `sys.file.upload-path`
+- `local` — 本地文件系统，保存到 `sys.file.upload-path`，按 `public/`、`private/` 子目录区分可见性
 - `s3` — S3 兼容存储（Minio / AWS S3 / R2 / 阿里云 OSS 等），配置 `sys.file.s3.{endpoint,region,accessKey,secretKey,bucketName,pathStyleAccess}`
 - 自定义 — 实现 `framework.spi.FileOperator` 接口并注册 `@Bean @Primary FileOperator`，框架自动跳过默认创建
+
+文件 `objectName` 带可见性前缀（如 `public/202607/xxx.jpg` / `private/202607/xxx.pdf`），本地磁盘路径 = `sys.file.upload-path` + `objectName`，与 URL `/file/{objectName}` 完全一致。
+
+### 未认领文件自动清理
+
+上传文件默认标记为未认领 (`joinTable=null`)，仅在业务数据保存后通过 `SysFileService.claim*()` 设置 `joinTable/joinId` 后方变为已认领。未认领的文件超过期限后由 Quartz 定时任务 `CleanTempFileJob` 自动删除。
+
+- **确认时机**：业务 Controller 的 create/update 方法中，save 后调用 `sysFileService.claimHtml(joinTable, joinId, oldHtml, newHtml)`（富文本）或 `sysFileService.claimList(joinTable, joinId, oldObjectNames, newObjectNames)`（objectName 列表）对比新旧数据，确认新增文件并清理移除的旧文件
+- **清理配置**：`sys.file.clean-unclaimed-minutes=120`（默认 2 小时）
+- **清理频率**：每 10 分钟执行一次（cron `0 */10 * * * ?`）
+- **孤儿文件**：业务数据删除后残留的已认领文件，同一任务会检查对应业务表（主键列约定为 `id`）中记录是否已不存在，不存在则一并清理
 
 完整配置项见 `SystemProperties.java`。
 
@@ -436,7 +472,7 @@ VITE_THEME_BACKGROUND_COLOR=#f5f5f5
 1. **Entity** — 继承 `BaseEntity`，JPA 自动建表
 2. **Repository** — 继承 `BaseRepository<T, String>`，通用 CRUD + 动态查询
 3. **Service** — 继承 `BaseService<T>`，通用业务逻辑
-4. **Controller** — RESTful，返回 `AjaxResult`，`@HasPermission` 控制权限
+4. **Controller** — RESTful，返回 `AjaxResult`，`@HasPermission` 控制权限；含文件上传字段的 save 后调用 `sysFileService.claim*()` 确认临时文件
 5. **菜单** — `src/main/resources/application-menu*.yml` 定义菜单树
 6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
 

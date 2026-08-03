@@ -22,6 +22,9 @@ public class Article extends BaseEntity {
     @Column(length = 200, nullable = false)
     private String title;
 
+    @Column(name = "main_image", length = 200)
+    private String mainImage;
+
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;

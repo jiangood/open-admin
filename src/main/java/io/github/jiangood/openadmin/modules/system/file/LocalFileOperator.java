@@ -12,21 +12,12 @@ import java.io.InputStream;
 @Slf4j
 public class LocalFileOperator implements FileOperator {
 
-    public static final String BUCKET_NAME = "defaultBucket";
-
     private final String dir;
 
     public LocalFileOperator(String savePath) {
         log.info("本地文件保存地址为: {}", savePath);
         FileUtil.mkdir(savePath);
-
-        // 判断bucket存在不存在
-        String bucketPath = savePath + File.separator + BUCKET_NAME;
-        if (!FileUtil.exist(bucketPath)) {
-            FileUtil.mkdir(bucketPath);
-        }
-
-        this.dir = savePath + File.separator + BUCKET_NAME + File.separator;
+        this.dir = savePath + File.separator;
     }
 
 
@@ -52,7 +43,7 @@ public class LocalFileOperator implements FileOperator {
         // 判断文件存在不存在
         String absoluteFile = getAbsoluteFile(key);
         if (!FileUtil.exist(absoluteFile)) {
-            String message = StrUtil.format("本地文件不存在,bucket={},key={} ,path={}", BUCKET_NAME, key, absoluteFile);
+            String message = StrUtil.format("本地文件不存在,key={} ,path={}", key, absoluteFile);
             throw new FileNotFoundException(message);
         }
         return FileUtil.getInputStream(absoluteFile);

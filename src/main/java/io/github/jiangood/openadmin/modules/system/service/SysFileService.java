@@ -4,15 +4,16 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileNameUtil;
-import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
-import io.github.jiangood.openadmin.util.ImgTool;
+import io.github.jiangood.openadmin.util.RequestTool;
+import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
+import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
@@ -27,16 +28,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 文件服务类
@@ -48,63 +47,56 @@ import java.util.Optional;
 @Slf4j
 public class SysFileService {
 
-    public static final String PREVIEW_URL_PATTERN = "/preview/{id}";
-    public static final String DOWNLOAD_URL_PATTERN = "/sysFile/download/{id}";
 
 
-    public static final int[] IMAGE_SIZE = {400, 800, 1200};
-    public static final String[] IMAGE_SIZE_LABEL = {"小图", "中图", "大图"};
 
     private final SystemProperties systemProperties;
     private final FileOperator fileOperator;
     private final SysFileRepository sysFileRepository;
 
-    public Optional<SysFile> findByTradeNo(String tradeNo) {
-        return sysFileRepository.findByTradeNo(tradeNo);
+    /**
+     * 获得预览相对url（含 context-path），如 /example/file/xxx.jpg
+     *
+     * @param objectName
+     * @return
+     */
+    public String getPreviewUrl(String objectName) {
+        String contextPath = Optional.ofNullable(RequestTool.currentRequest())
+                .map(HttpServletRequest::getContextPath)
+                .orElse("");
+        return contextPath + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", objectName);
     }
 
-    public String getPreviewUrl(String id, HttpServletRequest request) {
-        String baseUrl = systemProperties.getBaseUrl();
+    public void deleteByObjectName(String objectName) throws Exception {
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
+        if (sysFile == null) {
+            return;
+        }
+        sysFileRepository.deleteById(sysFile.getId());
 
-        return baseUrl + getPreviewUrl(id);
+        // 删除原图
+        fileOperator.delete(objectName);
     }
 
     /**
-     * 获得预览相对url
-     *
-     * @param fileId
-     * @return
+     * 删除单个物理文件，失败仅记日志并返回 false（不抛出异常）
      */
-    public String getPreviewUrl(String fileId) {
-        return PREVIEW_URL_PATTERN.replace("{id}", fileId);
-    }
-
-    public String getDownloadUrl(String fileId, HttpServletRequest request) {
-        String baseUrl = systemProperties.getBaseUrl();
-
-        return baseUrl + DOWNLOAD_URL_PATTERN.replace("{id}", fileId);
-    }
-
-    public void deleteById(String id) throws Exception {
-        SysFile sysFile = sysFileRepository.findById(id).orElse(null);
-        sysFileRepository.deleteById(id);
-
-        // 删除原图
-        fileOperator.delete(sysFile.getObjectName());
-        // 删除已缓存的缩略图
-        if (sysFile.getType() == MaterialType.IMAGE) {
-            for (int size : IMAGE_SIZE) {
-                String thumbName = getObjectName(sysFile, size);
-                try {
-                    fileOperator.delete(thumbName);
-                } catch (Exception ignored) {
-                }
-            }
+    public boolean deletePhysicalFile(SysFile file) {
+        try {
+            fileOperator.delete(file.getObjectName());
+            return true;
+        } catch (Exception e) {
+            log.error("删除物理文件失败: objectName={}, error={}", file.getObjectName(), e.getMessage());
+            return false;
         }
     }
 
     public SysFile uploadFile(byte[] data, String originalFilename) throws Exception {
-        return this.uploadFile(new ByteArrayInputStream(data), originalFilename, data.length);
+        return this.uploadFile(data, originalFilename, FileVisibility.PUBLIC);
+    }
+
+    public SysFile uploadFile(byte[] data, String originalFilename, FileVisibility visibility) throws Exception {
+        return this.uploadFile(new ByteArrayInputStream(data), originalFilename, data.length, visibility);
     }
 
     /**
@@ -114,7 +106,18 @@ public class SysFileService {
      * @return
      * @throws Exception
      */
-    public SysFile uploadWebFile(String origUrl, String tradeNo) throws Exception {
+    public SysFile uploadWebFile(String origUrl) throws Exception {
+        return uploadWebFile(origUrl, FileVisibility.PUBLIC);
+    }
+
+    /**
+     * 上传网络文件
+     *
+     * @param origUrl
+     * @return
+     * @throws Exception
+     */
+    public SysFile uploadWebFile(String origUrl, FileVisibility visibility) throws Exception {
         log.info("准备上传网络文件 {}", origUrl);
         File tempFile = new File(FileUtil.getTmpDir(), FileNameUtil.mainName(origUrl));
 
@@ -129,7 +132,7 @@ public class SysFileService {
         }
 
 
-        SysFile sysFile = this.uploadFile(tempFile, tradeNo);
+        SysFile sysFile = this.uploadFile(tempFile, visibility);
         FileUtil.del(tempFile);
 
         sysFile.setOrigUrl(origUrl);
@@ -139,10 +142,10 @@ public class SysFileService {
     }
 
     public SysFile uploadFile(File file) throws Exception {
-        return this.uploadFile(file, null);
+        return uploadFile(file, FileVisibility.PUBLIC);
     }
 
-    public SysFile uploadFile(File file, String tradeNo) throws Exception {
+    public SysFile uploadFile(File file, FileVisibility visibility) throws Exception {
         // 特殊处理后缀，如临时文件
         String suffix = FileNameUtil.getSuffix(file);
         if (StrUtil.isEmpty(suffix) || "tmp".equals(suffix)) {
@@ -151,21 +154,28 @@ public class SysFileService {
 
         String name = FileNameUtil.mainName(file) + "." + suffix;
         try (InputStream is = new FileInputStream(file)) {
-            return this.uploadFile(is, name, file.length(), tradeNo);
+            return this.uploadFile(is, name, file.length(), visibility);
         }
     }
 
     public SysFile uploadFile(MultipartFile file) throws Exception {
+        return uploadFile(file, FileVisibility.PUBLIC);
+    }
+
+    public SysFile uploadFile(MultipartFile file, FileVisibility visibility) throws Exception {
         InputStream is = file.getInputStream();
         String name = file.getOriginalFilename();
-        return this.uploadFile(is, name, file.getSize());
+        return this.uploadFile(is, name, file.getSize(), visibility);
     }
 
     public SysFile uploadFile(InputStream is, String originalFilename, long size) throws Exception {
-        return this.uploadFile(is, originalFilename, size, null);
+        return uploadFile(is, originalFilename, size, FileVisibility.PUBLIC);
     }
 
-    public SysFile uploadFile(InputStream is, String originalFilename, long size, String tradeNo) throws Exception {
+    public SysFile uploadFile(InputStream is, String originalFilename, long size, FileVisibility visibility) throws Exception {
+        if (visibility == null) {
+            visibility = FileVisibility.PUBLIC;
+        }
         log.info("上传文件:{} 大小:{}", originalFilename, FileUtil.readableFileSize(size));
 
         // 获取文件后缀并校验真实类型
@@ -186,9 +196,8 @@ public class SysFileService {
             throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
         }
 
-        // WebP 文件：ImageIO 不支持缩略图生成，预览时自动回退原图
         if ("webp".equals(magicType)) {
-            log.warn("上传文件真实类型为 webp，不受 ImageIO 支持，缩略图生成将回退原图");
+            log.warn("上传文件真实类型为 webp");
             if (StrUtil.isNotEmpty(suffix) && !"webp".equalsIgnoreCase(suffix)) {
                 log.info("文件后缀修正: {} -> webp (文件头检测)", suffix);
                 suffix = "webp";
@@ -207,7 +216,7 @@ public class SysFileService {
         String id = IdTool.uuidV7();
 
         // 生成文件的最终名称
-        String objectName = genObjectName(id, suffix, null);
+        String objectName = genObjectName(id, suffix, visibility);
 
         // 文件管理信息
         SysFile sysFile = new SysFile();
@@ -215,14 +224,12 @@ public class SysFileService {
         sysFile.setSuffix(suffix);
         sysFile.setSize(size);
         sysFile.setObjectName(objectName);
-        sysFile.setTradeNo(tradeNo);
 
         MediaType mediaType = MediaTypeFactory.getMediaType("." + suffix).orElse(null);
         if (mediaType != null) {
             sysFile.setMimeType(mediaType.toString());
         }
         sysFile.setType(MaterialType.parseBySuffix(suffix));
-
 
         File tempFile = FileUtil.createTempFile("." + suffix, true);
         FileUtils.copyInputStreamToFile(is, tempFile);
@@ -239,44 +246,30 @@ public class SysFileService {
         return sysFile;
     }
 
-    public SysFile getFileAndStream(String fileId, Integer w) throws Exception {
-        Assert.hasText(fileId, "文件id不能为空");
-        // 获取文件名
-        SysFile sysFile = sysFileRepository.findById(fileId).orElse(null);
+    public SysFile getFileAndStream(String objectName) throws Exception {
+        Assert.hasText(objectName, "文件objectName不能为空");
+        // 获取文件记录
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
         Assert.notNull(sysFile, "文件数据记录不存在");
 
         // 返回文件字节码
-        sysFile.setInputStream(getFileStream(sysFile, w));
+        sysFile.setInputStream(getFileStream(sysFile));
 
         return sysFile;
     }
 
-    public InputStream getFileStream(SysFile sysFile, Integer w) throws Exception {
-        if (w != null && Arrays.stream(IMAGE_SIZE).noneMatch(s -> s == w)) {
-            throw new IllegalArgumentException("不支持的缩略图尺寸：" + w);
-        }
-        String objectName = getObjectName(sysFile, w);
-        if (!fileOperator.exist(objectName)) {
-            if (w != null && sysFile.getType() == MaterialType.IMAGE) {
-                generateThumbnail(sysFile, w);
-            } else {
-                log.error("文件不存在 {}", objectName);
-                throw new FileNotFoundException("文件不存在:" + objectName);
-            }
+    public InputStream getFileStream(SysFile sysFile) throws Exception {
+        if (!fileOperator.exist(sysFile.getObjectName())) {
+            log.error("文件不存在 {}", sysFile.getObjectName());
+            throw new FileNotFoundException("文件不存在:" + sysFile.getObjectName());
         }
 
-        if (!fileOperator.exist(objectName)) {
-            // 缩略图生成失败，回退到原图
-            log.warn("缩略图生成失败，返回原图 {}", objectName);
-            return getFileStream(sysFile, null);
-        }
-
-        return fileOperator.getFileStream(objectName);
+        return fileOperator.getFileStream(sysFile.getObjectName());
     }
 
-    public void download(String id, HttpServletResponse response) throws Exception {
+    public void download(String objectName, HttpServletResponse response) throws Exception {
         // 获取文件信息结果集
-        SysFile f = this.getFileAndStream(id, null);
+        SysFile f = this.getFileAndStream(objectName);
         String fileName = f.getOriginName();
         DownloadTool.download(fileName, f.getInputStream(), f.getSize(), response);
     }
@@ -284,19 +277,19 @@ public class SysFileService {
     /**
      * 下载到所属服务器
      *
-     * @param id
+     * @param objectName
      * @param localFile
      * @return
      * @throws Exception
      */
-    public File downloadToLocal(String id, File localFile) throws Exception {
-        SysFile sysFile = sysFileRepository.findById(id).orElse(null);
+    public File downloadToLocal(String objectName, File localFile) throws Exception {
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
         fileOperator.downloadFile(sysFile.getObjectName(), localFile);
         return localFile;
     }
 
-    public File downloadToLocalTemp(String id) throws Exception {
-        SysFile sysFile = sysFileRepository.findById(id).orElse(null);
+    public File downloadToLocalTemp(String objectName) throws Exception {
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
         File tempFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
         fileOperator.downloadFile(sysFile.getObjectName(), tempFile);
 
@@ -307,34 +300,72 @@ public class SysFileService {
         return sysFileRepository.findById(id);
     }
 
-    public void fillAllImageUrl(SysFile sysFile) {
-        List<Dict> urls = new ArrayList<>();
-        String url = getPreviewUrl(sysFile.getId());
-        if (sysFile.getType() == MaterialType.IMAGE) {
-            for (int i = 0; i < IMAGE_SIZE.length; i++) {
-                int size = IMAGE_SIZE[i];
-                String sizeKey = IMAGE_SIZE_LABEL[i];
-                Dict dict = Dict.of("size", size, "label", sizeKey, "url", url + "?w=" + size);
-                urls.add(dict);
+    public SysFile findByObjectName(String objectName) {
+        return sysFileRepository.findByObjectName(objectName);
+    }
+
+    private static final Pattern HTML_FILE_PATTERN = Pattern.compile(
+            "file/((?:public|private)/\\d{6}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.[a-zA-Z0-9]+)");
+
+    @Transactional
+    public void claimList(String joinTable, String joinId, List<String> oldObjectNames, List<String> newObjectNames) {
+        if (newObjectNames != null && !newObjectNames.isEmpty()) {
+            List<String> toConfirm = new ArrayList<>(newObjectNames);
+            if (oldObjectNames != null) {
+                toConfirm.removeAll(oldObjectNames);
+            }
+            if (!toConfirm.isEmpty()) {
+                sysFileRepository.updateJoinRefByObjectNames(joinTable, joinId, toConfirm);
             }
         }
-        // TODO
-        // sysFile.putExtData("imageUrls", urls);
+        if (oldObjectNames != null && !oldObjectNames.isEmpty() && newObjectNames != null) {
+            List<String> toDelete = new ArrayList<>(oldObjectNames);
+            toDelete.removeAll(newObjectNames);
+            if (!toDelete.isEmpty()) {
+                List<SysFile> removedFiles = sysFileRepository.findByObjectNameIn(toDelete);
+                sysFileRepository.deleteAllInBatch(removedFiles);
+                for (SysFile file : removedFiles) {
+                    deletePhysicalFile(file);
+                }
+            }
+        }
+    }
+
+    @Transactional
+    public void claim(String joinTable, String joinId, String oldObjectName, String newObjectName) {
+        claimList(joinTable, joinId, objectNameList(oldObjectName), objectNameList(newObjectName));
+    }
+
+    private List<String> objectNameList(String objectName) {
+        return StrUtil.isBlank(objectName) ? List.of() : List.of(objectName);
+    }
+
+    @Transactional
+    public void claimHtml(String joinTable, String joinId, String oldHtml, String newHtml) {
+        claimList(joinTable, joinId, extractObjectNamesFromHtml(oldHtml), extractObjectNamesFromHtml(newHtml));
+    }
+
+    private List<String> extractObjectNamesFromHtml(String html) {
+        if (StrUtil.isBlank(html)) {
+            return List.of();
+        }
+        Matcher matcher = HTML_FILE_PATTERN.matcher(html);
+        Set<String> objectNames = new LinkedHashSet<>();
+        while (matcher.find()) {
+            objectNames.add(matcher.group(1));
+        }
+        return new ArrayList<>(objectNames);
     }
 
     public Page<SysFile> findAll(Specification<SysFile> q, Pageable pageable) {
-        Page<SysFile> page = sysFileRepository.findAll(q, pageable);
-        for (SysFile sysFile : page) {
-            this.fillAllImageUrl(sysFile);
-        }
-        return page;
+        return sysFileRepository.findAll(q, pageable);
     }
 
-    public boolean isFileExist(String id) {
-        if (StrUtil.isEmpty(id)) {
+    public boolean isFileExist(String objectName) {
+        if (StrUtil.isEmpty(objectName)) {
             return false;
         }
-        SysFile file = sysFileRepository.findById(id).orElse(null);
+        SysFile file = sysFileRepository.findByObjectName(objectName);
         if (file == null) {
             return false;
         }
@@ -342,51 +373,13 @@ public class SysFileService {
         return fileOperator.exist(file.getObjectName());
     }
 
-    private void generateThumbnail(SysFile sysFile, int width) throws Exception {
-        String originalName = getObjectName(sysFile, null);
-        String thumbName = getObjectName(sysFile, width);
-
-        File originalFile = FileUtil.createTempFile("." + sysFile.getSuffix(), true);
-        FileUtil.del(originalFile);
-        try {
-            fileOperator.downloadFile(originalName, originalFile);
-            File thumbFile = ImgTool.scale(originalFile, width);
-            if (thumbFile != null) {
-                try {
-                    fileOperator.saveFile(thumbName, thumbFile);
-                    log.info("缩略图已生成并缓存 {}", thumbName);
-                } finally {
-                    FileUtil.del(thumbFile);
-                }
-            }
-        } finally {
-            FileUtil.del(originalFile);
-        }
-    }
-
     private static boolean isBlockedMagicType(String magicType) {
         return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js")
                 .contains(magicType);
     }
 
-    private String genObjectName(String id, String suffix, Integer size) {
-        String baseName = id;
-        if (size != null) {
-            baseName += "_" + size;
-        }
-        return DateUtil.format(new Date(), "yyyyMM") + "/" + baseName + "." + suffix;
-    }
-
-    private String getObjectName(SysFile file, Integer size) {
-        if (size == null) {
-            return file.getObjectName();
-        }
-
-        String end = "." + file.getSuffix();
-        String sizeEnd = "_" + size + "." + file.getSuffix();
-        String sizeObjectName = file.getObjectName().replace(end, sizeEnd);
-        log.info("获取截取后的 {}", sizeObjectName);
-        return sizeObjectName;
+    private String genObjectName(String id, String suffix, FileVisibility visibility) {
+        return visibility.getPrefix() + "/" + DateUtil.format(new Date(), "yyyyMM") + "/" + id + "." + suffix;
     }
 
 }

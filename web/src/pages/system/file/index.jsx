@@ -15,7 +15,7 @@ export default class extends React.Component {
     formRef = React.createRef()
 
     handleDelete = row => {
-        HttpUtils.post('admin/sysFile/delete', row).then(rs => {
+        HttpUtils.post('admin/sysFile/delete', {value: row.objectName}).then(rs => {
             this.tableRef.current.reload()
         })
     }
@@ -57,21 +57,9 @@ export default class extends React.Component {
         },
         {
             title: '预览',
-            dataIndex: 'id',
-            render(id, record) {
-                const nodes = [<a href={UrlUtils.contextPath('/admin/sysFile/preview/' + record.id)} target='_blank'>预览</a>]
-
-
-                if (record.imageUrls?.length > 0) {
-                    for (let item of record.imageUrls) {
-                        const url = item.url;
-                        const label = item.label;
-                        nodes.push(<a href={(url)} target='_blank' style={{marginLeft: 8}}>{label}</a>)
-                    }
-                }
-
-                return nodes;
-
+            dataIndex: 'objectName',
+            render(objectName) {
+                return <a href={UrlUtils.contextPath('/file/' + objectName)} target='_blank'>预览</a>
             }
         },
         {

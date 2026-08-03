@@ -6,6 +6,7 @@ import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.system.entity.Article;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.service.ArticleService;
+import io.github.jiangood.openadmin.modules.system.service.SysFileService;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import jakarta.validation.Valid;
@@ -22,6 +23,7 @@ import java.util.List;
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final SysFileService sysFileService;
 
     @HasPermission("article:read")
     @RequestMapping("page")
@@ -43,6 +45,8 @@ public class ArticleController {
     @PostMapping("create")
     public AjaxResult create(@RequestBody Article param) throws Exception {
         Article result = articleService.save(param, null);
+        sysFileService.claimHtml("sys_article", result.getId(), null, param.getContent());
+        sysFileService.claim("sys_article", result.getId(), null, param.getMainImage());
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
 
@@ -50,7 +54,12 @@ public class ArticleController {
     @HasPermission("article:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody Article param, RequestBodyKeys updateFields) throws Exception {
+        Article old = articleService.findById(param.getId()).orElse(null);
         Article result = articleService.save(param, updateFields);
+        sysFileService.claimHtml("sys_article", param.getId(), old == null ? null : old.getContent(), param.getContent());
+        sysFileService.claim("sys_article", param.getId(),
+                old == null ? null : old.getMainImage(),
+                param.getMainImage());
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
 
