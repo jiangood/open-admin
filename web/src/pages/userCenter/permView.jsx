@@ -1,5 +1,5 @@
 import React from "react";
-import {Empty, Table, Tag, Typography} from "antd";
+import {Empty, Table, Tag} from "antd";
 import {HttpUtils} from "../../framework";
 
 export default class PermView extends React.Component {
@@ -66,12 +66,11 @@ export default class PermView extends React.Component {
                     <Tag color='processing'>{data.dataPermLabel || '-'}</Tag>
                 </span>
             </div>
-            <Typography.Title level={5}>机构权限</Typography.Title>
             {data.orgRows && data.orgRows.length
                 ? <Table size='small' rowKey='key' columns={orgColumns} dataSource={data.orgRows}
-                         pagination={false} expandable={{defaultExpandAllRows: true}}/>
+                         pagination={false} expandable={{defaultExpandAllRows: true}}
+                         style={{marginBottom: 24}}/>
                 : <Empty description='暂无机构数据'/>}
-            <Typography.Title level={5} style={{marginTop: 24}}>菜单权限</Typography.Title>
             {data.menuRows && data.menuRows.length
                 ? <Table size='small' rowKey='key' columns={menuColumns} dataSource={data.menuRows}
                          pagination={false} expandable={{defaultExpandAllRows: true}}/>
