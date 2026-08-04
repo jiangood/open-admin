@@ -43,6 +43,12 @@ public class UserCenterController {
     }
 
 
+    @RequestMapping("perms")
+    public AjaxResult perms() {
+        return AjaxResult.ok().data(sysUserService.getPermView(LoginTool.getUserId()));
+    }
+
+
     @PostMapping("update-pwd")
     public AjaxResult updatePwd(@RequestBody UpdatePwdReq request, HttpServletRequest servletRequest) {
         sysUserService.updatePwd(LoginTool.getUserId(), request.getOldPassword(), request.getNewPassword());
