@@ -1,6 +1,6 @@
 import React from "react";
 import {Empty, Table, Tag} from "antd";
-import {HttpUtils} from "../../framework";
+import {HttpUtils, Gap} from "../../framework";
 
 export default class PermView extends React.Component {
 
@@ -68,9 +68,9 @@ export default class PermView extends React.Component {
             </div>
             {data.orgRows && data.orgRows.length
                 ? <Table size='small' rowKey='key' columns={orgColumns} dataSource={data.orgRows}
-                         pagination={false} expandable={{defaultExpandAllRows: true}}
-                         style={{marginBottom: 24}}/>
+                         pagination={false} expandable={{defaultExpandAllRows: true}}/>
                 : <Empty description='暂无机构数据'/>}
+            <Gap/>
             {data.menuRows && data.menuRows.length
                 ? <Table size='small' rowKey='key' columns={menuColumns} dataSource={data.menuRows}
                          pagination={false} expandable={{defaultExpandAllRows: true}}/>
