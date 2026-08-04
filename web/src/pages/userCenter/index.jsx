@@ -64,11 +64,17 @@ export default class extends React.Component {
                    onCancel={() => this.setState({changePwdOpen: false})}
                    onOk={() => this.formRef?.submit()}>
                 <Form ref={this.formRef} onFinish={this.onPwdFinish} style={{maxWidth: 400}}>
+                    <Form.Item name='oldPassword'
+                               label='原密码'
+                               rules={[{required: true, message: '请输入原密码'}]}
+                    >
+                        <Input.Password></Input.Password>
+                    </Form.Item>
                     <Form.Item name='newPassword'
                                label='新密码'
                                extra={'请输入字母、数字、特殊字符'}
                                rules={[
-                                   {required: true},
+                                   {required: true, message: '请输入新密码'},
                                    {
                                        validator: this.pwdValidator
                                    }
