@@ -11,7 +11,6 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import io.github.jiangood.openadmin.util.dto.TreeOption;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,22 +95,19 @@ class SysUserServicePermViewTest {
         UserCenterPermVO vo = sysUserService.getPermView("u1");
 
         assertNotNull(vo);
-        assertEquals("ALL", vo.getDataPermType());
-        assertEquals("unit1", vo.getUnitId());
-        assertEquals("org1", vo.getOrgId());
-        // ALL => 全量机构 id
-        assertEquals(Set.of("unit1", "org1"), Set.copyOf(vo.getOrgPermIds()));
-        // admin => 全量权限码
-        assertTrue(vo.getOwnedPerms().containsAll(List.of("sys-user:read", "sys-user:edit")));
-        // 菜单树根节点下权限叶子 key 为完整权限码
-        assertEquals(1, vo.getMenuTree().size());
-        TreeOption menuNode = vo.getMenuTree().get(0);
-        assertEquals("sys-user", menuNode.getKey());
-        List<String> leafKeys = menuNode.getChildren().stream().map(TreeOption::getKey).toList();
-        assertTrue(leafKeys.containsAll(List.of("sys-user:read", "sys-user:edit")));
-        // 机构树
-        assertEquals(1, vo.getOrgTree().size());
-        assertEquals("unit1", vo.getOrgTree().get(0).getKey());
+        assertEquals("所有", vo.getDataPermLabel());
+        // ALL => 全量机构 id 已授权
+        assertEquals(1, vo.getOrgRows().size());
+        assertEquals("unit1", vo.getOrgRows().get(0).getKey());
+        assertEquals("mine", vo.getOrgRows().get(0).getStatus());
+        assertEquals(1, vo.getOrgRows().get(0).getChildren().size());
+        assertEquals("mine", vo.getOrgRows().get(0).getChildren().get(0).getStatus());
+        // admin => 全量权限码已拥有
+        assertEquals(1, vo.getMenuRows().size());
+        UserCenterPermVO.MenuRow menuRow = vo.getMenuRows().get(0);
+        assertEquals("用户管理", menuRow.getTitle());
+        assertEquals(List.of("读取", "编辑"), menuRow.getPerms());
+        assertEquals("all", menuRow.getStatus());
     }
 
     @Test
@@ -134,11 +130,14 @@ class SysUserServicePermViewTest {
 
         UserCenterPermVO vo = sysUserService.getPermView("u2");
 
-        assertEquals("CUSTOM", vo.getDataPermType());
-        assertEquals(List.of("org2"), vo.getOrgPermIds());
-        assertEquals(List.of("sys-user:read"), vo.getOwnedPerms());
-        // 菜单树即使无权限也应展示全量菜单，权限叶子完整
-        assertEquals(1, vo.getMenuTree().size());
-        assertEquals(2, vo.getMenuTree().get(0).getChildren().size());
+        assertEquals("自定义", vo.getDataPermLabel());
+        // 机构树仅 unit1，且为我的机构
+        assertEquals(1, vo.getOrgRows().size());
+        assertEquals("mine", vo.getOrgRows().get(0).getStatus());
+        // 菜单树即使无权限也应展示全量菜单，权限名称完整
+        assertEquals(1, vo.getMenuRows().size());
+        assertEquals(List.of("读取", "编辑"), vo.getMenuRows().get(0).getPerms());
+        // 仅拥有 sys-user:read => 部分授权
+        assertEquals("partial", vo.getMenuRows().get(0).getStatus());
     }
 }

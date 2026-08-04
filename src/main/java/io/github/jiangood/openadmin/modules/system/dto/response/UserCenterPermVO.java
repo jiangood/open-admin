@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.dto.response;
 
-import io.github.jiangood.openadmin.util.dto.TreeOption;
 import lombok.Data;
 
 import java.util.List;
@@ -11,25 +10,32 @@ import java.util.List;
 @Data
 public class UserCenterPermVO {
 
-    /** 数据权限类型：（ALL/LEVEL/CHILDREN/CUSTOM） */
-    private String dataPermType;
+    /** 数据权限类型中文标签（所有/本级/本级和子级/自定义） */
+    private String dataPermLabel;
 
-    /** 所属机构（公司/单位级）id */
-    private String unitId;
+    /** 机构权限行（树形，status: mine/owned） */
+    private List<OrgRow> orgRows;
 
-    /** 所属机构节点 id */
-    private String orgId;
+    /** 菜单权限行（树形，status: all/partial，权限名称已聚合到 perms） */
+    private List<MenuRow> menuRows;
 
-    /** 有效数据权限机构 id 集 */
-    private List<String> orgPermIds;
+    @Data
+    public static class OrgRow {
+        private String key;
+        private String title;
+        /** mine=我的机构, owned=已授权, 无=未授权 */
+        private String status;
+        private List<OrgRow> children;
+    }
 
-    /** 机构全量树 */
-    private List<TreeOption> orgTree;
-
-    /** 菜单全量树（每个菜单节点下挂权限叶子节点） */
-    private List<TreeOption> menuTree;
-
-    /** 用户已拥有权限码（不含 ROLE_/ORG_ 前缀） */
-    private List<String> ownedPerms;
-
+    @Data
+    public static class MenuRow {
+        private String key;
+        private String title;
+        /** 该菜单下的权限名称 */
+        private List<String> perms;
+        /** all=全部授权, partial=部分授权, 无=未授权 */
+        private String status;
+        private List<MenuRow> children;
+    }
 }

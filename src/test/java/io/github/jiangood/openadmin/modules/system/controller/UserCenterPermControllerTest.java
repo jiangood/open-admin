@@ -53,14 +53,12 @@ class UserCenterPermControllerTest {
     @Test
     void perms_shouldReturnPermView() throws Exception {
         UserCenterPermVO vo = new UserCenterPermVO();
-        vo.setDataPermType("ALL");
-        vo.setUnitId("unit1");
+        vo.setDataPermLabel("所有");
 
         when(sysUserService.getPermView("u1")).thenReturn(vo);
 
         mockMvc.perform(get("/admin/userCenter/perms"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.dataPermType").value("ALL"))
-                .andExpect(jsonPath("$.data.unitId").value("unit1"));
+                .andExpect(jsonPath("$.data.dataPermLabel").value("所有"));
     }
 }

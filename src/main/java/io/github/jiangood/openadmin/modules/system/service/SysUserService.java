@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
+import io.github.jiangood.openadmin.util.annotation.RemarkTool;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterPermVO;
@@ -224,7 +225,7 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
     /**
-     * 个人中心"我的权限"视图：机构树、数据权限范围、菜单权限树、已拥有权限码、角色。
+     * 个人中心"我的权限"视图：机构树（含授权状态）、数据权限类型、菜单权限树（权限名称聚合+授权状态）。
      * <p>
      * 整体加事务以支持懒加载（角色/自定义数据权限机构），getUserPerms 为自调用不走代理，
      * 依赖本方法开启的外层事务完成懒加载。
@@ -236,20 +237,26 @@ public class SysUserService extends BaseService<SysUser> {
         if (user == null) {
             return vo;
         }
-        vo.setDataPermType(user.getDataPermType() == null ? null : user.getDataPermType().name());
-        vo.setUnitId(user.getUnitId());
-        vo.setOrgId(user.getOrgId());
+        vo.setDataPermLabel(user.getDataPermType() == null ? null : RemarkTool.getRemark(user.getDataPermType()));
 
-        // 数据权限范围
-        vo.setOrgPermIds(getOrgPermissions(userId));
+        // 有效数据权限机构 id 集
+        Set<String> orgPermIds = new HashSet<>(getOrgPermissions(userId));
 
-        // 机构全量树
+        // 机构全量树 + 授权状态
         List<TreeOption> orgOptions = sysOrgService.findAll().stream()
                 .map(org -> new TreeOption(org.getName(), org.getId(), org.getPid()))
                 .toList();
-        vo.setOrgTree(TreeTool.buildTree(orgOptions));
+        vo.setOrgRows(toOrgRows(TreeTool.buildTree(orgOptions), user.getUnitId(), user.getOrgId(), orgPermIds));
 
-        // 菜单全量树，每个菜单节点挂权限叶子（key=完整权限码）
+        // 已拥有权限码（过滤 ROLE_/ORG_ 前缀）
+        Set<String> owned = new TreeSet<>();
+        for (String perm : getUserPerms(userId)) {
+            if (!perm.startsWith("ROLE_") && !perm.startsWith("ORG_")) {
+                owned.add(perm);
+            }
+        }
+
+        // 菜单全量树 + 权限名称聚合 + 授权状态（权限不再挂子节点）
         List<MenuDefinition> menus = sysMenuRepository.findAll().stream()
                 .filter(menu -> menu.getDisabled() == null || !menu.getDisabled())
                 .toList();
@@ -266,18 +273,59 @@ public class SysUserService extends BaseService<SysUser> {
             node.setChildren(permLeaves);
             return node;
         }).toList();
-        vo.setMenuTree(TreeTool.buildTree(menuOptions));
-
-        // 已拥有权限码（过滤 ROLE_/ORG_ 前缀）
-        Set<String> owned = new TreeSet<>();
-        for (String perm : getUserPerms(userId)) {
-            if (!perm.startsWith("ROLE_") && !perm.startsWith("ORG_")) {
-                owned.add(perm);
-            }
-        }
-        vo.setOwnedPerms(new ArrayList<>(owned));
+        vo.setMenuRows(toMenuRows(TreeTool.buildTree(menuOptions), owned));
 
         return vo;
+    }
+
+    /** 机构树 -> 表格行，标注 mine/owned 状态 */
+    private List<UserCenterPermVO.OrgRow> toOrgRows(List<TreeOption> nodes, String unitId, String orgId, Set<String> orgPermIds) {
+        List<UserCenterPermVO.OrgRow> rows = new ArrayList<>();
+        for (TreeOption node : nodes) {
+            UserCenterPermVO.OrgRow row = new UserCenterPermVO.OrgRow();
+            row.setKey(node.getKey());
+            row.setTitle(node.getTitle());
+            if (node.getKey().equals(unitId) || node.getKey().equals(orgId)) {
+                row.setStatus("mine");
+            } else if (orgPermIds.contains(node.getKey())) {
+                row.setStatus("owned");
+            }
+            if (CollUtil.isNotEmpty(node.getChildren())) {
+                row.setChildren(toOrgRows(node.getChildren(), unitId, orgId, orgPermIds));
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    /** 菜单树 -> 表格行，权限名称聚合到 perms，标注 all/partial 状态 */
+    private List<UserCenterPermVO.MenuRow> toMenuRows(List<TreeOption> nodes, Set<String> owned) {
+        List<UserCenterPermVO.MenuRow> rows = new ArrayList<>();
+        for (TreeOption node : nodes) {
+            UserCenterPermVO.MenuRow row = new UserCenterPermVO.MenuRow();
+            row.setKey(node.getKey());
+            row.setTitle(node.getTitle());
+
+            List<TreeOption> leaves = node.getChildren() == null ? List.of()
+                    : node.getChildren().stream().filter(TreeOption::getLeaf).toList();
+            List<TreeOption> subMenus = node.getChildren() == null ? List.of()
+                    : node.getChildren().stream().filter(c -> c.getLeaf() == null || !c.getLeaf()).toList();
+
+            row.setPerms(leaves.stream().map(TreeOption::getTitle).toList());
+            int ownedCount = (int) leaves.stream().filter(leaf -> owned.contains(leaf.getKey())).count();
+            if (!leaves.isEmpty()) {
+                if (ownedCount == leaves.size()) {
+                    row.setStatus("all");
+                } else if (ownedCount > 0) {
+                    row.setStatus("partial");
+                }
+            }
+            if (CollUtil.isNotEmpty(subMenus)) {
+                row.setChildren(toMenuRows(subMenus, owned));
+            }
+            rows.add(row);
+        }
+        return rows;
     }
 
     @Cacheable(value = "userPerms", key = "#id", sync = true, condition = "#id != null")
