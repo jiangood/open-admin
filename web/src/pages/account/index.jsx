@@ -1,6 +1,7 @@
 import React from "react";
 import {Avatar, Card, Col, Row, Tabs} from "antd";
 import ChangePassword from "./changePassword";
+import PermView from "./permView";
 import {HttpUtils, Page} from "../../framework";
 
 export default class extends React.Component {
@@ -71,7 +72,11 @@ export default class extends React.Component {
                                         <ChangePassword/>
                                     </div>
                                 },
-
+                                {
+                                    label: '我的权限', key: 'perms', children: <div>
+                                        <PermView/>
+                                    </div>
+                                },
                             ]}
                             tabPlacement='left'
                         >
