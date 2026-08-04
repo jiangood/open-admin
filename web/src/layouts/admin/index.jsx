@@ -204,6 +204,10 @@ return <Layout className='main-layout'>
                         <div key={a.code} className='item' style={{cursor: 'pointer', padding: '0 12px', whiteSpace: 'nowrap'}}
                              onClick={() => PageUtils.open('/article/' + a.code, a.title)}>{a.title}</div>
                     ))}
+                    {this.props.orgSwitcher?.({
+                        activeTopMenu: this.getActiveTopMenu(),
+                        loginInfo: this.props.loginInfo,
+                    })}
                     {this.props.headerExtra?.({
                         activeTopMenu: this.getActiveTopMenu(),
                         loginInfo: this.props.loginInfo,
