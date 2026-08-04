@@ -57,25 +57,52 @@ export default class PermView extends React.Component {
 
         const menuColumns = [
             {
-                title: '名称', dataIndex: 'title', key: 'title',
+                title: '菜单名称', dataIndex: 'title', key: 'title',
             },
             {
-                title: '权限码', dataIndex: 'code', key: 'code',
-                render: (code) => code || '',
+                title: '权限名称', dataIndex: 'perms', key: 'permNames',
+                render: (perms) => (perms || []).map(p => p.name).join('、') || '-',
+            },
+            {
+                title: '权限码', dataIndex: 'perms', key: 'permCodes',
+                render: (perms) => (perms || []).map(p => p.code).join('、') || '-',
             },
             {
                 title: '状态', dataIndex: 'status', key: 'status', width: 140,
-                render: (status) => status ? <Tag color='green'>已授权</Tag> : '-',
+                render: (status) => {
+                    if (status === 'all') {
+                        return <Tag color='green'>已授权</Tag>;
+                    }
+                    if (status === 'partial') {
+                        return <Tag color='orange'>部分授权</Tag>;
+                    }
+                    return '-';
+                }
             },
         ];
         const menuRows = (nodes) => (nodes || []).map(node => {
-            const children = node.children && node.children.length ? menuRows(node.children) : undefined;
+            const leaves = (node.children || []).filter(c => c.isLeaf);
+            const subMenus = (node.children || []).filter(c => !c.isLeaf);
+            const perms = leaves.map(l => ({
+                name: l.title,
+                code: l.key,
+                owned: data.ownedPerms && data.ownedPerms.includes(l.key),
+            }));
+            const ownedCount = perms.filter(p => p.owned).length;
+            let status;
+            if (perms.length === 0) {
+                status = null;
+            } else if (ownedCount === perms.length) {
+                status = 'all';
+            } else if (ownedCount > 0) {
+                status = 'partial';
+            }
             return {
                 key: node.key,
                 title: node.title,
-                code: node.isLeaf ? node.key : null,
-                status: node.isLeaf && data.ownedPerms && data.ownedPerms.includes(node.key),
-                children,
+                perms,
+                status,
+                children: subMenus.length ? menuRows(subMenus) : undefined,
             };
         });
 
