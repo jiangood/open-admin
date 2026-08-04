@@ -56,7 +56,7 @@ export default class extends React.Component {
                 </Descriptions>
             </Card>
 
-            <Card>
+            <Card title="我的权限">
                 <PermView/>
             </Card>
 
