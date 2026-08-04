@@ -1,7 +1,9 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
+import io.github.jiangood.openadmin.framework.dict.DictType;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 
+@DictType(code = "dataPermType", label = "数据权限")
 @Remark("数据权限类型")
 public enum DataPermType {
 

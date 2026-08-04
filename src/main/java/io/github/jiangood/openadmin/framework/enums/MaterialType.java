@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.framework.enums;
 
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.openadmin.framework.dict.DictType;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -11,7 +12,7 @@ import java.util.LinkedHashMap;
 /**
  * 素材类型
  */
-@Remark("materialType")
+@DictType(code = "materialType", label = "素材类型")
 public enum MaterialType {
 
 

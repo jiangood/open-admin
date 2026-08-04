@@ -1,7 +1,9 @@
 package io.github.jiangood.openadmin.modules.system.enums;
 
+import io.github.jiangood.openadmin.framework.dict.DictType;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 
+@DictType(code = "articlePosition", label = "文章显示位置")
 @Remark("文章显示位置")
 public enum ArticlePosition {
 
