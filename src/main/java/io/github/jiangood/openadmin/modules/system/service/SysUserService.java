@@ -307,9 +307,9 @@ public class SysUserService extends BaseService<SysUser> {
             row.setTitle(node.getTitle());
 
             List<TreeOption> leaves = node.getChildren() == null ? List.of()
-                    : node.getChildren().stream().filter(TreeOption::getLeaf).toList();
+                    : node.getChildren().stream().filter(c -> Boolean.TRUE.equals(c.getLeaf())).toList();
             List<TreeOption> subMenus = node.getChildren() == null ? List.of()
-                    : node.getChildren().stream().filter(c -> c.getLeaf() == null || !c.getLeaf()).toList();
+                    : node.getChildren().stream().filter(c -> !Boolean.TRUE.equals(c.getLeaf())).toList();
 
             row.setPerms(leaves.stream().map(TreeOption::getTitle).toList());
             int ownedCount = (int) leaves.stream().filter(leaf -> owned.contains(leaf.getKey())).count();

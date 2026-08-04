@@ -111,8 +111,7 @@ class SysUserServicePermViewTest {
     }
 
     @Test
-    void getPermView_customScope_operatorRole() {
-        SysUser user = new SysUser();
+    void getPermView_customScope_operatorRole() {        SysUser user = new SysUser();
         user.setId("u2");
         user.setAccount("op");
         user.setDataPermType(DataPermType.CUSTOM);
@@ -139,5 +138,46 @@ class SysUserServicePermViewTest {
         assertEquals(List.of("读取", "编辑"), vo.getMenuRows().get(0).getPerms());
         // 仅拥有 sys-user:read => 部分授权
         assertEquals("partial", vo.getMenuRows().get(0).getStatus());
+    }
+
+    @Test
+    void getPermView_withSubMenu_shouldNotNpe() {
+        SysUser user = new SysUser();
+        user.setId("u3");
+        user.setAccount("admin2");
+        user.setDataPermType(DataPermType.ALL);
+        user.setUnitId("unit1");
+        user.setOrgId("org1");
+        SysRole admin = new SysRole();
+        admin.setCode("admin");
+        admin.setName("管理员");
+        user.setRoles(new HashSet<>(Set.of(admin)));
+
+        MenuDefinition parent = new MenuDefinition();
+        parent.setId("sys-parent");
+        parent.setName("系统管理");
+        MenuDefinition child = new MenuDefinition();
+        child.setId("sys-user");
+        child.setName("用户管理");
+        child.setPid("sys-parent");
+        MenuDefinition.PermDefinition read = new MenuDefinition.PermDefinition();
+        read.setName("读取");
+        read.setCode("read");
+        child.setPerms(List.of(read));
+
+        when(sysUserRepository.findById("u3")).thenReturn(Optional.of(user));
+        when(sysOrgService.findAll()).thenReturn(List.of(org("unit1", "总部", null)));
+        when(sysMenuRepository.findAll()).thenReturn(List.of(parent, child));
+
+        UserCenterPermVO vo = sysUserService.getPermView("u3");
+
+        // 父菜单行（无权限叶子、有子菜单）不应 NPE
+        assertEquals(1, vo.getMenuRows().size());
+        UserCenterPermVO.MenuRow parentRow = vo.getMenuRows().get(0);
+        assertEquals("系统管理", parentRow.getTitle());
+        assertTrue(parentRow.getPerms().isEmpty());
+        assertEquals(1, parentRow.getChildren().size());
+        assertEquals(List.of("读取"), parentRow.getChildren().get(0).getPerms());
+        assertEquals("all", parentRow.getChildren().get(0).getStatus());
     }
 }
