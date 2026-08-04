@@ -1,8 +1,14 @@
 import React from 'react'
-import {Button, Form, Input, Modal, Popconfirm} from 'antd'
+import {Button, Form, Input, Modal, Popconfirm, Select, Tag} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
 import {PermActions, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils} from "../../../framework";
+
+const FILE_STATUS = {
+    TEMP: {label: '未认领', color: 'default'},
+    IN_USE: {label: '使用中', color: 'success'},
+    PENDING_DELETE: {label: '待删除', color: 'danger'},
+}
 
 export default class extends React.Component {
 
@@ -26,6 +32,15 @@ export default class extends React.Component {
             tooltip: '上传时候的文件名',
             dataIndex: 'originName',
             width: 200,
+        },
+        {
+            title: '状态',
+            dataIndex: 'status',
+            width: 120,
+            render(status) {
+                const item = FILE_STATUS[status]
+                return item ? <Tag color={item.color}>{item.label}</Tag> : (status || '-')
+            },
         },
         {
             title: '存储名称',
@@ -97,6 +112,10 @@ export default class extends React.Component {
                         </Form.Item>
                         <Form.Item label='对象名称' name='objectName'>
                             <Input/>
+                        </Form.Item>
+                        <Form.Item label='状态' name='status'>
+                            <Select allowClear placeholder='请选择状态'
+                                    options={Object.entries(FILE_STATUS).map(([value, item]) => ({value, label: item.label}))}/>
                         </Form.Item>
                         <Form.Item label='类型' name='type'>
                             <FieldDictSelect typeCode='materialType'/>
