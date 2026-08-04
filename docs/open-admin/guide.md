@@ -84,9 +84,10 @@ web/
 
 ### 数据字典
 
-- **预设字典**：`orgType`、`approveStatus`、`sex`、`yesNo`、`dataPermType`、`statusColor`
+- **枚举驱动**：框架内置字典（`approveStatus`、`sex`、`yesNo`、`dataPermType`、`statusColor`、`articlePosition`、`materialType`、`fileStatus`）由 Java 枚举自动同步生成——枚举类型标注 `@DictType(code, label)`、常量标注 `@Remark(label)`（可选 `@DictColor`），每次启动经 `DictSeedSync` 同步，枚举是唯一数据源，无需写 SQL 种子
+- **业务扩展**：业务模块自定义枚举加 `@DictType`/`@Remark` 后，在任意 `@Configuration` 中注入 `DictEnumRegistry` 并调用 `register(MyEnum.class)` 即可自动入字典
 - **前端使用**：`<FieldDictSelect typeCode="sex" />` 字典选择器；`DictUtils.dictList("sex")` / `DictUtils.dictLabel("sex", "MALE")` / `DictUtils.dictTag("approveStatus", "APPROVED")`
-- **扩展**：通过管理界面或 `DictDataInitializer` 钩子添加
+- **管理界面**：仍可通过字典管理界面维护非枚举类型（业务自建）字典；枚举类型的 label/color 由代码维护
 
 ### 其他内置功能
 
