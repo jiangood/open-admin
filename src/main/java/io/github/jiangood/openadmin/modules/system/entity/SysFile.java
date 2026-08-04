@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.system.entity;
 import cn.hutool.core.io.FileUtil;
 import io.github.jiangood.openadmin.util.ContentTypeTool;
 import io.github.jiangood.openadmin.util.RequestTool;
+import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -49,6 +50,12 @@ public class SysFile extends BaseEntity {
     private String mimeType;
     @Enumerated(EnumType.STRING)
     private MaterialType type;
+    /**
+     * 生命周期状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 30)
+    private FileStatus status;
     private String title;
     private String description;
     private String hash;
@@ -116,5 +123,10 @@ public class SysFile extends BaseEntity {
         return null;
     }
 
-
+    @PrePersist
+    public void prePersist() {
+        if (status == null) {
+            status = FileStatus.TEMP;
+        }
+    }
 }
