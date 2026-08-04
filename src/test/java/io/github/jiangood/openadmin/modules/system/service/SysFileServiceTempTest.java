@@ -26,6 +26,8 @@ class SysFileServiceTempTest {
     private FileOperator fileOperator;
     @Mock
     private SysFileRepository sysFileRepository;
+    @Mock
+    private SysUserService sysUserService;
 
     private SysFileService sysFileService;
 
@@ -34,7 +36,7 @@ class SysFileServiceTempTest {
 
     @BeforeEach
     void setUp() {
-        sysFileService = new SysFileService(systemProperties, fileOperator, sysFileRepository);
+        sysFileService = new SysFileService(systemProperties, fileOperator, sysFileRepository, sysUserService);
     }
 
     @Test

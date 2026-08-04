@@ -53,6 +53,7 @@ public class SysFileService {
     private final SystemProperties systemProperties;
     private final FileOperator fileOperator;
     private final SysFileRepository sysFileRepository;
+    private final SysUserService sysUserService;
 
     /**
      * 获得预览相对url（含 context-path），如 /example/file/xxx.jpg
@@ -358,7 +359,11 @@ public class SysFileService {
     }
 
     public Page<SysFile> findAll(Specification<SysFile> q, Pageable pageable) {
-        return sysFileRepository.findAll(q, pageable);
+        Page<SysFile> page = sysFileRepository.findAll(q, pageable);
+        for (SysFile file : page.getContent()) {
+            file.setCreateUserLabel(sysUserService.getNameById(file.getCreateUser()));
+        }
+        return page;
     }
 
     public boolean isFileExist(String objectName) {

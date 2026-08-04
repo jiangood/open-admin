@@ -73,6 +73,11 @@ public class SysFile extends BaseEntity {
     private String extra3;
     @Transient
     private InputStream inputStream;
+    /**
+     * 上传者姓名（查询时由 createUser 关联 SysUser 填充，不落库）
+     */
+    @Transient
+    private String createUserLabel;
 
     public SysFile() {
     }
