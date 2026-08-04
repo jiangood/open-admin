@@ -2,7 +2,9 @@ import React from "react";
 import {Button, Form, Input, Modal} from "antd";
 import {HttpUtils, history} from "../../framework";
 
-export default class extends React.Component {
+export default class ChangePassword extends React.Component {
+
+    formRef = React.createRef();
 
     state = {
         successModalOpen: false,
@@ -28,7 +30,26 @@ export default class extends React.Component {
     }
 
     render() {
-        return <div>
+        return <>
+            <Modal open={this.props.open} title="修改密码" okText="确定" cancelText="取消"
+                   onCancel={this.props.onClose}
+                   onOk={() => this.formRef?.submit()}>
+                <Form ref={this.formRef} onFinish={this.onFinish} style={{maxWidth: 400}}>
+                    <Form.Item name='newPassword'
+                               label='新密码'
+                               extra={'请输入字母、数字、特殊字符'}
+                               rules={[
+                                   {required: true},
+                                   {
+                                       validator: this.validator
+                                   }
+                               ]}
+                    >
+                        <Input.Password></Input.Password>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
             <Modal open={this.state.successModalOpen} title="提示" okText="确定"
                    onCancel={() => this.setState({successModalOpen: false})}
                    onOk={() => {
@@ -37,29 +58,6 @@ export default class extends React.Component {
                    }}>
                 修改密码成功
             </Modal>
-
-            <Form onFinish={this.onFinish} style={{maxWidth: 400}}>
-
-                <Form.Item name='newPassword'
-                           label='新密码'
-                           extra={'请输入字母、数字、特殊字符'}
-                           rules={[
-                               {required: true},
-                               {
-                                   validator: this.validator
-                               }
-                           ]}
-                >
-                    <Input.Password></Input.Password>
-                </Form.Item>
-
-                <Form.Item wrapperCol={{offset: 5}} style={{marginTop: 40}}>
-                    <Button type="primary" htmlType="submit">
-                        确定
-                    </Button>
-                </Form.Item>
-            </Form>
-
-        </div>
+        </>
     }
 }

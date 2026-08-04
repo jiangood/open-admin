@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, Descriptions, Tabs} from "antd";
+import {Button, Card, Descriptions} from "antd";
 import ChangePassword from "./changePassword";
 import PermView from "./permView";
 import {HttpUtils, Page} from "../../framework";
@@ -7,7 +7,8 @@ import {HttpUtils, Page} from "../../framework";
 export default class extends React.Component {
 
     state = {
-        info: {}
+        info: {},
+        changePwdOpen: false,
     }
 
     componentDidMount() {
@@ -17,10 +18,12 @@ export default class extends React.Component {
     }
 
     render() {
-        const {info} = this.state;
+        const {info, changePwdOpen} = this.state;
         return <Page backgroundGray>
 
-            <Card title="个人信息" style={{marginBottom: 16}}>
+            <Card title="个人信息"
+                  style={{marginBottom: 16}}
+                  extra={<Button onClick={() => this.setState({changePwdOpen: true})}>修改密码</Button>}>
                 <Descriptions column={2} size="middle">
                     <Descriptions.Item label="用户名称">{info.name}</Descriptions.Item>
                     <Descriptions.Item label="账号">{info.account}</Descriptions.Item>
@@ -34,25 +37,10 @@ export default class extends React.Component {
             </Card>
 
             <Card>
-                <Tabs
-                    items={[
-                        {
-                            label: '我的权限', key: 'perms', children: (
-                                <div>
-                                    <PermView/>
-                                </div>
-                            )
-                        },
-                        {
-                            label: '修改密码', key: 'pwd', children: (
-                                <div>
-                                    <ChangePassword/>
-                                </div>
-                            )
-                        },
-                    ]}
-                />
+                <PermView/>
             </Card>
+
+            <ChangePassword open={changePwdOpen} onClose={() => this.setState({changePwdOpen: false})}/>
 
         </Page>
     }
