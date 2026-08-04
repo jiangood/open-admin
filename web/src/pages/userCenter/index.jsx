@@ -1,5 +1,5 @@
 import React from "react";
-import {Avatar, Card, Col, Row, Tabs} from "antd";
+import {Avatar, Card, Descriptions, Space, Tag, Tabs, Typography} from "antd";
 import ChangePassword from "./changePassword";
 import PermView from "./permView";
 import {HttpUtils, Page} from "../../framework";
@@ -20,73 +20,63 @@ export default class extends React.Component {
         const {info} = this.state;
         return <Page backgroundGray title="个人中心" description="查看和编辑个人资料">
 
-            <Row gutter={[16, 16]}>
-                <Col md={6} sm={24}>
-                    <Card title='个人信息'>
+            <Card style={{marginBottom: 16}} styles={{body: {padding: 0}}}>
+                <div style={{
+                    background: 'linear-gradient(135deg, #1677ff 0%, #69b1ff 100%)',
+                    padding: '40px 24px 56px',
+                    textAlign: 'center',
+                }}>
+                    <Avatar size={96} title='点击修改头像' style={{backgroundColor: 'rgba(255,255,255,0.25)', fontSize: 40}}>
+                        {info.name ? info.name.charAt(0) : 'U'}
+                    </Avatar>
+                    <div style={{marginTop: 16}}>
+                        <span style={{fontSize: 22, fontWeight: 600, color: '#fff'}}>{info.name}</span>
+                    </div>
+                    <Typography.Text style={{color: 'rgba(255,255,255,0.85)'}}>账号：{info.account}</Typography.Text>
+                    <div style={{marginTop: 8}}>
+                        <Space wrap>
+                            {(info.roles || []).map((r, i) => <Tag color="blue" key={i}>{r}</Tag>)}
+                            {info.org ? <Tag color="cyan">{info.org}</Tag> : null}
+                        </Space>
+                    </div>
+                </div>
+            </Card>
 
-                        <div className='flex-center' style={{marginBottom: 32}}>
-                            <Avatar size={128} title='点击修改头像'/>
-                        </div>
-
-
-                        <table className='oa-table'>
-                            <tbody>
-                            <tr>
-                                <td>用户名称</td>
-                                <td align='right'>{info.name}</td>
-                            </tr>
-                            <tr>
-                                <td>账号</td>
-                                <td align='right'>{info.account}</td>
-                            </tr>
-                            <tr>
-                                <td>手机号码</td>
-                                <td>{info.phone}</td>
-                            </tr>
-                            <tr>
-                                <td>用户邮箱</td>
-                                <td>{info.email}</td>
-                            </tr>
-                            <tr>
-                                <td>所属部门</td>
-                                <td>{info.unit} {info.dept}</td>
-                            </tr>
-                            <tr>
-                                <td>所属角色</td>
-                                <td>{info.roles}</td>
-                            </tr>
-                            <tr>
-                                <td>创建日期</td>
-                                <td>{info.createTime}</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </Card>
-                </Col>
-                <Col md={18} sm={24}>
-                    <Card title='个人设置'>
-                        <Tabs
-                            items={[
-                                {
-                                    label: '修改密码', key: 'pwd', children: <div>
-                                        <ChangePassword/>
-                                    </div>
-                                },
-                                {
-                                    label: '我的权限', key: 'perms', children: <div>
-                                        <PermView/>
-                                    </div>
-                                },
-                            ]}
-                            tabPlacement='left'
-                        >
-                        </Tabs>
-                    </Card>
-                </Col>
-            </Row>
-
+            <Card>
+                <Tabs
+                    items={[
+                        {
+                            label: '个人信息', key: 'info', children: (
+                                <Descriptions column={2} size="middle">
+                                    <Descriptions.Item label="用户名称">{info.name}</Descriptions.Item>
+                                    <Descriptions.Item label="账号">{info.account}</Descriptions.Item>
+                                    <Descriptions.Item label="手机号码">{info.phone}</Descriptions.Item>
+                                    <Descriptions.Item label="用户邮箱">{info.email}</Descriptions.Item>
+                                    <Descriptions.Item label="所属单位">{info.unit}</Descriptions.Item>
+                                    <Descriptions.Item label="所属机构">{info.org}</Descriptions.Item>
+                                    <Descriptions.Item label="所属角色">{(info.roles || []).join('、') || '-'}</Descriptions.Item>
+                                    <Descriptions.Item label="创建日期">{info.createTime}</Descriptions.Item>
+                                </Descriptions>
+                            )
+                        },
+                        {
+                            label: '我的权限', key: 'perms', children: (
+                                <div>
+                                    <PermView/>
+                                </div>
+                            )
+                        },
+                        {
+                            label: '修改密码', key: 'pwd', children: (
+                                <div>
+                                    <ChangePassword/>
+                                </div>
+                            )
+                        },
+                    ]}
+                />
+            </Card>
 
         </Page>
-
     }
 }
