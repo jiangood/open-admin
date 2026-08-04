@@ -2,7 +2,7 @@ import React from 'react';
 import {Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import "./index.less"
-import {HttpUtils, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT} from "../../framework";
+import {HttpUtils, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT, OrgSwitcher} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabLayout } from "./TabLayout";
@@ -204,10 +204,10 @@ return <Layout className='main-layout'>
                         <div key={a.code} className='item' style={{cursor: 'pointer', padding: '0 12px', whiteSpace: 'nowrap'}}
                              onClick={() => PageUtils.open('/article/' + a.code, a.title)}>{a.title}</div>
                     ))}
-                    {this.props.orgSwitcher?.({
+                    {this.props.showOrgSwitcher?.({
                         activeTopMenu: this.getActiveTopMenu(),
                         loginInfo: this.props.loginInfo,
-                    })}
+                    }) && <OrgSwitcher/>}
                     {this.props.headerExtra?.({
                         activeTopMenu: this.getActiveTopMenu(),
                         loginInfo: this.props.loginInfo,

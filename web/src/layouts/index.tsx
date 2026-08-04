@@ -29,7 +29,7 @@ export interface HeaderExtraContext {
 
 interface LayoutsProps {
     headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
-    orgSwitcher?: (context: HeaderExtraContext) => React.ReactNode;
+    showOrgSwitcher?: (context: HeaderExtraContext) => boolean;
 }
 
 export class Layouts extends React.Component<LayoutsProps> {
@@ -129,7 +129,7 @@ export class Layouts extends React.Component<LayoutsProps> {
         return (
             <ErrorBoundary minimal>
                 <ConfigProvider {...configProps}>
-                    {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout headerExtra={this.props.headerExtra} orgSwitcher={this.props.orgSwitcher} loginInfo={GlobalData.getLoginInfo()}/> : (
+                    {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/> : (
                         <PageLoading messages={[
                             !siteInfoLoaded && '加载站点信息...',
                             !loginChecked && '检查登录中...',
