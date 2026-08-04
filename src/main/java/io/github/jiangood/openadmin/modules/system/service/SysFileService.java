@@ -10,6 +10,7 @@ import cn.hutool.http.HttpUtil;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.RequestTool;
+import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
@@ -68,15 +69,32 @@ public class SysFileService {
         return contextPath + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", objectName);
     }
 
-    public void deleteByObjectName(String objectName) throws Exception {
+    @Transactional
+    public void deleteByObjectName(String objectName) {
         SysFile sysFile = sysFileRepository.findByObjectName(objectName);
         if (sysFile == null) {
             return;
         }
-        sysFileRepository.deleteById(sysFile.getId());
+        deleteFileInternal(sysFile);
+    }
 
-        // 删除原图
-        fileOperator.delete(objectName);
+    /**
+     * 删除单个文件：先标记为待删除，物理删除成功后再删 DB 记录；
+     * 物理删除失败时保持 PENDING_DELETE 状态，由清理任务下轮重试
+     *
+     * @return 物理文件删除成功返回 true
+     */
+    @Transactional
+    public boolean deleteFileInternal(SysFile file) {
+        if (file.getStatus() != FileStatus.PENDING_DELETE) {
+            file.setStatus(FileStatus.PENDING_DELETE);
+            sysFileRepository.save(file);
+        }
+        if (!deletePhysicalFile(file)) {
+            return false;
+        }
+        sysFileRepository.deleteById(file.getId());
+        return true;
     }
 
     /**
@@ -320,14 +338,10 @@ public class SysFileService {
             }
         }
         if (oldObjectNames != null && !oldObjectNames.isEmpty() && newObjectNames != null) {
-            List<String> toDelete = new ArrayList<>(oldObjectNames);
-            toDelete.removeAll(newObjectNames);
-            if (!toDelete.isEmpty()) {
-                List<SysFile> removedFiles = sysFileRepository.findByObjectNameIn(toDelete);
-                sysFileRepository.deleteAllInBatch(removedFiles);
-                for (SysFile file : removedFiles) {
-                    deletePhysicalFile(file);
-                }
+            List<String> toRemove = new ArrayList<>(oldObjectNames);
+            toRemove.removeAll(newObjectNames);
+            if (!toRemove.isEmpty()) {
+                sysFileRepository.updateStatusByObjectNames(toRemove, FileStatus.PENDING_DELETE);
             }
         }
     }

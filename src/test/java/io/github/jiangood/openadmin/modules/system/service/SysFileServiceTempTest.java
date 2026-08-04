@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
+import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
@@ -13,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -48,47 +50,34 @@ class SysFileServiceTempTest {
 
         verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/id-b.jpg"));
         verify(sysFileRepository, never()).findByObjectNameIn(any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claimList_shouldDeleteRemovedFiles() throws Exception {
-        SysFile oldFileA = new SysFile("id-a");
-        oldFileA.setObjectName("public/202607/id-a.jpg");
-        when(sysFileRepository.findByObjectNameIn(List.of("public/202607/id-a.jpg"))).thenReturn(List.of(oldFileA));
-
+    void claimList_shouldMarkRemovedFilesPendingDelete() throws Exception {
         List<String> oldNames = List.of("public/202607/id-a.jpg", "public/202607/id-b.jpg");
         List<String> newNames = List.of("public/202607/id-b.jpg");
 
         sysFileService.claimList(JOIN_TABLE, JOIN_ID, oldNames, newNames);
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
-        verify(sysFileRepository).findByObjectNameIn(List.of("public/202607/id-a.jpg"));
-        verify(sysFileRepository).deleteAllInBatch(List.of(oldFileA));
-        verify(fileOperator).delete("public/202607/id-a.jpg");
-    }
-
-    @Test
-    void claimList_shouldNotThrowWhenPhysicalDeleteFails() throws Exception {
-        SysFile oldFile = new SysFile("id-a");
-        oldFile.setObjectName("public/202607/id-a.jpg");
-        when(sysFileRepository.findByObjectNameIn(List.of("public/202607/id-a.jpg"))).thenReturn(List.of(oldFile));
-        doThrow(new RuntimeException("disk error")).when(fileOperator).delete("public/202607/id-a.jpg");
-
-        assertDoesNotThrow(() -> sysFileService.claimList(JOIN_TABLE, JOIN_ID, List.of("public/202607/id-a.jpg"), List.of()));
-
-        verify(sysFileRepository).deleteAllInBatch(List.of(oldFile));
+        verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
+        verify(sysFileRepository, never()).deleteAllInBatch(any());
+        verify(fileOperator, never()).delete(any());
     }
 
     @Test
     void claimList_shouldHandleNullInputs() throws Exception {
         assertDoesNotThrow(() -> sysFileService.claimList(JOIN_TABLE, JOIN_ID, null, null));
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
     void claimList_shouldHandleEmptyInputs() throws Exception {
         assertDoesNotThrow(() -> sysFileService.claimList(JOIN_TABLE, JOIN_ID, List.of(), List.of()));
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
@@ -116,16 +105,12 @@ class SysFileServiceTempTest {
     }
 
     @Test
-    void claim_shouldDeleteRemovedFile() throws Exception {
-        SysFile oldFile = new SysFile("id-a");
-        oldFile.setObjectName("public/202607/id-a.jpg");
-        when(sysFileRepository.findByObjectNameIn(List.of("public/202607/id-a.jpg"))).thenReturn(List.of(oldFile));
-
+    void claim_shouldMarkRemovedFilePendingDelete() throws Exception {
         sysFileService.claim(JOIN_TABLE, JOIN_ID, "public/202607/id-a.jpg", null);
 
-        verify(sysFileRepository).findByObjectNameIn(List.of("public/202607/id-a.jpg"));
-        verify(sysFileRepository).deleteAllInBatch(List.of(oldFile));
-        verify(fileOperator).delete("public/202607/id-a.jpg");
+        verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
+        verify(sysFileRepository, never()).deleteAllInBatch(any());
+        verify(fileOperator, never()).delete(any());
     }
 
     @Test
@@ -154,5 +139,57 @@ class SysFileServiceTempTest {
         boolean ok = sysFileService.deletePhysicalFile(file);
 
         assertFalse(ok);
+    }
+
+    @Test
+    void deleteByObjectName_shouldMarkPendingDeleteThenDelete() throws Exception {
+        SysFile file = new SysFile("id-a");
+        file.setObjectName("public/202607/id-a.jpg");
+        file.setStatus(FileStatus.IN_USE);
+        when(sysFileRepository.findByObjectName("public/202607/id-a.jpg")).thenReturn(file);
+
+        sysFileService.deleteByObjectName("public/202607/id-a.jpg");
+
+        assertEquals(FileStatus.PENDING_DELETE, file.getStatus());
+        verify(sysFileRepository).save(file);
+        verify(fileOperator).delete("public/202607/id-a.jpg");
+        verify(sysFileRepository).deleteById("id-a");
+    }
+
+    @Test
+    void deleteByObjectName_shouldKeepPendingDeleteWhenPhysicalFails() throws Exception {
+        SysFile file = new SysFile("id-a");
+        file.setObjectName("public/202607/id-a.jpg");
+        file.setStatus(FileStatus.IN_USE);
+        when(sysFileRepository.findByObjectName("public/202607/id-a.jpg")).thenReturn(file);
+        doThrow(new RuntimeException("disk error")).when(fileOperator).delete("public/202607/id-a.jpg");
+
+        sysFileService.deleteByObjectName("public/202607/id-a.jpg");
+
+        assertEquals(FileStatus.PENDING_DELETE, file.getStatus());
+        verify(sysFileRepository).save(file);
+        verify(sysFileRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteByObjectName_shouldDoNothingWhenNotFound() {
+        when(sysFileRepository.findByObjectName("public/202607/missing.jpg")).thenReturn(null);
+
+        sysFileService.deleteByObjectName("public/202607/missing.jpg");
+
+        verify(sysFileRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void deleteFileInternal_shouldNotSaveWhenAlreadyPendingDelete() {
+        SysFile file = new SysFile("id-a");
+        file.setObjectName("public/202607/id-a.jpg");
+        file.setStatus(FileStatus.PENDING_DELETE);
+
+        boolean ok = sysFileService.deleteFileInternal(file);
+
+        assertTrue(ok);
+        verify(sysFileRepository, never()).save(any());
+        verify(sysFileRepository).deleteById("id-a");
     }
 }
