@@ -34,6 +34,11 @@ class DictSeedSyncTest {
         DONE
     }
 
+    @DictType(code = "testStatus", label = "测试状态")
+    enum NoRemark {
+        FOO
+    }
+
     @Mock
     private SysDictTypeRepository typeRepository;
     @Mock
@@ -135,6 +140,46 @@ class DictSeedSyncTest {
 
         verify(typeRepository, never()).save(any(SysDictType.class));
         verify(itemRepository, never()).save(any(SysDictItem.class));
+    }
+
+    @Test
+    void syncCreatesRootTypeWhenMissing() {
+        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.empty());
+        when(typeRepository.save(any(SysDictType.class))).thenAnswer(inv -> {
+            SysDictType saved = inv.getArgument(0);
+            if (saved.getId() == null) {
+                saved.setId("new-root");
+            }
+            return saved;
+        });
+        when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
+        when(itemRepository.findByTypeCodeAndCode(anyString(), anyString())).thenReturn(Optional.empty());
+        when(itemRepository.save(any(SysDictItem.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        sync.afterSeedDataInitialize();
+
+        ArgumentCaptor<SysDictType> typeCaptor = ArgumentCaptor.forClass(SysDictType.class);
+        verify(typeRepository, times(2)).save(typeCaptor.capture());
+        List<SysDictType> savedTypes = typeCaptor.getAllValues();
+        assertEquals("new-root", savedTypes.get(0).getId());
+        assertEquals("系统数据", savedTypes.get(0).getTypeLabel());
+        assertEquals("new-root", savedTypes.get(1).getPid());
+        assertEquals("testStatus", savedTypes.get(1).getTypeCode());
+        assertEquals("测试状态", savedTypes.get(1).getTypeLabel());
+    }
+
+    @Test
+    void syncFailsFastWhenRemarkMissing() {
+        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
+        when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
+
+        DictEnumRegistry registry = new DictEnumRegistry();
+        registry.register(NoRemark.class);
+        DictSeedSync noRemarkSync = new DictSeedSync(registry,
+                providerOf(typeRepository),
+                providerOf(itemRepository));
+
+        assertThrows(IllegalArgumentException.class, noRemarkSync::afterSeedDataInitialize);
     }
 
     private SysDictType rootType(String id) {

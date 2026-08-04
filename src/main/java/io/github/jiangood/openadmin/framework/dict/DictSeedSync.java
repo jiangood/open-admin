@@ -98,7 +98,7 @@ public class DictSeedSync implements StartupHook {
                         if (!label.equals(item.getLabel())) { item.setLabel(label); changed = true; }
                         if (!Objects.equals(color, item.getColor())) { item.setColor(color); changed = true; }
                         if (!Boolean.TRUE.equals(item.getEnabled())) { item.setEnabled(true); changed = true; }
-                        if (seq != item.getSeq()) { item.setSeq(seq); changed = true; }
+                        if (!Objects.equals(seq, item.getSeq())) { item.setSeq(seq); changed = true; }
                         if (changed) itemRepository.save(item);
                     }, () -> {
                         SysDictItem item = new SysDictItem();
