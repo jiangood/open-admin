@@ -1,14 +1,16 @@
 import React from "react";
-import {Button, Card, Descriptions} from "antd";
-import ChangePassword from "./changePassword";
+import {Button, Card, Descriptions, Form, Input, Modal} from "antd";
 import PermView from "./permView";
-import {HttpUtils, Page} from "../../framework";
+import {HttpUtils, history, Page} from "../../framework";
 
 export default class extends React.Component {
+
+    formRef = React.createRef();
 
     state = {
         info: {},
         changePwdOpen: false,
+        changePwdSuccess: false,
     }
 
     componentDidMount() {
@@ -17,8 +19,26 @@ export default class extends React.Component {
         })
     }
 
+    onPwdFinish = (values) => {
+        HttpUtils.post('admin/userCenter/update-pwd', values).then(() => {
+            this.setState({changePwdOpen: false, changePwdSuccess: true});
+        })
+    }
+
+    pwdValidator = (rule, value) => {
+        return new Promise((resolve, reject) => {
+            HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false}).then(response => {
+                const rs = response.data
+                if (!rs.success) {
+                    reject(rs.message)
+                }
+                resolve()
+            })
+        })
+    }
+
     render() {
-        const {info, changePwdOpen} = this.state;
+        const {info, changePwdOpen, changePwdSuccess} = this.state;
         return <Page backgroundGray>
 
             <Card title="个人信息"
@@ -40,7 +60,33 @@ export default class extends React.Component {
                 <PermView/>
             </Card>
 
-            <ChangePassword open={changePwdOpen} onClose={() => this.setState({changePwdOpen: false})}/>
+            <Modal open={changePwdOpen} title="修改密码" okText="确定" cancelText="取消"
+                   onCancel={() => this.setState({changePwdOpen: false})}
+                   onOk={() => this.formRef?.submit()}>
+                <Form ref={this.formRef} onFinish={this.onPwdFinish} style={{maxWidth: 400}}>
+                    <Form.Item name='newPassword'
+                               label='新密码'
+                               extra={'请输入字母、数字、特殊字符'}
+                               rules={[
+                                   {required: true},
+                                   {
+                                       validator: this.pwdValidator
+                                   }
+                               ]}
+                    >
+                        <Input.Password></Input.Password>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Modal open={changePwdSuccess} title="提示" okText="确定"
+                   onCancel={() => this.setState({changePwdSuccess: false})}
+                   onOk={() => {
+                       this.setState({changePwdSuccess: false});
+                       history.push('/public/login');
+                   }}>
+                修改密码成功
+            </Modal>
 
         </Page>
     }
