@@ -35,15 +35,11 @@ export default class PermView extends React.Component {
         if (!data) {
             return <Empty description='加载中...'/>;
         }
-        const rolesText = data.roles && data.roles.length
-            ? data.roles.map(r => r.name).join('、')
-            : '无';
         return <div>
             <div style={{marginBottom: 16}}>
                 <span>数据权限：
                     <Tag color='processing'>{DATA_PERM_LABEL[data.dataPermType] || data.dataPermType || '-'}</Tag>
                 </span>
-                <span style={{marginLeft: 16}}>权限来源角色：{rolesText}</span>
             </div>
             <Row gutter={16}>
                 <Col md={12} sm={24}>
