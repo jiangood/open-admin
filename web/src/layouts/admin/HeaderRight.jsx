@@ -38,7 +38,7 @@ export class HeaderRight extends React.Component {
     }
 
     account = () => {
-        PageUtils.open('/account', '个人中心')
+        PageUtils.open('/userCenter', '个人中心')
     }
 
     openArticle = (code, title) => {
@@ -61,7 +61,7 @@ export class HeaderRight extends React.Component {
         }))
 
         const menuItems = [
-            {key: 'account', label: '个人中心'},
+            {key: 'userCenter', label: '个人中心'},
             ...articleItems,
             {key: 'logout', label: '退出登录'},
         ]
@@ -76,7 +76,7 @@ export class HeaderRight extends React.Component {
 
             <Dropdown menu={{
                 onClick: ({key}) => {
-                    if (key === 'account') {
+                    if (key === 'userCenter') {
                         this.account()
                     } else if (key === 'logout') {
                         this.logout();
