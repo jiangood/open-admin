@@ -192,4 +192,20 @@ class SysFileServiceTempTest {
         verify(sysFileRepository, never()).save(any());
         verify(sysFileRepository).deleteById("id-a");
     }
+
+    @Test
+    void deleteFileInternal_shouldKeepPendingDeleteWhenDbDeleteFails() throws Exception {
+        SysFile file = new SysFile("id-a");
+        file.setObjectName("public/202607/id-a.jpg");
+        file.setStatus(FileStatus.IN_USE);
+        doThrow(new RuntimeException("db error")).when(sysFileRepository).deleteById("id-a");
+
+        boolean ok = sysFileService.deleteFileInternal(file);
+
+        assertFalse(ok);
+        assertEquals(FileStatus.PENDING_DELETE, file.getStatus());
+        verify(sysFileRepository).save(file);
+        verify(fileOperator).delete("public/202607/id-a.jpg");
+        verify(sysFileRepository).deleteById("id-a");
+    }
 }

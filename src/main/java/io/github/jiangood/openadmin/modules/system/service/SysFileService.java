@@ -93,8 +93,13 @@ public class SysFileService {
         if (!deletePhysicalFile(file)) {
             return false;
         }
-        sysFileRepository.deleteById(file.getId());
-        return true;
+        try {
+            sysFileRepository.deleteById(file.getId());
+            return true;
+        } catch (Exception e) {
+            log.error("删除文件记录失败，保留待删除状态以便重试: id={}, error={}", file.getId(), e.getMessage());
+            return false;
+        }
     }
 
     /**

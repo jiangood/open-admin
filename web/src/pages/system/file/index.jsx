@@ -7,7 +7,7 @@ import {PermActions, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils
 const FILE_STATUS = {
     TEMP: {label: '未认领', color: 'default'},
     IN_USE: {label: '使用中', color: 'success'},
-    PENDING_DELETE: {label: '待删除', color: 'danger'},
+    PENDING_DELETE: {label: '待删除', color: 'error'},
 }
 
 export default class extends React.Component {

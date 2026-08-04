@@ -80,12 +80,15 @@ class CleanTempFileJobTest {
         when(sysFileRepository.findByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), any(Date.class))).thenReturn(List.of());
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
         when(jdbcRunner.existsById("sys_article", "article-999")).thenReturn(false);
-        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of());
+        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of(claimed));
+        when(sysFileService.deleteFileInternal(claimed)).thenReturn(true);
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-c.jpg"), FileStatus.PENDING_DELETE);
+        verify(sysFileService).deleteFileInternal(claimed);
         assertTrue(result.contains("标记孤儿 1 个"));
+        assertTrue(result.contains("删除待删 1 个"));
     }
 
     @Test
