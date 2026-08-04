@@ -13,6 +13,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Date;
@@ -24,6 +27,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("unchecked")
 class CleanTempFileJobTest {
 
     @Mock
@@ -46,6 +50,14 @@ class CleanTempFileJobTest {
         ReflectionTestUtils.setField(job, "systemProperties", systemProperties);
     }
 
+    private Page<SysFile> emptyPage() {
+        return new PageImpl<>(List.of());
+    }
+
+    private Page<SysFile> pageOf(SysFile... files) {
+        return new PageImpl<>(List.of(files));
+    }
+
     @Test
     void execute_shouldMarkUnclaimedThenDeletePending() throws Exception {
         SysFile a = new SysFile("id-a");
@@ -54,17 +66,18 @@ class CleanTempFileJobTest {
         b.setObjectName("public/202607/id-b.jpg");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.findByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), any(Date.class))).thenReturn(List.of(a, b));
-        when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of(a, b));
-        when(sysFileService.deleteFileInternal(a)).thenReturn(true);
-        when(sysFileService.deleteFileInternal(b)).thenReturn(false);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(2);
+        when(sysFileRepository.findByStatus(eq(FileStatus.IN_USE), any(Pageable.class))).thenReturn(emptyPage());
+        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(a, b), emptyPage());
+        when(sysFileService.deletePhysicalFile(a)).thenReturn(true);
+        when(sysFileService.deletePhysicalFile(b)).thenReturn(false);
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
-        verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg", "public/202607/id-b.jpg"), FileStatus.PENDING_DELETE);
-        verify(sysFileService).deleteFileInternal(a);
-        verify(sysFileService).deleteFileInternal(b);
+        verify(sysFileRepository).updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class));
+        verify(sysFileService).deletePhysicalFile(a);
+        verify(sysFileService).deletePhysicalFile(b);
+        verify(sysFileRepository).deleteAllByIdInBatch(List.of("id-a"));
         assertTrue(result.contains("标记未认领 2 个"));
         assertTrue(result.contains("删除待删 1 个"));
     }
@@ -77,16 +90,16 @@ class CleanTempFileJobTest {
         claimed.setJoinId("article-999");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.findByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), any(Date.class))).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.findByStatus(eq(FileStatus.IN_USE), any(Pageable.class))).thenReturn(pageOf(claimed), emptyPage());
         when(jdbcRunner.existsById("sys_article", "article-999")).thenReturn(false);
-        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of(claimed));
-        when(sysFileService.deleteFileInternal(claimed)).thenReturn(true);
+        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(claimed), emptyPage());
+        when(sysFileService.deletePhysicalFile(claimed)).thenReturn(true);
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-c.jpg"), FileStatus.PENDING_DELETE);
-        verify(sysFileService).deleteFileInternal(claimed);
+        verify(sysFileRepository).deleteAllByIdInBatch(List.of("id-c"));
         assertTrue(result.contains("标记孤儿 1 个"));
         assertTrue(result.contains("删除待删 1 个"));
     }
@@ -99,15 +112,16 @@ class CleanTempFileJobTest {
         claimed.setJoinId("article-1");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.findByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), any(Date.class))).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.findByStatus(eq(FileStatus.IN_USE), any(Pageable.class))).thenReturn(pageOf(claimed), emptyPage());
         when(jdbcRunner.existsById("sys_article", "article-1")).thenReturn(true);
-        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of());
+        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
-        verify(sysFileService, never()).deleteFileInternal(any());
+        verify(sysFileRepository, never()).deleteAllByIdInBatch(any());
+        verify(sysFileService, never()).deletePhysicalFile(any());
         assertTrue(result.contains("标记孤儿 0 个"));
     }
 
@@ -119,15 +133,16 @@ class CleanTempFileJobTest {
         claimed.setJoinId("article-999");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.findByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), any(Date.class))).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.findByStatus(eq(FileStatus.IN_USE), any(Pageable.class))).thenReturn(pageOf(claimed), emptyPage());
         when(jdbcRunner.existsById("sys_article", "article-999")).thenThrow(new RuntimeException("table not found"));
-        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of());
+        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
-        verify(sysFileService, never()).deleteFileInternal(any());
+        verify(sysFileRepository, never()).deleteAllByIdInBatch(any());
+        verify(sysFileService, never()).deletePhysicalFile(any());
         assertTrue(result.contains("标记孤儿 0 个"));
     }
 
@@ -138,14 +153,15 @@ class CleanTempFileJobTest {
         file.setStatus(FileStatus.PENDING_DELETE);
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.findByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), any(Date.class))).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(FileStatus.PENDING_DELETE)).thenReturn(List.of(file));
-        when(sysFileService.deleteFileInternal(file)).thenReturn(false);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.findByStatus(eq(FileStatus.IN_USE), any(Pageable.class))).thenReturn(emptyPage());
+        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(file), emptyPage());
+        when(sysFileService.deletePhysicalFile(file)).thenReturn(false);
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
-        verify(sysFileService).deleteFileInternal(file);
+        verify(sysFileService).deletePhysicalFile(file);
+        verify(sysFileRepository, never()).deleteAllByIdInBatch(any());
         assertTrue(result.contains("删除待删 0 个"));
     }
 }

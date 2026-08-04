@@ -13,6 +13,7 @@ import jakarta.annotation.Resource;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobDataMap;
 import org.slf4j.Logger;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -23,6 +24,9 @@ import java.util.List;
 @DisallowConcurrentExecution
 @JobDescription(label = "清理临时文件", params = {})
 public class CleanTempFileJob extends BaseJob {
+
+    /** 每页处理的文件数量，避免文件过多时一次性加载到内存 */
+    private static final int PAGE_SIZE = 1000;
 
     @Resource
     private SysFileRepository sysFileRepository;
@@ -38,50 +42,86 @@ public class CleanTempFileJob extends BaseJob {
         int cleanMinutes = systemProperties.getFile().getCleanUnclaimedMinutes();
         Date deadline = DateUtil.offsetMinute(new Date(), -cleanMinutes);
 
-        // 1. 标记超时未认领为待删除
-        List<SysFile> unclaimedFiles = sysFileRepository.findByStatusAndCreateTimeBefore(FileStatus.TEMP, deadline);
-        logger.info("找到 {} 个过期临时文件 (clean={}m)", unclaimedFiles.size(), cleanMinutes);
-        int unclaimedCount = markPendingDelete(unclaimedFiles);
+        // 1. 单条 UPDATE 标记超时未认领为待删除（TEMP -> PENDING_DELETE，无需查询）
+        int unclaimedCount = sysFileRepository.updateStatusByStatusAndCreateTimeBefore(
+                FileStatus.TEMP, FileStatus.PENDING_DELETE, deadline);
 
-        // 2. 孤儿扫描：业务记录已不存在则标记待删除
-        List<String> orphanNames = new ArrayList<>();
-        for (SysFile file : sysFileRepository.findByStatus(FileStatus.IN_USE)) {
-            try {
-                if (!jdbcRunner.existsById(file.getJoinTable(), file.getJoinId())) {
-                    orphanNames.add(file.getObjectName());
-                }
-            } catch (Exception e) {
-                logger.error("检查业务记录存在性失败: joinTable={}, joinId={}, error={}",
-                        file.getJoinTable(), file.getJoinId(), e.getMessage());
-            }
-        }
-        if (!orphanNames.isEmpty()) {
-            sysFileRepository.updateStatusByObjectNames(orphanNames, FileStatus.PENDING_DELETE);
-        }
+        // 2. 孤儿扫描：分页只读扫描，孤儿收集后统一标记待删除
+        int orphanCount = markOrphans(logger);
 
-        // 3. 最后删除所有待删除文件（含本轮标记与历史失败遗留）
-        List<SysFile> pendingDeleteFiles = sysFileRepository.findByStatus(FileStatus.PENDING_DELETE);
-        int deletedCount = 0;
-        for (SysFile file : pendingDeleteFiles) {
-            if (sysFileService.deleteFileInternal(file)) {
-                deletedCount++;
-            }
-        }
+        // 3. 删除待删文件：分页物理删除，扫描完成后批量删除库行
+        int deletedCount = deletePendingFiles(logger);
 
         logger.info("临时文件清理完成，标记未认领 {} 个，标记孤儿 {} 个，删除待删 {} 个",
-                unclaimedCount, orphanNames.size(), deletedCount);
-        return "清理完成，标记未认领 " + unclaimedCount + " 个，标记孤儿 " + orphanNames.size()
+                unclaimedCount, orphanCount, deletedCount);
+        return "清理完成，标记未认领 " + unclaimedCount + " 个，标记孤儿 " + orphanCount
                 + " 个，删除待删 " + deletedCount + " 个";
     }
 
-    private int markPendingDelete(List<SysFile> files) {
-        List<String> names = new ArrayList<>();
-        for (SysFile file : files) {
-            names.add(file.getObjectName());
+    /**
+     * 分页扫描在用文件（只读，扫描时不改状态），业务记录已不存在则收集孤儿，扫描完统一标记
+     */
+    private int markOrphans(Logger logger) {
+        List<String> orphanNames = new ArrayList<>();
+        int page = 0;
+        while (true) {
+            List<SysFile> content = sysFileRepository.findByStatus(FileStatus.IN_USE, PageRequest.of(page, PAGE_SIZE)).getContent();
+            if (content.isEmpty()) {
+                break;
+            }
+            for (SysFile file : content) {
+                try {
+                    if (!jdbcRunner.existsById(file.getJoinTable(), file.getJoinId())) {
+                        orphanNames.add(file.getObjectName());
+                    }
+                } catch (Exception e) {
+                    logger.error("检查业务记录存在性失败: joinTable={}, joinId={}, error={}",
+                            file.getJoinTable(), file.getJoinId(), e.getMessage());
+                }
+            }
+            page++;
         }
-        if (!names.isEmpty()) {
-            sysFileRepository.updateStatusByObjectNames(names, FileStatus.PENDING_DELETE);
+        updateStatusBatch(orphanNames);
+        return orphanNames.size();
+    }
+
+    /**
+     * 分页删除待删文件：扫描时只做物理删除（不影响 DB 结果集），扫描完成后批量删除库行，
+     * 避免边删边翻页导致行偏移漏删
+     */
+    private int deletePendingFiles(Logger logger) {
+        List<String> deletedIds = new ArrayList<>();
+        int page = 0;
+        while (true) {
+            List<SysFile> content = sysFileRepository.findByStatus(FileStatus.PENDING_DELETE, PageRequest.of(page, PAGE_SIZE)).getContent();
+            if (content.isEmpty()) {
+                break;
+            }
+            for (SysFile file : content) {
+                if (sysFileService.deletePhysicalFile(file)) {
+                    deletedIds.add(file.getId());
+                }
+            }
+            page++;
         }
-        return names.size();
+        for (int i = 0; i < deletedIds.size(); i += PAGE_SIZE) {
+            List<String> batch = deletedIds.subList(i, Math.min(i + PAGE_SIZE, deletedIds.size()));
+            try {
+                sysFileRepository.deleteAllByIdInBatch(batch);
+            } catch (Exception e) {
+                logger.error("删除文件记录失败，保留待删除状态以便重试: count={}, error={}", batch.size(), e.getMessage());
+            }
+        }
+        return deletedIds.size();
+    }
+
+    /**
+     * 分批批量更新状态，避免单次 IN 条件过大
+     */
+    private void updateStatusBatch(List<String> objectNames) {
+        for (int i = 0; i < objectNames.size(); i += PAGE_SIZE) {
+            List<String> batch = objectNames.subList(i, Math.min(i + PAGE_SIZE, objectNames.size()));
+            sysFileRepository.updateStatusByObjectNames(batch, FileStatus.PENDING_DELETE);
+        }
     }
 }
