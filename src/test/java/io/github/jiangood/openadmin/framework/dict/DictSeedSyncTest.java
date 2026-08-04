@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.modules.system.repository.SysDictItemReposit
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.ObjectProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +45,18 @@ class DictSeedSyncTest {
     void setUp() {
         DictEnumRegistry registry = new DictEnumRegistry();
         registry.register(TestStatus.class);
-        sync = new DictSeedSync(registry, typeRepository, itemRepository);
+        sync = new DictSeedSync(registry,
+                providerOf(typeRepository),
+                providerOf(itemRepository));
+    }
+
+    private <T> ObjectProvider<T> providerOf(T object) {
+        return new ObjectProvider<T>() {
+            @Override
+            public T getObject() {
+                return object;
+            }
+        };
     }
 
     @Test

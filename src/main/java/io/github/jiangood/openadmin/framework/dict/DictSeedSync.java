@@ -9,6 +9,7 @@ import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeReposit
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,8 +25,8 @@ public class DictSeedSync implements StartupHook {
     public static final String ROOT_TYPE_LABEL = "系统数据";
 
     private final DictEnumRegistry registry;
-    private final SysDictTypeRepository typeRepository;
-    private final SysDictItemRepository itemRepository;
+    private final ObjectProvider<SysDictTypeRepository> typeRepositoryProvider;
+    private final ObjectProvider<SysDictItemRepository> itemRepositoryProvider;
 
     @Override
     @Transactional
@@ -34,7 +35,9 @@ public class DictSeedSync implements StartupHook {
         if (enumClasses.isEmpty()) {
             return;
         }
-        String rootId = ensureRootType();
+        SysDictTypeRepository typeRepository = typeRepositoryProvider.getObject();
+        SysDictItemRepository itemRepository = itemRepositoryProvider.getObject();
+        String rootId = ensureRootType(typeRepository);
         int typeCount = 0;
         int itemCount = 0;
         for (Class<? extends Enum<?>> enumClass : enumClasses) {
@@ -43,14 +46,14 @@ public class DictSeedSync implements StartupHook {
                 log.warn("枚举 {} 缺少 @DictType 注解，跳过字典同步", enumClass.getName());
                 continue;
             }
-            syncType(enumClass, dictType, rootId);
+            syncType(typeRepository, dictType, rootId);
             typeCount++;
-            itemCount += syncItems(enumClass, dictType.code());
+            itemCount += syncItems(itemRepository, enumClass, dictType.code());
         }
         log.info("字典枚举同步完成：{} 个类型，{} 个字典项", typeCount, itemCount);
     }
 
-    private String ensureRootType() {
+    private String ensureRootType(SysDictTypeRepository typeRepository) {
         return typeRepository.findFirstByPidIsNull()
                 .orElseGet(() -> {
                     SysDictType root = new SysDictType();
@@ -62,7 +65,7 @@ public class DictSeedSync implements StartupHook {
                 }).getId();
     }
 
-    private void syncType(Class<? extends Enum<?>> enumClass, DictType dictType, String rootId) {
+    private void syncType(SysDictTypeRepository typeRepository, DictType dictType, String rootId) {
         typeRepository.findByTypeCode(dictType.code())
                 .ifPresentOrElse(existing -> {
                     if (!dictType.label().equals(existing.getTypeLabel())) {
@@ -80,12 +83,12 @@ public class DictSeedSync implements StartupHook {
                 });
     }
 
-    private int syncItems(Class<? extends Enum<?>> enumClass, String typeCode) {
+    private int syncItems(SysDictItemRepository itemRepository, Class<? extends Enum<?>> enumClass, String typeCode) {
         int count = 0;
         Object[] constants = enumClass.getEnumConstants();
         for (int i = 0; i < constants.length; i++) {
-            Enum<?> constant = (Enum<?>) constants[i];
             int seq = i;
+            Enum<?> constant = (Enum<?>) constants[i];
             String code = constant.name();
             String label = labelOf(constant);
             StatusColor color = colorOf(constant);
