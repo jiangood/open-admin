@@ -32,10 +32,4 @@ public interface SysFileRepository extends BaseRepository<SysFile, String> {
     List<SysFile> findByStatus(FileStatus status);
 
     List<SysFile> findByStatusAndCreateTimeBefore(FileStatus status, Date deadline);
-
-    @Query("SELECT f FROM SysFile f WHERE f.joinTable IS NULL AND f.joinId IS NULL AND f.createTime < :deadline")
-    List<SysFile> findUnclaimedFiles(@Param("deadline") Date deadline);
-
-    @Query("SELECT f FROM SysFile f WHERE f.joinTable IS NOT NULL AND f.joinId IS NOT NULL")
-    List<SysFile> findClaimedFiles();
 }
