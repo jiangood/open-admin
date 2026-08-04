@@ -35,5 +35,7 @@ public interface SysFileRepository extends BaseRepository<SysFile, String> {
     @Query("UPDATE SysFile f SET f.status = :to WHERE f.status = :from AND f.createTime < :deadline")
     int updateStatusByStatusAndCreateTimeBefore(@Param("from") FileStatus from, @Param("to") FileStatus to, @Param("deadline") Date deadline);
 
+    List<SysFile> findByStatus(FileStatus status);
+
     Page<SysFile> findByStatus(FileStatus status, Pageable pageable);
 }
