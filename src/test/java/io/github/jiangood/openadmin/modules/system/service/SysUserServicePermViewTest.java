@@ -99,9 +99,6 @@ class SysUserServicePermViewTest {
         assertEquals("ALL", vo.getDataPermType());
         assertEquals("unit1", vo.getUnitId());
         assertEquals("org1", vo.getOrgId());
-        assertEquals(1, vo.getRoles().size());
-        assertEquals("管理员", vo.getRoles().get(0).getName());
-        assertEquals("admin", vo.getRoles().get(0).getCode());
         // ALL => 全量机构 id
         assertEquals(Set.of("unit1", "org1"), Set.copyOf(vo.getOrgPermIds()));
         // admin => 全量权限码
@@ -140,8 +137,6 @@ class SysUserServicePermViewTest {
         assertEquals("CUSTOM", vo.getDataPermType());
         assertEquals(List.of("org2"), vo.getOrgPermIds());
         assertEquals(List.of("sys-user:read"), vo.getOwnedPerms());
-        assertEquals(1, vo.getRoles().size());
-        assertEquals("运营", vo.getRoles().get(0).getName());
         // 菜单树即使无权限也应展示全量菜单，权限叶子完整
         assertEquals(1, vo.getMenuTree().size());
         assertEquals(2, vo.getMenuTree().get(0).getChildren().size());

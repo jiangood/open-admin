@@ -55,17 +55,12 @@ class UserCenterPermControllerTest {
         UserCenterPermVO vo = new UserCenterPermVO();
         vo.setDataPermType("ALL");
         vo.setUnitId("unit1");
-        UserCenterPermVO.RoleInfo role = new UserCenterPermVO.RoleInfo();
-        role.setCode("admin");
-        role.setName("管理员");
-        vo.setRoles(List.of(role));
 
         when(sysUserService.getPermView("u1")).thenReturn(vo);
 
         mockMvc.perform(get("/admin/userCenter/perms"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.dataPermType").value("ALL"))
-                .andExpect(jsonPath("$.data.unitId").value("unit1"))
-                .andExpect(jsonPath("$.data.roles[0].code").value("admin"));
+                .andExpect(jsonPath("$.data.unitId").value("unit1"));
     }
 }

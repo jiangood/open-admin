@@ -32,12 +32,4 @@ public class UserCenterPermVO {
     /** 用户已拥有权限码（不含 ROLE_/ORG_ 前缀） */
     private List<String> ownedPerms;
 
-    /** 角色列表 */
-    private List<RoleInfo> roles;
-
-    @Data
-    public static class RoleInfo {
-        private String code;
-        private String name;
-    }
 }

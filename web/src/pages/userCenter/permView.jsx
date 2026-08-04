@@ -1,5 +1,5 @@
 import React from "react";
-import {Card, Col, Empty, Row, Tag, Tree} from "antd";
+import {Card, Empty, Tag, Tree} from "antd";
 import {HttpUtils} from "../../framework";
 
 const DATA_PERM_LABEL = {
@@ -41,33 +41,27 @@ export default class PermView extends React.Component {
                     <Tag color='processing'>{DATA_PERM_LABEL[data.dataPermType] || data.dataPermType || '-'}</Tag>
                 </span>
             </div>
-            <Row gutter={16}>
-                <Col md={12} sm={24}>
-                    <Card title='机构权限' size='small' styles={{body: {maxHeight: 480, overflow: 'auto'}}}>
-                        {data.orgTree && data.orgTree.length
-                            ? <Tree treeData={data.orgTree}
-                                    checkedKeys={data.orgPermIds}
-                                    checkable
-                                    selectable={false}
-                                    defaultExpandAll
-                                    showLine
-                                    titleRender={this.renderOrgTitle}/>
-                            : <Empty description='暂无机构数据'/>}
-                    </Card>
-                </Col>
-                <Col md={12} sm={24}>
-                    <Card title='菜单权限' size='small' styles={{body: {maxHeight: 480, overflow: 'auto'}}}>
-                        {data.menuTree && data.menuTree.length
-                            ? <Tree treeData={data.menuTree}
-                                    checkedKeys={data.ownedPerms}
-                                    checkable
-                                    selectable={false}
-                                    defaultExpandAll
-                                    showLine/>
-                            : <Empty description='暂无权限数据'/>}
-                    </Card>
-                </Col>
-            </Row>
+            <Card title='机构权限' size='small' style={{marginBottom: 16}} styles={{body: {maxHeight: 480, overflow: 'auto'}}}>
+                {data.orgTree && data.orgTree.length
+                    ? <Tree treeData={data.orgTree}
+                            checkedKeys={data.orgPermIds}
+                            checkable
+                            selectable={false}
+                            defaultExpandAll
+                            showLine
+                            titleRender={this.renderOrgTitle}/>
+                    : <Empty description='暂无机构数据'/>}
+            </Card>
+            <Card title='菜单权限' size='small' styles={{body: {maxHeight: 480, overflow: 'auto'}}}>
+                {data.menuTree && data.menuTree.length
+                    ? <Tree treeData={data.menuTree}
+                            checkedKeys={data.ownedPerms}
+                            checkable
+                            selectable={false}
+                            defaultExpandAll
+                            showLine/>
+                    : <Empty description='暂无权限数据'/>}
+            </Card>
         </div>;
     }
 }

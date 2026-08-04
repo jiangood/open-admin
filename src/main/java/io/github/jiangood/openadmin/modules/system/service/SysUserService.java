@@ -240,15 +240,6 @@ public class SysUserService extends BaseService<SysUser> {
         vo.setUnitId(user.getUnitId());
         vo.setOrgId(user.getOrgId());
 
-        List<UserCenterPermVO.RoleInfo> roles = user.getRoles().stream()
-                .map(role -> {
-                    UserCenterPermVO.RoleInfo info = new UserCenterPermVO.RoleInfo();
-                    info.setCode(role.getCode());
-                    info.setName(role.getName());
-                    return info;
-                }).toList();
-        vo.setRoles(roles);
-
         // 数据权限范围
         vo.setOrgPermIds(getOrgPermissions(userId));
 
