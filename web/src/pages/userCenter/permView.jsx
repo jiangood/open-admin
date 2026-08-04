@@ -73,8 +73,8 @@ export default class PermView extends React.Component {
             return {
                 key: node.key,
                 title: node.title,
-                code: node.leaf ? node.key : null,
-                status: node.leaf && data.ownedPerms && data.ownedPerms.includes(node.key),
+                code: node.isLeaf ? node.key : null,
+                status: node.isLeaf && data.ownedPerms && data.ownedPerms.includes(node.key),
                 children,
             };
         });
