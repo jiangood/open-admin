@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.StringReq;
+import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
@@ -37,12 +38,14 @@ public class SysFileController {
                            String originName,
                            String objectName,
                            MaterialType type,
+                           FileStatus status,
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysFile> q = Spec.of();
         q.betweenDateRange("createTime", dateRange, true);
         q.eq(SysFile.Fields.originName, originName);
         q.eq(SysFile.Fields.objectName, objectName);
         q.eq(SysFile.Fields.type, type);
+        q.eq(SysFile.Fields.status, status);
 
         Page<SysFile> page = service.findAll(q, pageable);
         return AjaxResult.ok().data(page);
