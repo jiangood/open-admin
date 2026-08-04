@@ -42,23 +42,22 @@ export default class extends React.Component {
                 </div>
             </Card>
 
+            <Card title="个人信息" style={{marginBottom: 16}}>
+                <Descriptions column={2} size="middle">
+                    <Descriptions.Item label="用户名称">{info.name}</Descriptions.Item>
+                    <Descriptions.Item label="账号">{info.account}</Descriptions.Item>
+                    <Descriptions.Item label="手机号码">{info.phone}</Descriptions.Item>
+                    <Descriptions.Item label="用户邮箱">{info.email}</Descriptions.Item>
+                    <Descriptions.Item label="所属单位">{info.unit}</Descriptions.Item>
+                    <Descriptions.Item label="所属机构">{info.org}</Descriptions.Item>
+                    <Descriptions.Item label="所属角色">{(info.roles || []).join('、') || '-'}</Descriptions.Item>
+                    <Descriptions.Item label="创建日期">{info.createTime}</Descriptions.Item>
+                </Descriptions>
+            </Card>
+
             <Card>
                 <Tabs
                     items={[
-                        {
-                            label: '个人信息', key: 'info', children: (
-                                <Descriptions column={2} size="middle">
-                                    <Descriptions.Item label="用户名称">{info.name}</Descriptions.Item>
-                                    <Descriptions.Item label="账号">{info.account}</Descriptions.Item>
-                                    <Descriptions.Item label="手机号码">{info.phone}</Descriptions.Item>
-                                    <Descriptions.Item label="用户邮箱">{info.email}</Descriptions.Item>
-                                    <Descriptions.Item label="所属单位">{info.unit}</Descriptions.Item>
-                                    <Descriptions.Item label="所属机构">{info.org}</Descriptions.Item>
-                                    <Descriptions.Item label="所属角色">{(info.roles || []).join('、') || '-'}</Descriptions.Item>
-                                    <Descriptions.Item label="创建日期">{info.createTime}</Descriptions.Item>
-                                </Descriptions>
-                            )
-                        },
                         {
                             label: '我的权限', key: 'perms', children: (
                                 <div>
