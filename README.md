@@ -21,7 +21,7 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
 }
 ```
 
-添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。
+添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。**首次启动后端时，框架会自动生成 `.opencode/skills/` 与 `docs/open-admin/` 到项目根目录**（详见 [Skills (opencode)](#skills-opencode)）。
 
 ## 快速开始
 
@@ -84,7 +84,7 @@ createRoot(document.getElementById('root')).render(
 - 页面文件放在 `src/pages/` 下，扩展名 `.jsx` 或 `.tsx`，文件名首字母小写（大写开头视为普通组件不注册路由）
 - `src/pages/product/index.jsx` → 路由 `/product`；`$code.jsx` → 动态段 `/:code`
 - 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
-- 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](#页面生命周期)）
+- 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](docs/open-admin/api.md#页面生命周期)）
 
 **目录约定**（无需配置，自动识别）：
 
@@ -96,413 +96,14 @@ createRoot(document.getElementById('root')).render(
 
 **按需使用**：可只加后端依赖（REST API 访问管理功能），或只加前端依赖（对接自有后端 API）。
 
-## 架构设计
+## 文档
 
-```
-┌─────────────────────────────────────────────────────┐
-│  前端: React 19 + Ant Design 6 + Vite 8             │
-│  ┌─────────────────────────────────────────────┐    │
-│  │ @jiangood/open-admin (组件库 + 管理页面)     │    │
-│  └─────────────────────────────────────────────┘    │
-├─────────────────── HTTP API ────────────────────────┤
-│  后端: Java 21 + Spring Boot 4.0 + JPA + Security   │
-│  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐ │
-│  │ modules  │ │framework │ │  util  │ │  config  │ │
-│  │ (业务层) │ │  (框架层) │ │ (工具) │ │  (配置)  │ │
-│  └──────────┘ └──────────┘ └────────┘ └──────────┘ │
-├─────────────────── JDBC ────────────────────────────┤
-│                    MySQL 8+                          │
-└─────────────────────────────────────────────────────┘
-```
-
-### 项目结构
-
-```
-src/main/java/io/github/jiangood/openadmin/
-├── framework/          # 框架基础层
-│   ├── spi/            # 扩展点接口（OrgTypeProvider, FileOperator, StartupHook）
-│   ├── config/         # Spring 配置（Security, JPA, Jackson）
-│   ├── data/           # BaseEntity, BaseRepository, Spec
-│   ├── perm/           # @HasPermission 注解 + 切面
-│   ├── log/            # @Log 操作日志注解 + 切面
-│   └── common/         # 通用（登录/认证/站点信息）
-├── util/               # 工具类库（BeanTool, JsonTool, TreeTool, ExcelTool 等）
-└── modules/
-    ├── system/         # 用户/角色/菜单/组织/字典/文件/日志
-    └── job/            # Quartz 定时任务
-web/
-├── src/framework/      # @jiangood/open-admin 框架组件库
-├── src/pages/          # 业务页面
-└── src/layouts/        # 布局组件
-```
-
-### 自动配置机制
-
-框架通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册 `OpenAdminConfiguration`（含 `@ComponentScan` / `@EntityScan` / `@EnableJpaRepositories`，扫描包 `io.github.jiangood.openadmin`）。默认配置在 `application-lib.yml`，业务项目通过 `spring.config.import` 引入。
-
-### 框架扩展点 (`framework.spi`)
-
-`io.github.jiangood.openadmin.framework.spi` 包集中存放框架的 SPI 接口，业务项目通过实现这些接口来扩展框架行为：
-
-| 接口 | 用途 | 注册方式 |
-|------|------|---------|
-| `OrgTypeProvider` | 自定义机构类型（如新增"门店"类型） | `@Component` |
-| `FileOperator` | 自定义文件存储后端（注册 `@Bean @Primary FileOperator` 覆盖默认） | `@ConditionalOnMissingBean` |
-| `StartupHook` | 系统启动钩子（JPA 建表前/种子数据前后） | `@Component` |
-
-实现类被 `@ComponentScan` 自动发现，无需手动注册。
-
-## 技术栈
-
-| 层级 | 技术 |
+| 文档 | 内容 |
 |------|------|
-| 前端 | React 19, Ant Design 6, Vite 8, TypeScript |
-| 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
-| 数据库 | MySQL 8+ |
-| 构建 | Maven (后端), npm (前端) |
-
-## 核心功能
-
-### 用户权限管理
-
-- **用户管理**：列表/创建/编辑/重置密码/授权数据
-- **角色管理**：列表/创建/编辑/分配权限（菜单 + 按钮）
-- **权限控制**：后端 `@HasPermission("resource:action")` 注解 + AOP 切面，支持 SpEL；前端 `<Button perm="xxx:yyy" />`（配合 `PermActions`）和 `<Perm code="xxx">` 组件
-- **权限码格式**：全小写两段式 `{资源}:{操作}`，资源 kebab-case（如 `sys-user:read`、`sys-role:grant-permission`）
-- **YAML 定义**：`application-menu*.yml` 中用 `perms` 对象列表定义
-
-### 数据字典
-
-- **预设字典**：`orgType`、`approveStatus`、`sex`、`yesNo`、`dataPermType`、`statusColor`
-- **前端使用**：`<FieldDictSelect typeCode="sex" />` 字典选择器；`DictUtils.dictList("sex")` / `DictUtils.dictLabel("sex", "MALE")` / `DictUtils.dictTag("approveStatus", "APPROVED")`
-- **扩展**：通过管理界面或 `DictDataInitializer` 钩子添加
-
-### 其他内置功能
-
-| 功能 | 说明 |
-|------|------|
-| 作业调度 | 基于 Quartz，动态创建/暂停/恢复，继承 `BaseJob` + `@JobDescription` |
-| 文件管理 | `sys.file.store-type` 配置（`local` / `s3` / `custom`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
-| 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
-| 运行日志查看 | 在线查看日志文件 |
-
-## 开发规范
-
-### 后端命名
-
-| 项 | 规范 |
-|----|------|
-| Entity | 大驼峰单数，继承 `BaseEntity`，`@Table(name = "t_xxx")` |
-| Repository | 继承 `BaseRepository<T, String>`，简单条件用派生查询，复杂用 `Spec` |
-| Service | 继承 `BaseService<T>`，构造器注入，`@Transactional(readOnly = true)`，VO 不暴露 Entity |
-| Controller | `admin/` 前缀 + kebab-case 复数，`@HasPermission` 控制权限，统一返回 `AjaxResult` |
-| DTO | `XxxCreateReq` / `XxxUpdateReq` / `XxxPageQuery` / `XxxVO` |
-
-### REST API 规范
-
-| 操作 | HTTP | URL | 方法 |
-|------|------|-----|------|
-| 分页查询 | GET | `admin/xxx/page` | `page(Pageable)` |
-| 详情 | GET | `admin/xxx/{id}` | `getById(@PathVariable id)` |
-| 创建 | POST | `admin/xxx/create` | `create(@RequestBody dto)` |
-| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, RequestBodyKeys keys)` |
-| 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
-
-### 后端要点
-
-- 强制构造器注入，禁止 `@Autowired` 字段注入
-- 业务异常抛 `ServiceException`，Controller 不做 try-catch
-- 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
-- 方法参数校验用 `@Valid` / `@Validated`
-
-### 前端要点
-
-- 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）
-- 使用 ES6+，强制 `const`/`let`，解构赋值
-- 优先使用框架组件：`ProTable`、`Page`、`FieldDictSelect` 等
-- 权限控制：`<PermActions>` 包裹 `<Button perm="...">`、`<Perm code="...">`
-- 跨组件通信使用 `EventBus`（`emit` / `on` / `once` / `off`），不要使用 `document.dispatchEvent`
-- 对话框优先使用 `<Modal>` 组件（state 控制 `open`），避免 `Modal.info()` / `Modal.confirm()` 等静态方法
-- 页面生命周期：页面组件实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用，详见[页面生命周期](#页面生命周期)
-
-## API 参考
-
-### 后端
-
-#### Spec 动态查询
-
-```java
-Spec<User> spec = Spec.of()
-    .eq("status", 1).like("name", "张")
-    .between("createTime", start, end)
-    .or(Spec.of().like("name", "张"), Spec.of().like("name", "李"))
-    .eq("user.id", userId);  // 关联查询
-repository.findAll(spec, pageable);
-```
-
-#### 注解
-
-| 注解 | 用途 |
-|------|------|
-| `@HasPermission("resource:action")` | 权限控制 |
-| `@Log` | 操作日志 |
-| `@RateLimit(count=10, duration=60)` | IP 限流 |
-| `@JobDescription` | 定时任务定义 |
-| `@ValidateMobile` / `@ValidateIdCard` / ... | 字段格式校验 |
-
-#### 工具类
-
-| 类 | 主要方法 |
-|----|---------|
-| `ExcelTool` | `importExcel` / `exportExcel` |
-| `JdbcRunner` (framework.data) | `findById` / `findAll` / `save` / `deleteById` / `count` |
-| `LoginTool` | `getUserId` / `getUser` / `getPermissions` / `isAdmin` |
-| `TreeTool` | `buildTree` / `walk` / `treeToList` / `getLeafs` |
-| `BeanTool` / `JsonTool` / `StringTool` | 常用对象/JSON/字符串操作 |
-| `PasswordTool` | 密码加密 |
-
-#### 定时任务
-
-```java
-@JobDescription(label = "数据同步", params = {
-    @FieldDescription(name = "syncType", label = "同步类型", required = true)
-})
-public class DataSyncJob extends BaseJob {
-    public String execute(JobDataMap data, Logger logger) { ... }
-}
-```
-
-### 前端
-
-#### 组件
-
-| 组件 | 用途 |
-|------|------|
-| `Page` | 页面容器（标题/描述/右侧操作区） |
-| `ProTable` | 数据表格，分页/筛选/工具栏/树形模式，`request`/`columns`/`treeMode`/`toolBarRender` |
-| `LinkButton` | 链接跳转按钮 |
-| `NamedIcon` | 通过名称渲染 Ant Design 图标 |
-| `PermActions` | 按子元素 `perm` 属性过滤的权限操作区 |
-| `Perm` | 权限控制容器（`code` 属性） |
-| `ViewText` / `ViewBoolean` / `ViewFile` / `ViewImage` 等 | 展示组件 |
-| `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
-
-#### 页面生命周期
-
-多 Tab 布局中，所有页面保持 mounted（仅 `display` 切换）。框架提供 `onShow()` 生命周期方法，在页面首次加载或从其他 Tab 切回时自动调用。
-
-```jsx
-export default class extends React.Component {
-  tableRef = React.createRef()
-
-  onShow() {
-    this.tableRef.current?.reload()
-  }
-
-  render() {
-    return <ProTable actionRef={this.tableRef} ... />
-  }
-}
-```
-
-| 触发场景 | onShow 是否调用 |
-|---------|:--------------:|
-| 首次打开 Tab | ✅ |
-| 切换到其他 Tab 再切回来 | ✅ |
-| 右键「刷新」Tab | ✅（组件重建后立即调用） |
-| Tab 始终激活（无切换） | ❌ |
-
-> 注：仅 class 组件支持，方法名固定为 `onShow`。
-
-#### 下载弹框
-
-通过 ref 调用 `download()` 方法触发下载，`title` 可自定义对话框标题，`onFinish` 在下载完成后回调：
-
-```jsx
-import { DownloadModal } from '@jiangood/open-admin';
-
-class ReportPage extends React.Component {
-  dlRef = React.createRef();
-
-  handleExport = () => {
-    this.dlRef.current.download({
-      url: '/admin/report/export',
-      params: { type: 'monthly', year: 2026, month: 7 },
-    });
-  };
-
-  // POST 请求，指定文件名
-  handleBatchExport = () => {
-    this.dlRef.current.download({
-      url: '/admin/report/export',
-      method: 'POST',
-      data: { ids: ['1', '2', '3'] },
-      fileName: '批量导出.xlsx',
-    });
-  };
-
-  render() {
-    return (
-      <>
-        <Button onClick={this.handleExport}>导出报表</Button>
-        <DownloadModal ref={this.dlRef} title="导出报表" onFinish={() => this.tableRef.refresh()} />
-      </>
-    );
-  }
-}
-```
-
-弹框展示三种状态：下载中（进度条 + 已下载/总计 + 速度）、已完成（✅ + 文件大小）、失败（❌ + 错误消息）。下载中不可关闭弹框，失败后可重试。
-
-#### 字段组件
-
-| 组件 | 用途 |
-|------|------|
-| `FieldRemoteSelect` | 远程搜索选择框 |
-| `FieldDictSelect` | 字典选择 |
-| `FieldBoolean` | 布尔值选择（select/radio/checkbox/switch） |
-| `FieldDate` / `FieldDateRange` | 日期/日期范围 |
-| `FieldSysOrgTreeSelect` | 系统组织树选择 |
-| `FieldUploadFile` | 文件上传（`/admin/sysFile/upload`） |
-| `FieldEditor` | 富文本编辑器 |
-| `FieldPercent` | 百分比输入 |
-| `FieldTable` / `FieldTableSelect` | 表格字段/选择 |
-
-#### 文件上传预览
-
-文件按可见性分为公共/私有，objectName 前缀即目录（`public/` / `private/`），URL 与磁盘路径保持一致：
-
-- `/file/{objectName}` 预览，如 `/file/public/202607/xxx.jpg`（公共，免登录）、`/file/private/202607/xxx.pdf`（私有，需登录）
-
-上传/下载接口（需登录）：
-- `POST /admin/sysFile/upload` — 上传，表单参数 `visibility`（`public` / `private`，默认 `public`）
-- `GET /admin/sysFile/download/{objectName}` — 下载
-
-上传文件默认标记为临时，保存业务数据后后端自动确认（详见[临时文件自动清理](#临时文件自动清理)）。
-
-前端字段直接存储文件 `objectName`（如 `public/202607/xxx.jpg`），`ViewImage` / `ViewFile` / `FieldUploadFile` 自动拼接 `/file/{objectName}` 展示；上传组件通过 `visibility` prop 指定可见性，默认 `public`（私有文件显式传 `visibility='private'`）：
-
-##### nginx 直连公共文件
-
-公共文件可通过 nginx 直接代理，完全绕过 Spring（`sys.file.upload-path` 对应磁盘目录，注意 nginx 配置需与 `alias` 前缀一致）：
-
-```nginx
-# 公共文件直连（磁盘路径 = {upload-path}/public/...）
-location /file/public/ {
-    alias /home/files/;
-    expires 7d;
-    add_header Cache-Control "public";
-}
-# /file/private/ 不配置 location，继续走 Spring 鉴权
-```
-
-#### 工具类
-
-| 类 | 主要方法 |
-|----|---------|
-| `HttpUtils` | `get` / `post` / `postForm`（axios 封装，自动 context-path） |
-| `DownloadModal` | `download` 实例方法，弹框显示下载进度和状态，支持取消/重试 |
-| `UrlUtils` | `contextPath(path)` 拼接 context-path / URL 参数处理 |
-| `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
-| `TreeUtils` | `buildTree` / `treeToList` / `walk` |
-| `DateUtils` | `formatDate` / `formatTime` / `formatDateTime` |
-| `EventBus` | `on` / `once` / `emit` / `off` — 跨组件通信，优先使用，替代 `document.dispatchEvent` |
-
-## 配置参考
-
-### 系统配置 (`sys.*` in `application.yml`)
-
-| 配置 | 说明 | 默认值 |
-|------|------|--------|
-| `sys.title` | 系统标题（必填） | 管理系统 |
-| `sys.captcha-enable` | 登录验证码 | true |
-| `sys.default-password` | 默认密码 | Open@1234 |
-| `sys.show-logo` | 是否显示 Logo | true |
-| `sys.file.store-type` | 文件存储 (`local`/`s3`/`custom`) | local |
-| `sys.file.upload-path` | 本地上传路径 | /home/files |
-| `sys.file.clean-unclaimed-minutes` | 未认领文件自动清理时间（分钟） | 120 |
-| `sys.file.s3.*` | S3 兼容存储配置 | — |
-| `sys.session-idle-time` | Session 超时（分钟） | 180 |
-| `sys.job-enable` | 定时任务开关 | true |
-
-### 文件存储
-
-通过 `sys.file.store-type` 选择后端（`local` / `s3` / `custom`）：
-
-- `local` — 本地文件系统，保存到 `sys.file.upload-path`，按 `public/`、`private/` 子目录区分可见性
-- `s3` — S3 兼容存储（Minio / AWS S3 / R2 / 阿里云 OSS 等），配置 `sys.file.s3.{endpoint,region,accessKey,secretKey,bucketName,pathStyleAccess}`
-- 自定义 — 实现 `framework.spi.FileOperator` 接口并注册 `@Bean @Primary FileOperator`，框架自动跳过默认创建
-
-文件 `objectName` 带可见性前缀（如 `public/202607/xxx.jpg` / `private/202607/xxx.pdf`），本地磁盘路径 = `sys.file.upload-path` + `objectName`，与 URL `/file/{objectName}` 完全一致。
-
-### 未认领文件自动清理
-
-上传文件默认标记为未认领 (`joinTable=null`)，仅在业务数据保存后通过 `SysFileService.claim*()` 设置 `joinTable/joinId` 后方变为已认领。未认领的文件超过期限后由 Quartz 定时任务 `CleanTempFileJob` 自动删除。
-
-- **确认时机**：业务 Controller 的 create/update 方法中，save 后调用 `sysFileService.claimHtml(joinTable, joinId, oldHtml, newHtml)`（富文本）或 `sysFileService.claimList(joinTable, joinId, oldObjectNames, newObjectNames)`（objectName 列表）对比新旧数据，确认新增文件并清理移除的旧文件
-- **清理配置**：`sys.file.clean-unclaimed-minutes=120`（默认 2 小时）
-- **清理频率**：每 10 分钟执行一次（cron `0 */10 * * * ?`）
-- **孤儿文件**：业务数据删除后残留的已认领文件，同一任务会检查对应业务表（主键列约定为 `id`）中记录是否已不存在，不存在则一并清理
-
-完整配置项见 `SystemProperties.java`。
-
-### Servlet Context-Path
-
-| 位置 | 配置 |
-|------|------|
-| 后端 `application.yml` | `server.servlet.context-path` |
-| 前端 `web/.env` | `VITE_SERVER_SERVLET_CONTEXT_PATH` |
-
-前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `UrlUtils.contextPath(path)` 拼接。
-
-### 主题定制
-
-`web/.env` 配置：
-
-```
-VITE_THEME_PRIMARY_COLOR=#1961AC
-VITE_THEME_SUCCESS_COLOR=#52c41a
-VITE_THEME_WARNING_COLOR=#faad14
-VITE_THEME_ERROR_COLOR=#ff4d4f
-VITE_THEME_BACKGROUND_COLOR=#f5f5f5
-```
-
-## 添加业务模块
-
-1. **Entity** — 继承 `BaseEntity`，JPA 自动建表
-2. **Repository** — 继承 `BaseRepository<T, String>`，通用 CRUD + 动态查询
-3. **Service** — 继承 `BaseService<T>`，通用业务逻辑
-4. **Controller** — RESTful，返回 `AjaxResult`，`@HasPermission` 控制权限；含文件上传字段的 save 后调用 `sysFileService.claim*()` 确认临时文件
-5. **菜单** — `src/main/resources/application-menu*.yml` 定义菜单树
-6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
-
-## 内置模块
-
-| 模块 | 包路径 | 功能 |
-|------|--------|------|
-| system | `modules/system/` | 用户/角色/菜单/组织/字典/文件/日志管理 |
-| job | `modules/job/` | Quartz 定时任务 |
-| logviewer | `modules/logviewer/` | 运行日志在线查看 |
-
-## FAQ
-
-**种子数据如何管理？** 框架使用 Flyway 管理种子数据的版本化迁移。框架内置的种子数据位于 `classpath:db/migration/open-admin/V1__seed__init_data.sql`，首次启动时自动执行。
-
-**业务项目如何添加自己的种子数据？** 在 `src/main/resources/db/migration/` 目录下放置 Flyway 迁移脚本即可：
-
-```
-src/main/resources/
-└── db/migration/
-    └── V1__seed__init_biz_data.sql
-```
-
-脚本使用 `INSERT IGNORE` 确保幂等性。框架的 seed 脚本与业务项目的脚本互不干扰（不同目录）。
-
-**MySQL 5.7 兼容？** 添加 `hibernate-community-dialects` 依赖，配置 `spring.jpa.properties.hibernate.dialect=org.hibernate.community.dialect.MySQLLegacyDialect`。
-
-**前端依赖安装失败？** `npm install --registry=https://registry.npmmirror.com`
-
-**端口被占用？** 后端默认 8080，前端默认 8000，可通过环境变量 `SERVER_PORT` 修改后端端口。
+| [docs/open-admin/guide.md](docs/open-admin/guide.md) | 架构设计 / 核心功能 / 添加业务模块 / 内置模块 / FAQ |
+| [docs/open-admin/api.md](docs/open-admin/api.md) | 后端（Spec/注解/工具类/定时任务）+ 前端（组件/生命周期/字段组件/文件上传/工具类）API 参考 |
+| [docs/open-admin/config.md](docs/open-admin/config.md) | 全部 `sys.*` 配置 / 文件存储 / 未认领文件清理 / context-path / 主题定制 |
+| [docs/open-admin/development.md](docs/open-admin/development.md) | 后端命名 / REST API 规范 / 前后端开发要点 |
 
 ## Skills (opencode)
 
@@ -513,6 +114,21 @@ src/main/resources/
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
 
-### 安装到业务项目
+### 自动同步到业务项目
 
-复制 .opencode/skills 目录到业务项目
+框架 JAR 内置业务侧 skills 与文档（`META-INF/open-admin/project-files/`）。业务项目**启动后端时自动同步**到项目根目录：
+
+```
+<项目根>/.opencode/skills/oa-crud/SKILL.md
+<项目根>/.opencode/skills/oa-upgrade/SKILL.md
+<项目根>/docs/open-admin/*.md     # 即本文档（guide/api/config/development/AGENTS）
+<项目根>/AGENTS.md                # opencode 开发指引（仅首次生成，不覆盖本地自定义）
+```
+
+- 同步按**内容比对**：无变更不写入，升级新版本后首次启动自动覆盖更新
+- `docs/open-admin/` 全量镜像（删除该目录下孤儿文件）；`.opencode/skills/` 仅覆盖框架 skill，不删除业务本地 skill
+- 根目录 `AGENTS.md` 仅在不存在时生成（便于 opencode 开发，业务可自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
+- 目标目录为项目根（向上查找最近 `pom.xml`），生产部署目录无 `pom.xml` 时仅生成 `AGENTS.md` 副本
+- 无需任何配置，默认开启
+
+> 首次接入无需手动复制，启动一次后端即可；升级后下次启动即自动更新。

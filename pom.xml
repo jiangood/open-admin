@@ -331,6 +331,38 @@
                 </configuration>
             </plugin>
 
+            <!-- 将框架管理的项目文件（业务侧 skills + docs）打包进 JAR，供业务项目启动时同步 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>package-project-files</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/open-admin/project-files</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/.opencode/skills</directory>
+                                    <targetPath>.opencode/skills</targetPath>
+                                    <includes>
+                                        <include>oa-crud/**</include>
+                                        <include>oa-upgrade/**</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>${project.basedir}/docs/open-admin</directory>
+                                    <targetPath>docs/open-admin</targetPath>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

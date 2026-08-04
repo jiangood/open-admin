@@ -105,7 +105,17 @@ npm run build
 
 如有编译或测试失败，根据错误信息修复后重新从失败步骤开始验证。
 
-### 7. 其他检查（可选）
+### 7. 框架文件自动同步（skills + docs + AGENTS.md）
+
+框架 JAR 内置业务侧 skills 与文档（`META-INF/open-admin/project-files/`），业务项目**启动后端时按内容比对自动同步**到项目根目录：
+
+- `<项目根>/.opencode/skills/oa-crud/`、`oa-upgrade/` — 覆盖写入（不删除业务本地 skill）
+- `<项目根>/docs/open-admin/*.md` — 全量镜像（删除孤儿文件）
+- `<项目根>/AGENTS.md` — 仅在不存在时生成（不覆盖业务自定义）；新版本随 `docs/open-admin/AGENTS.md` 提供
+
+无需手动复制。若本次升级未启动后端，可告知开发者下次启动后生效。
+
+### 8. 其他检查（可选）
 
 - 启动项目确认登录/页面正常
 - 核心业务流程可用
@@ -117,6 +127,7 @@ npm run build
 - [ ] `npm run build` 正常
 - [ ] Release Notes 中的 Breaking Changes 已逐项处理
 - [ ] Git 提交日志中涉及业务代码的变更已适配
+- [ ] 升级后启动后端，`.opencode/skills/` 与 `docs/open-admin/` 已同步为新版本内容
 - [ ] 升级后功能正常（登录、菜单、CRUD 操作）
 
 ## 代码规范
