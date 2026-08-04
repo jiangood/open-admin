@@ -64,10 +64,6 @@ export default class PermView extends React.Component {
                 render: (perms) => (perms || []).map(p => p.name).join('、') || '-',
             },
             {
-                title: '权限码', dataIndex: 'perms', key: 'permCodes',
-                render: (perms) => (perms || []).map(p => p.code).join('、') || '-',
-            },
-            {
                 title: '状态', dataIndex: 'status', key: 'status', width: 140,
                 render: (status) => {
                     if (status === 'all') {
