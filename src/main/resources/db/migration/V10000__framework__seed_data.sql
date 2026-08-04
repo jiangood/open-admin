@@ -74,6 +74,16 @@ INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, crea
 ('27', 'articlePosition', 'HEADER_RIGHT', '顶部导航-右侧', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 ('28', 'articlePosition', 'NONE', '不显示', TRUE, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
+
+-- ---------------------------------------------------------------------------
+-- 默认组织机构
+-- ---------------------------------------------------------------------------
+
+INSERT INTO sys_org (id, name, seq, enabled, type, create_time, update_time)
+VALUES ('1', '默认单位（请修改）', 0, TRUE, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+
 -- ---------------------------------------------------------------------------
 -- 管理员角色
 -- ---------------------------------------------------------------------------
@@ -85,8 +95,8 @@ VALUES ('1', 'admin', '管理员', '["*"]', TRUE, '系统生成', CURRENT_TIMEST
 -- 管理员用户（密码：Open@1234）
 -- ---------------------------------------------------------------------------
 
-INSERT INTO sys_user (id, account, name, password, data_perm_type, enabled, last_password_change_time, create_time, update_time)
-VALUES ('1', 'admin', '管理员', '$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG', 'ALL', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+INSERT INTO sys_user (id, account, name, unit_id,org_id, password, data_perm_type, enabled, last_password_change_time, create_time, update_time)
+VALUES ('1', 'admin', '''管理员', '1','1','$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG', 'ALL', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 管理员用户-角色关联
@@ -94,12 +104,6 @@ VALUES ('1', 'admin', '管理员', '$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt
 
 INSERT INTO sys_user_role (user_id, role_id) VALUES ('1', '1');
 
--- ---------------------------------------------------------------------------
--- 默认组织机构
--- ---------------------------------------------------------------------------
-
-INSERT INTO sys_org (id, name, seq, enabled, type, create_time, update_time)
-VALUES ('org_root', '默认单位', 0, TRUE, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 文章管理 — 默认数据
