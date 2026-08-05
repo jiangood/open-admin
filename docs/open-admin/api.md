@@ -57,10 +57,32 @@ public class DataSyncJob extends BaseJob {
 | `ProTable` | 数据表格，分页/筛选/工具栏/树形模式，`request`/`columns`/`treeMode`/`toolBarRender` |
 | `LinkButton` | 链接跳转按钮 |
 | `NamedIcon` | 通过名称渲染 Ant Design 图标 |
-| `PermActions` | 按子元素 `perm` 属性过滤的权限操作区 |
+| `PermActions` | 权限操作区：数据驱动 `actions`（支持 `perm` 过滤、`more` 下拉、`size`）或按子元素 `perm` 属性过滤（不推荐） |
 | `Perm` | 权限控制容器（`code` 属性） |
 | `ViewText` / `ViewBoolean` / `ViewFile` / `ViewImage` 等 | 展示组件 |
 | `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
+
+#### PermActions
+
+推荐使用 `actions` 数据驱动模式，按每个 action 的 `perm` 过滤；`more` 开启下拉折叠（多余操作进入 `...` 菜单），`size` 透传到按钮：
+
+```jsx
+import { PermActions } from '@jiangood/open-admin';
+
+<PermActions
+    more
+    size="small"
+    actions={[
+        { label: '编辑', perm: 'sys-user:update', onClick: () => this.handleEdit(record) },
+        { label: '删除', perm: 'sys-user:delete', danger: true,
+          confirm: '是否确定删除用户', onClick: () => this.handleDelete(record) },
+    ]}
+/>
+```
+
+`PermAction` 字段：`label`、`perm`、`onClick`、`confirm`（确认提示）、`danger`、`disabled`、`icon`、`type`（`primary`/`dashed`/`link`/`text`，仅按钮生效）。`more` 为布尔值，开启后多余操作折叠进 `...` 下拉。
+
+> 传统 children 写法（包裹 `<Button perm="...">`）已不推荐，控制台会输出迁移提示，建议改用 `actions`。
 
 ### 页面生命周期
 
