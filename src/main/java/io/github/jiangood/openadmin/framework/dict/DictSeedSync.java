@@ -24,14 +24,14 @@ public class DictSeedSync implements StartupHook {
 
     public static final String ROOT_TYPE_LABEL = "系统数据";
 
-    private final DictEnumRegistry registry;
+    private final DictEnumScanner scanner;
     private final ObjectProvider<SysDictTypeRepository> typeRepositoryProvider;
     private final ObjectProvider<SysDictItemRepository> itemRepositoryProvider;
 
     @Override
     @Transactional
     public void afterSeedDataInitialize() {
-        List<Class<? extends Enum<?>>> enumClasses = registry.getAll();
+        List<Class<? extends Enum<?>>> enumClasses = scanner.scan();
         if (enumClasses.isEmpty()) {
             return;
         }
@@ -42,10 +42,6 @@ public class DictSeedSync implements StartupHook {
         int itemCount = 0;
         for (Class<? extends Enum<?>> enumClass : enumClasses) {
             DictType dictType = enumClass.getAnnotation(DictType.class);
-            if (dictType == null) {
-                log.warn("枚举 {} 缺少 @DictType 注解，跳过字典同步", enumClass.getName());
-                continue;
-            }
             syncType(typeRepository, dictType, rootId);
             typeCount++;
             itemCount += syncItems(itemRepository, enumClass, dictType.code());

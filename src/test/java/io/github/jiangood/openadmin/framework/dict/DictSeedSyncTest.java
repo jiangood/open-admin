@@ -43,16 +43,15 @@ class DictSeedSyncTest {
     private SysDictTypeRepository typeRepository;
     @Mock
     private SysDictItemRepository itemRepository;
+    @Mock
+    private DictEnumScanner scanner;
 
     private DictSeedSync sync;
 
     @BeforeEach
     void setUp() {
-        DictEnumRegistry registry = new DictEnumRegistry();
-        registry.register(TestStatus.class);
-        sync = new DictSeedSync(registry,
-                providerOf(typeRepository),
-                providerOf(itemRepository));
+        sync = new DictSeedSync(scanner, providerOf(typeRepository), providerOf(itemRepository));
+        when(scanner.scan()).thenReturn(List.of(TestStatus.class));
     }
 
     private <T> ObjectProvider<T> providerOf(T object) {
@@ -172,14 +171,9 @@ class DictSeedSyncTest {
     void syncFailsFastWhenRemarkMissing() {
         when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
+        when(scanner.scan()).thenReturn(List.of(NoRemark.class));
 
-        DictEnumRegistry registry = new DictEnumRegistry();
-        registry.register(NoRemark.class);
-        DictSeedSync noRemarkSync = new DictSeedSync(registry,
-                providerOf(typeRepository),
-                providerOf(itemRepository));
-
-        assertThrows(IllegalArgumentException.class, noRemarkSync::afterSeedDataInitialize);
+        assertThrows(IllegalArgumentException.class, sync::afterSeedDataInitialize);
     }
 
     private SysDictType rootType(String id) {
