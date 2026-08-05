@@ -115,12 +115,26 @@ class SysRoleServiceTest {
         normalRole.setMenus(Arrays.asList());
 
         when(roleRepository.findById("3")).thenReturn(Optional.of(normalRole));
-        when(sysMenuRepository.findAllById(Arrays.asList())).thenReturn(Arrays.asList());
 
         List<MenuDefinition> result = sysRoleService.ownMenu("3");
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testOwnMenu_whenRoleMenusIsNull_shouldReturnEmptyList() {
+        SysRole normalRole = new SysRole();
+        normalRole.setId("4");
+        normalRole.setCode("normal");
+
+        when(roleRepository.findById("4")).thenReturn(Optional.of(normalRole));
+
+        List<MenuDefinition> result = sysRoleService.ownMenu("4");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(sysMenuRepository, never()).findAllById(any());
     }
 
     @Test

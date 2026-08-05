@@ -79,6 +79,9 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
 
     @Override
     public List<MenuDefinition> findAllById(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
         Set<String> idSet = new HashSet<>(ids);
         return menus.stream().filter(m -> idSet.contains(m.getId())).toList();
     }

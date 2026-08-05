@@ -53,7 +53,9 @@ public class SysRoleService extends BaseService<SysRole> {
         if (role.isAdmin()) {
             menuList = sysMenuRepository.findAll();
         } else {
-            menuList = sysMenuRepository.findAllById(role.getMenus());
+            List<String> menuIds = role.getMenus();
+            menuList = (menuIds == null || menuIds.isEmpty()) ? List.of()
+                    : sysMenuRepository.findAllById(menuIds);
         }
 
         return menuList.stream().distinct().sorted(Comparator.comparing(MenuDefinition::getSeq)).toList();
