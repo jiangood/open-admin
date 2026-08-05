@@ -1,40 +1,56 @@
 package io.github.jiangood.openadmin.framework.dict;
 
+import io.github.jiangood.openadmin.OpenAdminConfiguration;
 import io.github.jiangood.openadmin.framework.spi.StartupHook;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
+import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ClassUtils;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class DictSeedSync implements StartupHook {
+    
+    private static  final   String rootId = "1";
 
-    public static final String ROOT_TYPE_LABEL = "系统数据";
+    private final ObjectProvider<BeanFactory> beanFactoryProvider;
 
-    private final DictEnumScanner scanner;
     private final ObjectProvider<SysDictTypeRepository> typeRepositoryProvider;
+
     private final ObjectProvider<SysDictItemRepository> itemRepositoryProvider;
+
+    // ---------- 枚举 → 字典同步 ----------
 
     @Override
     @Transactional
     public void afterSeedDataInitialize() {
-        List<Class<? extends Enum<?>>> enumClasses = scanner.scan();
+        List<Class<? extends Enum<?>>> enumClasses = scan();
         if (enumClasses.isEmpty()) {
             return;
         }
         SysDictTypeRepository typeRepository = typeRepositoryProvider.getObject();
         SysDictItemRepository itemRepository = itemRepositoryProvider.getObject();
-        String rootId = ensureRootType(typeRepository);
+
         int typeCount = 0;
         int itemCount = 0;
         for (Class<? extends Enum<?>> enumClass : enumClasses) {
@@ -46,17 +62,6 @@ public class DictSeedSync implements StartupHook {
         log.info("字典枚举同步完成：{} 个类型，{} 个字典项", typeCount, itemCount);
     }
 
-    private String ensureRootType(SysDictTypeRepository typeRepository) {
-        return typeRepository.findFirstByPidIsNull()
-                .orElseGet(() -> {
-                    SysDictType root = new SysDictType();
-                    root.setTypeCode(null);
-                    root.setTypeLabel(ROOT_TYPE_LABEL);
-                    root.setEnabled(true);
-                    root.setSeq(0);
-                    return typeRepository.save(root);
-                }).getId();
-    }
 
     private void syncType(SysDictTypeRepository typeRepository, DictType dictType, String rootId) {
         typeRepository.findByTypeCode(dictType.code())
@@ -83,8 +88,8 @@ public class DictSeedSync implements StartupHook {
             int seq = i;
             Enum<?> constant = (Enum<?>) constants[i];
             String code = constant.name();
-            String label = DictEnumTool.getLabel(constant);
-            String color = DictEnumTool.getColor(constant);
+            String label = getLabel(constant);
+            String color = getColor(constant);
             itemRepository.findByTypeCodeAndCode(typeCode, code)
                     .ifPresentOrElse(item -> {
                         boolean changed = false;
@@ -106,5 +111,79 @@ public class DictSeedSync implements StartupHook {
             count++;
         }
         return count;
+    }
+
+    // ---------- @DictType 枚举自动发现 ----------
+
+    public List<Class<? extends Enum<?>>> scan() {
+        ClassPathScanningCandidateComponentProvider provider =
+                new ClassPathScanningCandidateComponentProvider(false) {
+                    @Override
+                    protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
+                        return true;
+                    }
+                };
+        provider.addIncludeFilter(new AnnotationTypeFilter(DictType.class));
+
+        Set<String> classNames = new LinkedHashSet<>();
+        for (String basePackage : basePackages()) {
+            provider.findCandidateComponents(basePackage)
+                    .forEach(bd -> {
+                        if (bd.getBeanClassName() != null) {
+                            classNames.add(bd.getBeanClassName());
+                        }
+                    });
+        }
+
+        List<Class<? extends Enum<?>>> result = new ArrayList<>();
+        for (String className : classNames) {
+            try {
+                Class<?> clazz = ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
+                if (clazz.isEnum() && clazz.getEnclosingClass() == null) {
+                    result.add((Class<? extends Enum<?>>) clazz);
+                } else {
+                    log.warn("{} 标注了 @DictType 但不是顶层枚举，忽略", className);
+                }
+            } catch (ClassNotFoundException | LinkageError e) {
+                log.warn("扫描 @DictType 枚举失败：{}", className, e);
+            }
+        }
+        return result;
+    }
+
+    private List<String> basePackages() {
+        Set<String> packages = new LinkedHashSet<>();
+        packages.add(OpenAdminConfiguration.PKG);
+        try {
+            packages.addAll(AutoConfigurationPackages.get(beanFactoryProvider.getObject()));
+        } catch (IllegalStateException e) {
+            log.warn("AutoConfigurationPackages 不可用，仅扫描框架基础包 {}", OpenAdminConfiguration.PKG);
+        }
+        return List.copyOf(packages);
+    }
+
+    // ---------- @DictItem 读取 ----------
+
+    public static String getLabel(Enum<?> constant) {
+        return dictItemOf(constant).label();
+    }
+
+    public static String getColor(Enum<?> constant) {
+        String color = dictItemOf(constant).color();
+        return color.isEmpty() ? null : color;
+    }
+
+    private static DictItem dictItemOf(Enum<?> constant) {
+        try {
+            Field field = constant.getDeclaringClass().getDeclaredField(constant.name());
+            DictItem item = field.getAnnotation(DictItem.class);
+            if (item == null) {
+                throw new IllegalArgumentException(constant.getDeclaringClass().getSimpleName()
+                        + "." + constant.name() + " 缺少 @DictItem 注解");
+            }
+            return item;
+        } catch (NoSuchFieldException e) {
+            throw new IllegalStateException("读取枚举 @DictItem 失败", e);
+        }
     }
 }

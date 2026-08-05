@@ -10,69 +10,9 @@
 -- ---------------------------------------------------------------------------
 
 INSERT INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_time, update_time) VALUES
-('1', NULL, NULL, '系统数据', TRUE, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+('1', NULL, NULL, '内置枚举', TRUE, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
-INSERT INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_time, update_time) VALUES
-('2', '1', 'orgType', '机构类型', TRUE, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('3', '1', 'approveStatus', '审核状态', TRUE, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('4', '1', 'sex', '性别', TRUE, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('5', '1', 'yesNo', '是否', TRUE, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('6', '1', 'dataPermType', '数据权限', TRUE, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('7', '1', 'statusColor', '状态颜色', TRUE, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('8', '1', 'articlePosition', '文章显示位置', TRUE, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
--- ---------------------------------------------------------------------------
--- 字典项
--- ---------------------------------------------------------------------------
-
--- 机构类型
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('1', 'orgType', '1', '单位', TRUE, 'SUCCESS', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('2', 'orgType', '2', '部门', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- 审核状态
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('3', 'approveStatus', 'DRAFT', '待提交', TRUE, 'DEFAULT', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('4', 'approveStatus', 'PENDING', '审核中', TRUE, 'WARNING', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('5', 'approveStatus', 'APPROVED', '审核通过', TRUE, 'SUCCESS', 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('6', 'approveStatus', 'REJECTED', '审核未通过', TRUE, 'ERROR', 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- 性别
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('7', 'sex', 'MALE', '男', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('8', 'sex', 'FEMALE', '女', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('9', 'sex', 'UNKNOWN', '保密', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- 是否
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('10', 'yesNo', 'Y', '是', TRUE, 'SUCCESS', 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('11', 'yesNo', 'N', '否', TRUE, 'ERROR', 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- 数据权限
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('12', 'dataPermType', 'ALL', '所有', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('13', 'dataPermType', 'LEVEL', '本级', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('14', 'dataPermType', 'CHILDREN', '本级和子级', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('15', 'dataPermType', 'CUSTOM', '自定义', TRUE, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- 状态颜色
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('16', 'statusColor', 'SUCCESS', '成功', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('17', 'statusColor', 'PROCESSING', '处理中', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('18', 'statusColor', 'ERROR', '错误', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('19', 'statusColor', 'WARNING', '警告', TRUE, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('20', 'statusColor', 'DEFAULT', '默认', TRUE, NULL, 4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('21', 'statusColor', 'RED', '红色', TRUE, NULL, 5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('22', 'statusColor', 'BLUE', '蓝色', TRUE, NULL, 6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('23', 'statusColor', 'GREEN', '绿色', TRUE, NULL, 7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('24', 'statusColor', 'GRAY', '灰色', TRUE, NULL, 8, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- 文章显示位置
-INSERT INTO sys_dict_item (id, type_code, code, label, enabled, color, seq, create_time, update_time) VALUES
-('25', 'articlePosition', 'HEADER_AVATAR_DROPDOWN', '顶部导航-头像-下拉菜单', TRUE, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('26', 'articlePosition', 'HEADER_LEFT', '顶部导航-左侧', TRUE, NULL, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('27', 'articlePosition', 'HEADER_RIGHT', '顶部导航-右侧', TRUE, NULL, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-('28', 'articlePosition', 'NONE', '不显示', TRUE, NULL, 3, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 -- ---------------------------------------------------------------------------
@@ -114,3 +54,12 @@ INSERT INTO sys_article (id, code, title, content, position, seq, enabled, creat
 
 INSERT INTO sys_article (id, code, title, content, position, seq, enabled, create_time, update_time) VALUES
 ('article_help', 'help', '系统帮助', '<h1>系统帮助</h1><p>系统使用帮助。</p>', 'HEADER_AVATAR_DROPDOWN', 20, TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+-- ---------------------------------------------------------------------------
+-- 定时任务 — 清理临时文件
+-- ---------------------------------------------------------------------------
+INSERT INTO sys_job (id, name, cron, enabled, job_class, job_data, create_time, update_time)
+VALUES ('CleanTempFileJob', '文件管理-清理临时文件', '0 0 3 * * ?', TRUE,
+        'io.github.jiangood.openadmin.modules.system.job.CleanTempFileJob',
+        NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

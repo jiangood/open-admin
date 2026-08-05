@@ -1,16 +1,24 @@
 package io.github.jiangood.openadmin.framework.dict;
 
+import io.github.jiangood.openadmin.framework.enums.ApproveStatus;
+import io.github.jiangood.openadmin.framework.enums.FileStatus;
+import io.github.jiangood.openadmin.framework.enums.MaterialType;
+import io.github.jiangood.openadmin.framework.enums.Sex;
+import io.github.jiangood.openadmin.framework.enums.YesNo;
+import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
+import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.ObjectProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +30,8 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DictSeedSyncTest {
+
+    // ---- 同步逻辑测试用夹具（嵌套枚举，不会被 scan() 发现） ----
 
     @DictType(code = "testStatus", label = "测试状态")
     enum TestStatus {
@@ -40,15 +50,42 @@ class DictSeedSyncTest {
     private SysDictTypeRepository typeRepository;
     @Mock
     private SysDictItemRepository itemRepository;
-    @Mock
-    private DictEnumScanner scanner;
 
     private DictSeedSync sync;
 
     @BeforeEach
     void setUp() {
-        sync = new DictSeedSync(scanner, providerOf(typeRepository), providerOf(itemRepository));
-        when(scanner.scan()).thenReturn(List.of(TestStatus.class));
+        sync = new TestableDictSeedSync(List.of(TestStatus.class),
+                providerOf(typeRepository), providerOf(itemRepository));
+    }
+
+    // 子类覆盖 scan()，隔离同步逻辑
+    static class TestableDictSeedSync extends DictSeedSync {
+        private final List<Class<? extends Enum<?>>> enums;
+
+        TestableDictSeedSync(List<Class<? extends Enum<?>>> enums,
+                             ObjectProvider<SysDictTypeRepository> typeProvider,
+                             ObjectProvider<SysDictItemRepository> itemProvider) {
+            super(blankBeanFactoryProvider(), typeProvider, itemProvider);
+            this.enums = enums;
+        }
+
+        @Override
+        public List<Class<? extends Enum<?>>> scan() {
+            return enums;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ObjectProvider<BeanFactory> blankBeanFactoryProvider() {
+        return mock(ObjectProvider.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    private static ObjectProvider<BeanFactory> failingBeanFactoryProvider() {
+        ObjectProvider<BeanFactory> provider = mock(ObjectProvider.class);
+        when(provider.getObject()).thenThrow(new IllegalStateException("no AutoConfigurationPackages in unit test"));
+        return provider;
     }
 
     private <T> ObjectProvider<T> providerOf(T object) {
@@ -166,11 +203,46 @@ class DictSeedSyncTest {
 
     @Test
     void syncFailsFastWhenDictItemMissing() {
+        DictSeedSync noRemarkSync = new TestableDictSeedSync(List.of(NoRemark.class),
+                providerOf(typeRepository), providerOf(itemRepository));
         when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
-        when(scanner.scan()).thenReturn(List.of(NoRemark.class));
 
-        assertThrows(IllegalArgumentException.class, sync::afterSeedDataInitialize);
+        assertThrows(IllegalArgumentException.class, noRemarkSync::afterSeedDataInitialize);
+    }
+
+    // ---- 自动发现（真实扫描，走 AutoConfigurationPackages 不可用的降级路径） ----
+
+    @Test
+    void scanFindsAllFrameworkEnums() {
+        DictSeedSync real = new DictSeedSync(failingBeanFactoryProvider(),
+                providerOf(typeRepository), providerOf(itemRepository));
+        List<Class<? extends Enum<?>>> result = real.scan();
+        assertTrue(result.contains(ApproveStatus.class));
+        assertTrue(result.contains(Sex.class));
+        assertTrue(result.contains(YesNo.class));
+        assertTrue(result.contains(DataPermType.class));
+        assertTrue(result.contains(ArticlePosition.class));
+        assertTrue(result.contains(MaterialType.class));
+        assertTrue(result.contains(FileStatus.class));
+        assertTrue(result.stream().allMatch(Class::isEnum));
+    }
+
+    @Test
+    void scanExcludesNonEnumDictTypeClasses() {
+        DictSeedSync real = new DictSeedSync(failingBeanFactoryProvider(),
+                providerOf(typeRepository), providerOf(itemRepository));
+        List<Class<? extends Enum<?>>> result = real.scan();
+        assertTrue(result.stream().noneMatch(c -> c.getName().contains("NotAnEnumDictType")));
+    }
+
+    @Test
+    void scanExcludesNestedEnums() {
+        DictSeedSync real = new DictSeedSync(failingBeanFactoryProvider(),
+                providerOf(typeRepository), providerOf(itemRepository));
+        List<Class<? extends Enum<?>>> result = real.scan();
+        assertTrue(result.stream().noneMatch(c -> c.getName().contains("$")),
+                "嵌套枚举（如 DictSeedSyncTest$TestStatus/$NoRemark 测试夹具）不应被当作字典枚举");
     }
 
     private SysDictType rootType(String id) {
