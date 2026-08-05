@@ -259,6 +259,7 @@ export default class extends React.Component {
                 <Form.Item label='颜色' name='color'>
                     <AutoComplete
                         allowClear
+                        maxLength={20}
                         options={COLOR_OPTIONS}
                         filterOption={(input, option) =>
                             (option.value + option.label).toLowerCase().includes(input.toLowerCase())
