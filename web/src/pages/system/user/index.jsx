@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Form, Input, Modal, Popconfirm, Select, Splitter, message} from 'antd';
+import {Button, Card, Form, Input, Modal, Select, Splitter, message} from 'antd';
 import React from 'react';
 import {
     PermActions,
@@ -123,19 +123,15 @@ export default class extends React.Component {
             dataIndex: 'option',
             fixed: 'right',
             render: (_, record) => {
-                return <PermActions>
-                    <Button size='small' perm='sys-user:update' onClick={() => this.handleEdit(record)}> 编辑 </Button>
-
-                    <Button size='small' perm='sys-user:grant-permission'
-                            onClick={() => this.permRef.current.show(record)}> 授权 </Button>
-
-                    <Button size='small' perm='sys-user:reset-password' onClick={() => this.resetPwd(record)}>重置密码</Button>
-
-                    <Popconfirm perm='sys-user:delete' title={'是否确定删除用户'}
-                                onConfirm={() => this.handleDelete(record)}>
-                        <Button size='small'>删除</Button>
-                    </Popconfirm>
-                </PermActions>;
+                return <PermActions
+                    more
+                    actions={[
+                        {label: '编辑', perm: 'sys-user:update', onClick: () => this.handleEdit(record)},
+                        {label: '授权', perm: 'sys-user:grant-permission', onClick: () => this.permRef.current.show(record)},
+                        {label: '重置密码', perm: 'sys-user:reset-password', onClick: () => this.resetPwd(record)},
+                        {label: '删除', perm: 'sys-user:delete', confirm: '是否确定删除用户', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
     ];
@@ -160,7 +156,7 @@ export default class extends React.Component {
 
         return <Page title="用户管理" description="管理系统用户">
             <Splitter>
-                <Splitter.Panel defaultSize={350} style={{paddingRight: 8}}>
+                <Splitter.Panel defaultSize={240} style={{paddingRight: 8}}>
                     <Card size='small'>
                         <OrgTree onChange={this.onSelectOrg}/>
                     </Card>
