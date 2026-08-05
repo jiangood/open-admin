@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
-import io.github.jiangood.openadmin.util.annotation.RemarkTool;
+import io.github.jiangood.openadmin.framework.dict.DictEnumTool;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterPermVO;
@@ -237,7 +237,7 @@ public class SysUserService extends BaseService<SysUser> {
         if (user == null) {
             return vo;
         }
-        vo.setDataPermLabel(user.getDataPermType() == null ? null : RemarkTool.getRemark(user.getDataPermType()));
+        vo.setDataPermLabel(user.getDataPermType() == null ? null : DictEnumTool.getLabel(user.getDataPermType()));
 
         // 有效数据权限机构 id 集
         Set<String> orgPermIds = new HashSet<>(getOrgPermissions(userId));

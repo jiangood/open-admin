@@ -5,7 +5,6 @@ import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
-import io.github.jiangood.openadmin.util.annotation.Remark;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.ObjectProvider;
 import org.junit.jupiter.api.Test;
@@ -27,10 +26,9 @@ class DictSeedSyncTest {
 
     @DictType(code = "testStatus", label = "测试状态")
     enum TestStatus {
-        @Remark("待处理")
-        @DictColor(StatusColor.WARNING)
+        @DictItem(label = "待处理", color = "WARNING")
         PENDING,
-        @Remark("已完成")
+        @DictItem(label = "已完成")
         DONE
     }
 
@@ -168,7 +166,7 @@ class DictSeedSyncTest {
     }
 
     @Test
-    void syncFailsFastWhenRemarkMissing() {
+    void syncFailsFastWhenDictItemMissing() {
         when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
         when(scanner.scan()).thenReturn(List.of(NoRemark.class));

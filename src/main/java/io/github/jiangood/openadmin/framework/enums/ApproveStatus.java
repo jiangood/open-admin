@@ -1,29 +1,23 @@
 package io.github.jiangood.openadmin.framework.enums;
 
-import io.github.jiangood.openadmin.framework.dict.DictColor;
+import io.github.jiangood.openadmin.framework.dict.DictItem;
 import io.github.jiangood.openadmin.framework.dict.DictType;
-import io.github.jiangood.openadmin.util.annotation.Remark;
 import lombok.Getter;
 
 @DictType(code = "approveStatus", label = "审核状态")
-@Remark("审核状态")
 @Getter
 public enum ApproveStatus {
 
-    @Remark("待提交")
-    @DictColor(StatusColor.DEFAULT)
+    @DictItem(label = "待提交", color = "DEFAULT")
     DRAFT,
 
-    @Remark("审核中")
-    @DictColor(StatusColor.WARNING)
+    @DictItem(label = "审核中", color = "WARNING")
     PENDING,
 
-    @Remark("审核通过")
-    @DictColor(StatusColor.SUCCESS)
+    @DictItem(label = "审核通过", color = "SUCCESS")
     APPROVED,
 
-    @Remark("审核未通过")
-    @DictColor(StatusColor.ERROR)
+    @DictItem(label = "审核未通过", color = "ERROR")
     REJECTED
 
 }

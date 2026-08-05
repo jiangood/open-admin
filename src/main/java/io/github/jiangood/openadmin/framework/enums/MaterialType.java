@@ -2,8 +2,8 @@ package io.github.jiangood.openadmin.framework.enums;
 
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.openadmin.framework.dict.DictItem;
 import io.github.jiangood.openadmin.framework.dict.DictType;
-import io.github.jiangood.openadmin.util.annotation.Remark;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
 
@@ -16,17 +16,17 @@ import java.util.LinkedHashMap;
 public enum MaterialType {
 
 
-    @Remark("文档")
+    @DictItem(label = "文档")
     DOCUMENT,
 
-    @Remark("图片")
+    @DictItem(label = "图片")
     IMAGE,
 
 
-    @Remark("视频")
+    @DictItem(label = "视频")
     VIDEO,
 
-    @Remark("音频")
+    @DictItem(label = "音频")
     AUDIO;
 
 

@@ -6,14 +6,12 @@ import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
-import io.github.jiangood.openadmin.util.annotation.Remark;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 
@@ -86,8 +84,8 @@ public class DictSeedSync implements StartupHook {
             int seq = i;
             Enum<?> constant = (Enum<?>) constants[i];
             String code = constant.name();
-            String label = labelOf(constant);
-            StatusColor color = colorOf(constant);
+            String label = DictEnumTool.getLabel(constant);
+            StatusColor color = DictEnumTool.getColor(constant);
             itemRepository.findByTypeCodeAndCode(typeCode, code)
                     .ifPresentOrElse(item -> {
                         boolean changed = false;
@@ -109,29 +107,5 @@ public class DictSeedSync implements StartupHook {
             count++;
         }
         return count;
-    }
-
-    private String labelOf(Enum<?> constant) {
-        try {
-            Field field = constant.getDeclaringClass().getDeclaredField(constant.name());
-            Remark remark = field.getAnnotation(Remark.class);
-            if (remark == null) {
-                throw new IllegalArgumentException(constant.getDeclaringClass().getSimpleName()
-                        + "." + constant.name() + " 缺少 @Remark 注解");
-            }
-            return remark.value();
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException("读取枚举 @Remark 失败", e);
-        }
-    }
-
-    private StatusColor colorOf(Enum<?> constant) {
-        try {
-            Field field = constant.getDeclaringClass().getDeclaredField(constant.name());
-            DictColor dictColor = field.getAnnotation(DictColor.class);
-            return dictColor == null ? null : dictColor.value();
-        } catch (NoSuchFieldException e) {
-            throw new IllegalStateException("读取枚举 @DictColor 失败", e);
-        }
     }
 }
