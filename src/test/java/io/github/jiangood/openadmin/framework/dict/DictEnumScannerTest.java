@@ -50,4 +50,11 @@ class DictEnumScannerTest {
         List<Class<? extends Enum<?>>> result = scanner.scan();
         assertTrue(result.stream().noneMatch(c -> c.getName().contains("NotAnEnumDictType")));
     }
+
+    @Test
+    void scanExcludesNestedEnums() {
+        List<Class<? extends Enum<?>>> result = scanner.scan();
+        assertTrue(result.stream().noneMatch(c -> c.getName().contains("$")),
+                "嵌套枚举（如 DictSeedSyncTest$TestStatus/$NoRemark 测试夹具）不应被当作字典枚举");
+    }
 }

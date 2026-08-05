@@ -50,10 +50,10 @@ public class DictEnumScanner {
         for (String className : classNames) {
             try {
                 Class<?> clazz = ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
-                if (clazz.isEnum()) {
+                if (clazz.isEnum() && clazz.getEnclosingClass() == null) {
                     result.add((Class<? extends Enum<?>>) clazz);
                 } else {
-                    log.warn("{} 标注了 @DictType 但不是枚举，忽略", className);
+                    log.warn("{} 标注了 @DictType 但不是顶层枚举，忽略", className);
                 }
             } catch (ClassNotFoundException | LinkageError e) {
                 log.warn("扫描 @DictType 枚举失败：{}", className, e);
