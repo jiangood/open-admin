@@ -1,16 +1,27 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
+import {AutoComplete, Button, Card, Descriptions, Empty, Form, Input, InputNumber, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
 import React from 'react';
 import {
     PermActions,
     FieldBoolean,
-    FieldDictSelect,
     FormModal,
     HttpUtils,
     Page,
     ProTable,
     ViewSwitch,
 } from "../../../framework";
+
+const COLOR_OPTIONS = [
+    {value: 'SUCCESS', label: '成功'},
+    {value: 'PROCESSING', label: '处理中'},
+    {value: 'ERROR', label: '错误'},
+    {value: 'WARNING', label: '警告'},
+    {value: 'DEFAULT', label: '默认'},
+    {value: 'RED', label: '红色'},
+    {value: 'BLUE', label: '蓝色'},
+    {value: 'GREEN', label: '绿色'},
+    {value: 'GRAY', label: '灰色'},
+]
 
 export default class extends React.Component {
 
@@ -246,7 +257,14 @@ export default class extends React.Component {
                     <Input/>
                 </Form.Item>
                 <Form.Item label='颜色' name='color'>
-                    <FieldDictSelect typeCode='statusColor'/>
+                    <AutoComplete
+                        allowClear
+                        options={COLOR_OPTIONS}
+                        filterOption={(input, option) =>
+                            (option.value + option.label).toLowerCase().includes(input.toLowerCase())
+                        }
+                        placeholder='如 SUCCESS、#ff0000'
+                    />
                 </Form.Item>
                 <Form.Item label='序号' name='seq'>
                     <InputNumber/>
