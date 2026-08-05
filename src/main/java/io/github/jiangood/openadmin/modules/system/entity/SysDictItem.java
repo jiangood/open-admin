@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -38,8 +37,7 @@ public class SysDictItem extends BaseEntity {
 
     @Remark("颜色")
     @Column(columnDefinition = "VARCHAR(20)")
-    @Enumerated(EnumType.STRING)
-    private StatusColor color;
+    private String color;
 
 
 

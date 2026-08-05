@@ -4,7 +4,6 @@ import io.github.jiangood.openadmin.framework.enums.ApproveStatus;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.enums.Sex;
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.framework.enums.YesNo;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
@@ -38,7 +37,6 @@ class DictEnumScannerTest {
         assertTrue(result.contains(Sex.class));
         assertTrue(result.contains(YesNo.class));
         assertTrue(result.contains(DataPermType.class));
-        assertTrue(result.contains(StatusColor.class));
         assertTrue(result.contains(ArticlePosition.class));
         assertTrue(result.contains(MaterialType.class));
         assertTrue(result.contains(FileStatus.class));

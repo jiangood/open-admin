@@ -12,5 +12,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DictItem {
     String label();
+
+    /**
+     * 可选颜色。支持两种格式：
+     * <ul>
+     *   <li>预设色名：DEFAULT、PROCESSING、SUCCESS、ERROR、WARNING、RED、BLUE、GREEN、GRAY</li>
+     *   <li>十六进制：#rgb 或 #rrggbb，如 #ff0000</li>
+     * </ul>
+     * 留空表示无颜色。
+     */
     String color() default "";
 }

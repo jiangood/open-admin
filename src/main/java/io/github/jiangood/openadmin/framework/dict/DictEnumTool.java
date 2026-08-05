@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.framework.dict;
 
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
-
 import java.lang.reflect.Field;
 
 public final class DictEnumTool {
@@ -13,17 +11,9 @@ public final class DictEnumTool {
         return dictItemOf(constant).label();
     }
 
-    public static StatusColor getColor(Enum<?> constant) {
+    public static String getColor(Enum<?> constant) {
         String color = dictItemOf(constant).color();
-        if (color.isEmpty()) {
-            return null;
-        }
-        try {
-            return StatusColor.valueOf(color);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException(constant.getDeclaringClass().getSimpleName() + "."
-                    + constant.name() + " 的 @DictItem.color 不是合法的 StatusColor: " + color, e);
-        }
+        return color.isEmpty() ? null : color;
     }
 
     private static DictItem dictItemOf(Enum<?> constant) {

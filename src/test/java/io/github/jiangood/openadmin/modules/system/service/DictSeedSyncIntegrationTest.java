@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
@@ -28,7 +27,7 @@ class DictSeedSyncIntegrationTest {
     void frameworkEnumsAreSyncedAsDicts() {
         List<String> typeCodes = List.of(
                 "approveStatus", "sex", "yesNo", "dataPermType",
-                "statusColor", "articlePosition", "materialType", "fileStatus");
+                "articlePosition", "materialType", "fileStatus");
         for (String typeCode : typeCodes) {
             assertTrue(typeRepository.findByTypeCode(typeCode).isPresent(),
                     "字典类型应存在: " + typeCode);
@@ -54,6 +53,6 @@ class DictSeedSyncIntegrationTest {
         Map<String, SysDictItem> byCode = items.stream()
                 .collect(Collectors.toMap(SysDictItem::getCode, i -> i));
         assertEquals("审核通过", byCode.get("APPROVED").getLabel());
-        assertEquals(StatusColor.SUCCESS, byCode.get("APPROVED").getColor());
+        assertEquals("SUCCESS", byCode.get("APPROVED").getColor());
     }
 }

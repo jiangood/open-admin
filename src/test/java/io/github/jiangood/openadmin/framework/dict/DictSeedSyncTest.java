@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.dict;
 
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
@@ -82,7 +81,7 @@ class DictSeedSyncTest {
         List<SysDictItem> items = itemCaptor.getAllValues();
         assertEquals("PENDING", items.get(0).getCode());
         assertEquals("待处理", items.get(0).getLabel());
-        assertEquals(StatusColor.WARNING, items.get(0).getColor());
+        assertEquals("WARNING", items.get(0).getColor());
         assertEquals(0, items.get(0).getSeq());
         assertEquals("DONE", items.get(1).getCode());
         assertNull(items.get(1).getColor());
@@ -103,7 +102,7 @@ class DictSeedSyncTest {
         staleItem.setTypeCode("testStatus");
         staleItem.setCode("PENDING");
         staleItem.setLabel("旧标签");
-        staleItem.setColor(StatusColor.ERROR);
+        staleItem.setColor("ERROR");
         staleItem.setEnabled(false);
         staleItem.setSeq(5);
         when(itemRepository.findByTypeCodeAndCode("testStatus", "PENDING")).thenReturn(Optional.of(staleItem));
@@ -115,7 +114,7 @@ class DictSeedSyncTest {
         verify(typeRepository).save(existingType);
         assertEquals("测试状态", existingType.getTypeLabel());
         assertEquals("待处理", staleItem.getLabel());
-        assertEquals(StatusColor.WARNING, staleItem.getColor());
+        assertEquals("WARNING", staleItem.getColor());
         assertTrue(staleItem.getEnabled());
         assertEquals(0, staleItem.getSeq());
     }
@@ -129,7 +128,7 @@ class DictSeedSyncTest {
         existingType.setTypeLabel("测试状态");
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.of(existingType));
         when(itemRepository.findByTypeCodeAndCode("testStatus", "PENDING"))
-                .thenReturn(Optional.of(item("PENDING", "待处理", StatusColor.WARNING, 0)));
+                .thenReturn(Optional.of(item("PENDING", "待处理", "WARNING", 0)));
         when(itemRepository.findByTypeCodeAndCode("testStatus", "DONE"))
                 .thenReturn(Optional.of(item("DONE", "已完成", null, 1)));
 
@@ -180,7 +179,7 @@ class DictSeedSyncTest {
         return root;
     }
 
-    private SysDictItem item(String code, String label, StatusColor color, int seq) {
+    private SysDictItem item(String code, String label, String color, int seq) {
         SysDictItem item = new SysDictItem();
         item.setTypeCode("testStatus");
         item.setCode(code);

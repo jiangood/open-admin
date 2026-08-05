@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.dict;
 
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.framework.spi.StartupHook;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
@@ -85,7 +84,7 @@ public class DictSeedSync implements StartupHook {
             Enum<?> constant = (Enum<?>) constants[i];
             String code = constant.name();
             String label = DictEnumTool.getLabel(constant);
-            StatusColor color = DictEnumTool.getColor(constant);
+            String color = DictEnumTool.getColor(constant);
             itemRepository.findByTypeCodeAndCode(typeCode, code)
                     .ifPresentOrElse(item -> {
                         boolean changed = false;
