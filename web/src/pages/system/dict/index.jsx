@@ -134,16 +134,13 @@ export default class extends React.Component {
         {
             title: '操作', dataIndex: 'option',
             render: (_, record) => {
-                return (
-                    <PermActions>
-                        <Button size='small' perm='sys-dict:update'
-                                onClick={() => this.handleItemEdit(record)}>编辑</Button>
-                        <Popconfirm perm='sys-dict:delete' title='是否确定删除字典项'
-                                    onConfirm={() => this.handleItemDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </PermActions>
-                );
+                return <PermActions
+                    more
+                    actions={[
+                        {label: '编辑', perm: 'sys-dict:update', onClick: () => this.handleItemEdit(record)},
+                        {label: '删除', perm: 'sys-dict:delete', confirm: '是否确定删除字典项', onClick: () => this.handleItemDelete(record)},
+                    ]}
+                />;
             },
         },
     ]

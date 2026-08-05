@@ -1,5 +1,5 @@
 import React from 'react'
-import {Button, Form, Input, Modal, Popconfirm} from 'antd'
+import {Button, Form, Input, Modal} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
 import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils} from "../../../framework";
@@ -74,12 +74,12 @@ export default class extends React.Component {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => (
-                <PermActions>
-                    <Popconfirm perm='sys-file:delete' title='是否确定删除文件信息'
-                                onConfirm={() => this.handleDelete(record)}>
-                        <a>删除</a>
-                    </Popconfirm>
-                </PermActions>
+                <PermActions
+                    more
+                    actions={[
+                        {label: '删除', perm: 'sys-file:delete', confirm: '是否确定删除文件信息', onClick: () => this.handleDelete(record)},
+                    ]}
+                />
             ),
         },
     ]

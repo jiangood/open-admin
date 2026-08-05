@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Transfer, Tree} from 'antd'
+import {Button, Form, Input, InputNumber, Modal, Select, Transfer, Tree} from 'antd'
 import React from 'react'
 import {FieldBoolean, FormModal, HttpUtils, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
 
@@ -112,22 +112,15 @@ export default class extends React.Component {
             dataIndex: 'option',
             render: (_, record) => {
 
-                return (
-                    <PermActions>
-                        <Button size='small' perm='sys-role:grant-permission'
-                                onClick={() => this.handleEditUser(record)}>用户设置</Button>
-
-                        <Button size='small' perm='sys-role:grant-permission'
-                                onClick={() => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')}>权限设置</Button>
-
-                        <Button size='small' perm='sys-role:update'
-                                onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm perm='sys-role:delete' title='是否确定删除系统角色'
-                                    onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </PermActions>
-                );
+                return <PermActions
+                    more
+                    actions={[
+                        {label: '用户设置', perm: 'sys-role:grant-permission', onClick: () => this.handleEditUser(record)},
+                        {label: '权限设置', perm: 'sys-role:grant-permission', onClick: () => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')},
+                        {label: '编辑', perm: 'sys-role:update', onClick: () => this.handleEdit(record)},
+                        {label: '删除', perm: 'sys-role:delete', confirm: '是否确定删除系统角色', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
     ]

@@ -8,9 +8,7 @@ import {
     Input,
     message,
     Modal,
-    Popconfirm,
     Select,
-    Space,
     Switch,
     Tag
 } from 'antd'
@@ -153,16 +151,15 @@ export default class extends React.Component {
             fixed: 'right',
             render: (_, record) => {
 
-                return (
-                    <Space>
-                        <Button size='small' onClick={() => this.showExecuteRecord(record)}>执行记录</Button>
-                        <Button size='small' perm='job:trigger' onClick={() => this.handleTriggerJob(record)}>执行一次</Button>
-                        <Button size='small' perm='job:update' onClick={() => this.handleEdit(record)}> 编辑 </Button>
-                        <Popconfirm perm='job:delete' title='是否确定删除?' onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </Space>
-                );
+                return <PermActions
+                    more
+                    actions={[
+                        {label: '执行记录', onClick: () => this.showExecuteRecord(record)},
+                        {label: '执行一次', perm: 'job:trigger', onClick: () => this.handleTriggerJob(record)},
+                        {label: '编辑', perm: 'job:update', onClick: () => this.handleEdit(record)},
+                        {label: '删除', perm: 'job:delete', confirm: '是否确定删除?', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
 

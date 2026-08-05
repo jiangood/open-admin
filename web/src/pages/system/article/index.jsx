@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal, Popconfirm} from 'antd'
+import {Button, Form, Input, InputNumber, Modal} from 'antd'
 import React from 'react'
 import {
     DictUtils,
@@ -85,15 +85,14 @@ export default class extends React.Component {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => {
-                return (
-                    <PermActions>
-                        <Button size='small' onClick={() => this.handlePreview(record)}>预览</Button>
-                        <Button size='small' perm='article:update' onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm perm='article:delete' title='确定删除?' onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </PermActions>
-                );
+                return <PermActions
+                    more
+                    actions={[
+                        {label: '预览', onClick: () => this.handlePreview(record)},
+                        {label: '编辑', perm: 'article:update', onClick: () => this.handleEdit(record)},
+                        {label: '删除', perm: 'article:delete', confirm: '确定删除?', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
     ]
