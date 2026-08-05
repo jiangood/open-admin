@@ -5,6 +5,7 @@ import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.dto.MenuItem;
+import io.github.jiangood.openadmin.modules.system.dto.MenuPermTreeNode;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
@@ -33,6 +34,22 @@ public class SysMenuService {
             return node;
         }).toList();
         return TreeTool.buildTree(items);
+    }
+
+    public List<MenuPermTreeNode> menuPermTree() {
+        List<MenuDefinition> all = sysMenuRepository.findAll();
+        List<MenuPermTreeNode> nodes = all.stream().map(def -> {
+            MenuPermTreeNode node = new MenuPermTreeNode();
+            node.setId(def.getId());
+            node.setPid(def.getPid());
+            node.setName(def.getName());
+            node.setPermCodes(def.getPermCodes());
+            node.setPermNames(def.getPermNames());
+            node.setDisabled(def.getDisabled());
+            return node;
+        }).toList();
+        return TreeTool.buildTree(nodes, MenuPermTreeNode::getId, MenuPermTreeNode::getPid,
+                MenuPermTreeNode::getChildren, MenuPermTreeNode::setChildren);
     }
 
     public Dict buildMenuInfo(List<MenuDefinition> menuDefs) {

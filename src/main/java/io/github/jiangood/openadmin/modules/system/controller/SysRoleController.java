@@ -144,7 +144,7 @@ public class SysRoleController {
     @HasPermission("sys-role:grant-permission")
     @RequestMapping("perm-tree-table")
     public AjaxResult menuTree() {
-        return AjaxResult.ok().data(sysMenuService.menuTree());
+        return AjaxResult.ok().data(sysMenuService.menuPermTree());
     }
 
     @HasPermission("sys-role:update")
