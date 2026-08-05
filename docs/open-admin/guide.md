@@ -84,7 +84,7 @@ web/
 
 ### 数据字典
 
-- **枚举驱动**：框架内置字典（`approveStatus`、`sex`、`yesNo`、`dataPermType`、`statusColor`、`articlePosition`、`materialType`、`fileStatus`）由 Java 枚举自动同步生成——枚举类型标注 `@DictType(code, label)`、常量标注 `@Remark(label)`（可选 `@DictColor`），每次启动经 `DictSeedSync` 同步，枚举是唯一数据源，无需写 SQL 种子
+- **枚举驱动**：框架内置字典（`approveStatus`、`sex`、`yesNo`、`dataPermType`、`statusColor`、`articlePosition`、`materialType`、`fileStatus`）由 Java 枚举自动同步生成——枚举类型标注 `@DictType(code, label)`、常量标注 `@DictItem(label, color?)`（`color` 为 `StatusColor` 常量名，可省略），每次启动经 `DictSeedSync` 同步，枚举是唯一数据源，无需写 SQL 种子
 - **业务扩展**：业务模块自定义枚举加 `@DictType`/`@Remark` 后，放在业务基础包下即可自动入字典（启动时自动扫描业务基础包与框架包）；基础包之外的枚举不在自动扫描范围
 - **前端使用**：`<FieldDictSelect typeCode="sex" />` 字典选择器；`DictUtils.dictList("sex")` / `DictUtils.dictLabel("sex", "MALE")` / `DictUtils.dictTag("approveStatus", "APPROVED")`
 - **管理界面**：仍可通过字典管理界面维护非枚举类型（业务自建）字典；枚举类型的 label/color 由代码维护
