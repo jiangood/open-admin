@@ -99,7 +99,6 @@ class DictSeedSyncTest {
 
     @Test
     void syncCreatesTypeAndItems() {
-        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
         when(typeRepository.save(any(SysDictType.class))).thenAnswer(inv -> inv.getArgument(0));
         when(itemRepository.findByTypeCodeAndCode(anyString(), anyString())).thenReturn(Optional.empty());
@@ -109,7 +108,7 @@ class DictSeedSyncTest {
 
         ArgumentCaptor<SysDictType> typeCaptor = ArgumentCaptor.forClass(SysDictType.class);
         verify(typeRepository).save(typeCaptor.capture());
-        assertEquals("root", typeCaptor.getValue().getPid());
+        assertEquals("1", typeCaptor.getValue().getPid());
         assertEquals("testStatus", typeCaptor.getValue().getTypeCode());
         assertEquals("测试状态", typeCaptor.getValue().getTypeLabel());
 
@@ -127,7 +126,6 @@ class DictSeedSyncTest {
 
     @Test
     void syncFixesLabelAndColorDrift() {
-        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         SysDictType existingType = new SysDictType();
         existingType.setId("t1");
         existingType.setTypeCode("testStatus");
@@ -158,7 +156,6 @@ class DictSeedSyncTest {
 
     @Test
     void syncIsIdempotent() {
-        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         SysDictType existingType = new SysDictType();
         existingType.setId("t1");
         existingType.setTypeCode("testStatus");
@@ -176,36 +173,9 @@ class DictSeedSyncTest {
     }
 
     @Test
-    void syncCreatesRootTypeWhenMissing() {
-        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.empty());
-        when(typeRepository.save(any(SysDictType.class))).thenAnswer(inv -> {
-            SysDictType saved = inv.getArgument(0);
-            if (saved.getId() == null) {
-                saved.setId("new-root");
-            }
-            return saved;
-        });
-        when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
-        when(itemRepository.findByTypeCodeAndCode(anyString(), anyString())).thenReturn(Optional.empty());
-        when(itemRepository.save(any(SysDictItem.class))).thenAnswer(inv -> inv.getArgument(0));
-
-        sync.afterSeedDataInitialize();
-
-        ArgumentCaptor<SysDictType> typeCaptor = ArgumentCaptor.forClass(SysDictType.class);
-        verify(typeRepository, times(2)).save(typeCaptor.capture());
-        List<SysDictType> savedTypes = typeCaptor.getAllValues();
-        assertEquals("new-root", savedTypes.get(0).getId());
-        assertEquals("系统数据", savedTypes.get(0).getTypeLabel());
-        assertEquals("new-root", savedTypes.get(1).getPid());
-        assertEquals("testStatus", savedTypes.get(1).getTypeCode());
-        assertEquals("测试状态", savedTypes.get(1).getTypeLabel());
-    }
-
-    @Test
     void syncFailsFastWhenDictItemMissing() {
         DictSeedSync noRemarkSync = new TestableDictSeedSync(List.of(NoRemark.class),
                 providerOf(typeRepository), providerOf(itemRepository));
-        when(typeRepository.findFirstByPidIsNull()).thenReturn(Optional.of(rootType("root")));
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, noRemarkSync::afterSeedDataInitialize);
@@ -243,12 +213,6 @@ class DictSeedSyncTest {
         List<Class<? extends Enum<?>>> result = real.scan();
         assertTrue(result.stream().noneMatch(c -> c.getName().contains("$")),
                 "嵌套枚举（如 DictSeedSyncTest$TestStatus/$NoRemark 测试夹具）不应被当作字典枚举");
-    }
-
-    private SysDictType rootType(String id) {
-        SysDictType root = new SysDictType();
-        root.setId(id);
-        return root;
     }
 
     private SysDictItem item(String code, String label, String color, int seq) {
