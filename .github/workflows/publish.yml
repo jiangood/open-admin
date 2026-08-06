@@ -124,6 +124,10 @@ jobs:
             npm publish --access public --no-git-checks
           fi
 
+  sync-mirror:
+    needs: npm-publish
+    runs-on: ubuntu-latest
+    steps:
       - name: 同步阿里云镜像仓库
         run: |
           npm install -g cnpm --registry=https://registry.npmmirror.com
