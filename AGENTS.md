@@ -1,14 +1,21 @@
-# CLAUDE.md
+# AGENTS.md
 
-本文件为 Claude Code 等 AI 工具提供本仓库的指引。详细文档请参阅 [README.md](README.md)。
+本文件为 opencode 等 AI 工具提供本仓库（open-admin 框架）的开发指引。详细文档请参阅 [README.md](README.md)。
+
 
 ## Project Overview
 
-open-admin 是一个可嵌入的后台管理系统框架。业务项目通过 Maven/npm 添加依赖即可获得完整的后台管理能力，无需从零搭建用户管理、角色权限、数据字典等功能。
+open-admin 是一个可嵌入的后台管理系统框架（本仓库即框架本体）。业务项目通过 Maven/npm 依赖即可获得完整的后台管理能力。
+
+**本仓库身兼"框架"与"示例应用"两职，改动前先分清作用域：**
+
+- 后端框架源码 `src/main/java`；前端框架 + 内置页面 `web/src/**`（npm 包 `@jiangood/open-admin` 的发布内容，入口 `web/src/index.ts`，页面由 `web/vite-plugin` 扫描 `src/pages` 自动注册路由）
+- `web/src/pages/test/*` 不打进 npm 包（package.json `files` 排除）
+- `docs/open-admin/` 与 `.opencode/skills/oa-crud`、`oa-upgrade` 会被打包进 JAR，并在**业务项目启动后端时自动同步**到其根目录（`ProjectFileSyncer` 按内容比对）。修改这些文件 = 修改框架对外 API，必须 `mvn clean install` 后在示例项目验证。`oa-publishing-release` skill 仅本仓库使用，不打进 JAR
 
 ## Tech Stack
 
-- **Backend**: Java 21, Spring Boot 4.1.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
+- **Backend**: Java 21, Spring Boot 4.1.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+（测试用 H2）
 - **Frontend**: React 19, Ant Design 6, Vite 8（自研 hash 路由 + PageFrame）, TypeScript
 - **Build**: Maven (backend), npm (frontend)
 
@@ -30,7 +37,7 @@ D:/ws/
 ```bash
 mvn clean compile                                          # 编译
 mvn test -Dtest=BeanToolTest                               # 运行单个测试
-mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅运行纯单元测试，跳过 SpringBootTest 集成测试（更快）
+mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试，跳过 SpringBootTest 集成测试（更快）
 mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
@@ -38,9 +45,12 @@ node scripts/bump-version.js <新版本号>                     # 升级 pom.xml
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
+cd web && npm run test:e2e                                    # Playwright 端到端测试
 ```
 
 测试使用 H2 内存数据库，无需 MySQL。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
+
+E2E（`web/e2e/`）自动拉起后端（`mvn spring-boot:run`  profiles=lib,e2e，端口 8080）与前端（端口 3000），运行前需释放这两个端口。
 
 ## Auto-Configuration Mechanism
 
@@ -58,6 +68,17 @@ cd web && npm run build                                       # 前端构建
 - **操作日志**: `@Log` 注解 + AOP 切面，异步记录
 - **页面生命周期**: 多 Tab 下页面保持 mounted，通过 `PageFrame` 的 `show` prop + ref 机制自动调用组件 `onShow()` 方法（首次打开 / Tab 切回时触发）
 
+## Development Conventions
+
+- Java 强制构造器注入（`@RequiredArgsConstructor` + `private final`），禁止 `@Autowired` 字段注入
+- 业务异常抛 `ServiceException`，Controller 不做 try-catch
+- Controller 统一返回 `AjaxResult`，权限用 `@HasPermission("resource:action")`（全小写两段式，如 `sys-user:read`）
+- REST API 约定：`admin/xxx/page`(分页) / `admin/xxx/{id}`(详情) / `admin/xxx/create`(POST) / `admin/xxx/update`(POST) / `admin/xxx/delete`(POST)
+- 枚举字典用 `@DictItem` 注解（自动扫描入库），不用 `@Remark`
+- 前端优先用框架组件：`ProTable`、`Page`、`Field*`、`PermActions`；页面文件小写开头才注册路由，大驼峰视为普通组件
+- 跨组件通信用 `EventBus`（`emit/on/once/off`），禁止 `document.dispatchEvent`；对话框用 `<Modal open={...}>`，避免静态 `Modal.info()/confirm()`
+- 详细规范见 `docs/open-admin/development.md`
+
 ## Adding a Business Module
 
 1. **Entity**: 继承 `BaseEntity`，JPA 自动建表
@@ -66,6 +87,5 @@ cd web && npm run build                                       # 前端构建
 4. **Controller**: RESTful，返回 `AjaxResult`，使用 `@HasPermission` 控制权限
 5. **菜单**: `src/main/resources/application-menu*.yml` 定义菜单（Map 结构，key 为菜单 id，pid 表达父子关系）
 6. **前端**: 使用 ProTable + Field* 组件快速搭建 CRUD 页面
-
 
 完整配置和 API 参考请查看 [README.md](README.md)。
