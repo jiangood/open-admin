@@ -45,7 +45,7 @@ jobs:
       - name: Frontend Build
         run: |
           cd web
-          npm ci
+          npm install
           npm run build
 
   e2e:
@@ -83,7 +83,7 @@ jobs:
       - name: E2E Test
         run: |
           cd web
-          npm ci
+          npm install
           npx playwright install chromium
           npm run test:e2e
         env:

@@ -111,7 +111,7 @@ jobs:
       - name: Build NPM package
         run: |
           cd web
-          npm ci
+          npm install
           npm run build
 
       - name: Publish NPM package (if not exists)

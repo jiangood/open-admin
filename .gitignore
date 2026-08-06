@@ -17,6 +17,7 @@ target/
 ### VS Code ###
 /web/node_modules/
 /web/pnpm-lock.yaml
+/web/package-lock.json
 /web/src/.umi/
 /web/src/.umi-production/
 /web/dist/
