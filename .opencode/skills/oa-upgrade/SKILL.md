@@ -24,32 +24,32 @@ description: 在业务项目中升级 open-admin 框架版本 — 读取 Release
 
 ### 工具检查
 
-- `gh` CLI 已安装并认证（`gh auth status`）
 - Maven 可用（`mvn --version`）
-- Node.js / npm 可用（`node --version`）
+- Node.js / npm 可用（`node --version`）—— 用 `npm view` 验证版本
 
 ## 升级流程
 
 ### 1. 确认当前版本与可用版本
 
-展示当前版本，然后拉取框架仓库的发布列表：
+展示当前版本，然后拉取框架的可用版本：
 
 ```bash
-gh release list --repo jiangood/open-admin -L 10
+npm view @jiangood/open-admin versions --json
+npm view @jiangood/open-admin version
 ```
 
 向开发者展示可用版本，询问目标版本号（如 `3.0.2`、`4.0.0` 等）。
 
 ### 2. 读取变更信息
 
-同时获取两个数据源，合并展示给开发者：
+同时获取两个数据源，用 webfetch 工具抓取以下页面，合并展示给开发者：
 
-```bash
+```text
 # 2a. Git 提交日志（当前版本到目标版本之间的所有提交）
-gh api repos/jiangood/open-admin/compare/v{current_version}...v{target_version} --jq '.commits[].commit.message'
+https://github.com/jiangood/open-admin/compare/v{current_version}...v{target_version}
 
 # 2b. 目标版本的 Release Notes（含 Breaking Changes 和迁移说明）
-gh release view v{target_version} --repo jiangood/open-admin
+https://github.com/jiangood/open-admin/releases/tag/v{target_version}
 ```
 
 展示要点：
@@ -140,5 +140,4 @@ npm run build
 ## 参考
 
 - 框架仓库: https://github.com/jiangood/open-admin
-- GitHub API 文档: https://docs.github.com/en/rest/releases
-- `gh` CLI 文档: https://cli.github.com/manual/
+- npm 包页面（`npm view` 查询版本）: https://www.npmjs.com/package/@jiangood/open-admin
