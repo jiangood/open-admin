@@ -56,7 +56,15 @@ export class UserPage {
 
     async clickDelete(text: string) {
         const row = this.page.locator(`.ant-table-row:has-text("${text}")`);
-        await row.locator('button:has-text("删除")').click();
+        const deleteButton = row.locator('button:has-text("删除")');
+        if ((await deleteButton.count()) > 0) {
+            await deleteButton.click();
+        } else {
+            await row.locator('button:has(.anticon-ellipsis)').click();
+            await this.page
+                .locator('.ant-dropdown-menu-item:has-text("删除")')
+                .click();
+        }
         await this.page.click('.ant-popconfirm .ant-btn-primary');
     }
 }
