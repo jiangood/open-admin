@@ -153,6 +153,7 @@ export default class extends React.Component {
 
                 return <PermActions
                     more
+                    size="small"
                     actions={[
                         {label: '执行记录', onClick: () => this.showExecuteRecord(record)},
                         {label: '执行一次', perm: 'job:trigger', onClick: () => this.handleTriggerJob(record)},

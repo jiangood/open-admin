@@ -87,6 +87,7 @@ export default class extends React.Component {
             render: (_, record) => {
                 return <PermActions
                     more
+                    size="small"
                     actions={[
                         {label: '预览', onClick: () => this.handlePreview(record)},
                         {label: '编辑', perm: 'article:update', onClick: () => this.handleEdit(record)},

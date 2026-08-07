@@ -36,7 +36,7 @@ export interface PermActionsProps {
 export class PermActions extends React.Component<PermActionsProps> {
     static defaultProps: Partial<PermActionsProps> = {
         more: false,
-        size: 'small',
+        size: 'middle',
     };
 
     render() {

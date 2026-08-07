@@ -76,6 +76,7 @@ export default class extends React.Component {
             render: (_, record) => (
                 <PermActions
                     more
+                    size="small"
                     actions={[
                         {label: '删除', perm: 'sys-file:delete', confirm: '是否确定删除文件信息', onClick: () => this.handleDelete(record)},
                     ]}

@@ -147,6 +147,7 @@ export default class extends React.Component {
             render: (_, record) => {
                 return <PermActions
                     more
+                    size="small"
                     actions={[
                         {label: '编辑', perm: 'sys-dict:update', onClick: () => this.handleItemEdit(record)},
                         {label: '删除', perm: 'sys-dict:delete', confirm: '是否确定删除字典项', onClick: () => this.handleItemDelete(record)},
