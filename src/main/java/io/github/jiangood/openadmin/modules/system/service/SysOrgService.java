@@ -14,6 +14,8 @@ import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -55,6 +57,7 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
     @Transactional
+    @CacheEvict(key = "#id", condition = "#id != null")
     public void deleteById(String id) {
         long count = sysOrgRepository.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
@@ -100,6 +103,7 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
     @Transactional
+    @CacheEvict(key = "#input.id", condition = "#input.id != null")
     public SysOrg save(SysOrg input, List<String> requestKeys) throws Exception {
         boolean isNew = input.isNew();
 
@@ -243,6 +247,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         return TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
     }
 
+    @Cacheable(key = "#id", condition = "#id != null")
     public String getNameById(String id) {
         if (id == null) {
             return null;
