@@ -15,7 +15,7 @@ open-admin 是一个可嵌入的后台管理系统框架（本仓库即框架本
 
 ## Tech Stack
 
-- **Backend**: Java 21, Spring Boot 4.1.0, JPA (Hibernate), Spring Security, Quartz, MySQL 8+（测试用 H2）
+- **Backend**: Java 21, Spring Boot 4+, JPA (Hibernate), Spring Security, Quartz, MySQL 8+（测试用 H2）
 - **Frontend**: React 19, Ant Design 6, Vite 8（自研 hash 路由 + PageFrame）, TypeScript
 - **Build**: Maven (backend), npm (frontend)
 

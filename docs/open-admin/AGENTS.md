@@ -10,7 +10,7 @@
 
 ## 技术栈与目录约定
 
-- **后端**：Java 21, Spring Boot 4, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
+- **后端**：Java 21, Spring Boot 4+, JPA (Hibernate), Spring Security, Quartz, MySQL 8+
 - **前端**：React 19, Ant Design 6, Vite 8, TypeScript
 - **后端源码**：`src/main/java/{groupId}.{project}/`（业务包）
 - **前端页面**：`web/src/pages/`（小写开头文件自动注册路由）

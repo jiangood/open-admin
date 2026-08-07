@@ -16,7 +16,7 @@
 │  │ @jiangood/open-admin (组件库 + 管理页面)     │    │
 │  └─────────────────────────────────────────────┘    │
 ├─────────────────── HTTP API ────────────────────────┤
-│  后端: Java 21 + Spring Boot 4.0 + JPA + Security   │
+│  后端: Java 21 + Spring Boot 4+ + JPA + Security   │
 │  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐ │
 │  │ modules  │ │framework │ │  util  │ │  config  │ │
 │  │ (业务层) │ │  (框架层) │ │ (工具) │ │  (配置)  │ │
@@ -68,7 +68,7 @@ web/
 | 层级 | 技术 |
 |------|------|
 | 前端 | React 19, Ant Design 6, Vite 8, TypeScript |
-| 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
+| 后端 | Java 21, Spring Boot 4+, JPA (Hibernate), Spring Security, Quartz |
 | 数据库 | MySQL 8+ |
 | 构建 | Maven (后端), npm (前端) |
 
