@@ -27,17 +27,24 @@ class ProjectFileSyncerTest {
     @Test
     void locateProjectRootFindsPomXml() {
         ProjectFileSyncer syncer = new ProjectFileSyncer();
-        Path root = syncer.locateProjectRoot();
+        Path userDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
+        Path root = syncer.locateProjectRoot(userDir);
         assertNotNull(root, "应从 user.dir 向上找到项目根");
         assertTrue(Files.isRegularFile(root.resolve("pom.xml")), "项目根应包含 pom.xml");
-        Path userDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
         assertTrue(userDir.startsWith(root), "user.dir 应位于项目根之下");
+    }
+
+    @Test
+    void locateProjectRootReturnsNullWithoutPomXml(@TempDir Path tmp) {
+        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        assertNull(syncer.locateProjectRoot(tmp), "无 pom.xml 的目录（如生产 jar 部署）应返回 null");
     }
 
     @Test
     void frameworkRepoDetectedByArtifactId() {
         ProjectFileSyncer syncer = new ProjectFileSyncer();
-        Path root = syncer.locateProjectRoot();
+        Path userDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
+        Path root = syncer.locateProjectRoot(userDir);
         assertNotNull(root);
         assertTrue(syncer.isFrameworkRepo(root), "open-admin 框架仓库（pom artifactId=open-admin）应被识别");
     }
@@ -64,6 +71,20 @@ class ProjectFileSyncerTest {
     void dirWithoutPomNotDetected(@TempDir Path tmp) {
         ProjectFileSyncer syncer = new ProjectFileSyncer();
         assertFalse(syncer.isFrameworkRepo(tmp), "无 pom.xml 的目录不应被识别为框架仓库");
+    }
+
+    @Test
+    void syncSkipsSilentlyWhenNoProjectRoot(@TempDir Path tmp) throws IOException {
+        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        Path userDir = tmp.resolve("prod").resolve("app");
+        Files.createDirectories(userDir);
+
+        syncer.sync(userDir);
+
+        assertFalse(Files.exists(userDir.resolve("docs/open-admin/AGENTS.md")),
+                "生产 jar 部署（无 pom.xml）不应生成 AGENTS.md 副本");
+        assertFalse(Files.exists(userDir.resolve("docs")), "生产 jar 部署不应写入任何文档");
+        assertFalse(Files.exists(userDir.resolve("AGENTS.md")), "生产 jar 部署不应生成根目录 AGENTS.md");
     }
 
     @Test

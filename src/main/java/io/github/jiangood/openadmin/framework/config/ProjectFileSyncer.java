@@ -28,7 +28,7 @@ import java.util.stream.Stream;
  * <p>
  * 逻辑：
  * <ol>
- *   <li>从 {@code user.dir} 向上查找最近的 pom.xml 作为业务项目根目录，找不到则仅生成 AGENTS.md 副本</li>
+ *   <li>从 {@code user.dir} 向上查找最近的 pom.xml 作为业务项目根目录，找不到（如生产 jar 部署）则跳过同步</li>
  *   <li>若 pom.xml 的项目名称为 {@code open-admin}（框架自身仓库），则跳过（避免框架自同步污染）</li>
  *   <li>读取 classpath {@code META-INF/open-admin/project-files/**}，逐文件字节比对后写入：</li>
  *   <li>{@code docs/open-admin/} 全量镜像（删除孤儿文件）；{@code .opencode/skills/} 仅覆盖写入（不删除未知 skill）</li>
@@ -49,33 +49,39 @@ public class ProjectFileSyncer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         try {
-            List<PayloadFile> payload = readPayload();
-            if (payload.isEmpty()) {
-                log.warn("[project-files] classpath 中未找到 {}，跳过同步", PAYLOAD_ROOT);
-                return;
-            }
-            Path projectRoot = locateProjectRoot();
-            if (projectRoot == null) {
-                log.warn("[project-files] 未找到项目根目录（向上查找 pom.xml 无果），仅生成 AGENTS.md 副本");
-                writeAgentsMdCopy(payload, Paths.get(System.getProperty("user.dir")));
-                return;
-            }
-            if (isFrameworkRepo(projectRoot)) {
-                log.debug("[project-files] 当前为 open-admin 框架仓库（pom artifactId=open-admin），跳过框架文件同步");
-                return;
-            }
-            int written = mirror(payload, projectRoot);
-            log.info("[project-files] 框架文件同步完成，新增/更新 {} 个文件 → {}", written, projectRoot);
+            sync(Paths.get(System.getProperty("user.dir")));
         } catch (Exception e) {
             log.warn("[project-files] 框架文件同步失败: {}", e.getMessage());
         }
     }
 
     /**
-     * 从 user.dir 向上查找最近的 pom.xml 所在目录作为项目根。
+     * 同步逻辑（包级可见便于测试），userDir 为启动时的工作目录。
      */
-    Path locateProjectRoot() {
-        Path current = Paths.get(System.getProperty("user.dir")).toAbsolutePath();
+    void sync(Path userDir) throws IOException {
+        List<PayloadFile> payload = readPayload();
+        if (payload.isEmpty()) {
+            log.warn("[project-files] classpath 中未找到 {}，跳过同步", PAYLOAD_ROOT);
+            return;
+        }
+        Path projectRoot = locateProjectRoot(userDir);
+        if (projectRoot == null) {
+            log.debug("[project-files] 未找到项目根目录（向上查找 pom.xml 无果，如生产 jar 部署），跳过同步");
+            return;
+        }
+        if (isFrameworkRepo(projectRoot)) {
+            log.debug("[project-files] 当前为 open-admin 框架仓库（pom artifactId=open-admin），跳过框架文件同步");
+            return;
+        }
+        int written = mirror(payload, projectRoot);
+        log.info("[project-files] 框架文件同步完成，新增/更新 {} 个文件 → {}", written, projectRoot);
+    }
+
+    /**
+     * 从 userDir 向上查找最近的 pom.xml 所在目录作为项目根。
+     */
+    Path locateProjectRoot(Path userDir) {
+        Path current = userDir.toAbsolutePath();
         while (current != null) {
             if (Files.isRegularFile(current.resolve("pom.xml"))) {
                 return current;
@@ -229,20 +235,6 @@ public class ProjectFileSyncer implements CommandLineRunner {
         Files.write(rootFile, content);
         log.info("[project-files] 生成 AGENTS.md（业务项目根目录）");
         return 1;
-    }
-
-    /**
-     * 未找到项目根目录时，在当前目录的 docs/open-admin 下生成 AGENTS.md 副本。
-     */
-    private void writeAgentsMdCopy(List<PayloadFile> payload, Path fallbackDir) throws IOException {
-        byte[] content = findAgentsMd(payload);
-        if (content == null) {
-            return;
-        }
-        Path target = fallbackDir.resolve(DOCS_REL + "AGENTS.md").normalize();
-        if (writeIfChanged(content, target)) {
-            log.info("[project-files] 生成 AGENTS.md 副本 → {}", target);
-        }
     }
 
     private byte[] findAgentsMd(List<PayloadFile> payload) {
