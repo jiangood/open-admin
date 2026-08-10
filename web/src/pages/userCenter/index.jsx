@@ -62,7 +62,7 @@ export default class extends React.Component {
 
             <Modal open={changePwdOpen} title="修改密码" okText="确定" cancelText="取消"
                    onCancel={() => this.setState({changePwdOpen: false})}
-                   onOk={() => this.formRef?.submit()}>
+                   onOk={() => this.formRef.current?.submit()}>
                 <Form ref={this.formRef} onFinish={this.onPwdFinish} style={{maxWidth: 400}}>
                     <Form.Item name='oldPassword'
                                label='原密码'
