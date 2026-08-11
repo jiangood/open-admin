@@ -46,7 +46,12 @@ jobs:
       - name: 检出示例项目
         env:
           EXAMPLE_PAT: ${{ secrets.EXAMPLE_PAT }}
+          GIT_TERMINAL_PROMPT: 0
         run: |
+          if [ -z "$EXAMPLE_PAT" ]; then
+            echo "::error::未配置 EXAMPLE_PAT 密钥（需对 jiangood/open-admin-example 有 repo 写权限的 PAT）"
+            exit 1
+          fi
           git clone --depth 1 "https://x-access-token:${EXAMPLE_PAT}@github.com/jiangood/open-admin-example.git" example
           cd example
           git config user.name "open-admin-bot"
