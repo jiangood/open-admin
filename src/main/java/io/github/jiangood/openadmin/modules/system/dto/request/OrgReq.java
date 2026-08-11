@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class OrgReq {
+    String id;
     String pid;
     String name;
     Integer seq;
