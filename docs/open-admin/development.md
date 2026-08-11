@@ -38,3 +38,15 @@
 - 跨组件通信使用 `EventBus`（`emit` / `on` / `once` / `off`），不要使用 `document.dispatchEvent`
 - 对话框优先使用 `<Modal>` 组件（state 控制 `open`），避免 `Modal.info()` / `Modal.confirm()` 等静态方法
 - 页面生命周期：页面组件实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用，详见[页面生命周期](api.md#页面生命周期)
+
+### 页面目录约定
+
+页面文件放在 `web/src/pages/` 下（小写开头自动注册路由），按目录自动识别页面类型，无需额外配置：
+
+| 目录 | 路由前缀 | 是否需要登录 | 是否需要 AdminLayout |
+|------|---------|-------------|---------------------|
+| `pages/` | `/` | ✅ 是 | ✅ 是 |
+| `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
+| `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
+
+`public` 页免登录、无后台布局（如登录页）；`standalone` 页需登录但无后台布局（如强制改密页）。
