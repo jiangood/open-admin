@@ -43,7 +43,7 @@ export default class extends React.Component {
 
             <Card title="个人信息"
                   style={{marginBottom: 16}}
-                  extra={<Button onClick={() => this.setState({changePwdOpen: true})}>修改密码</Button>}>
+                  extra={<Button type="primary" danger onClick={() => this.setState({changePwdOpen: true})}>修改密码</Button>}>
                 <Descriptions column={2} size="middle">
                     <Descriptions.Item label="用户名称">{info.name}</Descriptions.Item>
                     <Descriptions.Item label="账号">{info.account}</Descriptions.Item>
