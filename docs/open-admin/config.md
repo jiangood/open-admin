@@ -51,12 +51,16 @@
 
 ## 主题定制
 
-`web/.env` 配置：
+主题颜色默认值内置框架（`#1961AC` 主色等），业务项目**零配置**即可获得默认主题。需要定制时，在入口组件 `<Layouts>` 传入 `colors` prop 覆盖：
 
+```jsx
+<Layouts colors={{
+    colorPrimary: '#1961AC',
+    colorSuccess: '#52c41a',
+    colorWarning: '#faad14',
+    colorError: '#ff4d4f',
+    colorBgLayout: '#f5f5f5',
+}}/>
 ```
-VITE_THEME_PRIMARY_COLOR=#1961AC
-VITE_THEME_SUCCESS_COLOR=#52c41a
-VITE_THEME_WARNING_COLOR=#faad14
-VITE_THEME_ERROR_COLOR=#ff4d4f
-VITE_THEME_BACKGROUND_COLOR=#f5f5f5
-```
+
+`colors` 为可选字段，未传的项使用框架默认值。菜单/标签栏等处的 `--primary-color` CSS 变量会随主题自动同步。

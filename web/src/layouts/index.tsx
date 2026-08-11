@@ -6,20 +6,20 @@ import 'dayjs/locale/zh-cn';
 import {history, PageFrame} from "../framework";
 
 import AdminLayout from "./admin"
-import {HttpUtils, PageLoading, PageUtils, GlobalData, getThemeConfig, EventBus} from "../framework";
+import {HttpUtils, PageLoading, PageUtils, GlobalData, getThemeConfig, setThemeColors, EventBus} from "../framework";
 import {ErrorBoundary} from "../framework";
+import type {ThemeColors} from "../framework";
 
 import '../style/global.less'
 import './index.less'
 
 dayjs.locale('zh-cn');
 
-const configProps = {
+const baseConfigProps = {
     input: {autoComplete: 'off'},
     form: {validateMessages: {required: '必填项'}, colon: false},
     button: {autoInsertSpace: false},
     locale: zhCN,
-    theme: getThemeConfig(),
 };
 
 export interface HeaderExtraContext {
@@ -30,6 +30,8 @@ export interface HeaderExtraContext {
 interface LayoutsProps {
     headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
     showOrgSwitcher?: (context: HeaderExtraContext) => boolean;
+    /** 主题颜色覆盖，不传使用框架默认主题 */
+    colors?: Partial<ThemeColors>;
 }
 
 export class Layouts extends React.Component<LayoutsProps> {
@@ -42,6 +44,11 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     unlisten: (() => void) | null = null;
     unsubscribeLoginExpired: (() => void) | null = null;
+
+    constructor(props: LayoutsProps) {
+        super(props);
+        setThemeColors(props.colors);
+    }
 
     onLocationChange = ({location}: { location: typeof history.location }) => {
         this.setState({location});
@@ -128,7 +135,7 @@ export class Layouts extends React.Component<LayoutsProps> {
 
         return (
             <ErrorBoundary minimal>
-                <ConfigProvider {...configProps}>
+                <ConfigProvider {...baseConfigProps} theme={getThemeConfig()}>
                     {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/> : (
                         <PageLoading messages={[
                             !siteInfoLoaded && '加载站点信息...',
