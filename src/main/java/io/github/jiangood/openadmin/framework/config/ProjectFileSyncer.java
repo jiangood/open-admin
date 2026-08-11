@@ -66,7 +66,6 @@ public class ProjectFileSyncer implements CommandLineRunner {
         }
         Path projectRoot = locateProjectRoot(userDir);
         if (projectRoot == null) {
-            log.debug("[project-files] 未找到项目根目录（向上查找 pom.xml 无果，如生产 jar 部署），跳过同步");
             return;
         }
         if (isFrameworkRepo(projectRoot)) {
