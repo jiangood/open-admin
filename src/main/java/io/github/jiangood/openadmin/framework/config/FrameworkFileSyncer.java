@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  * <ol>
  *   <li>从 {@code user.dir} 向上查找最近的 pom.xml 作为业务项目根目录，找不到（如生产 jar 部署）则跳过同步</li>
  *   <li>若 pom.xml 的项目名称为 {@code open-admin}（框架自身仓库），则跳过（避免框架自同步污染）</li>
- *   <li>读取 classpath {@code META-INF/open-admin/project-files/**}，逐文件字节比对后写入：</li>
+ *   <li>读取 classpath {@code META-INF/open-admin/framework-files/**}，逐文件字节比对后写入：</li>
  *   <li>{@code docs/open-admin/} 全量镜像（删除孤儿文件）；{@code .opencode/skills/} 仅覆盖写入（不删除未知 skill）</li>
  *   <li>根目录 {@code AGENTS.md} 仅当不存在时生成（不覆盖业务自定义）</li>
  * </ol>
@@ -38,9 +38,9 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Component
-public class ProjectFileSyncer implements CommandLineRunner {
+public class FrameworkFileSyncer implements CommandLineRunner {
 
-    static final String PAYLOAD_ROOT = "META-INF/open-admin/project-files/";
+    static final String PAYLOAD_ROOT = "META-INF/open-admin/framework-files/";
     static final String DOCS_REL = "docs/open-admin/";
 
     /** 框架自身的 Maven artifactId，用于识别框架仓库本身 */
@@ -51,7 +51,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
         try {
             sync(Paths.get(System.getProperty("user.dir")));
         } catch (Exception e) {
-            log.warn("[project-files] 框架文件同步失败: {}", e.getMessage());
+            log.warn("[framework-files] 框架文件同步失败: {}", e.getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
     void sync(Path userDir) throws IOException {
         List<PayloadFile> payload = readPayload();
         if (payload.isEmpty()) {
-            log.warn("[project-files] classpath 中未找到 {}，跳过同步", PAYLOAD_ROOT);
+            log.warn("[framework-files] classpath 中未找到 {}，跳过同步", PAYLOAD_ROOT);
             return;
         }
         Path projectRoot = locateProjectRoot(userDir);
@@ -69,11 +69,11 @@ public class ProjectFileSyncer implements CommandLineRunner {
             return;
         }
         if (isFrameworkRepo(projectRoot)) {
-            log.debug("[project-files] 当前为 open-admin 框架仓库（pom artifactId=open-admin），跳过框架文件同步");
+            log.debug("[framework-files] 当前为 open-admin 框架仓库（pom artifactId=open-admin），跳过框架文件同步");
             return;
         }
         int written = mirror(payload, projectRoot);
-        log.info("[project-files] 框架文件同步完成，新增/更新 {} 个文件 → {}", written, projectRoot);
+        log.info("[framework-files] 框架文件同步完成，新增/更新 {} 个文件 → {}", written, projectRoot);
     }
 
     /**
@@ -118,7 +118,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
             }
             return null;
         } catch (Exception e) {
-            log.warn("[project-files] 解析 pom.xml 失败: {}", e.getMessage());
+            log.warn("[framework-files] 解析 pom.xml 失败: {}", e.getMessage());
             return null;
         }
     }
@@ -127,7 +127,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
      * 从代码源（target/classes 目录或 jar）读取 payload 文件清单。
      */
     List<PayloadFile> readPayload() throws IOException {
-        URL location = ProjectFileSyncer.class.getProtectionDomain().getCodeSource().getLocation();
+        URL location = FrameworkFileSyncer.class.getProtectionDomain().getCodeSource().getLocation();
         if (location == null) {
             return List.of();
         }
@@ -138,7 +138,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
             return List.of();
         }
         if (Files.isDirectory(source)) {
-            return readPayloadDir(source.resolve("META-INF").resolve("open-admin").resolve("project-files"));
+            return readPayloadDir(source.resolve("META-INF").resolve("open-admin").resolve("framework-files"));
         }
         if (Files.isRegularFile(source)) {
             return readPayloadJar(source);
@@ -205,12 +205,12 @@ public class ProjectFileSyncer implements CommandLineRunner {
             }
             Path target = root.resolve(rel).normalize();
             if (!target.startsWith(root)) {
-                log.warn("[project-files] 忽略越界路径: {}", rel);
+                log.warn("[framework-files] 忽略越界路径: {}", rel);
                 continue;
             }
             if (writeIfChanged(pf.content, target)) {
                 written++;
-                log.info("[project-files] 写入 {}", rel);
+                log.info("[framework-files] 写入 {}", rel);
             }
         }
         written += cleanupDocsOrphans(docRels, root.resolve(DOCS_REL).normalize());
@@ -232,7 +232,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
         }
         Files.createDirectories(root);
         Files.write(rootFile, content);
-        log.info("[project-files] 生成 AGENTS.md（业务项目根目录）");
+        log.info("[framework-files] 生成 AGENTS.md（业务项目根目录）");
         return 1;
     }
 
@@ -270,7 +270,7 @@ public class ProjectFileSyncer implements CommandLineRunner {
                 String rel = docsDir.relativize(f).toString().replace('\\', '/');
                 if (!managedRels.contains(rel)) {
                     Files.deleteIfExists(f);
-                    log.info("[project-files] 删除孤儿文档: {}{}", DOCS_REL, rel);
+                    log.info("[framework-files] 删除孤儿文档: {}{}", DOCS_REL, rel);
                     removed++;
                 }
             }

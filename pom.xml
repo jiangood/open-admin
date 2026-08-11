@@ -337,13 +337,13 @@
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>package-project-files</id>
+                        <id>package-framework-files</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>
                         <configuration>
-                            <outputDirectory>${project.build.outputDirectory}/META-INF/open-admin/project-files</outputDirectory>
+                            <outputDirectory>${project.build.outputDirectory}/META-INF/open-admin/framework-files</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>${project.basedir}/.opencode/skills</directory>

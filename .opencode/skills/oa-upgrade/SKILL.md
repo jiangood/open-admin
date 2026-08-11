@@ -107,13 +107,13 @@ npm run build
 
 ### 7. 框架文件自动同步（skills + docs + AGENTS.md）
 
-框架 JAR 内置业务侧 skills 与文档（`META-INF/open-admin/project-files/`），业务项目**启动后端时按内容比对自动同步**到项目根目录：
+框架 JAR 内置业务侧 skills 与文档（`META-INF/open-admin/framework-files/`），业务项目**启动后端时按内容比对自动同步**到项目根目录：
 
 - `<项目根>/.opencode/skills/oa-crud/`、`oa-upgrade/` — 覆盖写入（不删除业务本地 skill）
 - `<项目根>/docs/open-admin/*.md` — 全量镜像（删除孤儿文件）
 - `<项目根>/AGENTS.md` — 仅在不存在时生成（不覆盖业务自定义）；新版本随 `docs/open-admin/AGENTS.md` 提供
 
-无需手动复制。若本次升级未启动后端，可告知开发者下次启动后生效。
+无需手动复制。**升级完成后必须启动一次后端**，`FrameworkFileSyncer` 会按内容比对把新版 `.opencode/skills/`、`docs/open-admin/`、`AGENTS.md` 重新同步到项目根目录；未启动后端则这些文件不会更新。请在最后显式提醒开发者：启动后端后确认框架相关文件已重新生成。
 
 ### 8. 其他检查（可选）
 

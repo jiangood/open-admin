@@ -16,17 +16,17 @@ import java.util.zip.ZipOutputStream;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * ProjectFileSyncer 单元测试（不依赖 Spring 容器）
+ * FrameworkFileSyncer 单元测试（不依赖 Spring 容器）
  */
-class ProjectFileSyncerTest {
+class FrameworkFileSyncerTest {
 
-    private static ProjectFileSyncer.PayloadFile payload(String rel, String content) {
-        return new ProjectFileSyncer.PayloadFile(rel, content.getBytes(StandardCharsets.UTF_8));
+    private static FrameworkFileSyncer.PayloadFile payload(String rel, String content) {
+        return new FrameworkFileSyncer.PayloadFile(rel, content.getBytes(StandardCharsets.UTF_8));
     }
 
     @Test
     void locateProjectRootFindsPomXml() {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         Path userDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
         Path root = syncer.locateProjectRoot(userDir);
         assertNotNull(root, "应从 user.dir 向上找到项目根");
@@ -36,13 +36,13 @@ class ProjectFileSyncerTest {
 
     @Test
     void locateProjectRootReturnsNullWithoutPomXml(@TempDir Path tmp) {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         assertNull(syncer.locateProjectRoot(tmp), "无 pom.xml 的目录（如生产 jar 部署）应返回 null");
     }
 
     @Test
     void frameworkRepoDetectedByArtifactId() {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         Path userDir = Path.of(System.getProperty("user.dir")).toAbsolutePath().normalize();
         Path root = syncer.locateProjectRoot(userDir);
         assertNotNull(root);
@@ -54,7 +54,7 @@ class ProjectFileSyncerTest {
         Files.writeString(tmp.resolve("pom.xml"),
                 "<project><parent><artifactId>spring-boot-starter-parent</artifactId></parent>"
                         + "<artifactId>open-admin</artifactId></project>");
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         assertTrue(syncer.isFrameworkRepo(tmp), "pom artifactId=open-admin 应识别为框架仓库");
     }
 
@@ -63,19 +63,19 @@ class ProjectFileSyncerTest {
         Files.writeString(tmp.resolve("pom.xml"),
                 "<project><parent><artifactId>spring-boot-starter-parent</artifactId></parent>"
                         + "<artifactId>my-biz-app</artifactId></project>");
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         assertFalse(syncer.isFrameworkRepo(tmp), "业务项目 pom 不应被识别为框架仓库");
     }
 
     @Test
     void dirWithoutPomNotDetected(@TempDir Path tmp) {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         assertFalse(syncer.isFrameworkRepo(tmp), "无 pom.xml 的目录不应被识别为框架仓库");
     }
 
     @Test
     void syncSkipsSilentlyWhenNoProjectRoot(@TempDir Path tmp) throws IOException {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         Path userDir = tmp.resolve("prod").resolve("app");
         Files.createDirectories(userDir);
 
@@ -89,8 +89,8 @@ class ProjectFileSyncerTest {
 
     @Test
     void mirrorFirstRunCreatesFiles(@TempDir Path tmp) throws IOException {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
-        List<ProjectFileSyncer.PayloadFile> payload = new ArrayList<>();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
+        List<FrameworkFileSyncer.PayloadFile> payload = new ArrayList<>();
         payload.add(payload("docs/open-admin/guide.md", "# guide v1"));
         payload.add(payload(".opencode/skills/oa-crud/SKILL.md", "# crud"));
 
@@ -103,8 +103,8 @@ class ProjectFileSyncerTest {
 
     @Test
     void mirrorSameContentWritesNothing(@TempDir Path tmp) throws IOException {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
-        List<ProjectFileSyncer.PayloadFile> payload = new ArrayList<>();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
+        List<FrameworkFileSyncer.PayloadFile> payload = new ArrayList<>();
         payload.add(payload("docs/open-admin/guide.md", "# guide v1"));
         payload.add(payload(".opencode/skills/oa-crud/SKILL.md", "# crud"));
 
@@ -119,8 +119,8 @@ class ProjectFileSyncerTest {
 
     @Test
     void mirrorGeneratesRootAgentsMdWhenMissing(@TempDir Path tmp) throws IOException {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
-        List<ProjectFileSyncer.PayloadFile> payload = new ArrayList<>();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
+        List<FrameworkFileSyncer.PayloadFile> payload = new ArrayList<>();
         payload.add(payload("docs/open-admin/AGENTS.md", "# AGENTS framework"));
 
         int written = syncer.mirror(payload, tmp);
@@ -132,9 +132,9 @@ class ProjectFileSyncerTest {
 
     @Test
     void mirrorDoesNotOverwriteExistingRootAgentsMd(@TempDir Path tmp) throws IOException {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         Files.writeString(tmp.resolve("AGENTS.md"), "# 业务自定义内容");
-        List<ProjectFileSyncer.PayloadFile> payload = new ArrayList<>();
+        List<FrameworkFileSyncer.PayloadFile> payload = new ArrayList<>();
         payload.add(payload("docs/open-admin/AGENTS.md", "# AGENTS framework"));
 
         int written = syncer.mirror(payload, tmp);
@@ -147,14 +147,14 @@ class ProjectFileSyncerTest {
 
     @Test
     void mirrorUpdatesCleansDocsOrphansButKeepsUnknownSkill(@TempDir Path tmp) throws IOException {
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
         // 预置：孤儿文档 + 未知 skill（业务本地，不应删除）
         Files.createDirectories(tmp.resolve("docs/open-admin"));
         Files.writeString(tmp.resolve("docs/open-admin/legacy.md"), "# legacy");
         Files.createDirectories(tmp.resolve(".opencode/skills/oa-publishing-release"));
         Files.writeString(tmp.resolve(".opencode/skills/oa-publishing-release/SKILL.md"), "# release");
 
-        List<ProjectFileSyncer.PayloadFile> payload = new ArrayList<>();
+        List<FrameworkFileSyncer.PayloadFile> payload = new ArrayList<>();
         payload.add(payload("docs/open-admin/guide.md", "# guide v2"));
         payload.add(payload("docs/open-admin/api.md", "# api"));
         payload.add(payload(".opencode/skills/oa-crud/SKILL.md", "# crud"));
@@ -177,8 +177,8 @@ class ProjectFileSyncerTest {
         Files.createDirectories(base.resolve(".opencode/skills/oa-crud"));
         Files.writeString(base.resolve(".opencode/skills/oa-crud/SKILL.md"), "# crud");
 
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
-        List<ProjectFileSyncer.PayloadFile> payload = syncer.readPayloadDir(base);
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
+        List<FrameworkFileSyncer.PayloadFile> payload = syncer.readPayloadDir(base);
 
         assertEquals(2, payload.size());
         assertTrue(payload.stream().anyMatch(p -> p.relativePath().equals("docs/open-admin/guide.md")));
@@ -189,10 +189,10 @@ class ProjectFileSyncerTest {
     void readPayloadJarReadsOnlyPayloadEntries(@TempDir Path tmp) throws IOException {
         Path jarPath = tmp.resolve("open-admin-test.jar");
         try (ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(jarPath.toFile()))) {
-            zos.putNextEntry(new ZipEntry("META-INF/open-admin/project-files/docs/open-admin/guide.md"));
+            zos.putNextEntry(new ZipEntry("META-INF/open-admin/framework-files/docs/open-admin/guide.md"));
             zos.write("# guide".getBytes(StandardCharsets.UTF_8));
             zos.closeEntry();
-            zos.putNextEntry(new ZipEntry("META-INF/open-admin/project-files/.opencode/skills/oa-crud/SKILL.md"));
+            zos.putNextEntry(new ZipEntry("META-INF/open-admin/framework-files/.opencode/skills/oa-crud/SKILL.md"));
             zos.write("# crud".getBytes(StandardCharsets.UTF_8));
             zos.closeEntry();
             zos.putNextEntry(new ZipEntry("META-INF/other/not-payload.txt"));
@@ -200,8 +200,8 @@ class ProjectFileSyncerTest {
             zos.closeEntry();
         }
 
-        ProjectFileSyncer syncer = new ProjectFileSyncer();
-        List<ProjectFileSyncer.PayloadFile> payload = syncer.readPayloadJar(jarPath);
+        FrameworkFileSyncer syncer = new FrameworkFileSyncer();
+        List<FrameworkFileSyncer.PayloadFile> payload = syncer.readPayloadJar(jarPath);
 
         assertEquals(2, payload.size());
         assertTrue(payload.stream().anyMatch(p -> p.relativePath().equals("docs/open-admin/guide.md")));

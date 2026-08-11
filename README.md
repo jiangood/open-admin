@@ -116,7 +116,7 @@ createRoot(document.getElementById('root')).render(
 
 ### 自动同步到业务项目
 
-框架 JAR 内置业务侧 skills 与文档（`META-INF/open-admin/project-files/`）。业务项目**启动后端时自动同步**到项目根目录：
+框架 JAR 内置业务侧 skills 与文档（`META-INF/open-admin/framework-files/`）。业务项目**启动后端时自动同步**到项目根目录：
 
 ```
 <项目根>/.opencode/skills/oa-crud/SKILL.md
