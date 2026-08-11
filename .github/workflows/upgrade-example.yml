@@ -1,0 +1,141 @@
+name: Auto Upgrade Example
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      target_version:
+        description: '目标框架版本号（留空则自动取最新发布版本，如 3.0.10）'
+        required: false
+        type: string
+      model:
+        description: 'opencode 模型（默认免费模型，无需 API Key）'
+        required: false
+        type: string
+        default: 'opencode/deepseek-v4-flash-free'
+
+concurrency:
+  group: auto-upgrade-example
+  cancel-in-progress: false
+
+jobs:
+  upgrade-example:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 获取最新框架版本
+        id: version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ inputs.target_version }}" ]; then
+            echo "version=${{ inputs.target_version }}" >> "$GITHUB_OUTPUT"
+          else
+            LATEST=$(gh release list --repo jiangood/open-admin -L 1 --json tagName --jq '.[0].tagName')
+            echo "version=${LATEST#v}" >> "$GITHUB_OUTPUT"
+          fi
+          echo "目标版本: v${{ steps.version.outputs.version }}"
+
+      - name: 检出 open-admin 源码（目标版本，用于同步 skills/docs）
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          ref: v${{ steps.version.outputs.version }}
+
+      - name: 检出示例项目
+        env:
+          EXAMPLE_PAT: ${{ secrets.EXAMPLE_PAT }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${EXAMPLE_PAT}@github.com/jiangood/open-admin-example.git" example
+          cd example
+          git config user.name "open-admin-bot"
+          git config user.email "open-admin-bot@users.noreply.github.com"
+
+      - name: 对比版本（无新版本则直接结束）
+        id: check
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          POM_VER=$(grep -A3 '<artifactId>open-admin</artifactId>' example/pom.xml | grep -oP '<version>\K[^<]+' | head -1)
+          NPM_VER=$(jq -r '.dependencies["@jiangood/open-admin"]' example/web/package.json | sed 's/\^//')
+          echo "当前版本: pom=$POM_VER npm=$NPM_VER, 目标: $VERSION"
+          if [ -z "$POM_VER" ] || [ -z "$NPM_VER" ]; then
+            echo "::error::未能从示例项目解析框架版本（pom=$POM_VER npm=$NPM_VER）"
+            exit 1
+          fi
+          if [ "$POM_VER" = "$VERSION" ] && [ "$NPM_VER" = "$VERSION" ]; then
+            echo "示例项目已是最新版本 $VERSION，无需升级"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 设置 JDK 21
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: 设置 Node.js
+        if: steps.check.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: 安装 opencode
+        if: steps.check.outputs.skip != 'true'
+        run: npm i -g opencode-ai
+
+      - name: opencode 执行升级（oa-upgrade skill）
+        if: steps.check.outputs.skip != 'true'
+        working-directory: example
+        env:
+          OPENCODE_MODEL: ${{ inputs.model || 'opencode/deepseek-v4-flash-free' }}
+        run: |
+          opencode run -m "$OPENCODE_MODEL" --auto \
+            "请使用项目内置的 oa-upgrade skill，将 open-admin 框架从当前版本升级到 v${{ steps.version.outputs.version }}。要求：
+             1) 按 skill 流程直接执行，不要询问确认，直接升级 pom.xml 中 io.github.jiangood:open-admin 与 web/package.json 中 @jiangood/open-admin 的版本；
+             2) 用 webfetch 读取 https://github.com/jiangood/open-admin/releases/tag/v${{ steps.version.outputs.version }} 的 Release Notes 与对应提交日志，处理 Breaking Changes 与代码迁移；
+             3) 运行 mvn clean compile 和 cd web && npm run build 验证并修复问题；
+             4) 不要执行 git commit / git push。"
+
+      - name: 后端编译验证（push 前硬性门槛）
+        if: steps.check.outputs.skip != 'true'
+        working-directory: example
+        run: mvn clean compile
+
+      - name: 前端构建验证（push 前硬性门槛）
+        if: steps.check.outputs.skip != 'true'
+        working-directory: example/web
+        run: |
+          npm install
+          npm run build
+
+      - name: 同步框架 skills/docs（与 FrameworkFileSyncer 行为一致）
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          set -e
+          cd example
+          rm -rf docs/open-admin
+          mkdir -p docs/open-admin
+          cp -r "$GITHUB_WORKSPACE"/docs/open-admin/. docs/open-admin/
+          mkdir -p .opencode/skills/oa-crud .opencode/skills/oa-upgrade
+          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-crud/SKILL.md" .opencode/skills/oa-crud/SKILL.md
+          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade/SKILL.md" .opencode/skills/oa-upgrade/SKILL.md
+          if [ ! -f AGENTS.md ]; then
+            cp docs/open-admin/AGENTS.md AGENTS.md
+          fi
+
+      - name: 提交并推送
+        if: steps.check.outputs.skip != 'true'
+        working-directory: example
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "无变更，跳过提交"
+            exit 0
+          fi
+          git commit -m "chore: upgrade open-admin to v$VERSION"
+          git push origin master
