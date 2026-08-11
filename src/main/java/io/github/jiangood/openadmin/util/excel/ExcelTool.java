@@ -181,7 +181,7 @@ public class ExcelTool {
     }
 
 
-    public static void everyCell(XSSFSheet sheet, Consumer<XSSFCell> fn) {
+    public static void forEachCell(XSSFSheet sheet, Consumer<XSSFCell> fn) {
         Iterator<Row> rowIterator = sheet.rowIterator();
 
         while (rowIterator.hasNext()) {
@@ -345,7 +345,7 @@ public class ExcelTool {
     public static List<String> getEmptyCells(XSSFSheet sheet) {
         List<String> coordsList = new ArrayList<>();
 
-        everyCell(sheet, cell -> {
+        forEachCell(sheet, cell -> {
             String coords = getCoords(cell);
 
             Object cellValue = getCellValue(cell);
