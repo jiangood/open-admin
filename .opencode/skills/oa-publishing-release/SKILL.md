@@ -22,6 +22,12 @@ Automates the release workflow for open-admin framework projects: check latest r
 - Maven + Node.js available
 - Ports 8080 + 3000 free (for E2E tests, if applicable)
 
+## Immediate Execution
+
+**When this skill is invoked, begin executing immediately. Do NOT ask "What would you like me to do?" or wait for further instructions. Do NOT stop to clarify — run the workflow from Step 1 onwards.**
+
+The only place you pause for user input is Step 2, where you present the version options via the question tool. After the user confirms, continue through Step 7 without further confirmation.
+
 ## Workflow
 
 ### 1. Check Remote Release Version
@@ -41,7 +47,7 @@ Compute default suggestion (patch bump), then present options:
 # Options: patch (3.0.2), minor (3.1.0), major (4.0.0), custom
 ```
 
-Present to user with question tool. Only continue after user confirms.
+**Immediately invoke the `question` tool with these options (patch / minor / major / custom), with the default patch bump marked "(Recommended)". Do NOT narrate the choices in plain text and wait — the question tool is what pops up the selectable version options. Only continue after the user confirms.**
 
 ### 3. Bump Version
 
