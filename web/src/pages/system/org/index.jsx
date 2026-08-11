@@ -157,6 +157,7 @@ export default class extends React.Component {
                         </div>
                         {selectedOrg && (
                             <Descriptions size='small' column={2}>
+                                <Descriptions.Item label="唯一标识">{selectedOrg.id}</Descriptions.Item>
                                 <Descriptions.Item label="名称">{selectedOrg.name}</Descriptions.Item>
                                 <Descriptions.Item label="类型">{selectedOrg.typeLabel}</Descriptions.Item>
                                 <Descriptions.Item label="上级机构">{selectedOrg.parentName || '-'}</Descriptions.Item>
