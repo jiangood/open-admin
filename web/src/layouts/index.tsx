@@ -44,6 +44,7 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     unlisten: (() => void) | null = null;
     unsubscribeLoginExpired: (() => void) | null = null;
+    unsubscribeLogoutSuccess: (() => void) | null = null;
 
     constructor(props: LayoutsProps) {
         super(props);
@@ -108,6 +109,9 @@ export class Layouts extends React.Component<LayoutsProps> {
                 this.setState({loginExpiredVisible: true});
             }
         });
+        this.unsubscribeLogoutSuccess = EventBus.on('logoutSuccess', () => {
+            this.setState({loginChecked: false});
+        });
         this.loadData();
     }
 
@@ -123,6 +127,9 @@ export class Layouts extends React.Component<LayoutsProps> {
         }
         if (this.unsubscribeLoginExpired) {
             this.unsubscribeLoginExpired();
+        }
+        if (this.unsubscribeLogoutSuccess) {
+            this.unsubscribeLogoutSuccess();
         }
     }
 
@@ -153,7 +160,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             <Modal open={this.state.loginExpiredVisible} title="确认操作" okText="确定"
                    onCancel={() => this.setState({loginExpiredVisible: false})}
                    onOk={() => {
-                       this.setState({loginExpiredVisible: false});
+                       this.setState({loginExpiredVisible: false, loginChecked: false});
                        PageUtils.redirectToLogin();
                    }}>
                 登录已过期，请重新登录

@@ -1,6 +1,6 @@
 import {Avatar, Dropdown, Modal} from "antd";
 import React from "react";
-import {DeviceUtils, HttpUtils, PageUtils, GlobalData, getToken, history, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {DeviceUtils, HttpUtils, PageUtils, GlobalData, getToken, history, EventBus, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -100,6 +100,7 @@ export class HeaderRight extends React.Component {
                    onCancel={() => this.setState({alertVisible: false})}
                    onOk={() => {
                        this.setState({alertVisible: false});
+                        EventBus.emit('logoutSuccess');
                         history.replace('/public/login')
                     }}>
                  退出登录成功
@@ -109,6 +110,7 @@ export class HeaderRight extends React.Component {
                    onOk={() => {
                        this.setState({confirmVisible: false});
                        localStorage.clear();
+                       EventBus.emit('logoutSuccess');
                        history.replace('/public/login')
                    }}>
                 退出登录失败，是否清空缓存
