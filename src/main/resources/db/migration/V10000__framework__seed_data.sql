@@ -20,7 +20,7 @@ INSERT INTO sys_dict_type (id, pid, type_code, type_label, enabled, seq, create_
 -- ---------------------------------------------------------------------------
 
 INSERT INTO sys_org (id, name, seq, enabled, type, create_time, update_time)
-VALUES ('1', '默认单位（请修改）', 0, TRUE, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES ('1', '默认单位', 0, TRUE, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 
 
