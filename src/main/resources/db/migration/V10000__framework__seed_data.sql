@@ -36,7 +36,7 @@ VALUES ('1', 'admin', '管理员', '["*"]', TRUE, '系统生成', CURRENT_TIMEST
 -- ---------------------------------------------------------------------------
 
 INSERT INTO sys_user (id, account, name, unit_id,org_id, password, data_perm_type, enabled, last_password_change_time, create_time, update_time)
-VALUES ('1', 'admin', '''管理员', '1','1','$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG', 'ALL', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+VALUES ('1', 'admin', '管理员', '1','1','$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG', 'ALL', TRUE, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- ---------------------------------------------------------------------------
 -- 管理员用户-角色关联
