@@ -142,6 +142,9 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
         }
         filename = parsedName;
       }
+      if (filename && filename !== this.state.fileName) {
+        this.setState({fileName: filename});
+      }
 
       const url = window.URL.createObjectURL(new Blob([blob]));
       const link = document.createElement('a');
