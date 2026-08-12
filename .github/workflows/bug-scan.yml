@@ -37,6 +37,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          gh label create bug-scan --description 'AI Bug Scan workflow 自动发现' --force || true
           gh issue list --state open --label bug-scan --json number,title,body > existing-issues.json
           echo "已有 open bug-scan issues: $(jq length existing-issues.json)"
 
@@ -68,7 +69,7 @@ jobs:
           if not Path('findings.json').exists():
               print('findings.json 不存在，跳过')
               sys.exit(0)
-          findings = json.loads(Path('findings.json').read_text(encoding='utf-8'))
+          findings = json.loads(Path('findings.json').read_text(encoding='utf-8-sig'))
           if not findings:
               print('findings.json 为空，跳过')
               sys.exit(0)
