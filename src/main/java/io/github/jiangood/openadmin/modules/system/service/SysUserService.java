@@ -157,7 +157,10 @@ public class SysUserService extends BaseService<SysUser> {
         Assert.hasText(newPassword, "请输入新密码");
         SysUser sysUser = sysUserRepository.findById(userId).orElse(null);
         Assert.notNull(sysUser, "用户不存在");
-        Assert.state(passwordEncoder.matches(oldPassword, sysUser.getPassword()), "旧密码不正确");
+        // 强制改密（首次登录或密码被管理员重置，lastPasswordChangeTime 为空）时无旧密码可校验，直接放行
+        if (sysUser.getLastPasswordChangeTime() != null) {
+            Assert.state(passwordEncoder.matches(oldPassword, sysUser.getPassword()), "旧密码不正确");
+        }
 
         PasswordTool.validateStrength(newPassword);
 
