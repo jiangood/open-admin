@@ -59,6 +59,11 @@ public class SysJob extends BaseEntity {
         return Collections.emptyMap();
     }
 
+    @Transient
+    public String getJobClassName() {
+        return jobClass == null ? null : jobClass.substring(jobClass.lastIndexOf('.') + 1);
+    }
+
 
     @PrePersist
     @PreUpdate

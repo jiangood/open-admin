@@ -13,7 +13,7 @@ import {
     Tag
 } from 'antd'
 import {PlusOutlined} from "@ant-design/icons";
-import {FormModal, HttpUtils, Page, PermActions, ProTable, StringUtils, UrlUtils, ValueType} from "../../../framework";
+import {FormModal, HttpUtils, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -117,8 +117,7 @@ export default class extends React.Component {
         },
         {
             title: '执行类',
-            dataIndex: 'jobClass',
-
+            dataIndex: 'jobClassName',
         },
 
         {
@@ -311,8 +310,9 @@ export default class extends React.Component {
             const option = this.state.jobClassOptions.find(o => o.value === changed.jobClass)
             if (option) {
                 const {label} = option;
-                if (StringUtils.contains(label, " ")) { // 取中文名部门设置为name
-                    this.modalRef.current.formInstance.setFieldValue("name", label.split(" ")[1])
+                const match = label.match(/[（(](.*?)[）)]/);
+                if (match) { // 取括号内中文描述设置为name
+                    this.modalRef.current.formInstance.setFieldValue("name", match[1])
                 }
             }
         }

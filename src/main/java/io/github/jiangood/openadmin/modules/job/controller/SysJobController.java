@@ -103,14 +103,15 @@ public class SysJobController {
                 })
                 .map(cls -> {
                     String name = cls.getName();
+                    String simpleName = cls.getSimpleName();
 
                     Option option = new Option();
                     option.setValue(name);
-                    option.setLabel(name);
+                    option.setLabel(simpleName);
 
                     JobDescription jobDesc = cls.getAnnotation(JobDescription.class);
                     if (jobDesc != null) {
-                        option.setLabel(name + " " + jobDesc.label());
+                        option.setLabel(simpleName + "（" + jobDesc.label() + "）");
                     }
 
                     return option;
