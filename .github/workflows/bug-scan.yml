@@ -56,8 +56,7 @@ jobs:
           1. 只报告高置信度的确凿 bug，宁缺毋滥；没有确凿 bug 就输出空数组 []
           2. 先用 Write 工具把结果写入 findings.json，格式为 JSON 数组（不要 Markdown 代码块包裹），每条记录字段：title(string)、severity(high|medium|low)、category(logic|interaction)、file(相对路径)、line(行号，尽量精确)、description(为什么是 bug)、suggestion(修复建议)
           3. 去重：先读取 existing-issues.json，对每个候选 bug 由 AI 按问题本质判断（而非仅标题文本）是否与已有 open issue 重复；重复的跳过，不写入 findings.json
-          4. 最后一条消息必须是原始 JSON 数组本身（与 findings.json 内容完全一致，不要任何解释文字、不要 Markdown 代码块围栏）。如果无法调用 Write 工具，则仅把 JSON 数组作为最后一条消息输出即可。"
-          | tee scan-output.jsonl
+          4. 最后一条消息必须是原始 JSON 数组本身（与 findings.json 内容完全一致，不要任何解释文字、不要 Markdown 代码块围栏）。如果无法调用 Write 工具，则仅把 JSON 数组作为最后一条消息输出即可。" | tee scan-output.jsonl
 
       - name: 解析扫描结果并创建 Issue
         env:
