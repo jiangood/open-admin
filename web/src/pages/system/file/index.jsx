@@ -90,9 +90,7 @@ export default class extends React.Component {
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => (
-                    <PermActions>
-                        <Button type='primary' perm='sys-file:upload' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
-                    </PermActions>
+                    <Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
                 )}
                 request={(params) => {
                     return HttpUtils.get('admin/sysFile/page', params);
