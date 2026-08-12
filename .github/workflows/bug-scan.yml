@@ -45,20 +45,21 @@ jobs:
         env:
           OPENCODE_MODEL: ${{ inputs.model || 'opencode/deepseek-v4-flash-free' }}
         run: |
-          opencode run -m "$OPENCODE_MODEL" --auto "请对 open-admin 框架仓库做一次全面的 bug 扫描。重点找【逻辑 bug】与【前后端交互 bug】，不找优化、性能、代码风格、重构类问题。
+          opencode run -m "$OPENCODE_MODEL" --auto --format json "请对 open-admin 框架仓库做一次全面的 bug 扫描。重点找【逻辑 bug】与【前后端交互 bug】，不找优化、性能、代码风格、重构类问题。
           扫描范围：
           1) 后端 src/main/java 全部代码
           2) 前端 web/src 全部代码
           要找的问题：
           1. 逻辑 bug：空指针、事务边界、查询条件错误、状态流转、分页边界、权限校验、并发、数据一致性等
           2. 前后端交互 bug：URL 路径与方法不匹配、请求参数名/类型与后端 DTO 不一致、响应字段名与前端取值不一致、分页参数（pageNum/pageSize）约定不匹配、权限码（后端 @HasPermission 与前端 PermActions）不一致、字典值不一致等
-          输出要求：
-          1. 只报告高置信度的确凿 bug，宁缺毋滥；没有确凿 bug 就写入空数组 []
-          2. 用 Write 工具把结果写入 findings.json，格式为 JSON 数组，每条记录字段：title(string)、severity(high|medium|low)、category(logic|interaction)、file(相对路径)、line(行号，尽量精确)、description(为什么是 bug)、suggestion(修复建议)
+          输出要求（严格遵守，这是自动化的核心契约）：
+          1. 只报告高置信度的确凿 bug，宁缺毋滥；没有确凿 bug 就输出空数组 []
+          2. 先用 Write 工具把结果写入 findings.json，格式为 JSON 数组（不要 Markdown 代码块包裹），每条记录字段：title(string)、severity(high|medium|low)、category(logic|interaction)、file(相对路径)、line(行号，尽量精确)、description(为什么是 bug)、suggestion(修复建议)
           3. 去重：先读取 existing-issues.json，对每个候选 bug 由 AI 按问题本质判断（而非仅标题文本）是否与已有 open issue 重复；重复的跳过，不写入 findings.json
-          最后在回复中总结扫描结果。"
+          4. 最后一条消息必须是原始 JSON 数组本身（与 findings.json 内容完全一致，不要任何解释文字、不要 Markdown 代码块围栏）。如果无法调用 Write 工具，则仅把 JSON 数组作为最后一条消息输出即可。"
+          | tee scan-output.jsonl
 
-      - name: 解析 findings.json 并创建 Issue
+      - name: 解析扫描结果并创建 Issue
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -66,12 +67,45 @@ jobs:
           import json, subprocess, sys
           from pathlib import Path
 
-          if not Path('findings.json').exists():
-              print('findings.json 不存在，跳过')
-              sys.exit(0)
-          findings = json.loads(Path('findings.json').read_text(encoding='utf-8-sig'))
+          def extract_from_output():
+              for line in Path('scan-output.jsonl').read_text(encoding='utf-8-sig', errors='replace').splitlines():
+                  line = line.strip()
+                  if not line.startswith('{'):
+                      continue
+                  try:
+                      event = json.loads(line)
+                  except json.JSONDecodeError:
+                      continue
+                  if event.get('type') != 'text':
+                      continue
+                  text = (event.get('part') or {}).get('text', '')
+                  stripped = text.strip()
+                  if not stripped:
+                      continue
+                  if stripped.startswith('```'):
+                      stripped = stripped.strip('`')
+                      for prefix in ('json', 'JSON'):
+                          if stripped.startswith(prefix):
+                              stripped = stripped[len(prefix):].lstrip()
+                  stripped = stripped.strip()
+                  if stripped.startswith('[') and stripped.endswith(']'):
+                      try:
+                          return json.loads(stripped)
+                      except json.JSONDecodeError:
+                          continue
+              return None
+
+          findings = None
+          if Path('findings.json').exists():
+              try:
+                  findings = json.loads(Path('findings.json').read_text(encoding='utf-8-sig'))
+              except json.JSONDecodeError as e:
+                  print(f'findings.json 解析失败: {e}')
+          if findings is None:
+              print('findings.json 缺失或无效，尝试从 scan-output.jsonl 提取')
+              findings = extract_from_output()
           if not findings:
-              print('findings.json 为空，跳过')
+              print('未发现确凿 bug 或提取失败，结束')
               sys.exit(0)
 
           created = 0
@@ -122,5 +156,6 @@ jobs:
           name: bug-scan-report
           path: |
             findings.json
+            scan-output.jsonl
             bug-scan-report.md
           if-no-files-found: warn
