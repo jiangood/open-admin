@@ -296,7 +296,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
                 onOk={handleConfirm}
                 onCancel={closeModal}
                 confirmLoading={uploading}
-                okButtonProps={{disabled: needsCrop}}
+                okButtonProps={{disabled: needsCrop || !preview}}
             >
                 {cropperActive ? (
                     <div>
