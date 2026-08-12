@@ -49,7 +49,7 @@ public class SysJobController {
         return AjaxResult.ok().data(service.page(name, jobClass, pageable));
     }
 
-    @Log("作业-创建")
+    @Log("定时任务-创建")
     @HasPermission("job:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody SysJob param) throws Exception {
@@ -58,7 +58,7 @@ public class SysJobController {
         return AjaxResult.ok().msg("创建成功");
     }
 
-    @Log("作业-更新")
+    @Log("定时任务-更新")
     @HasPermission("job:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody SysJob param, RequestBodyKeys updateFields) throws Exception {
@@ -75,7 +75,7 @@ public class SysJobController {
     }
 
 
-    @Log("作业-执行一次")
+    @Log("定时任务-执行一次")
     @HasPermission("job:trigger")
     @PostMapping("trigger-job")
     public AjaxResult triggerJob(@Valid @RequestBody IdReq req) throws SchedulerException, ClassNotFoundException {

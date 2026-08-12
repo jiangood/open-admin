@@ -15,7 +15,7 @@ import org.springframework.util.Assert;
 import java.util.Collections;
 import java.util.Map;
 
-@Remark("作业")
+@Remark("定时任务")
 @Getter
 @Setter
 @Entity

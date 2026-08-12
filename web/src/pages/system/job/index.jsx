@@ -61,7 +61,7 @@ export default class extends React.Component {
         HttpUtils.get('admin/job/job-class-options').then(rs => {
             this.setState({jobClassOptions: rs})
         }).catch(e => {
-            console.error('[Job] 加载作业类选项失败:', e);
+            console.error('[Job] 加载任务类选项失败:', e);
         })
     }
 
@@ -79,7 +79,7 @@ export default class extends React.Component {
         HttpUtils.post("admin/job/get-job-param-fields", jobData || {}, {className}).then(rs => {
             this.setState({paramList: rs})
         }).catch(e => {
-            console.error('[Job] 加载作业参数字段失败:', e);
+            console.error('[Job] 加载任务参数字段失败:', e);
         })
     }
 
@@ -91,12 +91,12 @@ export default class extends React.Component {
     }
 
     handleDelete = row => {
-        const hide = message.loading("删除作业中...")
+        const hide = message.loading("删除任务中...")
         HttpUtils.post('admin/job/delete', {id: row.id}).then(rs => {
             hide();
             this.tableRef.current.reload();
         }).catch(e => {
-            console.error('[Job] 删除作业失败:', e);
+            console.error('[Job] 删除任务失败:', e);
             hide();
         })
     }
@@ -105,7 +105,7 @@ export default class extends React.Component {
         HttpUtils.post('admin/job/trigger-job', {id: row.id}).then(rs => {
             this.tableRef.current.reload();
         }).catch(e => {
-            console.error('[Job] 触发作业失败:', e);
+            console.error('[Job] 触发任务失败:', e);
         })
     }
 
@@ -181,7 +181,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page title="作业调度" description="管理定时作业任务">
+        return <Page title="定时任务" description="管理定时任务">
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => (
@@ -205,7 +205,7 @@ export default class extends React.Component {
             />
 
 
-            <FormModal ref={this.modalRef} title='作业调度' width={800}
+            <FormModal ref={this.modalRef} title='定时任务' width={800}
                        onFinish={this.onFinish}
                        onValuesChange={this.onValuesChange}>
                 <Form.Item label='执行类' name='jobClass' rules={[{required: true}]}
@@ -227,7 +227,7 @@ export default class extends React.Component {
 
                 {this.state.paramList?.map(p => (
                     <div key={p.name}>
-                        <Divider>作业参数</Divider>
+                        <Divider>任务参数</Divider>
                         <Form.Item label={p.label}
                                    name={['jobData', p.name]}
                                    key={p.name}
@@ -242,7 +242,7 @@ export default class extends React.Component {
                 ))}
             </FormModal>
 
-            <Modal title='作业调度状态'
+            <Modal title='定时任务状态'
                    open={this.state.statusOpen}
                    onCancel={() => this.setState({statusOpen: false})}
                    footer={null}
@@ -252,7 +252,7 @@ export default class extends React.Component {
 
             </Modal>
 
-            <Modal title='作业调度记录'
+            <Modal title='定时任务记录'
                    open={this.state.executeRecordOpen}
                    onCancel={() => this.setState({executeRecordOpen: false})}
                    footer={null}
