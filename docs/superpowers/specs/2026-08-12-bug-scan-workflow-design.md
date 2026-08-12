@@ -45,10 +45,9 @@ on:
 
 1. `actions/checkout@v5`（默认分支，`fetch-depth: 1`）
 2. 安装 opencode：`npm i -g opencode-ai`
-3. 设置 JDK 21（供后续可选编译验证，参考 upgrade-repos）
-4. 获取已有 open Issue 列表（供 AI 去重参考）
+3. 获取已有 open Issue 列表（供 AI 去重参考）
    - `gh issue list --state open --label bug-scan --json number,title,body` 输出到 `existing-issues.json`
-5. `opencode run -m $MODEL --auto` 单次全扫
+4. `opencode run -m $MODEL --auto` 单次全扫
    - 扫描范围：后端 `src/main/java` + 前端 `web/src`
    - 要求 opencode 将发现写入 `findings.json`（工作目录下的文件）
    - 提示词约束：
@@ -57,7 +56,7 @@ on:
      - 只报告高置信度的确凿 bug，宁缺毋滥
      - **AI 判断去重**：先读取 `existing-issues.json`，对每个候选 bug 由 AI 判断（按问题本质，而非仅标题文本）是否与已有 open Issue 重复；重复则跳过，不写入 findings.json
    - 环境变量 `OPENCODE_MODEL` 控制模型（同 upgrade-repos 模式）
-6. 解析 `findings.json` 并创建 Issue
+5. 解析 `findings.json` 并创建 Issue
    - 遍历每条记录直接 `gh issue create`，body 含位置（file:line）、原因、修复建议
    - 使用 `GITHUB_TOKEN`（workflow 自动注入，有 issues:write 权限）
    - 创建前可再用 `gh issue list --search` 做一道轻量兜底查重（AI 已判断为主，此步防并发）
