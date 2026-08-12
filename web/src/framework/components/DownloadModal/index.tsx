@@ -281,8 +281,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
         <div style={{padding: '20px 0'}}>
           {/* 文件名 */}
           <div style={{marginBottom: 16, fontSize: 15, fontWeight: 500, color: '#333'}}>
-            <DownloadOutlined style={{marginRight: 8}}/>
-            {fileName || '未知文件'}
+            文件名：{fileName || '未知文件'}
           </div>
 
           {/* 下载中 */}
