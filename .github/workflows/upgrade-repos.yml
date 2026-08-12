@@ -1,4 +1,4 @@
-name: Auto Upgrade Example
+name: Auto Upgrade Framework Consumers
 
 on:
   schedule:
@@ -16,13 +16,30 @@ on:
         default: 'opencode/deepseek-v4-flash-free'
 
 concurrency:
-  group: auto-upgrade-example
+  group: auto-upgrade-framework-consumers
   cancel-in-progress: false
 
 jobs:
-  upgrade-example:
+  upgrade:
+    name: upgrade-${{ matrix.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: example
+            repo: open-admin-example
+            branch: master
+            frontend_build: 'npm run build'
+          - name: docker-admin
+            repo: docker-admin
+            branch: main
+            frontend_build: 'npm run build'
+          - name: flowable
+            repo: open-admin-flowable
+            branch: master
+            frontend_build: ''
     steps:
       - name: 获取最新框架版本
         id: version
@@ -43,17 +60,17 @@ jobs:
           fetch-depth: 1
           ref: v${{ steps.version.outputs.version }}
 
-      - name: 检出示例项目
+      - name: 检出 ${{ matrix.repo }}
         env:
           EXAMPLE_PAT: ${{ secrets.EXAMPLE_PAT }}
           GIT_TERMINAL_PROMPT: 0
         run: |
           if [ -z "$EXAMPLE_PAT" ]; then
-            echo "::error::未配置 EXAMPLE_PAT 密钥（需对 jiangood/open-admin-example 有 repo 写权限的 PAT）"
+            echo "::error::未配置 EXAMPLE_PAT 密钥（需对 jiangood/${{ matrix.repo }} 有 repo 写权限的 PAT）"
             exit 1
           fi
-          git clone --depth 1 "https://x-access-token:${EXAMPLE_PAT}@github.com/jiangood/open-admin-example.git" example
-          cd example
+          git clone --depth 1 "https://x-access-token:${EXAMPLE_PAT}@github.com/jiangood/${{ matrix.repo }}.git" repo
+          cd repo
           git config user.name "open-admin-bot"
           git config user.email "open-admin-bot@users.noreply.github.com"
 
@@ -61,18 +78,33 @@ jobs:
         id: check
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          POM_VER=$(grep -A3 '<artifactId>open-admin</artifactId>' example/pom.xml | grep -oP '<version>\K[^<]+' | head -1)
-          NPM_VER=$(jq -r '.dependencies["@jiangood/open-admin"]' example/web/package.json | sed 's/\^//')
+          POM_VER=$(grep -A3 '<artifactId>open-admin</artifactId>' repo/pom.xml | grep -oP '<version>\K[^<]+' | head -1)
+          NPM_VER=$(jq -r '(.dependencies // {})["@jiangood/open-admin"] // (.peerDependencies // {})["@jiangood/open-admin"] // empty' repo/web/package.json 2>/dev/null | sed 's/[\^~]//')
           echo "当前版本: pom=$POM_VER npm=$NPM_VER, 目标: $VERSION"
-          if [ -z "$POM_VER" ] || [ -z "$NPM_VER" ]; then
-            echo "::error::未能从示例项目解析框架版本（pom=$POM_VER npm=$NPM_VER）"
+          if [ -z "$POM_VER" ]; then
+            echo "::error::未能从 ${{ matrix.repo }} pom.xml 解析 open-admin 版本"
             exit 1
           fi
-          if [ "$POM_VER" = "$VERSION" ] && [ "$NPM_VER" = "$VERSION" ]; then
-            echo "示例项目已是最新版本 $VERSION，无需升级"
+          if [ "$POM_VER" = "$VERSION" ] && { [ -z "$NPM_VER" ] || [ "$NPM_VER" = "$VERSION" ]; }; then
+            echo "${{ matrix.repo }} 已是最新版本 $VERSION，无需升级"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 同步框架 skills/docs 到仓库（供 opencode 发现 oa-upgrade skill）
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          set -e
+          cd repo
+          rm -rf docs/open-admin
+          mkdir -p docs/open-admin
+          cp -r "$GITHUB_WORKSPACE"/docs/open-admin/. docs/open-admin/
+          mkdir -p .opencode/skills/oa-crud .opencode/skills/oa-upgrade
+          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-crud/SKILL.md" .opencode/skills/oa-crud/SKILL.md
+          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade/SKILL.md" .opencode/skills/oa-upgrade/SKILL.md
+          if [ ! -f AGENTS.md ]; then
+            cp docs/open-admin/AGENTS.md AGENTS.md
           fi
 
       - name: 设置 JDK 21
@@ -94,7 +126,7 @@ jobs:
 
       - name: opencode 执行升级（oa-upgrade skill）
         if: steps.check.outputs.skip != 'true'
-        working-directory: example
+        working-directory: repo
         env:
           OPENCODE_MODEL: ${{ inputs.model || 'opencode/deepseek-v4-flash-free' }}
         run: |
@@ -102,39 +134,24 @@ jobs:
             "请使用项目内置的 oa-upgrade skill，将 open-admin 框架从当前版本升级到 v${{ steps.version.outputs.version }}。要求：
              1) 按 skill 流程直接执行，不要询问确认，直接升级 pom.xml 中 io.github.jiangood:open-admin 与 web/package.json 中 @jiangood/open-admin 的版本；
              2) 用 webfetch 读取 https://github.com/jiangood/open-admin/releases/tag/v${{ steps.version.outputs.version }} 的 Release Notes 与对应提交日志，处理 Breaking Changes 与代码迁移；
-             3) 运行 mvn clean compile 和 cd web && npm run build 验证并修复问题；
+             3) 运行 mvn clean compile 验证后端；前端如存在 build 脚本则运行 npm run build，没有则跳过；
              4) 不要执行 git commit / git push。"
 
       - name: 后端编译验证（push 前硬性门槛）
         if: steps.check.outputs.skip != 'true'
-        working-directory: example
+        working-directory: repo
         run: mvn clean compile
 
       - name: 前端构建验证（push 前硬性门槛）
-        if: steps.check.outputs.skip != 'true'
-        working-directory: example/web
+        if: steps.check.outputs.skip != 'true' && matrix.frontend_build != ''
+        working-directory: repo/web
         run: |
           npm install
-          npm run build
-
-      - name: 同步框架 skills/docs（与 FrameworkFileSyncer 行为一致）
-        if: steps.check.outputs.skip != 'true'
-        run: |
-          set -e
-          cd example
-          rm -rf docs/open-admin
-          mkdir -p docs/open-admin
-          cp -r "$GITHUB_WORKSPACE"/docs/open-admin/. docs/open-admin/
-          mkdir -p .opencode/skills/oa-crud .opencode/skills/oa-upgrade
-          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-crud/SKILL.md" .opencode/skills/oa-crud/SKILL.md
-          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade/SKILL.md" .opencode/skills/oa-upgrade/SKILL.md
-          if [ ! -f AGENTS.md ]; then
-            cp docs/open-admin/AGENTS.md AGENTS.md
-          fi
+          ${{ matrix.frontend_build }}
 
       - name: 提交并推送
         if: steps.check.outputs.skip != 'true'
-        working-directory: example
+        working-directory: repo
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           git add -A
@@ -143,4 +160,4 @@ jobs:
             exit 0
           fi
           git commit -m "chore: upgrade open-admin to v$VERSION"
-          git push origin master
+          git push origin ${{ matrix.branch }}
