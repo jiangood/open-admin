@@ -26,15 +26,7 @@ export default class extends React.Component {
     }
 
     pwdValidator = (rule, value) => {
-        return new Promise((resolve, reject) => {
-            HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false}).then(response => {
-                const rs = response.data
-                if (!rs.success) {
-                    reject(rs.message)
-                }
-                resolve()
-            })
-        })
+        return HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false})
     }
 
     render() {
