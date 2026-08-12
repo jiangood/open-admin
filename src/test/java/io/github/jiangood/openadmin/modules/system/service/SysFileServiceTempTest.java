@@ -261,6 +261,7 @@ class SysFileServiceTempTest {
 
         assertEquals("public/img/", result.getObjectName().substring(0, 11));
         assertTrue(result.getObjectName().endsWith(".jpg"));
+        assertEquals("image", result.getType());
         assertEquals(SysFileService.thumbKeyOf(result.getObjectName()),
                 thumbKey.getAllValues().stream().filter(k -> k.contains(".thumb.")).findFirst().orElse(null));
     }

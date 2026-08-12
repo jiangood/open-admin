@@ -12,7 +12,6 @@ import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.enums.FileVisibility;
-import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
@@ -238,7 +237,6 @@ public class SysFileService {
         if (mediaType != null) {
             sysFile.setMimeType(mediaType.toString());
         }
-        sysFile.setType(MaterialType.parseBySuffix(suffix));
 
         File tempFile = FileUtil.createTempFile("." + suffix, true);
         FileUtils.copyInputStreamToFile(is, tempFile);
@@ -302,7 +300,7 @@ public class SysFileService {
         if (mediaType != null) {
             sysFile.setMimeType(mediaType.toString());
         }
-        sysFile.setType(MaterialType.parseBySuffix(fileSuffix));
+        sysFile.setType("image");
 
         sysFile = sysFileRepository.save(sysFile);
 

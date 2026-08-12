@@ -4,7 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import io.github.jiangood.openadmin.util.ContentTypeTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
-import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import jakarta.persistence.*;
@@ -48,8 +47,11 @@ public class SysFile extends BaseEntity {
     private Long size;
     @Column(length = 50)
     private String mimeType;
-    @Enumerated(EnumType.STRING)
-    private MaterialType type;
+    /**
+     * 素材类型（字符串，图片上传时为 image，普通文件留空）
+     */
+    @Column(length = 50)
+    private String type;
     /**
      * 生命周期状态
      */

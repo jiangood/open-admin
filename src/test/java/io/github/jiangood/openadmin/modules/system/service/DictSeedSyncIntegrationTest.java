@@ -27,7 +27,7 @@ class DictSeedSyncIntegrationTest {
     void frameworkEnumsAreSyncedAsDicts() {
         List<String> typeCodes = List.of(
                 "approveStatus", "sex", "yesNo", "dataPermType",
-                "articlePosition", "materialType", "fileStatus");
+                "articlePosition", "fileStatus");
         for (String typeCode : typeCodes) {
             assertTrue(typeRepository.findByTypeCode(typeCode).isPresent(),
                     "字典类型应存在: " + typeCode);

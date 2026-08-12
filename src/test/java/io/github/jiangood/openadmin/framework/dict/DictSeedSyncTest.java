@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.framework.dict;
 
 import io.github.jiangood.openadmin.framework.enums.ApproveStatus;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
-import io.github.jiangood.openadmin.framework.enums.MaterialType;
 import io.github.jiangood.openadmin.framework.enums.Sex;
 import io.github.jiangood.openadmin.framework.enums.YesNo;
 import io.github.jiangood.openadmin.modules.system.entity.DataPermType;
@@ -193,7 +192,6 @@ class DictSeedSyncTest {
         assertTrue(result.contains(YesNo.class));
         assertTrue(result.contains(DataPermType.class));
         assertTrue(result.contains(ArticlePosition.class));
-        assertTrue(result.contains(MaterialType.class));
         assertTrue(result.contains(FileStatus.class));
         assertTrue(result.stream().allMatch(Class::isEnum));
     }
