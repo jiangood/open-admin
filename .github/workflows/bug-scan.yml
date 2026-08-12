@@ -56,3 +56,70 @@ jobs:
           2. 用 Write 工具把结果写入 findings.json，格式为 JSON 数组，每条记录字段：title(string)、severity(high|medium|low)、category(logic|interaction)、file(相对路径)、line(行号，尽量精确)、description(为什么是 bug)、suggestion(修复建议)
           3. 去重：先读取 existing-issues.json，对每个候选 bug 由 AI 按问题本质判断（而非仅标题文本）是否与已有 open issue 重复；重复的跳过，不写入 findings.json
           最后在回复中总结扫描结果。"
+
+      - name: 解析 findings.json 并创建 Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - <<'PY'
+          import json, subprocess, sys
+          from pathlib import Path
+
+          if not Path('findings.json').exists():
+              print('findings.json 不存在，跳过')
+              sys.exit(0)
+          findings = json.loads(Path('findings.json').read_text(encoding='utf-8'))
+          if not findings:
+              print('findings.json 为空，跳过')
+              sys.exit(0)
+
+          created = 0
+          skipped = 0
+          for f in findings:
+              title = str(f.get('title', '')).strip()
+              if not title:
+                  continue
+              check = subprocess.run(
+                  ['gh', 'issue', 'list', '--state', 'open', '--label', 'bug-scan', '--search', f'"{title}"', '--json', 'number', '--limit', '1'],
+                  capture_output=True, text=True)
+              if json.loads(check.stdout or '[]'):
+                  print(f'重复跳过: {title}')
+                  skipped += 1
+                  continue
+              body = (
+                  f"**严重级别**: {f.get('severity', 'medium')}\n"
+                  f"**类别**: {f.get('category', 'logic')}\n"
+                  f"**位置**: {f.get('file', '?')}:{f.get('line', '?')}\n\n"
+                  f"**问题描述**:\n{f.get('description', '')}\n\n"
+                  f"**修复建议**:\n{f.get('suggestion', '')}\n\n"
+                  "---\n*由 AI Bug Scan workflow 自动创建*"
+              )
+              r = subprocess.run(
+                  ['gh', 'issue', 'create', '--label', 'bug-scan', '--title', title, '--body', body],
+                  capture_output=True, text=True)
+              if r.returncode == 0:
+                  print(f'已创建: {r.stdout.strip()}')
+                  created += 1
+              else:
+                  print(f'创建失败: {title}: {r.stderr.strip()}')
+
+          report = Path('bug-scan-report.md')
+          report.write_text(
+              f"# AI Bug Scan 报告\n\n共发现 {len(findings)} 条，新建 {created} 条，重复跳过 {skipped} 条。\n\n"
+              + "\n".join(
+                  f"- [{f.get('severity','medium').upper()}] {f.get('title','')} (`{f.get('file','?')}:{f.get('line','?')}`)"
+                  for f in findings
+              ),
+              encoding='utf-8'
+          )
+          print(f'共发现 {len(findings)} 条，新建 {created} 条，重复跳过 {skipped} 条')
+          PY
+
+      - name: 上传扫描报告
+        uses: actions/upload-artifact@v4
+        with:
+          name: bug-scan-report
+          path: |
+            findings.json
+            bug-scan-report.md
+          if-no-files-found: warn
