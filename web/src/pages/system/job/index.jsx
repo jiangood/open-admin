@@ -209,7 +209,7 @@ export default class extends React.Component {
                        onFinish={this.onFinish}
                        onValuesChange={this.onValuesChange}>
                 <Form.Item label='执行类' name='jobClass' rules={[{required: true}]}
-                           tooltip='org.quartz.Job接口，参考io.tmgg.job.builtin.DemoJob'>
+                           tooltip='继承 BaseJob，参考 HelloWorldJob'>
                     <Select options={this.state.jobClassOptions}/>
                 </Form.Item>
                 <Form.Item label='名称' name='name' rules={[{required: true}]}>
