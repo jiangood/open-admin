@@ -1,0 +1,58 @@
+name: AI Bug Scan
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      model:
+        description: 'opencode 模型（默认免费模型，无需 API Key）'
+        required: false
+        type: string
+        default: 'opencode/deepseek-v4-flash-free'
+
+concurrency:
+  group: ai-bug-scan
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  bug-scan:
+    name: AI Bug Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: 安装 opencode
+        run: npm i -g opencode-ai
+
+      - name: 获取已有 open Issue（供 AI 去重参考）
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue list --state open --label bug-scan --json number,title,body > existing-issues.json
+          echo "已有 open bug-scan issues: $(jq length existing-issues.json)"
+
+      - name: opencode 全量扫描（逻辑 bug + 前后端交互 bug）
+        env:
+          OPENCODE_MODEL: ${{ inputs.model || 'opencode/deepseek-v4-flash-free' }}
+        run: |
+          opencode run -m "$OPENCODE_MODEL" --auto "请对 open-admin 框架仓库做一次全面的 bug 扫描。重点找【逻辑 bug】与【前后端交互 bug】，不找优化、性能、代码风格、重构类问题。
+          扫描范围：
+          1) 后端 src/main/java 全部代码
+          2) 前端 web/src 全部代码
+          要找的问题：
+          1. 逻辑 bug：空指针、事务边界、查询条件错误、状态流转、分页边界、权限校验、并发、数据一致性等
+          2. 前后端交互 bug：URL 路径与方法不匹配、请求参数名/类型与后端 DTO 不一致、响应字段名与前端取值不一致、分页参数（pageNum/pageSize）约定不匹配、权限码（后端 @HasPermission 与前端 PermActions）不一致、字典值不一致等
+          输出要求：
+          1. 只报告高置信度的确凿 bug，宁缺毋滥；没有确凿 bug 就写入空数组 []
+          2. 用 Write 工具把结果写入 findings.json，格式为 JSON 数组，每条记录字段：title(string)、severity(high|medium|low)、category(logic|interaction)、file(相对路径)、line(行号，尽量精确)、description(为什么是 bug)、suggestion(修复建议)
+          3. 去重：先读取 existing-issues.json，对每个候选 bug 由 AI 按问题本质判断（而非仅标题文本）是否与已有 open issue 重复；重复的跳过，不写入 findings.json
+          最后在回复中总结扫描结果。"
