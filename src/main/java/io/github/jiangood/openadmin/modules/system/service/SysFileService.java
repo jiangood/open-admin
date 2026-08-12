@@ -103,16 +103,34 @@ public class SysFileService {
     }
 
     /**
-     * 删除单个物理文件，失败仅记日志并返回 false（不抛出异常）
+     * 删除单个物理文件（含缩略图），失败仅记日志并返回 false（不抛出异常）
      */
     public boolean deletePhysicalFile(SysFile file) {
         try {
             fileOperator.delete(file.getObjectName());
-            return true;
         } catch (Exception e) {
             log.error("删除物理文件失败: objectName={}, error={}", file.getObjectName(), e.getMessage());
             return false;
         }
+        // 一并删除缩略图（不存在时忽略）
+        try {
+            fileOperator.delete(thumbKeyOf(file.getObjectName()));
+        } catch (Exception e) {
+            log.warn("删除缩略图失败: objectName={}, error={}", file.getObjectName(), e.getMessage());
+        }
+        return true;
+    }
+
+    /**
+     * 由主文件 objectName 推导缩略图 objectName：
+     * public/img/202401/{uuid}.jpg -> public/img/202401/{uuid}.thumb.jpg
+     */
+    public static String thumbKeyOf(String objectName) {
+        int idx = objectName.lastIndexOf('.');
+        if (idx < 0) {
+            return objectName + SysFileConstants.THUMB_MARK;
+        }
+        return objectName.substring(0, idx) + SysFileConstants.THUMB_MARK + objectName.substring(idx);
     }
 
     public SysFile uploadFile(byte[] data, String originalFilename) throws Exception {
@@ -202,40 +220,7 @@ public class SysFileService {
         }
         log.info("上传文件:{} 大小:{}", originalFilename, FileUtil.readableFileSize(size));
 
-        // 获取文件后缀并校验真实类型
-        String suffix = null;
-        if (ObjectUtil.isNotEmpty(originalFilename)) {
-            suffix = StrUtil.subAfter(originalFilename, ".", true);
-        }
-
-        if (!is.markSupported()) {
-            is = new BufferedInputStream(is);
-        }
-        is.mark(64);
-        String magicType = FileTypeUtil.getType(is);
-        is.reset();
-
-        // 始终用 magic byte 校验：阻断可执行文件伪装成普通图片/文档
-        if (StrUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
-            throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
-        }
-
-        if ("webp".equals(magicType)) {
-            log.warn("上传文件真实类型为 webp");
-            if (StrUtil.isNotEmpty(suffix) && !"webp".equalsIgnoreCase(suffix)) {
-                log.info("文件后缀修正: {} -> webp (文件头检测)", suffix);
-                suffix = "webp";
-            }
-        }
-
-        if (StrUtil.isEmpty(suffix) && StrUtil.isNotEmpty(magicType)) {
-            suffix = magicType;
-            originalFilename += '.' + suffix;
-        }
-
-        Assert.hasText(suffix, "解析后缀失败");
-        Set<String> allowSet = Set.of(systemProperties.getFile().getAllowUpload().split(","));
-        Assert.state(allowSet.contains(suffix.toLowerCase()), "文件格式" + suffix + "不允许上传");
+        String suffix = validateAndGetSuffix(is, originalFilename);
 
         String id = IdTool.uuidV7();
 
@@ -270,6 +255,102 @@ public class SysFileService {
         return sysFile;
     }
 
+    /**
+     * 上传图片（压缩图 + 缩略图），一次请求同时存储两份文件
+     * <p>
+     * 压缩图 objectName: {visibility}/img/{yyyyMM}/{id}.{suffix}
+     * 缩略图 objectName: {visibility}/img/{yyyyMM}/{id}.thumb.{suffix}
+     * 缩略图不建独立 SysFile 记录，按命名约定随压缩图一起删除
+     *
+     * @return 压缩图对应的 SysFile 记录
+     */
+    public SysFile uploadImage(MultipartFile file, MultipartFile thumb, FileVisibility visibility) throws Exception {
+        if (visibility == null) {
+            visibility = FileVisibility.PUBLIC;
+        }
+        log.info("上传图片:{} 大小:{}, 缩略图:{} 大小:{}",
+                file.getOriginalFilename(), FileUtil.readableFileSize(file.getSize()),
+                thumb.getOriginalFilename(), FileUtil.readableFileSize(thumb.getSize()));
+
+        String fileSuffix = validateAndGetSuffix(file.getInputStream(), file.getOriginalFilename());
+        String thumbSuffix = validateAndGetSuffix(thumb.getInputStream(), thumb.getOriginalFilename());
+
+        String id = IdTool.uuidV7();
+        String objectName = genObjectName(id, fileSuffix, visibility, true);
+        String thumbObjectName = thumbKeyOf(objectName);
+
+        // 保存压缩图
+        File tempFile = FileUtil.createTempFile("." + fileSuffix, true);
+        FileUtils.copyInputStreamToFile(file.getInputStream(), tempFile);
+        fileOperator.saveFile(objectName, tempFile);
+        FileUtil.del(tempFile);
+
+        // 保存缩略图（无独立 SysFile 记录）
+        File tempThumb = FileUtil.createTempFile("." + thumbSuffix, true);
+        FileUtils.copyInputStreamToFile(thumb.getInputStream(), tempThumb);
+        fileOperator.saveFile(thumbObjectName, tempThumb);
+        FileUtil.del(tempThumb);
+
+        // 压缩图建立文件管理记录
+        SysFile sysFile = new SysFile();
+        sysFile.setOriginName(file.getOriginalFilename());
+        sysFile.setSuffix(fileSuffix);
+        sysFile.setSize(file.getSize());
+        sysFile.setObjectName(objectName);
+
+        MediaType mediaType = MediaTypeFactory.getMediaType("." + fileSuffix).orElse(null);
+        if (mediaType != null) {
+            sysFile.setMimeType(mediaType.toString());
+        }
+        sysFile.setType(MaterialType.parseBySuffix(fileSuffix));
+
+        sysFile = sysFileRepository.save(sysFile);
+
+        log.debug("上传图片结束 {}", objectName);
+
+        return sysFile;
+    }
+
+    /**
+     * 校验文件真实类型（magic byte）并解析合法后缀，返回小写后缀
+     */
+    private String validateAndGetSuffix(InputStream is, String originalFilename) throws Exception {
+        // 获取文件后缀并校验真实类型
+        String suffix = null;
+        if (ObjectUtil.isNotEmpty(originalFilename)) {
+            suffix = StrUtil.subAfter(originalFilename, ".", true);
+        }
+
+        if (!is.markSupported()) {
+            is = new BufferedInputStream(is);
+        }
+        is.mark(64);
+        String magicType = FileTypeUtil.getType(is);
+        is.reset();
+
+        // 始终用 magic byte 校验：阻断可执行文件伪装成普通图片/文档
+        if (StrUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
+            throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
+        }
+
+        if ("webp".equals(magicType)) {
+            log.warn("上传文件真实类型为 webp");
+            if (StrUtil.isNotEmpty(suffix) && !"webp".equalsIgnoreCase(suffix)) {
+                log.info("文件后缀修正: {} -> webp (文件头检测)", suffix);
+                suffix = "webp";
+            }
+        }
+
+        if (StrUtil.isEmpty(suffix) && StrUtil.isNotEmpty(magicType)) {
+            suffix = magicType;
+        }
+
+        Assert.hasText(suffix, "解析后缀失败");
+        Set<String> allowSet = Set.of(systemProperties.getFile().getAllowUpload().split(","));
+        Assert.state(allowSet.contains(suffix.toLowerCase()), "文件格式" + suffix + "不允许上传");
+        return suffix.toLowerCase();
+    }
+
     public SysFile getFileAndStream(String objectName) throws Exception {
         Assert.hasText(objectName, "文件objectName不能为空");
         // 获取文件记录
@@ -289,6 +370,17 @@ public class SysFileService {
         }
 
         return fileOperator.getFileStream(sysFile.getObjectName());
+    }
+
+    /**
+     * 按 objectName 直接获取文件流（不查 SysFile 记录，用于缩略图等衍生文件）
+     */
+    public InputStream getFileStreamByObjectName(String objectName) throws Exception {
+        if (!fileOperator.exist(objectName)) {
+            log.error("文件不存在 {}", objectName);
+            throw new FileNotFoundException("文件不存在:" + objectName);
+        }
+        return fileOperator.getFileStream(objectName);
     }
 
     public void download(String objectName, HttpServletResponse response) throws Exception {
@@ -397,13 +489,32 @@ public class SysFileService {
         return fileOperator.exist(file.getObjectName());
     }
 
+    /**
+     * 判断物理文件是否真实存在（不查 SysFile 记录，用于缩略图等衍生文件）
+     */
+    public boolean isPhysicalFileExist(String objectName) {
+        return StrUtil.isNotEmpty(objectName) && fileOperator.exist(objectName);
+    }
+
     private static boolean isBlockedMagicType(String magicType) {
         return Set.of("exe", "dll", "bat", "com", "msi", "scr", "pif", "reg", "vbs", "sh", "js")
                 .contains(magicType);
     }
 
     private String genObjectName(String id, String suffix, FileVisibility visibility) {
-        return visibility.getPrefix() + "/" + DateUtil.format(new Date(), "yyyyMM") + "/" + id + "." + suffix;
+        return genObjectName(id, suffix, visibility, false);
+    }
+
+    /**
+     * 生成 objectName；image=true 时图片单独存放 img 目录：
+     * public/202401/{id}.jpg  ->  public/img/202401/{id}.jpg
+     */
+    private String genObjectName(String id, String suffix, FileVisibility visibility, boolean image) {
+        String dir = visibility.getPrefix() + "/" + DateUtil.format(new Date(), "yyyyMM");
+        if (image) {
+            dir = visibility.getPrefix() + "/" + SysFileConstants.IMAGE_DIR + "/" + DateUtil.format(new Date(), "yyyyMM");
+        }
+        return dir + "/" + id + "." + suffix;
     }
 
 }

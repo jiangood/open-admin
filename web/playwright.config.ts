@@ -1,6 +1,6 @@
 import {defineConfig} from '@playwright/test';
 
-const BASE_URL = process.env.BASE_URL || 'http://localhost:3456';
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 export default defineConfig({
     testDir: './e2e',
@@ -18,16 +18,16 @@ export default defineConfig({
     globalSetup: './e2e/global-setup.ts',
     webServer: [
         {
-            command: 'cd .. && mvn spring-boot:run -Dspring-boot.run.profiles=lib,e2e -Dspring-boot.run.arguments=--server.port=8910 -q',
-            port: 8910,
+            command: 'cd .. && mvn spring-boot:run -Dspring-boot.run.profiles=lib,e2e -q',
+            port: 8080,
             reuseExistingServer: !process.env.CI,
             timeout: 120000,
         },
         {
             command: 'npm run dev',
-            port: 3456,
+            port: 3000,
             reuseExistingServer: !process.env.CI,
-            env: {...process.env, SERVER_PORT: '8910'},
+            env: {...process.env, SERVER_PORT: '8080'},
             timeout: 30000,
         },
     ],

@@ -1,6 +1,4 @@
 import React from "react";
-import ImgCrop from "antd-img-crop";
-import type {ImgCropProps} from "antd-img-crop";
 import {message, Modal, Upload} from "antd";
 import type {UploadChangeParam, UploadFile, UploadProps} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
@@ -14,10 +12,6 @@ export type SysUploadFile = UploadFile & { objectName?: string };
 export interface FieldUploadFileProps extends FieldProps<string> {
     /** 最大上传数量，默认 1 */
     maxCount?: number;
-    /** 是否启用上传前裁切图片 */
-    cropImage?: boolean;
-    /** 裁切配置（antd-img-crop 的 cropperProps） */
-    cropperProps?: ImgCropProps['cropperProps'];
     /** 上传列表的内建样式，默认 picture-card */
     listType?: UploadProps['listType'];
     /** 接受的文件类型，如 image/* */
@@ -30,7 +24,6 @@ export interface FieldUploadFileProps extends FieldProps<string> {
 
 interface FieldUploadFileState {
     maxCount: number;
-    cropImage: boolean;
     fileList: SysUploadFile[];
     /** 逗号分隔的文件 objectName */
     value: string | null;
@@ -39,16 +32,13 @@ interface FieldUploadFileState {
 }
 
 /**
- * 上传图片前裁切， 单张图片
- *
- * 可参考 react-easy-crop
+ * 通用文件上传（不含图片压缩/裁切，图片上传请使用 FieldUploadImage）
  */
 export class FieldUploadFile extends React.Component<FieldUploadFileProps, FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewObjectName?: string }> {
 
     state: FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewObjectName?: string } = {
         // 传入的参数
         maxCount: 1,
-        cropImage: false,
         visibility: 'public',
 
         // 内部参数
@@ -65,7 +55,6 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
     componentDidUpdate(prevProps: FieldUploadFileProps) {
         const next: Partial<FieldUploadFileState> = {};
         if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
-        if (this.props.cropImage !== prevProps.cropImage) next.cropImage = this.props.cropImage;
         if (this.props.visibility !== prevProps.visibility) next.visibility = this.props.visibility;
 
         const prevValue = prevProps.value ?? null;
@@ -142,12 +131,6 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
     };
 
     render() {
-        if (this.state.cropImage) {
-            return <ImgCrop cropperProps={this.props.cropperProps} modalTitle={'裁剪图片'} fillColor={null}>
-                {this.getUpload()}
-            </ImgCrop>;
-        }
-
         return <>
             {this.getUpload()}
             <Modal open={!!this.state.errorTitle} title={this.state.errorTitle} okText="确定"

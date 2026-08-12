@@ -1,6 +1,6 @@
 import {request} from '@playwright/test';
 
-const BACKEND = process.env.API_BASE || 'http://localhost:8910';
+const BACKEND = process.env.API_BASE || 'http://localhost:8080';
 const CONTEXT_PATH = process.env.SERVLET_CONTEXT || '/change-this-servlet-context';
 const BASE = BACKEND + CONTEXT_PATH;
 

@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -195,6 +196,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.noContent().build();
     }
 
+
+    /**
+     * 上传文件超过大小限制
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public AjaxResult maxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        log.warn("上传文件超过大小限制: {}", e.getMessage());
+        return AjaxResult.err().msg("上传文件过大，请压缩后再试");
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public AjaxResult httpMessageNotReadableException(HttpMessageNotReadableException e) {

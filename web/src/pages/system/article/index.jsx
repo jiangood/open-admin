@@ -6,7 +6,7 @@ import {
     FieldBoolean,
     FieldDictSelect,
     FieldEditor,
-    FieldUploadFile,
+    FieldUploadImage,
     FormModal,
     HttpUtils,
     Page,
@@ -136,7 +136,7 @@ export default class extends React.Component {
                 </Form.Item>
 
                 <Form.Item label='主图' name='mainImage'>
-                    <FieldUploadFile maxCount={1} cropImage accept='image/*'/>
+                    <FieldUploadImage maxCount={1}/>
                 </Form.Item>
 
                 <Form.Item label='内容' name='content'>

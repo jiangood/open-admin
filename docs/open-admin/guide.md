@@ -135,4 +135,4 @@ src/main/resources/
 
 **前端依赖安装失败？** `npm install --registry=https://registry.npmmirror.com`
 
-**端口被占用？** 后端默认 8080，前端默认 8000，可通过环境变量 `SERVER_PORT` 修改后端端口。
+**端口被占用？** 后端默认 8080，前端默认 3000，可通过环境变量 `SERVER_PORT` 修改后端端口。

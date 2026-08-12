@@ -22,31 +22,35 @@ export class ViewImage extends React.Component {
     }
 
     const urlList = [];
+    const thumbList = [];
     for (let v of vs) {
       const isAbsUrl = v.startsWith('http');
       const isDataUrl = v.startsWith('data:');
       const isObjectName = v.startsWith('public/') || v.startsWith('private/');
       if (isAbsUrl || isDataUrl) {
         urlList.push(v);
+        thumbList.push(v);
         continue;
       }
 
       if (isObjectName) {
         urlList.push(UrlUtils.contextPath('/file/' + v));
+        thumbList.push(UrlUtils.contextPath('/file/' + v + '?thumb=1'));
         continue;
       }
 
       urlList.push(UrlUtils.contextPath(v));
+      thumbList.push(UrlUtils.contextPath(v));
     }
 
     const closeModal = () => this.setState({modalOpen: false});
 
-    const imgs = urlList.map((url) => (
+    const imgs = thumbList.map((thumb, i) => (
       <img
         style={{ display: 'inline-block' }}
-        key={url}
-        src={url}
-        onClick={() => this.setState({modalOpen: true, previewUrl: url})}
+        key={urlList[i]}
+        src={thumb}
+        onClick={() => this.setState({modalOpen: true, previewUrl: urlList[i]})}
         width={60}
         height={60}
       />

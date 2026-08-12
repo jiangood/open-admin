@@ -2,14 +2,17 @@ package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
+import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 
@@ -207,5 +210,58 @@ class SysFileServiceTempTest {
         verify(sysFileRepository).save(file);
         verify(fileOperator).delete("public/202607/id-a.jpg");
         verify(sysFileRepository).deleteById("id-a");
+    }
+
+    @Test
+    void thumbKeyOf_shouldInsertThumbMarkBeforeSuffix() {
+        assertEquals("public/img/202607/id-a.thumb.jpg", SysFileService.thumbKeyOf("public/img/202607/id-a.jpg"));
+    }
+
+    @Test
+    void deletePhysicalFile_shouldAlsoDeleteThumbnail() throws Exception {
+        SysFile file = new SysFile("id-a");
+        file.setObjectName("public/img/202607/id-a.jpg");
+
+        boolean ok = sysFileService.deletePhysicalFile(file);
+
+        assertTrue(ok);
+        verify(fileOperator).delete("public/img/202607/id-a.jpg");
+        verify(fileOperator).delete("public/img/202607/id-a.thumb.jpg");
+    }
+
+    @Test
+    void deletePhysicalFile_shouldIgnoreThumbnailDeleteFailure() throws Exception {
+        SysFile file = new SysFile("id-a");
+        file.setObjectName("public/img/202607/id-a.jpg");
+        lenient().doThrow(new RuntimeException("thumb disk error")).when(fileOperator).delete("public/img/202607/id-a.thumb.jpg");
+
+        boolean ok = sysFileService.deletePhysicalFile(file);
+
+        assertTrue(ok);
+        verify(fileOperator).delete("public/img/202607/id-a.jpg");
+        verify(fileOperator).delete("public/img/202607/id-a.thumb.jpg");
+    }
+
+    @Test
+    void uploadImage_shouldGenerateImgDirectoryObjectNameAndSaveBoth() throws Exception {
+        when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
+
+        MockMultipartFile file = new MockMultipartFile("file", "photo.jpg", "image/jpeg",
+                new byte[]{(byte) 0xFF, (byte) 0xD8, 0x00, 0x10});
+        MockMultipartFile thumb = new MockMultipartFile("thumb", "photo.thumb.jpg", "image/jpeg",
+                new byte[]{(byte) 0xFF, (byte) 0xD8, 0x00, 0x10});
+        when(sysFileRepository.save(any(SysFile.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SysFile result = sysFileService.uploadImage(file, thumb, FileVisibility.PUBLIC);
+
+        ArgumentCaptor<String> mainKey = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> thumbKey = ArgumentCaptor.forClass(String.class);
+        verify(fileOperator, atLeastOnce()).saveFile(mainKey.capture(), any());
+        verify(fileOperator, atLeastOnce()).saveFile(thumbKey.capture(), any());
+
+        assertEquals("public/img/", result.getObjectName().substring(0, 11));
+        assertTrue(result.getObjectName().endsWith(".jpg"));
+        assertEquals(SysFileService.thumbKeyOf(result.getObjectName()),
+                thumbKey.getAllValues().stream().filter(k -> k.contains(".thumb.")).findFirst().orElse(null));
     }
 }

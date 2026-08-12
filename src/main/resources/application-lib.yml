@@ -13,6 +13,11 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration
+  servlet:
+    multipart:
+      # 图片前端已压缩，此处留足空间给大文件/富文本直传
+      max-file-size: 20MB
+      max-request-size: 20MB
   cache:
     type: caffeine
     caffeine:

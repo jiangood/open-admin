@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -44,9 +45,12 @@ public class FilePreviewController {
 
     /**
      * 预览文件
+     * <p>
+     * 支持 ?thumb=1：优先返回缩略图（{objectName} 推导 .thumb），缩略图不存在时回退原图
      */
     @GetMapping("/file/{*objectName}")
     public ResponseEntity<StreamingResponseBody> preview(@PathVariable String objectName,
+                                                         @RequestParam(value = "thumb", required = false, defaultValue = "false") boolean thumb,
                                                          HttpServletRequest request) {
         objectName = stripLeadingSlash(objectName);
         SysFile file = service.findByObjectName(objectName);
@@ -58,11 +62,25 @@ public class FilePreviewController {
             log.error("后缀不支持预览 {}", fileExtension);
             return ResponseEntity.badRequest().build();
         }
+
+        // 缩略图请求：若缩略图存在则流式返回缩略图，否则回退原图（兼容存量数据）
+        String streamObjectName = objectName;
+        String eTag = objectName;
+        if (thumb) {
+            String thumbObjectName = SysFileService.thumbKeyOf(objectName);
+            if (service.isPhysicalFileExist(thumbObjectName)) {
+                streamObjectName = thumbObjectName;
+                eTag = thumbObjectName;
+            } else {
+                log.trace("缩略图不存在，回退原图 objectName={}", objectName);
+            }
+        }
+
         try {
-            InputStream inputStream = service.getFileStream(file);
+            InputStream inputStream = service.getFileStreamByObjectName(streamObjectName);
 
             boolean video = ContentTypeTool.isVideo(file.getContentType());
-            String disposition = "inline; filename=\"" + URLUtil.encode(FileNameUtil.mainName(objectName)) + "\"";
+            String disposition = "inline; filename=\"" + URLUtil.encode(FileNameUtil.mainName(streamObjectName)) + "\"";
             if (video) {
                 String rangeHeader = request.getHeader("Range");
                 if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {
@@ -81,7 +99,7 @@ public class FilePreviewController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
                     .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
-                    .eTag(objectName)
+                    .eTag(eTag)
                     .lastModified(file.getUpdateTime().getTime())
                     .body(new MyStreamingResponseBody(inputStream));
         } catch (FileNotFoundException fe) {

@@ -70,6 +70,25 @@ public class SysFileController {
     }
 
     /**
+     * 上传图片（压缩图 + 缩略图，一次请求两份文件）
+     */
+    @PostMapping("uploadImage")
+    public AjaxResult uploadImage(@RequestPart("file") MultipartFile file,
+                                  @RequestPart("thumb") MultipartFile thumb,
+                                  @RequestParam(value = "visibility", required = false) String visibility) throws Exception {
+        SysFile sysFile = service.uploadImage(file, thumb, FileVisibility.parse(visibility));
+
+        String location = service.getPreviewUrl(sysFile.getObjectName());
+        String thumbObjectName = SysFileService.thumbKeyOf(sysFile.getObjectName());
+
+        return AjaxResult.ok()
+                .putExtData("location", location) // 兼容富文本的格式
+                .data("objectName", sysFile.getObjectName())
+                .data("thumbObjectName", thumbObjectName)
+                .data("name", sysFile.getOriginName());
+    }
+
+    /**
      * 下载文件
      */
     @GetMapping("download/{*objectName}")

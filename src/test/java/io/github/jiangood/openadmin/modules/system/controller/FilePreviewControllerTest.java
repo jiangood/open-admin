@@ -13,6 +13,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.ByteArrayInputStream;
 
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,10 +44,52 @@ class FilePreviewControllerTest {
         file.setUpdateTime(new java.util.Date());
 
         when(service.findByObjectName(objectName)).thenReturn(file);
-        when(service.getFileStream(file))
+        when(service.getFileStreamByObjectName(objectName))
                 .thenReturn(new ByteArrayInputStream(new byte[100]));
 
         mockMvc.perform(get("/file/" + objectName))
                 .andExpect(status().isOk());
+    }
+
+    @Test
+    void preview_thumb_shouldStreamThumbnailWhenExists() throws Exception {
+        String objectName = "public/202608/019fc59764cb73358d4962136421816a.jpg";
+        String thumbObjectName = "public/202608/019fc59764cb73358d4962136421816a.thumb.jpg";
+        SysFile file = new SysFile("id-1");
+        file.setObjectName(objectName);
+        file.setSuffix("jpg");
+        file.setSize(100L);
+        file.setUpdateTime(new java.util.Date());
+
+        when(service.findByObjectName(objectName)).thenReturn(file);
+        when(service.isPhysicalFileExist(thumbObjectName)).thenReturn(true);
+        when(service.getFileStreamByObjectName(thumbObjectName))
+                .thenReturn(new ByteArrayInputStream(new byte[50]));
+
+        mockMvc.perform(get("/file/" + objectName).param("thumb", "true"))
+                .andExpect(status().isOk());
+
+        verify(service).getFileStreamByObjectName(thumbObjectName);
+    }
+
+    @Test
+    void preview_thumb_shouldFallbackToOriginalWhenThumbnailMissing() throws Exception {
+        String objectName = "public/202608/019fc59764cb73358d4962136421816a.jpg";
+        String thumbObjectName = "public/202608/019fc59764cb73358d4962136421816a.thumb.jpg";
+        SysFile file = new SysFile("id-1");
+        file.setObjectName(objectName);
+        file.setSuffix("jpg");
+        file.setSize(100L);
+        file.setUpdateTime(new java.util.Date());
+
+        when(service.findByObjectName(objectName)).thenReturn(file);
+        when(service.isPhysicalFileExist(thumbObjectName)).thenReturn(false);
+        when(service.getFileStreamByObjectName(objectName))
+                .thenReturn(new ByteArrayInputStream(new byte[100]));
+
+        mockMvc.perform(get("/file/" + objectName).param("thumb", "true"))
+                .andExpect(status().isOk());
+
+        verify(service).getFileStreamByObjectName(objectName);
     }
 }
