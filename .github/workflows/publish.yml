@@ -1,4 +1,4 @@
-name: Publish NPM, Maven
+﻿name: Publish NPM, Maven
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract Tag
         id: tag
@@ -48,7 +48,7 @@ jobs:
           echo "✓ Maven version matches tag!"
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -79,7 +79,7 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract Tag
         id: tag
@@ -103,7 +103,7 @@ jobs:
           echo "✓ NPM version matches tag!"
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -140,7 +140,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Extract Tag
         id: tag
         uses: aaronbarnaby/get-tag@v1.0.0

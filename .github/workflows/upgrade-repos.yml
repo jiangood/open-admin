@@ -1,4 +1,4 @@
-name: Auto Upgrade Framework Consumers
+﻿name: Auto Upgrade Framework Consumers
 
 on:
   schedule:
@@ -39,7 +39,7 @@ jobs:
           - name: flowable
             repo: open-admin-flowable
             branch: master
-            frontend_build: ''
+            frontend_build: 'npm run build'
     steps:
       - name: 获取最新框架版本
         id: version
@@ -55,7 +55,7 @@ jobs:
           echo "目标版本: v${{ steps.version.outputs.version }}"
 
       - name: 检出 open-admin 源码（目标版本，用于同步 skills/docs）
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
           ref: v${{ steps.version.outputs.version }}
@@ -109,14 +109,14 @@ jobs:
 
       - name: 设置 JDK 21
         if: steps.check.outputs.skip != 'true'
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
 
       - name: 设置 Node.js
         if: steps.check.outputs.skip != 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
 
