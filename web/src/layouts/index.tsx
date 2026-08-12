@@ -91,6 +91,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             GlobalData.setSiteArticles(data.siteArticles);
 
             if (data.needUpdatePwd) {
+                this.setState({loginChecked: true});
                 history.push('/standalone/forceUpdatePwd');
                 return;
             }
