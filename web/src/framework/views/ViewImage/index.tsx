@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal} from 'antd';
+import {Image} from 'antd';
 import {UrlUtils} from '../../utils';
 
 /**
@@ -16,9 +16,26 @@ import {UrlUtils} from '../../utils';
  */
 export class ViewImage extends React.Component {
 
-  state = {
-    modalOpen: false,
-    previewUrl: null,
+  static previewGroupProps = {
+    preview: {
+      scaleStep: 0.3,
+    },
+  };
+
+  resolveUrl = (v) => {
+    const isAbsUrl = v.startsWith('http');
+    const isDataUrl = v.startsWith('data:');
+    const isObjectName = v.startsWith('public/') || v.startsWith('private/');
+    if (isAbsUrl || isDataUrl) {
+      return {url: v, thumb: v};
+    }
+    if (isObjectName) {
+      return {
+        url: UrlUtils.contextPath('/file/' + v),
+        thumb: UrlUtils.contextPath('/file/' + v + '?thumb=1'),
+      };
+    }
+    return {url: UrlUtils.contextPath(v), thumb: UrlUtils.contextPath(v)};
   };
 
   render() {
@@ -34,55 +51,27 @@ export class ViewImage extends React.Component {
       vs = vs.split(',');
     }
 
-    const urlList = [];
-    const thumbList = [];
-    for (let v of vs) {
-      const isAbsUrl = v.startsWith('http');
-      const isDataUrl = v.startsWith('data:');
-      const isObjectName = v.startsWith('public/') || v.startsWith('private/');
-      if (isAbsUrl || isDataUrl) {
-        urlList.push(v);
-        thumbList.push(v);
-        continue;
-      }
-
-      if (isObjectName) {
-        urlList.push(UrlUtils.contextPath('/file/' + v));
-        thumbList.push(UrlUtils.contextPath('/file/' + v + '?thumb=1'));
-        continue;
-      }
-
-      urlList.push(UrlUtils.contextPath(v));
-      thumbList.push(UrlUtils.contextPath(v));
+    const items = vs.map(this.resolveUrl);
+    const previewConfig = {
+      scaleStep: 0.3,
+    };
+    if (previewTitle) {
+      previewConfig.title = previewTitle;
     }
 
-    const closeModal = () => this.setState({modalOpen: false});
-
-    const imgs = thumbList.map((thumb, i) => (
-      <img
-        key={urlList[i]}
-        src={thumb}
-        width={size}
-        height={size}
-        style={{display: 'inline-block', objectFit: 'cover', borderRadius, cursor: preview ? 'pointer' : undefined, ...style}}
-        onClick={() => {
-          if (preview) {
-            this.setState({modalOpen: true, previewUrl: urlList[i]})
-          }
-        }}
-      />
-    ));
-
     return (
-      <>
-        {imgs}
-        <Modal open={this.state.modalOpen} title={previewTitle} width="70vw" footer={null}
-               onCancel={closeModal}>
-          <div style={{maxHeight: '70vh', overflow: 'auto'}}>
-            <img src={this.state.previewUrl} style={{maxWidth: '100%'}}/>
-          </div>
-        </Modal>
-      </>
+      <Image.PreviewGroup preview={previewConfig}>
+        {items.map((item, i) => (
+          <Image
+            key={item.url}
+            src={item.thumb}
+            width={size}
+            height={size}
+            style={{display: 'inline-block', objectFit: 'cover', borderRadius, cursor: preview ? 'pointer' : undefined, ...style}}
+            preview={preview ? {src: item.url} : false}
+          />
+        ))}
+      </Image.PreviewGroup>
     );
   }
 }
