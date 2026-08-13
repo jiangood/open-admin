@@ -180,7 +180,7 @@ export default class extends React.Component {
 
 
     render() {
-        return <Page title="定时任务" description="管理定时任务">
+        return <Page>
             <ProTable
                 actionRef={this.tableRef}
                 toolBarRender={() => (
