@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
-import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
@@ -252,7 +251,7 @@ class SysFileServiceTempTest {
                 new byte[]{(byte) 0xFF, (byte) 0xD8, 0x00, 0x10});
         when(sysFileRepository.save(any(SysFile.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        SysFile result = sysFileService.uploadImage(file, thumb, FileVisibility.PUBLIC);
+        SysFile result = sysFileService.uploadImage(file, thumb, true);
 
         ArgumentCaptor<String> mainKey = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> thumbKey = ArgumentCaptor.forClass(String.class);

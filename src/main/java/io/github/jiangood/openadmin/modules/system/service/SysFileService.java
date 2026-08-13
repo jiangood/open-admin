@@ -11,7 +11,6 @@ import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
-import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
@@ -133,11 +132,11 @@ public class SysFileService {
     }
 
     public SysFile uploadFile(byte[] data, String originalFilename) throws Exception {
-        return this.uploadFile(data, originalFilename, FileVisibility.PUBLIC);
+        return this.uploadFile(data, originalFilename, true);
     }
 
-    public SysFile uploadFile(byte[] data, String originalFilename, FileVisibility visibility) throws Exception {
-        return this.uploadFile(new ByteArrayInputStream(data), originalFilename, data.length, visibility);
+    public SysFile uploadFile(byte[] data, String originalFilename, boolean isPublic) throws Exception {
+        return this.uploadFile(new ByteArrayInputStream(data), originalFilename, data.length, isPublic);
     }
 
     /**
@@ -148,7 +147,7 @@ public class SysFileService {
      * @throws Exception
      */
     public SysFile uploadWebFile(String origUrl) throws Exception {
-        return uploadWebFile(origUrl, FileVisibility.PUBLIC);
+        return uploadWebFile(origUrl, true);
     }
 
     /**
@@ -158,7 +157,7 @@ public class SysFileService {
      * @return
      * @throws Exception
      */
-    public SysFile uploadWebFile(String origUrl, FileVisibility visibility) throws Exception {
+    public SysFile uploadWebFile(String origUrl, boolean isPublic) throws Exception {
         log.info("准备上传网络文件 {}", origUrl);
         File tempFile = new File(FileUtil.getTmpDir(), FileNameUtil.mainName(origUrl));
 
@@ -173,7 +172,7 @@ public class SysFileService {
         }
 
 
-        SysFile sysFile = this.uploadFile(tempFile, visibility);
+        SysFile sysFile = this.uploadFile(tempFile, isPublic);
         FileUtil.del(tempFile);
 
         sysFile.setOrigUrl(origUrl);
@@ -183,10 +182,10 @@ public class SysFileService {
     }
 
     public SysFile uploadFile(File file) throws Exception {
-        return uploadFile(file, FileVisibility.PUBLIC);
+        return uploadFile(file, true);
     }
 
-    public SysFile uploadFile(File file, FileVisibility visibility) throws Exception {
+    public SysFile uploadFile(File file, boolean isPublic) throws Exception {
         // 特殊处理后缀，如临时文件
         String suffix = FileNameUtil.getSuffix(file);
         if (StrUtil.isEmpty(suffix) || "tmp".equals(suffix)) {
@@ -195,28 +194,25 @@ public class SysFileService {
 
         String name = FileNameUtil.mainName(file) + "." + suffix;
         try (InputStream is = new FileInputStream(file)) {
-            return this.uploadFile(is, name, file.length(), visibility);
+            return this.uploadFile(is, name, file.length(), isPublic);
         }
     }
 
     public SysFile uploadFile(MultipartFile file) throws Exception {
-        return uploadFile(file, FileVisibility.PUBLIC);
+        return uploadFile(file, true);
     }
 
-    public SysFile uploadFile(MultipartFile file, FileVisibility visibility) throws Exception {
+    public SysFile uploadFile(MultipartFile file, boolean isPublic) throws Exception {
         InputStream is = file.getInputStream();
         String name = file.getOriginalFilename();
-        return this.uploadFile(is, name, file.getSize(), visibility);
+        return this.uploadFile(is, name, file.getSize(), isPublic);
     }
 
     public SysFile uploadFile(InputStream is, String originalFilename, long size) throws Exception {
-        return uploadFile(is, originalFilename, size, FileVisibility.PUBLIC);
+        return uploadFile(is, originalFilename, size, true);
     }
 
-    public SysFile uploadFile(InputStream is, String originalFilename, long size, FileVisibility visibility) throws Exception {
-        if (visibility == null) {
-            visibility = FileVisibility.PUBLIC;
-        }
+    public SysFile uploadFile(InputStream is, String originalFilename, long size, boolean isPublic) throws Exception {
         log.info("上传文件:{} 大小:{}", originalFilename, FileUtil.readableFileSize(size));
 
         String suffix = validateAndGetSuffix(is, originalFilename);
@@ -224,7 +220,7 @@ public class SysFileService {
         String id = IdTool.uuidV7();
 
         // 生成文件的最终名称
-        String objectName = genObjectName(id, suffix, visibility);
+        String objectName = genObjectName(id, suffix, isPublic);
 
         // 文件管理信息
         SysFile sysFile = new SysFile();
@@ -256,16 +252,13 @@ public class SysFileService {
     /**
      * 上传图片（压缩图 + 缩略图），一次请求同时存储两份文件
      * <p>
-     * 压缩图 objectName: {visibility}/img/{yyyyMM}/{id}.{suffix}
-     * 缩略图 objectName: {visibility}/img/{yyyyMM}/{id}.thumb.{suffix}
+     * 压缩图 objectName: {prefix}/img/{yyyyMM}/{id}.{suffix}
+     * 缩略图 objectName: {prefix}/img/{yyyyMM}/{id}.thumb.{suffix}
      * 缩略图不建独立 SysFile 记录，按命名约定随压缩图一起删除
      *
      * @return 压缩图对应的 SysFile 记录
      */
-    public SysFile uploadImage(MultipartFile file, MultipartFile thumb, FileVisibility visibility) throws Exception {
-        if (visibility == null) {
-            visibility = FileVisibility.PUBLIC;
-        }
+    public SysFile uploadImage(MultipartFile file, MultipartFile thumb, boolean isPublic) throws Exception {
         log.info("上传图片:{} 大小:{}, 缩略图:{} 大小:{}",
                 file.getOriginalFilename(), FileUtil.readableFileSize(file.getSize()),
                 thumb.getOriginalFilename(), FileUtil.readableFileSize(thumb.getSize()));
@@ -274,7 +267,7 @@ public class SysFileService {
         String thumbSuffix = validateAndGetSuffix(thumb.getInputStream(), thumb.getOriginalFilename());
 
         String id = IdTool.uuidV7();
-        String objectName = genObjectName(id, fileSuffix, visibility, true);
+        String objectName = genObjectName(id, fileSuffix, isPublic, true);
         String thumbObjectName = thumbKeyOf(objectName);
 
         // 保存压缩图
@@ -499,18 +492,19 @@ public class SysFileService {
                 .contains(magicType);
     }
 
-    private String genObjectName(String id, String suffix, FileVisibility visibility) {
-        return genObjectName(id, suffix, visibility, false);
+    private String genObjectName(String id, String suffix, boolean isPublic) {
+        return genObjectName(id, suffix, isPublic, false);
     }
 
     /**
      * 生成 objectName；image=true 时图片单独存放 img 目录：
      * public/202401/{id}.jpg  ->  public/img/202401/{id}.jpg
      */
-    private String genObjectName(String id, String suffix, FileVisibility visibility, boolean image) {
-        String dir = visibility.getPrefix() + "/" + DateUtil.format(new Date(), "yyyyMM");
+    private String genObjectName(String id, String suffix, boolean isPublic, boolean image) {
+        String prefix = isPublic ? SysFileConstants.PUBLIC_PREFIX : SysFileConstants.PRIVATE_PREFIX;
+        String dir = prefix + "/" + DateUtil.format(new Date(), "yyyyMM");
         if (image) {
-            dir = visibility.getPrefix() + "/" + SysFileConstants.IMAGE_DIR + "/" + DateUtil.format(new Date(), "yyyyMM");
+            dir = prefix + "/" + SysFileConstants.IMAGE_DIR + "/" + DateUtil.format(new Date(), "yyyyMM");
         }
         return dir + "/" + id + "." + suffix;
     }

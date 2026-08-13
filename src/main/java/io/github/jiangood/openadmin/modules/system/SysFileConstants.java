@@ -9,7 +9,7 @@ public final class SysFileConstants {
     /** 私有文件目录前缀 */
     public static final String PRIVATE_PREFIX = "private";
 
-    /** 图片上传目录标记（插在 visibility 与日期之间），如 public/img/202401/xxx.jpg */
+    /** 图片上传目录标记（插在前缀与日期之间），如 public/img/202401/xxx.jpg */
     public static final String IMAGE_DIR = "img";
     /** 缩略图文件标记（插在主文件名与后缀之间），如 xxx.thumb.jpg */
     public static final String THUMB_MARK = ".thumb";

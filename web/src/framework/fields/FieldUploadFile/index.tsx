@@ -16,8 +16,8 @@ export interface FieldUploadFileProps extends FieldProps<string> {
     listType?: UploadProps['listType'];
     /** 接受的文件类型，如 image/* */
     accept?: string;
-    /** 文件可见性，默认 public */
-    visibility?: 'public' | 'private';
+    /** 是否公开免登录访问，默认 true（private 需登录） */
+    isPublic?: boolean;
     /** 文件列表变化回调（新增文件上传成功后才触发） */
     onFileChange?: (fileList: SysUploadFile[]) => void;
 }
@@ -28,7 +28,7 @@ interface FieldUploadFileState {
     /** 逗号分隔的文件 objectName */
     value: string | null;
     accept?: string;
-    visibility?: 'public' | 'private';
+    isPublic?: boolean;
 }
 
 /**
@@ -39,7 +39,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
     state: FieldUploadFileState & { errorTitle?: string; errorContent?: string; previewObjectName?: string } = {
         // 传入的参数
         maxCount: 1,
-        visibility: 'public',
+        isPublic: true,
 
         // 内部参数
         fileList: [],
@@ -55,7 +55,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
     componentDidUpdate(prevProps: FieldUploadFileProps) {
         const next: Partial<FieldUploadFileState> = {};
         if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
-        if (this.props.visibility !== prevProps.visibility) next.visibility = this.props.visibility;
+        if (this.props.isPublic !== prevProps.isPublic) next.isPublic = this.props.isPublic;
 
         const prevValue = prevProps.value ?? null;
         const curValue = this.props.value ?? null;
@@ -150,7 +150,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
 
         return <Upload
             action={UrlUtils.contextPath('/admin/sysFile/upload')}
-            data={{visibility: this.state.visibility}}
+            data={{isPublic: this.state.isPublic}}
             listType={this.props.listType || 'picture-card'}
             fileList={fileList}
             onChange={this.handleChange}

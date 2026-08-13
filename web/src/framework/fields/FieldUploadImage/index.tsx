@@ -13,8 +13,8 @@ interface FieldUploadImageProps extends FieldProps<string> {
     maxCount?: number;
     /** 缩略图最长边，默认 300 */
     thumbWidth?: number;
-    /** 文件可见性，默认 public */
-    visibility?: 'public' | 'private';
+    /** 是否公开免登录访问，默认 true（private 需登录） */
+    isPublic?: boolean;
     /** 接受的文件类型 */
     accept?: string;
 }
@@ -122,7 +122,7 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
 export function FieldUploadImage(props: FieldUploadImageProps) {
     const {
         value, onChange, maxCount = 1,
-        thumbWidth = 300, visibility = 'public', accept = 'image/*',
+        thumbWidth = 300, isPublic = true, accept = 'image/*',
     } = props;
 
     const [objectNames, setObjectNames] = useState<string[]>(() => (value ? value.split(',') : []));
@@ -324,7 +324,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
             const fd = new FormData();
             fd.append('file', preview.cFile);
             fd.append('thumb', tFile);
-            fd.append('visibility', visibility);
+            fd.append('isPublic', isPublic);
             const rs = await HttpUtils.post('admin/sysFile/uploadImage', fd, null, {headers: {'Content-Type': 'multipart/form-data'}});
             const newNames = [...objectNames, rs.objectName];
             setObjectNames(newNames);
@@ -335,7 +335,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
         } finally {
             setUploading(false);
         }
-    }, [closeModal, objectNames, onChange, preview, thumbWidth, visibility]);
+    }, [closeModal, objectNames, onChange, preview, thumbWidth, isPublic]);
 
     const removeImage = useCallback((name: string) => {
         const newNames = objectNames.filter((n) => n !== name);

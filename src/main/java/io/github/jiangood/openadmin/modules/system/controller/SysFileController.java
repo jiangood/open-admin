@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.StringReq;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
-import io.github.jiangood.openadmin.framework.enums.FileVisibility;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
@@ -56,8 +55,8 @@ public class SysFileController {
      */
     @PostMapping("upload")
     public AjaxResult upload(@RequestPart("file") MultipartFile file,
-                             @RequestParam(value = "visibility", required = false) String visibility) throws Exception {
-        SysFile sysFile = service.uploadFile(file, FileVisibility.parse(visibility));
+                             @RequestParam(value = "isPublic", defaultValue = "true") boolean isPublic) throws Exception {
+        SysFile sysFile = service.uploadFile(file, isPublic);
 
         // location 供富文本直接使用，返回含 context-path 的相对路径（如 /example/file/xxx.jpg）
         String location = service.getPreviewUrl(sysFile.getObjectName());
@@ -74,8 +73,8 @@ public class SysFileController {
     @PostMapping("uploadImage")
     public AjaxResult uploadImage(@RequestPart("file") MultipartFile file,
                                   @RequestPart("thumb") MultipartFile thumb,
-                                  @RequestParam(value = "visibility", required = false) String visibility) throws Exception {
-        SysFile sysFile = service.uploadImage(file, thumb, FileVisibility.parse(visibility));
+                                  @RequestParam(value = "isPublic", defaultValue = "true") boolean isPublic) throws Exception {
+        SysFile sysFile = service.uploadImage(file, thumb, isPublic);
 
         String location = service.getPreviewUrl(sysFile.getObjectName());
         String thumbObjectName = SysFileService.thumbKeyOf(sysFile.getObjectName());

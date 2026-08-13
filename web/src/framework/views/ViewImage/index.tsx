@@ -2,7 +2,18 @@ import React from 'react';
 import {Modal} from 'antd';
 import {UrlUtils} from '../../utils';
 
-
+/**
+ * 图片展示组件
+ *
+ * 支持的属性：
+ * - value: 图片地址，支持多个（逗号分隔或数组）。objectName（public/、private/ 开头）自动拼 /file/ 前缀
+ * - size: 缩略图尺寸（正方形边长），默认 60
+ * - borderRadius: 圆角，默认 4
+ * - preview: 是否可点击放大预览，默认 true
+ * - previewTitle: 预览弹窗标题，默认「预览图片」
+ * - placeholder: value 为空时展示的内容，默认不渲染
+ * - style: 附加到 img 的样式
+ */
 export class ViewImage extends React.Component {
 
   state = {
@@ -11,12 +22,14 @@ export class ViewImage extends React.Component {
   };
 
   render() {
-    let vs = this.props.value
+    const {value, size = 60, borderRadius = 4, preview = true, previewTitle = '预览图片',
+           placeholder, style} = this.props;
 
-    if (!vs) {
-      return;
+    if (!value) {
+      return placeholder || null;
     }
 
+    let vs = value;
     if (typeof vs === 'string') {
       vs = vs.split(',');
     }
@@ -47,21 +60,25 @@ export class ViewImage extends React.Component {
 
     const imgs = thumbList.map((thumb, i) => (
       <img
-        style={{ display: 'inline-block' }}
         key={urlList[i]}
         src={thumb}
-        onClick={() => this.setState({modalOpen: true, previewUrl: urlList[i]})}
-        width={60}
-        height={60}
+        width={size}
+        height={size}
+        style={{display: 'inline-block', objectFit: 'cover', borderRadius, cursor: preview ? 'pointer' : undefined, ...style}}
+        onClick={() => {
+          if (preview) {
+            this.setState({modalOpen: true, previewUrl: urlList[i]})
+          }
+        }}
       />
     ));
 
     return (
       <>
         {imgs}
-        <Modal open={this.state.modalOpen} title="预览图片" width="70vw" footer={null}
+        <Modal open={this.state.modalOpen} title={previewTitle} width="70vw" footer={null}
                onCancel={closeModal}>
-          <div style={{maxHeight:'70vh',overflow:'auto'}}>
+          <div style={{maxHeight: '70vh', overflow: 'auto'}}>
             <img src={this.state.previewUrl} style={{maxWidth: '100%'}}/>
           </div>
         </Modal>
