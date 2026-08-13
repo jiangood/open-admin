@@ -12,7 +12,8 @@ import {
     Page,
     PageUtils,
     PermActions,
-    ProTable
+    ProTable,
+    ViewImage
 } from "../../../framework";
 
 export default class extends React.Component {
@@ -59,6 +60,14 @@ export default class extends React.Component {
         {
             title: '标题',
             dataIndex: 'title',
+        },
+        {
+            title: '主图',
+            dataIndex: 'mainImage',
+            width: 80,
+            render(v) {
+                return <ViewImage value={v} size={48}/>
+            },
         },
         {
             title: '显示位置',
