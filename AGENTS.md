@@ -52,6 +52,20 @@ cd web && npm run test:e2e                                    # Playwright 端�
 
 E2E（`web/e2e/`）自动拉起后端（`mvn spring-boot:run`  profiles=lib,e2e，端口 8080）与前端（端口 3000），运行前需释放这两个端口。
 
+## Startup Scripts（启动前后端用脚本）
+
+日常开发优先用 `scripts/` 下的脚本（后台 nohup 运行，日志落 `logs/`，PID 在 `logs/*.pid`，`logs/` 已被 gitignore）：
+
+```bash
+scripts/start-all.sh                                    # 一键后台启动前后端
+scripts/start-backend.sh {start|stop|restart|status}    # 后端: mvn -Pdev spring-boot:run（devtools 热重载）
+scripts/start-frontend.sh {start|stop|restart|status}   # 前端: npm run dev（端口 3000，缺 node_modules 自动安装）
+scripts/bug-scan.sh [模型]                              # 本地 AI bug 扫描（opencode + gh），产物在 target/bug-scan/
+```
+
+- 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，需本地 MySQL 8+，连接参数见其中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
+
 ## Auto-Configuration Mechanism
 
 框架通过 Spring Boot 自动配置机制注入：`AutoConfiguration.imports` 注册 `OpenAdminConfiguration`（含 `@ComponentScan` / `@EntityScan` / `@EnableJpaRepositories`，扫描 `io.github.jiangood.openadmin`）。默认配置在 `application-lib.yml`，业务项目通过 `spring.config.import` 引入。
