@@ -1,3 +1,4 @@
+import {Spin} from 'antd';
 import React from 'react';
 import {Editor as TinyMceEditor} from '@tinymce/tinymce-react';
 import {UrlUtils} from '../../utils';
@@ -15,18 +16,42 @@ export interface FieldEditorProps extends FieldProps<string> {
  *
  * 图片上传相关配置 https://www.tiny.cloud/docs/tinymce/7/image/
  */
-export class FieldEditor extends React.Component<FieldEditorProps> {
+export class FieldEditor extends React.Component<FieldEditorProps, {loading: boolean}> {
+    state = {loading: false};
+    private timer: number | undefined;
+
+    componentDidMount() {
+        this.timer = window.setTimeout(() => {
+            this.setState({loading: true});
+        }, 200);
+    }
+
+    componentWillUnmount() {
+        if (this.timer != null) {
+            window.clearTimeout(this.timer);
+        }
+    }
+
     render() {
+        const {loading} = this.state;
         const visibility = this.props.visibility || 'public';
         const uploadUrl = UrlUtils.contextPath('/admin/sysFile/upload') + '?visibility=' + visibility;
         const jsUrl = UrlUtils.contextPath('/admin/tinymce/tinymce.min.js');
         const {value, onChange, height} = this.props;
+        const editorHeight = height || 300;
 
         return (
-            <TinyMceEditor
-                value={value}
-                tinymceScriptSrc={jsUrl}
-                init={{
+            <div style={{position: 'relative'}}>
+                <TinyMceEditor
+                    value={value}
+                    tinymceScriptSrc={jsUrl}
+                    onInit={() => {
+                        if (this.timer != null) {
+                            window.clearTimeout(this.timer);
+                        }
+                        this.setState({loading: false});
+                    }}
+                    init={{
                     min_height: 300,
                     language: 'zh_CN',
                     height: height,
@@ -54,7 +79,28 @@ export class FieldEditor extends React.Component<FieldEditorProps> {
                         onChange(content);
                     }
                 }}
-            />
+                />
+                {loading && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        minHeight: editorHeight + 44,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        background: '#fff',
+                        zIndex: 1,
+                    }}>
+                        <Spin/>
+                        <span style={{color: '#999'}}>编辑器加载中...</span>
+                    </div>
+                )}
+            </div>
         );
     }
 }
