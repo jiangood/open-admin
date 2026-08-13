@@ -1,5 +1,6 @@
 import React from "react";
 import {HttpUtils, Page, UrlUtils} from "../../framework";
+import "./article.less";
 
 export default class extends React.Component {
 
@@ -36,17 +37,26 @@ export default class extends React.Component {
             </Page>
         }
 
-        return <Page title={article.title}>
-            {article.mainImage && (
-                <div style={{marginBottom: 16, textAlign: 'center'}}>
-                    <img
-                        src={UrlUtils.contextPath('/file/' + article.mainImage)}
-                        style={{maxWidth: '100%', maxHeight: 400, borderRadius: 4}}
-                        alt='主图'
-                    />
+        return <Page>
+            <div className="oa-article">
+                <div className="oa-article-title">
+                    <h1>{article.title}</h1>
+                    <div className="oa-article-meta">
+                        {article.createUserLabel && <span>发布人：{article.createUserLabel}</span>}
+                        {article.createTime && <span>发布时间：{article.createTime}</span>}
+                    </div>
                 </div>
-            )}
-            <div dangerouslySetInnerHTML={{__html: article.content}}/>
+                {article.mainImage && (
+                    <div style={{marginBottom: 16, textAlign: 'center'}}>
+                        <img
+                            src={UrlUtils.contextPath('/file/' + article.mainImage)}
+                            style={{maxWidth: '100%', maxHeight: 400, borderRadius: 4}}
+                            alt='主图'
+                        />
+                    </div>
+                )}
+                <div dangerouslySetInnerHTML={{__html: article.content}}/>
+            </div>
         </Page>
     }
 }

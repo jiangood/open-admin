@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal} from 'antd'
+import {Button, Form, Input, InputNumber} from 'antd'
 import React from 'react'
 import {
     DictUtils,
@@ -10,18 +10,15 @@ import {
     FormModal,
     HttpUtils,
     Page,
+    PageUtils,
     PermActions,
-    ProTable,
-    UrlUtils
+    ProTable
 } from "../../../framework";
-
-const {TextArea} = Input;
 
 export default class extends React.Component {
 
     state = {
         editing: false,
-        previewArticle: null,
     }
 
     modalRef = React.createRef()
@@ -38,7 +35,7 @@ export default class extends React.Component {
     }
 
     handlePreview = record => {
-        this.setState({previewArticle: record})
+        PageUtils.open('/article/' + record.code, record.title)
     }
 
     onFinish = async values => {
@@ -99,7 +96,6 @@ export default class extends React.Component {
     ]
 
     render() {
-        const {previewArticle} = this.state
         return <Page
             title="文章管理"
             description="管理系统文章，如关于、帮助等页面"
@@ -155,21 +151,6 @@ export default class extends React.Component {
                     <FieldBoolean/>
                 </Form.Item>
             </FormModal>
-
-            <Modal
-                open={!!previewArticle}
-                title={previewArticle?.title}
-                width={800}
-                footer={null}
-                onCancel={() => this.setState({previewArticle: null})}
-            >
-                {previewArticle?.mainImage && (
-                    <div style={{marginBottom: 16}}>
-                        <img src={UrlUtils.contextPath('/file/' + previewArticle.mainImage)} style={{maxWidth: '100%'}} alt='主图'/>
-                    </div>
-                )}
-                <div dangerouslySetInnerHTML={{__html: previewArticle?.content || ''}}/>
-            </Modal>
         </Page>
     }
 }

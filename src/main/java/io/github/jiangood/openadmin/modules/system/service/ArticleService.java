@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 public class ArticleService extends BaseService<Article> {
 
     private final ArticleRepository articleRepository;
+    private final SysUserService sysUserService;
 
     @Transactional
     public Article save(Article input, List<String> requestKeys) throws Exception {
@@ -31,7 +32,11 @@ public class ArticleService extends BaseService<Article> {
     }
 
     public Article getByCode(String code) {
-        return articleRepository.findByCode(code);
+        Article article = articleRepository.findByCode(code);
+        if (article != null) {
+            article.setCreateUserLabel(sysUserService.getNameById(article.getCreateUser()));
+        }
+        return article;
     }
 
     public List<Article> listByPosition(ArticlePosition position) {

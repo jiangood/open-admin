@@ -37,6 +37,12 @@ public class Article extends BaseEntity {
 
     private Boolean enabled;
 
+    /**
+     * 发布人姓名（查询时由 createUser 关联 SysUser 填充，不落库）
+     */
+    @Transient
+    private String createUserLabel;
+
     @PrePersist
     public void prePersist() {
         if (position == null) {
