@@ -18,7 +18,7 @@ start() {
     fi
 
     echo "启动前端: npm run dev (端口 3000)"
-    nohup npm run dev > "$LOG_FILE" 2>&1 &
+    nohup npm run dev --prefix "$ROOT/web" > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
     echo "前端已启动 (PID $(cat "$PID_FILE"))，日志: $LOG_FILE"
 }
