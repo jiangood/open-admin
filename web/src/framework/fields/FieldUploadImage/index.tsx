@@ -11,24 +11,12 @@ import type {FieldProps} from '../types';
 interface FieldUploadImageProps extends FieldProps<string> {
     /** 最大上传数量，默认 1 */
     maxCount?: number;
-    /** 目标尺寸（默认 800x600），裁切框与最终压缩均按此比例 */
-    targetWidth?: number;
-    /** 目标尺寸（默认 800x600） */
-    targetHeight?: number;
     /** 缩略图最长边，默认 300 */
     thumbWidth?: number;
-    /** 压缩质量，默认 0.8 */
-    quality?: number;
     /** 文件可见性，默认 public */
     visibility?: 'public' | 'private';
     /** 接受的文件类型 */
     accept?: string;
-    /** 超过该宽度/高度提示尺寸过大，默认 1920x1080 */
-    maxWebWidth?: number;
-    /** 超过该高度提示尺寸过大，默认 1920x1080 */
-    maxWebHeight?: number;
-    /** 超过该存储大小提示过大，默认 2MB */
-    maxStorageSize?: number;
 }
 
 interface Dims {
@@ -99,20 +87,19 @@ function compressToFile(source: Blob, options: {maxWidth?: number; maxHeight?: n
 }
 
 /**
- * 压缩到指定体积内：先按 maxWidth 等比缩放，再二分 quality 逼近目标体积；
+ * 压缩到指定体积内：先按 maxWidth 等比缩放，再二分质量逼近目标体积；
  * 若最低质量仍超目标，则进一步缩小宽度。
  */
-async function compressToTarget(source: Blob, maxWidth: number | undefined, targetBytes: number, quality: number): Promise<File> {
+async function compressToTarget(source: Blob, maxWidth: number | undefined, targetBytes: number): Promise<File> {
     const maxW = maxWidth || undefined;
     if (!targetBytes || targetBytes <= 0) {
-        return compressToFile(source, {maxWidth: maxW, maxHeight: maxW, quality});
+        return compressToFile(source, {maxWidth: maxW, maxHeight: maxW});
     }
-    // 尝试给定质量
-    let best = await compressToFile(source, {maxWidth: maxW, maxHeight: maxW, quality});
+    // 二分查找满足目标体积的最大质量（JPEG 质量范围 0.1 ~ 1）
+    let best = await compressToFile(source, {maxWidth: maxW, maxHeight: maxW, quality: 1});
     if (best.size <= targetBytes) return best;
-    // 二分查找满足目标的最大质量
     let lo = 0.1;
-    let hi = quality;
+    let hi = 1;
     for (let i = 0; i < 5; i++) {
         const mid = Number(((lo + hi) / 2).toFixed(2));
         const f = await compressToFile(source, {maxWidth: maxW, maxHeight: maxW, quality: mid});
@@ -134,8 +121,8 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
 
 export function FieldUploadImage(props: FieldUploadImageProps) {
     const {
-        value, onChange, maxCount = 1, targetWidth = 800, targetHeight = 600,
-        thumbWidth = 300, quality = 0.8, visibility = 'public', accept = 'image/*',
+        value, onChange, maxCount = 1,
+        thumbWidth = 300, visibility = 'public', accept = 'image/*',
     } = props;
 
     const [objectNames, setObjectNames] = useState<string[]>(() => (value ? value.split(',') : []));
@@ -146,7 +133,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
     const [preview, setPreview] = useState<PreviewResult>();
     const [tool, setTool] = useState<Tool>();
     const [cropperReady, setCropperReady] = useState(false);
-    const [cropRatio, setCropRatio] = useState<Dims | null>({width: targetWidth, height: targetHeight});
+    const [cropRatio, setCropRatio] = useState<Dims | null>({width: 4, height: 3});
     const [uploading, setUploading] = useState(false);
     const [fullPreviewUrl, setFullPreviewUrl] = useState<string>();
     const [compressWidth, setCompressWidth] = useState<number>(1920);
@@ -169,16 +156,15 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
     }, []);
 
     /**
-     * 处理源文件为当前主图（仅压缩，不生成缩略图），用于裁切/自动处理后更新画布
+     * 处理源文件为当前主图（不压缩，仅加载画布预览），用于裁切/手动处理后更新画布
      */
-    const regenerate = useCallback(async (source: Blob) => {
-        const cFile = await compressToFile(source, {maxWidth: targetWidth, maxHeight: targetHeight, quality});
-        const cUrl = URL.createObjectURL(cFile);
+    const regenerate = useCallback(async (file: File) => {
+        const cUrl = URL.createObjectURL(file);
         const cdims = await readDims(cUrl);
         revokePreviewUrls();
         previewUrlsRef.current = [cUrl];
-        setPreview({cUrl, cFile, cSize: cFile.size, cdims});
-    }, [quality, revokePreviewUrls, targetHeight, targetWidth]);
+        setPreview({cUrl, cFile: file, cSize: file.size, cdims});
+    }, [revokePreviewUrls]);
 
     /**
      * 默认展示原图：不做任何压缩处理
@@ -212,7 +198,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
         const file = preview?.cFile || selectedFileRef.current;
         if (!file) return;
         try {
-            const cFile = await compressToTarget(file, width, size, quality);
+            const cFile = await compressToTarget(file, width, size);
             const cUrl = URL.createObjectURL(cFile);
             const cdims = await readDims(cUrl);
             revokePreviewUrls();
@@ -223,7 +209,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
         } catch (e) {
             message.error('压缩失败');
         }
-    }, [preview, quality, revokePreviewUrls]);
+    }, [preview, revokePreviewUrls]);
 
     const handleBeforeUpload = useCallback(async (file: File) => {
         if (objectNames.length >= maxCount) {
@@ -315,8 +301,8 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
                 const croppedFile = new File([blob], 'cropped.jpg', {type: mime});
                 await regenerate(croppedFile);
             }
-        }, mime, quality);
-    }, [preview, quality, regenerate]);
+        }, mime);
+    }, [preview, regenerate]);
 
     /** 重置：丢弃所有处理，回到原始图片 */
     const resetImage = useCallback(() => {
@@ -334,7 +320,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
         setUploading(true);
         try {
             // 确定时才生成缩略图
-            const tFile = await compressToFile(preview.cFile, {maxWidth: thumbWidth, maxHeight: thumbWidth, quality});
+            const tFile = await compressToFile(preview.cFile, {maxWidth: thumbWidth, maxHeight: thumbWidth});
             const fd = new FormData();
             fd.append('file', preview.cFile);
             fd.append('thumb', tFile);
@@ -349,7 +335,7 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
         } finally {
             setUploading(false);
         }
-    }, [closeModal, objectNames, onChange, preview, quality, thumbWidth, visibility]);
+    }, [closeModal, objectNames, onChange, preview, thumbWidth, visibility]);
 
     const removeImage = useCallback((name: string) => {
         const newNames = objectNames.filter((n) => n !== name);
