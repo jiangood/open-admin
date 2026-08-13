@@ -439,38 +439,52 @@ public class SysFileService {
             "file/((?:public|private)(?:/img)?/\\d{6}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.[a-zA-Z0-9]+)(?:\\?[\\w=&.-]*)?");
 
 
+    /**
+     * 认领单个文件：绑定业务记录并置为使用中
+     */
     @Transactional
-    public void claimList(String joinTable, String joinId, List<String> oldObjectNames, List<String> newObjectNames) {
-        if (newObjectNames != null && !newObjectNames.isEmpty()) {
-            List<String> toConfirm = new ArrayList<>(newObjectNames);
-            if (oldObjectNames != null) {
-                toConfirm.removeAll(oldObjectNames);
-            }
-            if (!toConfirm.isEmpty()) {
-                sysFileRepository.updateJoinRefByObjectNames(joinTable, joinId, toConfirm);
-            }
-        }
-        if (oldObjectNames != null && !oldObjectNames.isEmpty() && newObjectNames != null) {
-            List<String> toRemove = new ArrayList<>(oldObjectNames);
-            toRemove.removeAll(newObjectNames);
-            if (!toRemove.isEmpty()) {
-                sysFileRepository.updateStatusByObjectNames(toRemove, FileStatus.PENDING_DELETE);
-            }
-        }
+    public void claim(String joinTable, String joinId, String objectName) {
+        claimList(joinTable, joinId, objectNameList(objectName));
     }
 
+    /**
+     * 认领富文本 HTML 中引用的所有文件
+     */
     @Transactional
-    public void claim(String joinTable, String joinId, String oldObjectName, String newObjectName) {
-        claimList(joinTable, joinId, objectNameList(oldObjectName), objectNameList(newObjectName));
+    public void claimHtml(String joinTable, String joinId, String html) {
+        claimList(joinTable, joinId, extractObjectNamesFromHtml(html));
+    }
+
+    /**
+     * 释放单个文件引用：置为待删除
+     */
+    @Transactional
+    public void release(String objectName) {
+        releaseList(objectNameList(objectName));
+    }
+
+    /**
+     * 释放富文本 HTML 中引用的所有文件
+     */
+    @Transactional
+    public void releaseHtml(String html) {
+        releaseList(extractObjectNamesFromHtml(html));
     }
 
     private List<String> objectNameList(String objectName) {
         return StrUtil.isBlank(objectName) ? List.of() : List.of(objectName);
     }
 
-    @Transactional
-    public void claimHtml(String joinTable, String joinId, String oldHtml, String newHtml) {
-        claimList(joinTable, joinId, extractObjectNamesFromHtml(oldHtml), extractObjectNamesFromHtml(newHtml));
+    private void claimList(String joinTable, String joinId, List<String> objectNames) {
+        if (objectNames != null && !objectNames.isEmpty()) {
+            sysFileRepository.updateJoinRefByObjectNames(joinTable, joinId, objectNames);
+        }
+    }
+
+    private void releaseList(List<String> objectNames) {
+        if (objectNames != null && !objectNames.isEmpty()) {
+            sysFileRepository.updateStatusByObjectNames(objectNames, FileStatus.PENDING_DELETE);
+        }
     }
 
     private List<String> extractObjectNamesFromHtml(String html) {

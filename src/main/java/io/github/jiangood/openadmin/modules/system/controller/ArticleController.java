@@ -45,8 +45,8 @@ public class ArticleController {
     @PostMapping("create")
     public AjaxResult create(@RequestBody Article param) throws Exception {
         Article result = articleService.save(param, null);
-        sysFileService.claimHtml("sys_article", result.getId(), null, param.getContent());
-        sysFileService.claim("sys_article", result.getId(), null, param.getMainImage());
+        sysFileService.claimHtml("sys_article", result.getId(), param.getContent());
+        sysFileService.claim("sys_article", result.getId(), param.getMainImage());
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
 
@@ -55,11 +55,14 @@ public class ArticleController {
     @PostMapping("update")
     public AjaxResult update(@RequestBody Article param, RequestBodyKeys updateFields) throws Exception {
         Article old = articleService.findById(param.getId()).orElse(null);
+        // 保存会改写托管实体 old，必须先释放旧引用
+        sysFileService.release(old.getMainImage());
+        sysFileService.releaseHtml(old.getContent());
+
         Article result = articleService.save(param, updateFields);
-        sysFileService.claimHtml("sys_article", param.getId(), old == null ? null : old.getContent(), param.getContent());
-        sysFileService.claim("sys_article", param.getId(),
-                old == null ? null : old.getMainImage(),
-                param.getMainImage());
+
+        sysFileService.claimHtml("sys_article", result.getId(), param.getContent());
+        sysFileService.claim("sys_article", result.getId(), param.getMainImage());
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
 

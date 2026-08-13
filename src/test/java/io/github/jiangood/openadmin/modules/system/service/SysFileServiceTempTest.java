@@ -44,60 +44,37 @@ class SysFileServiceTempTest {
     }
 
     @Test
-    void claimList_shouldConfirmNewFiles() throws Exception {
-        List<String> oldNames = List.of("public/202607/id-a.jpg");
-        List<String> newNames = List.of("public/202607/id-a.jpg", "public/202607/id-b.jpg");
+    void claim_shouldConfirmFile() throws Exception {
+        sysFileService.claim(JOIN_TABLE, JOIN_ID, "public/202607/id-a.jpg");
 
-        sysFileService.claimList(JOIN_TABLE, JOIN_ID, oldNames, newNames);
-
-        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/id-b.jpg"));
-        verify(sysFileRepository, never()).findByObjectNameIn(any());
+        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/id-a.jpg"));
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claimList_shouldMarkRemovedFilesPendingDelete() throws Exception {
-        List<String> oldNames = List.of("public/202607/id-a.jpg", "public/202607/id-b.jpg");
-        List<String> newNames = List.of("public/202607/id-b.jpg");
+    void claim_shouldHandleBlank() throws Exception {
+        sysFileService.claim(JOIN_TABLE, JOIN_ID, null);
+        sysFileService.claim(JOIN_TABLE, JOIN_ID, "  ");
 
-        sysFileService.claimList(JOIN_TABLE, JOIN_ID, oldNames, newNames);
-
-        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
-        verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
-        verify(sysFileRepository, never()).deleteAllInBatch(any());
-        verify(fileOperator, never()).delete(any());
-    }
-
-    @Test
-    void claimList_shouldHandleNullInputs() throws Exception {
-        assertDoesNotThrow(() -> sysFileService.claimList(JOIN_TABLE, JOIN_ID, null, null));
-        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
-        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
-    }
-
-    @Test
-    void claimList_shouldHandleEmptyInputs() throws Exception {
-        assertDoesNotThrow(() -> sysFileService.claimList(JOIN_TABLE, JOIN_ID, List.of(), List.of()));
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
     void claimHtml_shouldExtractObjectNamesAndConfirm() throws Exception {
-        String oldHtml = null;
-        String newHtml = "<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">";
+        String html = "<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">";
 
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, oldHtml, newHtml);
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, html);
 
         verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
     }
 
     @Test
     void claimHtml_shouldExtractImgDirectoryObjectNames() throws Exception {
-        String newHtml = "<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>"
+        String html = "<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>"
                 + "<p><img src=\"/file/private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>";
 
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null, newHtml);
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, html);
 
         verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of(
                 "public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
@@ -106,41 +83,61 @@ class SysFileServiceTempTest {
 
     @Test
     void claimHtml_shouldStripQueryStringAndContextPath() throws Exception {
-        String newHtml = "<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">";
+        String html = "<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">";
 
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null, newHtml);
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, html);
 
         verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID,
                 List.of("public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
     }
 
     @Test
-    void claimHtml_shouldHandleNull() throws Exception {
-        assertDoesNotThrow(() -> sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null, null));
+    void claimHtml_shouldHandleBlank() throws Exception {
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null);
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, "");
+
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claim_shouldConfirmNewFile() throws Exception {
-        sysFileService.claim(JOIN_TABLE, JOIN_ID, null, "public/202607/id-a.jpg");
-
-        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/id-a.jpg"));
-        verify(sysFileRepository, never()).findByObjectName(any());
-    }
-
-    @Test
-    void claim_shouldMarkRemovedFilePendingDelete() throws Exception {
-        sysFileService.claim(JOIN_TABLE, JOIN_ID, "public/202607/id-a.jpg", null);
+    void release_shouldMarkFilePendingDelete() throws Exception {
+        sysFileService.release("public/202607/id-a.jpg");
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
-        verify(sysFileRepository, never()).deleteAllInBatch(any());
+        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(fileOperator, never()).delete(any());
     }
 
     @Test
-    void claim_shouldHandleNulls() throws Exception {
-        assertDoesNotThrow(() -> sysFileService.claim(JOIN_TABLE, JOIN_ID, null, null));
+    void release_shouldHandleBlank() throws Exception {
+        sysFileService.release(null);
+        sysFileService.release("  ");
+
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
+    }
+
+    @Test
+    void releaseHtml_shouldExtractAndMarkPendingDelete() throws Exception {
+        String html = "<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
+                + "<img src=\"/file/private/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">";
+
+        sysFileService.releaseHtml(html);
+
+        verify(sysFileRepository).updateStatusByObjectNames(List.of(
+                "public/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
+                "private/202607/550e8400-e29b-41d4-a716-446655440000.jpg"), FileStatus.PENDING_DELETE);
+        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+    }
+
+    @Test
+    void releaseHtml_shouldHandleBlank() throws Exception {
+        sysFileService.releaseHtml(null);
+        sysFileService.releaseHtml("");
+
+        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
