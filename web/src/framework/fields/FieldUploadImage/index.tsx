@@ -514,11 +514,12 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
                                             style={{flex: 1}}
                                             options={[
                                                 {label: '不限', value: 0},
-                                                {label: '750 px（移动端主图）', value: 750},
+                                                {label: '400 px（logo）', value: 400},
+                                                {label: '640 px（移动端小图）', value: 640},
                                                 {label: '800 px（商品图）', value: 800},
-                                                {label: '1000 px（详情页大图）', value: 1000},
-                                                {label: '1200 px（大促主图）', value: 1200},
-                                                {label: '1920 px（PC 端大图）', value: 1920},
+                                                {label: '960 px（详情页）', value: 960},
+                                                {label: '1280 px（宽屏）', value: 1280},
+                                                {label: '1920 px（网页）', value: 1920},
                                                 {label: '2560 px（超清）', value: 2560},
                                             ]}
                                         />
