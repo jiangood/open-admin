@@ -29,6 +29,33 @@
 - 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
 - 方法参数校验用 `@Valid` / `@Validated`
 
+## 文件认领
+
+上传文件/图片后，`SysFile` 记录默认处于 **未认领（TEMP）** 状态；只有业务数据保存时调用 `SysFileService` 的认领方法才会转为 **使用中（IN_USE）** 并记录关联表/关联 ID。未认领文件默认 120 分钟（`sys.file.clean-unclaimed-minutes`）后被 `CleanTempFileJob` 物理删除，因此**包含文件/图片/富文本字段的业务模块必须在保存后认领文件**，否则上传的图片会莫名其妙消失。
+
+| 方法 | 适用字段 | 说明 |
+|------|---------|------|
+| `claim(joinTable, joinId, oldObjectName, newObjectName)` | 单值文件/图片字段（如主图） | 新值被认领，从旧值中移除的引用被标记待删除 |
+| `claimHtml(joinTable, joinId, oldHtml, newHtml)` | 富文本 HTML | 自动从 HTML 提取框架文件 URL（支持 `public`/`private` 前缀、`img/` 目录、`?thumb=1` query 串）后认领 |
+| `claimList(joinTable, joinId, oldNames, newNames)` | 多值文件列表 | 同上，批量处理 |
+
+```java
+// 新增
+Article result = articleService.save(param, null);
+sysFileService.claimHtml("biz_article", result.getId(), null, param.getContent());
+sysFileService.claim("biz_article", result.getId(), null, param.getMainImage());
+
+// 更新（传旧值以清理被移除的引用）
+Article old = service.findById(param.getId()).orElse(null);
+service.save(param, updateFields);
+sysFileService.claimHtml("biz_article", param.getId(),
+        old == null ? null : old.getContent(), param.getContent());
+sysFileService.claim("biz_article", param.getId(),
+        old == null ? null : old.getMainImage(), param.getMainImage());
+```
+
+认领方法均为 `@Transactional`，须在业务保存事务提交后调用（与 save 分属不同事务），调用顺序放在 `service.save(...)` 之后。完整示例见框架 `ArticleController`。
+
 ## 前端要点
 
 - 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）

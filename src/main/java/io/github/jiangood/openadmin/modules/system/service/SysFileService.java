@@ -411,8 +411,13 @@ public class SysFileService {
         return sysFileRepository.findByObjectName(objectName);
     }
 
+    /**
+     * 提取富文本 HTML 中的框架文件 URL：
+     * 支持 public/private 前缀、可选的 img/ 目录（uploadImage 产物）、query 串、带 context-path 的相对路径
+     */
     private static final Pattern HTML_FILE_PATTERN = Pattern.compile(
-            "file/((?:public|private)/\\d{6}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.[a-zA-Z0-9]+)");
+            "file/((?:public|private)(?:/img)?/\\d{6}/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\.[a-zA-Z0-9]+)(?:\\?[\\w=&.-]*)?");
+
 
     @Transactional
     public void claimList(String joinTable, String joinId, List<String> oldObjectNames, List<String> newObjectNames) {

@@ -311,6 +311,35 @@ public class CustomerController {
 }
 ```
 
+### 文件认领（必须）
+
+实体如果包含上传文件/图片字段（`FieldUploadFile`、`FieldUploadImage`、`FieldEditor` 富文本），业务保存后**必须调用 `SysFileService.claim()/claimHtml()` 认领文件**，否则文件一直处于"未认领(TEMP)"状态，默认 120 分钟后会被清理任务物理删除。
+
+- 上传的文件初始状态为 `TEMP`（未认领），认领后变为 `IN_USE`（使用中）并记录关联表/关联 ID
+- `claim(joinTable, joinId, oldObjectName, newObjectName)`：单值字段（如主图），传旧值/新值，用于把移除的旧引用标记为待删除
+- `claimHtml(joinTable, joinId, oldHtml, newHtml)`：富文本字段，内部从 HTML 中提取框架文件 URL（支持 `public`/`private` 前缀与 `img/` 目录）后认领
+- `joinTable` 填业务表名（如 `biz_article`），`joinId` 填记录 id
+- 调用放在 `service.save(...)` 之后（新记录用 `result.getId()`）
+
+参照框架示例 `ArticleController.java`：
+
+```java
+// 新增
+Article result = articleService.save(param, null);
+sysFileService.claimHtml("biz_article", result.getId(), null, param.getContent());
+sysFileService.claim("biz_article", result.getId(), null, param.getMainImage());
+
+// 更新
+Article old = service.findById(param.getId()).orElse(null);
+service.save(param, updateFields);
+sysFileService.claimHtml("biz_article", param.getId(),
+        old == null ? null : old.getContent(), param.getContent());
+sysFileService.claim("biz_article", param.getId(),
+        old == null ? null : old.getMainImage(), param.getMainImage());
+```
+
+> 若实体无任何文件/图片/富文本字段，可跳过本小节。删除业务记录时如需同步清理文件引用，可参考 `SysFileService` 的 `claim`/`claimHtml` 或框架文件管理删除接口。
+
 ## 第三步：前端页面创建
 
 ### 路由机制说明

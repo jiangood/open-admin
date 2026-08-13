@@ -93,6 +93,28 @@ class SysFileServiceTempTest {
     }
 
     @Test
+    void claimHtml_shouldExtractImgDirectoryObjectNames() throws Exception {
+        String newHtml = "<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>"
+                + "<p><img src=\"/file/private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>";
+
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null, newHtml);
+
+        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of(
+                "public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
+                "private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
+    }
+
+    @Test
+    void claimHtml_shouldStripQueryStringAndContextPath() throws Exception {
+        String newHtml = "<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">";
+
+        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null, newHtml);
+
+        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID,
+                List.of("public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
+    }
+
+    @Test
     void claimHtml_shouldHandleNull() throws Exception {
         assertDoesNotThrow(() -> sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null, null));
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
