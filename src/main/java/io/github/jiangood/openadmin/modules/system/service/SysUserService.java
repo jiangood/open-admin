@@ -130,14 +130,29 @@ public class SysUserService extends BaseService<SysUser> {
             SysUser.Fields.dataPermType,
             SysUser.Fields.lastPasswordChangeTime
         ));
-        fieldsToUpdate.add(SysUser.Fields.unitId);
+        if (fieldsToUpdate.contains(SysUser.Fields.orgId) || fieldsToUpdate.contains(SysUser.Fields.unitId)) {
+            fieldsToUpdate.add(SysUser.Fields.unitId);
+        }
         return super.update(input, fieldsToUpdate);
     }
 
     private void resolveOrg(SysUser input) {
         String inputOrgId = input.getOrgId();
         if (inputOrgId == null) return;
-        input.setUnitId(inputOrgId);
+        input.setUnitId(resolveUnitId(inputOrgId));
+    }
+
+    private String resolveUnitId(String orgId) {
+        List<String> path = new ArrayList<>(sysOrgService.getParentIdListById(orgId));
+        path.add(orgId);
+        Collections.reverse(path);
+        for (String id : path) {
+            SysOrg org = sysOrgService.findById(id).orElse(null);
+            if (org != null && Integer.valueOf(1).equals(org.getType())) {
+                return org.getId();
+            }
+        }
+        return orgId;
     }
 
 

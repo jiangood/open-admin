@@ -117,7 +117,10 @@ public class SysRoleController {
     @RequestMapping("own-perms")
     public AjaxResult ownPerms(String id) {
         SysRole role = sysRoleService.findById(id).orElse(null);
-        List<String> rolePerms = role.getPerms();
+        if (role == null) {
+            return AjaxResult.err("角色不存在");
+        }
+        List<String> rolePerms = CollUtil.emptyIfNull(role.getPerms());
 
         List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
 

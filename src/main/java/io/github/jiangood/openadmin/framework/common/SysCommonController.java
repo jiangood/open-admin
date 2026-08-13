@@ -82,7 +82,6 @@ public class SysCommonController {
         LoginInfoVO userResponse = new LoginInfoVO();
         userResponse.setId(user.getId());
         userResponse.setName(user.getName());
-        userResponse.setOrgName(sysOrgService.getNameById(user.getUnitId()));
         userResponse.setOrgName(sysOrgService.getNameById(user.getOrgId()));
         userResponse.setPermissions(permissions);
         userResponse.setAccount(user.getUsername());
