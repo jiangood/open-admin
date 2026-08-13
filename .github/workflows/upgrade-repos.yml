@@ -14,6 +14,11 @@ on:
         required: false
         type: string
         default: 'opencode/deepseek-v4-flash-free'
+      tag_prefix:
+        description: '升级后打 tag 的前缀（默认 v，如 v3.0.10）'
+        required: false
+        type: string
+        default: 'v'
 
 concurrency:
   group: auto-upgrade-framework-consumers
@@ -41,18 +46,25 @@ jobs:
             branch: master
             frontend_build: 'npm run build'
     steps:
-      - name: 获取最新框架版本
+      - name: 获取最新框架版本（npm 验证真实发布）
         id: version
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ -n "${{ inputs.target_version }}" ]; then
-            echo "version=${{ inputs.target_version }}" >> "$GITHUB_OUTPUT"
-          else
-            LATEST=$(gh release list --repo jiangood/open-admin -L 1 --json tagName --jq '.[0].tagName')
-            echo "version=${LATEST#v}" >> "$GITHUB_OUTPUT"
+          CANDIDATE="${{ inputs.target_version }}"
+          if [ -z "$CANDIDATE" ]; then
+            CANDIDATE=$(gh release list --repo jiangood/open-admin -L 1 --json tagName --jq '.[0].tagName' | sed 's/^v//')
+            echo "GitHub 最新 release tag: v$CANDIDATE"
           fi
-          echo "目标版本: v${{ steps.version.outputs.version }}"
+          # 用 npm 验证版本是否真实发布（GitHub tag 可能存在但 npm publish 失败/跳过）
+          if npm view "@jiangood/open-admin@$CANDIDATE" version &>/dev/null; then
+            echo "npm 已验证 @jiangood/open-admin@$CANDIDATE 已发布"
+          else
+            CANDIDATE=$(npm view @jiangood/open-admin version)
+            echo "::warning::npm 上未发布该版本，改用 npm 最新已发布版本 v$CANDIDATE"
+          fi
+          echo "version=$CANDIDATE" >> "$GITHUB_OUTPUT"
+          echo "目标版本: v$CANDIDATE"
 
       - name: 检出 open-admin 源码（目标版本，用于同步 skills/docs）
         uses: actions/checkout@v5
@@ -137,6 +149,28 @@ jobs:
              3) 运行 mvn clean compile 验证后端；前端如存在 build 脚本则运行 npm run build，没有则跳过；
              4) 不要执行 git commit / git push。"
 
+      - name: 递增消费仓库自身版本（写回 pom + package.json）
+        if: steps.check.outputs.skip != 'true'
+        working-directory: repo
+        id: versionbump
+        run: |
+          set -e
+          git fetch origin --tags --force
+          PREFIX="${{ inputs.tag_prefix }}"
+          LATEST=$(git tag | grep -E "^${PREFIX}[0-9]+\.[0-9]+\.[0-9]+$" \
+            | sed "s/^${PREFIX}//" | sort -V | tail -1)
+          if [ -z "$LATEST" ]; then
+            echo "仓库无自身版本 tag，跳过递增与打 tag"
+            echo "skip_tag=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          IFS=. read -r MAJOR MINOR PATCH <<< "$LATEST"
+          NEXT="$MAJOR.$MINOR.$((PATCH + 1))"
+          echo "递增版本: $LATEST -> $NEXT"
+          echo "new_version=$NEXT" >> "$GITHUB_OUTPUT"
+          mvn versions:set -DnewVersion="$NEXT" -DgenerateBackupPoms=false -q
+          [ -f web/package.json ] && (cd web && npm version "$NEXT" --no-git-tag-version --allow-same-version)
+
       - name: 后端编译验证（push 前硬性门槛）
         if: steps.check.outputs.skip != 'true'
         working-directory: repo
@@ -161,3 +195,21 @@ jobs:
           fi
           git commit -m "chore: upgrade open-admin to v$VERSION"
           git push origin ${{ matrix.branch }}
+
+      - name: 打 tag 标记升级版本
+        if: steps.check.outputs.skip != 'true' && steps.versionbump.outputs.skip_tag != 'true'
+        working-directory: repo
+        run: |
+          TAG="${{ inputs.tag_prefix }}${{ steps.versionbump.outputs.new_version }}"
+          git fetch origin --tags
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG 已存在，跳过"
+            exit 0
+          fi
+          if git log -1 --oneline | grep -q "upgrade open-admin"; then
+            git tag "$TAG"
+            git push origin "$TAG"
+            echo "已打 tag $TAG 并推送"
+          else
+            echo "本次无升级提交，跳过打 tag"
+          fi
