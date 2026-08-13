@@ -1,14 +1,15 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React from "react";
 import {Button, Divider, Modal, Radio, Select, Space, Upload, message} from "antd";
 import {DeleteOutlined, EyeOutlined, PlusOutlined} from "@ant-design/icons";
 import Compressor from "compressorjs";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
 import {HttpUtils} from "../../utils";
+import {ObjectUtils} from "../../utils";
 import {UrlUtils} from "../../utils";
 import type {FieldProps} from '../types';
 
-interface FieldUploadImageProps extends FieldProps<string> {
+export interface FieldUploadImageProps extends FieldProps<string> {
     /** 最大上传数量，默认 1 */
     maxCount?: number;
     /** 缩略图最长边，默认 300 */
@@ -33,6 +34,27 @@ interface PreviewResult {
 }
 
 type Tool = 'crop' | 'auto';
+
+interface FieldUploadImageState {
+    maxCount: number;
+    thumbWidth: number;
+    isPublic: boolean;
+    accept: string;
+
+    objectNames: string[];
+    modalOpen: boolean;
+    originalUrl?: string;
+    originalDims?: Dims;
+    originalSize: number;
+    preview?: PreviewResult;
+    tool?: Tool;
+    cropperReady: boolean;
+    cropRatio: Dims | null;
+    uploading: boolean;
+    fullPreviewUrl?: string;
+    compressWidth: number;
+    compressSize: number;
+}
 
 function formatSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
@@ -119,100 +141,165 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
     return best;
 }
 
-export function FieldUploadImage(props: FieldUploadImageProps) {
-    const {
-        value, onChange, maxCount = 1,
-        thumbWidth = 300, isPublic = true, accept = 'image/*',
-    } = props;
+export class FieldUploadImage extends React.Component<FieldUploadImageProps, FieldUploadImageState> {
 
-    const [objectNames, setObjectNames] = useState<string[]>(() => (value ? value.split(',') : []));
-    const [modalOpen, setModalOpen] = useState(false);
-    const [originalUrl, setOriginalUrl] = useState<string>();
-    const [originalDims, setOriginalDims] = useState<Dims>();
-    const [originalSize, setOriginalSize] = useState(0);
-    const [preview, setPreview] = useState<PreviewResult>();
-    const [tool, setTool] = useState<Tool>();
-    const [cropperReady, setCropperReady] = useState(false);
-    const [cropRatio, setCropRatio] = useState<Dims | null>({width: 4, height: 3});
-    const [uploading, setUploading] = useState(false);
-    const [fullPreviewUrl, setFullPreviewUrl] = useState<string>();
-    const [compressWidth, setCompressWidth] = useState<number>(1920);
-    const [compressSize, setCompressSize] = useState<number>(500 * 1024);
+    state: FieldUploadImageState = {
+        // 传入的参数
+        maxCount: 1,
+        thumbWidth: 300,
+        isPublic: true,
+        accept: 'image/*',
 
-    const imgRef = useRef<HTMLImageElement>(null);
-    const cropperRef = useRef<Cropper>();
-    const selectedFileRef = useRef<File>();
-    const previewUrlsRef = useRef<string[]>([]);
+        // 内部参数
+        objectNames: [],
+        modalOpen: false,
+        originalSize: 0,
+        cropperReady: false,
+        cropRatio: {width: 4, height: 3},
+        uploading: false,
+        compressWidth: 1920,
+        compressSize: 500 * 1024,
+    };
 
-    // 父组件 value 变化时同步
-    useEffect(() => {
-        const parsed = value ? value.split(',') : [];
-        setObjectNames(parsed);
-    }, [value]);
+    private imgRef = React.createRef<HTMLImageElement>();
+    private cropperRef?: Cropper;
+    private selectedFileRef?: File;
+    private previewUrlsRef: string[] = [];
 
-    const revokePreviewUrls = useCallback(() => {
-        previewUrlsRef.current.forEach((u) => URL.revokeObjectURL(u));
-        previewUrlsRef.current = [];
-    }, []);
+    constructor(props: FieldUploadImageProps) {
+        super(props);
+        ObjectUtils.copyPropertyIfPresent(props, this.state);
+        if (this.props.value) this.state.objectNames = this.props.value.split(',');
+    }
+
+    componentDidUpdate(prevProps: FieldUploadImageProps, prevState: FieldUploadImageState) {
+        const next: Partial<FieldUploadImageState> = {};
+        if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
+        if (this.props.thumbWidth !== prevProps.thumbWidth) next.thumbWidth = this.props.thumbWidth;
+        if (this.props.isPublic !== prevProps.isPublic) next.isPublic = this.props.isPublic;
+        if (this.props.accept !== prevProps.accept) next.accept = this.props.accept;
+
+        const prevValue = prevProps.value ?? null;
+        const curValue = this.props.value ?? null;
+        if (curValue !== prevValue) {
+            next.objectNames = curValue ? curValue.split(',') : [];
+        }
+
+        if (Object.keys(next).length > 0) this.setState(next as FieldUploadImageState);
+
+        // 进入/退出裁切工具时初始化或销毁 Cropper
+        if (prevState.modalOpen !== this.state.modalOpen || prevState.tool !== this.state.tool) {
+            this.destroyCropper();
+            if (this.state.modalOpen && this.state.tool === 'crop') {
+                this.initCropper();
+            }
+        }
+
+        // 切换裁切比例时仅更新约束，保留当前裁切框位置（避免重建后贴边）
+        if (prevState.cropRatio !== this.state.cropRatio && this.cropperRef) {
+            if (!this.state.cropRatio) {
+                const box = this.cropperRef.getCropBoxData();
+                this.cropperRef.setAspectRatio(NaN);
+                this.cropperRef.setCropBoxData(box);
+            } else {
+                this.cropperRef.setAspectRatio(this.state.cropRatio.width / this.state.cropRatio.height);
+            }
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.cropperRef) {
+            this.cropperRef.destroy();
+            this.cropperRef = undefined;
+        }
+        this.revokePreviewUrls();
+    }
+
+    private destroyCropper() {
+        if (this.cropperRef) {
+            this.cropperRef.destroy();
+            this.cropperRef = undefined;
+        }
+        this.setState({cropperReady: false});
+    }
+
+    private initCropper() {
+        const el = this.imgRef.current;
+        if (!el) return;
+        const init = () => {
+            if (this.cropperRef) this.cropperRef.destroy();
+            this.cropperRef = new Cropper(el, {
+                aspectRatio: this.state.cropRatio ? this.state.cropRatio.width / this.state.cropRatio.height : NaN,
+                viewMode: 1,
+                autoCropArea: 0.85,
+                dragMode: 'move',
+            });
+            this.setState({cropperReady: true});
+        };
+        if (el.complete) init();
+        else el.addEventListener('load', init, {once: true});
+    }
+
+    private revokePreviewUrls() {
+        this.previewUrlsRef.forEach((u) => URL.revokeObjectURL(u));
+        this.previewUrlsRef = [];
+    }
 
     /**
      * 处理源文件为当前主图（不压缩，仅加载画布预览），用于裁切/手动处理后更新画布
      */
-    const regenerate = useCallback(async (file: File) => {
+    private regenerate = async (file: File) => {
         const cUrl = URL.createObjectURL(file);
         const cdims = await readDims(cUrl);
-        revokePreviewUrls();
-        previewUrlsRef.current = [cUrl];
-        setPreview({cUrl, cFile: file, cSize: file.size, cdims});
-    }, [revokePreviewUrls]);
+        this.revokePreviewUrls();
+        this.previewUrlsRef = [cUrl];
+        this.setState({preview: {cUrl, cFile: file, cSize: file.size, cdims}});
+    };
 
     /**
      * 默认展示原图：不做任何压缩处理
      */
-    const loadOriginalPreview = useCallback(async (file: File, url: string, dims: Dims) => {
-        revokePreviewUrls();
-        previewUrlsRef.current = [];
-        setPreview({cUrl: url, cFile: file, cSize: file.size, cdims: dims});
-    }, [revokePreviewUrls]);
+    private loadOriginalPreview = async (file: File, url: string, dims: Dims) => {
+        this.revokePreviewUrls();
+        this.previewUrlsRef = [];
+        this.setState({preview: {cUrl: url, cFile: file, cSize: file.size, cdims: dims}});
+    };
 
-    const closeModal = useCallback(() => {
-        if (cropperRef.current) {
-            cropperRef.current.destroy();
-            cropperRef.current = undefined;
-        }
-        setModalOpen(false);
-        setTool(undefined);
-        setCropperReady(false);
-        setUploading(false);
-        setOriginalUrl(undefined);
-        setOriginalDims(undefined);
-        setOriginalSize(0);
-        setPreview(undefined);
-        if (originalUrl) URL.revokeObjectURL(originalUrl);
-        revokePreviewUrls();
-    }, [originalUrl, revokePreviewUrls]);
+    private closeModal = () => {
+        this.destroyCropper();
+        this.setState({
+            modalOpen: false,
+            tool: undefined,
+            uploading: false,
+            originalUrl: undefined,
+            originalDims: undefined,
+            originalSize: 0,
+            preview: undefined,
+        });
+        if (this.state.originalUrl) URL.revokeObjectURL(this.state.originalUrl);
+        this.revokePreviewUrls();
+    };
 
     /** 手动压缩：按用户设定的最大宽度与目标体积压缩当前主图 */
-    const applyCompress = useCallback(async (width?: number, size?: number) => {
+    private applyCompress = async (width?: number, size?: number) => {
         // 优先压缩当前主图（裁切结果），否则用原始文件
-        const file = preview?.cFile || selectedFileRef.current;
+        const file = this.state.preview?.cFile || this.selectedFileRef;
         if (!file) return;
         try {
-            const cFile = await compressToTarget(file, width, size);
+            const cFile = await compressToTarget(file, width, size ?? 0);
             const cUrl = URL.createObjectURL(cFile);
             const cdims = await readDims(cUrl);
-            revokePreviewUrls();
-            previewUrlsRef.current = [cUrl];
-            setPreview({cUrl, cFile, cSize: cFile.size, cdims});
-            setTool(undefined);
+            this.revokePreviewUrls();
+            this.previewUrlsRef = [cUrl];
+            this.setState({preview: {cUrl, cFile, cSize: cFile.size, cdims}, tool: undefined});
             message.success(`已压缩：${cdims.width} x ${cdims.height} / ${formatSize(cFile.size)}`);
         } catch (e) {
             message.error('压缩失败');
         }
-    }, [preview, revokePreviewUrls]);
+    };
 
-    const handleBeforeUpload = useCallback(async (file: File) => {
-        if (objectNames.length >= maxCount) {
+    private handleBeforeUpload = async (file: File) => {
+        if (this.state.objectNames.length >= this.state.maxCount) {
             message.warning('已达到最大上传数量');
             return Upload.LIST_IGNORE;
         }
@@ -221,332 +308,288 @@ export function FieldUploadImage(props: FieldUploadImageProps) {
             return Upload.LIST_IGNORE;
         }
 
-        selectedFileRef.current = file;
+        this.selectedFileRef = file;
         const url = URL.createObjectURL(file);
-        setOriginalUrl(url);
-        setOriginalSize(file.size);
-        setTool(undefined);
-        setModalOpen(true);
+        this.setState({originalUrl: url, originalSize: file.size, tool: undefined, modalOpen: true});
 
         try {
             // EXIF 方向感知地读取原始尺寸
             const bitmap = await createImageBitmap(file, {imageOrientation: 'from-image'});
             const dims = {width: bitmap.width, height: bitmap.height};
             bitmap.close();
-            setOriginalDims(dims);
+            this.setState({originalDims: dims});
             // 默认展示原图，不做压缩处理，用户可点击「压缩」按钮手动压缩
-            await loadOriginalPreview(file, url, dims);
+            await this.loadOriginalPreview(file, url, dims);
         } catch (e) {
             message.error('读取图片失败');
-            closeModal();
+            this.closeModal();
             return;
         }
 
         return Upload.LIST_IGNORE;
-    }, [closeModal, loadOriginalPreview, maxCount, objectNames.length]);
+    };
 
-    // 进入裁切工具时初始化 Cropper
-    useEffect(() => {
-        if (!modalOpen || tool !== 'crop') return;
-        const el = imgRef.current;
-        if (!el) return;
-        const init = () => {
-            if (cropperRef.current) cropperRef.current.destroy();
-            cropperRef.current = new Cropper(el, {
-                aspectRatio: cropRatio ? cropRatio.width / cropRatio.height : NaN,
-                viewMode: 1,
-                autoCropArea: 0.85,
-                dragMode: 'move',
-            });
-            setCropperReady(true);
-        };
-        if (el.complete) init();
-        else el.addEventListener('load', init, {once: true});
-        return () => {
-            if (cropperRef.current) {
-                cropperRef.current.destroy();
-                cropperRef.current = undefined;
-            }
-            setCropperReady(false);
-        };
-    }, [modalOpen, tool]);
-
-    // 切换比例时仅更新约束，保留当前裁切框位置（避免重建后贴边）
-    useEffect(() => {
-        if (!cropperRef.current) return;
-        if (!cropRatio) {
-            // 切到自由：保持当前裁切框大小不变
-            const box = cropperRef.current.getCropBoxData();
-            cropperRef.current.setAspectRatio(NaN);
-            cropperRef.current.setCropBoxData(box);
-        } else {
-            cropperRef.current.setAspectRatio(cropRatio.width / cropRatio.height);
-        }
-    }, [cropRatio]);
-
-    const confirmCrop = useCallback(async () => {
-        const cropper = cropperRef.current;
-        const file = preview?.cFile || selectedFileRef.current;
+    private confirmCrop = () => {
+        const cropper = this.cropperRef;
+        const file = this.state.preview?.cFile || this.selectedFileRef;
         if (!cropper || !file) return;
         const canvas = cropper.getCroppedCanvas();
         const mime = file.type || 'image/jpeg';
         canvas.toBlob(async (blob) => {
-            if (cropperRef.current) {
-                cropperRef.current.destroy();
-                cropperRef.current = undefined;
-            }
-            setTool(undefined);
-            setCropperReady(false);
+            this.destroyCropper();
+            this.setState({tool: undefined});
             if (blob) {
                 const croppedFile = new File([blob], 'cropped.jpg', {type: mime});
-                await regenerate(croppedFile);
+                await this.regenerate(croppedFile);
             }
         }, mime);
-    }, [preview, regenerate]);
+    };
 
     /** 重置：丢弃所有处理，回到原始图片 */
-    const resetImage = useCallback(() => {
-        const file = selectedFileRef.current;
+    private resetImage = () => {
+        const file = this.selectedFileRef;
         if (!file) return;
-        if (originalUrl && originalDims) {
-            setTool(undefined);
-            setCropperReady(false);
-            loadOriginalPreview(file, originalUrl, originalDims);
+        if (this.state.originalUrl && this.state.originalDims) {
+            this.setState({tool: undefined, cropperReady: false});
+            this.loadOriginalPreview(file, this.state.originalUrl, this.state.originalDims);
         }
-    }, [loadOriginalPreview, originalDims, originalUrl]);
+    };
 
-    const handleConfirm = useCallback(async () => {
-        if (!preview) return;
-        setUploading(true);
+    private handleConfirm = async () => {
+        if (!this.state.preview) return;
+        this.setState({uploading: true});
         try {
             // 确定时才生成缩略图
-            const tFile = await compressToFile(preview.cFile, {maxWidth: thumbWidth, maxHeight: thumbWidth});
+            const tFile = await compressToFile(this.state.preview.cFile, {maxWidth: this.state.thumbWidth, maxHeight: this.state.thumbWidth});
             const fd = new FormData();
-            fd.append('file', preview.cFile);
+            fd.append('file', this.state.preview.cFile);
             fd.append('thumb', tFile);
-            fd.append('isPublic', isPublic);
+            fd.append('isPublic', String(this.state.isPublic));
             const rs = await HttpUtils.post('admin/sysFile/uploadImage', fd, null, {headers: {'Content-Type': 'multipart/form-data'}});
-            const newNames = [...objectNames, rs.objectName];
-            setObjectNames(newNames);
-            onChange?.(newNames.join(','));
-            closeModal();
+            const newNames = [...this.state.objectNames, rs.objectName];
+            this.setState({objectNames: newNames});
+            this.props.onChange?.(newNames.join(','));
+            this.closeModal();
         } catch (e) {
             message.error(HttpUtils.extractErrorMessage(e));
         } finally {
-            setUploading(false);
+            this.setState({uploading: false});
         }
-    }, [closeModal, objectNames, onChange, preview, thumbWidth, isPublic]);
+    };
 
-    const removeImage = useCallback((name: string) => {
-        const newNames = objectNames.filter((n) => n !== name);
-        setObjectNames(newNames);
-        onChange?.(newNames.join(','));
-    }, [objectNames, onChange]);
+    private removeImage = (name: string) => {
+        const newNames = this.state.objectNames.filter((n) => n !== name);
+        this.setState({objectNames: newNames});
+        this.props.onChange?.(newNames.join(','));
+    };
 
-    // 画布当前显示的图片
-    const canvasImg = preview
-        ? {url: preview.cUrl, dims: preview.cdims, size: preview.cSize}
-        : undefined;
+    render() {
+        const {objectNames, accept, compressWidth, compressSize, cropRatio, cropperReady, fullPreviewUrl, maxCount, modalOpen, originalUrl, preview, tool, uploading} = this.state;
 
-    // 是否需要压缩：当前图片宽度/体积任一超过设定目标
-    const needCompress = !!canvasImg?.dims && (
-        (compressWidth > 0 && canvasImg.dims.width > compressWidth) ||
-        (compressSize > 0 && canvasImg.size > compressSize)
-    );
+        // 画布当前显示的图片
+        const canvasImg = preview
+            ? {url: preview.cUrl, dims: preview.cdims, size: preview.cSize}
+            : undefined;
 
-    return (
-        <>
-            <div>
-                {objectNames.map((name) => (
-                    <div key={name} style={{
-                        position: 'relative', display: 'inline-block', marginRight: 8, verticalAlign: 'top',
-                        width: 80, height: 80, borderRadius: 4, overflow: 'hidden', cursor: 'pointer',
-                    }}
-                        onMouseEnter={(e) => {
-                            const mask = e.currentTarget.querySelector('.oa-field-upload-img-mask') as HTMLElement;
-                            if (mask) {
-                                mask.style.opacity = '1';
-                                mask.style.pointerEvents = 'auto';
-                            }
+        // 是否需要压缩：当前图片宽度/体积任一超过设定目标
+        const needCompress = !!canvasImg?.dims && (
+            (compressWidth > 0 && canvasImg.dims.width > compressWidth) ||
+            (compressSize > 0 && canvasImg.size > compressSize)
+        );
+
+        return (
+            <>
+                <div>
+                    {objectNames.map((name) => (
+                        <div key={name} style={{
+                            position: 'relative', display: 'inline-block', marginRight: 8, verticalAlign: 'top',
+                            width: 80, height: 80, borderRadius: 4, overflow: 'hidden', cursor: 'pointer',
                         }}
-                        onMouseLeave={(e) => {
-                            const mask = e.currentTarget.querySelector('.oa-field-upload-img-mask') as HTMLElement;
-                            if (mask) {
-                                mask.style.opacity = '0';
-                                mask.style.pointerEvents = 'none';
-                            }
-                        }}
-                    >
-                        <img
-                            src={UrlUtils.contextPath(`/file/${name}?thumb=1`)}
-                            width={80}
-                            height={80}
-                            style={{objectFit: 'cover', borderRadius: 4, display: 'block'}}
-                            alt={name}
-                        />
-                        <div style={{
-                            position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: 'rgba(0,0,0,0.45)', opacity: 0, transition: 'opacity .3s', borderRadius: 4,
-                            pointerEvents: 'none',
-                        }} className="oa-field-upload-img-mask">
-                            <Space size={12}>
-                                <EyeOutlined
-                                    style={{color: '#fff', fontSize: 18, cursor: 'pointer'}}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setFullPreviewUrl(UrlUtils.contextPath(`/file/${name}`));
-                                    }}
-                                />
-                                <DeleteOutlined
-                                    style={{color: '#fff', fontSize: 18, cursor: 'pointer'}}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        removeImage(name);
-                                    }}
-                                />
-                            </Space>
-                        </div>
-                    </div>
-                ))}
-                {objectNames.length < maxCount && (
-                    <Upload accept={accept} showUploadList={false} beforeUpload={handleBeforeUpload} multiple={false}>
-                        <Button icon={<PlusOutlined/>}>选择图片</Button>
-                    </Upload>
-                )}
-            </div>
-
-            <Modal
-                open={modalOpen}
-                title="图片处理"
-                width={900}
-                centered
-                okText="确定"
-                cancelText="取消"
-                onOk={handleConfirm}
-                onCancel={closeModal}
-                confirmLoading={uploading}
-                okButtonProps={{disabled: tool === 'crop' || !preview}}
-                cancelButtonProps={{disabled: tool === 'crop'}}
-                styles={{body: {height: 'calc(100vh - 300px)', minHeight: 400, overflow: 'hidden'}}}
-            >
-                <div style={{display: 'flex', gap: 16, height: '100%'}}>
-                    {/* 中央画布 + 底部操作按钮 */}
-                    <div style={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12}}>
-                        <div style={{
-                            flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            background: '#f5f5f5', borderRadius: 8, border: '1px dashed #d9d9d9', position: 'relative', overflow: 'hidden',
-                        }}>
-                            {tool === 'crop' ? (
-                                <img key="crop-canvas" ref={imgRef} src={preview?.cUrl || originalUrl} style={{maxWidth: '100%', maxHeight: '100%'}} alt="待裁切"/>
-                            ) : canvasImg?.url ? (
-                                <img src={canvasImg.url} style={{maxWidth: '100%', maxHeight: '100%'}} alt="预览"/>
-                            ) : (
-                                <div style={{color: '#999'}}>生成中...</div>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* 右侧属性栏 */}
-                    <div style={{width: 240, flexShrink: 0, borderLeft: '1px solid #f0f0f0', paddingLeft: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
-                        <div style={{flex: 1, overflowY: 'auto'}}>
-                            {/* 工具栏（横排） */}
-                            {tool !== 'crop' && (
-                                <Space size={8} style={{marginBottom: 12, display: 'flex'}}>
-                                    <Button
-                                        type={tool === 'crop' ? 'primary' : 'default'}
-                                        onClick={() => {
-                                            setTool('crop');
+                            onMouseEnter={(e) => {
+                                const mask = e.currentTarget.querySelector('.oa-field-upload-img-mask') as HTMLElement;
+                                if (mask) {
+                                    mask.style.opacity = '1';
+                                    mask.style.pointerEvents = 'auto';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                const mask = e.currentTarget.querySelector('.oa-field-upload-img-mask') as HTMLElement;
+                                if (mask) {
+                                    mask.style.opacity = '0';
+                                    mask.style.pointerEvents = 'none';
+                                }
+                            }}
+                        >
+                            <img
+                                src={UrlUtils.contextPath(`/file/${name}?thumb=1`)}
+                                width={80}
+                                height={80}
+                                style={{objectFit: 'cover', borderRadius: 4, display: 'block'}}
+                                alt={name}
+                            />
+                            <div style={{
+                                position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: 'rgba(0,0,0,0.45)', opacity: 0, transition: 'opacity .3s', borderRadius: 4,
+                                pointerEvents: 'none',
+                            }} className="oa-field-upload-img-mask">
+                                <Space size={12}>
+                                    <EyeOutlined
+                                        style={{color: '#fff', fontSize: 18, cursor: 'pointer'}}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            this.setState({fullPreviewUrl: UrlUtils.contextPath(`/file/${name}`)});
                                         }}
-                                    >裁切</Button>
-                                    <Button onClick={resetImage}>重置</Button>
+                                    />
+                                    <DeleteOutlined
+                                        style={{color: '#fff', fontSize: 18, cursor: 'pointer'}}
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            this.removeImage(name);
+                                        }}
+                                    />
                                 </Space>
-                            )}
-                            {tool !== 'crop' && <Divider style={{margin: '0 0 12px'}}/>}
-                            <div style={{fontWeight: 600, marginBottom: 8}}>{tool === 'crop' ? '裁切信息' : '图片信息'}</div>
-                            {tool === 'crop' ? (
-                                <>
-                                    <Radio.Group
-                                        value={cropRatio ? formatRatio(cropRatio.width, cropRatio.height) : 'free'}
-                                        onChange={(e) => {
-                                            const found = CROP_RATIOS.find((r) => (r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free') === e.target.value);
-                                            setCropRatio(found ? found.ratio : null);
-                                        }}
-                                        style={{display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12}}
-                                    >
-                                        {CROP_RATIOS.map((r) => (
-                                            <Radio key={r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free'} value={r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free'}>
-                                                {r.label}{r.desc ? <span style={{color: '#999', fontSize: 12}}>（{r.desc}）</span> : null}
-                                            </Radio>
-                                        ))}
-                                    </Radio.Group>
-                                </>
-                            ) : (
-                                <>
-                                    {canvasImg && (
-                                        <div style={{color: '#666'}}>
-                                            <div>尺寸：{canvasImg.dims ? `${canvasImg.dims.width} x ${canvasImg.dims.height}` : '--'}</div>
-                                            <div>体积：{formatSize(canvasImg.size)}</div>
-                                        </div>
-                                    )}
+                            </div>
+                        </div>
+                    ))}
+                    {objectNames.length < maxCount && (
+                        <Upload accept={accept} showUploadList={false} beforeUpload={this.handleBeforeUpload} multiple={false}>
+                            <Button icon={<PlusOutlined/>}>选择图片</Button>
+                        </Upload>
+                    )}
+                </div>
 
-                                    {/* 压缩处理 */}
-                                    <Divider style={{margin: '12px 0'}}/>
-                                    <div style={{fontWeight: 600, marginBottom: 8}}>压缩处理</div>
-                                    <div style={{marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8}}>
-                                        <span style={{color: '#666', flexShrink: 0}}>最大宽度</span>
-                                        <Select
-                                            value={compressWidth}
-                                            onChange={setCompressWidth}
-                                            style={{flex: 1}}
-                                            options={[
-                                                {label: '不限', value: 0},
-                                                {label: '400 px（logo）', value: 400},
-                                                {label: '640 px（移动端小图）', value: 640},
-                                                {label: '800 px（商品图）', value: 800},
-                                                {label: '960 px（详情页）', value: 960},
-                                                {label: '1280 px（宽屏）', value: 1280},
-                                                {label: '1920 px（网页）', value: 1920},
-                                                {label: '2560 px（超清）', value: 2560},
-                                            ]}
-                                        />
-                                    </div>
-                                    <div style={{marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8}}>
-                                        <span style={{color: '#666', flexShrink: 0}}>最大体积</span>
-                                        <Select
-                                            value={compressSize}
-                                            onChange={setCompressSize}
-                                            style={{flex: 1}}
-                                            options={[
-                                                {label: '不限', value: 0},
-                                                {label: '200 KB（秒开）', value: 200 * 1024},
-                                                {label: '500 KB（流畅）', value: 500 * 1024},
-                                                {label: '1 MB（较快）', value: 1024 * 1024},
-                                                {label: '2 MB（较慢）', value: 2 * 1024 * 1024},
-                                            ]}
-                                        />
-                                    </div>
-                                    {needCompress
-                                        ? <Button block danger type="primary" onClick={() => applyCompress(compressWidth, compressSize)}>推荐压缩</Button>
-                                        : <Button block disabled>无需压缩</Button>}
-                                </>
+                <Modal
+                    open={modalOpen}
+                    title="图片处理"
+                    width={900}
+                    centered
+                    okText="确定"
+                    cancelText="取消"
+                    onOk={this.handleConfirm}
+                    onCancel={this.closeModal}
+                    confirmLoading={uploading}
+                    okButtonProps={{disabled: tool === 'crop' || !preview}}
+                    cancelButtonProps={{disabled: tool === 'crop'}}
+                    styles={{body: {height: 'calc(100vh - 300px)', minHeight: 400, overflow: 'hidden'}}}
+                >
+                    <div style={{display: 'flex', gap: 16, height: '100%'}}>
+                        {/* 中央画布 + 底部操作按钮 */}
+                        <div style={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12}}>
+                            <div style={{
+                                flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                background: '#f5f5f5', borderRadius: 8, border: '1px dashed #d9d9d9', position: 'relative', overflow: 'hidden',
+                            }}>
+                                {tool === 'crop' ? (
+                                    <img key="crop-canvas" ref={this.imgRef} src={preview?.cUrl || originalUrl} style={{maxWidth: '100%', maxHeight: '100%'}} alt="待裁切"/>
+                                ) : canvasImg?.url ? (
+                                    <img src={canvasImg.url} style={{maxWidth: '100%', maxHeight: '100%'}} alt="预览"/>
+                                ) : (
+                                    <div style={{color: '#999'}}>生成中...</div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* 右侧属性栏 */}
+                        <div style={{width: 240, flexShrink: 0, borderLeft: '1px solid #f0f0f0', paddingLeft: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+                            <div style={{flex: 1, overflowY: 'auto'}}>
+                                {/* 工具栏（横排） */}
+                                {tool !== 'crop' && (
+                                    <Space size={8} style={{marginBottom: 12, display: 'flex'}}>
+                                        <Button
+                                            onClick={() => {
+                                                this.setState({tool: 'crop'});
+                                            }}
+                                        >裁切</Button>
+                                        <Button onClick={this.resetImage}>重置</Button>
+                                    </Space>
+                                )}
+                                {tool !== 'crop' && <Divider style={{margin: '0 0 12px'}}/>}
+                                <div style={{fontWeight: 600, marginBottom: 8}}>{tool === 'crop' ? '裁切信息' : '图片信息'}</div>
+                                {tool === 'crop' ? (
+                                    <>
+                                        <Radio.Group
+                                            value={cropRatio ? formatRatio(cropRatio.width, cropRatio.height) : 'free'}
+                                            onChange={(e) => {
+                                                const found = CROP_RATIOS.find((r) => (r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free') === e.target.value);
+                                                this.setState({cropRatio: found ? found.ratio : null});
+                                            }}
+                                            style={{display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12}}
+                                        >
+                                            {CROP_RATIOS.map((r) => (
+                                                <Radio key={r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free'} value={r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free'}>
+                                                    {r.label}{r.desc ? <span style={{color: '#999', fontSize: 12}}>（{r.desc}）</span> : null}
+                                                </Radio>
+                                            ))}
+                                        </Radio.Group>
+                                    </>
+                                ) : (
+                                    <>
+                                        {canvasImg && (
+                                            <div style={{color: '#666'}}>
+                                                <div>尺寸：{canvasImg.dims ? `${canvasImg.dims.width} x ${canvasImg.dims.height}` : '--'}</div>
+                                                <div>体积：{formatSize(canvasImg.size)}</div>
+                                            </div>
+                                        )}
+
+                                        {/* 压缩处理 */}
+                                        <Divider style={{margin: '12px 0'}}/>
+                                        <div style={{fontWeight: 600, marginBottom: 8}}>压缩处理</div>
+                                        <div style={{marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8}}>
+                                            <span style={{color: '#666', flexShrink: 0}}>最大宽度</span>
+                                            <Select
+                                                value={compressWidth}
+                                                onChange={(v) => this.setState({compressWidth: v})}
+                                                style={{flex: 1}}
+                                                options={[
+                                                    {label: '不限', value: 0},
+                                                    {label: '400 px（logo）', value: 400},
+                                                    {label: '640 px（移动端小图）', value: 640},
+                                                    {label: '800 px（商品图）', value: 800},
+                                                    {label: '960 px（详情页）', value: 960},
+                                                    {label: '1280 px（宽屏）', value: 1280},
+                                                    {label: '1920 px（网页）', value: 1920},
+                                                    {label: '2560 px（超清）', value: 2560},
+                                                ]}
+                                            />
+                                        </div>
+                                        <div style={{marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8}}>
+                                            <span style={{color: '#666', flexShrink: 0}}>最大体积</span>
+                                            <Select
+                                                value={compressSize}
+                                                onChange={(v) => this.setState({compressSize: v})}
+                                                style={{flex: 1}}
+                                                options={[
+                                                    {label: '不限', value: 0},
+                                                    {label: '200 KB（秒开）', value: 200 * 1024},
+                                                    {label: '500 KB（流畅）', value: 500 * 1024},
+                                                    {label: '1 MB（较快）', value: 1024 * 1024},
+                                                    {label: '2 MB（较慢）', value: 2 * 1024 * 1024},
+                                                ]}
+                                            />
+                                        </div>
+                                        {needCompress
+                                            ? <Button block danger type="primary" onClick={() => this.applyCompress(compressWidth, compressSize)}>推荐压缩</Button>
+                                            : <Button block disabled>无需压缩</Button>}
+                                    </>
+                                )}
+                            </div>
+                            {tool === 'crop' && (
+                                <div style={{display: 'flex', gap: 12, marginTop: 'auto', padding: '12px 16px 16px 0'}}>
+                                    <Button style={{flex: 1}} onClick={() => { this.setState({tool: undefined, cropperReady: false}); }}>取消</Button>
+                                    <Button style={{flex: 1}} type="primary" onClick={this.confirmCrop} disabled={!cropperReady}>确认裁切</Button>
+                                </div>
                             )}
                         </div>
-                        {tool === 'crop' && (
-                            <div style={{display: 'flex', gap: 12, marginTop: 'auto', padding: '12px 16px 16px 0'}}>
-                                <Button style={{flex: 1}} onClick={() => { setTool(undefined); setCropperReady(false); }}>取消</Button>
-                                <Button style={{flex: 1}} type="primary" onClick={confirmCrop} disabled={!cropperReady}>确认裁切</Button>
-                            </div>
-                        )}
                     </div>
-                </div>
-            </Modal>
+                </Modal>
 
-            <Modal open={!!fullPreviewUrl} title="图片预览" width="70vw" footer={null}
-                   onCancel={() => setFullPreviewUrl(undefined)}>
-                {fullPreviewUrl && <img src={fullPreviewUrl} style={{maxWidth: '100%'}} alt="预览"/>}
-            </Modal>
-        </>
-    );
+                <Modal open={!!fullPreviewUrl} title="图片预览" width="70vw" footer={null}
+                       onCancel={() => this.setState({fullPreviewUrl: undefined})}>
+                    {fullPreviewUrl && <img src={fullPreviewUrl} style={{maxWidth: '100%'}} alt="预览"/>}
+                </Modal>
+            </>
+        );
+    }
 }
 
 export default FieldUploadImage;
