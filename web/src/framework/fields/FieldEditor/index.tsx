@@ -41,7 +41,7 @@ export class FieldEditor extends React.Component<FieldEditorProps, {loading: boo
         const editorHeight = height || 300;
 
         return (
-            <div style={{position: 'relative'}}>
+            <div style={{position: 'relative', minHeight: loading ? editorHeight + 44 : undefined}}>
                 <TinyMceEditor
                     value={value}
                     tinymceScriptSrc={jsUrl}
