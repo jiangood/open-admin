@@ -18,6 +18,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 /**
  * 文件
  */
@@ -110,6 +112,15 @@ public class SysFileController {
     public AjaxResult delete(@RequestBody StringReq stringReq) throws Exception {
         service.deleteByObjectName(stringReq.getValue());
         return AjaxResult.ok();
+    }
+
+    /**
+     * 批量删除文件（按 id）
+     */
+    @HasPermission("sys-file:delete")
+    @PostMapping("deleteBatch")
+    public AjaxResult deleteBatch(@RequestBody List<String> ids) throws Exception {
+        return AjaxResult.ok().data(service.deleteBatch(ids));
     }
 }
 

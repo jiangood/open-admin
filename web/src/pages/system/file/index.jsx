@@ -1,5 +1,5 @@
 import React from 'react'
-import {Button, Form, Input, Modal} from 'antd'
+import {Button, Form, Input, Modal, Space} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
 import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils, ViewImage} from "../../../framework";
@@ -17,6 +17,13 @@ export default class extends React.Component {
     handleDelete = row => {
         HttpUtils.post('admin/sysFile/delete', {value: row.objectName}).then(rs => {
             this.tableRef.current.reload()
+        })
+    }
+
+    handleBatchDelete = ids => {
+        HttpUtils.post('admin/sysFile/deleteBatch', ids).then(rs => {
+            this.tableRef.current.reload()
+            this.tableRef.current.clearSelection()
         })
     }
 
@@ -143,8 +150,21 @@ export default class extends React.Component {
         return <Page>
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => (
-                    <Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
+                rowSelection={{}}
+                toolBarRender={(params, selection) => (
+                    <Space>
+                        <Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
+                        <PermActions
+                            actions={[{
+                                label: `批量删除${selection.selectedRowKeys.length ? `(${selection.selectedRowKeys.length})` : ''}`,
+                                perm: 'sys-file:delete',
+                                danger: true,
+                                disabled: !selection.selectedRowKeys.length,
+                                confirm: `是否确定删除选中的 ${selection.selectedRowKeys.length} 个文件?`,
+                                onClick: () => this.handleBatchDelete(selection.selectedRowKeys),
+                            }]}
+                        />
+                    </Space>
                 )}
                 request={(params) => {
                     return HttpUtils.get('admin/sysFile/page', params);

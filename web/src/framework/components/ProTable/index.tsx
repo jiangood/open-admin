@@ -9,6 +9,7 @@ import './index.less'
 /** 通过 actionRef 暴露的表格操作 */
 export interface ProTableActionRef {
     reload: () => void;
+    clearSelection: () => void;
 }
 
 /** request 返回结构（Spring Data Page 序列化 + 扩展数据） */
@@ -122,7 +123,8 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         this.loadData()
         if (this.props.actionRef) {
             this.props.actionRef.current = {
-                reload: () => this.loadData()
+                reload: () => this.loadData(),
+                clearSelection: () => this.setState({selectedRowKeys: [], selectedRows: []})
             }
         }
 

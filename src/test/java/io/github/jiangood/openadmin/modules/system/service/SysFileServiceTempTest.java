@@ -205,6 +205,51 @@ class SysFileServiceTempTest {
     }
 
     @Test
+    void deleteBatch_shouldReturnZeroOnEmptyIds() {
+        assertEquals(0, sysFileService.deleteBatch(List.of()));
+        assertEquals(0, sysFileService.deleteBatch(null));
+        verify(sysFileRepository, never()).findAllById(any());
+    }
+
+    @Test
+    void deleteBatch_shouldDeleteAllFoundFiles() throws Exception {
+        SysFile fileA = new SysFile("id-a");
+        fileA.setObjectName("public/202607/id-a.jpg");
+        fileA.setStatus(FileStatus.IN_USE);
+        SysFile fileB = new SysFile("id-b");
+        fileB.setObjectName("public/202607/id-b.jpg");
+        fileB.setStatus(FileStatus.IN_USE);
+        when(sysFileRepository.findAllById(List.of("id-a", "id-b"))).thenReturn(List.of(fileA, fileB));
+
+        int success = sysFileService.deleteBatch(List.of("id-a", "id-b"));
+
+        assertEquals(2, success);
+        verify(fileOperator).delete("public/202607/id-a.jpg");
+        verify(fileOperator).delete("public/202607/id-b.jpg");
+        verify(sysFileRepository).deleteById("id-a");
+        verify(sysFileRepository).deleteById("id-b");
+    }
+
+    @Test
+    void deleteBatch_shouldSkipNotFoundAndKeepPendingWhenPhysicalFails() throws Exception {
+        SysFile fileA = new SysFile("id-a");
+        fileA.setObjectName("public/202607/id-a.jpg");
+        fileA.setStatus(FileStatus.IN_USE);
+        SysFile fileB = new SysFile("id-b");
+        fileB.setObjectName("public/202607/id-b.jpg");
+        fileB.setStatus(FileStatus.IN_USE);
+        when(sysFileRepository.findAllById(List.of("id-a", "id-b", "missing"))).thenReturn(List.of(fileA, fileB));
+        lenient().doThrow(new RuntimeException("disk error")).when(fileOperator).delete("public/202607/id-b.jpg");
+
+        int success = sysFileService.deleteBatch(List.of("id-a", "id-b", "missing"));
+
+        assertEquals(1, success);
+        assertEquals(FileStatus.PENDING_DELETE, fileB.getStatus());
+        verify(sysFileRepository).deleteById("id-a");
+        verify(sysFileRepository, never()).deleteById("id-b");
+    }
+
+    @Test
     void deleteFileInternal_shouldNotSaveWhenAlreadyPendingDelete() {
         SysFile file = new SysFile("id-a");
         file.setObjectName("public/202607/id-a.jpg");

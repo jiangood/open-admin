@@ -77,6 +77,26 @@ public class SysFileService {
     }
 
     /**
+     * 批量删除文件（按 id），逐条执行删除流程，返回物理删除成功的数量
+     *
+     * @param ids SysFile 主键 id 集合
+     * @return 物理文件删除成功数量
+     */
+    @Transactional
+    public int deleteBatch(Collection<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return 0;
+        }
+        int success = 0;
+        for (SysFile file : sysFileRepository.findAllById(ids)) {
+            if (deleteFileInternal(file)) {
+                success++;
+            }
+        }
+        return success;
+    }
+
+    /**
      * 删除单个文件：先标记为待删除，物理删除成功后再删 DB 记录；
      * 物理删除失败时保持 PENDING_DELETE 状态，由清理任务下轮重试
      *
