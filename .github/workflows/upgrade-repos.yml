@@ -156,7 +156,7 @@ jobs:
         run: |
           set -e
           git fetch origin --tags --force
-          PREFIX="${{ inputs.tag_prefix }}"
+          PREFIX="${{ inputs.tag_prefix || 'v' }}"
           LATEST=$(git tag | grep -E "^${PREFIX}[0-9]+\.[0-9]+\.[0-9]+$" \
             | sed "s/^${PREFIX}//" | sort -V | tail -1)
           if [ -z "$LATEST" ]; then
@@ -200,7 +200,7 @@ jobs:
         if: steps.check.outputs.skip != 'true' && steps.versionbump.outputs.skip_tag != 'true'
         working-directory: repo
         run: |
-          TAG="${{ inputs.tag_prefix }}${{ steps.versionbump.outputs.new_version }}"
+          TAG="${{ inputs.tag_prefix || 'v' }}${{ steps.versionbump.outputs.new_version }}"
           git fetch origin --tags
           if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null 2>&1; then
             echo "Tag $TAG 已存在，跳过"
