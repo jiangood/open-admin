@@ -365,7 +365,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             fd.append('file', this.state.preview.cFile);
             fd.append('thumb', tFile);
             fd.append('isPublic', String(this.state.isPublic));
-            const rs = await HttpUtils.post('admin/sysFile/uploadImage', fd, null, {headers: {'Content-Type': 'multipart/form-data'}});
+            const rs = await HttpUtils.post('admin/sysFile/uploadImage', fd);
             const newNames = [...this.state.objectNames, rs.objectName];
             this.setState({objectNames: newNames});
             this.props.onChange?.(newNames.join(','));
