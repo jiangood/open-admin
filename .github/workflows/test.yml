@@ -88,3 +88,11 @@ jobs:
           npm run test:e2e
         env:
           CI: true
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-test-results
+          path: web/test-results/
+          if-no-files-found: ignore
