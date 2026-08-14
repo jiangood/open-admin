@@ -66,6 +66,7 @@ export class UrlUtils {
      */
     static contextPath(path: string): string {
         const base = import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH;
-        return base + path;
+        if (base === '/' || base === '') return path;
+        return base.replace(/\/+$/, '') + path;
     }
 }
