@@ -6,12 +6,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -30,16 +32,15 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        try {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String username = authentication.getName();
 
-            if (authentication != null && authentication.isAuthenticated()) {
-                String username = authentication.getName();
+            if (staleService.shouldRecheck(username)) {
 
-                if (staleService.isStale(username)) {
-
-                    logger.info("用户 [" + username + "] 权限已过期，正在无感刷新Security Context...");
+                try {
+                    logger.info("用户 [" + username + "] 权限已过期或需例行校验，正在无感刷新Security Context...");
 
                     UserDetails newDetails = userDetailsService.loadUserByUsername(username);
 
@@ -52,15 +53,27 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
 
                     staleService.clearStaleMark(username);
+                    staleService.recordChecked(username);
 
                     logger.info("用户 [" + username + "] 权限刷新完成。");
+                } catch (UsernameNotFoundException e) {
+                    // 用户被禁用或已删除：销毁会话并登出，避免旧会话继续持有全部权限
+                    logger.warn("用户 [" + username + "] 已不存在或已被禁用，销毁其会话");
+                    SecurityContextHolder.clearContext();
+                    HttpSession session = request.getSession(false);
+                    if (session != null) {
+                        session.invalidate();
+                    }
+                    ResponseTool.response(response, AjaxResult.UNAUTHORIZED);
+                    return;
+                } catch (Exception e) {
+                    logger.error("用户 [" + username + "] 权限刷新失败", e);
+                    ResponseTool.response(response, AjaxResult.err(e.getMessage()));
+                    return;
                 }
             }
-
-            filterChain.doFilter(request, response);
-        } catch (Exception e) {
-            logger.error("处理失败" + e.getMessage());
-            ResponseTool.response(response, AjaxResult.err(e.getMessage()));
         }
+
+        filterChain.doFilter(request, response);
     }
 }

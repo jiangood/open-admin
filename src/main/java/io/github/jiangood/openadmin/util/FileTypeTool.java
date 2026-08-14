@@ -8,7 +8,7 @@ public class FileTypeTool {
         }
 
         String lower = name.toLowerCase();
-        return lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".git") || lower.endsWith(".jpeg");
+        return lower.endsWith(".png") || lower.endsWith(".jpg") || lower.endsWith(".gif") || lower.endsWith(".jpeg");
     }
 
     public static boolean isOffice(String name) {

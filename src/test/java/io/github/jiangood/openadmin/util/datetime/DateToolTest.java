@@ -96,6 +96,18 @@ class DateToolTest {
     }
 
     @Test
+    void testDaysWithLocalDateTimeCrossMonthYear() {
+        // 跨月/跨年应计算总天数，而非 Period 的天数分量
+        LocalDateTime a = LocalDateTime.of(2024, 1, 31, 0, 0, 0);
+        LocalDateTime b = LocalDateTime.of(2024, 3, 1, 0, 0, 0);
+        assertEquals(30, DateTool.days(a, b));
+
+        LocalDateTime c = LocalDateTime.of(2023, 12, 31, 0, 0, 0);
+        LocalDateTime d = LocalDateTime.of(2024, 1, 1, 0, 0, 0);
+        assertEquals(1, DateTool.days(c, d));
+    }
+
+    @Test
     void testDaysWithDate() {
         // 测试正常情况：计算两个Date之间的天数差
         Date a = cn.hutool.core.date.DateUtil.parseDate("2023-01-01");

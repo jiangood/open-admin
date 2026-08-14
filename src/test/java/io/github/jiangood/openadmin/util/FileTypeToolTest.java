@@ -13,13 +13,13 @@ class FileTypeToolTest {
         // 测试正常图片类型
         assertTrue(FileTypeTool.isImage("test.png"));
         assertTrue(FileTypeTool.isImage("test.jpg"));
-        assertTrue(FileTypeTool.isImage("test.git"));
+        assertTrue(FileTypeTool.isImage("test.gif"));
         assertTrue(FileTypeTool.isImage("test.jpeg"));
 
         // 测试大小写不敏感
         assertTrue(FileTypeTool.isImage("test.PNG"));
         assertTrue(FileTypeTool.isImage("test.JPG"));
-        assertTrue(FileTypeTool.isImage("test.GIT"));
+        assertTrue(FileTypeTool.isImage("test.GIF"));
         assertTrue(FileTypeTool.isImage("test.JPEG"));
 
         // 测试非图片类型

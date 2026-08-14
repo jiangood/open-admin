@@ -42,4 +42,14 @@ class MathToolTest {
         assertEquals("50%", MathTool.percentStr(1000000, 2000000));
         assertEquals("0.01%", MathTool.percentStr(1, 10000, 2));
     }
+
+    @Test
+    void testPercentStrWithZeroTotal() {
+        // 除数为 0 时应返回 0%，不抛 NumberFormatException
+        assertEquals("0%", MathTool.percentStr(1, 0));
+        assertEquals("0%", MathTool.percentStr(5, 0, 0));
+        assertEquals("0%", MathTool.percentStr(5, 0, 2));
+        assertEquals("0%", MathTool.percentStr(1, null));
+        assertEquals("0%", MathTool.percentStr(null, 5));
+    }
 }

@@ -114,13 +114,18 @@ public class FilePreviewController {
     private ResponseEntity<StreamingResponseBody> handlePartialContent(InputStream inputStream, SysFile file, String rangeHeader) {
         log.trace("处理断点下载");
         long fileSize = file.getSize();
-        String[] ranges = rangeHeader.substring(6).split("-");
-        long rangeStart = Long.parseLong(ranges[0]);
-        long rangeEnd = ranges.length > 1 ? Long.parseLong(ranges[1]) : fileSize - 1;
 
-        if (rangeEnd >= fileSize) {
-            rangeEnd = fileSize - 1;
+        long[] range = parseRange(rangeHeader, fileSize);
+        if (range == null) {
+            // 非法或暂不支持的 Range（空段/后缀范围之外的多段等），忽略该头返回全量内容
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
+                    .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSize()))
+                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .body(new MyStreamingResponseBody(inputStream));
         }
+        long rangeStart = range[0];
+        long rangeEnd = range[1];
 
         long contentLength = rangeEnd - rangeStart + 1;
 
@@ -130,6 +135,56 @@ public class FilePreviewController {
                 .header(HttpHeaders.CONTENT_RANGE, "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize)
                 .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength))
                 .body(new MyStreamingResponseBody(inputStream, rangeStart, contentLength));
+    }
+
+    /**
+     * 解析单段 Range 头，支持 bytes=start-end / bytes=start- / bytes=-suffix 三种合法格式。
+     * 空段、多段、非法数字等不支持的情况返回 null（调用方回退全量返回）。
+     */
+    private static long[] parseRange(String rangeHeader, long fileSize) {
+        if (rangeHeader == null || !rangeHeader.startsWith("bytes=")) {
+            return null;
+        }
+        String spec = rangeHeader.substring(6);
+        if (spec.isEmpty() || spec.contains(",")) {
+            return null;
+        }
+        String[] ranges = spec.split("-");
+        if (ranges.length > 2) {
+            return null;
+        }
+        String startPart = ranges[0];
+        String endPart = ranges.length > 1 ? ranges[1] : null;
+        if (startPart.isEmpty() && (endPart == null || endPart.isEmpty())) {
+            return null;
+        }
+
+        long rangeStart;
+        long rangeEnd;
+        try {
+            if (startPart.isEmpty()) {
+                // 后缀范围，如 bytes=-500，取文件末尾 500 字节
+                long suffixLength = Long.parseLong(endPart);
+                if (suffixLength <= 0) {
+                    return null;
+                }
+                rangeStart = Math.max(0, fileSize - suffixLength);
+                rangeEnd = fileSize - 1;
+            } else {
+                rangeStart = Long.parseLong(startPart);
+                rangeEnd = endPart == null || endPart.isEmpty() ? fileSize - 1 : Long.parseLong(endPart);
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        if (rangeStart < 0 || rangeStart >= fileSize || rangeStart > rangeEnd) {
+            return null;
+        }
+        if (rangeEnd >= fileSize) {
+            rangeEnd = fileSize - 1;
+        }
+        return new long[]{rangeStart, rangeEnd};
     }
 
     private static String stripLeadingSlash(String objectName) {

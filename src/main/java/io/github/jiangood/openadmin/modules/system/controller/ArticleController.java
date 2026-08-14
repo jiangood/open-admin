@@ -54,15 +54,7 @@ public class ArticleController {
     @HasPermission("article:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody Article param, RequestBodyKeys updateFields) throws Exception {
-        Article old = articleService.findById(param.getId()).orElse(null);
-        // 保存会改写托管实体 old，必须先释放旧引用
-        sysFileService.release(old.getMainImage());
-        sysFileService.releaseHtml(old.getContent());
-
-        Article result = articleService.save(param, updateFields);
-
-        sysFileService.claimHtml("sys_article", result.getId(), param.getContent());
-        sysFileService.claim("sys_article", result.getId(), param.getMainImage());
+        Article result = articleService.update(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
 

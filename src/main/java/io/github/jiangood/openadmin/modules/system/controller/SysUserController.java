@@ -85,6 +85,7 @@ public class SysUserController {
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         SysUser user = sysUserService.findById(idRequest.getId()).orElse(null);
+        Assert.notNull(user, "用户不存在");
         sysUserService.deleteById(idRequest.getId());
         sysUserService.markPermsStale(user.getId(), user.getAccount());
 
@@ -166,6 +167,7 @@ public class SysUserController {
     /**
      * 拥有数据
      */
+    @HasPermission("sys-user:grant-permission")
     @GetMapping("get-perm-info")
     public AjaxResult getPermInfo(String id) {
         GrantUserPermReq permInfo = sysUserService.getPermInfo(id);

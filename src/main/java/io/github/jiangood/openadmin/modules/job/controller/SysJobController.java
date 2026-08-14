@@ -26,6 +26,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -80,6 +81,7 @@ public class SysJobController {
     @PostMapping("trigger-job")
     public AjaxResult triggerJob(@Valid @RequestBody IdReq req) throws SchedulerException, ClassNotFoundException {
         SysJob job = service.findById(req.getId()).orElse(null);
+        Assert.notNull(job, "任务不存在，可能已被删除");
         quartzService.triggerJob(job);
 
         return AjaxResult.ok().msg("执行一次命令已发送");

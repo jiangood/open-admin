@@ -11,7 +11,10 @@ public class MathTool {
     }
 
     public static String percentStr(Number n, Number total, int decimalPlaces) {
-        double percent = n.doubleValue() / total.doubleValue();
+        if (total == null || total.doubleValue() == 0) {
+            return NumberTool.formatNumber(0, decimalPlaces) + "%";
+        }
+        double percent = (n == null ? 0 : n.doubleValue()) / total.doubleValue();
         double v = percent * 100;
 
         return NumberTool.formatNumber(v, decimalPlaces) + "%";

@@ -108,6 +108,10 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
     }
 
     dateToStr(dateArr: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null, fmt: string): string {
+        if (dateArr == null) {
+            return "";
+        }
+
         const arr = dateArr as [dayjs.Dayjs | null, dayjs.Dayjs | null];
         const d1 = arr[0];
         const d2 = arr[1];

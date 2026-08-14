@@ -9,7 +9,7 @@ import org.springframework.util.Assert;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -149,7 +149,7 @@ public class DateTool {
      */
     public static int days(LocalDateTime a, LocalDateTime b) {
 
-        return Period.between(a.toLocalDate(), b.toLocalDate()).getDays();
+        return (int) ChronoUnit.DAYS.between(a.toLocalDate(), b.toLocalDate());
     }
 
     /**

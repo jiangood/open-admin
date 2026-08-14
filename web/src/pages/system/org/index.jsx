@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Popconfirm, Popover, Space, Spin, Splitter, Switch, Tree, Typography} from 'antd';
+import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Popover, Space, Spin, Splitter, Switch, Tree, Typography} from 'antd';
 import React from 'react';
 import {
     FieldBoolean,
@@ -10,6 +10,7 @@ import {
     HttpUtils,
     NamedIcon,
     Page,
+    PermActions,
     ViewSwitch,
 } from "../../../framework";
 
@@ -145,14 +146,16 @@ export default class extends React.Component {
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
                             <Typography.Text strong>机构信息</Typography.Text>
                             {selectedOrg && (
-                                <span>
-                                    <Button size='small' icon={<EditOutlined/>} perm='sys-org:update'
-                                            onClick={this.handleEdit} style={{marginRight: 4}}>编辑</Button>
-                                    <Popconfirm perm='sys-org:delete' title='是否确定删除组织机构'
-                                                onConfirm={this.handleDelete}>
-                                        <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
-                                    </Popconfirm>
-                                </span>
+                                <PermActions size='small' actions={[
+                                    {label: '编辑', perm: 'sys-org:update', icon: <EditOutlined/>, onClick: this.handleEdit},
+                                    {
+                                        label: '删除',
+                                        perm: 'sys-org:delete',
+                                        icon: <DeleteOutlined/>,
+                                        confirm: '是否确定删除组织机构',
+                                        onClick: this.handleDelete,
+                                    },
+                                ]}/>
                             )}
                         </div>
                         {selectedOrg && (

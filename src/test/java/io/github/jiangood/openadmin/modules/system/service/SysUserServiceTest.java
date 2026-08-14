@@ -223,4 +223,11 @@ class SysUserServiceTest {
         assertEquals(2, result.size());
         verify(sysUserRepository).findAllByEnabledTrue();
     }
+
+    @Test
+    void testGetPermInfo_whenUserNotExists() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.getPermInfo("no-such-id"));
+    }
 }

@@ -32,13 +32,19 @@ public class SysJobService extends BaseService<SysJob> {
     @Transactional
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {
         SysJob db;
+        String oldName = null;
         if (input.isNew()) {
             db = repository.save(input);
         } else {
+            SysJob old = repository.findById(input.getId()).orElse(null);
+            Assert.notNull(old, "任务不存在");
+            oldName = old.getName();
             this.updateField(input, requestKeys);
             db = repository.findById(input.getId()).orElse(null);
         }
 
+        // 改名场景：先按变更前的旧 name 清理 Quartz 任务/触发器，避免残留任务继续触发
+        quartzService.deleteJobByName(oldName);
         quartzService.deleteJob(db);
         if (db.getEnabled()) {
             quartzService.scheduleJob(db);

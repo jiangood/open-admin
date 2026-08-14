@@ -159,6 +159,9 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public void deleteById(String id) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
+        if (sysUser == null) {
+            throw new IllegalStateException("用户不存在");
+        }
         try {
             sysUserRepository.delete(sysUser);
         } catch (Exception e) {
@@ -393,6 +396,7 @@ public class SysUserService extends BaseService<SysUser> {
 
     public GrantUserPermReq getPermInfo(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
+        Assert.notNull(user, "用户不存在");
 
         GrantUserPermReq p = new GrantUserPermReq();
         p.setId(user.getId());
