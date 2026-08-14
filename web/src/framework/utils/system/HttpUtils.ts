@@ -21,6 +21,12 @@ export class HttpUtils {
         const url = config.url as string;
         config.url = url.startsWith('admin') ? '/' + url : url;
 
+        // FormData 请求交由浏览器自动生成带 boundary 的 multipart Content-Type，
+        // 否则手动指定 Content-Type 会缺失 boundary 导致后端解析失败
+        if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+            config.headers = {...config.headers, 'Content-Type': undefined};
+        }
+
         return new Promise<T>((resolve, reject) => {
             axiosInstance(config).then((response) => {
                 const body = response.data;
