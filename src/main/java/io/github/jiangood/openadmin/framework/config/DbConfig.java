@@ -48,6 +48,7 @@ public class DbConfig {
                     .baselineOnMigrate(true)
                     .baselineVersion("0")
                     .ignoreMigrationPatterns(ValidatePattern.fromPattern("*:*"))
+                    .outOfOrder(true)
                     .load();
             flyway.migrate();
 
