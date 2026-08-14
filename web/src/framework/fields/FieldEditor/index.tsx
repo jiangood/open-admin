@@ -56,6 +56,7 @@ export class FieldEditor extends React.Component<FieldEditorProps, {loading: boo
                     language: 'zh_CN',
                     height: height,
                     images_upload_url: uploadUrl,
+                    convert_urls: false,
                     promotion: false,
                     cache_suffix: '?v=v7.7',
                     plugins: [
