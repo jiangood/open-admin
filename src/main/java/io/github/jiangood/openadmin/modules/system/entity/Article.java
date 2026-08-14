@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.framework.file.FileField;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import jakarta.persistence.*;
@@ -22,9 +23,11 @@ public class Article extends BaseEntity {
     @Column(length = 200, nullable = false)
     private String title;
 
+    @FileField
     @Column(name = "main_image", length = 200)
     private String mainImage;
 
+    @FileField(html = true)
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;

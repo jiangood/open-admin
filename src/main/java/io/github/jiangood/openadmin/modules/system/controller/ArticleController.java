@@ -45,8 +45,7 @@ public class ArticleController {
     @PostMapping("create")
     public AjaxResult create(@RequestBody Article param) throws Exception {
         Article result = articleService.save(param, null);
-        sysFileService.claimHtml("sys_article", result.getId(), param.getContent());
-        sysFileService.claim("sys_article", result.getId(), param.getMainImage());
+        sysFileService.claim(result);
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
 

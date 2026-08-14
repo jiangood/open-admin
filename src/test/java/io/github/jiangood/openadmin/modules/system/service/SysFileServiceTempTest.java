@@ -35,109 +35,143 @@ class SysFileServiceTempTest {
 
     private SysFileService sysFileService;
 
-    private static final String JOIN_TABLE = "sys_article";
-    private static final String JOIN_ID = "article-123";
-
     @BeforeEach
     void setUp() {
         sysFileService = new SysFileService(systemProperties, fileOperator, sysFileRepository, sysUserService);
     }
 
     @Test
-    void claim_shouldConfirmFile() throws Exception {
-        sysFileService.claim(JOIN_TABLE, JOIN_ID, "public/202607/id-a.jpg");
+    void claim_shouldConfirmSingleFileField() {
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
 
-        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/id-a.jpg"));
+        sysFileService.claim(doc);
+
+        verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1", List.of("public/202607/id-a.jpg"));
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claim_shouldHandleBlank() throws Exception {
-        sysFileService.claim(JOIN_TABLE, JOIN_ID, null);
-        sysFileService.claim(JOIN_TABLE, JOIN_ID, "  ");
+    void claim_shouldConfirmHtmlField() {
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setContent("<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
+                + "<img src=\"/file/private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>");
 
-        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
-        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
-    }
+        sysFileService.claim(doc);
 
-    @Test
-    void claimHtml_shouldExtractObjectNamesAndConfirm() throws Exception {
-        String html = "<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">";
-
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, html);
-
-        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of("public/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
-    }
-
-    @Test
-    void claimHtml_shouldExtractImgDirectoryObjectNames() throws Exception {
-        String html = "<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>"
-                + "<p><img src=\"/file/private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>";
-
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, html);
-
-        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID, List.of(
+        verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1", List.of(
                 "public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
                 "private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
     }
 
     @Test
-    void claimHtml_shouldStripQueryStringAndContextPath() throws Exception {
-        String html = "<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">";
+    void claim_shouldStripQueryStringAndContextPathFromHtml() {
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setContent("<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">");
 
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, html);
+        sysFileService.claim(doc);
 
-        verify(sysFileRepository).updateJoinRefByObjectNames(JOIN_TABLE, JOIN_ID,
+        verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1",
                 List.of("public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
     }
 
     @Test
-    void claimHtml_shouldHandleBlank() throws Exception {
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, null);
-        sysFileService.claimHtml(JOIN_TABLE, JOIN_ID, "");
+    void claim_shouldSkipNullEntityOrMissingId() {
+        sysFileService.claim(null);
+
+        FileDoc noId = new FileDoc();
+        noId.setCover("public/202607/id-a.jpg");
+        sysFileService.claim(noId);
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void release_shouldMarkFilePendingDelete() throws Exception {
-        sysFileService.release("public/202607/id-a.jpg");
+    void claim_shouldSkipBlankFieldValues() {
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("  ");
+        doc.setContent(null);
+
+        sysFileService.claim(doc);
+
+        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
+    }
+
+    @Test
+    void claim_shouldFallbackToSnakeCaseClassNameWhenNoTableAnnotation() {
+        NoTableDoc doc = new NoTableDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+
+        sysFileService.claim(doc);
+
+        verify(sysFileRepository).updateJoinRefByObjectNames("no_table_doc", "doc-1", List.of("public/202607/id-a.jpg"));
+    }
+
+    @Test
+    void unclaim_shouldMarkFilesPendingDelete() throws Exception {
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+        doc.setContent("<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
+                + "<img src=\"/file/private/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">");
+
+        sysFileService.unclaim(doc);
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
+        verify(sysFileRepository).updateStatusByObjectNames(List.of(
+                "public/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
+                "private/202607/550e8400-e29b-41d4-a716-446655440000.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(fileOperator, never()).delete(any());
     }
 
     @Test
-    void release_shouldHandleBlank() throws Exception {
-        sysFileService.release(null);
-        sysFileService.release("  ");
+    void unclaim_shouldSkipNullEntityOrMissingId() {
+        sysFileService.unclaim(null);
+
+        FileDoc noId = new FileDoc();
+        noId.setCover("public/202607/id-a.jpg");
+        sysFileService.unclaim(noId);
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
-    @Test
-    void releaseHtml_shouldExtractAndMarkPendingDelete() throws Exception {
-        String html = "<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
-                + "<img src=\"/file/private/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">";
+    /** 无 @Table 注解的实体，验证 joinTable 回退为类名驼峰转下划线 */
+    static class NoTableDoc implements org.springframework.data.domain.Persistable<String> {
+        @jakarta.persistence.Id
+        private String id;
+        @io.github.jiangood.openadmin.framework.file.FileField
+        private String cover;
 
-        sysFileService.releaseHtml(html);
+        @Override
+        public String getId() {
+            return id;
+        }
 
-        verify(sysFileRepository).updateStatusByObjectNames(List.of(
-                "public/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
-                "private/202607/550e8400-e29b-41d4-a716-446655440000.jpg"), FileStatus.PENDING_DELETE);
-        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
-    }
+        public void setId(String id) {
+            this.id = id;
+        }
 
-    @Test
-    void releaseHtml_shouldHandleBlank() throws Exception {
-        sysFileService.releaseHtml(null);
-        sysFileService.releaseHtml("");
+        public String getCover() {
+            return cover;
+        }
 
-        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
-        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
+        public void setCover(String cover) {
+            this.cover = cover;
+        }
+
+        @Override
+        public boolean isNew() {
+            return id == null;
+        }
     }
 
     @Test

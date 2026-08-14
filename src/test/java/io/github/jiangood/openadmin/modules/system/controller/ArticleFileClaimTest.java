@@ -52,7 +52,10 @@ public class ArticleFileClaimTest {
         saveFile(newImage);
 
         String articleId = saveArticle("claim-about-1", oldImage, null);
-        sysFileService.claim("sys_article", articleId, oldImage);
+        Article claimDoc = new Article();
+        claimDoc.setId(articleId);
+        claimDoc.setMainImage(oldImage);
+        sysFileService.claim(claimDoc);
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(oldImage).getStatus());
 
         Article updateParam = new Article();
@@ -84,7 +87,10 @@ public class ArticleFileClaimTest {
 
         String oldContent = "<p><img src=\"/file/" + kept + "\"> <img src=\"/file/" + removed + "\"></p>";
         String articleId = saveArticle("claim-about-2", null, oldContent);
-        sysFileService.claimHtml("sys_article", articleId, oldContent);
+        Article claimDoc = new Article();
+        claimDoc.setId(articleId);
+        claimDoc.setContent(oldContent);
+        sysFileService.claim(claimDoc);
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(kept).getStatus());
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(removed).getStatus());
 

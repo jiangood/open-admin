@@ -7,6 +7,7 @@ import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
+import io.github.jiangood.openadmin.framework.file.FileField;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.RequestTool;
@@ -16,6 +17,7 @@ import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
+import jakarta.persistence.Table;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.MediaType;
 import org.springframework.http.MediaTypeFactory;
@@ -32,7 +35,9 @@ import org.springframework.util.Assert;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -440,35 +445,42 @@ public class SysFileService {
 
 
     /**
-     * 认领单个文件：绑定业务记录并置为使用中
+     * 认领实体引用的文件：遍历实体上所有 {@link FileField} 字段，绑定业务记录
+     * （joinTable 取实体 {@code @Table(name)}，joinId 取 {@code Persistable.getId()}）并置为使用中。
      */
     @Transactional
-    public void claim(String joinTable, String joinId, String objectName) {
-        claimList(joinTable, joinId, objectNameList(objectName));
+    public void claim(Persistable<String> entity) {
+        if (entity == null || StrUtil.isBlank(entity.getId())) {
+            return;
+        }
+        String joinTable = joinTableOf(entity.getClass());
+        String joinId = entity.getId();
+        for (Field field : fileFields(entity.getClass())) {
+            String value = StrUtil.toStringOrNull(readFieldValue(entity, field));
+            if (field.getAnnotation(FileField.class).html()) {
+                claimList(joinTable, joinId, extractObjectNamesFromHtml(value));
+            } else {
+                claimList(joinTable, joinId, objectNameList(value));
+            }
+        }
     }
 
     /**
-     * 认领富文本 HTML 中引用的所有文件
+     * 取消认领实体引用的文件：置为待删除（与 {@link #claim} 对应的释放引用操作）
      */
     @Transactional
-    public void claimHtml(String joinTable, String joinId, String html) {
-        claimList(joinTable, joinId, extractObjectNamesFromHtml(html));
-    }
-
-    /**
-     * 释放单个文件引用：置为待删除
-     */
-    @Transactional
-    public void release(String objectName) {
-        releaseList(objectNameList(objectName));
-    }
-
-    /**
-     * 释放富文本 HTML 中引用的所有文件
-     */
-    @Transactional
-    public void releaseHtml(String html) {
-        releaseList(extractObjectNamesFromHtml(html));
+    public void unclaim(Persistable<String> entity) {
+        if (entity == null || StrUtil.isBlank(entity.getId())) {
+            return;
+        }
+        for (Field field : fileFields(entity.getClass())) {
+            String value = StrUtil.toStringOrNull(readFieldValue(entity, field));
+            if (field.getAnnotation(FileField.class).html()) {
+                releaseList(extractObjectNamesFromHtml(value));
+            } else {
+                releaseList(objectNameList(value));
+            }
+        }
     }
 
     private List<String> objectNameList(String objectName) {
@@ -497,6 +509,41 @@ public class SysFileService {
             objectNames.add(matcher.group(1));
         }
         return new ArrayList<>(objectNames);
+    }
+
+    /** 按 class 缓存的 @FileField 字段列表（含父类字段） */
+    private static final Map<Class<?>, List<Field>> FILE_FIELDS_CACHE = new ConcurrentHashMap<>();
+
+    private List<Field> fileFields(Class<?> entityClass) {
+        return FILE_FIELDS_CACHE.computeIfAbsent(entityClass, clazz -> {
+            List<Field> fields = new ArrayList<>();
+            for (Class<?> c = clazz; c != null && c != Object.class; c = c.getSuperclass()) {
+                for (Field field : c.getDeclaredFields()) {
+                    if (field.isAnnotationPresent(FileField.class)) {
+                        fields.add(field);
+                    }
+                }
+            }
+            return fields;
+        });
+    }
+
+    private Object readFieldValue(Object entity, Field field) {
+        try {
+            field.setAccessible(true);
+            return field.get(entity);
+        } catch (IllegalAccessException e) {
+            log.warn("读取 @FileField 字段失败: {}.{}", entity.getClass().getSimpleName(), field.getName(), e);
+            return null;
+        }
+    }
+
+    private String joinTableOf(Class<?> entityClass) {
+        Table table = entityClass.getAnnotation(Table.class);
+        if (table != null && StrUtil.isNotBlank(table.name())) {
+            return table.name();
+        }
+        return StrUtil.toUnderlineCase(entityClass.getSimpleName());
     }
 
     public Page<SysFile> findAll(Specification<SysFile> q, Pageable pageable) {

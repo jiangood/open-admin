@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -56,12 +57,12 @@ class ArticleServiceTest {
         Article input = newArticle("no-such-id");
         assertThrows(IllegalArgumentException.class, () -> articleService.update(input, List.of("title")));
 
-        verify(sysFileService, never()).release(any());
-        verify(sysFileService, never()).claim(any(), any(), any());
+        verify(sysFileService, never()).unclaim(any());
+        verify(sysFileService, never()).claim(any());
     }
 
     @Test
-    void update_shouldReleaseOldFilesBeforeClaimNew() {
+    void update_shouldUnclaimOldBeforeClaimNew() {
         Article old = newArticle("a1");
         old.setCode("old-code");
         old.setMainImage("public/img/202601/old.jpg");
@@ -80,10 +81,8 @@ class ArticleServiceTest {
         articleService.update(input, List.of("code", "title", "mainImage", "content"));
 
         InOrder inOrder = inOrder(sysFileService);
-        inOrder.verify(sysFileService).release("public/img/202601/old.jpg");
-        inOrder.verify(sysFileService).releaseHtml("<img src=\"/file/public/img/202601/old.jpg\">");
-        inOrder.verify(sysFileService).claimHtml("sys_article", "a1", "<img src=\"/file/public/img/202601/new.jpg\">");
-        inOrder.verify(sysFileService).claim("sys_article", "a1", "public/img/202601/new.jpg");
+        inOrder.verify(sysFileService).unclaim(any(Persistable.class));
+        inOrder.verify(sysFileService).claim(any(Persistable.class));
     }
 
     @Test
@@ -98,8 +97,30 @@ class ArticleServiceTest {
 
         assertThrows(RuntimeException.class, () -> articleService.update(input, List.of("code")));
 
-        verify(sysFileService, never()).release(any());
-        verify(sysFileService, never()).claim(any(), any(), any());
+        verify(sysFileService, never()).unclaim(any());
+        verify(sysFileService, never()).claim(any());
+    }
+
+    @Test
+    void deleteById_shouldUnclaimBeforeDelete() {
+        Article article = newArticle("a1");
+        when(articleRepository.findById("a1")).thenReturn(Optional.of(article));
+
+        articleService.deleteById("a1");
+
+        InOrder inOrder = inOrder(sysFileService, articleRepository);
+        inOrder.verify(sysFileService).unclaim(article);
+        inOrder.verify(articleRepository).deleteById("a1");
+    }
+
+    @Test
+    void deleteById_shouldSkipUnclaimWhenNotExists() {
+        when(articleRepository.findById("missing")).thenReturn(Optional.empty());
+
+        articleService.deleteById("missing");
+
+        verify(sysFileService, never()).unclaim(any());
+        verify(articleRepository, never()).deleteById(any());
     }
 
     private Article newArticle(String id) {
