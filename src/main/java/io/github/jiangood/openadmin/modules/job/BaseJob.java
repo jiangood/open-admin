@@ -34,7 +34,7 @@ public abstract class BaseJob implements Job {
 
         SysJobLog jobLog = new SysJobLog();
         jobLog.setSysJob(job);
-        Date fireTime = context.getFireTime();
+        Date fireTime = context.getFireTime(); // NOSONAR: Quartz JobExecutionContext.getFireTime() 返回 java.util.Date，外部 API 不可改
         jobLog.setBeginTime(fireTime == null ? null : LocalDateTime.ofInstant(fireTime.toInstant(), ZoneId.systemDefault()));
         jobLog = sysJobLogRepository.save(jobLog);
 

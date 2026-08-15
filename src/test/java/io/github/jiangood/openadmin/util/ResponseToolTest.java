@@ -238,7 +238,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testSetDownloadExcelHeaderWithSpecialCharacters() throws IOException {
+    void testSetDownloadExcelHeaderWithSpecialCharacters() {
         String filename = "测试表格.xlsx";
         
         // 调用方法
