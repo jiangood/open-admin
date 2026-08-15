@@ -28,7 +28,7 @@ public class TreeOptionJsonTest {
     }
 
     @Test
-    public void setValueSyncsKey() throws Exception {
+    public void setValueSyncsKey() {
         TreeOption node = new TreeOption();
         node.setValue("org-3");
         assertTrue(node.getKey().equals("org-3"));

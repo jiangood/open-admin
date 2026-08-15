@@ -74,7 +74,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testResponseJson() throws IOException {
+    void testResponseJson() {
         // 创建测试数据
         AjaxResult result = AjaxResult.ok().msg("Success");
         
@@ -92,7 +92,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testResponseExceptionError() throws IOException {
+    void testResponseExceptionError() {
         Integer code = 500;
         String message = "Internal Server Error";
         
@@ -143,7 +143,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testResponseJsonWithNullData() throws IOException {
+    void testResponseJsonWithNullData() {
         // 调用方法，传入null数据
         ResponseTool.responseJson(mockResponse, null);
         

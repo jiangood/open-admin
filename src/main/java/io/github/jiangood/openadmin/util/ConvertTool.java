@@ -89,8 +89,7 @@ public class ConvertTool {
                 }
             }
 
-            T result = Convert.convert(type, value);
-            return result;
+            return Convert.convert(type, value);
         } catch (Exception e) {
             // 处理转换失败的情况，返回null
             return null;

@@ -63,7 +63,7 @@ public class SysFileRepositoryTest {
 
     @Test
     void updateStatusByStatusAndCreateTimeBefore_shouldMarkOnlyExpiredTemp() {
-        SysFile fresh = saveFile("public/202608/fresh.jpg");
+        saveFile("public/202608/fresh.jpg");
         SysFile claimed = saveFile("public/202608/claimed.jpg");
         claimed.setStatus(FileStatus.IN_USE);
         sysFileRepository.save(claimed);

@@ -25,9 +25,8 @@ public class AmtTool {
     public static BigDecimal fenToYuan(int fen) {
         BigDecimal dFen = new BigDecimal(fen);
 
-        BigDecimal y = dFen.divide(new BigDecimal("100"))
+        return dFen.divide(new BigDecimal("100"))
                 .setScale(2, RoundingMode.HALF_UP);
-        return y;
     }
 
 

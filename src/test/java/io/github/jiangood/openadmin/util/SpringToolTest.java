@@ -3,6 +3,8 @@ package io.github.jiangood.openadmin.util;
 import io.github.jiangood.openadmin.OpenAdminConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Import;
@@ -80,14 +82,14 @@ public class SpringToolTest {
 
     @Test
     public void testGetProperty() {
-        String property = SpringTool.getProperty("spring.application.name");
         // 配置文件中可能没有设置，所以允许为null
+        assertDoesNotThrow(() -> SpringTool.getProperty("spring.application.name"));
     }
 
     @Test
     public void testGetApplicationName() {
-        String applicationName = SpringTool.getApplicationName();
         // 配置文件中可能没有设置，所以允许为null
+        assertDoesNotThrow(() -> SpringTool.getApplicationName());
     }
 
     @Test

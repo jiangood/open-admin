@@ -135,7 +135,7 @@ public class JsonTool {
      * @return 转换后的对象
      * @throws IOException 如果转换失败
      */
-    public static <T> T jsonToBean(String json, Class<T> cls) throws IOException {
+    public static <T> T jsonToBean(String json, Class<T> cls) {
         if (json == null) {
             return null;
 
@@ -144,7 +144,7 @@ public class JsonTool {
         return om.readValue(json, cls);
     }
 
-    public static <T> T jsonToBean(byte[] json, Class<T> cls) throws IOException {
+    public static <T> T jsonToBean(byte[] json, Class<T> cls) {
         if (json == null) {
             return null;
 
@@ -162,8 +162,7 @@ public class JsonTool {
      * @return 转换后的对象
      * @throws IOException 如果转换失败
      */
-    public static <T> T jsonToBean(String json, TypeReference<T> valueTypeRef)
-            throws IOException {
+    public static <T> T jsonToBean(String json, TypeReference<T> valueTypeRef) {
         if (json == null) {
             return null;
 
@@ -275,8 +274,7 @@ public class JsonTool {
      * @return 转换后的Map对象，如果转换失败返回空Map
      * @throws IOException 如果转换失败
      */
-    public static Map<String, Object> jsonToMap(String json)
-            throws IOException {
+    public static Map<String, Object> jsonToMap(String json) {
         if (json != null && !json.isEmpty()) {
             return om.readValue(json, new TypeReference<HashMap<String, Object>>() {
             });
@@ -311,8 +309,7 @@ public class JsonTool {
      * @throws JacksonException 如果解析失败
      */
     public static JsonNode readTree(String json) throws JacksonException {
-        JsonNode node = om.reader().readTree(json);
-        return node;
+        return om.reader().readTree(json);
     }
 
     /**

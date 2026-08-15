@@ -128,9 +128,7 @@ public class SpringTool implements ApplicationContextAware {
     public static <T> Collection<String> getBeanNames(Class<T> type) {
         Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
         Map<String, T> beansOfType = applicationContext.getBeansOfType(type);
-        Set<String> beanNames = beansOfType.keySet();
-        return beanNames;
-
+        return beansOfType.keySet();
     }
 
 

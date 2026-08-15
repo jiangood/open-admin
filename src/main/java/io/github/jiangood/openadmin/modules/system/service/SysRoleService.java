@@ -36,7 +36,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
     @Transactional
     public void deleteById(String id) {
-        SysRole db = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
         roleRepository.deleteById(id);
     }
 

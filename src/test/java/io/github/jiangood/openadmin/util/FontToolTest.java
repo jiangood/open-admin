@@ -12,7 +12,6 @@ class FontToolTest {
     @Test
     void testGetDefaultFontPath() {
         // 测试获取默认字体路径
-        String fontPath = FontTool.getDefaultFontPath();
         // 字体路径可能为null（如果系统中没有安装指定的字体），但方法应该正常执行
         // 这里只验证方法不会抛出异常
         assertDoesNotThrow(() -> FontTool.getDefaultFontPath());
@@ -21,7 +20,6 @@ class FontToolTest {
     @Test
     void testGetDefaultFontName() {
         // 测试获取默认字体名称
-        String fontName = FontTool.getDefaultFontName();
         // 字体名称可能为null（如果系统中没有安装指定的字体），但方法应该正常执行
         // 这里只验证方法不会抛出异常
         assertDoesNotThrow(() -> FontTool.getDefaultFontName());

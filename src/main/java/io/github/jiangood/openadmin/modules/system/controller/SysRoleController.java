@@ -195,7 +195,7 @@ public class SysRoleController {
     public AjaxResult saveUserList(@RequestBody GrantUserToRoleReq request) {
         List<String> oldUserIds = sysRoleService.findUsers(request.getId())
             .stream().map(BaseEntity::getId).toList();
-        SysRole sysRole = sysRoleService.grantUsers(request.getId(), request.getUserIdList());
+        sysRoleService.grantUsers(request.getId(), request.getUserIdList());
 
         Set<String> affected = new HashSet<>(oldUserIds);
         if (request.getUserIdList() != null) {

@@ -40,9 +40,7 @@ public class PasswordTool {
         String pad = RandomUtil.randomString(allChars, 8);
         password.append(pad);
 
-        String shuffle = StringTool.shuffle(password.toString());
-
-        return shuffle;
+        return StringTool.shuffle(password.toString());
     }
 
     /**

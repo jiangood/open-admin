@@ -27,9 +27,7 @@ public class ResourceTool {
         String classPath = "classpath*:" + path;
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] resources = resolver.getResources(classPath);
-
-        return resources;
+        return resolver.getResources(classPath);
     }
 
     @SneakyThrows
@@ -124,7 +122,7 @@ public class ResourceTool {
     }
 
 
-    public static Resource findOne(String path) throws IOException {
+    public static Resource findOne(String path) {
         return new ClassPathResource(path);
     }
 

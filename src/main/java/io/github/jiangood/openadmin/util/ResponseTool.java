@@ -27,7 +27,7 @@ public class ResponseTool {
 
     public static final String CONTENT_TYPE_STREAM = "application/octet-stream";
 
-    public static void setDownloadHeader(String filename, String contentType, HttpServletResponse response) throws IOException {
+    public static void setDownloadHeader(String filename, String contentType, HttpServletResponse response) {
         filename = URLEncodeUtil.encode(filename, StandardCharsets.UTF_8);
 
         response.setContentType(contentType);
@@ -35,7 +35,7 @@ public class ResponseTool {
         response.setHeader("Access-Control-Expose-Headers", "content-disposition");
     }
 
-    public static void setDownloadExcelHeader(String filename, HttpServletResponse response) throws IOException {
+    public static void setDownloadExcelHeader(String filename, HttpServletResponse response) {
         filename = URLEncodeUtil.encode(filename, StandardCharsets.UTF_8);
         response.setContentType(CONTENT_TYPE_EXCEL);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
@@ -65,9 +65,7 @@ public class ResponseTool {
     private static String removeImgPrefix(String content) {
         String reg = "(<img.*?)(https?://.*?)(" + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", "") + ".*?>)";
 
-        String result = content.replaceAll(reg, "$1$3");
-
-        return result;
+        return content.replaceAll(reg, "$1$3");
     }
 
 

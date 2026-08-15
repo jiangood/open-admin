@@ -44,8 +44,7 @@ public class RemarkTool {
             if (ann == null) {
                 throw new BusinessException(t.getClass().getSimpleName() + "没有设置注解@Remark");
             }
-            String remark = ann.value();
-            return remark;
+            return ann.value();
         } catch (NoSuchFieldException | SecurityException e) {
             log.error("获取枚举Remark注解失败", e);
         }

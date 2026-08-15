@@ -40,8 +40,7 @@ public class SysJobLog extends BaseEntity {
     @Transient
     public String getJobRunTimeLabel() {
         if (jobRunTime != null) {
-            String str = DateUtil.formatBetween(jobRunTime, BetweenFormatter.Level.SECOND);
-            return str;
+            return DateUtil.formatBetween(jobRunTime, BetweenFormatter.Level.SECOND);
         }
         return null;
     }

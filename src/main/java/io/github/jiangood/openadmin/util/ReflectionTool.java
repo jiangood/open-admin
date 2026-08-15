@@ -69,10 +69,7 @@ public class ReflectionTool {
         Type genericReturnType = readMethod.getGenericReturnType();
 
         if (genericReturnType instanceof ParameterizedType pt) {
-
-            Type argument = pt.getActualTypeArguments()[0];
-
-            return argument;
+            return pt.getActualTypeArguments()[0];
         }
 
         return null;
