@@ -26,8 +26,9 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
         this.props.onChange?.(this.merge(a, b));
     };
 
+    // NOSONAR: S7760 - 参数可能为 null 而非仅 undefined，默认参数无法覆盖（与 S6606 语义冲突，?? 是正确写法）
     merge(a: RangePartValue, b: RangePartValue): string {
-        const av = a ?? ''; // NOSONAR: 参数可能为 null 而非 undefined，默认参数无法覆盖；S6606 与 S7760 在此场景语义冲突
+        const av = a ?? '';
         const bv = b ?? '';
         return av + SP + bv;
     }
