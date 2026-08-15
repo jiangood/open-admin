@@ -63,7 +63,16 @@ scripts/start-frontend.sh {start|stop|restart|status}   # 前端: npm run dev（
 scripts/bug-scan.sh [模型]                              # 本地 AI bug 扫描（opencode + gh），产物在 target/bug-scan/
 ```
 
+Windows 下用同名 `.bat`（cmd/双击），用法与 `.sh` 一致，日志同样落 `logs/`：
+
+```bat
+scripts\start-all.bat
+scripts\start-backend.bat start|stop|restart|status
+scripts\start-frontend.bat start|stop|restart|status
+```
+
 - 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
+- Windows 版内调 PowerShell `Start-Process cmd.exe` 后台启动、`taskkill /T` 结束整棵进程树，PID 同样记录在 `logs/*.pid`
 - 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，需本地 MySQL 8+，连接参数见其中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
 
 ## Auto-Configuration Mechanism
