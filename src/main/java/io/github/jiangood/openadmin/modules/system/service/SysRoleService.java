@@ -131,7 +131,12 @@ public class SysRoleService extends BaseService<SysRole> {
         }
 
         SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
-        role.setPerms(perms);
+        if (role.isAdmin()) {
+            // 管理员角色保持通配符权限，避免被授权页勾选结果覆盖
+            role.setPerms(List.of("*"));
+        } else {
+            role.setPerms(perms);
+        }
         role.setMenus(finalMenus);
         return roleRepository.save(role);
     }

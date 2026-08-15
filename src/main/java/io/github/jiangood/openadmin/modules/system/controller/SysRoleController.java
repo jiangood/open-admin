@@ -121,15 +121,16 @@ public class SysRoleController {
             return AjaxResult.err("角色不存在");
         }
         List<String> rolePerms = CollUtil.emptyIfNull(role.getPerms());
+        // 通配符 '*' 表示拥有全部权限，此时所有权限码均视为已选
+        boolean wildcard = rolePerms.contains("*");
 
         List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
 
         Map<String, Collection<String>> permsMap = new HashMap<>();
         for (MenuDefinition menuDef : menuList) {
             if (CollUtil.isNotEmpty(menuDef.getPermCodes())) {
-                Set<String> menuPerms = new HashSet<>(menuDef.getPermCodes());
-
-                List<String> ownMenuPerms = menuPerms.stream().filter(rolePerms::contains).toList();
+                List<String> ownMenuPerms = wildcard ? new ArrayList<>(menuDef.getPermCodes())
+                        : menuDef.getPermCodes().stream().filter(rolePerms::contains).toList();
                 permsMap.put(menuDef.getId(), ownMenuPerms);
             }
         }

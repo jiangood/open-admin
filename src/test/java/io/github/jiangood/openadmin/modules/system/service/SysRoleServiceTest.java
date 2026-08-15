@@ -258,4 +258,25 @@ class SysRoleServiceTest {
         assertTrue(result.getMenus().contains("sys"));
         assertTrue(result.getMenus().contains("sys-user"));
     }
+
+    @Test
+    void testSavePerms_whenAdminRole_shouldKeepWildcardPerms() {
+        SysRole role = new SysRole();
+        role.setId("1");
+        role.setCode("admin");
+        role.setPerms(Arrays.asList("*"));
+
+        MenuDefinition menu1 = new MenuDefinition();
+        menu1.setId("sys");
+        menu1.setName("系统管理");
+
+        when(sysMenuRepository.findAll()).thenReturn(Arrays.asList(menu1));
+        when(roleRepository.findById("1")).thenReturn(Optional.of(role));
+        when(roleRepository.save(any(SysRole.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SysRole result = sysRoleService.savePerms("1", Arrays.asList("sys-user:read"), Arrays.asList("sys"));
+
+        assertNotNull(result);
+        assertEquals(Arrays.asList("*"), result.getPerms());
+    }
 }
