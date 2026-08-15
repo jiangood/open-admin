@@ -111,18 +111,20 @@ export class FieldTable extends React.Component<FieldTableProps, FieldTableState
 
     notifyParent = () => {
         const {dataSource} = this.state;
-        this.props.onChange && this.props.onChange(dataSource);
+        this.props.onChange?.(dataSource);
     };
+
+    renderFooter = () => <Button type='dashed'
+                                 icon={<PlusOutlined/>}
+                                 onClick={this.add}>增加一行
+    </Button>;
 
     render() {
         return <div className='edit-table' style={this.props.style}>
             <Table columns={this.columns}
                    dataSource={this.state.dataSource}
                    size='small'
-                   footer={() => <Button type='dashed'
-                                         icon={<PlusOutlined/>}
-                                         onClick={this.add}>增加一行
-                   </Button>}
+                   footer={this.renderFooter}
                    pagination={false}
             >
 

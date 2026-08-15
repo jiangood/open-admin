@@ -22,11 +22,13 @@ export interface PermAction {
     type?: 'primary' | 'dashed' | 'link' | 'text' | 'default';
 }
 
+export type ButtonSize = 'small' | 'middle' | 'large';
+
 export interface PermActionsProps {
     /** 是否折叠为「第一个操作 + 更多下拉」，多余操作进入 `...` 菜单 */
     more?: boolean;
     /** 按钮尺寸 */
-    size?: 'small' | 'middle' | 'large';
+    size?: ButtonSize;
     /** 传统写法：包裹带 `perm` 属性的子元素，按 `perm` 过滤。不推荐，建议改用 `actions` 数据驱动 */
     children?: React.ReactNode;
     /** 数据驱动模式：操作数组，按每个 action 的 perm 过滤 */
@@ -34,7 +36,7 @@ export interface PermActionsProps {
 }
 
 export class PermActions extends React.Component<PermActionsProps> {
-    static defaultProps: Partial<PermActionsProps> = {
+    static readonly defaultProps: Partial<PermActionsProps> = {
         more: false,
         size: 'middle',
     };
@@ -98,7 +100,7 @@ export class PermActions extends React.Component<PermActionsProps> {
         if (visible.length === 0) return null;
 
         if (!more || visible.length <= 1) {
-            const buttons = visible.map((action, index) => (
+            const buttons = visible.map((action, index) => ( // NOSONAR: 按钮无稳定 id，静态过滤后顺序不变
                 <React.Fragment key={index}>{this.renderButton(action, size)}</React.Fragment>
             ));
             return <Space>{buttons}</Space>;

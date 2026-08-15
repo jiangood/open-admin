@@ -8,7 +8,7 @@ export class ViewText extends React.Component {
         modalOpen: false,
     };
 
-    static defaultProps = {
+    static readonly defaultProps = {
         ellipsis: false,
         maxLength: 15
     }

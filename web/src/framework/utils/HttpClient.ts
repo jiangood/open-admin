@@ -154,7 +154,7 @@ export class HttpClient {
                 const contentDisposition = response.headers['content-disposition'] || response.headers['Content-Disposition'];
                 if (contentDisposition) {
                     const match = /filename\*?=(?:['"]?)(?:UTF-8''|)(.+?)(?:['"]?$|;)/i.exec(contentDisposition);
-                    let parsedName = match && match[1] ? match[1].trim() : 'download.file';
+                    let parsedName = match?.[1] ? match[1].trim() : 'download.file';
                     try {
                         parsedName = decodeURIComponent(parsedName.replace(/"/g, ''));
                     } catch {
@@ -198,7 +198,7 @@ export class HttpClient {
             const responseData = e.response?.data;
             const status = e.response?.status;
             if (status === 504) return '504 请求后端服务失败';
-            if (responseData && responseData.message) return responseData.message;
+            if (responseData?.message) return responseData.message;
             if (e.message) return e.message;
             return defaultMsg;
         }

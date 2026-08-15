@@ -3,12 +3,10 @@ import {ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {history, PageFrame} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, PageFrame, PageLoading, PageUtils, history, getThemeConfig, setThemeColors, EventBus} from "../framework";
+import type {ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
-import {HttpClient, PageLoading, PageUtils, GlobalData, getThemeConfig, setThemeColors, EventBus} from "../framework";
-import {ErrorBoundary} from "../framework";
-import type {ThemeColors} from "../framework";
 
 import '../style/global.less'
 import './index.less'

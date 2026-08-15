@@ -23,7 +23,7 @@ export interface FieldBooleanProps extends FieldProps<boolean> {
 
 export class FieldBoolean extends React.Component<FieldBooleanProps> {
 
-    static defaultProps = {
+    static readonly defaultProps = {
         type: 'select'
     };
 
@@ -34,7 +34,7 @@ export class FieldBoolean extends React.Component<FieldBooleanProps> {
 
         switch (type) {
             case 'radio':
-                return <Radio.Group value={v} onChange={e => onChange && onChange(e.target.value)}>
+                return <Radio.Group value={v} onChange={e => onChange?.(e.target.value)}>
                     <Radio value={true}>是</Radio>
                     <Radio value={false}>否</Radio>
                 </Radio.Group>;
@@ -42,7 +42,7 @@ export class FieldBoolean extends React.Component<FieldBooleanProps> {
                 return <Checkbox
                     checked={v}
                     onChange={(e) => {
-                        onChange && onChange(e.target.checked);
+                        onChange?.(e.target.checked);
                     }}
                 />;
             case 'select':
@@ -51,7 +51,7 @@ export class FieldBoolean extends React.Component<FieldBooleanProps> {
                     {value: false, label: '否'},
                 ]}
                                value={v}
-                               onChange={value => onChange && onChange(value)}
+                               onChange={value => onChange?.(value)}
                                style={{width: '100%'}}
                                allowClear={true}
                                placeholder={'请选择'}
@@ -59,7 +59,7 @@ export class FieldBoolean extends React.Component<FieldBooleanProps> {
             case 'switch':
                 return <Switch
                     checked={v}
-                    onChange={checked => onChange && onChange(checked)}
+                    onChange={checked => onChange?.(checked)}
                 />;
             default:
                 return null;

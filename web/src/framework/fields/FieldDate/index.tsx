@@ -21,7 +21,7 @@ export interface FieldDateProps extends FieldProps<string> {
 }
 
 export class FieldDate extends React.Component<FieldDateProps> {
-    static defaultProps = {
+    static readonly defaultProps = {
         type: 'YYYY-MM-DD'
     };
 
@@ -33,34 +33,34 @@ export class FieldDate extends React.Component<FieldDateProps> {
             case 'YYYY':
                 return <DatePicker
                     value={this.strToDate(value, formattedType)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY'))}
                     picker="year"
                     {...rest}
                 />;
             case 'YYYY-MM':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-MM')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM'))}
                     picker="month"
                     {...rest}
                 />;
             case 'YYYY-QQ':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-QQ')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-QQ'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-QQ'))}
                     picker="quarter"
                     {...rest}
                 />;
             case 'YYYY-MM-DD':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-MM-DD')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM-DD'))}
                     {...rest}
                 ></DatePicker>;
             case 'YYYY-MM-DD HH:mm':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-MM-DD HH:mm')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM-DD HH:mm'))}
                     format='YYYY-MM-DD HH:mm'
                     showTime
                     {...rest}
@@ -68,7 +68,7 @@ export class FieldDate extends React.Component<FieldDateProps> {
             case 'YYYY-MM-DD HH:mm:ss':
                 return <DatePicker
                     value={this.strToDate(value, 'YYYY-MM-DD HH:mm:ss')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm:ss'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM-DD HH:mm:ss'))}
                     showTime
                     {...rest}
                 ></DatePicker>;
@@ -76,13 +76,13 @@ export class FieldDate extends React.Component<FieldDateProps> {
                 return <TimePicker
                     format='HH:mm'
                     value={this.strToDate(value, 'HH:mm')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'HH:mm'))}
                     {...rest}
                 ></TimePicker>;
             case 'HH:mm:ss':
                 return <TimePicker
                     value={this.strToDate(value, 'HH:mm:ss')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm:ss'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'HH:mm:ss'))}
                     {...rest}
                 ></TimePicker>;
             default:

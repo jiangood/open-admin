@@ -13,7 +13,7 @@ interface FieldRemoteSelectProps extends Omit<SelectProps, 'value' | 'onChange' 
 }
 
 export class FieldRemoteSelect extends BaseRemoteSelect<FieldRemoteSelectProps> {
-    static defaultProps = {
+    static readonly defaultProps = {
         placeholder: '请搜索选择',
     };
 

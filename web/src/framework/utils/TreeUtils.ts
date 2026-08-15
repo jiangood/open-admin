@@ -19,7 +19,7 @@ export class TreeUtils {
     static findByKey<T extends TreeNode>(key: string | number, list: T[], keyName: keyof T | 'id' = 'id'): T | undefined {
         for (const item of list) {
             if (item[keyName as keyof T] === key) return item;
-            if (item.children && item.children.length) {
+            if (item.children?.length) {
                 const rs = TreeUtils.findByKey(key, item.children as T[], keyName);
                 if (rs) return rs;
             }

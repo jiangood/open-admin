@@ -26,7 +26,7 @@ interface FieldTableSelectState {
  */
 export class FieldTableSelect extends React.Component<FieldTableSelectProps, FieldTableSelectState> {
 
-    static defaultProps = {
+    static readonly defaultProps = {
         placeholder: '请搜索选择',
     };
 
@@ -62,7 +62,7 @@ export class FieldTableSelect extends React.Component<FieldTableSelectProps, Fie
                                 label: record.name,
                                 open: false
                             });
-                            this.props.onChange && this.props.onChange(record.id);
+                            this.props.onChange?.(record.id);
                         }}>选择</Button>;
                 }
             }]}

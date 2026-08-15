@@ -69,7 +69,7 @@ export class FieldEditor extends React.Component<FieldEditorProps, {loading: boo
                     setup: function (editor) {
                         editor.on('OpenWindow', function(e) {
                             const dialog = e.dialog;
-                            if (dialog && dialog.getData().dimensions) {
+                            if (dialog?.getData().dimensions) {
                                 dialog.showTab("upload");
                             }
                         });

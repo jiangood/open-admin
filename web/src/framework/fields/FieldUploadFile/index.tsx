@@ -104,7 +104,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
 
     handleChange = ({fileList, file}: UploadChangeParam<SysUploadFile>) => {
         const rs = file.response;
-        if (rs != null && rs.success === false) {
+        if (rs?.success === false) {
             this.setState({errorTitle: '上传失败', errorContent: rs.message});
             return;
         }

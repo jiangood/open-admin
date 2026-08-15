@@ -48,7 +48,11 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
             onSelect={this.onSelectOrg}
             showIcon
             blockNode
-            icon={item => item.iconName ? <NamedIcon name={item.iconName}/> : null}
+            icon={renderOrgIcon}
         />
     }
+}
+
+function renderOrgIcon(item) {
+    return item.iconName ? <NamedIcon name={item.iconName}/> : null;
 }

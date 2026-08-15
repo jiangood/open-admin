@@ -8,23 +8,25 @@ const SP = StringUtils.ISO_SPLITTER;
 /** 数字范围值，形如 "1/100"（起止以 / 分隔） */
 export type FieldNumberRangeValue = string;
 
+export type RangePartValue = number | string | null;
+
 export interface FieldNumberRangeProps extends FieldProps<FieldNumberRangeValue> {
     /** 默认值（形如 "1/100"），value 为空时挂载后回填 */
     defaultValue?: string;
 }
 
 export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
-    onChangeA = (a: number | string | null) => {
+    onChangeA = (a: RangePartValue) => {
         const {b} = this.parse(this.props.value);
-        this.props.onChange && this.props.onChange(this.merge(a, b));
+        this.props.onChange?.(this.merge(a, b));
     };
 
-    onChangeB = (b: number | string | null) => {
+    onChangeB = (b: RangePartValue) => {
         const {a} = this.parse(this.props.value);
-        this.props.onChange && this.props.onChange(this.merge(a, b));
+        this.props.onChange?.(this.merge(a, b));
     };
 
-    merge(a: number | string | null, b: number | string | null): string {
+    merge(a: RangePartValue, b: RangePartValue): string {
         if (a == null) {
             a = '';
         }
@@ -45,7 +47,7 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     componentDidMount() {
         const {value, defaultValue, onChange} = this.props;
         if (value == null && defaultValue) {
-            onChange && onChange(defaultValue);
+            onChange?.(defaultValue);
         }
     }
 

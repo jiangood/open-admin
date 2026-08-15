@@ -309,6 +309,7 @@ export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, Pro
         this.setState({params: values, current: 1, sorter: {}}, this.loadData)
     }
 
+    // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
     changeFormValues = (values: Record<string, unknown>) => {
         if (this.formRef.current) {
             this.formRef.current.resetFields()

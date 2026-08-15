@@ -4,9 +4,7 @@ import {DeleteOutlined, EyeOutlined, PlusOutlined} from "@ant-design/icons";
 import Compressor from "compressorjs";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import {HttpClient} from "../../utils";
-import {ObjectUtils} from "../../utils";
-import {UrlUtils} from "../../utils";
+import {HttpClient, ObjectUtils, UrlUtils} from "../../utils";
 import type {FieldProps} from '../types';
 
 export interface FieldUploadImageProps extends FieldProps<string> {
@@ -143,7 +141,7 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
 
 export class FieldUploadImage extends React.Component<FieldUploadImageProps, FieldUploadImageState> {
 
-    state: FieldUploadImageState = {
+    readonly state: FieldUploadImageState = {
         // 传入的参数
         maxCount: 1,
         thumbWidth: 300,

@@ -52,7 +52,7 @@ export function NamedIcon(props: NamedIconProps): React.ReactElement {
         };
     }, [name]);
 
-    const Icon = (loaded && loaded.name === name) ? loaded.comp : iconCache.get(name);
+    const Icon = (loaded?.name === name) ? loaded.comp : iconCache.get(name);
 
     if (Icon) {
         return <Icon {...rest} />;

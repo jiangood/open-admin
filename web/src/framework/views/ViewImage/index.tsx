@@ -16,7 +16,7 @@ import {UrlUtils} from '../../utils';
  */
 export class ViewImage extends React.Component {
 
-  static previewGroupProps = {
+  static readonly previewGroupProps = {
     preview: {
       scaleStep: 0.3,
     },

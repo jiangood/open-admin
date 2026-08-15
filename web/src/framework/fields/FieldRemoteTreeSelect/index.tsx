@@ -4,7 +4,7 @@ import { StringUtils } from '../../utils';
 import { BaseRemoteSelect } from '../BaseRemoteSelect';
 
 export class FieldRemoteTreeSelect extends BaseRemoteSelect {
-    static defaultProps = {
+    static readonly defaultProps = {
         treeDefaultExpandAll: true,
     };
 

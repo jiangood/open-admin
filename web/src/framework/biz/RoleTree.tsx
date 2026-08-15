@@ -44,7 +44,11 @@ export class RoleTree extends React.Component<RoleTreeProps, RoleTreeState> {
             onSelect={this.onSelect}
             showIcon
             blockNode
-            icon={() => <SolutionOutlined/>}
+            icon={renderRoleIcon}
         />
     }
+}
+
+function renderRoleIcon() {
+    return <SolutionOutlined/>;
 }

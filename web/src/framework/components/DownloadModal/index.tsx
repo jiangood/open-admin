@@ -41,8 +41,8 @@ export interface DownloadModalProps {
 }
 
 export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
-  private abortController: AbortController | null = null;
-  private lastOptions: DownloadOptions | null = null;
+  private readonly abortController: AbortController | null = null;
+  private readonly lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;
   private lastLoaded: number = 0;
   private speedTimer: ReturnType<typeof setInterval> | null = null;
@@ -61,6 +61,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     };
   }
 
+  // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
   download = (options: DownloadOptions) => {
     this.startDownload(options);
   };
@@ -135,7 +136,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       let filename = this.state.fileName;
       if (!filename && contentDisposition) {
         const match = /filename\*?=(?:['"]?)(?:UTF-8''|)(.+?)(?:['"]?$|;)/i.exec(contentDisposition);
-        let parsedName = match && match[1] ? match[1].trim() : 'download.file';
+        let parsedName = match?.[1] ? match[1].trim() : 'download.file';
         try {
           parsedName = decodeURIComponent(parsedName.replace(/"/g, ''));
         } catch {

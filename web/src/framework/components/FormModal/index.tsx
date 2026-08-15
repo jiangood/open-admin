@@ -12,7 +12,7 @@ export interface FormModalProps {
 
 export default class FormModal extends React.Component<FormModalProps> {
 
-  state = {
+  readonly state = {
     visible: false,
     confirmLoading: false,
   }
@@ -20,10 +20,12 @@ export default class FormModal extends React.Component<FormModalProps> {
   private pendingValues: Record<string, unknown> | null = null
   private formRef = React.createRef<FormInstance>()
 
+  // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
   get formInstance() {
     return this.formRef.current
   }
 
+  // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
   open = (values?: Record<string, unknown>) => {
     this.pendingValues = values || {}
     this.setState({visible: true})

@@ -8,7 +8,7 @@ interface FieldSysOrgTreeSelectProps extends FieldProps<string | string[]> {
 
 export class FieldSysOrgTreeSelect extends React.Component<FieldSysOrgTreeSelectProps> {
 
-    static defaultProps = {
+    static readonly defaultProps = {
         type: 'dept',
     };
 

@@ -28,7 +28,7 @@ export class FieldRemoteTreeCascader extends BaseRemoteSelect {
             <Cascader
                 options={data}
                 onChange={(arr) => {
-                    onChange && onChange(arr[arr.length - 1]);
+                    onChange?.(arr[arr.length - 1]);
                 }}
                 value={arr}
                 fieldNames={{ label: 'title', value: 'key' }}

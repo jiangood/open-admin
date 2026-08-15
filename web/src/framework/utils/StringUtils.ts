@@ -3,14 +3,14 @@ export class StringUtils {
     static readonly ISO_SPLITTER: string = "/";
 
     static removePrefix(str: string | null | undefined, ch: string): string {
-        if (str != null && str.startsWith(ch)) {
+        if (str?.startsWith(ch)) {
             return str.substring(ch.length);
         }
         return str ?? '';
     }
 
     static removeSuffix(str: string | null | undefined, ch: string): string {
-        if (str != null && str.endsWith(ch)) {
+        if (str?.endsWith(ch)) {
             return str.substring(0, str.length - ch.length);
         }
         return str ?? '';

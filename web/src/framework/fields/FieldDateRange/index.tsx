@@ -26,7 +26,7 @@ export interface FieldDateRangeProps extends FieldProps<FieldDateRangeValue> {
 }
 
 export class FieldDateRange extends React.Component<FieldDateRangeProps> {
-    static defaultProps = {
+    static readonly defaultProps = {
         type: 'YYYY-MM-DD'
     };
 
@@ -38,34 +38,34 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
             case 'YYYY':
                 return <DatePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY'))}
                     picker="year"
                     {...rest}
                 />;
             case 'YYYY-MM':
                 return <DatePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM'))}
                     picker="month"
                     {...rest}
                 />;
             case 'YYYY-QQ':
                 return <DatePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-QQ'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-QQ'))}
                     picker="quarter"
                     {...rest}
                 />;
             case 'YYYY-MM-DD':
                 return <DatePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM-DD'))}
                     {...rest}
                 />;
             case 'YYYY-MM-DD HH:mm':
                 return <DatePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM-DD HH:mm'))}
                     format='YYYY-MM-DD HH:mm'
                     showTime
                     {...rest}
@@ -73,7 +73,7 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
             case 'YYYY-MM-DD HH:mm:ss':
                 return <DatePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm:ss'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'YYYY-MM-DD HH:mm:ss'))}
                     showTime
                     {...rest}
                 />;
@@ -81,13 +81,13 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
                 return <TimePicker.RangePicker
                     format='HH:mm'
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'HH:mm'))}
                     {...rest}
                 />;
             case 'HH:mm:ss':
                 return <TimePicker.RangePicker
                     value={this.strToDate(value)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm:ss'))}
+                    onChange={v => onChange?.(this.dateToStr(v, 'HH:mm:ss'))}
                     {...rest}
                 />;
             default:

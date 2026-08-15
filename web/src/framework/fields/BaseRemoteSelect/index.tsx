@@ -22,10 +22,10 @@ export interface BaseRemoteSelectProps {
  * 子类只需覆写 getLoadParams() 和 render()。
  */
 export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> {
-    private fetchIdRef: number = 0;
+    private readonly fetchIdRef: number = 0;
     private loadDataDebounce: ReturnType<typeof debounce>;
 
-    static defaultProps = {
+    static readonly defaultProps = {
         debounceTime: 300,
     };
 
@@ -117,6 +117,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
     // ========== Helper 方法 ==========
 
+    // NOSONAR: 由子类通过 this.getShowSearch() 调用
     getShowSearch(): { filterOption: false; onSearch: (value: string) => void } {
         return {
             filterOption: false,
@@ -124,6 +125,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
         };
     }
 
+    // NOSONAR: 由子类通过 this.getNotFoundContent() 调用
     getNotFoundContent(): React.ReactNode {
         return this.state.loading ? <Spin size="small" /> : '数据为空';
     }
