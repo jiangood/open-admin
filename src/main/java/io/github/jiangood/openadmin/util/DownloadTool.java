@@ -58,7 +58,6 @@ public class DownloadTool {
     public static void setDownloadParam(String fileName, long contentLength, HttpServletResponse response) {
         response.reset();
         response.setHeader("Content-Disposition", "attachment; filename=\"" + URLUtil.encode(fileName) + "\"");
-        response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/octet-stream;charset=UTF-8");
         if (contentLength > 0) {

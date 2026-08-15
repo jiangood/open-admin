@@ -30,7 +30,6 @@ class DownloadToolTest {
         // 验证响应头设置
         verify(response).reset();
         verify(response).setHeader("Content-Disposition", "attachment; filename=\"test.txt\"");
-        verify(response).setHeader("Access-Control-Allow-Origin", "*");
         verify(response).setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         verify(response).setContentType("application/octet-stream;charset=UTF-8");
         verify(response).addHeader("Content-Length", String.valueOf(contentLength));
@@ -51,7 +50,6 @@ class DownloadToolTest {
         // 验证响应头设置
         verify(response).reset();
         verify(response).setHeader("Content-Disposition", "attachment; filename=\"test.txt\"");
-        verify(response).setHeader("Access-Control-Allow-Origin", "*");
         verify(response).setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         verify(response).setContentType("application/octet-stream;charset=UTF-8");
         // 验证 contentLength 为 0 时不设置 Content-Length 头
@@ -73,7 +71,6 @@ class DownloadToolTest {
         // 验证响应头设置
         verify(response).reset();
         verify(response).setHeader("Content-Disposition", "attachment; filename=\"test.txt\"");
-        verify(response).setHeader("Access-Control-Allow-Origin", "*");
         verify(response).setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         verify(response).setContentType("application/octet-stream;charset=UTF-8");
         // 验证 contentLength 为负数时不设置 Content-Length 头
