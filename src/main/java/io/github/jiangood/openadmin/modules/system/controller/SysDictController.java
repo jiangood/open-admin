@@ -95,7 +95,7 @@ public class SysDictController {
     @Log("字典-创建")
     @HasPermission("sys-dict:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody DictItemReq req) throws Exception {
+    public AjaxResult create(@RequestBody DictItemReq req) {
         SysDictItem param = BeanUtil.copyProperties(req, SysDictItem.class);
         SysDictItem result = itemService.save(param, null);
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
@@ -104,7 +104,7 @@ public class SysDictController {
     @Log("字典-更新")
     @HasPermission("sys-dict:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody DictItemReq req, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody DictItemReq req, RequestBodyKeys updateFields) {
         SysDictItem param = BeanUtil.copyProperties(req, SysDictItem.class);
         SysDictItem result = itemService.save(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");

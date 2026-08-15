@@ -43,7 +43,7 @@ public class ArticleController {
     @Log("文章-创建")
     @HasPermission("article:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody ArticleReq req) throws Exception {
+    public AjaxResult create(@RequestBody ArticleReq req) {
         Article param = BeanUtil.copyProperties(req, Article.class);
         Article result = articleService.save(param, null);
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
