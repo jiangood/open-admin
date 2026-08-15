@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.job.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ClassUtil;
 import tools.jackson.core.JacksonException;
@@ -15,6 +16,7 @@ import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import io.github.jiangood.openadmin.modules.job.JobParamFieldProvider;
+import io.github.jiangood.openadmin.modules.job.dto.request.JobReq;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
@@ -53,7 +55,8 @@ public class SysJobController {
     @Log("定时任务-创建")
     @HasPermission("job:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody SysJob param) throws Exception {
+    public AjaxResult create(@RequestBody JobReq req) throws Exception {
+        SysJob param = BeanUtil.copyProperties(req, SysJob.class);
         validateJobClass(param.getJobClass());
         service.save(param, null);
         return AjaxResult.ok().msg("创建成功");
@@ -62,7 +65,8 @@ public class SysJobController {
     @Log("定时任务-更新")
     @HasPermission("job:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody SysJob param, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody JobReq req, RequestBodyKeys updateFields) throws Exception {
+        SysJob param = BeanUtil.copyProperties(req, SysJob.class);
         service.save(param, updateFields);
         return AjaxResult.ok().msg("更新成功");
     }

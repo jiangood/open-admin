@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.util.StrUtil;
@@ -16,6 +17,7 @@ import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermReq;
+import io.github.jiangood.openadmin.modules.system.dto.request.UserReq;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -64,19 +66,21 @@ public class SysUserController {
     @Log("用户-创建")
     @HasPermission("sys-user:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody SysUser input) throws Exception {
+    public AjaxResult create(@RequestBody UserReq input) throws Exception {
+        SysUser entity = BeanUtil.copyProperties(input, SysUser.class);
         String plain = PasswordTool.random();
-        input.setPassword(plain);
-        sysUserService.create(input);
+        entity.setPassword(plain);
+        sysUserService.create(entity);
         return AjaxResult.ok("添加新用户成功").data("password", plain);
     }
 
     @Log("用户-更新")
     @HasPermission("sys-user:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
-        sysUserService.update(input, updateFields);
-        sysUserService.markPermsStale(input.getId(), input.getAccount());
+    public AjaxResult update(@RequestBody UserReq input, RequestBodyKeys updateFields) throws Exception {
+        SysUser entity = BeanUtil.copyProperties(input, SysUser.class);
+        sysUserService.update(entity, updateFields);
+        sysUserService.markPermsStale(entity.getId(), entity.getAccount());
         return AjaxResult.ok("更新成功");
     }
 
@@ -120,9 +124,9 @@ public class SysUserController {
     @Log("用户-重置密码")
     @HasPermission("sys-user:reset-password")
     @PostMapping("reset-pwd")
-    public AjaxResult resetPwd(@RequestBody SysUser user) {
-        Assert.hasText(user.getPassword(), "请输入新密码");
-        sysUserService.resetPwd(user.getId(), user.getPassword());
+    public AjaxResult resetPwd(@RequestBody UserReq input) {
+        Assert.hasText(input.getPassword(), "请输入新密码");
+        sysUserService.resetPwd(input.getId(), input.getPassword());
         return AjaxResult.ok().msg("重置成功");
     }
 

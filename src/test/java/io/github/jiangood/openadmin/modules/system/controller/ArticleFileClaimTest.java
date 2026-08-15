@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
+import io.github.jiangood.openadmin.modules.system.dto.request.ArticleReq;
 import io.github.jiangood.openadmin.modules.system.entity.Article;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
@@ -62,7 +63,7 @@ public class ArticleFileClaimTest {
         sysFileService.claim(claimDoc);
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(oldImage).getStatus());
 
-        Article updateParam = new Article();
+        ArticleReq updateParam = new ArticleReq();
         updateParam.setId(articleId);
         updateParam.setCode("claim-about-1");
         updateParam.setTitle("标题-改");
@@ -98,7 +99,7 @@ public class ArticleFileClaimTest {
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(kept).getStatus());
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(removed).getStatus());
 
-        Article updateParam = new Article();
+        ArticleReq updateParam = new ArticleReq();
         updateParam.setId(articleId);
         updateParam.setCode("claim-about-2");
         updateParam.setTitle("标题-改");
@@ -126,7 +127,7 @@ public class ArticleFileClaimTest {
         sysFileService.claim(ownerDoc);
 
         String updaterId = saveArticle("claim-updater", null, null);
-        Article updateParam = new Article();
+        ArticleReq updateParam = new ArticleReq();
         updateParam.setId(updaterId);
         updateParam.setCode("claim-updater");
         updateParam.setTitle("标题-改");
@@ -156,7 +157,7 @@ public class ArticleFileClaimTest {
         ownerDoc.setMainImage(shared);
         sysFileService.claim(ownerDoc);
 
-        Article param = new Article();
+        ArticleReq param = new ArticleReq();
         param.setCode("claim-new");
         param.setTitle("新文章");
         param.setMainImage(shared);

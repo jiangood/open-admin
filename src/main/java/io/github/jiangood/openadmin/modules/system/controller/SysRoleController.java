@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
@@ -12,6 +13,7 @@ import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserToRoleReq;
+import io.github.jiangood.openadmin.modules.system.dto.request.RoleReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.SaveRolePermReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -70,7 +72,8 @@ public class SysRoleController {
     @Log("角色-创建")
     @HasPermission("sys-role:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody SysRole role) throws Exception {
+    public AjaxResult create(@RequestBody RoleReq req) throws Exception {
+        SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, null);
 
         for (SysUser user : role.getUsers()) {
@@ -86,7 +89,8 @@ public class SysRoleController {
     @Log("角色-更新")
     @HasPermission("sys-role:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody SysRole role, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody RoleReq req, RequestBodyKeys updateFields) throws Exception {
+        SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, updateFields);
 
         for (SysUser user : role.getUsers()) {

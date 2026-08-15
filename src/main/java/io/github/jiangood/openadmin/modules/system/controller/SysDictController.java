@@ -1,11 +1,14 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.modules.system.dto.DictItemVO;
+import io.github.jiangood.openadmin.modules.system.dto.request.DictItemReq;
+import io.github.jiangood.openadmin.modules.system.dto.request.DictTypeReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.service.SysDictItemService;
@@ -37,7 +40,8 @@ public class SysDictController {
 
     @HasPermission("sys-dict:create")
     @PostMapping("type-create")
-    public AjaxResult typeCreate(@RequestBody SysDictType param) {
+    public AjaxResult typeCreate(@RequestBody DictTypeReq req) {
+        SysDictType param = BeanUtil.copyProperties(req, SysDictType.class);
         if (sysDictTypeService.isTypeCodeExist(param.getTypeCode(), null)) {
             return AjaxResult.err("类型编码已存在");
         }
@@ -47,7 +51,8 @@ public class SysDictController {
 
     @HasPermission("sys-dict:update")
     @PostMapping("type-update")
-    public AjaxResult typeUpdate(@RequestBody SysDictType param, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult typeUpdate(@RequestBody DictTypeReq req, RequestBodyKeys updateFields) throws Exception {
+        SysDictType param = BeanUtil.copyProperties(req, SysDictType.class);
         SysDictType result = sysDictTypeService.update(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
@@ -90,7 +95,8 @@ public class SysDictController {
     @Log("字典-创建")
     @HasPermission("sys-dict:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody SysDictItem param) throws Exception {
+    public AjaxResult create(@RequestBody DictItemReq req) throws Exception {
+        SysDictItem param = BeanUtil.copyProperties(req, SysDictItem.class);
         SysDictItem result = itemService.save(param, null);
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
@@ -98,7 +104,8 @@ public class SysDictController {
     @Log("字典-更新")
     @HasPermission("sys-dict:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody SysDictItem param, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody DictItemReq req, RequestBodyKeys updateFields) throws Exception {
+        SysDictItem param = BeanUtil.copyProperties(req, SysDictItem.class);
         SysDictItem result = itemService.save(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
