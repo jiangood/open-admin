@@ -67,6 +67,6 @@ export class UrlUtils {
     static contextPath(path: string): string {
         const base = import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH;
         if (base === '/' || base === '') return path;
-        return base.replace(/\/+$/, '') + path;
+        return base.replace(/\/+$/, '') + path; // NOSONAR: 需去除尾部斜杠，正则已最简
     }
 }

@@ -23,9 +23,8 @@ export class ViewFile extends React.Component {
             return    <iframe
                 src={url}
                 width='99%'
-                frameBorder={0}
                 title="文件预览"
-                style={{height}}
+                style={{height, border: 0}}
             />
         }
 
@@ -35,9 +34,8 @@ export class ViewFile extends React.Component {
                 <iframe
                     src={url}
                     width='99%'
-                    frameBorder={0}
                     title="文件预览"
-                    style={{height}}
+                    style={{height, border: 0}}
                 />
             </div>
         });

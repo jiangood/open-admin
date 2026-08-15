@@ -28,8 +28,8 @@ function postLogin(values, query, success, error) {
 function encodePassword(pwd) {
     const chars = [];
     for (let i = 0; i < pwd.length; i++)
-        chars.push(pwd.charCodeAt(i) + i + 2);
-    return btoa(String.fromCharCode(...chars));
+        chars.push(pwd.codePointAt(i) + i + 2);
+    return btoa(String.fromCodePoint(...chars));
 }
 
 export default class LoginPage extends React.Component {

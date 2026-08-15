@@ -32,7 +32,7 @@ export default class FilePage extends React.Component {
             title: '缩略图',
             dataIndex: 'objectName',
             width: 80,
-            render: (objectName, record) => {
+            render: (objectName, record) => { // NOSONAR: 返回元素或占位文本，类型不同属预期
                 if (record.type !== 'image') {
                     return '-'
                 }

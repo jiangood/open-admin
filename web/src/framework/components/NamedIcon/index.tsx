@@ -12,7 +12,7 @@ const iconLoaders: Record<string, () => Promise<{ default: IconComponent }>> = {
 for (const [path, loader] of Object.entries(
     import.meta.glob('/node_modules/@ant-design/icons/es/icons/*.js')
 )) {
-    const name = /([^/]+)\.js$/.exec(path)?.[1];
+    const name = /([^/]+)\.js$/.exec(path)?.[1]; // NOSONAR: 提取文件名，已最简
     if (name) {
         iconLoaders[name] = loader as () => Promise<{ default: IconComponent }>;
     }

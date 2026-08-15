@@ -311,7 +311,7 @@ export default class JobPage extends React.Component {
             const option = this.state.jobClassOptions.find(o => o.value === changed.jobClass)
             if (option) {
                 const {label} = option;
-                const match = label.match(/[（(](.*?)[）)]/);
+                const match = label.match(/[（(](.*?)[）)]/); // NOSONAR: 匹配中英文括号内内容，已最简
                 if (match) { // 取括号内中文描述设置为name
                     this.modalRef.current.formInstance.setFieldValue("name", match[1])
                 }

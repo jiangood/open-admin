@@ -514,7 +514,6 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                                 {tool !== 'crop' && <Divider style={{margin: '0 0 12px'}}/>}
                                 <div style={{fontWeight: 600, marginBottom: 8}}>{tool === 'crop' ? '裁切信息' : '图片信息'}</div>
                                 {tool === 'crop' ? (
-                                    <>
                                         <Radio.Group
                                             value={cropRatio ? formatRatio(cropRatio.width, cropRatio.height) : 'free'}
                                             onChange={(e) => {
@@ -529,7 +528,6 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                                                 </Radio>
                                             ))}
                                         </Radio.Group>
-                                    </>
                                 ) : (
                                     <>
                                         {canvasImg && (

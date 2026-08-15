@@ -54,7 +54,7 @@ export function getThemeConfig(): ThemeConfig {
     return cachedConfig;
 }
 
-export function getToken(): Record<string, unknown> {
+export function getToken(): ThemeColors & Record<string, unknown> {
     if (!cachedToken) {
         cachedToken = getDesignToken(getThemeConfig());
     }

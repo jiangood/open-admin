@@ -37,9 +37,9 @@ export interface ProTableProps<T = unknown> {
     /** antd Table 列定义 */
     columns: TableProps<T>['columns'];
     /** 获取表格操作句柄（reload） */
-    actionRef?: React.MutableRefObject<ProTableActionRef | undefined>;
+    actionRef?: React.RefObject<ProTableActionRef | undefined>;
     /** 获取搜索表单实例 */
-    formRef?: React.MutableRefObject<FormInstance | undefined>;
+    formRef?: React.RefObject<FormInstance | undefined>;
     /** 工具栏渲染，参数为当前搜索值与行选择状态 */
     toolBarRender?: (params: Record<string, unknown>, selection: {
         selectedRows: T[];
