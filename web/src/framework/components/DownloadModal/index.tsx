@@ -209,12 +209,12 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           this.lastTime = now;
           this.lastLoaded = loaded;
         }
-        this.setState({
+        this.setState((prev) => ({
           progress: total ? Math.round((loaded / total) * 100) : 0,
           loaded,
           total,
-          speed: speed > 0 ? this.formatSpeed(speed) : this.state.speed,
-        });
+          speed: speed > 0 ? this.formatSpeed(speed) : prev.speed,
+        }));
       },
     };
 
@@ -229,13 +229,12 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       this.clearSpeedTimer();
       return this.saveBlob(response);
     }).then(() => {
-      const total = this.state.total;
-      this.setState({
+      this.setState((prev) => ({
         status: 'completed',
         progress: 100,
         speed: '',
-        loaded: total || this.state.loaded,
-      });
+        loaded: prev.total || prev.loaded,
+      }));
       this.props.onFinish?.();
     }).catch((error: any) => {
       this.clearSpeedTimer();
