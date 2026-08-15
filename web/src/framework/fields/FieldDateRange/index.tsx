@@ -22,7 +22,7 @@ export interface FieldDateRangeProps extends FieldProps<FieldDateRangeValue> {
     /** 自定义样式 */
     style?: React.CSSProperties;
     /** 其余属性透传给 RangePicker */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export class FieldDateRange extends React.Component<FieldDateRangeProps> {
@@ -37,34 +37,34 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
         switch (formattedType) {
             case 'YYYY':
                 return <DatePicker.RangePicker
-                    value={this.strToDate(value, 'YYYY')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY'))}
                     picker="year"
                     {...rest}
                 />;
             case 'YYYY-MM':
                 return <DatePicker.RangePicker
-                    value={this.strToDate(value, 'YYYY-MM')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM'))}
                     picker="month"
                     {...rest}
                 />;
             case 'YYYY-QQ':
                 return <DatePicker.RangePicker
-                    value={this.strToDate(value, 'YYYY-QQ')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-QQ'))}
                     picker="quarter"
                     {...rest}
                 />;
             case 'YYYY-MM-DD':
                 return <DatePicker.RangePicker
-                    value={this.strToDate(value, 'YYYY-MM-DD')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD'))}
                     {...rest}
                 />;
             case 'YYYY-MM-DD HH:mm':
                 return <DatePicker.RangePicker
-                    value={this.strToDate(value, 'YYYY-MM-DD HH:mm')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm'))}
                     format='YYYY-MM-DD HH:mm'
                     showTime
@@ -72,7 +72,7 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
                 />;
             case 'YYYY-MM-DD HH:mm:ss':
                 return <DatePicker.RangePicker
-                    value={this.strToDate(value, 'YYYY-MM-DD HH:mm:ss')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm:ss'))}
                     showTime
                     {...rest}
@@ -80,13 +80,13 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
             case 'HH:mm':
                 return <TimePicker.RangePicker
                     format='HH:mm'
-                    value={this.strToDate(value, 'HH:mm')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm'))}
                     {...rest}
                 />;
             case 'HH:mm:ss':
                 return <TimePicker.RangePicker
-                    value={this.strToDate(value, 'HH:mm:ss')}
+                    value={this.strToDate(value)}
                     onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm:ss'))}
                     {...rest}
                 />;
@@ -96,7 +96,7 @@ export class FieldDateRange extends React.Component<FieldDateRangeProps> {
 
     }
 
-    strToDate(v: string | null | undefined, fmt: string): [dayjs.Dayjs, dayjs.Dayjs] | null {
+    strToDate(v: string | null | undefined): [dayjs.Dayjs, dayjs.Dayjs] | null {
         if (!v) {
             return null;
         }

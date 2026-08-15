@@ -9,7 +9,7 @@ export interface FieldTableSelectProps extends FieldProps<string> {
     /** 数据加载地址 */
     url: string;
     /** 表格列配置（操作列由组件自动追加） */
-    columns: TableColumnsType<Record<string, any>>;
+    columns: TableColumnsType<Record<string, unknown>>;
     /** 占位文本，默认 请搜索选择 */
     placeholder?: string;
 }

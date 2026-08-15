@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Form, Input, message} from "antd";
 import {HttpClient, history} from "../../framework";
 
-export default class extends React.Component {
+export default class ForceUpdatePwdPage extends React.Component {
 
     onFinish = (values) => {
         HttpClient.post('admin/userCenter/update-pwd', values, null, () => {

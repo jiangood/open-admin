@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * 通用字段组件属性接口
  * @template T - value 的类型

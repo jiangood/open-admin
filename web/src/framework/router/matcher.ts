@@ -6,7 +6,7 @@ function safeDecodeURIComponent(s: string): string {
 
 export interface RouteDef {
     path: string;
-    component: ComponentType<any>;
+    component: ComponentType<unknown>;
 }
 
 interface InternalRoute extends RouteDef {
@@ -14,7 +14,7 @@ interface InternalRoute extends RouteDef {
 }
 
 export interface MatchResult {
-    component: ComponentType<any>;
+    component: ComponentType<unknown>;
     params: Record<string, string>;
 }
 

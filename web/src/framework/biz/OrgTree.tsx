@@ -1,4 +1,4 @@
-import {Alert, Skeleton, Tree} from 'antd';
+import {Alert, Skeleton, Tree, type TreeDataNode} from 'antd';
 import React from 'react';
 import {HttpClient} from "../utils";
 import {NamedIcon} from "../components/NamedIcon";
@@ -9,7 +9,7 @@ interface OrgTreeProps {
 
 interface OrgTreeState {
     treeDataLoading: boolean;
-    treeData: any[];
+    treeData: TreeDataNode[];
     currentOrgId: string | null;
 }
 

@@ -4,12 +4,12 @@ import {BaseRemoteSelect} from '../BaseRemoteSelect';
 import type {SelectProps} from "antd/es/select";
 import type {FieldProps} from '../types';
 
-interface FieldRemoteSelectProps extends Omit<SelectProps, 'value' | 'onChange' | 'mode'>, FieldProps<any> {
+interface FieldRemoteSelectProps extends Omit<SelectProps, 'value' | 'onChange' | 'mode'>, FieldProps<unknown> {
     url: string;
     debounceTime?: number;
     multiple?: boolean;
-    paramsProcessor?: (params: any) => any;
-    responseProcessor?: (response: any) => any;
+    paramsProcessor?: (params: Record<string, unknown>) => Record<string, unknown>;
+    responseProcessor?: (response: unknown) => unknown;
 }
 
 export class FieldRemoteSelect extends BaseRemoteSelect<FieldRemoteSelectProps> {

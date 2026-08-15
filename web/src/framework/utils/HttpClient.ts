@@ -1,5 +1,5 @@
 import axios from "axios";
-import type {AxiosRequestConfig} from "axios";
+import type {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import qs from 'qs';
 import {message as messageApi} from "antd";
 import {EventBus} from "./EventBus";
@@ -43,21 +43,21 @@ export interface AjaxError {
     message: string;
 }
 
-interface AjaxSettings<T = any> {
+interface AjaxSettings<T = unknown> {
     url: string;
     method?: 'GET' | 'POST';
-    params?: any;
-    data?: any;
+    params?: unknown;
+    data?: unknown;
     headers?: AxiosRequestConfig['headers'];
     success?: (data: T) => void;
     error?: (e: AjaxError) => void;
 }
 
-interface DownloadSettings<T = any> {
+interface DownloadSettings {
     url: string;
     method?: 'GET' | 'POST';
-    params?: any;
-    data?: any;
+    params?: unknown;
+    data?: unknown;
     fileName?: string;
     onDownloadProgress?: (progress: {loaded: number; total: number}) => void;
     success?: (blob: Blob) => void;
@@ -72,22 +72,22 @@ const axiosInstance = axios.create({
 });
 
 export class HttpClient {
-    static ajax<T = any>(settings: AjaxSettings<T>): void {
+    static ajax<T = unknown>(settings: AjaxSettings<T>): void {
         const {url, method = 'GET', params, data, headers, success, error} = settings;
         HttpClient.coreRequest<T>({
             url, method, params, data, headers, success, error
         });
     }
 
-    static get<T = any>(url: string, params: any = null, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
+    static get<T = unknown>(url: string, params: unknown = null, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
         HttpClient.ajax<T>({url, method: 'GET', params, success, error});
     }
 
-    static post<T = any>(url: string, data: any = null, params: any = null, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
+    static post<T = unknown>(url: string, data: unknown = null, params: unknown = null, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
         HttpClient.ajax<T>({url, method: 'POST', data, params, success, error});
     }
 
-    static postForm<T = any>(url: string, data: any, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
+    static postForm<T = unknown>(url: string, data: unknown, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
         HttpClient.ajax<T>({
             url,
             method: 'POST',
@@ -103,7 +103,7 @@ export class HttpClient {
      * 成功即触发浏览器保存；JSON 错误响应自动识别为失败；文件名优先 settings.fileName，
      * 否则从 Content-Disposition 解析。
      */
-    static download<T = any>(settings: DownloadSettings<T>): void {
+    static download(settings: DownloadSettings): void {
         const {url, method = 'GET', params, data, fileName, onDownloadProgress, success, error} = settings;
         const hasError = typeof error === 'function';
 
@@ -123,12 +123,12 @@ export class HttpClient {
             params,
             data,
             responseType: 'blob',
-            onDownloadProgress: (progressEvent: any) => {
+            onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
                 if (onDownloadProgress) {
                     onDownloadProgress({loaded: progressEvent.loaded, total: progressEvent.total});
                 }
             }
-        }).then((response: any) => {
+        }).then((response) => {
             const blob: Blob = response.data;
 
             if (blob.type === 'application/json') {
@@ -141,7 +141,7 @@ export class HttpClient {
                             EventBus.emit('loginExpired');
                         }
                         finishError({code: rs.code, message: rs.message || '下载失败'});
-                    } catch (e) {
+                    } catch {
                         finishError({message: '解析错误响应失败'});
                     }
                 };
@@ -157,7 +157,7 @@ export class HttpClient {
                     let parsedName = match && match[1] ? match[1].trim() : 'download.file';
                     try {
                         parsedName = decodeURIComponent(parsedName.replace(/"/g, ''));
-                    } catch (e) {
+                    } catch {
                         parsedName = parsedName.replace(/"/g, '');
                     }
                     filename = parsedName;
@@ -203,14 +203,15 @@ export class HttpClient {
             return defaultMsg;
         }
         if (e instanceof Error) return e.message || defaultMsg;
-        if (e && typeof e === 'object' && (e as any).message) return (e as any).message;
+        if (e && typeof e === 'object' && (e as {message?: unknown}).message) return (e as {message: string}).message;
         return defaultMsg;
     }
 
     /** 把任意异常（AxiosError / Error / AjaxError / 业务消息）统一包装成 AjaxError */
     private static toAjaxError(e: unknown, defaultMsg = '操作失败'): AjaxError {
-        if (e && typeof e === 'object' && typeof (e as any).message === 'string') {
-            return {code: (e as any).code, message: (e as any).message};
+        if (e && typeof e === 'object' && typeof (e as {message?: unknown}).message === 'string') {
+            const ajaxErr = e as {code?: number | string; message: string};
+            return {code: ajaxErr.code, message: ajaxErr.message};
         }
         return {message: HttpClient.errToMsg(e, defaultMsg)};
     }
@@ -219,7 +220,7 @@ export class HttpClient {
         return url.startsWith('admin') ? '/' + url : url;
     }
 
-    private static coreRequest<T = any>(settings: AjaxSettings<T>): void {
+    private static coreRequest<T = unknown>(settings: AjaxSettings<T>): void {
         const {url, method, params, data, headers, success, error} = settings;
         const config: AxiosRequestConfig = {url: HttpClient.prefixUrl(url), method, params, data, headers};
 
@@ -252,7 +253,7 @@ export class HttpClient {
 
         axiosInstance(config).then((response) => {
             const body = response.data;
-            let {success: ok, message, data: result} = body;
+            const {success: ok, message, data: result} = body;
             if (ok == undefined) {
                 success?.(response as unknown as T);
                 return;

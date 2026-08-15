@@ -1,4 +1,4 @@
-import {Skeleton, Tree} from 'antd';
+import {Skeleton, Tree, type TreeDataNode} from 'antd';
 import React from 'react';
 import {SolutionOutlined} from '@ant-design/icons';
 import {HttpClient} from "../utils";
@@ -9,7 +9,7 @@ interface RoleTreeProps {
 
 interface RoleTreeState {
     treeDataLoading: boolean;
-    treeData: any[];
+    treeData: TreeDataNode[];
     currentOrgId: string | null;
 }
 
@@ -44,7 +44,7 @@ export class RoleTree extends React.Component<RoleTreeProps, RoleTreeState> {
             onSelect={this.onSelect}
             showIcon
             blockNode
-            icon={item => <SolutionOutlined/>}
+            icon={() => <SolutionOutlined/>}
         />
     }
 }

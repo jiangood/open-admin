@@ -1,8 +1,8 @@
-export interface TreeNode<T = any> {
+export interface TreeNode<T = unknown> {
     id: string | number;
     pid: string | number | null;
     children?: TreeNode<T>[];
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export class TreeUtils {

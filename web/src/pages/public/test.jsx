@@ -2,7 +2,7 @@ import React from "react";
 import {Page} from "../../framework";
 import {Button, message, Modal, Space} from "antd";
 
-export default class extends React.Component {
+export default class TestPage extends React.Component {
 
     state = {
         modalOpen:false

@@ -40,7 +40,7 @@ const cronOptions = [
 ]
 
 
-export default class extends React.Component {
+export default class JobPage extends React.Component {
 
     state = {
         selectedRowKeys: [],

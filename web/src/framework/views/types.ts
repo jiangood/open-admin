@@ -15,12 +15,10 @@ export interface ViewProps<T> {
  * 通用视图组件类类型
  * @template T - value 的类型
  */
-export interface ViewComponent<T> extends React.ComponentClass<ViewProps<T>> {
-}
+export type ViewComponent<T> = React.ComponentClass<ViewProps<T>>;
 
 /**
  * 通用视图组件函数类型
  * @template T - value 的类型
  */
-export interface ViewFunctionComponent<T> extends React.FC<ViewProps<T>> {
-}
+export type ViewFunctionComponent<T> = React.FC<ViewProps<T>>;

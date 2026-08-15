@@ -293,7 +293,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             this.previewUrlsRef = [cUrl];
             this.setState({preview: {cUrl, cFile, cSize: cFile.size, cdims}, tool: undefined});
             message.success(`已压缩：${cdims.width} x ${cdims.height} / ${formatSize(cFile.size)}`);
-        } catch (e) {
+        } catch {
             message.error('压缩失败');
         }
     };
@@ -320,7 +320,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             this.setState({originalDims: dims});
             // 默认展示原图，不做压缩处理，用户可点击「压缩」按钮手动压缩
             await this.loadOriginalPreview(file, url, dims);
-        } catch (e) {
+        } catch {
             message.error('读取图片失败');
             this.closeModal();
             return;

@@ -61,7 +61,7 @@ export class ViewImage extends React.Component {
 
     return (
       <Image.PreviewGroup preview={previewConfig}>
-        {items.map((item, i) => (
+        {items.map((item) => (
           <Image
             key={item.url}
             src={item.thumb}

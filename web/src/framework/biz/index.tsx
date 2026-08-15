@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {FieldRemoteSelect, FieldRemoteTreeSelect} from "../fields";
 import React, {type ComponentProps} from "react";
 

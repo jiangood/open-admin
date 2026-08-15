@@ -4,7 +4,7 @@ import {CloudUploadOutlined} from "@ant-design/icons";
 
 import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpClient, Page, ProTable, UrlUtils, ViewImage} from "../../../framework";
 
-export default class extends React.Component {
+export default class FilePage extends React.Component {
 
     state = {
         formOpen: false,

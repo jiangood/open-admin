@@ -3,10 +3,10 @@ import React from 'react'
 
 export interface FormModalProps {
   title: string
-  onFinish?: (values: Record<string, any>) => Promise<void> | void
-  onValuesChange?: (changedValues: any, allValues: any) => void
+  onFinish?: (values: Record<string, unknown>) => Promise<void> | void
+  onValuesChange?: (changedValues: Record<string, unknown>, allValues: Record<string, unknown>) => void
   width?: number
-  labelCol?: Record<string, any>
+  labelCol?: Record<string, unknown>
   children?: React.ReactNode
 }
 
@@ -17,14 +17,14 @@ export default class FormModal extends React.Component<FormModalProps> {
     confirmLoading: false,
   }
 
-  private pendingValues: Record<string, any> | null = null
+  private pendingValues: Record<string, unknown> | null = null
   private formRef = React.createRef<FormInstance>()
 
   get formInstance() {
     return this.formRef.current
   }
 
-  open = (values?: Record<string, any>) => {
+  open = (values?: Record<string, unknown>) => {
     this.pendingValues = values || {}
     this.setState({visible: true})
   }

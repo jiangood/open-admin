@@ -4,7 +4,7 @@ import React from 'react'
 import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
 
 
-export default class extends React.Component {
+export default class RolePage extends React.Component {
 
     state = {
         usersModalOpen: false,
@@ -203,7 +203,7 @@ export default class extends React.Component {
                     targetKeys={this.state.targetKeys}
                     selectedKeys={this.state.selectedKeys}
                     render={item => item.title}
-                    onChange={(nextTargetKeys, direction, moveKeys) => {
+                    onChange={(nextTargetKeys, _direction, _moveKeys) => {
                         this.setState({
                             targetKeys: nextTargetKeys
                         })

@@ -14,7 +14,7 @@ const countUnits = (nodes: OrgNode[] = []): number =>
 /**
  * 组织机构切换器：切换当前组织机构（单位），默认隐藏，由 Layouts 的 orgSwitcher 插槽按需渲染。
  */
-export class OrgSwitcher extends React.Component<{}, {tree: OrgNode[]; currentOrgId: string | null}> {
+export class OrgSwitcher extends React.Component<Record<string, never>, {tree: OrgNode[]; currentOrgId: string | null}> {
     state = {tree: [], currentOrgId: null};
 
     componentDidMount() {

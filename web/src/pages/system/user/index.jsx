@@ -16,7 +16,7 @@ import {
 } from "../../../framework";
 import UserPerm from "./userPerm";
 
-export default class extends React.Component {
+export default class UserPage extends React.Component {
 
     state = {
         currentOrgId: null,

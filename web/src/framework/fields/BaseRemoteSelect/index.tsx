@@ -4,15 +4,15 @@ import { debounce } from 'lodash';
 import { HttpClient } from '../../utils';
 
 interface BaseRemoteSelectState {
-    data: any[];
+    data: Record<string, unknown>[];
     loading: boolean;
 }
 
 export interface BaseRemoteSelectProps {
     url?: string;
-    value?: any;
+    value?: unknown;
     debounceTime?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**
@@ -35,7 +35,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
             data: [],
             loading: false,
         };
-        this.loadDataDebounce = debounce(this._loadData, (props as any).debounceTime || 300);
+        this.loadDataDebounce = debounce(this._loadData, props.debounceTime || 300);
     }
 
     componentDidMount() {
@@ -56,7 +56,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
     }
 
     /** 返回请求参数。searchText=undefined 表示初始加载 */
-    getLoadParams(searchText?: string): Record<string, any> {
+    getLoadParams(searchText?: string): Record<string, unknown> {
         return { searchText, selected: this.props.value };
     }
 

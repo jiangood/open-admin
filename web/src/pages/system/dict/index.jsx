@@ -23,7 +23,7 @@ const COLOR_OPTIONS = [
     {value: 'GRAY', label: '灰色'},
 ]
 
-export default class extends React.Component {
+export default class DictPage extends React.Component {
 
     state = {
         typeTree: [],

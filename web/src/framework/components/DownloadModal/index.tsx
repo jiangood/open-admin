@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import qs from 'qs';
+import type {AxiosProgressEvent, AxiosRequestConfig, AxiosResponse} from "axios";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH,
@@ -17,8 +18,8 @@ const axiosInstance = axios.create({
 
 interface DownloadOptions {
   url: string;
-  params?: Record<string, any>;
-  data?: Record<string, any>;
+  params?: Record<string, unknown>;
+  data?: Record<string, unknown>;
   method?: 'GET' | 'POST';
   fileName?: string;
 }
@@ -107,7 +108,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     }
   };
 
-  private saveBlob(response: any) {
+  private saveBlob(response: AxiosResponse) {
     return new Promise<void>((resolve, reject) => {
       const {data: blob, headers} = response;
 
@@ -122,7 +123,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           try {
             const rs = JSON.parse(reader.result as string);
             reject(new Error(rs.message || '下载失败'));
-          } catch (e) {
+          } catch {
             reject(new Error('解析错误响应失败'));
           }
         };
@@ -137,7 +138,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
         let parsedName = match && match[1] ? match[1].trim() : 'download.file';
         try {
           parsedName = decodeURIComponent(parsedName.replace(/"/g, ''));
-        } catch (e) {
+        } catch {
           parsedName = parsedName.replace(/"/g, '');
         }
         filename = parsedName;
@@ -193,12 +194,12 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       }
     }, 2000);
 
-    const config: any = {
+    const config: AxiosRequestConfig = {
       url: options.url,
       method: options.method || 'GET',
       responseType: 'blob',
       signal: this.abortController.signal,
-      onDownloadProgress: (progressEvent: any) => {
+      onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
         const {loaded, total} = progressEvent;
         const now = Date.now();
         // 计算速度
@@ -225,7 +226,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       config.data = options.data;
     }
 
-    axiosInstance(config).then((response: any) => {
+    axiosInstance(config).then((response) => {
       this.clearSpeedTimer();
       return this.saveBlob(response);
     }).then(() => {
@@ -236,7 +237,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
         loaded: prev.total || prev.loaded,
       }));
       this.props.onFinish?.();
-    }).catch((error: any) => {
+    }).catch((error) => {
       this.clearSpeedTimer();
       if (axios.isCancel(error)) {
         // 用户取消，不显示错误

@@ -116,7 +116,7 @@ export class Layouts extends React.Component<LayoutsProps> {
         this.loadData();
     }
 
-    componentDidUpdate(prevProps: {}, prevState: typeof this.state) {
+    componentDidUpdate(prevProps: LayoutsProps, prevState: typeof this.state) {
         if (this.state.location !== prevState.location) {
             this.loadData();
         }

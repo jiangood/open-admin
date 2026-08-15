@@ -21,18 +21,18 @@ export const DEFAULT_COLORS: Required<ThemeColors> = {
 
 let overrideColors: Partial<ThemeColors> | null = null;
 let cachedConfig: ThemeConfig | null = null;
-let cachedToken: Record<string, any> | null = null;
+let cachedToken: Record<string, unknown> | null = null;
 
 function buildConfig(): ThemeConfig {
-    const token: Record<string, any> = { borderRadius: 4, ...DEFAULT_COLORS, ...overrideColors };
-    const components: Record<string, any> = {
+    const token: Record<string, unknown> = { borderRadius: 4, ...DEFAULT_COLORS, ...overrideColors };
+    const components: Record<string, unknown> = {
         Layout: { headerBg: 'white', triggerHeight: 32 },
     };
 
     return { token, components };
 }
 
-function syncCssVars(token: Record<string, any>) {
+function syncCssVars(token: Record<string, unknown>) {
     if (typeof document === 'undefined') return;
     const el = document.documentElement;
     el.style.setProperty('--primary-color', token.colorPrimary);
@@ -54,7 +54,7 @@ export function getThemeConfig(): ThemeConfig {
     return cachedConfig;
 }
 
-export function getToken(): Record<string, any> {
+export function getToken(): Record<string, unknown> {
     if (!cachedToken) {
         cachedToken = getDesignToken(getThemeConfig());
     }

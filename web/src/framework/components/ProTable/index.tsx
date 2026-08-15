@@ -14,23 +14,23 @@ export interface ProTableActionRef {
 }
 
 /** request 返回结构（Spring Data Page 序列化 + 扩展数据） */
-export interface ProTableRequestResult<T = any> {
+export interface ProTableRequestResult<T = unknown> {
     content: T[];
     totalElements: number | string;
     size: number;
     extData?: {
         summary?: React.ReactNode;
-        [key: string]: any;
+        [key: string]: unknown;
     };
 }
 
-export interface ProTableProps<T = any> {
+export interface ProTableProps<T = unknown> {
     /**
      * 数据请求（回调式），框架自动注入 page/size/sort 参数。
      * 页面实现需把 success/error 透传给 HttpClient：request = (params, success, error) => HttpClient.get(url, params, success, error)
      */
     request: (
-        params: Record<string, any>,
+        params: Record<string, unknown>,
         success: (data: ProTableRequestResult<T>) => void,
         error?: (e: AjaxError) => void
     ) => void;
@@ -41,7 +41,7 @@ export interface ProTableProps<T = any> {
     /** 获取搜索表单实例 */
     formRef?: React.MutableRefObject<FormInstance | undefined>;
     /** 工具栏渲染，参数为当前搜索值与行选择状态 */
-    toolBarRender?: (params: Record<string, any>, selection: {
+    toolBarRender?: (params: Record<string, unknown>, selection: {
         selectedRows: T[];
         selectedRowKeys: React.Key[];
     }) => React.ReactNode;
@@ -62,12 +62,12 @@ export interface ProTableProps<T = any> {
     treeMode?: boolean;
 }
 
-interface ProTableState<T = any> {
+interface ProTableState<T = unknown> {
     selectedRowKeys: React.Key[];
     selectedRows: T[];
     tableSize: 'small' | 'middle' | 'large';
     loading: boolean;
-    params: Record<string, any>;
+    params: Record<string, unknown>;
     dataSource: T[];
     total: number;
     current: number;
@@ -78,12 +78,12 @@ interface ProTableState<T = any> {
     };
     extData: {
         summary?: React.ReactNode;
-        [key: string]: any;
+        [key: string]: unknown;
     };
     scrollY: number | string | null;
 }
 
-export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTableState<T>> {
+export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, ProTableState<T>> {
 
 
     state: ProTableState<T> = {
@@ -188,7 +188,6 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
 
     render() {
         const {
-            actionRef,
             toolBarRender,
             columns,
             rowSelection,
@@ -223,7 +222,7 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
                         showTotal: (total) => `共 ${total} 条`
                     }}
 
-                    onChange={(pagination, filters, sorter, extra) => {
+                    onChange={(pagination, filters, sorter) => {
                         if (this.props.treeMode) {
                             this.setState({sorter}, this.loadData)
                         } else {
@@ -306,11 +305,11 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         };
     };
 
-    onSearch = (values: Record<string, any>) => {
+    onSearch = (values: Record<string, unknown>) => {
         this.setState({params: values, current: 1, sorter: {}}, this.loadData)
     }
 
-    changeFormValues = (values: Record<string, any>) => {
+    changeFormValues = (values: Record<string, unknown>) => {
         if (this.formRef.current) {
             this.formRef.current.resetFields()
             this.formRef.current.setFieldsValue(values)

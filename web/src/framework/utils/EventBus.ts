@@ -1,14 +1,14 @@
-type EventCallback = (...args: any[]) => void;
+type EventCallback = (...args: unknown[]) => void;
 
 interface EventEntry {
     fn: EventCallback & { __callback?: EventCallback };
-    ctx?: any;
+    ctx?: unknown;
 }
 
 export class EventBus {
     private static __stack: Record<string, EventEntry[]> = {};
 
-    static on<T extends any[] = []>(name: string, callback: (...args: T) => void, ctx?: any): () => void {
+    static on<T extends unknown[] = []>(name: string, callback: (...args: T) => void, ctx?: unknown): () => void {
         if (!EventBus.__stack[name]) {
             EventBus.__stack[name] = [];
         }
@@ -16,9 +16,9 @@ export class EventBus {
         return () => EventBus.off(name, callback);
     }
 
-    static once<T extends any[] = []>(name: string, callback: (...args: T) => void, ctx?: any): () => void {
+    static once<T extends unknown[] = []>(name: string, callback: (...args: T) => void, ctx?: unknown): () => void {
         const unsubscribe = () => EventBus.off(name, callback);
-        const listener: EventEntry['fn'] = (...args: any[]) => {
+        const listener: EventEntry['fn'] = (...args: unknown[]) => {
             EventBus.off(name, listener);
             callback.apply(ctx, args);
         };
@@ -28,7 +28,7 @@ export class EventBus {
         return unsubscribe;
     }
 
-    static emit<T extends any[] = []>(name: string, ...args: T): void {
+    static emit<T extends unknown[] = []>(name: string, ...args: T): void {
         const list = EventBus.__stack[name];
         if (list !== undefined) {
             list.slice(0).forEach(entry => {
@@ -37,7 +37,7 @@ export class EventBus {
         }
     }
 
-    static off<T extends any[] = []>(name: string, callback?: (...args: T) => void): void {
+    static off<T extends unknown[] = []>(name: string, callback?: (...args: T) => void): void {
         const list = EventBus.__stack[name];
         if (list === undefined) return;
         if (callback === undefined) {

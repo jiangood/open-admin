@@ -2,7 +2,7 @@ import React from 'react';
 import {Form, Input, Tag} from "antd";
 import {ViewText, FieldDateRange, HttpClient, Page, ProTable} from "../../../framework";
 
-export default class extends React.Component {
+export default class LogPage extends React.Component {
 
 
     columns = [

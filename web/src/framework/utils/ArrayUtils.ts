@@ -10,7 +10,7 @@ export class ArrayUtils {
         return false;
     }
 
-    static maxBy<T extends Record<K, any>, K extends keyof T>(arr: T[], key: K): T | undefined {
+    static maxBy<T extends Record<K, unknown>, K extends keyof T>(arr: T[], key: K): T | undefined {
         if (arr == null || arr.length === 0) return undefined;
         let maxElement: T | undefined = undefined;
         let maxValue = -Infinity;

@@ -16,12 +16,12 @@ export interface FieldTableColumn {
     /** 列宽 */
     width?: number | string;
     /** 自定义渲染（返回的组件会被注入 value/onChange） */
-    render?: (value: any, record: Record<string, any>, index: number) => React.ReactElement;
+    render?: (value: unknown, record: Record<string, unknown>, index: number) => React.ReactElement;
     /** 其余 antd Table 列属性 */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
-export interface FieldTableProps extends FieldProps<Record<string, any>[]> {
+export interface FieldTableProps extends FieldProps<Record<string, unknown>[]> {
     /** 列配置（操作列由组件自动追加） */
     columns: FieldTableColumn[];
     /** 容器样式 */
@@ -29,7 +29,7 @@ export interface FieldTableProps extends FieldProps<Record<string, any>[]> {
 }
 
 interface FieldTableState {
-    dataSource: Record<string, any>[];
+    dataSource: Record<string, unknown>[];
 }
 
 /**
@@ -84,13 +84,13 @@ export class FieldTable extends React.Component<FieldTableProps, FieldTableState
         dataSource: []
     };
 
-    onCellChange = (index: number, dataIndex: string | undefined, e: any) => {
+    onCellChange = (index: number, dataIndex: string | undefined, e: unknown) => {
         const {dataSource} = this.state;
         const row = dataSource[index];
 
-        let v = e;
+        let v: unknown = e;
         if (e != null && typeof e === 'object' && 'target' in e) {
-            v = e.target.value;
+            v = (e as {target: {value: unknown}}).target.value;
         }
 
         const next = [...dataSource];
@@ -104,7 +104,7 @@ export class FieldTable extends React.Component<FieldTableProps, FieldTableState
         this.setState({dataSource}, this.notifyParent);
     };
 
-    remove = (record: Record<string, any>) => {
+    remove = (record: Record<string, unknown>) => {
         const {dataSource} = this.state;
         this.setState({dataSource: dataSource.filter(item => item !== record)}, this.notifyParent);
     };

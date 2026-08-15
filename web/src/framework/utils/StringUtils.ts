@@ -90,17 +90,17 @@ export class StringUtils {
         return StringUtils.cutByWidth(str, len) + suffix;
     }
 
-    static isString(value: any): value is string {
+    static isString(value: unknown): value is string {
         return typeof value === 'string';
     }
 
-    static split(str: any, sp: string): string[] {
+    static split(str: string | string[] | null | undefined, sp: string): string[] {
         if (str == null || str.length === 0) return [];
         if (Array.isArray(str)) return str;
         return str.split(sp);
     }
 
-    static join(arr: any, sp: string): string {
+    static join(arr: unknown, sp: string): string {
         if (arr == null || !Array.isArray(arr)) {
             return '';
         }

@@ -50,7 +50,8 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     }
 
     render() {
-        let {value, defaultValue} = this.props;
+        const {defaultValue} = this.props;
+        let {value} = this.props;
         if (value == null) {
             value = defaultValue;
         }

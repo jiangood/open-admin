@@ -16,7 +16,7 @@ import {
     ViewImage
 } from "../../../framework";
 
-export default class extends React.Component {
+export default class ArticleListPage extends React.Component {
 
     state = {
         editing: false,

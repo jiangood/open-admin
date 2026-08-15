@@ -4,7 +4,7 @@ import {DictUtils} from "../../utils";
 import type {SelectProps} from "antd/es/select";
 import type {FieldProps} from '../types';
 
-interface FieldDictSelectProps extends Omit<SelectProps, 'options' | 'children' | 'mode' | 'value' | 'onChange'>, FieldProps<any> {
+interface FieldDictSelectProps extends Omit<SelectProps, 'options' | 'children' | 'mode' | 'value' | 'onChange'>, FieldProps<unknown> {
     typeCode: string;
 }
 

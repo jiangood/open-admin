@@ -2,7 +2,7 @@ import React from "react";
 import {HttpClient, Page, UrlUtils} from "../../framework";
 import "./article.less";
 
-export default class extends React.Component {
+export default class ArticlePage extends React.Component {
 
     state = {
         article: null,

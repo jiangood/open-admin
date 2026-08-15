@@ -32,7 +32,7 @@ function encodePassword(pwd) {
     return btoa(String.fromCharCode(...chars));
 }
 
-export default class extends React.Component {
+export default class LoginPage extends React.Component {
 
     state = {
         logging: false,
@@ -83,14 +83,14 @@ export default class extends React.Component {
             <section className='login-page' style={pageStyle}>
                 <div className="login-content">
                     <h1>{siteInfo.title}</h1>
-                    {this.getForm(siteInfo)}
+                    {this.getForm()}
                     {this.renderFormBottom()}
                 </div>
             </section>
         );
     }
 
-    getForm = siteInfo => {
+    getForm = () => {
         const form = (
             <Form
                 name="normal_login"

@@ -17,7 +17,7 @@ export interface FieldDateProps extends FieldProps<string> {
     /** 自定义样式 */
     style?: React.CSSProperties;
     /** 其余属性透传给 DatePicker/TimePicker */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export class FieldDate extends React.Component<FieldDateProps> {

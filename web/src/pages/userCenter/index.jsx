@@ -3,7 +3,7 @@ import {Button, Card, Descriptions, Form, Input, Modal} from "antd";
 import PermView from "./permView";
 import {HttpClient, history, Page} from "../../framework";
 
-export default class extends React.Component {
+export default class UserCenterPage extends React.Component {
 
     formRef = React.createRef();
 

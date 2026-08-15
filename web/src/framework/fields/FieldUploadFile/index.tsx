@@ -88,7 +88,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
                 if (f.response) { // 新上传的
                     const ajaxResult = f.response;
                     if (ajaxResult.success) {
-                        const {objectName, name} = ajaxResult.data;
+                        const {objectName} = ajaxResult.data;
                         f.objectName = objectName;
                         objectNames.push(objectName);
                     } else {
@@ -102,7 +102,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         return objectNames;
     }
 
-    handleChange = ({fileList, event, file}: UploadChangeParam<SysUploadFile>) => {
+    handleChange = ({fileList, file}: UploadChangeParam<SysUploadFile>) => {
         const rs = file.response;
         if (rs != null && rs.success === false) {
             this.setState({errorTitle: '上传失败', errorContent: rs.message});

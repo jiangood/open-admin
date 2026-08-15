@@ -67,7 +67,7 @@ export class FieldBoolean extends React.Component<FieldBooleanProps> {
 
     }
 
-    parseBoolean(v: any): boolean | undefined {
+    parseBoolean(v: unknown): boolean | undefined {
         if (v === null || v === undefined) {
             return undefined;
         }

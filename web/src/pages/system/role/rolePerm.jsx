@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
 import {HttpClient, Page} from "../../../framework";
-export default class extends React.Component {
+export default class RolePermPage extends React.Component {
 
 
     state = {

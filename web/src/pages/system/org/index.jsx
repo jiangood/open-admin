@@ -14,7 +14,7 @@ import {
     ViewSwitch,
 } from "../../../framework";
 
-export default class extends React.Component {
+export default class OrgPage extends React.Component {
 
     state = {
         selectedOrg: null,
