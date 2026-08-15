@@ -93,8 +93,7 @@ function readDims(url: string): Promise<Dims> {
 
 function compressToFile(source: Blob, options: {maxWidth?: number; maxHeight?: number; width?: number; height?: number; quality?: number}): Promise<File> {
     return new Promise((resolve, reject) => {
-        new Compressor(source, {
-            // NOSONAR (typescript:S1848) — compressorjs 通过构造函数副作用异步压缩，回调内 resolve/reject，实例无需保留
+        new Compressor(source, { // NOSONAR (typescript:S1848) — compressorjs 通过构造函数副作用异步压缩，回调内 resolve/reject，实例无需保留
             maxWidth: options.maxWidth,
             maxHeight: options.maxHeight,
             width: options.width,
