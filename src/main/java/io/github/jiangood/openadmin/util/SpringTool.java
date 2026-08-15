@@ -22,7 +22,6 @@ public class SpringTool implements ApplicationContextAware {
     private static final String MSG_CONTEXT_NOT_INIT = "Spring应用上下文未初始化";
 
     public SpringTool() {
-        System.out.println("SpringTool init");
     }
 
 

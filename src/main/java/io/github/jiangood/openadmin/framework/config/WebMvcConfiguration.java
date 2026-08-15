@@ -28,8 +28,6 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
 
-        //  registry.addInterceptor(appApiInterceptor).addPathPatterns(WebConstants.APP_API_PATTERN);
-
     }
 
     @Override

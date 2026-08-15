@@ -33,7 +33,7 @@ public class Option {
         return result;
     }
 
-    public static <T> List<Option> convertList(Iterable<String> list) {
+    public static List<Option> convertList(Iterable<String> list) {
         List<Option> result = new ArrayList<>();
         for (String t : list) {
             result.add(new Option(t, t));

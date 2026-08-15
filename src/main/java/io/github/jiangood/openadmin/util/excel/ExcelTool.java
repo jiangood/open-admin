@@ -135,7 +135,7 @@ public class ExcelTool {
         exportExcel(cls, list, response.getOutputStream());
     }
 
-    public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws IOException {
+    public static void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws IOException {
         ResponseTool.setDownloadExcelHeader(filename, response);
 
         try {
@@ -254,7 +254,7 @@ public class ExcelTool {
         }
         final StringBuilder colName = StrUtil.builder();
         do {
-            if (colName.length() > 0) {
+            if (!colName.isEmpty()) {
                 index--;
             }
             int remainder = index % 26;
@@ -482,11 +482,6 @@ public class ExcelTool {
 
             CellType cellType = cell.getCellType();
             switch (cellType) {
-                case _NONE:
-                case BLANK:
-                case ERROR:
-                    continue;
-
                 case NUMERIC:
                 case FORMULA:
                 case BOOLEAN:
@@ -497,6 +492,11 @@ public class ExcelTool {
                     if (CharSequenceUtil.isNotBlank(str)) {
                         return false;
                     }
+                case _NONE:
+                case BLANK:
+                case ERROR:
+                default:
+                    // 空值单元格继续扫描
             }
         }
 

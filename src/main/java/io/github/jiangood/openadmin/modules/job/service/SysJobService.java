@@ -6,7 +6,8 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
-import lombok.RequiredArgsConstructor;
+import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
@@ -21,15 +22,22 @@ import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class SysJobService extends BaseService<SysJob> {
 
     private final QuartzManager quartzService;
     private final SysJobLogRepository sysJobLogRepository;
     private final Scheduler scheduler;
 
+    public SysJobService(SysJobRepository repository, EntityManager entityManager,
+                         QuartzManager quartzService, SysJobLogRepository sysJobLogRepository, Scheduler scheduler) {
+        super(repository, entityManager);
+        this.quartzService = quartzService;
+        this.sysJobLogRepository = sysJobLogRepository;
+        this.scheduler = scheduler;
+    }
 
-    @Transactional
+
+    @Transactional(rollbackFor = Exception.class)
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {
         SysJob db;
         String oldName = null;
@@ -54,7 +62,7 @@ public class SysJobService extends BaseService<SysJob> {
     }
 
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteJob(String id) throws SchedulerException {
         log.info("删除定时任务 {}", id);
         SysJob job = repository.findById(id).orElse(null);

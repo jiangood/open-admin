@@ -125,7 +125,7 @@ public class IpTool {
             if (CharSequenceUtil.isNotBlank(region)) sb.append(" ").append(region);
             if (CharSequenceUtil.isNotBlank(city)) sb.append(" ").append(city);
             if (CharSequenceUtil.isNotBlank(isp)) sb.append(",").append("运营商：").append(isp);
-            return sb.length() > 0 ? sb.toString() : null;
+            return sb.isEmpty() ? null : sb.toString();
         }
     }
 
@@ -194,7 +194,7 @@ public class IpTool {
             if (CharSequenceUtil.isNotBlank(region)) sb.append(" ").append(region);
             if (CharSequenceUtil.isNotBlank(city)) sb.append(" ").append(city);
             if (CharSequenceUtil.isNotBlank(org)) sb.append(",").append("运营商：").append(org);
-            return sb.length() > 0 ? sb.toString() : null;
+            return sb.isEmpty() ? null : sb.toString();
         }
     }
 }

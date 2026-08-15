@@ -49,7 +49,7 @@ public class CleanTempFileJob extends BaseJob {
         int orphanCount = markOrphans(logger);
 
         // 3. 删除待删文件：逐文件物理删除并删库行
-        int deletedCount = deletePendingFiles(logger);
+        int deletedCount = deletePendingFiles();
 
         logger.info("临时文件清理完成，标记未认领 {} 个，标记孤儿 {} 个，删除待删 {} 个",
                 unclaimedCount, orphanCount, deletedCount);
@@ -80,9 +80,10 @@ public class CleanTempFileJob extends BaseJob {
      * 删除待删文件：反复取第一页（offset 固定 0，删掉的行让剩余记录前移），
      * 逐文件物理删除并删库行，失败的文件保留 PENDING_DELETE 待下轮重试
      */
-    private int deletePendingFiles(Logger logger) {
+    private int deletePendingFiles() {
         int count = 0;
-        while (true) {
+        boolean hasMore = true;
+        while (hasMore) {
             List<SysFile> content = sysFileRepository.findByStatus(FileStatus.PENDING_DELETE, PageRequest.of(0, PAGE_SIZE)).getContent();
             if (content.isEmpty()) {
                 break;
@@ -94,9 +95,7 @@ public class CleanTempFileJob extends BaseJob {
                     deletedRound++;
                 }
             }
-            if (deletedRound == 0) {
-                break;
-            }
+            hasMore = deletedRound > 0;
         }
         return count;
     }

@@ -8,7 +8,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +19,6 @@ import java.util.*;
 /**
  * 系统角色service接口实现类
  */
-@RequiredArgsConstructor
 @Slf4j
 @Service
 public class SysRoleService extends BaseService<SysRole> {
@@ -30,15 +29,24 @@ public class SysRoleService extends BaseService<SysRole> {
     private final SysMenuRepository sysMenuRepository;
     private final SysUserRepository sysUserRepository;
 
+    public SysRoleService(SysRoleRepository repository, EntityManager entityManager,
+                          SysRoleRepository roleRepository, SysMenuRepository sysMenuRepository, SysUserRepository sysUserRepository) {
+        super(repository, entityManager);
+        this.roleRepository = roleRepository;
+        this.sysMenuRepository = sysMenuRepository;
+        this.sysUserRepository = sysUserRepository;
+    }
+
 
     public Optional<SysRole> findByCode(String code) {
         return roleRepository.findByCode(code);
     }
 
 
+    @Override
     @Transactional
     public void deleteById(String id) {
-        roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         roleRepository.deleteById(id);
     }
 
@@ -49,7 +57,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
     @Transactional
     public List<MenuDefinition> ownMenu(String id) {
-        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         List<MenuDefinition> menuList;
 
         if (role.isAdmin()) {
@@ -111,7 +119,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
     @Transactional
     public SysRole grantUsers(String id, List<String> userIdList) {
-        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         role.getUsers().clear();
         if (userIdList != null && !userIdList.isEmpty()) {
             List<SysUser> userList = sysUserRepository.findAllById(userIdList);
@@ -132,7 +140,7 @@ public class SysRoleService extends BaseService<SysRole> {
             finalMenus.addAll(pids);
         }
 
-        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         if (role.isAdmin()) {
             // 管理员角色保持通配符权限，避免被授权页勾选结果覆盖
             role.setPerms(List.of("*"));

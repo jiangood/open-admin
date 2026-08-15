@@ -228,10 +228,10 @@ class JdbcRunnerImplTest {
 
         assertEquals(1, db.save(table, row(1L, "张三", 25)));
 
-        Map<String, Object> record = db.findById(table, 1L);
-        assertNotNull(record);
-        assertEquals("张三", record.get("name"));
-        assertEquals(25, ((Number) record.get("age")).intValue());
+        Map<String, Object> found = db.findById(table, 1L);
+        assertNotNull(found);
+        assertEquals("张三", found.get("name"));
+        assertEquals(25, ((Number) found.get("age")).intValue());
     }
 
     @Test
@@ -246,9 +246,9 @@ class JdbcRunnerImplTest {
         data.put("age", 26);
         assertEquals(1, db.save(table, data));
 
-        Map<String, Object> record = db.findById(table, 1L);
-        assertEquals("张三更新", record.get("name"));
-        assertEquals(26, ((Number) record.get("age")).intValue());
+        Map<String, Object> found = db.findById(table, 1L);
+        assertEquals("张三更新", found.get("name"));
+        assertEquals(26, ((Number) found.get("age")).intValue());
         assertEquals(1, db.count(table)); // 确认是 update 而非 insert
     }
 

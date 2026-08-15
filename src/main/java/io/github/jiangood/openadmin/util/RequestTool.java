@@ -55,9 +55,7 @@ public class RequestTool {
         while (names.hasMoreElements()) {
             String name = names.nextElement();
 
-            if (!initData.containsKey(name)) {
-                initData.put(name, request.getParameter(name));
-            }
+            initData.computeIfAbsent(name, request::getParameter);
         }
 
         return initData;

@@ -162,7 +162,7 @@ public class FilePreviewController {
         }
 
         long[] range = computeRange(startPart, endPart, fileSize);
-        if (range == null) {
+        if (range.length == 0) {
             return new long[0];
         }
         long rangeStart = range[0];
@@ -182,7 +182,7 @@ public class FilePreviewController {
                 // 后缀范围，如 bytes=-500，取文件末尾 500 字节
                 long suffixLength = Long.parseLong(endPart);
                 if (suffixLength <= 0) {
-                    return null;
+                    return new long[0];
                 }
                 return new long[]{Math.max(0, fileSize - suffixLength), fileSize - 1};
             }
@@ -190,7 +190,7 @@ public class FilePreviewController {
             long rangeEnd = endPart == null || endPart.isEmpty() ? fileSize - 1 : Long.parseLong(endPart);
             return new long[]{rangeStart, rangeEnd};
         } catch (NumberFormatException e) {
-            return null;
+            return new long[0];
         }
     }
 

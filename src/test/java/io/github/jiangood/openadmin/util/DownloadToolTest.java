@@ -20,7 +20,7 @@ class DownloadToolTest {
         long contentLength = 1024;
 
         // 模拟 HttpServletResponse
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         // 执行设置参数操作
         DownloadTool.setDownloadParam(fileName, contentLength, response);
@@ -40,7 +40,7 @@ class DownloadToolTest {
         long contentLength = 0;
 
         // 模拟 HttpServletResponse
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         // 执行设置参数操作
         DownloadTool.setDownloadParam(fileName, contentLength, response);
@@ -61,7 +61,7 @@ class DownloadToolTest {
         long contentLength = -1;
 
         // 模拟 HttpServletResponse
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         // 执行设置参数操作
         DownloadTool.setDownloadParam(fileName, contentLength, response);
@@ -82,7 +82,7 @@ class DownloadToolTest {
         byte[] fileBytes = "Hello".getBytes();
 
         // 模拟 HttpServletResponse，使其在获取输出流时抛出异常
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.getOutputStream()).thenThrow(new IOException("Output stream error"));
 
         // 验证是否抛出 IllegalStateException
@@ -99,7 +99,7 @@ class DownloadToolTest {
         long fileSize = 5;
 
         // 模拟 HttpServletResponse，使其在获取输出流时抛出异常
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.getOutputStream()).thenThrow(new IOException("Output stream error"));
 
         // 验证是否抛出 IllegalStateException

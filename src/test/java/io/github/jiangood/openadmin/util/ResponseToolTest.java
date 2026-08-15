@@ -22,9 +22,9 @@ class ResponseToolTest {
     @BeforeEach
     void setUp() throws IOException {
         // 创建模拟的 HttpServletResponse
-        mockResponse = Mockito.mock(HttpServletResponse.class);
+        mockResponse = mock(HttpServletResponse.class);
         // 创建模拟的 HttpServletRequest
-        mockRequest = Mockito.mock(HttpServletRequest.class);
+        mockRequest = mock(HttpServletRequest.class);
         // 创建 StringWriter 来捕获响应输出
         responseWriter = new StringWriter();
         when(mockResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));

@@ -29,19 +29,18 @@ public class ReflectTool {
         Type genType = clazz.getGenericSuperclass();
 
         if (!(genType instanceof ParameterizedType)) {
-            logger.debug(clazz.getSimpleName() + "'s superclass not ParameterizedType");
+            logger.debug("{} 's superclass not ParameterizedType", clazz.getSimpleName());
             return Object.class;
         }
 
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
 
         if (index >= params.length || index < 0) {
-            logger.debug("Index: " + index + ", Size of " + clazz.getSimpleName() + "'s Parameterized Type: "
-                    + params.length);
+            logger.debug("Index: {}, Size of {} 's Parameterized Type: {}", index, clazz.getSimpleName(), params.length);
             return Object.class;
         }
         if (!(params[index] instanceof Class)) {
-            logger.debug(clazz.getSimpleName() + " not set the actual class on superclass generic parameter");
+            logger.debug("{} not set the actual class on superclass generic parameter", clazz.getSimpleName());
             return Object.class;
         }
 

@@ -153,10 +153,7 @@ public class LoginTool {
     private static HttpSession getSession() {
         ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         if (attrs != null) {
-            HttpServletRequest request = attrs.getRequest();
-            if (request != null) {
-                return request.getSession();
-            }
+            return attrs.getRequest().getSession();
         }
         return null;
     }

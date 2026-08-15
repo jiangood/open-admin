@@ -69,10 +69,8 @@ public class SysOrgController {
     @HasPermission("sys-org:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody OrgReq input) throws Exception {
-        if (input.getLeader() != null) {
-            if (CharSequenceUtil.isEmpty(input.getLeader().getId())) {
-                input.setLeader(null);
-            }
+        if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
+            input.setLeader(null);
         }
         SysOrg input2 = BeanTool.copy(input, new SysOrg());
         input2.setType(input.getType());
@@ -88,10 +86,8 @@ public class SysOrgController {
     @HasPermission("sys-org:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
-        if (input.getLeader() != null) {
-            if (CharSequenceUtil.isEmpty(input.getLeader().getId())) {
-                input.setLeader(null);
-            }
+        if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
+            input.setLeader(null);
         }
         SysOrg input2 = BeanTool.copy(input, new SysOrg());
         input2.setType(input.getType());

@@ -189,7 +189,7 @@ public class StringTool {
      * @return 如果字符串为null或长度为0返回true，否则返回false
      */
     public static boolean isEmpty(String str) {
-        return str == null || str.length() == 0;
+        return str == null || str.isEmpty();
     }
 
     /**

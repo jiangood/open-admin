@@ -79,7 +79,7 @@ public class SecurityConfig {
                     log.info("设置最大并发会话数为 {}", maximumSessions);
 
                     cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-                    cfg.sessionConcurrency(configurer -> {
+                    cfg.sessionConcurrency(configurer -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
                         configurer.maximumSessions(maximumSessions)
                                 .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
                         ;
@@ -92,7 +92,7 @@ public class SecurityConfig {
         http.addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
 
 
-        http.exceptionHandling(cfg -> {
+        http.exceptionHandling(cfg -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
             cfg.accessDeniedHandler((request, response, e) -> {
                 ResponseTool.response(response, AjaxResult.FORBIDDEN);
             }).authenticationEntryPoint((request, response, e) -> {

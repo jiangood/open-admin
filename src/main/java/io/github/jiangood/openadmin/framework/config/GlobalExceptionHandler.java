@@ -165,13 +165,13 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(TransactionSystemException.class)
-    public AjaxResult TransactionSystemException(TransactionSystemException e) {
+    public AjaxResult transactionSystemException(TransactionSystemException e) {
         log.error("事务异常", e);
         return AjaxResult.err().msg(ExceptionToMessageTool.convert(e));
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
-    public AjaxResult InvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e, HttpServletRequest request) {
+    public AjaxResult invalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e, HttpServletRequest request) {
         log.error("数据访问API使用异常", e);
         Throwable throwable = e.getCause();
         return AjaxResult.err().msg(throwable.getMessage());

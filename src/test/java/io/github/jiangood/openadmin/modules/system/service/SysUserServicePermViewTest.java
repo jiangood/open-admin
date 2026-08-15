@@ -46,10 +46,13 @@ class SysUserServicePermViewTest {
     private SysUserService sysUserService;
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private jakarta.persistence.EntityManager entityManager;
+
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
-        sysUserService = new SysUserService(sysUserRepository, roleRepository, sysOrgService,
+        sysUserService = new SysUserService(sysUserRepository, entityManager, sysUserRepository, roleRepository, sysOrgService,
                 sysMenuRepository, userConverter, permissionStaleService, passwordEncoder);
     }
 

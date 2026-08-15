@@ -173,19 +173,16 @@ public class FrameworkFileSyncer implements CommandLineRunner {
             var entries = jar.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
-                if (entry.isDirectory()) {
-                    continue;
-                }
                 String name = entry.getName();
-                if (!name.startsWith(PAYLOAD_ROOT)) {
-                    continue;
-                }
-                String rel = name.substring(PAYLOAD_ROOT.length());
-                if (rel.isEmpty() || rel.contains("..")) {
-                    continue;
-                }
-                try (InputStream in = jar.getInputStream(entry)) {
-                    result.add(new PayloadFile(rel, in.readAllBytes()));
+                String rel = name.startsWith(PAYLOAD_ROOT) ? name.substring(PAYLOAD_ROOT.length()) : null;
+                boolean valid = !entry.isDirectory()
+                        && rel != null
+                        && !rel.isEmpty()
+                        && !rel.contains("..");
+                if (valid) {
+                    try (InputStream in = jar.getInputStream(entry)) {
+                        result.add(new PayloadFile(rel, in.readAllBytes()));
+                    }
                 }
             }
         }

@@ -22,6 +22,8 @@ import java.util.Set;
  */
 @Slf4j
 public class ExceptionToMessageTool {
+    private static final String MSG_REFERENCED = "数据已被引用，请检查";
+
     private ExceptionToMessageTool() {
     }
 
@@ -59,11 +61,11 @@ public class ExceptionToMessageTool {
     private static String convert(DataIntegrityViolationException e) {
         Throwable ex = e.getCause() != null ? e.getCause().getCause() : null;
         if (ex == null) {
-            return "数据已被引用，请检查";
+            return MSG_REFERENCED;
         }
         String msg = ex.getMessage();
         if (msg == null) {
-            return "数据已被引用，请检查";
+            return MSG_REFERENCED;
         }
 
         if (msg.contains("Data too long")) {
@@ -80,7 +82,7 @@ public class ExceptionToMessageTool {
                 return nullColumn;
             }
         }
-        return "数据已被引用，请检查";
+        return MSG_REFERENCED;
     }
 
     private static String duplicateValue(SQLIntegrityConstraintViolationException ex) {

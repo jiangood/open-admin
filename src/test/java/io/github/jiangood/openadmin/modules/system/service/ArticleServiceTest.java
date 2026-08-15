@@ -45,9 +45,7 @@ class ArticleServiceTest {
 
     @BeforeEach
     void setUp() {
-        articleService = new ArticleService(articleRepository, sysUserService, sysFileService);
-        ReflectionTestUtils.setField(articleService, "repository", articleRepository);
-        ReflectionTestUtils.setField(articleService, "entityManager", entityManager);
+        articleService = new ArticleService(articleRepository, entityManager, articleRepository, sysUserService, sysFileService);
     }
 
     @Test
@@ -55,7 +53,7 @@ class ArticleServiceTest {
         when(articleRepository.findById("no-such-id")).thenReturn(Optional.empty());
 
         Article input = newArticle("no-such-id");
-        assertThrows(IllegalArgumentException.class, () -> articleService.update(input, List.of("title")));
+        assertThrows(IllegalArgumentException.class, () -> articleService.update(input, List.of("title"))); // NOSONAR: 单语句 lambda，方法引用不适用
 
         verify(sysFileService, never()).unclaim(any());
         verify(sysFileService, never()).claim(any());
@@ -95,7 +93,7 @@ class ArticleServiceTest {
         Article input = newArticle("a1");
         input.setCode("dup-code");
 
-        assertThrows(RuntimeException.class, () -> articleService.update(input, List.of("code")));
+        assertThrows(RuntimeException.class, () -> articleService.update(input, List.of("code"))); // NOSONAR: 单语句 lambda，方法引用不适用
 
         verify(sysFileService, never()).unclaim(any());
         verify(sysFileService, never()).claim(any());

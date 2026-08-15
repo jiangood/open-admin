@@ -23,8 +23,8 @@ import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.persistence.EntityManager;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -42,7 +42,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
-@RequiredArgsConstructor
 @Slf4j
 @Service
 public class SysUserService extends BaseService<SysUser> {
@@ -60,6 +59,20 @@ public class SysUserService extends BaseService<SysUser> {
     private final PermissionStaleService permissionStaleService;
 
     private final PasswordEncoder passwordEncoder;
+
+    public SysUserService(SysUserRepository repository, EntityManager entityManager,
+                          SysUserRepository sysUserRepository, SysRoleRepository roleRepository, SysOrgService sysOrgService,
+                          SysMenuRepository sysMenuRepository, UserConverter userConverter,
+                          PermissionStaleService permissionStaleService, PasswordEncoder passwordEncoder) {
+        super(repository, entityManager);
+        this.sysUserRepository = sysUserRepository;
+        this.roleRepository = roleRepository;
+        this.sysOrgService = sysOrgService;
+        this.sysMenuRepository = sysMenuRepository;
+        this.userConverter = userConverter;
+        this.permissionStaleService = permissionStaleService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
 
     public UserVO findOneDto(String id) {
@@ -158,6 +171,7 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
 
+    @Override
     @Transactional
     public void deleteById(String id) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);

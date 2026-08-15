@@ -27,6 +27,9 @@ class SysRoleServiceTest {
     private SysRoleRepository roleRepository;
 
     @Mock
+    private jakarta.persistence.EntityManager entityManager;
+
+    @Mock
     private SysMenuRepository sysMenuRepository;
 
     @Mock
@@ -36,7 +39,7 @@ class SysRoleServiceTest {
 
     @BeforeEach
     void setUp() {
-        sysRoleService = new SysRoleService(roleRepository, sysMenuRepository, sysUserRepository);
+        sysRoleService = new SysRoleService(roleRepository, entityManager, roleRepository, sysMenuRepository, sysUserRepository);
     }
 
     @Test

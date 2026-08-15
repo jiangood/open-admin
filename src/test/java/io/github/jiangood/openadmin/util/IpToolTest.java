@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class IpToolTest {
@@ -14,7 +15,7 @@ class IpToolTest {
 
     @BeforeEach
     void setUp() {
-        mockRequest = Mockito.mock(HttpServletRequest.class);
+        mockRequest = mock(HttpServletRequest.class);
     }
 
     @Test

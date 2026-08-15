@@ -112,9 +112,7 @@ public class TreeTool {
 
     public static Map<String, TreeOption> treeToMap(List<TreeOption> tree) {
         Map<String, TreeOption> map = new HashMap<>();
-        walk(tree, TreeOption::getChildren, node -> {
-            map.put(node.getKey(), node);
-        });
+        walk(tree, TreeOption::getChildren, node -> map.put(node.getKey(), node));
         return map;
     }
 

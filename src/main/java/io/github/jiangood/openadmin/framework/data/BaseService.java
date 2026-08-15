@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.framework.data;
 import cn.hutool.core.bean.BeanUtil;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Persistable;
@@ -20,11 +19,13 @@ import java.util.Optional;
  */
 public abstract class BaseService<T extends Persistable<String>> {
 
-    @Autowired
-    protected BaseRepository<T, String> repository;
+    protected final BaseRepository<T, String> repository;
+    private final EntityManager entityManager;
 
-    @Autowired
-    private EntityManager entityManager;
+    protected BaseService(BaseRepository<T, String> repository, EntityManager entityManager) {
+        this.repository = repository;
+        this.entityManager = entityManager;
+    }
 
     public List<T> findAll() {
         return repository.findAll();

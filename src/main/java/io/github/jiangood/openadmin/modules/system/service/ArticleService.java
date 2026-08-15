@@ -5,7 +5,7 @@ import io.github.jiangood.openadmin.modules.system.entity.Article;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.repository.ArticleRepository;
 import io.github.jiangood.openadmin.util.BusinessException;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
@@ -14,13 +14,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Service
 public class ArticleService extends BaseService<Article> {
 
     private final ArticleRepository articleRepository;
     private final SysUserService sysUserService;
     private final SysFileService sysFileService;
+
+    public ArticleService(ArticleRepository repository, EntityManager entityManager,
+                          ArticleRepository articleRepository, SysUserService sysUserService, SysFileService sysFileService) {
+        super(repository, entityManager);
+        this.articleRepository = articleRepository;
+        this.sysUserService = sysUserService;
+        this.sysFileService = sysFileService;
+    }
 
     @Transactional
     public Article save(Article input, List<String> requestKeys) {

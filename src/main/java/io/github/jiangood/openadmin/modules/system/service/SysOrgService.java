@@ -11,7 +11,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@RequiredArgsConstructor
 @Slf4j
 @Service
 @CacheConfig(cacheNames = "sys_org")
@@ -35,6 +34,13 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     private final SysOrgRepository sysOrgRepository;
     private final SysUserRepository sysUserRepository;
+
+    public SysOrgService(SysOrgRepository repository, EntityManager entityManager,
+                         SysOrgRepository sysOrgRepository, SysUserRepository sysUserRepository) {
+        super(repository, entityManager);
+        this.sysOrgRepository = sysOrgRepository;
+        this.sysUserRepository = sysUserRepository;
+    }
 
     public Optional<SysOrg> findByThirdId(String thirdId) {
         return sysOrgRepository.findByThirdId(thirdId);
@@ -54,6 +60,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         }
     }
 
+    @Override
     @Transactional
     @CacheEvict(key = "#id", condition = "#id != null")
     public void deleteById(String id) {
@@ -100,7 +107,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.seq));
     }
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @CacheEvict(key = "#input.id", condition = "#input.id != null")
     public SysOrg save(SysOrg input, List<String> requestKeys) throws Exception {
         boolean isNew = input.isNew();
@@ -177,6 +184,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         return null;
     }
 
+    @Override
     public List<SysOrg> findAll() {
         return repository.findAll(Sort.by(SysOrg.Fields.seq));
     }
@@ -205,6 +213,7 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
     public void cleanCache() {
+        // 缓存由 @CacheEvict 注解管理，无需手动清理
     }
 
     public boolean checkIsLeaf(String id) {
