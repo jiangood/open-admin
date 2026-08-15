@@ -228,7 +228,7 @@ public class FrameworkFileSyncer implements CommandLineRunner {
             return 0;
         }
         byte[] content = findAgentsMd(payload);
-        if (content == null) {
+        if (content.length == 0) {
             return 0;
         }
         Files.createDirectories(root);
@@ -243,7 +243,7 @@ public class FrameworkFileSyncer implements CommandLineRunner {
                 return pf.content();
             }
         }
-        return null;
+        return new byte[0];
     }
 
     private boolean writeIfChanged(byte[] content, Path target) throws IOException {

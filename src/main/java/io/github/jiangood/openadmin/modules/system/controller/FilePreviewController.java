@@ -116,7 +116,7 @@ public class FilePreviewController {
         long fileSize = file.getSize();
 
         long[] range = parseRange(rangeHeader, fileSize);
-        if (range == null) {
+        if (range.length == 0) {
             // 非法或暂不支持的 Range（空段/后缀范围之外的多段等），忽略该头返回全量内容
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
@@ -139,24 +139,24 @@ public class FilePreviewController {
 
     /**
      * 解析单段 Range 头，支持 bytes=start-end / bytes=start- / bytes=-suffix 三种合法格式。
-     * 空段、多段、非法数字等不支持的情况返回 null（调用方回退全量返回）。
+     * 空段、多段、非法数字等不支持的情况返回空数组（调用方回退全量返回）。
      */
     private static long[] parseRange(String rangeHeader, long fileSize) {
         if (rangeHeader == null || !rangeHeader.startsWith("bytes=")) {
-            return null;
+            return new long[0];
         }
         String spec = rangeHeader.substring(6);
         if (spec.isEmpty() || spec.contains(",")) {
-            return null;
+            return new long[0];
         }
         String[] ranges = spec.split("-");
         if (ranges.length > 2) {
-            return null;
+            return new long[0];
         }
         String startPart = ranges[0];
         String endPart = ranges.length > 1 ? ranges[1] : null;
         if (startPart.isEmpty() && (endPart == null || endPart.isEmpty())) {
-            return null;
+            return new long[0];
         }
 
         long rangeStart;
@@ -166,7 +166,7 @@ public class FilePreviewController {
                 // 后缀范围，如 bytes=-500，取文件末尾 500 字节
                 long suffixLength = Long.parseLong(endPart);
                 if (suffixLength <= 0) {
-                    return null;
+                    return new long[0];
                 }
                 rangeStart = Math.max(0, fileSize - suffixLength);
                 rangeEnd = fileSize - 1;
@@ -175,11 +175,11 @@ public class FilePreviewController {
                 rangeEnd = endPart == null || endPart.isEmpty() ? fileSize - 1 : Long.parseLong(endPart);
             }
         } catch (NumberFormatException e) {
-            return null;
+            return new long[0];
         }
 
         if (rangeStart < 0 || rangeStart >= fileSize || rangeStart > rangeEnd) {
-            return null;
+            return new long[0];
         }
         if (rangeEnd >= fileSize) {
             rangeEnd = fileSize - 1;

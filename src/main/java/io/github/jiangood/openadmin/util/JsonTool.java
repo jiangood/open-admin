@@ -202,7 +202,7 @@ public class JsonTool {
      */
     public static <T> List<T> jsonToBeanListQuietly(String json, Class<T> cls) {
         if (json == null) {
-            return null;
+            return List.of();
         }
         try {
             ObjectMapper mapper = om;
@@ -211,7 +211,7 @@ public class JsonTool {
         } catch (Exception e) {
             log.error("JSON转实体列表失败", e);
         }
-        return null;
+        return List.of();
     }
 
     /**
@@ -224,7 +224,7 @@ public class JsonTool {
     @SuppressWarnings("unchecked")
     public static <T> List<T> jsonToListQuietly(String json) {
         if (json == null) {
-            return null;
+            return List.of();
         }
         try {
             ObjectMapper mapper = om;
@@ -232,7 +232,7 @@ public class JsonTool {
         } catch (Exception e) {
             log.error("JSON转列表失败", e);
         }
-        return null;
+        return List.of();
     }
 
     /**
@@ -290,7 +290,7 @@ public class JsonTool {
      */
     public static Map<String, String> jsonToMapStringStringQuietly(String json) {
         if (json == null) {
-            return null;
+            return Map.of();
         }
         try {
             return om.readValue(json, new TypeReference<HashMap<String, String>>() {
@@ -298,7 +298,7 @@ public class JsonTool {
         } catch (JacksonException e) {
             log.error("JSON转Map<String,String>失败", e);
         }
-        return null;
+        return Map.of();
     }
 
     /**

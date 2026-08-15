@@ -181,7 +181,7 @@ public class SpringTool implements ApplicationContextAware {
      */
     public static String[] getActiveProfiles() {
         if (null == applicationContext) {
-            return null;
+            return new String[0];
         }
         return applicationContext.getEnvironment().getActiveProfiles();
     }
