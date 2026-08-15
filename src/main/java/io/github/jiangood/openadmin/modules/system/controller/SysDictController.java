@@ -51,7 +51,7 @@ public class SysDictController {
 
     @HasPermission("sys-dict:update")
     @PostMapping("type-update")
-    public AjaxResult typeUpdate(@RequestBody DictTypeReq req, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult typeUpdate(@RequestBody DictTypeReq req, RequestBodyKeys updateFields) {
         SysDictType param = BeanUtil.copyProperties(req, SysDictType.class);
         SysDictType result = sysDictTypeService.update(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");

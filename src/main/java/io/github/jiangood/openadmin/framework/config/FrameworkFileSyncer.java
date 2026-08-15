@@ -285,10 +285,10 @@ public class FrameworkFileSyncer implements CommandLineRunner {
             if (this == o) {
                 return true;
             }
-            if (!(o instanceof PayloadFile other)) {
-                return false;
+            if (o instanceof PayloadFile(String otherRelativePath, byte[] otherContent)) {
+                return Objects.equals(relativePath, otherRelativePath) && Arrays.equals(content, otherContent);
             }
-            return Objects.equals(relativePath, other.relativePath) && Arrays.equals(content, other.content);
+            return false;
         }
 
         @Override

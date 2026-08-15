@@ -52,7 +52,7 @@ public class ArticleController {
     @Log("文章-更新")
     @HasPermission("article:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody ArticleReq req, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody ArticleReq req, RequestBodyKeys updateFields) {
         Article param = BeanUtil.copyProperties(req, Article.class);
         Article result = articleService.update(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
