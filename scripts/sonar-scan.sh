@@ -8,7 +8,7 @@
 #
 # 依赖: mvn（已配置）、本地 SonarQube（默认 http://localhost:9000）
 # 说明: 先执行 mvn verify（测试 + jacoco report 生成 target/site/jacoco/jacoco.xml），
-#       再执行 sonar:sonar 上传分析结果，报告地址见输出末尾。
+#       再执行 sonar:sonar 上传分析结果（后端 src/main/java + 前端 web/src），报告地址见输出末尾。
 
 set -euo pipefail
 
@@ -26,7 +26,7 @@ mvn -B -ntp \
   -Dsonar.host.url="$SONAR_HOST_URL" \
   -Dsonar.projectKey=open-admin \
   -Dsonar.projectName=open-admin \
-  -Dsonar.sources=src/main/java \
+  -Dsonar.sources=src/main/java,web/src \
   -Dsonar.java.binaries=target/classes \
   -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-  -Dsonar.exclusions=**/docs/**,**/test/**
+  -Dsonar.exclusions=**/docs/**,**/test/**,web/dist/**,web/coverage/**,web/playwright-report/**
