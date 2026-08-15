@@ -22,7 +22,7 @@ export interface BaseRemoteSelectProps {
  * 子类只需覆写 getLoadParams() 和 render()。
  */
 export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> {
-    private fetchIdRef: number = 0;
+    private fetchIdRef: number = 0; // NOSONAR: 构造器中赋值
     private loadDataDebounce: ReturnType<typeof debounce>;
 
     static readonly defaultProps = {

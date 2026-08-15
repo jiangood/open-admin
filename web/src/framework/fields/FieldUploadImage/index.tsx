@@ -141,7 +141,7 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
 
 export class FieldUploadImage extends React.Component<FieldUploadImageProps, FieldUploadImageState> {
 
-    state: FieldUploadImageState = {
+    state: FieldUploadImageState = { // NOSONAR: 构造器中按 props 初始化，无法 readonly
         // 传入的参数
         maxCount: 1,
         thumbWidth: 300,

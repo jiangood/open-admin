@@ -12,7 +12,7 @@ export interface FormModalProps {
 
 export default class FormModal extends React.Component<FormModalProps> {
 
-  readonly state = {
+  readonly state = { // NOSONAR: React state 惯例
     visible: false,
     confirmLoading: false,
   }

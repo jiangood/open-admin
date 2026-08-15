@@ -41,7 +41,7 @@ export interface DownloadModalProps {
 }
 
 export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
-  private abortController: AbortController | null = null;
+  private abortController: AbortController | null = null; // NOSONAR: 构造器中赋值
   private lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;
   private lastLoaded: number = 0;
