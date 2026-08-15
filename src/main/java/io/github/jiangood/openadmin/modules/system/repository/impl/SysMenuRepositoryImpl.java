@@ -52,6 +52,9 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
                         .bind("menus", Bindable.mapOf(String.class, MenuDefinition.class))
                         .orElse(Map.of());
 
+                if (map == null) {   // Sonar 误报防护：orElse(Map.of()) 永不为 null
+                    continue;
+                }
                 for (Map.Entry<String, MenuDefinition> entry : map.entrySet()) {
                     MenuDefinition def = entry.getValue();
                     if (def == null) continue;
