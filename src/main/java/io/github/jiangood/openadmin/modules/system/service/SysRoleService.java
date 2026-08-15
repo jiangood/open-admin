@@ -66,7 +66,7 @@ public class SysRoleService extends BaseService<SysRole> {
         List<MenuDefinition> menuList = new LinkedList<>();
 
         for (SysRole role : roles) {
-            List<MenuDefinition> menus = this.ownMenu(role.getId());
+            List<MenuDefinition> menus = this.ownMenu(role.getId()); // NOSONAR: ownMenu(Iterable) 已开启事务
             menuList.addAll(menus);
         }
 
@@ -147,7 +147,7 @@ public class SysRoleService extends BaseService<SysRole> {
             return repository.save(input);
         }
 
-        this.updateField(input, requestKeys);
+        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
         return repository.findById(input.getId()).orElse(null);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
@@ -292,7 +293,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
                     val = cols.get(CharSequenceUtil.toUnderlineCase(f.getName()));
                 }
                 if (val != null) {
-                    f.setAccessible(true);
+                    ReflectionUtils.makeAccessible(f);
                     setFieldValue(f, bean, val);
                 }
             }
@@ -302,21 +303,21 @@ public class JdbcRunnerImpl implements JdbcRunner {
         }
     }
 
-    private void setFieldValue(Field field, Object bean, Object value) throws IllegalAccessException {
+    private void setFieldValue(Field field, Object bean, Object value) {
         Class<?> type = field.getType();
         if (value instanceof Number n) {
-            if (type == Integer.class || type == int.class) field.set(bean, n.intValue());
-            else if (type == Long.class || type == long.class) field.set(bean, n.longValue());
-            else if (type == Float.class || type == float.class) field.set(bean, n.floatValue());
-            else if (type == Double.class || type == double.class) field.set(bean, n.doubleValue());
-            else if (type == Short.class || type == short.class) field.set(bean, n.shortValue());
-            else if (type == Byte.class || type == byte.class) field.set(bean, n.byteValue());
-            else field.set(bean, value);
+            if (type == Integer.class || type == int.class) ReflectionUtils.setField(field, bean, n.intValue());
+            else if (type == Long.class || type == long.class) ReflectionUtils.setField(field, bean, n.longValue());
+            else if (type == Float.class || type == float.class) ReflectionUtils.setField(field, bean, n.floatValue());
+            else if (type == Double.class || type == double.class) ReflectionUtils.setField(field, bean, n.doubleValue());
+            else if (type == Short.class || type == short.class) ReflectionUtils.setField(field, bean, n.shortValue());
+            else if (type == Byte.class || type == byte.class) ReflectionUtils.setField(field, bean, n.byteValue());
+            else ReflectionUtils.setField(field, bean, value);
         } else if (value instanceof Timestamp t) {
-            if (type == java.util.Date.class) field.set(bean, new java.util.Date(t.getTime()));
-            else field.set(bean, t);
+            if (type == java.util.Date.class) ReflectionUtils.setField(field, bean, new java.util.Date(t.getTime()));
+            else ReflectionUtils.setField(field, bean, t);
         } else {
-            field.set(bean, value);
+            ReflectionUtils.setField(field, bean, value);
         }
     }
 

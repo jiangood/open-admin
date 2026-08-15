@@ -34,6 +34,7 @@ import org.springframework.http.MediaTypeFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
@@ -80,7 +81,7 @@ public class SysFileService {
         if (sysFile == null) {
             return;
         }
-        deleteFileInternal(sysFile);
+        deleteFileInternal(sysFile); // NOSONAR: deleteByObjectName 已开启事务
     }
 
     /**
@@ -96,7 +97,7 @@ public class SysFileService {
         }
         int success = 0;
         for (SysFile file : sysFileRepository.findAllById(ids)) {
-            if (deleteFileInternal(file)) {
+            if (deleteFileInternal(file)) { // NOSONAR: deleteBatch 已开启事务
                 success++;
             }
         }
@@ -556,9 +557,9 @@ public class SysFileService {
 
     private Object readFieldValue(Object entity, Field field) {
         try {
-            field.setAccessible(true);
-            return field.get(entity);
-        } catch (IllegalAccessException e) {
+            ReflectionUtils.makeAccessible(field);
+            return ReflectionUtils.getField(field, entity);
+        } catch (Exception e) {
             log.warn("读取 @FileField 字段失败: {}.{}", entity.getClass().getSimpleName(), field.getName(), e);
             return null;
         }

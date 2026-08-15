@@ -24,7 +24,7 @@ public class SysLogService extends BaseService<SysLog> {
             return repository.save(input);
         }
 
-        this.updateField(input, requestKeys);
+        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
         return repository.findById(input.getId()).orElse(null);
     }
 }

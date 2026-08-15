@@ -36,7 +36,7 @@ public class ArticleService extends BaseService<Article> {
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
             throw new BusinessException("文章编码已存在");
         }
-        this.updateField(input, requestKeys);
+        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
         return articleRepository.findById(input.getId()).orElse(null);
     }
 
@@ -58,7 +58,7 @@ public class ArticleService extends BaseService<Article> {
         // 先取消认领旧文件引用（与保存同事务，保存失败整体回滚）
         sysFileService.unclaim(old);
 
-        this.updateField(input, requestKeys);
+        this.updateField(input, requestKeys); // NOSONAR: 外层 update() 已开启事务
         // 冲刷文章变更，避免随后带 clearAutomatically 的批量更新清空持久化上下文导致变更丢失
         articleRepository.flush();
 

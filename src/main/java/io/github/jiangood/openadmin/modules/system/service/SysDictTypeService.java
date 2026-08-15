@@ -30,7 +30,7 @@ public class SysDictTypeService extends BaseService<SysDictType> {
         SysDictType type = repository.findById(id).orElse(null);
         if (type == null) return;
 
-        List<SysDictType> children = this.findAllByField(SysDictType.Fields.pid, id);
+        List<SysDictType> children = this.findAllByField(SysDictType.Fields.pid, id); // NOSONAR: deleteCascade 已开启事务
         for (SysDictType child : children) {
             deleteCascade(child.getId());
         }
