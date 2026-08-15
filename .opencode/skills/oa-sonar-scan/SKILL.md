@@ -52,34 +52,34 @@ This runs `mvn verify` (all tests + JaCoCo report) then `sonar:sonar`, output en
 
 ### 2. Fetch Metrics
 
-框架仓库直接用封装好的查询脚本（等价 curl 命令见 `scripts/sonar-api.sh` 源码）：
+框架仓库直接用封装好的查询脚本（**Node 实现，跨平台**，Windows/Linux/macOS 均可用；等价 curl 命令见 `scripts/sonar-api.js` 源码）：
 
 ```bash
-bash scripts/sonar-api.sh metrics      # bugs / vulnerabilities / code_smells / coverage
-bash scripts/sonar-api.sh newcode      # new_* 指标（period）
-bash scripts/sonar-api.sh gate         # Quality Gate 状态（逐条件）
-bash scripts/sonar-api.sh bugs         # 未解决 BUG 统计 + 明细
-bash scripts/sonar-api.sh vulns        # 未解决 VULNERABILITY
-bash scripts/sonar-api.sh issues <rule>      # 指定规则未解决问题
-bash scripts/sonar-api.sh issues-after <ISO> # createdAfter 之后的问题（定位 new code 引入）
-bash scripts/sonar-api.sh history      # 指标历史趋势
-bash scripts/sonar-api.sh analyses     # 分析历史（找 leak period 起点）
+node scripts/sonar-api.js metrics      # bugs / vulnerabilities / code_smells / coverage
+node scripts/sonar-api.js newcode      # new_* 指标（period）
+node scripts/sonar-api.js gate         # Quality Gate 状态（逐条件）
+node scripts/sonar-api.js bugs         # 未解决 BUG 统计 + 明细
+node scripts/sonar-api.js vulns        # 未解决 VULNERABILITY
+node scripts/sonar-api.js issues <rule>      # 指定规则未解决问题
+node scripts/sonar-api.js issues-after <ISO> # createdAfter 之后的问题（定位 new code 引入）
+node scripts/sonar-api.js history      # 指标历史趋势
+node scripts/sonar-api.js analyses     # 分析历史（找 leak period 起点）
 ```
 
 Wait ~10s after `ANALYSIS SUCCESSFUL` before querying (server-side processing).
 
-业务项目（无脚本）：`SONAR_TOKEN=xxx SONAR_HOST_URL=http://localhost:9000 SONAR_PROJECT=<key>` 前缀同一命令即可；无该脚本时再照抄 `scripts/sonar-api.sh` 里的 curl。
+业务项目（无脚本）：`SONAR_TOKEN=xxx SONAR_HOST_URL=http://localhost:9000 SONAR_PROJECT=<key>` 前缀同一命令即可；无该脚本时再照抄 `scripts/sonar-api.js` 里的逻辑。
 
 ### 3. List Unresolved Issues
 
 Always filter `resolved=false` — default search **includes already-fixed (CLOSED) issues** and will confuse the counts:
 
 ```bash
-bash scripts/sonar-api.sh bugs
-bash scripts/sonar-api.sh vulns
+node scripts/sonar-api.js bugs
+node scripts/sonar-api.js vulns
 ```
 
-Also list the full details (rule / line / message) before fixing anything (add `issues <rule>` or a raw `api/issues/search` call per `sonar-api.sh` source).
+Also list the full details (rule / line / message) before fixing anything (add `issues <rule>` or a raw `api/issues/search` call per `sonar-api.js` source).
 
 ### 4. Triage & Fix One By One
 
@@ -136,7 +136,7 @@ Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts
 
 - Forgetting `resolved=false` → counts include already-fixed issues
 - Trusting `api/issues/search` totals while server is still indexing (wait ~10s; if counts disagree with `api/measures`, re-query)
-- **Using `api/measures/search` for new-code metrics** → new_* returns `undefined`; use `api/measures/component` (i.e. `sonar-api.sh newcode`)
+- **Using `api/measures/search` for new-code metrics** → new_* returns `undefined`; use `api/measures/component` (i.e. `node scripts/sonar-api.js newcode`)
 - **Trusting `sinceLeakPeriod=true`** → does NOT work on SonarQube 26.8 (returns all issues); use `createdAfter=<leak period start analysis time>` instead
 - **Putting `// NOSONAR` on the wrong line** → must be on the same line as the finding (S1848 case)
 - **"Fixing" S1082 with `role="button"`** → triggers S6819 (new violation). Use native `<button>` from the start
@@ -149,12 +149,12 @@ Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts
 
 - Frontend has **no typecheck script** (Vite/esbuild, no tsconfig) — verify with `cd web && npm run build`
 - Backend: `mvn clean compile` or targeted test
-- After each fix batch: re-scan, then confirm **both** overall counts (bugs/vulns) AND `new_violations` (`sonar-api.sh newcode`) went down / stayed 0
+- After each fix batch: re-scan, then confirm **both** overall counts (bugs/vulns) AND `new_violations` (`node scripts/sonar-api.js newcode`) went down / stayed 0
 
 ## Repository-Specific
 
 - Framework 仓库内可用封装脚本：
   - `scripts/sonar-scan.sh` — 全量扫描（mvn verify + sonar:sonar），自定位、仅扫本仓库
-  - `scripts/sonar-api.sh` — 只读查询辅助（metrics / newcode / gate / bugs / vulns / issues / issues-after / history / analyses），比手写 curl+node 更快
+  - `scripts/sonar-api.js` — 只读查询辅助（Node 实现，跨平台；metrics / newcode / gate / bugs / vulns / issues / issues-after / history / analyses）
   - 业务项目无这些脚本，直接用上面的 mvn 命令与 curl 查询
 - Skill 随 `oa-crud`/`oa-upgrade` 一起打包进框架 JAR，并在业务项目启动时同步到其根目录 `.opencode/skills/`（修改 = 修改框架对外 API）；`oa-publishing-release` 才是不进 JAR 的仓库专属 skill
