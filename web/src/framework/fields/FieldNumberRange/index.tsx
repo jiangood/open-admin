@@ -27,7 +27,9 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     };
 
     merge(a: RangePartValue, b: RangePartValue): string {
-        return (a == null ? '' : a) + SP + (b == null ? '' : b);
+        const av = a ?? '';
+        const bv = b ?? '';
+        return av + SP + bv;
     }
 
     parse(v: string | null | undefined): { a: number | null; b: number | null } {
