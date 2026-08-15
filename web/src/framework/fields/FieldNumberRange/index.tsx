@@ -18,19 +18,20 @@ export interface FieldNumberRangeProps extends FieldProps<FieldNumberRangeValue>
 export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     onChangeA = (a: RangePartValue) => {
         const {b} = this.parse(this.props.value);
-        this.props.onChange?.(this.merge(a, b));
+        this.props.onChange?.(this.merge(this.toPart(a), this.toPart(b)));
     };
 
     onChangeB = (b: RangePartValue) => {
         const {a} = this.parse(this.props.value);
-        this.props.onChange?.(this.merge(a, b));
+        this.props.onChange?.(this.merge(this.toPart(a), this.toPart(b)));
     };
 
-    // NOSONAR: S7760 - 参数可能为 null 而非仅 undefined，默认参数无法覆盖（与 S6606 语义冲突，?? 是正确写法）
-    merge(a: RangePartValue, b: RangePartValue): string {
-        const av = a ?? '';
-        const bv = b ?? '';
-        return av + SP + bv;
+    private toPart(v: RangePartValue): number | string {
+        return v ?? '';
+    }
+
+    merge(a: number | string, b: number | string): string {
+        return a + SP + b;
     }
 
     parse(v: string | null | undefined): { a: number | null; b: number | null } {
