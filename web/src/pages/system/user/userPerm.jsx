@@ -17,7 +17,7 @@ export default class UserPerm extends React.Component {
     }
     formRef = React.createRef() // NOSONAR: React ref，内部通过 this.formRef 使用
 
-    show(item) {
+    show(item) { // NOSONAR: ref 暴露给父组件调用的公共 API
         this.setState({visible: true})
 
         HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}, rs => {
@@ -77,11 +77,11 @@ export default class UserPerm extends React.Component {
                 </Form.Item>
 
 
-                {this.state.formValues.dataPermType === 'CUSTOM' && <>
+                {this.state.formValues.dataPermType === 'CUSTOM' &&
                     <Form.Item label='组织机构' name='orgIds'>
                         <FieldSysOrgTree/>
                     </Form.Item>
-                </>}
+                }
 
 
             </Form>
