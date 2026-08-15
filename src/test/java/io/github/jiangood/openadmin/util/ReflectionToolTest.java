@@ -6,7 +6,6 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 

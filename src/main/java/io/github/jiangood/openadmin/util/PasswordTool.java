@@ -5,9 +5,6 @@ import cn.hutool.core.util.RandomUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class PasswordTool {
     private PasswordTool() {

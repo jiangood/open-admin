@@ -3,11 +3,9 @@ package io.github.jiangood.openadmin.util;
 import io.github.jiangood.openadmin.OpenAdminConfiguration;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.List;

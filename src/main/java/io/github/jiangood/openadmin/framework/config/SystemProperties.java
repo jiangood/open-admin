@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.validation.constraints.NotBlank;
