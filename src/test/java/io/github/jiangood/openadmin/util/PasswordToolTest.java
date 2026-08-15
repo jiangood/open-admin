@@ -138,6 +138,36 @@ class PasswordToolTest {
     }
 
     @Test
+    void testIsAscii() {
+        assertTrue(PasswordTool.isAscii("Abc123!@#"), "ASCII 密码应该通过");
+        assertFalse(PasswordTool.isAscii("密码123"), "中文密码应该被拒绝");
+        assertFalse(PasswordTool.isAscii("abc😀"), "emoji 密码应该被拒绝");
+        assertFalse(PasswordTool.isAscii("a".repeat(65)), "超长 ASCII 密码应该被拒绝");
+        assertTrue(PasswordTool.isAscii("a".repeat(64)), "64 位 ASCII 密码应该通过");
+        assertFalse(PasswordTool.isAscii(""), "空密码应该被拒绝");
+        assertFalse(PasswordTool.isAscii(null), "null 密码应该被拒绝");
+    }
+
+    @Test
+    void testValidateStrengthRejectsNonAscii() {
+        assertThrows(IllegalStateException.class, () -> {
+            PasswordTool.validateStrength("密码123");
+        }, "中文密码应该抛出IllegalStateException");
+
+        assertThrows(IllegalStateException.class, () -> {
+            PasswordTool.validateStrength("abc😀!@#");
+        }, "emoji 密码应该抛出IllegalStateException");
+
+        assertThrows(IllegalStateException.class, () -> {
+            PasswordTool.validateStrength("Abc123!@#" + "a".repeat(60));
+        }, "超长 ASCII 密码应该抛出IllegalStateException");
+
+        assertDoesNotThrow(() -> {
+            PasswordTool.validateStrength("MyP@ssw0rd!23");
+        }, "正常 ASCII 密码不应抛出异常");
+    }
+
+    @Test
     void testValidateStrength() {
         // 测试验证强密码（不应该抛出异常）
         assertDoesNotThrow(() -> {

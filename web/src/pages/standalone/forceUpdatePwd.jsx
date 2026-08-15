@@ -42,10 +42,11 @@ export default class extends React.Component {
                                    extra={'请输入字母、数字、特殊字符'}
                                    rules={[
                                        {required: true, message: '请输入新密码'},
+                                       {pattern: /^[\x20-\x7E]{1,64}$/, message: '密码仅支持英文、数字与常见符号，长度不超过64位'},
                                        {validator: this.validator}
                                    ]}
                         >
-                            <Input.Password/>
+                            <Input.Password maxLength={64}/>
                         </Form.Item>
                         <Form.Item style={{marginTop: 40}}>
                             <Button type="primary" htmlType="submit" block size='large'>

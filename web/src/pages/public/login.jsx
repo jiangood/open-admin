@@ -59,7 +59,14 @@ export default class extends React.Component {
 
     submit = values => {
         this.setState({logging: true})
-        values.password = encodePassword(values.password)
+        try {
+            values.password = encodePassword(values.password)
+        } catch (e) {
+            console.error('[Login] 密码编码失败:', e);
+            this.setState({logging: false})
+            message.error('密码含不支持字符，请联系管理员重置')
+            return
+        }
         postLogin(values, this.props.location?.query).finally(() => {
             this.setState({logging: false})
         })

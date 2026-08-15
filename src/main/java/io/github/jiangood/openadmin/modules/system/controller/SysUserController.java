@@ -103,6 +103,9 @@ public class SysUserController {
         if (StrUtil.isEmpty(password)) {
             return AjaxResult.err().msg("请输入密码");
         }
+        if (!PasswordTool.isAscii(password)) {
+            return AjaxResult.err().msg("密码仅支持英文、数字与常见符号，长度不超过64位");
+        }
 
         PasswdStrength.PASSWD_LEVEL level = PasswdStrength.getLevel(password);
 

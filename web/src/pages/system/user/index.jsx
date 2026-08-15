@@ -267,8 +267,11 @@ export default class extends React.Component {
                         </Form.Item>
                     </>
                 )}
-                <Form.Item label="新密码" name="password" rules={[{required: true, message: '请输入新密码'}]}>
-                    <Input.Password placeholder="请输入新密码"/>
+                <Form.Item label="新密码" name="password" rules={[
+                    {required: true, message: '请输入新密码'},
+                    {pattern: /^[\x20-\x7E]{1,64}$/, message: '密码仅支持英文、数字与常见符号，长度不超过64位'}
+                ]}>
+                    <Input.Password maxLength={64} placeholder="请输入新密码"/>
                 </Form.Item>
             </FormModal>
 

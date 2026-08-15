@@ -65,8 +65,14 @@ public class PasswordTool {
      * @param password
      */
     public static void validateStrength(String password) {
+        Assert.hasText(password, "密码不能为空");
+        Assert.state(isAscii(password), "密码仅支持英文、数字与常见符号");
         Assert.state(isStrengthOk(password), "密码强度太低");
 
+    }
+
+    public static boolean isAscii(String password) {
+        return password != null && password.matches("[\\x20-\\x7E]{1,64}");
     }
 
     public static boolean isStrengthOk(String password) {
