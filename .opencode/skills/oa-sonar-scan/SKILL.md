@@ -18,7 +18,7 @@ Runs the open-admin repo through the local SonarQube (http://localhost:9000) wit
 ## Prerequisites
 
 - Local SonarQube running (port 9000, docker-compose under `/ws/sonarqube`)
-- Maven + local SonarQube token (defaults baked into `scripts/sonar-scan.sh`)
+- Maven + local SonarQube token (defaults baked into `scripts/sonar-scan.js`)
 - H2 test DB — no MySQL needed (Repository/Service tests use H2)
 
 ## Immediate Execution
@@ -29,10 +29,10 @@ Runs the open-admin repo through the local SonarQube (http://localhost:9000) wit
 
 ### 1. Run the Scan
 
-Framework 仓库（脚本封装好 token / projectKey / 覆盖率路径）：
+Framework 仓库（脚本封装好 token / projectKey / 覆盖率路径，**Node 实现，跨平台**）：
 
 ```bash
-bash scripts/sonar-scan.sh
+node scripts/sonar-scan.js
 ```
 
 业务项目（无该脚本，直接用 mvn 命令，按需替换 `projectKey`）：
@@ -125,7 +125,7 @@ fix(npe): ... (sonar S2259)
 
 ### 5. Re-scan to Verify
 
-Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts (Step 2/3). Iterate until `Bugs=0`, `Vulnerabilities=0`, and `new_violations=0`.
+Re-run `node scripts/sonar-scan.js`, then confirm with the **unresolved** counts (Step 2/3). Iterate until `Bugs=0`, `Vulnerabilities=0`, and `new_violations=0`.
 
 ## Quality Gate Notes
 
@@ -154,7 +154,7 @@ Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts
 ## Repository-Specific
 
 - Framework 仓库内可用封装脚本：
-  - `scripts/sonar-scan.sh` — 全量扫描（mvn verify + sonar:sonar），自定位、仅扫本仓库
+  - `scripts/sonar-scan.js` — 全量扫描（mvn verify + sonar:sonar），Node 实现、跨平台、自定位仅扫本仓库
   - `scripts/sonar-api.js` — 只读查询辅助（Node 实现，跨平台；metrics / newcode / gate / bugs / vulns / issues / issues-after / history / analyses）
   - 业务项目无这些脚本，直接用上面的 mvn 命令与 curl 查询
 - Skill 随 `oa-crud`/`oa-upgrade` 一起打包进框架 JAR，并在业务项目启动时同步到其根目录 `.opencode/skills/`（修改 = 修改框架对外 API）；`oa-publishing-release` 才是不进 JAR 的仓库专属 skill
