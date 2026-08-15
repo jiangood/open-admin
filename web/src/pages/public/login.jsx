@@ -40,21 +40,22 @@ export default class extends React.Component {
         siteInfo: {}
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         const siteInfo = GlobalData.getSiteInfo()
         if (siteInfo && siteInfo.title) {
             this.setState({siteInfo})
             return
         }
         // localStorage 中无站点信息，从服务端重新加载
-        try {
-            const rs = await HttpUtils.get('/admin/public/site-info', null, { showError: false })
-            GlobalData.setSiteInfo(rs)
-            this.setState({siteInfo: rs})
-        } catch (e) {
-            console.error('[Login] 加载站点信息失败:', e);
-            message.error('加载站点信息失败，请刷新页面重试')
-        }
+        HttpUtils.get('/admin/public/site-info', null, { showError: false })
+            .then(rs => {
+                GlobalData.setSiteInfo(rs)
+                this.setState({siteInfo: rs})
+            })
+            .catch(e => {
+                console.error('[Login] 加载站点信息失败:', e);
+                message.error('加载站点信息失败，请刷新页面重试')
+            })
     }
 
     submit = values => {
