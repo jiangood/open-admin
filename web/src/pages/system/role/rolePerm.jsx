@@ -39,9 +39,9 @@ export default class extends React.Component {
                 return <Checkbox.Group options={options}
                                        value={rowSelectedKey}
                                        onChange={(ks) => {
-                                           const rowSelectedKeys = this.state.rowSelectedKeys;
-                                           rowSelectedKeys[record.id] = ks;
-                                           this.setState({rowSelectedKeys})
+                                           this.setState(prevState => ({
+                                               rowSelectedKeys: {...prevState.rowSelectedKeys, [record.id]: ks}
+                                           }))
                                        }}/>
             }
         }

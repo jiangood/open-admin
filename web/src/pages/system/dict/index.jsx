@@ -98,11 +98,13 @@ export default class extends React.Component {
             this.setState({selectedType: null, selectedTypeCode: null})
             return
         }
-        const node = this.findNode(this.state.typeTree, selectedKeys[0])
-        this.setState({
-            selectedType: node,
-            selectedTypeCode: node?.typeCode || null
-        },()=>this.tableRef.current.reload())
+        this.setState((prevState) => {
+            const node = this.findNode(prevState.typeTree, selectedKeys[0])
+            return {
+                selectedType: node,
+                selectedTypeCode: node?.typeCode || null
+            }
+        }, () => this.tableRef.current.reload())
     }
 
     handleItemAdd = () => {
