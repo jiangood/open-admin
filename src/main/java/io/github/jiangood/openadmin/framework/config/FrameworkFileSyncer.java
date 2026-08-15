@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -279,5 +280,25 @@ public class FrameworkFileSyncer implements CommandLineRunner {
     }
 
     record PayloadFile(String relativePath, byte[] content) {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof PayloadFile other)) {
+                return false;
+            }
+            return Objects.equals(relativePath, other.relativePath) && Arrays.equals(content, other.content);
+        }
+
+        @Override
+        public int hashCode() {
+            return 31 * Objects.hash(relativePath) + Arrays.hashCode(content);
+        }
+
+        @Override
+        public String toString() {
+            return "PayloadFile[relativePath=" + relativePath + ", content=" + Arrays.toString(content) + "]";
+        }
     }
 }
