@@ -169,7 +169,15 @@ export default class extends React.Component {
                     <span
                         key={item.key}
                         className={'top-nav-item' + (item.key === activeTopMenuKey ? ' active' : '')}
+                        role="button"
+                        tabIndex={0}
                         onClick={() => this.onTopMenuClick({key: item.key})}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                this.onTopMenuClick({key: item.key});
+                            }
+                        }}
                     >
                         {item.label}
                     </span>
@@ -188,7 +196,14 @@ return <Layout className='main-layout'>
                    breakpoint={'md'}
              >
                 <div className='sider-header'>
-                    <img className='logo-img' src="./logo.png" onClick={() => history.push('/')} alt='logo'/>
+                    <img className='logo-img' src="./logo.png" alt='logo' role="button" tabIndex={0}
+                         onClick={() => history.push('/')}
+                         onKeyDown={(e) => {
+                             if (e.key === 'Enter' || e.key === ' ') {
+                                 e.preventDefault();
+                                 history.push('/');
+                             }
+                         }}/>
                     <h3 className='hide-on-mobile'>
                         <Link to="/" style={{color: 'rgba(255,255,255,0.85)'}}>{siteInfo.title}</Link>
                     </h3>
@@ -201,8 +216,14 @@ return <Layout className='main-layout'>
                 <Header className='header'>
                     {this.renderTopMenu()}
                     {this.state.headerLeftArticles.map(a => (
-                        <div key={a.code} className='item' style={{cursor: 'pointer', padding: '0 12px', whiteSpace: 'nowrap'}}
-                             onClick={() => PageUtils.open('/article/' + a.code, a.title)}>{a.title}</div>
+                        <div key={a.code} className='item' style={{cursor: 'pointer', padding: '0 12px', whiteSpace: 'nowrap'}} role="button" tabIndex={0}
+                             onClick={() => PageUtils.open('/article/' + a.code, a.title)}
+                             onKeyDown={(e) => {
+                                 if (e.key === 'Enter' || e.key === ' ') {
+                                     e.preventDefault();
+                                     PageUtils.open('/article/' + a.code, a.title);
+                                 }
+                             }}>{a.title}</div>
                     ))}
                     {this.props.showOrgSwitcher?.({
                         activeTopMenu: this.getActiveTopMenu(),

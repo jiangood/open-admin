@@ -51,7 +51,13 @@ export class HeaderRight extends React.Component {
 
         if (this.state.isMobileDevice) {
             return <div className='header-right'>
-                <a onClick={this.logout}>退出</a>
+                <a role="button" tabIndex={0} onClick={this.logout}
+                   onKeyDown={(e) => {
+                       if (e.key === 'Enter' || e.key === ' ') {
+                           e.preventDefault();
+                           this.logout();
+                       }
+                   }}>退出</a>
             </div>
         }
 
@@ -68,8 +74,14 @@ export class HeaderRight extends React.Component {
 
         return <div className='header-right'>
             {headerArticles.map(a => (
-                <div key={a.code} className='item' style={{cursor: 'pointer'}}
-                     onClick={() => this.openArticle(a.code, a.title)}>
+                <div key={a.code} className='item' style={{cursor: 'pointer'}} role="button" tabIndex={0}
+                     onClick={() => this.openArticle(a.code, a.title)}
+                     onKeyDown={(e) => {
+                         if (e.key === 'Enter' || e.key === ' ') {
+                             e.preventDefault();
+                             this.openArticle(a.code, a.title);
+                         }
+                     }}>
                     {a.title}
                 </div>
             ))}

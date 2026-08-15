@@ -27,7 +27,14 @@ export class ViewText extends React.Component {
         const short = StringUtils.ellipsis(value, maxLength);
         return (
             <Tooltip placement="topLeft" title={value}>
-                <span style={{cursor: 'pointer', borderBottom: '1px dashed #d9d9d9'}} onClick={() => this.setState({modalOpen: true})}>
+                <span role="button" tabIndex={0} style={{cursor: 'pointer', borderBottom: '1px dashed #d9d9d9'}}
+                      onClick={() => this.setState({modalOpen: true})}
+                      onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                              e.preventDefault();
+                              this.setState({modalOpen: true});
+                          }
+                      }}>
                     {short}
                 </span>
                 <Modal open={this.state.modalOpen} title="长文本内容" width={700} footer={null}

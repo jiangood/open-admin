@@ -90,10 +90,21 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                     ) : (
                         <div
                             key={item.key}
+                            role="menuitem"
+                            tabIndex={item.disabled ? -1 : 0}
                             onClick={() => {
                                 if (!item.disabled) {
                                     onClick({ key: item.key });
                                     onClose();
+                                }
+                            }}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    if (!item.disabled) {
+                                        onClick({ key: item.key });
+                                        onClose();
+                                    }
                                 }
                             }}
                             style={{

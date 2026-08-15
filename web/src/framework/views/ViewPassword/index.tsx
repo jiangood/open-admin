@@ -16,7 +16,14 @@ export class ViewPassword extends React.Component {
         const visible = this.state.visible;
         return <Space>
             <span>{this.state.visible ? v : '******'}</span>
-            <a onClick={() => this.setState({visible: !visible})}>
+            <a role="button" tabIndex={0}
+               onClick={() => this.setState({visible: !visible})}
+               onKeyDown={(e) => {
+                   if (e.key === 'Enter' || e.key === ' ') {
+                       e.preventDefault();
+                       this.setState({visible: !visible});
+                   }
+               }}>
                 {visible ? <EyeOutlined/> : <EyeInvisibleOutlined/>}
             </a>
         </Space>
