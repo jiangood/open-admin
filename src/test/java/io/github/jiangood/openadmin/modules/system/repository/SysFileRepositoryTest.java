@@ -99,6 +99,40 @@ public class SysFileRepositoryTest {
     }
 
     @Test
+    void updateJoinRefByObjectNames_shouldNotStealFileOwnedByAnotherRecord() {
+        SysFile claimed = saveFile("public/202608/shared.jpg");
+        claimed.setJoinTable("sys_article");
+        claimed.setJoinId("article-1");
+        claimed.setStatus(FileStatus.IN_USE);
+        sysFileRepository.save(claimed);
+        sysFileRepository.flush();
+
+        int updated = sysFileRepository.updateJoinRefByObjectNames("sys_article", "article-2", List.of("public/202608/shared.jpg"));
+        sysFileRepository.flush();
+
+        assertEquals(0, updated);
+        SysFile reloaded = sysFileRepository.findByObjectName("public/202608/shared.jpg");
+        assertEquals("article-1", reloaded.getJoinId());
+        assertEquals(FileStatus.IN_USE, reloaded.getStatus());
+    }
+
+    @Test
+    void updateJoinRefByObjectNames_shouldAllowReclaimBySameRecord() {
+        SysFile claimed = saveFile("public/202608/reclaim.jpg");
+        claimed.setJoinTable("sys_article");
+        claimed.setJoinId("article-1");
+        claimed.setStatus(FileStatus.IN_USE);
+        sysFileRepository.save(claimed);
+        sysFileRepository.flush();
+
+        int updated = sysFileRepository.updateJoinRefByObjectNames("sys_article", "article-1", List.of("public/202608/reclaim.jpg"));
+        sysFileRepository.flush();
+
+        assertEquals(1, updated);
+        assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName("public/202608/reclaim.jpg").getStatus());
+    }
+
+    @Test
     void updateStatusByObjectNames_shouldSetPendingDelete() {
         saveFile("public/202608/remove.jpg");
 

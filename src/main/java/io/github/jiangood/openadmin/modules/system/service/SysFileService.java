@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.github.jiangood.openadmin.framework.file.FileField;
+import io.github.jiangood.openadmin.util.BusinessException;
 import io.github.jiangood.openadmin.util.DownloadTool;
 import io.github.jiangood.openadmin.util.IdTool;
 import io.github.jiangood.openadmin.util.RequestTool;
@@ -466,19 +467,22 @@ public class SysFileService {
     }
 
     /**
-     * 取消认领实体引用的文件：置为待删除（与 {@link #claim} 对应的释放引用操作）
+     * 取消认领实体引用的文件：置为待删除（与 {@link #claim} 对应的释放引用操作）。
+     * 仅释放未被认领或归本记录所有的文件，被其他业务记录认领的文件不受影响。
      */
     @Transactional
     public void unclaim(Persistable<String> entity) {
         if (entity == null || StrUtil.isBlank(entity.getId())) {
             return;
         }
+        String joinTable = joinTableOf(entity.getClass());
+        String joinId = entity.getId();
         for (Field field : fileFields(entity.getClass())) {
             String value = StrUtil.toStringOrNull(readFieldValue(entity, field));
             if (field.getAnnotation(FileField.class).html()) {
-                releaseList(extractObjectNamesFromHtml(value));
+                releaseList(joinTable, joinId, extractObjectNamesFromHtml(value));
             } else {
-                releaseList(objectNameList(value));
+                releaseList(joinTable, joinId, objectNameList(value));
             }
         }
     }
@@ -488,15 +492,36 @@ public class SysFileService {
     }
 
     private void claimList(String joinTable, String joinId, List<String> objectNames) {
-        if (objectNames != null && !objectNames.isEmpty()) {
-            sysFileRepository.updateJoinRefByObjectNames(joinTable, joinId, objectNames);
+        if (objectNames == null || objectNames.isEmpty()) {
+            return;
+        }
+        List<String> conflicts = sysFileRepository.findByObjectNameIn(objectNames).stream()
+                .filter(file -> isOwnedByOther(file, joinTable, joinId))
+                .map(SysFile::getObjectName)
+                .toList();
+        if (!conflicts.isEmpty()) {
+            throw new BusinessException("文件已被其他业务记录引用，不允许多个业务共享同一文件: " + String.join(", ", conflicts));
+        }
+        sysFileRepository.updateJoinRefByObjectNames(joinTable, joinId, objectNames);
+    }
+
+    private void releaseList(String joinTable, String joinId, List<String> objectNames) {
+        if (objectNames == null || objectNames.isEmpty()) {
+            return;
+        }
+        List<String> owned = sysFileRepository.findByObjectNameIn(objectNames).stream()
+                .filter(file -> !isOwnedByOther(file, joinTable, joinId))
+                .map(SysFile::getObjectName)
+                .toList();
+        if (!owned.isEmpty()) {
+            sysFileRepository.updateStatusByObjectNames(owned, FileStatus.PENDING_DELETE);
         }
     }
 
-    private void releaseList(List<String> objectNames) {
-        if (objectNames != null && !objectNames.isEmpty()) {
-            sysFileRepository.updateStatusByObjectNames(objectNames, FileStatus.PENDING_DELETE);
-        }
+    /** 是否已被其他业务记录认领（joinTable/joinId 非空且与目标不同） */
+    private boolean isOwnedByOther(SysFile file, String joinTable, String joinId) {
+        return StrUtil.isNotBlank(file.getJoinTable())
+                && !(StrUtil.equals(joinTable, file.getJoinTable()) && StrUtil.equals(joinId, file.getJoinId()));
     }
 
     private List<String> extractObjectNamesFromHtml(String html) {

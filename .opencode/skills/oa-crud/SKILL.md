@@ -322,12 +322,16 @@ public class CustomerController {
 - 更新时**先 `unclaim(old)` 再 save**（`old` 是 JPA 托管实体，save 后会变成新值，晚取无效），save 后再 `claim(entity)` 认领新引用
 - 删除业务记录时建议在同一事务内先 `unclaim(entity)` 再删除（立即释放引用且随删除回滚）；未显式调用时 `CleanTempFileJob` 的孤儿扫描仍会兜底清理
 
-参照框架示例 `ArticleController.java`：
+参照框架示例 `ArticleController.java`（创建时认领与保存放**同一事务**，共享冲突会整体回滚）：
 
 ```java
-// 新增
-Article result = articleService.save(param, null);
-sysFileService.claim(result);
+// 新增 —— 在 @Transactional 的 save 方法内保存后认领
+@Transactional
+public Article save(Article input, List<String> requestKeys) {
+    Article result = articleRepository.save(input);
+    sysFileService.claim(result);
+    return result;
+}
 
 // 更新 —— 先取消认领旧引用，再保存并认领新引用
 Article old = service.findById(param.getId()).orElse(null);

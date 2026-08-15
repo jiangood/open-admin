@@ -27,7 +27,10 @@ public class ArticleService extends BaseService<Article> {
             if (articleRepository.existsByCode(input.getCode())) {
                 throw new RuntimeException("文章编码已存在");
             }
-            return articleRepository.save(input);
+            Article result = articleRepository.save(input);
+            // 与保存同事务认领文件：共享冲突时文章一并回滚，避免留下未认领的悬空引用
+            sysFileService.claim(result);
+            return result;
         }
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
             throw new RuntimeException("文章编码已存在");

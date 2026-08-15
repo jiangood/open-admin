@@ -5,6 +5,7 @@ import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
+import io.github.jiangood.openadmin.util.BusinessException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,11 +14,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
+import java.util.Collection;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +45,7 @@ class SysFileServiceTempTest {
 
     @Test
     void claim_shouldConfirmSingleFileField() {
+        when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
@@ -54,6 +58,7 @@ class SysFileServiceTempTest {
 
     @Test
     void claim_shouldConfirmHtmlField() {
+        when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setContent("<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
@@ -68,6 +73,7 @@ class SysFileServiceTempTest {
 
     @Test
     void claim_shouldStripQueryStringAndContextPathFromHtml() {
+        when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setContent("<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">");
@@ -105,6 +111,7 @@ class SysFileServiceTempTest {
 
     @Test
     void claim_shouldFallbackToSnakeCaseClassNameWhenNoTableAnnotation() {
+        when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         NoTableDoc doc = new NoTableDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
@@ -116,6 +123,9 @@ class SysFileServiceTempTest {
 
     @Test
     void unclaim_shouldMarkFilesPendingDelete() throws Exception {
+        stubFilePool(List.of(
+                ownedFile("public/202607/id-a.jpg"), ownedFile("public/202607/550e8400-e29b-41d4-a716-446655440000.jpg"),
+                ownedFile("private/202607/550e8400-e29b-41d4-a716-446655440000.jpg")));
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
@@ -130,6 +140,96 @@ class SysFileServiceTempTest {
                 "private/202607/550e8400-e29b-41d4-a716-446655440000.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(fileOperator, never()).delete(any());
+    }
+
+    @Test
+    void unclaim_shouldReleaseUnownedFiles() throws Exception {
+        SysFile unowned = new SysFile("id-a");
+        unowned.setObjectName("public/202607/id-a.jpg");
+        stubFilePool(List.of(unowned));
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+
+        sysFileService.unclaim(doc);
+
+        verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
+    }
+
+    @Test
+    void unclaim_shouldSkipFilesOwnedByAnotherRecord() throws Exception {
+        stubFilePool(List.of(otherOwnedFile("public/202607/id-a.jpg")));
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+
+        sysFileService.unclaim(doc);
+
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
+    }
+
+    @Test
+    void unclaim_shouldOnlyReleaseFilesOwnedByThisRecord() throws Exception {
+        String htmlFile = "public/202607/44444444-4444-4444-8444-444444444444.jpg";
+        stubFilePool(List.of(otherOwnedFile("public/202607/id-a.jpg"), ownedFile(htmlFile)));
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+        doc.setContent("<img src=\"/file/" + htmlFile + "\">");
+
+        sysFileService.unclaim(doc);
+
+        verify(sysFileRepository, never()).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
+        verify(sysFileRepository).updateStatusByObjectNames(List.of(htmlFile), FileStatus.PENDING_DELETE);
+    }
+
+    /** 按请求的 objectName 集合过滤返回文件池，模拟按 objectName 查询 */
+    private void stubFilePool(List<SysFile> pool) {
+        when(sysFileRepository.findByObjectNameIn(any())).thenAnswer(invocation -> {
+            Collection<String> names = invocation.getArgument(0);
+            return pool.stream().filter(f -> names.contains(f.getObjectName())).toList();
+        });
+    }
+
+    private SysFile ownedFile(String objectName) {
+        SysFile file = new SysFile();
+        file.setObjectName(objectName);
+        file.setJoinTable("test_doc");
+        file.setJoinId("doc-1");
+        return file;
+    }
+
+    private SysFile otherOwnedFile(String objectName) {
+        SysFile file = new SysFile();
+        file.setObjectName(objectName);
+        file.setJoinTable("test_doc");
+        file.setJoinId("doc-999");
+        return file;
+    }
+
+    @Test
+    void claim_shouldRejectFileOwnedByAnotherRecord() {
+        when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of(otherOwnedFile("public/202607/id-a.jpg")));
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+
+        assertThrows(BusinessException.class, () -> sysFileService.claim(doc));
+
+        verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
+        verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
+    }
+
+    @Test
+    void claim_shouldAllowFileOwnedBySameRecord() {
+        when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of(ownedFile("public/202607/id-a.jpg")));
+        FileDoc doc = new FileDoc();
+        doc.setId("doc-1");
+        doc.setCover("public/202607/id-a.jpg");
+
+        sysFileService.claim(doc);
+
+        verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1", List.of("public/202607/id-a.jpg"));
     }
 
     @Test

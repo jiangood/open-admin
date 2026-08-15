@@ -18,7 +18,9 @@ import java.util.List;
 public interface SysFileRepository extends BaseRepository<SysFile, String> {
 
     @Modifying(clearAutomatically = true)
-    @Query("UPDATE SysFile f SET f.joinTable = :joinTable, f.joinId = :joinId, f.status = io.github.jiangood.openadmin.framework.enums.FileStatus.IN_USE WHERE f.objectName IN :objectNames")
+    @Query("UPDATE SysFile f SET f.joinTable = :joinTable, f.joinId = :joinId, f.status = io.github.jiangood.openadmin.framework.enums.FileStatus.IN_USE " +
+            "WHERE f.objectName IN :objectNames " +
+            "AND (f.joinId IS NULL OR (f.joinTable = :joinTable AND f.joinId = :joinId))")
     int updateJoinRefByObjectNames(@Param("joinTable") String joinTable, @Param("joinId") String joinId, @Param("objectNames") Collection<String> objectNames);
 
     @Modifying(clearAutomatically = true)
