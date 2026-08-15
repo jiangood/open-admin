@@ -26,7 +26,7 @@ export default class PermView extends React.Component {
             },
             {
                 title: '状态', dataIndex: 'status', key: 'status', width: 140,
-                render: (status) => {
+                render: (status) => { // NOSONAR: 返回元素或占位文本，类型不同属预期
                     if (status === 'mine') {
                         return <Tag color='blue'>我的机构</Tag>;
                     }
@@ -48,7 +48,7 @@ export default class PermView extends React.Component {
             },
             {
                 title: '状态', dataIndex: 'status', key: 'status', width: 140,
-                render: (status) => {
+                render: (status) => { // NOSONAR: 返回元素或占位文本，类型不同属预期
                     if (status === 'all') {
                         return <Tag color='green'>已授权</Tag>;
                     }

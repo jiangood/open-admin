@@ -41,8 +41,8 @@ export interface DownloadModalProps {
 }
 
 export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
-  private readonly abortController: AbortController | null = null;
-  private readonly lastOptions: DownloadOptions | null = null;
+  private abortController: AbortController | null = null;
+  private lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;
   private lastLoaded: number = 0;
   private speedTimer: ReturnType<typeof setInterval> | null = null;

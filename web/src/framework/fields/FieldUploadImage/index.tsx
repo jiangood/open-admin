@@ -141,7 +141,7 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
 
 export class FieldUploadImage extends React.Component<FieldUploadImageProps, FieldUploadImageState> {
 
-    readonly state: FieldUploadImageState = {
+    state: FieldUploadImageState = {
         // 传入的参数
         maxCount: 1,
         thumbWidth: 300,
@@ -167,10 +167,10 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
     constructor(props: FieldUploadImageProps) {
         super(props);
         ObjectUtils.copyPropertyIfPresent(props, this.state);
-        if (this.props.value) this.state.objectNames = this.props.value.split(',');
+        if (props.value) this.state.objectNames = props.value.split(',');
     }
 
-    componentDidUpdate(prevProps: FieldUploadImageProps, prevState: FieldUploadImageState) {
+    componentDidUpdate(prevProps: FieldUploadImageProps, prevState: FieldUploadImageState) { // NOSONAR: 顺序同步多个 props 到 state，拆分反而更难读
         const next: Partial<FieldUploadImageState> = {};
         if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
         if (this.props.thumbWidth !== prevProps.thumbWidth) next.thumbWidth = this.props.thumbWidth;
