@@ -50,7 +50,7 @@ public class ArticleFileClaimTest {
     }
 
     @Test
-    void update_shouldClaimNewMainImageAndReleaseOld() throws Exception {
+    void update_shouldClaimNewMainImageAndReleaseOld() {
         String oldImage = "public/img/202608/old-main.jpg";
         String newImage = "public/img/202608/new-main.jpg";
         saveFile(oldImage);
@@ -82,7 +82,7 @@ public class ArticleFileClaimTest {
     }
 
     @Test
-    void update_shouldReleaseContentImagesRemovedFromHtml() throws Exception {
+    void update_shouldReleaseContentImagesRemovedFromHtml() {
         String kept = "public/img/202608/11111111-1111-4111-8111-111111111111.jpg";
         String removed = "public/img/202608/22222222-2222-4222-8222-222222222222.jpg";
         String added = "public/img/202608/33333333-3333-4333-8333-333333333333.jpg";
