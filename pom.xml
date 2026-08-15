@@ -378,6 +378,7 @@
                                     <includes>
                                         <include>oa-crud/**</include>
                                         <include>oa-upgrade/**</include>
+                                        <include>oa-sonar-scan/**</include>
                                     </includes>
                                 </resource>
                                 <resource>

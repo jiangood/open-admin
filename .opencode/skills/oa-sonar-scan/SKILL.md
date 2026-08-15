@@ -29,8 +29,23 @@ Runs the open-admin repo through the local SonarQube (http://localhost:9000) wit
 
 ### 1. Run the Scan
 
+Framework 仓库（脚本封装好 token / projectKey / 覆盖率路径）：
+
 ```bash
 bash scripts/sonar-scan.sh
+```
+
+业务项目（无该脚本，直接用 mvn 命令，按需替换 `projectKey`）：
+
+```bash
+mvn -B -ntp verify sonar:sonar \
+  -Dsonar.login="$SONAR_TOKEN" \
+  -Dsonar.host.url="$SONAR_HOST_URL" \
+  -Dsonar.projectKey=<业务项目Key> \
+  -Dsonar.projectName=<业务项目名> \
+  -Dsonar.sources=src/main/java \
+  -Dsonar.java.binaries=target/classes \
+  -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 ```
 
 This runs `mvn verify` (all tests + JaCoCo report) then `sonar:sonar`, output ends with `ANALYSIS SUCCESSFUL` and the dashboard URL.
@@ -110,5 +125,5 @@ Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts
 
 ## Repository-Specific
 
-- Scan script: `scripts/sonar-scan.sh` (self-locating; only scans this repo)
-- Skill is **not** packaged into the framework JAR (pom only packages `oa-crud/**` + `oa-upgrade/**`) — it is local-development tooling, like `oa-publishing-release`
+- Framework 仓库内可用封装脚本 `scripts/sonar-scan.sh`（自定位、仅扫本仓库）；业务项目直接用上面的 mvn 命令
+- Skill 随 `oa-crud`/`oa-upgrade` 一起打包进框架 JAR，并在业务项目启动时同步到其根目录 `.opencode/skills/`（修改 = 修改框架对外 API）；`oa-publishing-release` 才是不进 JAR 的仓库专属 skill
