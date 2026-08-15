@@ -366,9 +366,10 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             fd.append('thumb', tFile);
             fd.append('isPublic', String(this.state.isPublic));
             const rs = await HttpUtils.post('admin/sysFile/uploadImage', fd);
-            const newNames = [...this.state.objectNames, rs.objectName];
-            this.setState({objectNames: newNames});
-            this.props.onChange?.(newNames.join(','));
+            this.setState(
+                (prevState) => ({objectNames: [...prevState.objectNames, rs.objectName]}),
+                () => this.props.onChange?.(this.state.objectNames.join(','))
+            );
             this.closeModal();
         } catch (e) {
             message.error(HttpUtils.extractErrorMessage(e));
@@ -378,9 +379,10 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
     };
 
     private removeImage = (name: string) => {
-        const newNames = this.state.objectNames.filter((n) => n !== name);
-        this.setState({objectNames: newNames});
-        this.props.onChange?.(newNames.join(','));
+        this.setState(
+            (prevState) => ({objectNames: prevState.objectNames.filter((n) => n !== name)}),
+            () => this.props.onChange?.(this.state.objectNames.join(','))
+        );
     };
 
     render() {
