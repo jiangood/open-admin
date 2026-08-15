@@ -27,9 +27,7 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     };
 
     merge(a: RangePartValue, b: RangePartValue): string {
-        const av = a ?? ''; // NOSONAR: 参数可能为 null 而非 undefined，默认参数无法覆盖
-        const bv = b ?? '';
-        return av + SP + bv;
+        return (a == null ? '' : a) + SP + (b == null ? '' : b);
     }
 
     parse(v: string | null | undefined): { a: number | null; b: number | null } {

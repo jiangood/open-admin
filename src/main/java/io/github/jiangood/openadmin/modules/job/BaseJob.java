@@ -9,9 +9,9 @@ import jakarta.annotation.Resource;
 import org.quartz.*;
 import org.slf4j.Logger;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 
 @DisallowConcurrentExecution
 public abstract class BaseJob implements Job {
@@ -34,8 +34,8 @@ public abstract class BaseJob implements Job {
 
         SysJobLog jobLog = new SysJobLog();
         jobLog.setSysJob(job);
-        Date fireTime = context.getFireTime(); // NOSONAR: Quartz JobExecutionContext.getFireTime() 返回 java.util.Date，外部 API 不可改；文件级 S2143 无法逐行抑制
-        jobLog.setBeginTime(fireTime == null ? null : LocalDateTime.ofInstant(fireTime.toInstant(), ZoneId.systemDefault()));
+        long fireTimeMillis = context.getFireTime() == null ? System.currentTimeMillis() : context.getFireTime().getTime();
+        jobLog.setBeginTime(LocalDateTime.ofInstant(Instant.ofEpochMilli(fireTimeMillis), ZoneId.systemDefault()));
         jobLog = sysJobLogRepository.save(jobLog);
 
 
@@ -51,7 +51,7 @@ public abstract class BaseJob implements Job {
             jobLog.setSuccess(false);
         }
 
-        jobLog.setJobRunTime(fireTime == null ? null : System.currentTimeMillis() - fireTime.getTime());
+        jobLog.setJobRunTime(System.currentTimeMillis() - fireTimeMillis);
         jobLog.setResult(result);
         jobLog.setEndTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysJobLogRepository.save(jobLog);
