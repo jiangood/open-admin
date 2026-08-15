@@ -3,8 +3,7 @@
 # 本地 SonarQube 扫描 — 跑全量测试（JaCoCo 覆盖率）+ sonar 分析，结果上传本地 SonarQube。
 #
 # 用法:
-#   bash scripts/sonar-scan.sh                      # 扫描当前仓库（默认）
-#   bash scripts/sonar-scan.sh <项目目录>           # 扫描指定项目
+#   bash scripts/sonar-scan.sh                      # 扫描当前仓库
 #   SONAR_HOST_URL=xxx SONAR_TOKEN=yyy bash scripts/sonar-scan.sh   # 或用环境变量覆盖
 #
 # 依赖: mvn（已配置）、本地 SonarQube（默认 http://localhost:9000）
@@ -14,12 +13,11 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_DIR="${1:-$ROOT}"
 
 SONAR_HOST_URL="${SONAR_HOST_URL:-http://localhost:9000}"
 SONAR_TOKEN="${SONAR_TOKEN:-squ_156b1e2938c4f5cac460156c4881ff06c6209d5e}"
 
-cd "$PROJECT_DIR"
+cd "$ROOT"
 
 mvn -B -ntp \
   verify \
