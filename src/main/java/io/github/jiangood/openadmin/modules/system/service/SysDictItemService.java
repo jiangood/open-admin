@@ -12,7 +12,7 @@ import java.util.List;
 public class SysDictItemService extends BaseService<SysDictItem> {
 
     @Transactional
-    public SysDictItem save(SysDictItem input, List<String> requestKeys) throws Exception {
+    public SysDictItem save(SysDictItem input, List<String> requestKeys) {
         if (input.isNew()) {
             return repository.save(input);
         }

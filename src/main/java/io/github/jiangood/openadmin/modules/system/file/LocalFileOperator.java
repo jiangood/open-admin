@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 @Slf4j
@@ -29,7 +30,7 @@ public class LocalFileOperator implements FileOperator {
     }
 
     @Override
-    public void saveFile(String key, File file) throws Exception {
+    public void saveFile(String key, File file) throws IOException {
         String absoluteFile = getAbsoluteFile(key);
         FileUtil.copyFile(file, new File(absoluteFile));
     }
@@ -39,7 +40,7 @@ public class LocalFileOperator implements FileOperator {
     }
 
     @Override
-    public InputStream getFileStream(String key) throws Exception {
+    public InputStream getFileStream(String key) throws IOException {
         // 判断文件存在不存在
         String absoluteFile = getAbsoluteFile(key);
         if (!FileUtil.exist(absoluteFile)) {
@@ -50,7 +51,7 @@ public class LocalFileOperator implements FileOperator {
     }
 
     @Override
-    public void downloadFile(String key, File target) throws Exception {
+    public void downloadFile(String key, File target) throws IOException {
         // 判断文件存在不存在
         String absoluteFile = getAbsoluteFile(key);
         FileUtil.copyFile(new File(absoluteFile), target);

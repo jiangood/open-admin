@@ -119,7 +119,7 @@ public class SysFileController {
      */
     @HasPermission("sys-file:delete")
     @PostMapping("deleteBatch")
-    public AjaxResult deleteBatch(@RequestBody List<String> ids) throws Exception {
+    public AjaxResult deleteBatch(@RequestBody List<String> ids) {
         return AjaxResult.ok().data(service.deleteBatch(ids));
     }
 }

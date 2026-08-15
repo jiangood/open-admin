@@ -118,7 +118,7 @@ public class SecurityConfig {
      */
     @Bean
     @Order(3)
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception { // NOSONAR: Spring Security HttpSecurity.build() 强制声明 throws Exception
         http.authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
         );

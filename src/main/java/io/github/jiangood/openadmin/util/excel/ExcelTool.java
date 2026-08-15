@@ -15,6 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -31,7 +32,7 @@ public class ExcelTool {
 
 
 
-    public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws Exception {
+    public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws IOException, ReflectiveOperationException {
         try (XSSFWorkbook wb = new XSSFWorkbook(is)) {
 
             XSSFSheet sheet = wb.getSheetAt(0);
@@ -86,7 +87,7 @@ public class ExcelTool {
         }
     }
 
-    public static <T> void exportExcel(Class<T> cls, List<T> list, OutputStream os) throws Exception {
+    public static <T> void exportExcel(Class<T> cls, List<T> list, OutputStream os) throws IOException {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
@@ -123,12 +124,12 @@ public class ExcelTool {
         }
     }
 
-    public static <T> void exportExcelToResponse(Class<T> cls, List<T> list, HttpServletResponse response, String filename) throws Exception {
+    public static <T> void exportExcelToResponse(Class<T> cls, List<T> list, HttpServletResponse response, String filename) throws IOException {
         ResponseTool.setDownloadHeader(filename, ResponseTool.CONTENT_TYPE_EXCEL, response);
         exportExcel(cls, list, response.getOutputStream());
     }
 
-    public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws Exception {
+    public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws IOException {
         ResponseTool.setDownloadExcelHeader(filename, response);
 
         try {

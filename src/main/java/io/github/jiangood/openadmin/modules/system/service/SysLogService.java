@@ -19,7 +19,7 @@ public class SysLogService extends BaseService<SysLog> {
     }
 
     @Transactional
-    public SysLog save(SysLog input, List<String> requestKeys) throws Exception {
+    public SysLog save(SysLog input, List<String> requestKeys) {
         if (input.isNew()) {
             return repository.save(input);
         }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 
 /**
@@ -21,7 +22,7 @@ public class SysFileLogController {
     private FileLogService fileLogService;
 
     @GetMapping("{key}")
-    public void log(@PathVariable String key, HttpServletResponse response) throws Exception {
+    public void log(@PathVariable String key, HttpServletResponse response) throws IOException {
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/plain; utf-8");
 

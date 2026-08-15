@@ -57,5 +57,5 @@ public abstract class BaseJob implements Job {
         FileLogTool.clear();
     }
 
-    public abstract String execute(JobDataMap data, Logger logger) throws Exception;
+    public abstract String execute(JobDataMap data, Logger logger) throws Exception; // NOSONAR: 任务实现体允许抛出任意受检异常，框架统一捕获记录
 }

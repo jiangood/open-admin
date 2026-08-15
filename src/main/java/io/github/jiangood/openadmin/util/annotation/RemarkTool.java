@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.util.annotation;
 
+import io.github.jiangood.openadmin.util.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -41,7 +42,7 @@ public class RemarkTool {
             Field f = t.getClass().getDeclaredField(t.name());
             Remark ann = f.getAnnotation(Remark.class);
             if (ann == null) {
-                throw new RuntimeException(t.getClass().getSimpleName() + "没有设置注解@Remark");
+                throw new BusinessException(t.getClass().getSimpleName() + "没有设置注解@Remark");
             }
             String remark = ann.value();
             return remark;

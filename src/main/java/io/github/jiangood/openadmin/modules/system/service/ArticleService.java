@@ -4,6 +4,7 @@ import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.modules.system.entity.Article;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.repository.ArticleRepository;
+import io.github.jiangood.openadmin.util.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,10 +23,10 @@ public class ArticleService extends BaseService<Article> {
     private final SysFileService sysFileService;
 
     @Transactional
-    public Article save(Article input, List<String> requestKeys) throws Exception {
+    public Article save(Article input, List<String> requestKeys) {
         if (input.isNew()) {
             if (articleRepository.existsByCode(input.getCode())) {
-                throw new RuntimeException("文章编码已存在");
+                throw new BusinessException("文章编码已存在");
             }
             Article result = articleRepository.save(input);
             // 与保存同事务认领文件：共享冲突时文章一并回滚，避免留下未认领的悬空引用
@@ -33,7 +34,7 @@ public class ArticleService extends BaseService<Article> {
             return result;
         }
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
-            throw new RuntimeException("文章编码已存在");
+            throw new BusinessException("文章编码已存在");
         }
         this.updateField(input, requestKeys);
         return articleRepository.findById(input.getId()).orElse(null);
@@ -51,7 +52,7 @@ public class ArticleService extends BaseService<Article> {
         Assert.notNull(old, "文章不存在");
 
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
-            throw new RuntimeException("文章编码已存在");
+            throw new BusinessException("文章编码已存在");
         }
 
         // 先取消认领旧文件引用（与保存同事务，保存失败整体回滚）

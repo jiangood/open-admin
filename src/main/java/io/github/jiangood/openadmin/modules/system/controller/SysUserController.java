@@ -55,7 +55,7 @@ public class SysUserController {
     @HasPermission("sys-user:read")
     @GetMapping("page")
     public AjaxResult page(String orgId, String roleId, String name, String account, String phone, Boolean enabled,
-                           @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
+                           @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<UserVO> page = sysUserService.getAll(orgId, roleId, name, account, phone, enabled, pageable);
 

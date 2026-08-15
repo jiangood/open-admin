@@ -27,7 +27,7 @@ public class SysLogController {
 
     @HasPermission("sys-log:read")
     @GetMapping("page")
-    public AjaxResult page(String dateRange, String operation, @PageableDefault(sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
+    public AjaxResult page(String dateRange, String operation, @PageableDefault(sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) {
         Spec<SysLog> q = Spec.of();
         q.betweenDateRange(SysLog.Fields.operationTime, dateRange, true);
         q.like(SysLog.Fields.operation, operation);

@@ -49,7 +49,7 @@ public class SysRoleController {
     @HasPermission("sys-role:read")
     @GetMapping("page")
     public AjaxResult page(String name, String code,
-                           @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
+                           @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysRole> q = Spec.of();
         q.like(SysRole.Fields.name, name);
         q.like(SysRole.Fields.code, code);

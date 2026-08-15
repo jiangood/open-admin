@@ -17,7 +17,7 @@ import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
 public class PermissionAspect {
 
     @Before("@annotation(hasPermission)")
-    public void checkPermission(HasPermission hasPermission) throws Throwable {
+    public void checkPermission(HasPermission hasPermission) {
         String permission = hasPermission.value();
 
         if (!hasPermission(permission)) {

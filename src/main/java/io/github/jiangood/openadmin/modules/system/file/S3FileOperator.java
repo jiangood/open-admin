@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 
@@ -38,7 +39,7 @@ public class S3FileOperator implements FileOperator {
     }
 
     @Override
-    public void save(String key, InputStream inputStream) throws Exception {
+    public void save(String key, InputStream inputStream) throws IOException {
         File tempFile = FileUtil.createTempFile();
         try {
             FileUtil.writeFromStream(inputStream, tempFile, true);
@@ -53,7 +54,7 @@ public class S3FileOperator implements FileOperator {
     }
 
     @Override
-    public void saveFile(String key, File file) throws Exception {
+    public void saveFile(String key, File file) throws IOException {
         s3Client.putObject(PutObjectRequest.builder()
                         .bucket(bucketName)
                         .key(key)
@@ -62,7 +63,7 @@ public class S3FileOperator implements FileOperator {
     }
 
     @Override
-    public InputStream getFileStream(String key) throws Exception {
+    public InputStream getFileStream(String key) throws IOException {
         return s3Client.getObject(GetObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
@@ -70,14 +71,14 @@ public class S3FileOperator implements FileOperator {
     }
 
     @Override
-    public void downloadFile(String key, File target) throws Exception {
+    public void downloadFile(String key, File target) throws IOException {
         try (InputStream is = getFileStream(key)) {
             FileUtil.writeFromStream(is, target, true);
         }
     }
 
     @Override
-    public void delete(String key) throws Exception {
+    public void delete(String key) throws IOException {
         s3Client.deleteObject(DeleteObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
