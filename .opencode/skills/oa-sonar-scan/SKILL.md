@@ -52,54 +52,34 @@ This runs `mvn verify` (all tests + JaCoCo report) then `sonar:sonar`, output en
 
 ### 2. Fetch Metrics
 
+框架仓库直接用封装好的查询脚本（等价 curl 命令见 `scripts/sonar-api.sh` 源码）：
+
 ```bash
-TOKEN=squ_156b1e2938c4f5cac460156c4881ff06c6209d5e
-curl -s "http://localhost:9000/api/measures/search?projectKeys=open-admin&metricKeys=bugs,vulnerabilities,code_smells,coverage&ps=20" -u "$TOKEN:" \
-  | node -e "const d=JSON.parse(require('fs').readFileSync(0)); for(const m of d.measures) console.log(m.metric,'=',m.value)"
+bash scripts/sonar-api.sh metrics      # bugs / vulnerabilities / code_smells / coverage
+bash scripts/sonar-api.sh newcode      # new_* 指标（period）
+bash scripts/sonar-api.sh gate         # Quality Gate 状态（逐条件）
+bash scripts/sonar-api.sh bugs         # 未解决 BUG 统计 + 明细
+bash scripts/sonar-api.sh vulns        # 未解决 VULNERABILITY
+bash scripts/sonar-api.sh issues <rule>      # 指定规则未解决问题
+bash scripts/sonar-api.sh issues-after <ISO> # createdAfter 之后的问题（定位 new code 引入）
+bash scripts/sonar-api.sh history      # 指标历史趋势
+bash scripts/sonar-api.sh analyses     # 分析历史（找 leak period 起点）
 ```
 
 Wait ~10s after `ANALYSIS SUCCESSFUL` before querying (server-side processing).
 
-> 框架仓库也可用封装好的 `bash scripts/sonar-api.sh <cmd>`（metrics / newcode / gate / bugs / vulns / issues / history / analyses），见 Step 3b 下方说明。
-
-### 2b. Fetch New Code Metrics (period)
-
-⚠️ `api/measures/search` **不返回** new_* 指标（全是 undefined）。必须用 `api/measures/component`，取 `period` 字段：
-
-```bash
-curl -s "http://localhost:9000/api/measures/component?component=open-admin&metricKeys=new_violations,new_bugs,new_vulnerabilities,new_code_smells,new_lines,new_coverage" -u "$TOKEN:" \
-  | node -e "const d=JSON.parse(require('fs').readFileSync(0)); for(const m of d.component.measures) console.log(m.metric,'=',m.period?.value, m.period?.bestValue===true?'(best)':'')"
-```
+业务项目（无脚本）：`SONAR_TOKEN=xxx SONAR_HOST_URL=http://localhost:9000 SONAR_PROJECT=<key>` 前缀同一命令即可；无该脚本时再照抄 `scripts/sonar-api.sh` 里的 curl。
 
 ### 3. List Unresolved Issues
 
 Always filter `resolved=false` — default search **includes already-fixed (CLOSED) issues** and will confuse the counts:
 
 ```bash
-curl -s "http://localhost:9000/api/issues/search?projectKeys=open-admin&types=BUG&resolved=false&ps=100" -u "$TOKEN:" \
-  | node -e "const d=JSON.parse(require('fs').readFileSync(0)); console.log('total',d.total); const c={}; for(const i of d.issues) c[i.rule]=(c[i.rule]||0)+1; console.log(c)"
+bash scripts/sonar-api.sh bugs
+bash scripts/sonar-api.sh vulns
 ```
 
-Also list the full details (rule / line / message) before fixing anything.
-
-### 3b. SonarQube API 速查（本会话实测，SonarQube 26.8）
-
-Base: `http://localhost:9000`，认证 `-u "$TOKEN:"`，token 见 `scripts/sonar-scan.sh`。
-
-| 用途 | 接口 | 备注 |
-|---|---|---|
-| 健康检查 | `api/system/status` | 扫描前确认 `status=UP` |
-| 总指标 | `api/measures/search?projectKeys=open-admin&metricKeys=bugs,vulnerabilities,code_smells,coverage` | new_* 指标**不在此** |
-| New Code 指标 | `api/measures/component?component=open-admin&metricKeys=new_violations,new_bugs,new_lines,...` | 取 `period` 字段；`measures/search` 的 new_* 全为 undefined |
-| 问题列表 | `api/issues/search?projectKeys=open-admin&resolved=false&ps=100` | 可加 `types=BUG`, `rules=...`, `createdAfter=...`；**必须 `resolved=false`** |
-| Quality Gate | `api/qualitygates/project_status?projectKey=open-admin` | `status` + 逐 `conditions`（actual/error） |
-| 分支/分析历史 | `api/project_branches/list`, `api/project_analyses/search` | 后者含 VERSION 事件，可定位 leak period 起点 |
-| 项目详情 | `api/components/show?component=open-admin` | analysisDate 等 |
-| new code 定义 | `api/settings/values?component=open-admin&keys=sonar.leak.period` | 默认 previous_version |
-| 历史趋势 | `api/measures/search_history?component=open-admin&metrics=bugs,code_smells,coverage` | 确认修复后存量真实下降 |
-| 规则/指标元数据 | `api/rules/search?q=S6819`, `api/metrics/search` | 查规则含义 |
-
-**坑**：`sinceLeakPeriod=true` 在 26.8 实测**不生效**（返回全量），定位 new code 期新问题用 `createdAfter=<上次分析时间>`（配合 `project_analyses/search` 找起点）。`api/issues/anti_patterns` 该版本不存在（404）。
+Also list the full details (rule / line / message) before fixing anything (add `issues <rule>` or a raw `api/issues/search` call per `sonar-api.sh` source).
 
 ### 4. Triage & Fix One By One
 
@@ -156,7 +136,7 @@ Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts
 
 - Forgetting `resolved=false` → counts include already-fixed issues
 - Trusting `api/issues/search` totals while server is still indexing (wait ~10s; if counts disagree with `api/measures`, re-query)
-- **Using `api/measures/search` for new-code metrics** → new_* returns `undefined`; use `api/measures/component` (Step 2b)
+- **Using `api/measures/search` for new-code metrics** → new_* returns `undefined`; use `api/measures/component` (i.e. `sonar-api.sh newcode`)
 - **Trusting `sinceLeakPeriod=true`** → does NOT work on SonarQube 26.8 (returns all issues); use `createdAfter=<leak period start analysis time>` instead
 - **Putting `// NOSONAR` on the wrong line** → must be on the same line as the finding (S1848 case)
 - **"Fixing" S1082 with `role="button"`** → triggers S6819 (new violation). Use native `<button>` from the start
@@ -169,7 +149,7 @@ Re-run `bash scripts/sonar-scan.sh`, then confirm with the **unresolved** counts
 
 - Frontend has **no typecheck script** (Vite/esbuild, no tsconfig) — verify with `cd web && npm run build`
 - Backend: `mvn clean compile` or targeted test
-- After each fix batch: re-scan, then confirm **both** overall counts (bugs/vulns) AND `new_violations` (Step 2b) went down / stayed 0
+- After each fix batch: re-scan, then confirm **both** overall counts (bugs/vulns) AND `new_violations` (`sonar-api.sh newcode`) went down / stayed 0
 
 ## Repository-Specific
 
