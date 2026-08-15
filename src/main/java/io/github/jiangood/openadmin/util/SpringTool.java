@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.util.ArrayUtil;
 import io.github.jiangood.openadmin.OpenAdminConfiguration;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Component
 public class SpringTool implements ApplicationContextAware {
     public SpringTool() {
@@ -206,8 +207,7 @@ public class SpringTool implements ApplicationContextAware {
             try {
                 applicationContext.publishEvent(event);
             } catch (Exception e) {
-                // 记录异常日志，防止异常被忽略
-                e.printStackTrace(); // 在实际项目中应使用日志框架记录
+                log.error("异步发布事件失败: {}", e.getMessage(), e);
             }
         });
     }
