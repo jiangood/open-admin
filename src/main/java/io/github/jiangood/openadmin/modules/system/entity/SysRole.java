@@ -6,6 +6,7 @@ import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
@@ -20,6 +21,7 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldNameConstants
+@EqualsAndHashCode(callSuper = true)
 public class SysRole extends BaseEntity {
 
     @JsonIgnore

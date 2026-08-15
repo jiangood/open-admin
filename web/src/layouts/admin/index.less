@@ -27,6 +27,9 @@
         color: rgba(0, 0, 0, 0.65);
         transition: color 0.2s;
         white-space: nowrap;
+        background: none;
+        border: none;
+        font: inherit;
 
         &:hover {
           color: var(--primary-color, var(--primary-color, #1961AC));
@@ -50,6 +53,9 @@
         align-items: center;
         padding: 0 0.5rem;
         cursor: pointer;
+        background: none;
+        border: none;
+        font: inherit;
 
         &:hover {
           background: var(--primary-color-hover, #4990CD);
@@ -74,6 +80,15 @@
       .logo-img {
         height: 36px;
         cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+
+        img {
+          height: 36px;
+        }
       }
 
       h3 {
