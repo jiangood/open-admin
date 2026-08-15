@@ -28,95 +28,95 @@ public class ExcelTool {
 
 
     public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws Exception {
-        XSSFWorkbook wb = new XSSFWorkbook(is);
+        try (XSSFWorkbook wb = new XSSFWorkbook(is)) {
 
-        XSSFSheet sheet = wb.getSheetAt(0);
+            XSSFSheet sheet = wb.getSheetAt(0);
 
-        removeEmptyRows(sheet);         // 删除空行
+            removeEmptyRows(sheet);         // 删除空行
 
-        // 解析注解
-        Map<String, String> labelField = new HashMap<>();
-        Field[] declaredFields = FieldUtils.getAllFields(cls);
-        for (Field field : declaredFields) {
-            ExcelColumn ann = field.getAnnotation(ExcelColumn.class);
-            if (ann != null) {
-                labelField.put(ann.value(), field.getName()); //  eg 年龄，age
-            }
-        }
-
-
-        XSSFRow header = sheet.getRow(0); // 表头
-        Map<Integer, String> indexField = new HashMap<>();
-        for (Cell cell : header) {
-            int columnIndex = cell.getColumnIndex();
-            String label = cell.getStringCellValue();
-            if (label != null) {
-                label = label.trim();
-
-                if (labelField.containsKey(label)) {
-                    indexField.put(columnIndex, labelField.get(label));
+            // 解析注解
+            Map<String, String> labelField = new HashMap<>();
+            Field[] declaredFields = FieldUtils.getAllFields(cls);
+            for (Field field : declaredFields) {
+                ExcelColumn ann = field.getAnnotation(ExcelColumn.class);
+                if (ann != null) {
+                    labelField.put(ann.value(), field.getName()); //  eg 年龄，age
                 }
             }
-        }
 
 
-        List<T> list = new ArrayList<>(sheet.getLastRowNum() + 1);
-        for (Row row : sheet) {
-            if (row.getRowNum() == 0) {
-                continue; // 忽略表头
-            }
-            T t = cls.getConstructor().newInstance();
-            list.add(t);
+            XSSFRow header = sheet.getRow(0); // 表头
+            Map<Integer, String> indexField = new HashMap<>();
+            for (Cell cell : header) {
+                int columnIndex = cell.getColumnIndex();
+                String label = cell.getStringCellValue();
+                if (label != null) {
+                    label = label.trim();
 
-            for (Cell cell : row) {
-                Object cellValue = getCellValue((XSSFCell) cell);
-                if (!StrUtil.isBlankIfStr(cellValue)) {
-                    String fieldName = indexField.get(cell.getColumnIndex());
-                    if (fieldName != null) {
-                        BeanUtil.setFieldValue(t, fieldName, cellValue);
+                    if (labelField.containsKey(label)) {
+                        indexField.put(columnIndex, labelField.get(label));
                     }
                 }
             }
+
+
+            List<T> list = new ArrayList<>(sheet.getLastRowNum() + 1);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) {
+                    continue; // 忽略表头
+                }
+                T t = cls.getConstructor().newInstance();
+                list.add(t);
+
+                for (Cell cell : row) {
+                    Object cellValue = getCellValue((XSSFCell) cell);
+                    if (!StrUtil.isBlankIfStr(cellValue)) {
+                        String fieldName = indexField.get(cell.getColumnIndex());
+                        if (fieldName != null) {
+                            BeanUtil.setFieldValue(t, fieldName, cellValue);
+                        }
+                    }
+                }
+            }
+            return list;
         }
-        wb.close();
-        return list;
     }
 
     public static <T> void exportExcel(Class<T> cls, List<T> list, OutputStream os) throws Exception {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet();
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet();
 
-        Field[] fieldArr = cls.getDeclaredFields();
-        List<Field> fieldList = Arrays.stream(fieldArr).filter(t -> t.isAnnotationPresent(ExcelColumn.class))
-                .sorted(Comparator.comparingInt(t -> t.getAnnotation(ExcelColumn.class).seq())).toList();
-        Assert.notEmpty(fieldList,"导出类的字段必须使用@ExcelColumn");
+            Field[] fieldArr = cls.getDeclaredFields();
+            List<Field> fieldList = Arrays.stream(fieldArr).filter(t -> t.isAnnotationPresent(ExcelColumn.class))
+                    .sorted(Comparator.comparingInt(t -> t.getAnnotation(ExcelColumn.class).seq())).toList();
+            Assert.notEmpty(fieldList,"导出类的字段必须使用@ExcelColumn");
 
-        // 添加表头
-        {
-            Row row = sheet.createRow(0);
-            for (int i = 0; i < fieldList.size(); i++) {
-                Field field = fieldList.get(i);
-                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                row.createCell(i).setCellValue(column.value());
+            // 添加表头
+            {
+                Row row = sheet.createRow(0);
+                for (int i = 0; i < fieldList.size(); i++) {
+                    Field field = fieldList.get(i);
+                    ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+                    row.createCell(i).setCellValue(column.value());
+                }
             }
-        }
 
-        // 表体
-        for (int i = 0; i < list.size(); i++) {
-            int rowIndex = i + 1;
-            XSSFRow row = sheet.createRow(rowIndex);
+            // 表体
+            for (int i = 0; i < list.size(); i++) {
+                int rowIndex = i + 1;
+                XSSFRow row = sheet.createRow(rowIndex);
 
-            T bean = list.get(i);
-            for (int col = 0; col < fieldList.size(); col++) {
-                Field f = fieldList.get(col);
-                Object fieldValue = BeanUtil.getFieldValue(bean, f.getName());
-                XSSFCell cell = row.createCell(col);
-                setValue(cell, fieldValue);
+                T bean = list.get(i);
+                for (int col = 0; col < fieldList.size(); col++) {
+                    Field f = fieldList.get(col);
+                    Object fieldValue = BeanUtil.getFieldValue(bean, f.getName());
+                    XSSFCell cell = row.createCell(col);
+                    setValue(cell, fieldValue);
+                }
             }
-        }
 
-        workbook.write(os);
-        workbook.close();
+            workbook.write(os);
+        }
     }
 
     public static <T> void exportExcelToResponse(Class<T> cls, List<T> list, HttpServletResponse response, String filename) throws Exception {
@@ -127,9 +127,11 @@ public class ExcelTool {
     public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws Exception {
         ResponseTool.setDownloadExcelHeader(filename, response);
 
-        workbook.write(response.getOutputStream());
-
-        workbook.close();
+        try {
+            workbook.write(response.getOutputStream());
+        } finally {
+            workbook.close();
+        }
     }
 
 
