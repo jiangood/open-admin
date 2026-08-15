@@ -1,8 +1,9 @@
 import React from "react";
-import {Button, Form, Table} from 'antd';
+import {Button, Form, Table, message} from 'antd';
 import type {FormInstance, TableProps} from 'antd';
 
 import {StringUtils} from "../../utils";
+import type {AjaxError} from "../../utils";
 
 import './index.less'
 
@@ -24,8 +25,15 @@ export interface ProTableRequestResult<T = any> {
 }
 
 export interface ProTableProps<T = any> {
-    /** 数据请求，框架自动注入 page/size/sort 参数 */
-    request: (params: Record<string, any>) => Promise<ProTableRequestResult<T>>;
+    /**
+     * 数据请求（回调式），框架自动注入 page/size/sort 参数。
+     * 页面实现需把 success/error 透传给 HttpClient：request = (params, success, error) => HttpClient.get(url, params, success, error)
+     */
+    request: (
+        params: Record<string, any>,
+        success: (data: ProTableRequestResult<T>) => void,
+        error?: (e: AjaxError) => void
+    ) => void;
     /** antd Table 列定义 */
     columns: TableProps<T>['columns'];
     /** 获取表格操作句柄（reload） */
@@ -151,18 +159,18 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
 
 
         this.setState({loading: true})
-        request(params).then(rs => {
-            const {content, totalElements, size,extData} = rs;
+        request(params, (rs: ProTableRequestResult<T>) => {
+            const {content, totalElements, size, extData} = rs;
 
-
-            this.setState({dataSource: content, total: Number(totalElements),pageSize:size})
+            this.setState({dataSource: content, total: Number(totalElements), pageSize: size})
             if (extData) {
                 this.setState({extData})
             }
             this.updateSelectedRows(content)
-
-        }).finally(() => {
             this.setState({loading: false})
+        }, (e: AjaxError) => {
+            this.setState({loading: false})
+            message.error(e.message)
         })
     }
 

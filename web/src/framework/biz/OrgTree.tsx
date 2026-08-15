@@ -1,6 +1,6 @@
 import {Alert, Skeleton, Tree} from 'antd';
 import React from 'react';
-import {HttpUtils} from "../utils";
+import {HttpClient} from "../utils";
 import {NamedIcon} from "../components/NamedIcon";
 
 interface OrgTreeProps {
@@ -22,7 +22,7 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
     }
 
     componentDidMount() {
-        HttpUtils.get('admin/sysOrg/tree').then(tree => {
+        HttpClient.get('admin/sysOrg/tree', null, tree => {
             this.setState({treeData: tree, treeDataLoading: false})
         })
     }

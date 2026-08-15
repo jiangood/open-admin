@@ -1,6 +1,6 @@
-import {Form, Modal} from 'antd';
+import {Form, Modal, message} from 'antd';
 import React from 'react';
-import {FieldDictSelect, FieldRemoteSelect, FieldSysOrgTree, HttpUtils} from "../../../framework";
+import {FieldDictSelect, FieldRemoteSelect, FieldSysOrgTree, HttpClient} from "../../../framework";
 
 
 export default class UserPerm extends React.Component {
@@ -20,7 +20,7 @@ export default class UserPerm extends React.Component {
     show(item) {
         this.setState({visible: true})
 
-        HttpUtils.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
+        HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}, rs => {
             this.setState({formValues: rs})
             this.formRef.current.setFieldsValue(rs)
         })
@@ -34,17 +34,17 @@ export default class UserPerm extends React.Component {
         })
 
 
-        HttpUtils.post('admin/sysUser/grant-perm', values).then(rs => {
+        HttpClient.post('admin/sysUser/grant-perm', values, null, () => {
             this.setState({
                 visible: false,
                 confirmLoading: false
             })
             this.props.onOk()
-        }).finally(() => {
+        }, e => {
+            message.error(HttpClient.errToMsg(e))
             this.setState({
                 confirmLoading: false
             })
-
         })
     }
 

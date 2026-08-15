@@ -2,7 +2,7 @@ import React from 'react';
 import {Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import "./index.less"
-import {HttpUtils, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT, OrgSwitcher} from "../../framework";
+import {HttpClient, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT, OrgSwitcher} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabLayout } from "./TabLayout";
@@ -50,7 +50,7 @@ export default class extends React.Component {
 
     initMenu = () => {
         this.setState({menuLoading: true})
-        HttpUtils.get('/admin/menu-info').then(info => {
+        HttpClient.get('/admin/menu-info', null, info => {
             const {menuTree, pathMenuMap, menuMap} = info
             this.setState({menuMap})
 
@@ -86,11 +86,11 @@ export default class extends React.Component {
             }
 
             this.setState({menuTree, pathMenuMap, topMenus, sideMenus, activeTopMenuKey, currentMenuKey})
+            this.setState({menuLoading: false})
 
-        }).catch(err => {
+        }, err => {
             console.error('加载菜单失败:', err)
             this.setState({menuTree: [], topMenus: [], sideMenus: []})
-        }).finally(()=>{
             this.setState({menuLoading: false})
         })
     }

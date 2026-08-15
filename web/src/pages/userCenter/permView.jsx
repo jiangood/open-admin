@@ -1,6 +1,6 @@
 import React from "react";
 import {Empty, Table, Tag} from "antd";
-import {HttpUtils, Gap} from "../../framework";
+import {HttpClient, Gap} from "../../framework";
 
 export default class PermView extends React.Component {
 
@@ -9,7 +9,7 @@ export default class PermView extends React.Component {
     }
 
     componentDidMount() {
-        HttpUtils.get('admin/userCenter/perms').then(rs => {
+        HttpClient.get('admin/userCenter/perms', null, rs => {
             this.setState({data: rs})
         })
     }

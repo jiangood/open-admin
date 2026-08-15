@@ -8,7 +8,7 @@ import {
     FieldRemoteSelect,
     FieldSysOrgTreeSelect,
     FormModal,
-    HttpUtils,
+    HttpClient,
     OrgTree,
     Page,
     ProTable,
@@ -35,15 +35,16 @@ export default class extends React.Component {
         })
     }
 
-    onFinishResetPwd = async values => {
-        await HttpUtils.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
-        message.success('重置密码成功')
-        this.setState({resetPwdUser: null})
-        this.tableRef.current?.reload()
+    onFinishResetPwd = values => {
+        HttpClient.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password}, null, () => {
+            message.success('重置密码成功')
+            this.setState({resetPwdUser: null})
+            this.tableRef.current?.reload()
+        })
     }
 
     handleDelete = r => {
-        HttpUtils.post('admin/sysUser/delete', {id: r.id}).then(rs => {
+        HttpClient.post('admin/sysUser/delete', {id: r.id}, null, () => {
             this.tableRef.current.reload();
         })
     }
@@ -137,20 +138,21 @@ export default class extends React.Component {
         },
     ];
 
-    onFinish = async values => {
+    onFinish = values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
-        const result = await HttpUtils.post(url, values)
-        if (result && result.password) {
-            this.setState({
-                addResultModal: {
-                    open: true,
-                    account: values.account,
-                    password: result.password,
-                }
-            })
-        }
-        this.tableRef.current.reload()
+        HttpClient.post(url, values, null, result => {
+            if (result && result.password) {
+                this.setState({
+                    addResultModal: {
+                        open: true,
+                        account: values.account,
+                        password: result.password,
+                    }
+                })
+            }
+            this.tableRef.current.reload()
+        })
     }
 
     render() {
@@ -171,9 +173,9 @@ export default class extends React.Component {
                                 <Button perm='sys-user:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                             </PermActions>
                         )}
-                        request={(params) => {
+                        request={(params, success, error) => {
                             params.orgId = this.state.currentOrgId
-                            return HttpUtils.get('admin/sysUser/page', params)
+                            return HttpClient.get('admin/sysUser/page', params, success, error)
                         }}
                         columns={this.columns}
                         searchFormRender={() => (

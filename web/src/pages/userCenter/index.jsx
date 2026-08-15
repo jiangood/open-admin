@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Card, Descriptions, Form, Input, Modal} from "antd";
 import PermView from "./permView";
-import {HttpUtils, history, Page} from "../../framework";
+import {HttpClient, history, Page} from "../../framework";
 
 export default class extends React.Component {
 
@@ -14,20 +14,20 @@ export default class extends React.Component {
     }
 
     componentDidMount() {
-        HttpUtils.get('admin/userCenter/info').then(rs => {
+        HttpClient.get('admin/userCenter/info', null, rs => {
             this.setState({info: rs})
         })
     }
 
     onPwdFinish = (values) => {
-        HttpUtils.post('admin/userCenter/update-pwd', values).then(() => {
+        HttpClient.post('admin/userCenter/update-pwd', values, null, () => {
             this.setState({changePwdOpen: false, changePwdSuccess: true});
         })
     }
 
-    pwdValidator = (rule, value) => {
-        return HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false})
-    }
+    pwdValidator = (rule, value) => new Promise((resolve, reject) => {
+        HttpClient.get("admin/sysUser/pwd-strength", {password: value}, resolve, (e) => reject(e.message))
+    })
 
     render() {
         const {info, changePwdOpen, changePwdSuccess} = this.state;

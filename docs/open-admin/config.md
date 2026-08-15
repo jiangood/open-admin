@@ -47,7 +47,7 @@
 | 后端 `application.yml` | `server.servlet.context-path` |
 | 前端 `web/.env` | `VITE_SERVER_SERVLET_CONTEXT_PATH` |
 
-前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `UrlUtils.contextPath(path)` 拼接。
+前端 `HttpClient` 自动带上 context-path 前缀；硬编码 URL 用 `UrlUtils.contextPath(path)` 拼接。
 
 ## 主题定制
 

@@ -4,7 +4,7 @@ import {DeleteOutlined, EyeOutlined, PlusOutlined} from "@ant-design/icons";
 import Compressor from "compressorjs";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import {HttpUtils} from "../../utils";
+import {HttpClient} from "../../utils";
 import {ObjectUtils} from "../../utils";
 import {UrlUtils} from "../../utils";
 import type {FieldProps} from '../types';
@@ -365,15 +365,19 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             fd.append('file', this.state.preview.cFile);
             fd.append('thumb', tFile);
             fd.append('isPublic', String(this.state.isPublic));
-            const rs = await HttpUtils.post('admin/sysFile/uploadImage', fd);
-            this.setState(
-                (prevState) => ({objectNames: [...prevState.objectNames, rs.objectName]}),
-                () => this.props.onChange?.(this.state.objectNames.join(','))
-            );
-            this.closeModal();
+            HttpClient.post('admin/sysFile/uploadImage', fd, null, (rs) => {
+                this.setState(
+                    (prevState) => ({objectNames: [...prevState.objectNames, rs.objectName]}),
+                    () => this.props.onChange?.(this.state.objectNames.join(','))
+                );
+                this.closeModal();
+                this.setState({uploading: false});
+            }, (e) => {
+                message.error(HttpClient.errToMsg(e));
+                this.setState({uploading: false});
+            });
         } catch (e) {
-            message.error(HttpUtils.extractErrorMessage(e));
-        } finally {
+            message.error(HttpClient.errToMsg(e));
             this.setState({uploading: false});
         }
     };

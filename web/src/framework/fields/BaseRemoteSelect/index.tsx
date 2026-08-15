@@ -1,7 +1,7 @@
 import React from 'react';
 import { Spin } from 'antd';
 import { debounce } from 'lodash';
-import { HttpUtils } from '../../utils';
+import { HttpClient } from '../../utils';
 
 interface BaseRemoteSelectState {
     data: any[];
@@ -67,28 +67,30 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
     // ========== 数据加载 ==========
 
-    private _loadData = async (searchText?: string) => {
+    private _loadData = (searchText?: string) => {
         const url = this.getUrl();
         const fetchId = ++this.fetchIdRef;
 
         this.setState({ loading: true });
 
-        try {
-            const data = await HttpUtils.get(url, this.getLoadParams(searchText));
+        const done = () => {
+            if (fetchId === this.fetchIdRef) {
+                this.setState({ loading: false });
+            }
+        };
 
+        HttpClient.get(url, this.getLoadParams(searchText), (data) => {
             if (fetchId === this.fetchIdRef) {
                 this.setState({ data: data || [] });
             }
-        } catch (error) {
+            done();
+        }, (error) => {
             console.warn('[BaseRemoteSelect] 加载失败:', error);
             if (fetchId === this.fetchIdRef) {
                 this.setState({ data: [] });
             }
-        } finally {
-            if (fetchId === this.fetchIdRef) {
-                this.setState({ loading: false });
-            }
-        }
+            done();
+        });
     };
 
     /**

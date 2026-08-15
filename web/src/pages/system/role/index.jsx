@@ -1,7 +1,7 @@
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber, Modal, Transfer} from 'antd'
 import React from 'react'
-import {FieldBoolean, FormModal, HttpUtils, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
+import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
 
 
 export default class extends React.Component {
@@ -29,20 +29,21 @@ export default class extends React.Component {
 
     handleEditUser = record => {
         this.setState({usersModalOpen: true, selectedRecord: record})
-        HttpUtils.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
+        HttpClient.get('admin/sysRole/user-list', {id: record.id}, rs => {
             this.setState({userList: rs.list, targetKeys: rs.selectedKeys})
         })
     }
 
-    onFinish = async values => {
+    onFinish = values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysRole/create' : 'admin/sysRole/update';
-        await HttpUtils.post(url, values)
-        this.tableRef.current.reload()
+        HttpClient.post(url, values, null, () => {
+            this.tableRef.current.reload()
+        })
     }
 
     handleDelete = record => {
-        HttpUtils.post('admin/sysRole/delete', {id: record.id}).then(rs => {
+        HttpClient.post('admin/sysRole/delete', {id: record.id}, null, () => {
             this.tableRef.current.reload()
         })
     }
@@ -126,9 +127,9 @@ export default class extends React.Component {
             id: this.state.selectedRecord.id,
             userIdList: this.state.targetKeys
         }
-        HttpUtils.post('admin/sysRole/grant-users', params).then(rs => {
+        HttpClient.post('admin/sysRole/grant-users', params, null, () => {
             this.setState({usersModalOpen: false, usersModalLoading: false})
-        }).catch(() => {
+        }, () => {
             this.setState({usersModalLoading: false})
         })
     }
@@ -145,7 +146,7 @@ export default class extends React.Component {
                         <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/sysRole/page', params)}
+                request={(params, success, error) => HttpClient.get('admin/sysRole/page', params, success, error)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <>

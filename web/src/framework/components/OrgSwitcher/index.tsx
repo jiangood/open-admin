@@ -1,6 +1,6 @@
 import React from "react";
 import {TreeSelect} from "antd";
-import {HttpUtils} from "../../utils";
+import {HttpClient} from "../../utils";
 
 interface OrgNode {
     title: string;
@@ -18,7 +18,7 @@ export class OrgSwitcher extends React.Component<{}, {tree: OrgNode[]; currentOr
     state = {tree: [], currentOrgId: null};
 
     componentDidMount() {
-        HttpUtils.get("admin/myOrgs").then(data => {
+        HttpClient.get("admin/myOrgs", null, data => {
             if (data) {
                 this.setState({tree: data.tree || [], currentOrgId: data.currentOrgId || null});
             }
@@ -26,9 +26,8 @@ export class OrgSwitcher extends React.Component<{}, {tree: OrgNode[]; currentOr
     }
 
     handleChange = (orgId: string) => {
-        HttpUtils.post("admin/switchOrg", {orgId}).then(() => {
+        HttpClient.post("admin/switchOrg", {orgId}, null, () => {
             setTimeout(() => location.reload(), 1000);
-        }).catch(() => {
         });
     };
 

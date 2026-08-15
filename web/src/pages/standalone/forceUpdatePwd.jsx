@@ -1,19 +1,19 @@
 import React from "react";
 import {Button, Form, Input, message} from "antd";
-import {HttpUtils, history} from "../../framework";
+import {HttpClient, history} from "../../framework";
 
 export default class extends React.Component {
 
     onFinish = (values) => {
-        HttpUtils.post('admin/userCenter/update-pwd', values).then(() => {
+        HttpClient.post('admin/userCenter/update-pwd', values, null, () => {
             message.success('修改密码成功，请重新登录');
             history.push('/public/login');
         })
     }
 
-    validator = (rule, value) => {
-        return HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false})
-    }
+    validator = (rule, value) => new Promise((resolve, reject) => {
+        HttpClient.get("admin/sysUser/pwd-strength", {password: value}, resolve, (e) => reject(e.message))
+    })
 
     render() {
         return (

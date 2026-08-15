@@ -6,7 +6,7 @@ import 'dayjs/locale/zh-cn';
 import {history, PageFrame} from "../framework";
 
 import AdminLayout from "./admin"
-import {HttpUtils, PageLoading, PageUtils, GlobalData, getThemeConfig, setThemeColors, EventBus} from "../framework";
+import {HttpClient, PageLoading, PageUtils, GlobalData, getThemeConfig, setThemeColors, EventBus} from "../framework";
 import {ErrorBoundary} from "../framework";
 import type {ThemeColors} from "../framework";
 
@@ -76,16 +76,16 @@ export class Layouts extends React.Component<LayoutsProps> {
     }
 
     loadSiteInfo() {
-        HttpUtils.get("/admin/public/site-info").then(data => {
+        HttpClient.get("/admin/public/site-info", null, data => {
             GlobalData.setSiteInfo(data);
             this.setState({siteInfoLoaded: true});
-        }).catch(() => {
+        }, () => {
             console.error('[Layout] 加载站点信息失败');
         });
     }
 
     loadLoginInfo() {
-        HttpUtils.get('/admin/public/login-info').then(data => {
+        HttpClient.get('/admin/public/login-info', null, data => {
             GlobalData.setDictInfo(data.dictInfo);
             GlobalData.setLoginInfo(data.loginInfo);
             GlobalData.setSiteArticles(data.siteArticles);
@@ -97,7 +97,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             }
 
             this.setState({loginChecked: true});
-        }).catch(() => {
+        }, () => {
             console.error('[Layout] 初始化应用失败');
             PageUtils.redirectToLogin();
         });

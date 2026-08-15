@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Select} from "antd";
 import type {TableColumnsType} from "antd";
 import {ProTable} from "../../components";
-import {HttpUtils} from "../../utils";
+import {HttpClient} from "../../utils";
 import type {FieldProps} from '../types';
 
 export interface FieldTableSelectProps extends FieldProps<string> {
@@ -66,9 +66,9 @@ export class FieldTableSelect extends React.Component<FieldTableSelectProps, Fie
                         }}>选择</Button>;
                 }
             }]}
-            request={(params) => {
+            request={(params, success, error) => {
                 params.selected = this.props.value;
-                return HttpUtils.get(this.props.url, params);
+                return HttpClient.get(this.props.url, params, success, error);
             }}>
         </ProTable>;
     };

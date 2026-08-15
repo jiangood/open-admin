@@ -1,6 +1,6 @@
 import {Avatar, Dropdown, Modal} from "antd";
 import React from "react";
-import {DeviceUtils, HttpUtils, PageUtils, GlobalData, getToken, history, EventBus, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {DeviceUtils, HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -28,10 +28,10 @@ export class HeaderRight extends React.Component {
     }
 
     logout = () => {
-        HttpUtils.post('admin/auth/logout').then(async () => {
+        HttpClient.post('admin/auth/logout', null, null, () => {
             localStorage.clear()
             this.setState({alertVisible: true})
-        }).catch(async e => {
+        }, e => {
             console.error('[HeaderRight] 退出登录失败:', e);
             this.setState({confirmVisible: true})
         })

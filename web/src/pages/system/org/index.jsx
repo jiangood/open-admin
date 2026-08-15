@@ -7,7 +7,7 @@ import {
     FieldRemoteTreeSelect,
     FieldUserSelect,
     FormModal, Gap,
-    HttpUtils,
+    HttpClient,
     NamedIcon,
     Page,
     PermActions,
@@ -36,9 +36,10 @@ export default class extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpUtils.get('admin/sysOrg/tree', this.state.params).then(rs => {
+        HttpClient.get('admin/sysOrg/tree', this.state.params, rs => {
             this.setState({treeData: rs})
-        }).finally(() => {
+            this.setState({treeLoading: false});
+        }, () => {
             this.setState({treeLoading: false});
         })
     }
@@ -46,7 +47,7 @@ export default class extends React.Component {
     handleDelete = () => {
         const {selectedOrg} = this.state
         if (!selectedOrg) return
-        HttpUtils.post('admin/sysOrg/delete', {id: selectedOrg.id}).then(() => {
+        HttpClient.post('admin/sysOrg/delete', {id: selectedOrg.id}, null, () => {
             this.setState({selectedOrg: null})
             this.loadTree()
         })
@@ -57,7 +58,7 @@ export default class extends React.Component {
             this.setState({selectedOrg: null})
             return
         }
-        HttpUtils.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
+        HttpClient.get("admin/sysOrg/detail", {id: selectedKeys[0]}, rs => {
             this.setState({selectedOrg: rs})
         })
     }
@@ -71,11 +72,12 @@ export default class extends React.Component {
         this.modalRef.current.open({...this.state.selectedOrg})
     }
 
-    handleModalFinish = async values => {
+    handleModalFinish = values => {
         const isNew = !values.id
         const url = isNew ? 'admin/sysOrg/create' : 'admin/sysOrg/update'
-        await HttpUtils.post(url, values)
-        this.loadTree()
+        HttpClient.post(url, values, null, () => {
+            this.loadTree()
+        })
     }
 
     onDraggableChange = e => {
@@ -216,7 +218,7 @@ export default class extends React.Component {
         const dragKey = dragNode.key;
         const dropPos = e.node.pos.split('-');
         const dropPosition = e.dropPosition - Number(dropPos[dropPos.length - 1]);
-        HttpUtils.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}).then(this.loadTree)
+        HttpClient.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}, null, () => this.loadTree())
     };
 }
 

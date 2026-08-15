@@ -13,7 +13,7 @@ import {
     Tag
 } from 'antd'
 import {PlusOutlined} from "@ant-design/icons";
-import {FormModal, HttpUtils, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
+import {FormModal, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -58,9 +58,9 @@ export default class extends React.Component {
     modalRef = React.createRef()
 
     componentDidMount() {
-        HttpUtils.get('admin/job/job-class-options').then(rs => {
+        HttpClient.get('admin/job/job-class-options', null, rs => {
             this.setState({jobClassOptions: rs})
-        }).catch(e => {
+        }, e => {
             console.error('[Job] 加载任务类选项失败:', e);
         })
     }
@@ -76,35 +76,36 @@ export default class extends React.Component {
     }
 
     loadJobParamFields(className, jobData) {
-        HttpUtils.post("admin/job/get-job-param-fields", jobData || {}, {className}).then(rs => {
+        HttpClient.post("admin/job/get-job-param-fields", jobData || {}, {className}, rs => {
             this.setState({paramList: rs})
-        }).catch(e => {
+        }, e => {
             console.error('[Job] 加载任务参数字段失败:', e);
         })
     }
 
-    onFinish = async values => {
+    onFinish = values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/job/create' : 'admin/job/update';
-        await HttpUtils.post(url, values)
-        this.tableRef.current.reload()
+        HttpClient.post(url, values, null, () => {
+            this.tableRef.current.reload()
+        })
     }
 
     handleDelete = row => {
         const hide = message.loading("删除任务中...")
-        HttpUtils.post('admin/job/delete', {id: row.id}).then(rs => {
+        HttpClient.post('admin/job/delete', {id: row.id}, null, () => {
             hide();
             this.tableRef.current.reload();
-        }).catch(e => {
+        }, e => {
             console.error('[Job] 删除任务失败:', e);
             hide();
         })
     }
 
     handleTriggerJob = row => {
-        HttpUtils.post('admin/job/trigger-job', {id: row.id}).then(rs => {
+        HttpClient.post('admin/job/trigger-job', {id: row.id}, null, () => {
             this.tableRef.current.reload();
-        }).catch(e => {
+        }, e => {
             console.error('[Job] 触发任务失败:', e);
         })
     }
@@ -167,9 +168,9 @@ export default class extends React.Component {
 
     showStatus = () => {
         this.setState({statusOpen: true})
-        HttpUtils.get('admin/job/status').then(rs => {
+        HttpClient.get('admin/job/status', null, rs => {
             this.setState({status: rs})
-        }).catch(e => {
+        }, e => {
             console.error('[Job] 加载状态失败:', e);
         })
     };
@@ -189,7 +190,7 @@ export default class extends React.Component {
                         <Button perm='job:read' onClick={this.showStatus}>查看状态</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/job/page', params)}
+                request={(params, success, error) => HttpClient.get('admin/job/page', params, success, error)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <>
@@ -295,9 +296,9 @@ export default class extends React.Component {
                             return <a href={url} target='_blank'>日志</a>;
                         },
                     }
-                ]} request={params => {
+                ]} request={(params, success, error) => {
                     params.jobId = this.state.selectedRecord.id
-                    return HttpUtils.get('admin/job/execute-record', params);
+                    return HttpClient.get('admin/job/execute-record', params, success, error);
                 }}></ProTable>
 
             </Modal>

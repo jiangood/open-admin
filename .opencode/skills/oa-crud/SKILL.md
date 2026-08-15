@@ -360,7 +360,7 @@ sysFileService.claim(result);
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, Popconfirm} from 'antd'
 import React from 'react'
-import {FormModal, HttpUtils, Page, PermActions, ProTable} from "@jiangood/open-admin";
+import {FormModal, HttpClient, Page, PermActions, ProTable} from "@jiangood/open-admin";
 
 export default class extends React.Component {
 
@@ -389,10 +389,10 @@ export default class extends React.Component {
     handleEdit = record => this.modalRef.current.open({...record})
     handleSubmit = values => {
         const url = values.id ? 'admin/customer/update' : 'admin/customer/create'
-        return HttpUtils.post(url, values).then(() => this.tableRef.current.reload())
+        HttpClient.post(url, values, null, () => this.tableRef.current.reload())
     }
     handleDelete = record => {
-        HttpUtils.post('admin/customer/delete', {id: record.id}).then(() => this.tableRef.current.reload())
+        HttpClient.post('admin/customer/delete', {id: record.id}, null, () => this.tableRef.current.reload())
     }
 
     render() {
@@ -404,7 +404,7 @@ export default class extends React.Component {
                         <Button perm='customer:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/customer/page', params)}
+                request={(params, success, error) => HttpClient.get('admin/customer/page', params, success, error)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <Form.Item label='名称' name='name'>

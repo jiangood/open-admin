@@ -8,7 +8,7 @@ import {
     FieldEditor,
     FieldUploadImage,
     FormModal,
-    HttpUtils,
+    HttpClient,
     Page,
     PageUtils,
     PermActions,
@@ -39,15 +39,16 @@ export default class extends React.Component {
         PageUtils.open('/article/' + record.code, record.title)
     }
 
-    onFinish = async values => {
+    onFinish = values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/article/create' : 'admin/article/update';
-        await HttpUtils.post(url, values)
-        this.tableRef.current.reload()
+        HttpClient.post(url, values, null, () => {
+            this.tableRef.current.reload()
+        })
     }
 
     handleDelete = record => {
-        HttpUtils.post('admin/article/delete', {id: record.id}).then(rs => {
+        HttpClient.post('admin/article/delete', {id: record.id}, null, () => {
             this.tableRef.current.reload()
         })
     }
@@ -116,7 +117,7 @@ export default class extends React.Component {
                         <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/article/page', params)}
+                request={(params, success, error) => HttpClient.get('admin/article/page', params, success, error)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <>

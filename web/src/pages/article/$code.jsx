@@ -1,5 +1,5 @@
 import React from "react";
-import {HttpUtils, Page, UrlUtils} from "../../framework";
+import {HttpClient, Page, UrlUtils} from "../../framework";
 import "./article.less";
 
 export default class extends React.Component {
@@ -12,9 +12,9 @@ export default class extends React.Component {
     componentDidMount() {
         const code = this.props.params?.code
         if (code) {
-            HttpUtils.get('admin/article/getByCode', {code}).then(rs => {
+            HttpClient.get('admin/article/getByCode', {code}, rs => {
                 this.setState({article: rs, loading: false})
-            }).catch(() => {
+            }, () => {
                 this.setState({loading: false})
             })
         } else {

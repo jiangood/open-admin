@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, Form, Input, message} from 'antd';
 import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import {EventBus, HttpUtils, GlobalData, history} from "../../framework";
+import {EventBus, HttpClient, GlobalData, history} from "../../framework";
 
 import "./login.less"
 
@@ -13,16 +13,15 @@ function getRedirect(query) {
     return redirect;
 }
 
-function postLogin(values, query) {
-    return new Promise((resolve, reject) => {
-        HttpUtils.post('/admin/auth/login', values).then(rs => {
-            EventBus.emit('loginSuccess')
-            history.push(getRedirect(query))
-            resolve(rs)
-        }).catch(e => {
-            console.error('[Login] 登录失败:', e);
-            reject(e)
-        })
+function postLogin(values, query, success, error) {
+    HttpClient.post('/admin/auth/login', values, null, rs => {
+        EventBus.emit('loginSuccess')
+        history.push(getRedirect(query))
+        success && success(rs)
+    }, e => {
+        console.error('[Login] 登录失败:', e);
+        message.error(HttpClient.errToMsg(e))
+        error && error(e)
     })
 }
 
@@ -47,15 +46,13 @@ export default class extends React.Component {
             return
         }
         // localStorage 中无站点信息，从服务端重新加载
-        HttpUtils.get('/admin/public/site-info', null, { showError: false })
-            .then(rs => {
-                GlobalData.setSiteInfo(rs)
-                this.setState({siteInfo: rs})
-            })
-            .catch(e => {
-                console.error('[Login] 加载站点信息失败:', e);
-                message.error('加载站点信息失败，请刷新页面重试')
-            })
+        HttpClient.get('/admin/public/site-info', null, rs => {
+            GlobalData.setSiteInfo(rs)
+            this.setState({siteInfo: rs})
+        }, () => {
+            console.error('[Login] 加载站点信息失败');
+            message.error('加载站点信息失败，请刷新页面重试')
+        })
     }
 
     submit = values => {
@@ -68,7 +65,9 @@ export default class extends React.Component {
             message.error('密码含不支持字符，请联系管理员重置')
             return
         }
-        postLogin(values, this.props.location?.query).finally(() => {
+        postLogin(values, this.props.location?.query, () => {
+            this.setState({logging: false})
+        }, () => {
             this.setState({logging: false})
         })
     }

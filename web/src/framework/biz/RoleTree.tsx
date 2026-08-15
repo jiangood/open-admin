@@ -1,7 +1,7 @@
 import {Skeleton, Tree} from 'antd';
 import React from 'react';
 import {SolutionOutlined} from '@ant-design/icons';
-import {HttpUtils} from "../utils";
+import {HttpClient} from "../utils";
 
 interface RoleTreeProps {
     onSelect?: (orgId: string | null) => void;
@@ -22,7 +22,7 @@ export class RoleTree extends React.Component<RoleTreeProps, RoleTreeState> {
     }
 
     componentDidMount() {
-        HttpUtils.get('admin/sysRole/biz-tree').then(tree => {
+        HttpClient.get('admin/sysRole/biz-tree', null, tree => {
             this.setState({treeData: tree, treeDataLoading: false})
         })
     }

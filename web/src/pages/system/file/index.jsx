@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, Form, Input, Modal, Space} from 'antd'
 import {CloudUploadOutlined} from "@ant-design/icons";
 
-import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpUtils, Page, ProTable, UrlUtils, ViewImage} from "../../../framework";
+import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpClient, Page, ProTable, UrlUtils, ViewImage} from "../../../framework";
 
 export default class extends React.Component {
 
@@ -15,13 +15,13 @@ export default class extends React.Component {
     formRef = React.createRef()
 
     handleDelete = row => {
-        HttpUtils.post('admin/sysFile/delete', {value: row.objectName}).then(rs => {
+        HttpClient.post('admin/sysFile/delete', {value: row.objectName}, null, () => {
             this.tableRef.current.reload()
         })
     }
 
     handleBatchDelete = ids => {
-        HttpUtils.post('admin/sysFile/deleteBatch', ids).then(rs => {
+        HttpClient.post('admin/sysFile/deleteBatch', ids, null, () => {
             this.tableRef.current.reload()
             this.tableRef.current.clearSelection()
         })
@@ -166,8 +166,8 @@ export default class extends React.Component {
                         />
                     </Space>
                 )}
-                request={(params) => {
-                    return HttpUtils.get('admin/sysFile/page', params);
+                request={(params, success, error) => {
+                    return HttpClient.get('admin/sysFile/page', params, success, error);
                 }}
 
                 columns={this.columns}

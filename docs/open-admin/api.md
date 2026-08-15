@@ -79,15 +79,15 @@ public class DataSyncJob extends BaseJob {
 表单弹框，推荐替代静态 `Modal.confirm()` 表单场景。通过 ref 调用 `open(values)` 打开（传入值则回填表单，否则重置），`onFinish` 返回 `Promise` 时自动控制提交 loading，完成后关闭弹框：
 
 ```jsx
-import { FormModal } from '@jiangood/open-admin';
+import { FormModal, HttpClient } from '@jiangood/open-admin';
 
 class CustomerPage extends React.Component {
   modalRef = React.createRef();
   handleAdd = () => this.modalRef.current.open({});
   handleEdit = record => this.modalRef.current.open({...record});
   handleSubmit = values =>
-    HttpUtils.post(values.id ? 'admin/customer/update' : 'admin/customer/create', values)
-      .then(() => this.tableRef.current.reload());
+    HttpClient.post(values.id ? 'admin/customer/update' : 'admin/customer/create', values, null,
+      () => this.tableRef.current.reload());
 
   render() {
     return <FormModal ref={this.modalRef} title="客户信息" onFinish={this.handleSubmit}>
@@ -140,13 +140,13 @@ import { PermActions } from '@jiangood/open-admin';
 
 #### ProTable
 
-`request` 接收 `{page, size, sort}` 及搜索表单值（params），返回 `{content, totalElements, extData}`（Spring Data Page 序列化结构）。`actionRef` 暴露 `reload()` / `clearSelection()`，`formRef` 暴露搜索表单实例：
+`request` 为回调式：接收 `(params, success, error)`（params 含 `{page, size, sort}` 及搜索表单值），成功回调返回 `{content, totalElements, extData}`（Spring Data Page 序列化结构）。`actionRef` 暴露 `reload()` / `clearSelection()`，`formRef` 暴露搜索表单实例：
 
 ```jsx
 <ProTable
   actionRef={this.tableRef}
   formRef={this.searchFormRef}
-  request={(params) => HttpUtils.get('admin/customer/page', params)}
+  request={(params, success, error) => HttpClient.get('admin/customer/page', params, success, error)}
   columns={columns}
   rowSelection={true}                    // true 为 checkbox，对象可覆盖 {type, onChange}
   treeMode                              // 树形数据模式（关闭分页，不传 page/size）
@@ -336,7 +336,7 @@ location /file/public/ {
 
 | 类 | 主要方法 |
 |----|---------|
-| `HttpUtils` | `get` / `post` / `postForm`（axios 封装，自动 context-path，返回 `data`） |
+| `HttpClient` | `get` / `post` / `postForm` / `download`（回调式 axios 封装，自动 context-path，`success` 回调直接收 `data`，`error` 回调统一收 `{code, message}`） |
 | `UrlUtils` | `contextPath(path)` 拼接 context-path / `getParams` / `setParam` / `getPathname` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `walk` / `findByKey` / `flattenTree` / `getKeyList` / `getChildRecursive` |

@@ -5,7 +5,7 @@ import {
     PermActions,
     FieldBoolean,
     FormModal,
-    HttpUtils,
+    HttpClient,
     Page,
     ProTable,
     ViewSwitch,
@@ -42,9 +42,10 @@ export default class extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpUtils.get('admin/dict/type-tree').then(rs => {
+        HttpClient.get('admin/dict/type-tree', null, rs => {
             this.setState({typeTree: rs})
-        }).finally(() => {
+            this.setState({treeLoading: false})
+        }, () => {
             this.setState({treeLoading: false})
         })
     }
@@ -62,17 +63,18 @@ export default class extends React.Component {
     handleTypeDelete = () => {
         const {selectedType} = this.state
         if (!selectedType) return
-        HttpUtils.post('admin/dict/type-delete', {id: selectedType.id}).then(() => {
+        HttpClient.post('admin/dict/type-delete', {id: selectedType.id}, null, () => {
             this.setState({selectedType: null, selectedTypeCode: null})
             this.loadTree()
         })
     }
 
-    handleTypeFormFinish = async values => {
+    handleTypeFormFinish = values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/type-create' : 'admin/dict/type-update'
-        await HttpUtils.post(url, values)
-        this.loadTree()
+        HttpClient.post(url, values, null, () => {
+            this.loadTree()
+        })
     }
 
     findNode = (nodes, key) => {
@@ -116,16 +118,17 @@ export default class extends React.Component {
     }
 
     handleItemDelete = row => {
-        HttpUtils.post('admin/dict/delete', row).then(rs => {
+        HttpClient.post('admin/dict/delete', row, null, () => {
             this.tableRef.current.reload()
         })
     }
 
-    onItemFormFinish = async values => {
+    onItemFormFinish = values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/create' : 'admin/dict/update'
-        await HttpUtils.post(url, values)
-        this.tableRef.current.reload()
+        HttpClient.post(url, values, null, () => {
+            this.tableRef.current.reload()
+        })
     }
 
     columns = [
@@ -220,9 +223,9 @@ export default class extends React.Component {
                         {hasTypeSelected && <ProTable
                                 rowKey='uid'
                                 actionRef={this.tableRef}
-                                request={(params) => {
+                                request={(params, success, error) => {
                                     params.typeCode = selectedTypeCode
-                                    return HttpUtils.get('admin/dict/page', params)
+                                    return HttpClient.get('admin/dict/page', params, success, error)
                                 }}
                                 columns={this.columns}
                             />
