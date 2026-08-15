@@ -190,7 +190,11 @@ public class JdbcRunnerImpl implements JdbcRunner {
     }
 
     private Dialect detectDialect() {
-        try (Connection conn = jdbc.getDataSource().getConnection()) {
+        DataSource dataSource = jdbc.getDataSource();
+        if (dataSource == null) {
+            throw new IllegalStateException("JdbcTemplate 未配置 DataSource，无法探测数据库方言");
+        }
+        try (Connection conn = dataSource.getConnection()) {
             String product = conn.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT);
             if (product.contains("oracle") || product.contains("sql server")) {
                 return Dialect.OFFSET_FETCH;

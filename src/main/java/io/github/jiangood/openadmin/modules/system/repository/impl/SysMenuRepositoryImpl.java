@@ -52,16 +52,17 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
                         .bind("menus", Bindable.mapOf(String.class, MenuDefinition.class))
                         .orElse(Map.of());
 
-                map.forEach((key, def) -> {
-                    if (def == null) return;
-                    def.setId(key);
-                    merged.merge(key, def, (oldVal, newVal) -> {
+                for (Map.Entry<String, MenuDefinition> entry : map.entrySet()) {
+                    MenuDefinition def = entry.getValue();
+                    if (def == null) continue;
+                    def.setId(entry.getKey());
+                    merged.merge(entry.getKey(), def, (oldVal, newVal) -> {
                         // 用 newVal 的非 null 字段覆盖 oldVal
                         BeanUtil.copyProperties(newVal, oldVal,
                                 CopyOptions.create().ignoreNullValue());
                         return oldVal;
                     });
-                });
+                }
             }
 
             return merged.values().stream()

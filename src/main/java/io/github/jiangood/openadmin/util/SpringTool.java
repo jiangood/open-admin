@@ -44,6 +44,9 @@ public class SpringTool implements ApplicationContextAware {
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
             Class<?> beanType = applicationContext.getType(beanName);
+            if (beanType == null) {
+                continue;
+            }
             SpringBootApplication springBootAnnotation = beanType.getAnnotation(SpringBootApplication.class);
             if (springBootAnnotation != null) {
                 list.add(beanType);
