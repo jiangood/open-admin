@@ -33,7 +33,7 @@ public class SysFileController {
 
 
     @HasPermission("sys-file:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String dateRange,
                            String originName,
                            String objectName,

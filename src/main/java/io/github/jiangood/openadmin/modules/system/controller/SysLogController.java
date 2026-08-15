@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,7 +26,7 @@ public class SysLogController {
 
 
     @HasPermission("sys-log:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String dateRange, String operation, @PageableDefault(sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
         Spec<SysLog> q = Spec.of();
         q.betweenDateRange(SysLog.Fields.operationTime, dateRange, true);

@@ -39,7 +39,7 @@ public class SysOrgController {
     private final SysUserService sysUserService;
     private final List<OrgTypeProvider> orgTypeProviders;
 
-    @RequestMapping("tree")
+    @GetMapping("tree")
     public AjaxResult tree(boolean onlyShowEnabled, boolean onlyShowUnit, String searchText, Integer type) {
         Spec<SysOrg> q = Spec.of();
 

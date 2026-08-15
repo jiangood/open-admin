@@ -45,7 +45,7 @@ public class SysRoleController {
     private final SysUserService sysUserService;
 
     @HasPermission("sys-role:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String name, String code,
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
         Spec<SysRole> q = Spec.of();
@@ -97,7 +97,7 @@ public class SysRoleController {
     }
 
 
-    @RequestMapping("biz-tree")
+    @GetMapping("biz-tree")
     public AjaxResult bizTree() {
         List<SysRole> list = sysRoleService.findValid();
 
@@ -114,7 +114,7 @@ public class SysRoleController {
     }
 
     @HasPermission("sys-role:read")
-    @RequestMapping("own-perms")
+    @GetMapping("own-perms")
     public AjaxResult ownPerms(String id) {
         SysRole role = sysRoleService.findById(id).orElse(null);
         if (role == null) {
@@ -146,13 +146,13 @@ public class SysRoleController {
      * @return
      */
     @HasPermission("sys-role:grant-permission")
-    @RequestMapping("perm-tree-table")
+    @GetMapping("perm-tree-table")
     public AjaxResult menuTree() {
         return AjaxResult.ok().data(sysMenuService.menuPermTree());
     }
 
     @HasPermission("sys-role:update")
-    @RequestMapping("save-perms")
+    @PostMapping("save-perms")
     public AjaxResult savePerms(@RequestBody SaveRolePermReq request) {
         SysRole sysRole = sysRoleService.savePerms(request.getId(), request.getPerms(), request.getMenus());
         for (SysUser user : sysRole.getUsers()) {
@@ -163,7 +163,7 @@ public class SysRoleController {
 
 
     @HasPermission("sys-role:read")
-    @RequestMapping("user-list")
+    @GetMapping("user-list")
     public AjaxResult userList(String id) {
         List<SysUser> users = sysUserService.findAll();
         List<Dict> list = users.stream().map(u -> Dict.of("key", u.getId(), "title", u.getName())).toList();
@@ -187,7 +187,7 @@ public class SysRoleController {
 
 
     @HasPermission("sys-role:grant-permission")
-    @RequestMapping("grant-users")
+    @PostMapping("grant-users")
     public AjaxResult saveUserList(@RequestBody GrantUserToRoleReq request) {
         List<String> oldUserIds = sysRoleService.findUsers(request.getId())
             .stream().map(BaseEntity::getId).toList();
@@ -204,7 +204,7 @@ public class SysRoleController {
         return AjaxResult.ok().msg("授权用户成功");
     }
 
-    @RequestMapping("options")
+    @GetMapping("options")
     public AjaxResult options(DropdownReq dropdownRequest) {
         String searchText = dropdownRequest.getSearchText();
         List<SysRole> list = sysRoleService.findValid();

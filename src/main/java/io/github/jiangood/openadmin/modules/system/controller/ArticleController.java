@@ -24,7 +24,7 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @HasPermission("article:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String code, String title,
                            @PageableDefault(sort = "seq") Pageable pageable) {
         var spec = articleService.spec();

@@ -45,7 +45,7 @@ public class SysJobController {
 
 
     @HasPermission("job:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String name, String jobClass, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws SchedulerException {
         return AjaxResult.ok().data(service.page(name, jobClass, pageable));
     }
@@ -165,7 +165,7 @@ public class SysJobController {
         return AjaxResult.ok().data(result);
     }
 
-    @RequestMapping("execute-record")
+    @GetMapping("execute-record")
     public AjaxResult executeRecordPage(@RequestParam String jobId, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysJobLog> q = Spec.of();
         q.eq(SysJobLog.Fields.sysJob + ".id", jobId);
@@ -176,7 +176,7 @@ public class SysJobController {
 
 
     @HasPermission("job:read")
-    @RequestMapping("status")
+    @GetMapping("status")
     public AjaxResult info() throws SchedulerException {
         SchedulerMetaData meta = scheduler.getMetaData();
 

@@ -51,7 +51,7 @@ public class SysUserController {
 
 
     @HasPermission("sys-user:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String orgId, String roleId, String name, String account, String phone, Boolean enabled,
                            @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
 
@@ -127,7 +127,7 @@ public class SysUserController {
     }
 
 
-    @RequestMapping("options")
+    @GetMapping("options")
     public AjaxResult options(DropdownReq dropdownRequest) {
         String searchText = dropdownRequest.getSearchText();
         Spec<SysUser> query = Spec.of();

@@ -72,7 +72,7 @@ public class SysDictController {
     }
 
     @HasPermission("sys-dict:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String typeCode, String code, String label) {
         List<DictItemVO> list = sysDictService.getAllItems();
         if (typeCode != null) {
