@@ -117,16 +117,14 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
     // ========== Helper 方法 ==========
 
-    // NOSONAR: 由子类通过 this.getShowSearch() 调用
-    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } {
+    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } { // NOSONAR: 由子类通过 this.getShowSearch() 调用
         return {
             filterOption: false,
             onSearch: this.handleSearch,
         };
     }
 
-    // NOSONAR: 由子类通过 this.getNotFoundContent() 调用
-    getNotFoundContent(): React.ReactNode {
+    getNotFoundContent(): React.ReactNode { // NOSONAR: 由子类通过 this.getNotFoundContent() 调用
         return this.state.loading ? <Spin size="small" /> : '数据为空';
     }
 }

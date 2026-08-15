@@ -61,8 +61,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     };
   }
 
-  // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
-  download = (options: DownloadOptions) => {
+  download = (options: DownloadOptions) => { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
     this.startDownload(options);
   };
 

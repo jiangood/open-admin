@@ -20,9 +20,9 @@ export function PageLoading(props: PageLoadingProps) { // NOSONAR: 仅读取 pro
                     <Spin indicator={<LoadingOutlined style={{fontSize: 48, color: primaryColor}} spin/>}/>
                 </div>
                 <div className="oa-page-loading-messages">
-                    {titles.map((msg, i) => ( // NOSONAR: 提示文案列表静态无稳定 key
+                    {titles.map((msg, i) => (
                         <Alert
-                            key={i}
+                            key={i} // NOSONAR: 提示文案列表静态无稳定 key
                             title={<span style={{color: primaryColor}}>{msg}</span>}
                             type="info"
                             showIcon

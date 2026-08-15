@@ -133,7 +133,7 @@ export default class OrgPage extends React.Component {
                                   onSelect={this.onSelect}
                                   showIcon
                                   blockNode
-                                  icon={item => <NamedIcon name={item.data.iconName}/>}
+                                  icon={item => <NamedIcon name={item.data.iconName}/>} // NOSONAR: AntD 渲染函数惯例
                                   draggable={this.state.draggable}
                                   onDrop={this.onDrop}
                                   showLine

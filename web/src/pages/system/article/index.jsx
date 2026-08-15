@@ -113,14 +113,14 @@ export default class ArticleListPage extends React.Component {
         >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => (
+                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
                 request={(params, success, error) => HttpClient.get('admin/article/page', params, success, error)}
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='编码' name='code'>
                             <Input/>

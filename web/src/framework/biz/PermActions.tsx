@@ -100,8 +100,8 @@ export class PermActions extends React.Component<PermActionsProps> {
         if (visible.length === 0) return null;
 
         if (!more || visible.length <= 1) {
-            const buttons = visible.map((action, index) => ( // NOSONAR: 按钮无稳定 id，静态过滤后顺序不变
-                <React.Fragment key={index}>{this.renderButton(action, size)}</React.Fragment>
+            const buttons = visible.map((action, index) => (
+                <React.Fragment key={index}>{this.renderButton(action, size)}</React.Fragment> // NOSONAR: 按钮无稳定 id，静态过滤后顺序不变
             ));
             return <Space>{buttons}</Space>;
         }

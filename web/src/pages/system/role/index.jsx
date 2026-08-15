@@ -142,14 +142,14 @@ export default class RolePage extends React.Component {
         >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => (
+                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
                 request={(params, success, error) => HttpClient.get('admin/sysRole/page', params, success, error)}
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='角色名称' name='name'>
                             <Input/>

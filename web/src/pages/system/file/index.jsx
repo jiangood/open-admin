@@ -151,7 +151,7 @@ export default class FilePage extends React.Component {
             <ProTable
                 actionRef={this.tableRef}
                 rowSelection={{}}
-                toolBarRender={(params, selection) => (
+                toolBarRender={(params, selection) => ( // NOSONAR: AntD 渲染函数惯例
                     <Space>
                         <Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
                         <PermActions
@@ -171,7 +171,7 @@ export default class FilePage extends React.Component {
                 }}
 
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='文件名' name='originName'>
                             <Input/>

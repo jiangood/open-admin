@@ -319,14 +319,16 @@ public class JdbcRunnerImpl implements JdbcRunner {
         }
     }
 
-    private static Object convertNumber(Number n, Class<?> type) { // NOSONAR: Class 无法作为 switch 选择子，保留 if 链
-        if (type == Integer.class || type == int.class) return n.intValue();
-        if (type == Long.class || type == long.class) return n.longValue();
-        if (type == Float.class || type == float.class) return n.floatValue();
-        if (type == Double.class || type == double.class) return n.doubleValue();
-        if (type == Short.class || type == short.class) return n.shortValue();
-        if (type == Byte.class || type == byte.class) return n.byteValue();
-        return n;
+    private static Object convertNumber(Number n, Class<?> type) {
+        return switch (type.getName()) {
+            case "java.lang.Integer", "int" -> n.intValue();
+            case "java.lang.Long", "long" -> n.longValue();
+            case "java.lang.Float", "float" -> n.floatValue();
+            case "java.lang.Double", "double" -> n.doubleValue();
+            case "java.lang.Short", "short" -> n.shortValue();
+            case "java.lang.Byte", "byte" -> n.byteValue();
+            default -> n;
+        };
     }
     private Map<String, Object> mapToMap(ResultSet rs) throws SQLException {
         ResultSetMetaData meta = rs.getMetaData();

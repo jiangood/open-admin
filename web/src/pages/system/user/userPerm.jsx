@@ -15,7 +15,7 @@ export default class UserPerm extends React.Component {
             dataPermType: null
         },
     }
-    formRef = React.createRef()
+    formRef = React.createRef() // NOSONAR: React ref，内部通过 this.formRef 使用
 
     show(item) {
         this.setState({visible: true})

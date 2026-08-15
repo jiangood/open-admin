@@ -184,7 +184,7 @@ export default class JobPage extends React.Component {
         return <Page>
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => (
+                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button type='primary' perm='job:create' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button>
                         <Button perm='job:read' onClick={this.showStatus}>查看状态</Button>
@@ -192,7 +192,7 @@ export default class JobPage extends React.Component {
                 )}
                 request={(params, success, error) => HttpClient.get('admin/job/page', params, success, error)}
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='名称' name='name'>
                             <Input/>
