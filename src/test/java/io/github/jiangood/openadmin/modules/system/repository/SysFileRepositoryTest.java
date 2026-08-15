@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-public class SysFileRepositoryTest {
+class SysFileRepositoryTest {
 
     @Autowired
     private SysFileRepository sysFileRepository;

@@ -12,7 +12,7 @@ import java.util.Collection;
 class SpecImpl<T, V> implements Specification<T> {
     private final SpecType type;
     private final String field;
-    private final V value;
+    private final V value; // NOSONAR: JPA Specification 仅用于查询构建，不进行 Java 序列化
 
     public SpecImpl(SpecType type, String field, V value) {
         this.type = type;

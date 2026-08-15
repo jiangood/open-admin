@@ -410,8 +410,8 @@ public class ExcelTool {
             cell.setBlank();
             return;
         }
-        if (value instanceof String) {
-            cell.setCellValue((String) value);
+        if (value instanceof String str) {
+            cell.setCellValue(str);
         } else if (value instanceof Number) {
             if (value instanceof Integer i) {
                 cell.setCellValue(String.valueOf(i));

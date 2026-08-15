@@ -31,6 +31,9 @@ import java.util.function.Function;
 
 public class JdbcRunnerImpl implements JdbcRunner {
 
+    private static final String SQL_SELECT_ALL_FROM = "select * from ";
+    private static final String SQL_WHERE_ID = " where id=?";
+
     private final JdbcTemplate jdbc;
 
     public JdbcRunnerImpl(DataSource dataSource) {
@@ -41,12 +44,12 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public <T> T findById(String table, Object id, Class<T> cls) {
-        return findOne(cls, "select * from " + validateIdentifier(table) + " where id=?", id);
+        return findOne(cls, SQL_SELECT_ALL_FROM + validateIdentifier(table) + SQL_WHERE_ID, id);
     }
 
     @Override
     public Map<String, Object> findById(String table, Object id) {
-        return findOne("select * from " + validateIdentifier(table) + " where id=?", id);
+        return findOne(SQL_SELECT_ALL_FROM + validateIdentifier(table) + SQL_WHERE_ID, id);
     }
 
     @Override
@@ -63,7 +66,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public <T> List<T> findAll(String table, Class<T> cls) {
-        return findAll(cls, "select * from " + validateIdentifier(table));
+        return findAll(cls, SQL_SELECT_ALL_FROM + validateIdentifier(table));
     }
 
     @Override
@@ -80,7 +83,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public <T> Page<T> findAll(String table, Pageable pageable, Class<T> cls) {
-        return findAll(cls, pageable, "select * from " + validateIdentifier(table));
+        return findAll(cls, pageable, SQL_SELECT_ALL_FROM + validateIdentifier(table));
     }
 
     @Override
@@ -146,7 +149,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public boolean existsById(String table, Object id) {
-        Long count = findLong("select count(*) from " + validateIdentifier(table) + " where id=?", id);
+        Long count = findLong("select count(*) from " + validateIdentifier(table) + SQL_WHERE_ID, id);
         return count != null && count > 0;
     }
 
@@ -226,7 +229,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
                 return 0; // 除 id 外无其他列，无需更新
             }
             params.add(id);
-            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + " where id=?", params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
+            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + SQL_WHERE_ID, params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
         }
         StringJoiner cols = new StringJoiner(",");
         StringJoiner vals = new StringJoiner(",");
@@ -241,7 +244,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public int deleteById(String table, Object id) {
-        return jdbc.update("delete from " + validateIdentifier(table) + " where id=?", id); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
+        return jdbc.update("delete from " + validateIdentifier(table) + SQL_WHERE_ID, id); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
     }
 
     @Override

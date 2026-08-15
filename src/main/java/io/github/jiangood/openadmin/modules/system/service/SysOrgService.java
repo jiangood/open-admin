@@ -26,7 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -121,16 +120,16 @@ public class SysOrgService extends BaseService<SysOrg> {
     }
 
     public List<SysOrg> getLeafs(Collection<SysOrg> orgs) {
-        return orgs.stream().filter(o -> this.checkIsLeaf(o.getId())).collect(Collectors.toList());
+        return orgs.stream().filter(o -> this.checkIsLeaf(o.getId())).toList();
     }
 
     public List<String> getLeafIds(Collection<String> orgs) {
-        return orgs.stream().filter(this::checkIsLeaf).collect(Collectors.toList());
+        return orgs.stream().filter(this::checkIsLeaf).toList();
     }
 
     public List<String> findChildIdListById(String id) {
         List<SysOrg> list = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
-        return list.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return list.stream().map(BaseEntity::getId).toList();
     }
 
     public List<SysOrg> findDirectChildUnit(String id) {
@@ -147,7 +146,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     public List<SysOrg> findByTypeAndLevel(Integer type, int orgLevel) {
         List<SysOrg> all = sysOrgRepository.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, type), Sort.by(SysOrg.Fields.seq));
-        return all.stream().filter(o -> this.findLevelById(o.getId()) == orgLevel).collect(Collectors.toList());
+        return all.stream().filter(o -> this.findLevelById(o.getId()) == orgLevel).toList();
     }
 
     public SysUser getDeptLeader(String userId) {
@@ -199,10 +198,10 @@ public class SysOrgService extends BaseService<SysOrg> {
         List<SysOrg> result = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
 
         if (type != null) {
-            result = result.stream().filter(o -> type.equals(o.getType())).collect(Collectors.toList());
+            result = result.stream().filter(o -> type.equals(o.getType())).toList();
         }
 
-        return result.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return result.stream().map(BaseEntity::getId).toList();
     }
 
     public void cleanCache() {
@@ -224,7 +223,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     public List<String> findDirectChildUnitId(String id) {
         List<SysOrg> list = this.findDirectChildUnit(id, null);
-        return list.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return list.stream().map(BaseEntity::getId).toList();
     }
 
     public int findLevelById(String id) {

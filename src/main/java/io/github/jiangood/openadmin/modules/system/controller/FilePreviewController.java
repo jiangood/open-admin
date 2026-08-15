@@ -37,6 +37,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FilePreviewController {
 
+    private static final String ACCEPT_RANGES_VAL = "bytes";
+
     private final SysFileService service;
 
     private final Set<String> allowedPreviewTypes = Set.of(
@@ -92,7 +94,7 @@ public class FilePreviewController {
                         .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
                         .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSize()))
                         .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
-                        .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                        .header(HttpHeaders.ACCEPT_RANGES, ACCEPT_RANGES_VAL)
                         .body(new MyStreamingResponseBody(inputStream));
             }
 
@@ -121,7 +123,7 @@ public class FilePreviewController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
                     .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(file.getSize()))
-                    .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                    .header(HttpHeaders.ACCEPT_RANGES, ACCEPT_RANGES_VAL)
                     .body(new MyStreamingResponseBody(inputStream));
         }
         long rangeStart = range[0];
@@ -131,7 +133,7 @@ public class FilePreviewController {
 
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                 .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
-                .header(HttpHeaders.ACCEPT_RANGES, "bytes")
+                .header(HttpHeaders.ACCEPT_RANGES, ACCEPT_RANGES_VAL)
                 .header(HttpHeaders.CONTENT_RANGE, "bytes " + rangeStart + "-" + rangeEnd + "/" + fileSize)
                 .header(HttpHeaders.CONTENT_LENGTH, String.valueOf(contentLength))
                 .body(new MyStreamingResponseBody(inputStream, rangeStart, contentLength));

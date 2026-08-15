@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -184,7 +185,7 @@ public class SysUserService extends BaseService<SysUser> {
         PasswordTool.validateStrength(newPassword);
 
         sysUser.setPassword(PasswordTool.encode(newPassword));
-        sysUser.setLastPasswordChangeTime(LocalDateTime.now());
+        sysUser.setLastPasswordChangeTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysUserRepository.save(sysUser);
     }
 
@@ -230,7 +231,7 @@ public class SysUserService extends BaseService<SysUser> {
         // 超级管理员返回所有
         if (dataPermType == DataPermType.ALL) {
             List<SysOrg> all = sysOrgService.findAll();
-            return all.stream().map(BaseEntity::getId).collect(Collectors.toList());
+            return all.stream().map(BaseEntity::getId).toList();
         }
 
         String orgId = user.getUnitId();
@@ -240,7 +241,7 @@ public class SysUserService extends BaseService<SysUser> {
             case CHILDREN:
                 return sysOrgService.findChildIdListWithSelfById(orgId);
             case CUSTOM:
-                return user.getDataPerms().stream().map(BaseEntity::getId).collect(Collectors.toList());
+                return user.getDataPerms().stream().map(BaseEntity::getId).toList();
         }
 
         throw new IllegalStateException("有未处理的类型" + dataPermType);
@@ -402,8 +403,8 @@ public class SysUserService extends BaseService<SysUser> {
         GrantUserPermReq p = new GrantUserPermReq();
         p.setId(user.getId());
         p.setDataPermType(user.getDataPermType());
-        p.setOrgIds(user.getDataPerms().stream().map(BaseEntity::getId).collect(Collectors.toList()));
-        p.setRoleIds(user.getRoles().stream().map(BaseEntity::getId).collect(Collectors.toList()));
+        p.setOrgIds(user.getDataPerms().stream().map(BaseEntity::getId).toList());
+        p.setRoleIds(user.getRoles().stream().map(BaseEntity::getId).toList());
 
         return p;
     }

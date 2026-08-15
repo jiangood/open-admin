@@ -29,7 +29,7 @@ public class SysRole extends BaseEntity {
     @JoinTable(name = "sys_user_role",
             inverseJoinColumns = @JoinColumn(name = "user_id", nullable = false),
             joinColumns = @JoinColumn(name = "role_id", nullable = false))
-    Set<SysUser> users = new HashSet<>();
+    Set<SysUser> users = new HashSet<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     @Remark("名称")
     @Column(length = 50, unique = true)
     private String name;

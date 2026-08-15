@@ -27,13 +27,13 @@ public class ConvertTool {
         }
 
         // 处理空字符串的情况
-        if (value instanceof String && ((String) value).trim().isEmpty()) {
+        if (value instanceof String s && s.trim().isEmpty()) {
             return null;
         }
 
         // 修复数字转枚举时，输入为long的异常（常见于数据取值）
-        if (Enum.class.isAssignableFrom(type) && value instanceof Long) {
-            value = ((Long) value).intValue();
+        if (Enum.class.isAssignableFrom(type) && value instanceof Long l) {
+            value = l.intValue();
         }
 
         if (type.isAssignableFrom(List.class) && genericTypes != null && genericTypes.length == 1) {
@@ -51,39 +51,39 @@ public class ConvertTool {
 
         try {
             // 特殊处理数值范围检查
-            if (type == Byte.class && value instanceof String) {
+            if (type == Byte.class && value instanceof String s1) {
                 try {
-                    Byte.parseByte((String) value);
+                    Byte.parseByte(s1);
                 } catch (NumberFormatException e) {
                     return null;
                 }
-            } else if (type == Short.class && value instanceof String) {
+            } else if (type == Short.class && value instanceof String s2) {
                 try {
-                    Short.parseShort((String) value);
+                    Short.parseShort(s2);
                 } catch (NumberFormatException e) {
                     return null;
                 }
-            } else if (type == Integer.class && value instanceof String) {
+            } else if (type == Integer.class && value instanceof String s3) {
                 try {
-                    Integer.parseInt((String) value);
+                    Integer.parseInt(s3);
                 } catch (NumberFormatException e) {
                     return null;
                 }
-            } else if (type == Long.class && value instanceof String) {
+            } else if (type == Long.class && value instanceof String s4) {
                 try {
-                    Long.parseLong((String) value);
+                    Long.parseLong(s4);
                 } catch (NumberFormatException e) {
                     return null;
                 }
-            } else if (type == Float.class && value instanceof String) {
+            } else if (type == Float.class && value instanceof String s5) {
                 try {
-                    Float.parseFloat((String) value);
+                    Float.parseFloat(s5);
                 } catch (NumberFormatException e) {
                     return null;
                 }
-            } else if (type == Double.class && value instanceof String) {
+            } else if (type == Double.class && value instanceof String s6) {
                 try {
-                    Double.parseDouble((String) value);
+                    Double.parseDouble(s6);
                 } catch (NumberFormatException e) {
                     return null;
                 }

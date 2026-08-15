@@ -18,7 +18,7 @@ import java.util.List;
 public class SysDictType extends BaseEntity {
 
     @Transient
-    List<SysDictType> children;
+    List<SysDictType> children; // NOSONAR: 仅 Jackson 序列化，加 transient 会丢失 JSON 输出
 
     private String pid;
 

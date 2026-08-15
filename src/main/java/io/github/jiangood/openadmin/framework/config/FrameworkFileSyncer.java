@@ -139,7 +139,7 @@ public class FrameworkFileSyncer implements CommandLineRunner {
             return List.of();
         }
         if (Files.isDirectory(source)) {
-            return readPayloadDir(source.resolve("META-INF").resolve("open-admin").resolve("framework-files"));
+            return readPayloadDir(source.resolve("META-INF").resolve(FRAMEWORK_ARTIFACT).resolve("framework-files"));
         }
         if (Files.isRegularFile(source)) {
             return readPayloadJar(source);

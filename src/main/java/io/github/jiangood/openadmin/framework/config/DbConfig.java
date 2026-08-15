@@ -64,7 +64,7 @@ public class DbConfig {
         private final List<StartupHook> startupHooks;
         private final JdbcRunner db;
         public PreDdlDataSourceScriptDatabaseInitializer(DataSource dataSource, JdbcRunner db, List<StartupHook> startupHooks) {
-            super(dataSource, null);
+            super(dataSource, null); // NOSONAR: 有意不执行 SQL 脚本（见类注释），Spring 构造器参数允许 null
             this.startupHooks = startupHooks;
             this.db = db;
         }

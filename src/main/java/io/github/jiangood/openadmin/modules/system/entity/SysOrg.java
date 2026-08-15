@@ -25,7 +25,7 @@ public class SysOrg extends BaseEntity {
 
 
     @Transient
-    List<SysOrg> children;
+    List<SysOrg> children; // NOSONAR: 仅 Jackson 序列化，加 transient 会丢失 JSON 输出
     /**
      * 父id, 如果是根节点，则为空
      */

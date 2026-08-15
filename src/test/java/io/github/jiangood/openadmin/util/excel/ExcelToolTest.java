@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -59,7 +58,8 @@ class ExcelToolTest {
     @Test
     void testGetRowHeight() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
             XSSFRow row = sheet.createRow(0);
 
@@ -68,9 +68,8 @@ class ExcelToolTest {
 
             Integer height = ExcelTool.getRowHeight(row);
             assertEquals(20, height);
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
@@ -82,7 +81,8 @@ class ExcelToolTest {
     @Test
     void testSetValue() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
             // 测试设置值
@@ -90,15 +90,15 @@ class ExcelToolTest {
             XSSFCell cell = ExcelTool.getCellByCoords(sheet, "A1");
             assertNotNull(cell);
             assertEquals("Test Value", cell.getStringCellValue());
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
     void testGetCellValue() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
             XSSFRow row = sheet.createRow(0);
 
@@ -116,9 +116,8 @@ class ExcelToolTest {
             XSSFCell booleanCell = row.createCell(2);
             booleanCell.setCellValue(true);
             assertEquals(true, ExcelTool.getCellValue(booleanCell));
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
@@ -129,7 +128,8 @@ class ExcelToolTest {
     @Test
     void testRemoveRow() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
             // 创建两行数据
@@ -144,15 +144,15 @@ class ExcelToolTest {
             assertEquals(2, sheet.getLastRowNum() + 1);
             assertEquals("Row 1", sheet.getRow(0).getCell(0).getStringCellValue());
             assertEquals("Row 3", sheet.getRow(1).getCell(0).getStringCellValue());
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
     void testIsEmpty() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
             // 测试空行
@@ -163,9 +163,8 @@ class ExcelToolTest {
             XSSFRow nonEmptyRow = sheet.createRow(1);
             nonEmptyRow.createCell(0).setCellValue("Test Value");
             assertFalse(ExcelTool.isEmpty(nonEmptyRow));
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     // 测试用的实体类

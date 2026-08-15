@@ -16,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -38,7 +39,7 @@ public class CleanTempFileJob extends BaseJob {
     @Override
     public String execute(JobDataMap data, Logger logger) throws Exception {
         int cleanMinutes = systemProperties.getFile().getCleanUnclaimedMinutes();
-        LocalDateTime deadline = LocalDateTime.now().minusMinutes(cleanMinutes);
+        LocalDateTime deadline = LocalDateTime.now(ZoneId.systemDefault()).minusMinutes(cleanMinutes);
 
         // 1. 标记超时未认领为待删除（TEMP -> PENDING_DELETE）
         int unclaimedCount = sysFileRepository.updateStatusByStatusAndCreateTimeBefore(

@@ -31,7 +31,7 @@ public class SysUser extends BaseEntity {
     @JoinTable(name = "sys_user_role",
             joinColumns = @JoinColumn(name = "user_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
-    Set<SysRole> roles = new HashSet<>();
+    Set<SysRole> roles = new HashSet<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     // 数据权限类型
     @Enumerated(EnumType.STRING)
     DataPermType dataPermType;
@@ -39,7 +39,7 @@ public class SysUser extends BaseEntity {
     @Lazy
     @ManyToMany
     @JoinTable(name = "sys_user_data_perm", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "org_id"))
-    List<SysOrg> dataPerms = new ArrayList<>();
+    List<SysOrg> dataPerms = new ArrayList<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     /**
      * 所属机构 (公司，单位级别）
      */

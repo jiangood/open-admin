@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * （包名参考 org.springframework.data.domain.Page）
@@ -19,7 +18,7 @@ import java.util.stream.Collectors;
 public class PageExt<T> extends org.springframework.data.domain.PageImpl<T> {
 
 
-    private Map<String, Object> extData = new HashMap<>();
+    private Map<String, Object> extData = new HashMap<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
 
     private PageExt(List<T> content, Pageable pageable, long total) {
         super(content, pageable, total);
@@ -60,7 +59,7 @@ public class PageExt<T> extends org.springframework.data.domain.PageImpl<T> {
      * 调整 Page的内容为另外一个类型
      */
     public <R> PageExt<R> convert(Function<T, R> fn) {
-        List<R> content = this.getContent().stream().map(fn).collect(Collectors.toList());
+        List<R> content = this.getContent().stream().map(fn).toList();
         return new PageExt<>(content, this.getPageable(), this.getTotalElements());
     }
 

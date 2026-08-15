@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-public class ArticleFileClaimTest {
+class ArticleFileClaimTest {
 
     @Autowired
     private ArticleController articleController;

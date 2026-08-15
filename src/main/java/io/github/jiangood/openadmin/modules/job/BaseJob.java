@@ -53,7 +53,7 @@ public abstract class BaseJob implements Job {
 
         jobLog.setJobRunTime(fireTime == null ? null : System.currentTimeMillis() - fireTime.getTime());
         jobLog.setResult(result);
-        jobLog.setEndTime(LocalDateTime.now());
+        jobLog.setEndTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysJobLogRepository.save(jobLog);
         logger.info("执行结束 返回值{}", result);
         FileLogTool.clear();

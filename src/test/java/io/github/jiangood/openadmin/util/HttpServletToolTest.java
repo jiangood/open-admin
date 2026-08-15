@@ -46,9 +46,7 @@ class HttpServletToolTest {
         // 测试当RequestAttributes为null时的情况
         requestContextHolderMock.when(RequestContextHolder::getRequestAttributes).thenReturn(null);
         // 当RequestAttributes为null时，应该抛出IllegalStateException异常
-        assertThrows(IllegalStateException.class, () -> {
-            HttpServletTool.getRequest();
-        });
+        assertThrows(IllegalStateException.class, HttpServletTool::getRequest);
     }
 
     @Test
@@ -66,9 +64,7 @@ class HttpServletToolTest {
         // 测试当RequestAttributes为null时的情况
         requestContextHolderMock.when(RequestContextHolder::getRequestAttributes).thenReturn(null);
         // 当RequestAttributes为null时，应该抛出IllegalStateException异常
-        assertThrows(IllegalStateException.class, () -> {
-            HttpServletTool.getResponse();
-        });
+        assertThrows(IllegalStateException.class, HttpServletTool::getResponse);
     }
 
     @Test

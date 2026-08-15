@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Aspect
 @Component
@@ -92,7 +93,7 @@ public class LogAspect {
         SysLog sysLog = new SysLog();
         sysLog.setOperation(methodAnn.value());
         sysLog.setIp(ip);
-        sysLog.setOperationTime(LocalDateTime.now());
+        sysLog.setOperationTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysLog.setDuration((int) duration);
         sysLog.setParams(params);
         sysLog.setSuccess(result.isSuccess());

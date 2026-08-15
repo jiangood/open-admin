@@ -25,6 +25,6 @@ public class SysLogService extends BaseService<SysLog> {
         }
 
         this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return repository.findById(input.getId()).orElse(null);
+        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 }

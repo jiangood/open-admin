@@ -18,6 +18,6 @@ public class SysDictItemService extends BaseService<SysDictItem> {
         }
 
         this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return repository.findById(input.getId()).orElse(null);
+        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 }

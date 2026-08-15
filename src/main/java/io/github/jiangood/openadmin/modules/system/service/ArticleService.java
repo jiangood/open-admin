@@ -37,7 +37,7 @@ public class ArticleService extends BaseService<Article> {
             throw new BusinessException("文章编码已存在");
         }
         this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return articleRepository.findById(input.getId()).orElse(null);
+        return articleRepository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 
     /**
@@ -48,7 +48,7 @@ public class ArticleService extends BaseService<Article> {
     @Transactional
     @Override
     public Article update(Article input, List<String> requestKeys) {
-        Article old = articleRepository.findById(input.getId()).orElse(null);
+        Article old = articleRepository.findById(input.getId()).orElse(null); // NOSONAR: update 路径 id 必非空
         Assert.notNull(old, "文章不存在");
 
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
@@ -65,7 +65,7 @@ public class ArticleService extends BaseService<Article> {
         // 保存成功后认领新文件
         sysFileService.claim(input);
 
-        return articleRepository.findById(input.getId()).orElse(null);
+        return articleRepository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 
     /**

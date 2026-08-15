@@ -8,8 +8,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @Slf4j
-public class ThreadToolTest {
+class ThreadToolTest {
 
     @Test
     public void testExecute() throws InterruptedException {
@@ -39,13 +41,7 @@ public class ThreadToolTest {
     @Test
     public void testExecuteWhenRunnableNull() {
         // 测试runnable为null的情况
-        try {
-            ThreadTool.execute(null);
-            // 应该抛出NullPointerException
-            Assertions.fail("应该抛出NullPointerException");
-        } catch (NullPointerException e) {
-            // 预期会抛出异常
-        }
+        assertThrows(NullPointerException.class, () -> ThreadTool.execute(null));
     }
 
     @Test

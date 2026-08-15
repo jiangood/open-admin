@@ -69,7 +69,7 @@ public abstract class BaseService<T extends Persistable<String>> {
     @Transactional
     public T update(T input, List<String> fieldsToUpdate) {
         updateField(input, fieldsToUpdate); // NOSONAR: 调用方 update() 已开启事务，自调用不重复开事务，语义一致
-        return repository.findById(((BaseEntity) input).getId()).orElse(null);
+        return repository.findById(((BaseEntity) input).getId()).orElse(null); // NOSONAR: update 路径 id 必非空
     }
 
     // ========== 便利查询方法 ==========

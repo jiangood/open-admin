@@ -117,8 +117,8 @@ public class ExceptionToMessageTool {
             RollbackException cause = (RollbackException) e.getCause();
             if (cause != null) {
                 Throwable cause2 = cause.getCause();
-                if (cause2 instanceof ConstraintViolationException) {
-                    return convert((ConstraintViolationException) cause2);
+                if (cause2 instanceof ConstraintViolationException cve) {
+                    return convert(cve);
                 }
             }
         }

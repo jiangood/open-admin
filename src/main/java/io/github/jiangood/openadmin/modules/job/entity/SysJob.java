@@ -35,7 +35,7 @@ public class SysJob extends BaseEntity {
     // 参数
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "TEXT")
-    Map<String, Object> jobData;
+    Map<String, Object> jobData; // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     // 扩展字段
     String extraInfo;
 

@@ -24,6 +24,8 @@ import java.util.*;
 @Service
 public class SysRoleService extends BaseService<SysRole> {
 
+    private static final String MSG_ROLE_NOT_EXIST = "角色不存在";
+
     private final SysRoleRepository roleRepository;
     private final SysMenuRepository sysMenuRepository;
     private final SysUserRepository sysUserRepository;
@@ -148,6 +150,6 @@ public class SysRoleService extends BaseService<SysRole> {
         }
 
         this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return repository.findById(input.getId()).orElse(null);
+        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 }

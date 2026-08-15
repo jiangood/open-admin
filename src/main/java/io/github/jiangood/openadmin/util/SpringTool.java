@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class SpringTool implements ApplicationContextAware {
+
+    private static final String MSG_CONTEXT_NOT_INIT = "Spring应用上下文未初始化";
+
     public SpringTool() {
         System.out.println("SpringTool init");
     }
@@ -40,7 +43,7 @@ public class SpringTool implements ApplicationContextAware {
      * @return
      */
     public static Set<Class<?>> getBasePackageClasses() {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         Set<Class<?>> list = new HashSet<>();
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
@@ -74,7 +77,7 @@ public class SpringTool implements ApplicationContextAware {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return (T) applicationContext.getBean(name);
     }
 
@@ -107,7 +110,7 @@ public class SpringTool implements ApplicationContextAware {
      * @throws RuntimeException 如果Bean不存在，将抛出异常
      */
     public static <T> T getBean(String name, Class<T> clazz) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getBean(name, clazz);
     }
 
@@ -121,19 +124,19 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static <T> Map<String, T> getBeansOfType(Class<T> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getBeansOfType(type);
     }
 
     public static <T> Collection<String> getBeanNames(Class<T> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         Map<String, T> beansOfType = applicationContext.getBeansOfType(type);
         return beansOfType.keySet();
     }
 
 
     public static <T> List<T> getBeans(Class<T> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         Collection<T> values = applicationContext.getBeansOfType(type).values();
         return new ArrayList<>(values);
     }
@@ -146,7 +149,7 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static String[] getBeanNamesForType(Class<?> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getBeanNamesForType(type);
     }
 
@@ -159,7 +162,7 @@ public class SpringTool implements ApplicationContextAware {
      */
     public static String getProperty(String key) {
         if(key == null) throw new NullPointerException("key is null");
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getEnvironment().getProperty(key);
     }
 
@@ -187,7 +190,7 @@ public class SpringTool implements ApplicationContextAware {
     }
 
     public static boolean hasProfile(String name) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return ArrayUtil.contains(applicationContext.getEnvironment().getActiveProfiles(), name);
     }
 
@@ -200,7 +203,7 @@ public class SpringTool implements ApplicationContextAware {
 
 
     public static void publishEventAsync(ApplicationEvent event) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         ThreadTool.execute(() -> {
             try {
                 applicationContext.publishEvent(event);

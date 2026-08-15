@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Import;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 @SpringBootTest
 @Import(OpenAdminConfiguration.class)
-public class SpringToolTest {
+class SpringToolTest {
 
     @Test
     public void testGetBasePackageNames() {
@@ -89,7 +90,7 @@ public class SpringToolTest {
     @Test
     public void testGetApplicationName() {
         // 配置文件中可能没有设置，所以允许为null
-        assertDoesNotThrow(() -> SpringTool.getApplicationName());
+        assertDoesNotThrow(SpringTool::getApplicationName);
     }
 
     @Test
@@ -131,12 +132,7 @@ public class SpringToolTest {
     @Test
     public void testGetBeanByNameAndClassWhenNull() {
         // 测试name为null的情况
-        try {
-            SpringTool.getBean(null, SpringTool.class);
-            Assertions.fail("应该抛出异常");
-        } catch (Exception e) {
-            // 预期会抛出异常
-        }
+        assertThrows(Exception.class, () -> SpringTool.getBean(null, SpringTool.class));
     }
 
 

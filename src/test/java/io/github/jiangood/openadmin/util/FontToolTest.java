@@ -14,7 +14,7 @@ class FontToolTest {
         // 测试获取默认字体路径
         // 字体路径可能为null（如果系统中没有安装指定的字体），但方法应该正常执行
         // 这里只验证方法不会抛出异常
-        assertDoesNotThrow(() -> FontTool.getDefaultFontPath());
+        assertDoesNotThrow(FontTool::getDefaultFontPath);
     }
 
     @Test
@@ -22,7 +22,7 @@ class FontToolTest {
         // 测试获取默认字体名称
         // 字体名称可能为null（如果系统中没有安装指定的字体），但方法应该正常执行
         // 这里只验证方法不会抛出异常
-        assertDoesNotThrow(() -> FontTool.getDefaultFontName());
+        assertDoesNotThrow(FontTool::getDefaultFontName);
     }
 
     @Test
@@ -32,6 +32,6 @@ class FontToolTest {
         // 字体名称集合应该不为null，且至少包含系统默认的一些字体
         assertNotNull(fontNames);
         // 验证方法不会抛出异常
-        assertDoesNotThrow(() -> FontTool.getAllFontName());
+        assertDoesNotThrow(FontTool::getAllFontName);
     }
 }

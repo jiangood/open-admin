@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("admin/job")
@@ -121,7 +120,7 @@ public class SysJobController {
                     }
 
                     return option;
-                }).collect(Collectors.toList());
+                }).toList();
 
         return AjaxResult.ok().data(options);
     }

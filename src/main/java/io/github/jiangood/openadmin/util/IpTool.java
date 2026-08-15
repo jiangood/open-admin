@@ -21,6 +21,9 @@ public class IpTool {
 
     public static Cache<String, String> IP_ADDRESS_CACHE = CacheBuilder.newBuilder().maximumSize(500).expireAfterAccess(Duration.ofDays(5)).build();
 
+        private static final String USER_AGENT = "User-Agent";
+    private static final String USER_AGENT_VALUE = "curl/7.29.0";
+
     private static final IpProvider[] PROVIDERS = {
             new IpApiProvider(),
             new CipCcProvider(),
@@ -102,7 +105,7 @@ public class IpTool {
         @Override
         public String query(String ip) {
             String body = HttpRequest.get("http://ip-api.com/json/" + ip + "?lang=zh-CN&fields=status,country,regionName,city,isp")
-                    .header("User-Agent", "curl/7.29.0")
+                    .header(USER_AGENT, USER_AGENT_VALUE)
                     .timeout(5000)
                     .execute()
                     .body();
@@ -138,7 +141,7 @@ public class IpTool {
         @Override
         public String query(String ip) {
             String body = HttpRequest.get("http://cip.cc/" + ip)
-                    .header("User-Agent", "curl/7.29.0")
+                    .header(USER_AGENT, USER_AGENT_VALUE)
                     .timeout(5000)
                     .execute()
                     .body();
@@ -171,7 +174,7 @@ public class IpTool {
         @Override
         public String query(String ip) {
             String body = HttpRequest.get("https://ipinfo.io/" + ip + "/json")
-                    .header("User-Agent", "curl/7.29.0")
+                    .header(USER_AGENT, USER_AGENT_VALUE)
                     .timeout(5000)
                     .execute()
                     .body();
