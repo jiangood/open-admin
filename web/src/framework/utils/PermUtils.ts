@@ -1,5 +1,5 @@
-import {GlobalData} from '../../GlobalData';
-import {ArrayUtils} from '../ArrayUtils';
+import {GlobalData} from '../GlobalData';
+import {ArrayUtils} from './ArrayUtils';
 
 export class PermUtils {
     static getPermissions(): string[] {

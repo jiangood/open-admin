@@ -1,7 +1,7 @@
-import {history} from '../../router';
-import {StringUtils} from "../StringUtils";
-import {UrlUtils} from "../UrlUtils";
-import {EventBus} from "../EventBus";
+import {history} from '../router';
+import {StringUtils} from "./StringUtils";
+import {UrlUtils} from "./UrlUtils";
+import {EventBus} from "./EventBus";
 
 export class PageUtils {
     static redirectToLogin(): void {

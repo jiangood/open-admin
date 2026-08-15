@@ -2,7 +2,7 @@ import axios from "axios";
 import type {AxiosRequestConfig} from "axios";
 import qs from 'qs';
 import {message as messageApi} from "antd";
-import {EventBus} from "../EventBus";
+import {EventBus} from "./EventBus";
 
 /**
  * 回调式 HTTP 工具类（纯回调，所有方法均不返回 Promise）
