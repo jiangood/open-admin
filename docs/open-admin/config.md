@@ -10,7 +10,7 @@
 | `sys.captcha-enable` | 登录验证码 | true |
 | `sys.default-password` | 默认密码 | Open@1234 |
 | `sys.show-logo` | 是否显示 Logo | true |
-| `sys.file.store-type` | 文件存储 (`local`/`s3`/`custom`) | local |
+| `sys.file.store-type` | 文件存储 (`LOCAL`/`S3`/`CUSTOM`) | LOCAL |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
 | `sys.file.clean-unclaimed-minutes` | 未认领文件自动清理时间（分钟） | 120 |
 | `sys.file.s3.*` | S3 兼容存储配置 | — |
@@ -21,11 +21,11 @@
 
 ## 文件存储
 
-通过 `sys.file.store-type` 选择后端（`local` / `s3` / `custom`）：
+通过 `sys.file.store-type` 选择后端（`LOCAL` / `S3` / `CUSTOM`）：
 
-- `local` — 本地文件系统，保存到 `sys.file.upload-path`，按 `public/`、`private/` 子目录区分可见性
-- `s3` — S3 兼容存储（Minio / AWS S3 / R2 / 阿里云 OSS 等），配置 `sys.file.s3.{endpoint,region,accessKey,secretKey,bucketName,pathStyleAccess}`
-- 自定义 — 实现 `framework.spi.FileOperator` 接口并注册 `@Bean @Primary FileOperator`，框架自动跳过默认创建
+- `LOCAL` — 本地文件系统，保存到 `sys.file.upload-path`，按 `public/`、`private/` 子目录区分可见性
+- `S3` — S3 兼容存储（Minio / AWS S3 / R2 / 阿里云 OSS 等），配置 `sys.file.s3.{endpoint,region,accessKey,secretKey,bucketName,pathStyleAccess}`
+- `CUSTOM` — 实现 `framework.spi.FileOperator` 接口并注册 `@Bean @Primary FileOperator`，框架自动跳过默认创建
 
 文件 `objectName` 带可见性前缀（如 `public/202607/xxx.jpg` / `private/202607/xxx.pdf`），本地磁盘路径 = `sys.file.upload-path` + `objectName`，与 URL `/file/{objectName}` 完全一致。
 

@@ -20,12 +20,12 @@ public class PageJsonSerializer<T> extends ValueSerializer<Page<T>> {
     /**
      * 前后端交互时，分页是否从1开始的算的
      */
-    private static final boolean oneIndexed = true;
+    private static final boolean ONE_INDEXED = true;
 
     @Override
     public void serialize(Page<T> page, JsonGenerator gen, SerializationContext ctx) {
         int number = page.getNumber();
-        if (oneIndexed) {
+        if (ONE_INDEXED) {
             number++;
         }
 

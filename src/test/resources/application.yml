@@ -17,7 +17,7 @@ spring:
 
 sys:
   file:
-    store-type: local
+    store-type: LOCAL
     upload-path: /tmp/test-uploads
     s3:
       endpoint: http://localhost:9000

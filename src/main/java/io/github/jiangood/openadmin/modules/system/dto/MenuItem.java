@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.modules.system.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import lombok.Data;
 
 import java.util.List;
@@ -14,7 +13,7 @@ public class MenuItem implements Cloneable {
     private Boolean danger;
     private Boolean disabled;
     private String extra;
-    private AntdIcon icon;
+    private String icon;
     private String key;
     private String label;
 

@@ -91,13 +91,13 @@ public class SystemProperties {
     public static class FileStorage {
 
         public enum StoreType {
-            local, s3, custom
+            LOCAL, S3, CUSTOM
         }
 
         /**
-         * 存储类型: local / s3；自定义实现请注册 @Bean @Primary FileOperator
+         * 存储类型: LOCAL / S3；自定义实现请注册 @Bean @Primary FileOperator
          */
-        private StoreType storeType = StoreType.local;
+        private StoreType storeType = StoreType.LOCAL;
 
         /**
          * 本地上传文件路径

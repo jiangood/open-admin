@@ -16,9 +16,9 @@ public class FileConfig {
     public static FileOperator fileOperator(SystemProperties sp) {
         var file = sp.getFile();
         switch (file.getStoreType()) {
-            case local:
+            case LOCAL:
                 return new LocalFileOperator(file.getUploadPath());
-            case s3: {
+            case S3: {
                 var s3 = file.getS3();
                 return new S3FileOperator(s3.getEndpoint(), s3.getRegion(), s3.getAccessKey(), s3.getSecretKey(), s3.getBucketName(), s3.getPathStyleAccess());
             }

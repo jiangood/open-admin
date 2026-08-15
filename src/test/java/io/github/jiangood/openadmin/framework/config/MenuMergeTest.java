@@ -2,7 +2,6 @@ package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.bean.copier.CopyOptions;
-import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.Binder;
@@ -52,7 +51,7 @@ class MenuMergeTest {
         assertNotNull(def);
         assertEquals("用户管理", def.getName());
         assertEquals("sys", def.getPid());
-        assertEquals(AntdIcon.UserOutlined, def.getIcon());
+        assertEquals("UserOutlined", def.getIcon());
         assertNotNull(def.getPerms());
         assertEquals(1, def.getPerms().size());
         assertEquals("读取", def.getPerms().get(0).getName());
@@ -97,7 +96,7 @@ class MenuMergeTest {
 
         assertEquals(2, result.size());
         assertEquals("系统管理", result.get("sys").getName());
-        assertEquals(AntdIcon.UserOutlined, result.get("sys-user").getIcon());
+        assertEquals("UserOutlined", result.get("sys-user").getIcon());
     }
 
     @Test
@@ -123,7 +122,7 @@ class MenuMergeTest {
         MenuDefinition a = result.get("a");
         assertEquals("A", a.getName());
         assertEquals("/a", a.getPath());
-        assertEquals(AntdIcon.HomeOutlined, a.getIcon());
+        assertEquals("HomeOutlined", a.getIcon());
 
         MenuDefinition b = result.get("b");
         assertEquals("B", b.getName());

@@ -6,7 +6,6 @@ import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -198,7 +197,7 @@ class MenuLoadingIntegrationTest {
                 .findFirst().orElse(null);
         assertNotNull(dev, "test-dev 应该来自 application-menu-test-ext.yml 的合并");
         assertEquals("开发者工具", dev.getName());
-        assertEquals(AntdIcon.ToolOutlined, dev.getIcon());
+        assertEquals("ToolOutlined", dev.getIcon());
 
         // test-extra 来自 test-extra 文件
         MenuDefinition extra = all.stream()

@@ -31,7 +31,7 @@ import java.util.Set;
 @Component
 public class DictSeedSync implements StartupHook {
     
-    private static  final   String rootId = "1";
+    private static final String ROOT_ID = "1";
 
     private final ObjectProvider<BeanFactory> beanFactoryProvider;
 
@@ -55,7 +55,7 @@ public class DictSeedSync implements StartupHook {
         int itemCount = 0;
         for (Class<? extends Enum<?>> enumClass : enumClasses) {
             DictType dictType = enumClass.getAnnotation(DictType.class);
-            syncType(typeRepository, dictType, rootId);
+            syncType(typeRepository, dictType, ROOT_ID);
             typeCount++;
             itemCount += syncItems(itemRepository, enumClass, dictType.code());
         }
