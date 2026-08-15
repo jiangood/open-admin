@@ -103,7 +103,7 @@ public class ResourceTool {
         if (r instanceof UrlResource ur) {
             String[] orders = {
                     "/org/springframework/",
-                    OpenAdminConfiguration.class.getPackageName().replaceAll("\\.", "/"),
+                    OpenAdminConfiguration.class.getPackageName().replace(".", "/"),
             };
             for (int i = 0; i < orders.length; i++) {
                 String order = orders[i];

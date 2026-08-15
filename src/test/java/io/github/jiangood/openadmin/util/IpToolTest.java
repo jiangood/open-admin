@@ -3,6 +3,9 @@ package io.github.jiangood.openadmin.util;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
@@ -62,22 +65,11 @@ class IpToolTest {
         assertEquals("内网", address);
     }
 
-    @Test
-    void testGetLocationWithEmptyIp() {
-        String location = IpTool.getLocation(null);
-        assertEquals("内网", location);
-    }
-
-    @Test
-    void testGetLocationWithLocalIp() {
-        String location = IpTool.getLocation("127.0.0.1");
-        assertEquals("内网", location);
-    }
-
-    @Test
-    void testGetLocationWithLanIp() {
-        String location = IpTool.getLocation("192.168.1.1");
-        assertEquals("内网", location);
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"127.0.0.1", "192.168.1.1"})
+    void testGetLocationWithNonPublicIp(String ip) {
+        assertEquals("内网", IpTool.getLocation(ip));
     }
 
     @Test

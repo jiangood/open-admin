@@ -319,7 +319,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
         }
     }
 
-    private static Object convertNumber(Number n, Class<?> type) {
+    private static Object convertNumber(Number n, Class<?> type) { // NOSONAR: Class 无法作为 switch 选择子，保留 if 链
         if (type == Integer.class || type == int.class) return n.intValue();
         if (type == Long.class || type == long.class) return n.longValue();
         if (type == Float.class || type == float.class) return n.floatValue();
@@ -328,7 +328,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
         if (type == Byte.class || type == byte.class) return n.byteValue();
         return n;
     }
-
     private Map<String, Object> mapToMap(ResultSet rs) throws SQLException {
         ResultSetMetaData meta = rs.getMetaData();
         int n = meta.getColumnCount();

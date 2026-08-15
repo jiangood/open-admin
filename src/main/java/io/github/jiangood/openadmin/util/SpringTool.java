@@ -28,10 +28,9 @@ public class SpringTool implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
 
-    // NOSONAR: ApplicationContextAware 回调（实例方法）写入静态上下文，是持有 Spring 上下文的惯例写法
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringTool.applicationContext = applicationContext;
+        SpringTool.applicationContext = applicationContext; // NOSONAR: ApplicationContextAware 回调写入静态上下文，持有 Spring 上下文的惯例写法
     }
 
     public static String[] getBasePackageNames() {

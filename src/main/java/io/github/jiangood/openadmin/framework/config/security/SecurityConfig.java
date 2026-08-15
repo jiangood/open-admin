@@ -93,12 +93,11 @@ public class SecurityConfig {
 
 
         http.exceptionHandling(cfg -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
-            cfg.accessDeniedHandler((request, response, e) -> {
-                ResponseTool.response(response, AjaxResult.FORBIDDEN);
-            }).authenticationEntryPoint((request, response, e) -> {
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                ResponseTool.response(response, AjaxResult.UNAUTHORIZED);
-            });
+            cfg.accessDeniedHandler((request, response, e) -> ResponseTool.response(response, AjaxResult.FORBIDDEN))
+                    .authenticationEntryPoint((request, response, e) -> {
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        ResponseTool.response(response, AjaxResult.UNAUTHORIZED);
+                    });
         });
 
 

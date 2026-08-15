@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * 数组工具类，提供数组处理相关的工具方法
@@ -113,10 +113,10 @@ public class ArrayTool {
      * @param <T> 泛型类型
      * @return 满足条件的元素的索引，如果没有找到返回-1
      */
-    public static <T> int findIndex(T[] arr, Function<T, Boolean> fn) {
+    public static <T> int findIndex(T[] arr, Predicate<T> fn) {
         for (int i = 0; i < arr.length; i++) {
             T t = arr[i];
-            if (Boolean.TRUE.equals(fn.apply(t))) {
+            if (fn.test(t)) {
                 return i;
             }
         }

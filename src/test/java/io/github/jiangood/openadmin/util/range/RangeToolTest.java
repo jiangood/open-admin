@@ -1,6 +1,8 @@
 package io.github.jiangood.openadmin.util.range;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,10 +38,11 @@ class RangeToolTest {
         assertEquals("end", range.getEnd());
     }
 
-    @Test
-    void testToStrRangeWithEmptyString() {
-        // 测试空字符串
-        Range<String> range = RangeTool.toStrRange("");
+    @ParameterizedTest
+    @ValueSource(strings = {"", "  /  ", "   "})
+    void testToStrRangeWithEmptyInput(String input) {
+        // 测试空字符串/空值/纯空格
+        Range<String> range = RangeTool.toStrRange(input);
         assertNotNull(range);
         assertNull(range.getStart());
         assertNull(range.getEnd());
@@ -210,24 +213,6 @@ class RangeToolTest {
         assertThrows(Exception.class, () -> {
             RangeTool.toDateRange("invalid-date/2023-01-01");
         });
-    }
-
-    @Test
-    void testToStrRangeWithEmptyValues() {
-        // 测试空值
-        Range<String> range = RangeTool.toStrRange("  /  ");
-        assertNotNull(range);
-        assertNull(range.getStart());
-        assertNull(range.getEnd());
-    }
-
-    @Test
-    void testToStrRangeWithOnlySpaces() {
-        // 测试只有空格
-        Range<String> range = RangeTool.toStrRange("   ");
-        assertNotNull(range);
-        assertNull(range.getStart());
-        assertNull(range.getEnd());
     }
 
 }

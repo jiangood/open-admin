@@ -150,7 +150,7 @@ class PasswordToolTest {
 
         assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("abc😀!@#"), "emoji 密码应该抛出IllegalStateException");
 
-        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("Abc123!@#" + "a".repeat(60)),
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("Abc123!@#" + "a".repeat(60)), // NOSONAR: 单语句 lambda，方法引用不适用
                 "超长 ASCII 密码应该抛出IllegalStateException");
 
         assertDoesNotThrow(() -> PasswordTool.validateStrength("MyP@ssw0rd!23"), "正常 ASCII 密码不应抛出异常");
