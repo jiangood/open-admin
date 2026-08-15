@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropEvent;
@@ -70,7 +70,7 @@ public class SysOrgController {
     @PostMapping("create")
     public AjaxResult create(@RequestBody OrgReq input) throws Exception {
         if (input.getLeader() != null) {
-            if (StrUtil.isEmpty(input.getLeader().getId())) {
+            if (CharSequenceUtil.isEmpty(input.getLeader().getId())) {
                 input.setLeader(null);
             }
         }
@@ -89,7 +89,7 @@ public class SysOrgController {
     @PostMapping("update")
     public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
         if (input.getLeader() != null) {
-            if (StrUtil.isEmpty(input.getLeader().getId())) {
+            if (CharSequenceUtil.isEmpty(input.getLeader().getId())) {
                 input.setLeader(null);
             }
         }

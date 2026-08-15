@@ -5,6 +5,7 @@ import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpUtil;
 import io.github.jiangood.openadmin.framework.file.FileField;
@@ -192,7 +193,7 @@ public class SysFileService {
         log.info("下载文件完成 {}", FileUtil.readableFileSize(size));
 
         String suffix = FileNameUtil.getSuffix(origUrl);
-        if (StrUtil.isEmpty(suffix)) {
+        if (CharSequenceUtil.isEmpty(suffix)) {
             suffix = FileTypeUtil.getType(tempFile);
             tempFile = FileUtil.rename(tempFile, tempFile.getName() + "." + suffix, true);
         }
@@ -214,7 +215,7 @@ public class SysFileService {
     public SysFile uploadFile(File file, boolean isPublic) throws Exception {
         // 特殊处理后缀，如临时文件
         String suffix = FileNameUtil.getSuffix(file);
-        if (StrUtil.isEmpty(suffix) || "tmp".equals(suffix)) {
+        if (CharSequenceUtil.isEmpty(suffix) || "tmp".equals(suffix)) {
             suffix = FileTypeUtil.getType(file, true);
         }
 
@@ -335,7 +336,7 @@ public class SysFileService {
         // 获取文件后缀并校验真实类型
         String suffix = null;
         if (ObjectUtil.isNotEmpty(originalFilename)) {
-            suffix = StrUtil.subAfter(originalFilename, ".", true);
+            suffix = CharSequenceUtil.subAfter(originalFilename, ".", true);
         }
 
         if (!is.markSupported()) {
@@ -346,19 +347,19 @@ public class SysFileService {
         is.reset();
 
         // 始终用 magic byte 校验：阻断可执行文件伪装成普通图片/文档
-        if (StrUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
+        if (CharSequenceUtil.isNotEmpty(magicType) && isBlockedMagicType(magicType)) {
             throw new IllegalArgumentException("文件类型" + magicType + "不允许上传");
         }
 
         if ("webp".equals(magicType)) {
             log.warn("上传文件真实类型为 webp");
-            if (StrUtil.isNotEmpty(suffix) && !"webp".equalsIgnoreCase(suffix)) {
+            if (CharSequenceUtil.isNotEmpty(suffix) && !"webp".equalsIgnoreCase(suffix)) {
                 log.info("文件后缀修正: {} -> webp (文件头检测)", suffix);
                 suffix = "webp";
             }
         }
 
-        if (StrUtil.isEmpty(suffix) && StrUtil.isNotEmpty(magicType)) {
+        if (CharSequenceUtil.isEmpty(suffix) && CharSequenceUtil.isNotEmpty(magicType)) {
             suffix = magicType;
         }
 
@@ -451,7 +452,7 @@ public class SysFileService {
      */
     @Transactional
     public void claim(Persistable<String> entity) {
-        if (entity == null || StrUtil.isBlank(entity.getId())) {
+        if (entity == null || CharSequenceUtil.isBlank(entity.getId())) {
             return;
         }
         String joinTable = joinTableOf(entity.getClass());
@@ -472,7 +473,7 @@ public class SysFileService {
      */
     @Transactional
     public void unclaim(Persistable<String> entity) {
-        if (entity == null || StrUtil.isBlank(entity.getId())) {
+        if (entity == null || CharSequenceUtil.isBlank(entity.getId())) {
             return;
         }
         String joinTable = joinTableOf(entity.getClass());
@@ -488,7 +489,7 @@ public class SysFileService {
     }
 
     private List<String> objectNameList(String objectName) {
-        return StrUtil.isBlank(objectName) ? List.of() : List.of(objectName);
+        return CharSequenceUtil.isBlank(objectName) ? List.of() : List.of(objectName);
     }
 
     private void claimList(String joinTable, String joinId, List<String> objectNames) {
@@ -520,12 +521,12 @@ public class SysFileService {
 
     /** 是否已被其他业务记录认领（joinTable/joinId 非空且与目标不同） */
     private boolean isOwnedByOther(SysFile file, String joinTable, String joinId) {
-        return StrUtil.isNotBlank(file.getJoinTable())
-                && !(StrUtil.equals(joinTable, file.getJoinTable()) && StrUtil.equals(joinId, file.getJoinId()));
+        return CharSequenceUtil.isNotBlank(file.getJoinTable())
+                && !(CharSequenceUtil.equals(joinTable, file.getJoinTable()) && CharSequenceUtil.equals(joinId, file.getJoinId()));
     }
 
     private List<String> extractObjectNamesFromHtml(String html) {
-        if (StrUtil.isBlank(html)) {
+        if (CharSequenceUtil.isBlank(html)) {
             return List.of();
         }
         Matcher matcher = HTML_FILE_PATTERN.matcher(html);
@@ -565,10 +566,10 @@ public class SysFileService {
 
     private String joinTableOf(Class<?> entityClass) {
         Table table = entityClass.getAnnotation(Table.class);
-        if (table != null && StrUtil.isNotBlank(table.name())) {
+        if (table != null && CharSequenceUtil.isNotBlank(table.name())) {
             return table.name();
         }
-        return StrUtil.toUnderlineCase(entityClass.getSimpleName());
+        return CharSequenceUtil.toUnderlineCase(entityClass.getSimpleName());
     }
 
     public Page<SysFile> findAll(Specification<SysFile> q, Pageable pageable) {
@@ -580,7 +581,7 @@ public class SysFileService {
     }
 
     public boolean isFileExist(String objectName) {
-        if (StrUtil.isEmpty(objectName)) {
+        if (CharSequenceUtil.isEmpty(objectName)) {
             return false;
         }
         SysFile file = sysFileRepository.findByObjectName(objectName);
@@ -595,7 +596,7 @@ public class SysFileService {
      * 判断物理文件是否真实存在（不查 SysFile 记录，用于缩略图等衍生文件）
      */
     public boolean isPhysicalFileExist(String objectName) {
-        return StrUtil.isNotEmpty(objectName) && fileOperator.exist(objectName);
+        return CharSequenceUtil.isNotEmpty(objectName) && fileOperator.exist(objectName);
     }
 
     private static boolean isBlockedMagicType(String magicType) {

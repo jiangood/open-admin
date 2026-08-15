@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.data.impl;
 
 import cn.hutool.core.map.CaseInsensitiveLinkedMap;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -289,7 +289,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
             for (Field f : getMappableFields(cls)) {
                 Object val = cols.get(f.getName());
                 if (val == null) {
-                    val = cols.get(StrUtil.toUnderlineCase(f.getName()));
+                    val = cols.get(CharSequenceUtil.toUnderlineCase(f.getName()));
                 }
                 if (val != null) {
                     f.setAccessible(true);

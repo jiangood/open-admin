@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.framework.dict.DictSeedSync;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
@@ -99,10 +99,10 @@ public class SysUserService extends BaseService<SysUser> {
         query.like(SysUser.Fields.phone, phone);
         query.eq(SysUser.Fields.enabled, enabled);
 
-        if (StrUtil.isNotEmpty(orgId)) {
+        if (CharSequenceUtil.isNotEmpty(orgId)) {
             query.or(Spec.<SysUser>of().eq(SysUser.Fields.unitId, orgId), Spec.<SysUser>of().eq(SysUser.Fields.orgId, orgId));
         }
-        if (StrUtil.isNotEmpty(roleId)) {
+        if (CharSequenceUtil.isNotEmpty(roleId)) {
             query.isMember(SysUser.Fields.roles, new SysRole(roleId));
         }
 

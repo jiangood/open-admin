@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.util;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -29,7 +29,7 @@ public class RequestTool {
 
         // 判断请求头是否指定了协议
         String xForwardedProto = request.getHeader("x-forwarded-proto");
-        if (StrUtil.isNotEmpty(xForwardedProto)) {
+        if (CharSequenceUtil.isNotEmpty(xForwardedProto)) {
             scheme = xForwardedProto;
         }
 

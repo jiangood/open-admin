@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ExceptionToMessageTool;
 import io.github.jiangood.openadmin.util.HttpServletTool;
@@ -95,7 +95,7 @@ public class GlobalExceptionHandler {
     public AjaxResult missParamException(MissingServletRequestParameterException e) {
         log.warn("请求参数缺失：{}", e.getMessage());
         String parameterName = e.getParameterName();
-        String message = StrUtil.format("缺少请求的参数{}", parameterName);
+        String message = CharSequenceUtil.format("缺少请求的参数{}", parameterName);
         return AjaxResult.err().code(500).msg(message);
     }
 

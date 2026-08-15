@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.net.URLEncodeUtil;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -57,7 +57,7 @@ public class DownloadTool {
      */
     public static void setDownloadParam(String fileName, long contentLength, HttpServletResponse response) {
         response.reset();
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLUtil.encode(fileName) + "\"");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + URLEncodeUtil.encode(fileName) + "\"");
         response.setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         response.setContentType("application/octet-stream;charset=UTF-8");
         if (contentLength > 0) {

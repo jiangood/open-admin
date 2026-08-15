@@ -1,13 +1,13 @@
 package io.github.jiangood.openadmin.util;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 public class ContentTypeTool {
 
     public static boolean isVideo(String contentType) {
-        return StrUtil.startWith(contentType, "video");
+        return CharSequenceUtil.startWith(contentType, "video");
     }
 
     /**

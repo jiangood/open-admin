@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.util;
 
 
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.net.URLEncodeUtil;
 import cn.hutool.http.ContentType;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
@@ -25,7 +25,7 @@ public class ResponseTool {
     public static final String CONTENT_TYPE_STREAM = "application/octet-stream";
 
     public static void setDownloadHeader(String filename, String contentType, HttpServletResponse response) throws IOException {
-        filename = URLUtil.encode(filename, StandardCharsets.UTF_8);
+        filename = URLEncodeUtil.encode(filename, StandardCharsets.UTF_8);
 
         response.setContentType(contentType);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
@@ -33,7 +33,7 @@ public class ResponseTool {
     }
 
     public static void setDownloadExcelHeader(String filename, HttpServletResponse response) throws IOException {
-        filename = URLUtil.encode(filename, StandardCharsets.UTF_8);
+        filename = URLEncodeUtil.encode(filename, StandardCharsets.UTF_8);
         response.setContentType(CONTENT_TYPE_EXCEL);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setHeader("Access-Control-Expose-Headers", "content-disposition");

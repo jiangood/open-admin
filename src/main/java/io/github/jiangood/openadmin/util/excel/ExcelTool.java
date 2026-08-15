@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.util.excel;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.ResponseTool;
 import jakarta.servlet.http.HttpServletResponse;
@@ -483,7 +484,7 @@ public class ExcelTool {
 
                 case STRING:
                     String str = cell.getStringCellValue();
-                    if (StrUtil.isNotBlank(str)) {
+                    if (CharSequenceUtil.isNotBlank(str)) {
                         return false;
                     }
             }

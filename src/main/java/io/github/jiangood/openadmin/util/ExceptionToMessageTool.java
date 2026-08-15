@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.annotation.RemarkTool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -66,7 +66,7 @@ public class ExceptionToMessageTool {
             if (ex instanceof SQLIntegrityConstraintViolationException) {
                 if (msg.startsWith("Duplicate")) {
                     Matcher m = Pattern.compile("'(.*?)'").matcher(msg);
-                    if (m.find() && StrUtil.isNotBlank(m.group(1))) {
+                    if (m.find() && CharSequenceUtil.isNotBlank(m.group(1))) {
                         return "操作失败，数据重复：" + m.group(1);
                     }
                 }
@@ -74,7 +74,7 @@ public class ExceptionToMessageTool {
                 {
                     // Column 'file_id' cannot be null
                     Matcher m = Pattern.compile("Column '(.*)' cannot be null").matcher(msg);
-                    if (m.find() && StrUtil.isNotEmpty(m.group(1))) {
+                    if (m.find() && CharSequenceUtil.isNotEmpty(m.group(1))) {
                         return "字段" + m.group(1) + "不能为空";
                     }
                 }

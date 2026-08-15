@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util.range;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import java.math.BigDecimal;
 
 public class RangeTool {
@@ -12,7 +12,7 @@ public class RangeTool {
 
     public static Range<String> toStrRange(String str) {
         // 处理空字符串
-        if (StrUtil.isBlank(str)) {
+        if (CharSequenceUtil.isBlank(str)) {
             return new Range<>();
         }
 
@@ -22,15 +22,15 @@ public class RangeTool {
         
         if (index == -1) {
             // 没有分隔符，只有一个值
-            String value = StrUtil.trim(str);
-            range.setStart(StrUtil.emptyToNull(value));
+            String value = CharSequenceUtil.trim(str);
+            range.setStart(CharSequenceUtil.emptyToNull(value));
         } else {
             // 有分隔符，分割为两部分
-            String start = StrUtil.trim(str.substring(0, index));
-            String end = StrUtil.trim(str.substring(index + 1));
+            String start = CharSequenceUtil.trim(str.substring(0, index));
+            String end = CharSequenceUtil.trim(str.substring(index + 1));
             
-            range.setStart(StrUtil.emptyToNull(start));
-            range.setEnd(StrUtil.emptyToNull(end));
+            range.setStart(CharSequenceUtil.emptyToNull(start));
+            range.setEnd(CharSequenceUtil.emptyToNull(end));
         }
 
         return range;

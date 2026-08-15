@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.io.file.FileNameUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.net.URLEncodeUtil;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.service.SysFileService;
 import io.github.jiangood.openadmin.util.ContentTypeTool;
@@ -80,7 +80,7 @@ public class FilePreviewController {
             InputStream inputStream = service.getFileStreamByObjectName(streamObjectName);
 
             boolean video = ContentTypeTool.isVideo(file.getContentType());
-            String disposition = "inline; filename=\"" + URLUtil.encode(FileNameUtil.mainName(streamObjectName)) + "\"";
+            String disposition = "inline; filename=\"" + URLEncodeUtil.encode(FileNameUtil.mainName(streamObjectName)) + "\"";
             if (video) {
                 String rangeHeader = request.getHeader("Range");
                 if (rangeHeader != null && rangeHeader.startsWith("bytes=")) {

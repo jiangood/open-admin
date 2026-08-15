@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
@@ -104,7 +104,7 @@ public class SysUserController {
      */
     @GetMapping("pwd-strength")
     public AjaxResult pwdStrength(String password) {
-        if (StrUtil.isEmpty(password)) {
+        if (CharSequenceUtil.isEmpty(password)) {
             return AjaxResult.err().msg("请输入密码");
         }
         if (!PasswordTool.isAscii(password)) {
@@ -212,7 +212,7 @@ public class SysUserController {
         List<SysUser> userList = sysUserService.findByUnit(orgPermissions);
 
         List<TreeOption> orgOptions = orgList.stream().map(o -> new TreeOption(o.getName(), o.getId(), o.getPid())).toList();
-        List<TreeOption> userOptions = userList.stream().map(u -> new TreeOption(u.getName(), u.getId(), StrUtil.emptyToDefault(u.getOrgId(), u.getUnitId()))).toList();
+        List<TreeOption> userOptions = userList.stream().map(u -> new TreeOption(u.getName(), u.getId(), CharSequenceUtil.emptyToDefault(u.getOrgId(), u.getUnitId()))).toList();
         List<TreeOption> allOptions = ListUtils.union(orgOptions, userOptions);
 
         List<TreeOption> tree = TreeTool.buildTree(allOptions);

@@ -1,9 +1,9 @@
 package io.github.jiangood.openadmin.util;
 
-import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.CharUtil;
+import cn.hutool.core.util.PrimitiveArrayUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import com.google.common.base.CaseFormat;
 
 import java.util.Arrays;
@@ -21,13 +21,13 @@ public class StringTool {
      * @return
      */
     public static String shuffle(String str) {
-        if (StrUtil.isEmpty(str) || str.length() <= 1) {
+        if (CharSequenceUtil.isEmpty(str) || str.length() <= 1) {
             return str;
         }
 
         char[] chars = str.toCharArray();
 
-        chars = ArrayUtil.shuffle(chars);
+        chars = PrimitiveArrayUtil.shuffle(chars);
         // Fisher-Yates 洗牌算法
         for (int i = chars.length - 1; i > 0; i--) {
             int j = RandomUtil.randomInt(i + 1);

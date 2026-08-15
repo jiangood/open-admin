@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
@@ -262,7 +261,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     public List<String> findChildIdListWithSelfById(String id) {
         List<String> childIdListById = this.findChildIdListById(id);
-        List<String> resultList = CollectionUtil.newArrayList(childIdListById);
+        List<String> resultList = CollUtil.newArrayList(childIdListById);
         resultList.add(id);
         return resultList;
     }

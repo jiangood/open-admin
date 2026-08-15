@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.file;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,7 +43,7 @@ public class LocalFileOperator implements FileOperator {
         // 判断文件存在不存在
         String absoluteFile = getAbsoluteFile(key);
         if (!FileUtil.exist(absoluteFile)) {
-            String message = StrUtil.format("本地文件不存在,key={} ,path={}", key, absoluteFile);
+            String message = CharSequenceUtil.format("本地文件不存在,key={} ,path={}", key, absoluteFile);
             throw new FileNotFoundException(message);
         }
         return FileUtil.getInputStream(absoluteFile);

@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.util;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -8,17 +8,17 @@ import java.util.Map;
 public class URLTool {
 
     public static String removeQueryString(String url) {
-        return StrUtil.subBefore(url, '?', true);
+        return CharSequenceUtil.subBefore(url, '?', true);
     }
 
 
     public static Map<String, String> getParams(String url) {
         Map<String, String> map = new LinkedHashMap<>();
-        if (StrUtil.isEmpty(url)) {
+        if (CharSequenceUtil.isEmpty(url)) {
             return map;
         }
         if (url.contains("?")) {
-            url = StrUtil.subAfter(url, '?', true);
+            url = CharSequenceUtil.subAfter(url, '?', true);
         } else if (!url.contains("&")) {
             return map;
         }
@@ -57,7 +57,7 @@ public class URLTool {
      */
     public static String appendPath(String url, String path) {
         if (url.contains("?")) {
-            String[] arr = StrUtil.splitToArray(url, '?');
+            String[] arr = CharSequenceUtil.splitToArray(url, '?');
             return arr[0] + path + "?" + arr[1];
         }
 

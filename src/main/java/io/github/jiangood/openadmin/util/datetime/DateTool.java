@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.util.datetime;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.range.Range;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.util.Assert;
@@ -26,7 +26,7 @@ public class DateTool {
      * @return 如果是ISO格式的日期范围返回true，否则返回false
      */
     public static boolean isIsoDateRange(String s) {
-        return s.length() == 21 && !s.contains("/") && StrUtil.count(s, "-") == 4;
+        return s.length() == 21 && !s.contains("/") && CharSequenceUtil.count(s, "-") == 4;
     }
 
 

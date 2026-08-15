@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.service;
 
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.lang.Dict;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.dto.MenuItem;
 import io.github.jiangood.openadmin.modules.system.dto.MenuPermTreeNode;
@@ -65,7 +65,7 @@ public class SysMenuService {
 
                     item.setParentKey(def.getPid());
                     item.setIcon(def.getIcon());
-                    item.setPath(StrUtil.nullToEmpty(def.getPath()));
+                    item.setPath(CharSequenceUtil.nullToEmpty(def.getPath()));
 
                     if (def.getPath() != null) {
                         pathMenuMap.put(def.getPath(), def);

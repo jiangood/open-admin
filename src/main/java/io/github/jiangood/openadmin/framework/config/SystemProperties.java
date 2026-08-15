@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.config;
 
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -134,7 +134,7 @@ public class SystemProperties {
 
     public String getBaseUrl() {
         String url = this.baseUrl;
-        if (StrUtil.isEmpty(url)) {
+        if (CharSequenceUtil.isEmpty(url)) {
             url = RequestTool.getBaseUrl(RequestTool.currentRequest());
         }
         return url;

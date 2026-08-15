@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.data.specification;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.ArrayTool;
 import io.github.jiangood.openadmin.util.range.Range;
 import io.github.jiangood.openadmin.util.range.RangeTool;
@@ -49,7 +49,7 @@ public class Spec<T> implements Specification<T> {
      * @return this
      */
     public Spec<T> betweenDateRange(String field, String isoRange, boolean convertToJavaDate) {
-        if (StrUtil.isEmpty(isoRange)) {
+        if (CharSequenceUtil.isEmpty(isoRange)) {
             return this;
         }
 

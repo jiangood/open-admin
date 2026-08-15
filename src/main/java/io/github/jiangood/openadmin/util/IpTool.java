@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.net.NetUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
 import cn.hutool.http.HttpRequest;
 import com.google.common.cache.Cache;
@@ -106,22 +106,22 @@ public class IpTool {
                     .timeout(5000)
                     .execute()
                     .body();
-            if (StrUtil.isBlank(body)) {
+            if (CharSequenceUtil.isBlank(body)) {
                 return null;
             }
             var json = JsonTool.jsonToMapQuietly(body);
             if (json == null || !"success".equals(json.get("status"))) {
                 return null;
             }
-            String country = StrUtil.nullToDefault((String) json.get("country"), "");
-            String region = StrUtil.nullToDefault((String) json.get("regionName"), "");
-            String city = StrUtil.nullToDefault((String) json.get("city"), "");
-            String isp = StrUtil.nullToDefault((String) json.get("isp"), "");
+            String country = CharSequenceUtil.nullToDefault((String) json.get("country"), "");
+            String region = CharSequenceUtil.nullToDefault((String) json.get("regionName"), "");
+            String city = CharSequenceUtil.nullToDefault((String) json.get("city"), "");
+            String isp = CharSequenceUtil.nullToDefault((String) json.get("isp"), "");
             StringBuilder sb = new StringBuilder();
-            if (StrUtil.isNotBlank(country)) sb.append("地址：").append(country);
-            if (StrUtil.isNotBlank(region)) sb.append(" ").append(region);
-            if (StrUtil.isNotBlank(city)) sb.append(" ").append(city);
-            if (StrUtil.isNotBlank(isp)) sb.append(",").append("运营商：").append(isp);
+            if (CharSequenceUtil.isNotBlank(country)) sb.append("地址：").append(country);
+            if (CharSequenceUtil.isNotBlank(region)) sb.append(" ").append(region);
+            if (CharSequenceUtil.isNotBlank(city)) sb.append(" ").append(city);
+            if (CharSequenceUtil.isNotBlank(isp)) sb.append(",").append("运营商：").append(isp);
             return sb.length() > 0 ? sb.toString() : null;
         }
     }
@@ -142,20 +142,20 @@ public class IpTool {
                     .timeout(5000)
                     .execute()
                     .body();
-            if (StrUtil.isBlank(body)) {
+            if (CharSequenceUtil.isBlank(body)) {
                 return null;
             }
-            List<String> arr = StrUtil.split(body, "\n");
+            List<String> arr = CharSequenceUtil.split(body, "\n");
             StringBuilder sb = new StringBuilder();
             for (String a : arr) {
-                if (StrUtil.startWithAny(a, "地址", "运营商")) {
+                if (CharSequenceUtil.startWithAny(a, "地址", "运营商")) {
                     sb.append(a).append(",");
                 }
             }
             if (!sb.isEmpty()) {
                 sb.deleteCharAt(sb.length() - 1);
             }
-            return StrUtil.cleanBlank(sb.toString());
+            return CharSequenceUtil.cleanBlank(sb.toString());
         }
     }
 
@@ -175,22 +175,22 @@ public class IpTool {
                     .timeout(5000)
                     .execute()
                     .body();
-            if (StrUtil.isBlank(body)) {
+            if (CharSequenceUtil.isBlank(body)) {
                 return null;
             }
             var json = JsonTool.jsonToMapQuietly(body);
-            if (json == null || StrUtil.isBlank((String) json.get("ip"))) {
+            if (json == null || CharSequenceUtil.isBlank((String) json.get("ip"))) {
                 return null;
             }
-            String country = StrUtil.nullToDefault((String) json.get("country"), "");
-            String region = StrUtil.nullToDefault((String) json.get("region"), "");
-            String city = StrUtil.nullToDefault((String) json.get("city"), "");
-            String org = StrUtil.nullToDefault((String) json.get("org"), "");
+            String country = CharSequenceUtil.nullToDefault((String) json.get("country"), "");
+            String region = CharSequenceUtil.nullToDefault((String) json.get("region"), "");
+            String city = CharSequenceUtil.nullToDefault((String) json.get("city"), "");
+            String org = CharSequenceUtil.nullToDefault((String) json.get("org"), "");
             StringBuilder sb = new StringBuilder();
-            if (StrUtil.isNotBlank(country)) sb.append("地址：").append(country);
-            if (StrUtil.isNotBlank(region)) sb.append(" ").append(region);
-            if (StrUtil.isNotBlank(city)) sb.append(" ").append(city);
-            if (StrUtil.isNotBlank(org)) sb.append(",").append("运营商：").append(org);
+            if (CharSequenceUtil.isNotBlank(country)) sb.append("地址：").append(country);
+            if (CharSequenceUtil.isNotBlank(region)) sb.append(" ").append(region);
+            if (CharSequenceUtil.isNotBlank(city)) sb.append(" ").append(city);
+            if (CharSequenceUtil.isNotBlank(org)) sb.append(",").append("运营商：").append(org);
             return sb.length() > 0 ? sb.toString() : null;
         }
     }
