@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 系统操作日志表
@@ -57,6 +57,6 @@ public class SysLog extends BaseEntity {
     @Column(length = 64)
     private String ip;
 
-    private Date operationTime;
+    private LocalDateTime operationTime;
 
 }

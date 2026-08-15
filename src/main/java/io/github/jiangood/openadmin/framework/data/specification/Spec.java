@@ -12,6 +12,7 @@ import org.springframework.data.jpa.convert.QueryByExamplePredicateBuilder;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -41,20 +42,20 @@ public class Spec<T> implements Specification<T> {
 
     /**
      * ISO 格式的日期范围查询（如 "2024-01-01~2024-12-31"）。
-     * 支持转换为 java.util.Date 或保持字符串比较。
+     * 支持转换为 java.time.LocalDateTime 或保持字符串比较。
      *
      * @param field            字段名
      * @param isoRange         ISO 格式的日期范围字符串
-     * @param convertToJavaDate 是否转换为 java.util.Date 进行比较
+     * @param convertToDateTime 是否转换为 java.time.LocalDateTime 进行比较
      * @return this
      */
-    public Spec<T> betweenDateRange(String field, String isoRange, boolean convertToJavaDate) {
+    public Spec<T> betweenDateRange(String field, String isoRange, boolean convertToDateTime) {
         if (CharSequenceUtil.isEmpty(isoRange)) {
             return this;
         }
 
-        if (convertToJavaDate) {
-            Range<Date> range = RangeTool.toDateRange(isoRange);
+        if (convertToDateTime) {
+            Range<LocalDateTime> range = RangeTool.toDateRange(isoRange);
             return this.between(field, range.getStart(), range.getEnd());
         }
         Range<String> range = RangeTool.toStrRange(isoRange);
@@ -70,7 +71,7 @@ public class Spec<T> implements Specification<T> {
      * @param <V>   字段值类型
      * @return this
      */
-    public <V extends Comparable<V>> Spec<T> between(String field, Range<V> range) {
+    public <V extends Comparable<? super V>> Spec<T> between(String field, Range<V> range) {
         if (range == null || range.isEmpty()) {
             return this;
         }
@@ -87,7 +88,7 @@ public class Spec<T> implements Specification<T> {
      * @param <C>   字段值类型
      * @return this
      */
-    public <C extends Comparable<C>> Spec<T> between(String field, C begin, C end) {
+    public <C extends Comparable<? super C>> Spec<T> between(String field, C begin, C end) {
         if (begin != null && end != null) {
             return this.add(new SpecImpl<>(SpecType.BETWEEN, field, new Object[]{begin, end}));
         }

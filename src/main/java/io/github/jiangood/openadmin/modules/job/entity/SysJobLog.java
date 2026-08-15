@@ -9,7 +9,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "sys_job_log")
@@ -22,9 +23,9 @@ public class SysJobLog extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     SysJob sysJob;
 
-    Date beginTime;
+    LocalDateTime beginTime;
 
-    Date endTime;
+    LocalDateTime endTime;
 
     String result;
 
@@ -47,7 +48,7 @@ public class SysJobLog extends BaseEntity {
 
     @PrePersist
     public void prePersist() {
-        this.executeDate = DateUtil.formatDate(beginTime);
+        this.executeDate = beginTime == null ? null : beginTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         if (success == null) {
             success = true;
         }

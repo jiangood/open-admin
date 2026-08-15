@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.util.range;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -15,7 +15,7 @@ class DateRangeTest {
         DateRange dateRange = new DateRange(dateRangeStr);
         assertNotNull(dateRange.getStart());
         assertNotNull(dateRange.getEnd());
-        assertTrue(dateRange.getStart().before(dateRange.getEnd()));
+        assertTrue(dateRange.getStart().isBefore(dateRange.getEnd()));
     }
 
     @Test
@@ -40,8 +40,8 @@ class DateRangeTest {
         assertFalse(dateRange.isSame());
         
         // 测试 setters 和 getters
-        Date newStart = new Date();
-        Date newEnd = new Date();
+        LocalDateTime newStart = LocalDateTime.now();
+        LocalDateTime newEnd = LocalDateTime.now();
         dateRange.setStart(newStart);
         dateRange.setEnd(newEnd);
         assertEquals(newStart, dateRange.getStart());

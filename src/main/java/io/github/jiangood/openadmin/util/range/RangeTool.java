@@ -3,6 +3,9 @@ package io.github.jiangood.openadmin.util.range;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 
 public class RangeTool {
     private RangeTool() {
@@ -68,14 +71,14 @@ public class RangeTool {
     }
 
     // 日期
-    public static Range<java.util.Date> toDateRange(String str) {
+    public static Range<LocalDateTime> toDateRange(String str) {
         Range<String> range = toStrRange(str);
-        Range<java.util.Date> r = new Range<>();
-        r.setStart(range.getStart() == null ? null : DateUtil.parse(range.getStart()));
-        r.setEnd(range.getEnd() == null ? null : DateUtil.parse(range.getEnd()));
+        Range<LocalDateTime> r = new Range<>();
+        r.setStart(range.getStart() == null ? null : LocalDateTime.from(DateUtil.parse(range.getStart()).toInstant().atZone(ZoneId.systemDefault())));
+        r.setEnd(range.getEnd() == null ? null : LocalDateTime.from(DateUtil.parse(range.getEnd()).toInstant().atZone(ZoneId.systemDefault())));
 
         if (r.getEnd() != null) {
-            r.setEnd(DateUtil.endOfDay(r.getEnd()));
+            r.setEnd(LocalDateTime.from(r.getEnd().toLocalDate().atTime(LocalTime.MAX)));
         }
 
         return r;

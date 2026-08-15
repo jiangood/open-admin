@@ -9,6 +9,8 @@ import jakarta.annotation.Resource;
 import org.quartz.*;
 import org.slf4j.Logger;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @DisallowConcurrentExecution
@@ -33,7 +35,7 @@ public abstract class BaseJob implements Job {
         SysJobLog jobLog = new SysJobLog();
         jobLog.setSysJob(job);
         Date fireTime = context.getFireTime();
-        jobLog.setBeginTime(fireTime);
+        jobLog.setBeginTime(fireTime == null ? null : LocalDateTime.ofInstant(fireTime.toInstant(), ZoneId.systemDefault()));
         jobLog = sysJobLogRepository.save(jobLog);
 
 
@@ -49,9 +51,9 @@ public abstract class BaseJob implements Job {
             jobLog.setSuccess(false);
         }
 
-        jobLog.setJobRunTime(System.currentTimeMillis() - fireTime.getTime());
+        jobLog.setJobRunTime(fireTime == null ? null : System.currentTimeMillis() - fireTime.getTime());
         jobLog.setResult(result);
-        jobLog.setEndTime(new Date());
+        jobLog.setEndTime(LocalDateTime.now());
         sysJobLogRepository.save(jobLog);
         logger.info("执行结束 返回值{}", result);
         FileLogTool.clear();

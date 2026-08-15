@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.system.dto.response;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -12,12 +12,12 @@ public class UserVO {
     private String id;
 
     @Remark("创建时间")
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @Remark("创建人ID")
     private String createUser;
 
-    private Date updateTime;
+    private LocalDateTime updateTime;
 
     @Remark("更新人ID")
     private String updateUser;

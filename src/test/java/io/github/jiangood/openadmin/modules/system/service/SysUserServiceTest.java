@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -148,7 +148,7 @@ class SysUserServiceTest {
         SysUser user = new SysUser();
         user.setId("1");
         user.setPassword(passwordEncoder.encode("oldPassword"));
-        user.setLastPasswordChangeTime(new Date());
+        user.setLastPasswordChangeTime(LocalDateTime.now());
 
         when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
         when(sysUserRepository.save(any(SysUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -186,7 +186,7 @@ class SysUserServiceTest {
         SysUser user = new SysUser();
         user.setId("1");
         user.setPassword(passwordEncoder.encode("correctOldPassword"));
-        user.setLastPasswordChangeTime(new Date());
+        user.setLastPasswordChangeTime(LocalDateTime.now());
         when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
 
         assertThrows(IllegalStateException.class, () -> sysUserService.updatePwd("1", "wrongOldPassword", "NewP@ss123"));

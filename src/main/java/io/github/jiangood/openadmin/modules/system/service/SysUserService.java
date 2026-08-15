@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -183,7 +184,7 @@ public class SysUserService extends BaseService<SysUser> {
         PasswordTool.validateStrength(newPassword);
 
         sysUser.setPassword(PasswordTool.encode(newPassword));
-        sysUser.setLastPasswordChangeTime(new Date());
+        sysUser.setLastPasswordChangeTime(LocalDateTime.now());
         sysUserRepository.save(sysUser);
     }
 

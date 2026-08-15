@@ -2,9 +2,8 @@ package io.github.jiangood.openadmin.util.datetime;
 
 import io.github.jiangood.openadmin.util.range.Range;
 import org.junit.jupiter.api.Test;
-import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,7 +48,7 @@ class DateToolTest {
     @Test
     void testAllDaysOfMonth() {
         // 测试正常情况：获取某个月的所有日期
-        Date date = cn.hutool.core.date.DateUtil.parseDate("2023-01-01");
+        LocalDate date = LocalDate.parse("2023-01-01");
         List<String> days = DateTool.allDaysOfMonth(date);
         assertNotNull(days);
         assertEquals(31, days.size());
@@ -110,8 +109,8 @@ class DateToolTest {
     @Test
     void testDaysWithDate() {
         // 测试正常情况：计算两个Date之间的天数差
-        Date a = cn.hutool.core.date.DateUtil.parseDate("2023-01-01");
-        Date b = cn.hutool.core.date.DateUtil.parseDate("2023-01-03");
+        LocalDate a = LocalDate.parse("2023-01-01");
+        LocalDate b = LocalDate.parse("2023-01-03");
         assertEquals(2, DateTool.days(a, b));
     }
 
@@ -124,22 +123,22 @@ class DateToolTest {
     @Test
     void testGetYear() {
         // 测试正常情况：获取日期的年份
-        Date date = cn.hutool.core.date.DateUtil.parseDate("2023-01-01");
+        LocalDate date = LocalDate.parse("2023-01-01");
         assertEquals(2023, DateTool.getYear(date));
     }
 
     @Test
     void testGetMonth() {
         // 测试正常情况：获取日期的月份（从1开始）
-        Date date = cn.hutool.core.date.DateUtil.parseDate("2023-01-01");
+        LocalDate date = LocalDate.parse("2023-01-01");
         assertEquals(1, DateTool.getMonth(date));
         
-        Date date2 = cn.hutool.core.date.DateUtil.parseDate("2023-12-01");
+        LocalDate date2 = LocalDate.parse("2023-12-01");
         assertEquals(12, DateTool.getMonth(date2));
     }
 
     @Test
-    void testGetLastMonthOfTheSameYear() throws ParseException {
+    void testGetLastMonthOfTheSameYear() {
         // 测试正常情况：获取同年的上个月
         assertEquals("2023-01", DateTool.getLastMonthOfTheSameYear("2023-02"));
         

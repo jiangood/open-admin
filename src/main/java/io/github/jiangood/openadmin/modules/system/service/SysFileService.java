@@ -39,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
@@ -615,9 +616,10 @@ public class SysFileService {
      */
     private String genObjectName(String id, String suffix, boolean isPublic, boolean image) {
         String prefix = isPublic ? SysFileConstants.PUBLIC_PREFIX : SysFileConstants.PRIVATE_PREFIX;
-        String dir = prefix + "/" + DateUtil.format(new Date(), "yyyyMM");
+        String yyyyMM = DateUtil.format(LocalDateTime.now(), "yyyyMM");
+        String dir = prefix + "/" + yyyyMM;
         if (image) {
-            dir = prefix + "/" + SysFileConstants.IMAGE_DIR + "/" + DateUtil.format(new Date(), "yyyyMM");
+            dir = prefix + "/" + SysFileConstants.IMAGE_DIR + "/" + yyyyMM;
         }
         return dir + "/" + id + "." + suffix;
     }

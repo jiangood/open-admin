@@ -8,7 +8,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -68,8 +68,8 @@ public class SysFileRepositoryTest {
         claimed.setStatus(FileStatus.IN_USE);
         sysFileRepository.save(claimed);
 
-        Date past = new Date(System.currentTimeMillis() - 60_000);
-        Date future = new Date(System.currentTimeMillis() + 60_000);
+        LocalDateTime past = LocalDateTime.now().minusMinutes(1);
+        LocalDateTime future = LocalDateTime.now().plusMinutes(1);
 
         int updatedPast = sysFileRepository.updateStatusByStatusAndCreateTimeBefore(
                 FileStatus.TEMP, FileStatus.PENDING_DELETE, past);

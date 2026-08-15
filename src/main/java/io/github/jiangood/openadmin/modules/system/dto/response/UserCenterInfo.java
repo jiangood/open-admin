@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.modules.system.dto.response;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,5 +15,5 @@ public class UserCenterInfo {
     private List<String> roles;
     private String email;
     private String account;
-    private Date createTime;
+    private LocalDateTime createTime;
 }

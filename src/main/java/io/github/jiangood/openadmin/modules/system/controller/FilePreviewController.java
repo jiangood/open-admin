@@ -100,7 +100,7 @@ public class FilePreviewController {
                     .header(HttpHeaders.CONTENT_TYPE, file.getContentType())
                     .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
                     .eTag(eTag)
-                    .lastModified(file.getUpdateTime().getTime())
+                    .lastModified(file.getUpdateTime() == null ? 0 : file.getUpdateTime().atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli())
                     .body(new MyStreamingResponseBody(inputStream));
         } catch (FileNotFoundException fe) {
             log.info("预览文件失败, 文件不存在 objectName={}", objectName);

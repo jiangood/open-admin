@@ -31,7 +31,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testSetDownloadHeader() throws IOException {
+    void testSetDownloadHeader() {
         String filename = "test.txt";
         String contentType = "text/plain";
         
@@ -45,7 +45,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testSetDownloadExcelHeader() throws IOException {
+    void testSetDownloadExcelHeader() {
         String filename = "test.xlsx";
         
         // 调用方法
@@ -224,7 +224,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testSetDownloadHeaderWithSpecialCharacters() throws IOException {
+    void testSetDownloadHeaderWithSpecialCharacters() {
         String filename = "测试文件.txt";
         String contentType = "text/plain";
         

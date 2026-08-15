@@ -3,7 +3,8 @@ package io.github.jiangood.openadmin.util;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.unit.DataSizeUtil;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class FriendlyTool {
     private FriendlyTool() {
@@ -67,12 +68,12 @@ public class FriendlyTool {
     /**
      * 计算过去了多少时间
      */
-    public static String getPastTime(Date date) {
+    public static String getPastTime(LocalDateTime date) {
         if (date == null) {
             throw new IllegalArgumentException("日期参数不能为空");
         }
 
-        long between = System.currentTimeMillis() - date.getTime();
+        long between = System.currentTimeMillis() - date.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         if (between < MINUTE_1) {
             return "刚刚";
         }
@@ -101,8 +102,10 @@ public class FriendlyTool {
      * @param endTime   结束时间
      * @return 友好的时间差字符串表示
      */
-    public static String getTimeDiff(Date startTime, Date endTime) {
-        return getTimeDiff(startTime.getTime(), endTime.getTime());
+    public static String getTimeDiff(LocalDateTime startTime, LocalDateTime endTime) {
+        return getTimeDiff(
+                startTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
+                endTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli());
     }
 
 

@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -35,7 +35,7 @@ public interface SysFileRepository extends BaseRepository<SysFile, String> {
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE SysFile f SET f.status = :to WHERE f.status = :from AND f.createTime < :deadline")
-    int updateStatusByStatusAndCreateTimeBefore(@Param("from") FileStatus from, @Param("to") FileStatus to, @Param("deadline") Date deadline);
+    int updateStatusByStatusAndCreateTimeBefore(@Param("from") FileStatus from, @Param("to") FileStatus to, @Param("deadline") LocalDateTime deadline);
 
     List<SysFile> findByStatus(FileStatus status);
 

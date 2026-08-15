@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.util.range;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 
 /**
@@ -11,11 +11,11 @@ import java.util.Date;
  */
 @Getter
 @Setter
-public class DateRange extends Range<Date> {
+public class DateRange extends Range<LocalDateTime> {
 
 
     public DateRange(String str) {
-        Range<Date> dateRange = RangeTool.toDateRange(str);
+        Range<LocalDateTime> dateRange = RangeTool.toDateRange(str);
 
         this.start = dateRange.start;
         this.end = dateRange.end;

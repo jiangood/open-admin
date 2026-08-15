@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -314,7 +315,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
             else if (type == Byte.class || type == byte.class) ReflectionUtils.setField(field, bean, n.byteValue());
             else ReflectionUtils.setField(field, bean, value);
         } else if (value instanceof Timestamp t) {
-            if (type == java.util.Date.class) ReflectionUtils.setField(field, bean, new java.util.Date(t.getTime()));
+            if (type == LocalDateTime.class) ReflectionUtils.setField(field, bean, t.toLocalDateTime());
             else ReflectionUtils.setField(field, bean, t);
         } else {
             ReflectionUtils.setField(field, bean, value);

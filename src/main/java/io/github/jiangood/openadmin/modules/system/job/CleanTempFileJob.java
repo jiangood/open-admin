@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.job;
 
-import cn.hutool.core.date.DateUtil;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
@@ -16,7 +15,7 @@ import org.slf4j.Logger;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -39,7 +38,7 @@ public class CleanTempFileJob extends BaseJob {
     @Override
     public String execute(JobDataMap data, Logger logger) throws Exception {
         int cleanMinutes = systemProperties.getFile().getCleanUnclaimedMinutes();
-        Date deadline = DateUtil.offsetMinute(new Date(), -cleanMinutes);
+        LocalDateTime deadline = LocalDateTime.now().minusMinutes(cleanMinutes);
 
         // 1. 标记超时未认领为待删除（TEMP -> PENDING_DELETE）
         int unclaimedCount = sysFileRepository.updateStatusByStatusAndCreateTimeBefore(

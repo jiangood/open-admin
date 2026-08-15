@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Aspect
 @Component
@@ -92,7 +92,7 @@ public class LogAspect {
         SysLog sysLog = new SysLog();
         sysLog.setOperation(methodAnn.value());
         sysLog.setIp(ip);
-        sysLog.setOperationTime(new Date());
+        sysLog.setOperationTime(LocalDateTime.now());
         sysLog.setDuration((int) duration);
         sysLog.setParams(params);
         sysLog.setSuccess(result.isSuccess());

@@ -32,7 +32,7 @@ public class SysDictTypeService extends BaseService<SysDictType> {
 
         List<SysDictType> children = this.findAllByField(SysDictType.Fields.pid, id); // NOSONAR: deleteCascade 已开启事务
         for (SysDictType child : children) {
-            deleteCascade(child.getId());
+            deleteCascade(child.getId()); // NOSONAR: deleteCascade 自身为 @Transactional，递归调用不走代理但外层事务已开启
         }
 
         if (type.getTypeCode() != null) {

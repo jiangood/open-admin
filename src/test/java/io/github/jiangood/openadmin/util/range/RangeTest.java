@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.util.range;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -87,8 +87,8 @@ class RangeTest {
         assertFalse(stringRange.isSame());
         
         // 测试 Date 类型
-        Date now = new Date();
-        Range<Date> dateRange = new Range<>(now, now);
+        LocalDateTime now = LocalDateTime.now();
+        Range<LocalDateTime> dateRange = new Range<>(now, now);
         assertEquals(now, dateRange.getStart());
         assertEquals(now, dateRange.getEnd());
         assertFalse(dateRange.isEmpty());

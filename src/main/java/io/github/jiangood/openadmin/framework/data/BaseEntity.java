@@ -20,7 +20,7 @@ import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -40,14 +40,14 @@ public abstract class BaseEntity implements Persistable<String>, Serializable {
 
     @CreatedDate
     @Column(updatable = false)
-    private Date createTime;
+    private LocalDateTime createTime;
 
     @LastModifiedBy
     @Column(length = DBConstants.LEN_ID)
     private String updateUser;
 
     @LastModifiedDate
-    private Date updateTime;
+    private LocalDateTime updateTime;
 
     @PrePersist
     public void ensureId() {

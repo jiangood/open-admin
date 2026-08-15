@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 @Getter
 @Setter
-public class Range<T extends Comparable<T>> {
+public class Range<T extends Comparable<? super T>> {
 
     T start;
     T end;

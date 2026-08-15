@@ -11,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -46,7 +46,7 @@ public class Table<T> {
                 }
 
                 Class<?> type1 = f.getType();
-                if (type1.isAssignableFrom(String.class) || type1.isAssignableFrom(Number.class) || type1.isAssignableFrom(Date.class)) {
+                if (type1.isAssignableFrom(String.class) || type1.isAssignableFrom(Number.class) || type1.isAssignableFrom(LocalDateTime.class)) {
                     String title = f.getAnnotation(Remark.class).value();
                     tb.addColumn(title, f.getName());
                 }
@@ -62,7 +62,7 @@ public class Table<T> {
             }
 
             Class<?> type1 = f.getType();
-            if (type1.isAssignableFrom(String.class) || type1.isAssignableFrom(Number.class) || type1.isAssignableFrom(Date.class)) {
+            if (type1.isAssignableFrom(String.class) || type1.isAssignableFrom(Number.class) || type1.isAssignableFrom(LocalDateTime.class)) {
                 String title = f.isAnnotationPresent(Remark.class) ? f.getAnnotation(Remark.class).value() : f.getName();
                 tb.addColumn(title, f.getName());
             }
@@ -102,8 +102,8 @@ public class Table<T> {
         if (v == null) {
             return null;
         }
-        if (v instanceof Date d) {
-            return DateUtil.formatDateTime(d);
+        if (v instanceof LocalDateTime d) {
+            return DateUtil.format(d, "yyyy-MM-dd HH:mm:ss");
         }
 
         return v.toString();

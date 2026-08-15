@@ -41,7 +41,7 @@ class FilePreviewControllerTest {
         file.setObjectName(objectName);
         file.setSuffix("jpg");
         file.setSize(100L);
-        file.setUpdateTime(new java.util.Date());
+        file.setUpdateTime(java.time.LocalDateTime.now());
 
         when(service.findByObjectName(objectName)).thenReturn(file);
         when(service.getFileStreamByObjectName(objectName))
@@ -59,7 +59,7 @@ class FilePreviewControllerTest {
         file.setObjectName(objectName);
         file.setSuffix("jpg");
         file.setSize(100L);
-        file.setUpdateTime(new java.util.Date());
+        file.setUpdateTime(java.time.LocalDateTime.now());
 
         when(service.findByObjectName(objectName)).thenReturn(file);
         when(service.isPhysicalFileExist(thumbObjectName)).thenReturn(true);
@@ -80,7 +80,7 @@ class FilePreviewControllerTest {
         file.setObjectName(objectName);
         file.setSuffix("jpg");
         file.setSize(100L);
-        file.setUpdateTime(new java.util.Date());
+        file.setUpdateTime(java.time.LocalDateTime.now());
 
         when(service.findByObjectName(objectName)).thenReturn(file);
         when(service.isPhysicalFileExist(thumbObjectName)).thenReturn(false);

@@ -19,7 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,7 +69,7 @@ class CleanTempFileJobTest {
         b.setObjectName("public/202607/id-b.jpg");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(2);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(2);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of());
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(a, b), emptyPage());
         when(sysFileService.deleteFileInternal(a)).thenReturn(true);
@@ -77,7 +77,7 @@ class CleanTempFileJobTest {
 
         String result = job.execute(new JobDataMap(), mock(Logger.class));
 
-        verify(sysFileRepository).updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class));
+        verify(sysFileRepository).updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class));
         verify(sysFileService).deleteFileInternal(a);
         verify(sysFileService).deleteFileInternal(b);
         assertTrue(result.contains("标记未认领 2 个"));
@@ -92,7 +92,7 @@ class CleanTempFileJobTest {
         b.setObjectName("public/202607/id-b.jpg");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(0);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of());
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(a), pageOf(b), emptyPage());
         when(sysFileService.deleteFileInternal(a)).thenReturn(true);
@@ -113,7 +113,7 @@ class CleanTempFileJobTest {
         claimed.setJoinId("article-999");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(0);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
         when(jdbcRunner.existsById("sys_article", "article-999")).thenReturn(false);
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(claimed), emptyPage());
@@ -143,7 +143,7 @@ class CleanTempFileJobTest {
         orphan2.setJoinId("article-3");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(0);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(orphan1, inUse, orphan2));
         when(jdbcRunner.existsById("sys_article", "article-1")).thenReturn(false);
         when(jdbcRunner.existsById("sys_article", "article-2")).thenReturn(true);
@@ -166,7 +166,7 @@ class CleanTempFileJobTest {
         claimed.setJoinId("article-1");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(0);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
         when(jdbcRunner.existsById("sys_article", "article-1")).thenReturn(true);
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
@@ -186,7 +186,7 @@ class CleanTempFileJobTest {
         claimed.setJoinId("article-999");
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(0);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of(claimed));
         when(jdbcRunner.existsById("sys_article", "article-999")).thenThrow(new RuntimeException("table not found"));
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
@@ -205,7 +205,7 @@ class CleanTempFileJobTest {
         file.setStatus(FileStatus.PENDING_DELETE);
 
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
-        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(Date.class))).thenReturn(0);
+        when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(0);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of());
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(file), emptyPage());
         when(sysFileService.deleteFileInternal(file)).thenReturn(false);
