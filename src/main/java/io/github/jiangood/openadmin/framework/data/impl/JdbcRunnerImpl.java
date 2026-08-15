@@ -309,9 +309,8 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     private void setFieldValue(Field field, Object bean, Object value) {
         Class<?> type = field.getType();
-        if (value instanceof Number n) {
-            Object converted = convertNumber(n, type);
-            ReflectionUtils.setField(field, bean, converted);
+        if (value instanceof Number n) { // NOSONAR: 不同类型分派无法用 switch 表达
+            ReflectionUtils.setField(field, bean, convertNumber(n, type));
         } else if (value instanceof Timestamp t) {
             ReflectionUtils.setField(field, bean, type == LocalDateTime.class ? t.toLocalDateTime() : t);
         } else {
