@@ -18,9 +18,11 @@ export class StringUtils {
 
     static random(length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const values = new Uint32Array(length);
+        crypto.getRandomValues(values);
         let result = '';
         for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
+            result += characters.charAt(values[i] % characters.length);
         }
         return result;
     }
