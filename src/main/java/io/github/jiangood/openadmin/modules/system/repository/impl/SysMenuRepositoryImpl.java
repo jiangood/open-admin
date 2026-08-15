@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.source.ConfigurationPropertyS
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * 后加载覆盖先加载）。最后按 seq 排序返回扁平列表。
  */
 @Slf4j
-@Component
+@Repository
 public class SysMenuRepositoryImpl implements SysMenuRepository {
 
     private final List<MenuDefinition> menus;

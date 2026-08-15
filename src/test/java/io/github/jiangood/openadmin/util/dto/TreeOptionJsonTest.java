@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.util.dto;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,14 +25,14 @@ class TreeOptionJsonTest {
         node.setKey("org-2");
         String json = om.writeValueAsString(node);
         assertTrue(json.contains("\"value\":\"org-2\""));
-        assertTrue(node.getValue().equals("org-2"));
+        assertEquals("org-2", node.getValue());
     }
 
     @Test
     void setValueSyncsKey() {
         TreeOption node = new TreeOption();
         node.setValue("org-3");
-        assertTrue(node.getKey().equals("org-3"));
+        assertEquals("org-3", node.getKey());
     }
 
     @Test

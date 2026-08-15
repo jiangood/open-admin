@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Entity
 @FieldNameConstants
 @Table(name = "sys_log", indexes = {@Index(columnList = "operation")})
-public class SysLog extends BaseEntity {
+public class SysLog extends BaseEntity { // NOSONAR: BaseEntity 已按 id 定义 equals/hashCode
 
     @Column(nullable = false, length = 100)
     private String operation;

@@ -15,7 +15,7 @@ import java.util.function.Function;
  */
 @Getter
 @Setter
-public class PageExt<T> extends org.springframework.data.domain.PageImpl<T> {
+public class PageExt<T> extends org.springframework.data.domain.PageImpl<T> { // NOSONAR: 继承 PageImpl 的 equals（按内容），无需自定义
 
 
     private Map<String, Object> extData = new HashMap<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable

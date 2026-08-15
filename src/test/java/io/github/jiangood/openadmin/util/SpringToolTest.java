@@ -117,15 +117,15 @@ class SpringToolTest {
     @Test
     void testPublishEvent() {
         // 测试发布事件，不抛出异常即可
-        SpringTool.publishEvent(new TestEvent(this));
+        assertDoesNotThrow(() -> SpringTool.publishEvent(new TestEvent(this)));
         // 测试发布普通对象
-        SpringTool.publishEvent(new Object());
+        assertDoesNotThrow(() -> SpringTool.publishEvent(new Object()));
     }
 
     @Test
     void testPublishEventAsync() {
         // 测试异步发布事件，不抛出异常即可
-        SpringTool.publishEventAsync(new TestEvent(this));
+        assertDoesNotThrow(() -> SpringTool.publishEventAsync(new TestEvent(this)));
     }
 
 

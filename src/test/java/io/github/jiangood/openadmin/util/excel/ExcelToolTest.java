@@ -248,15 +248,8 @@ class ExcelToolTest {
         // 由于生成 Excel 文件比较复杂，这里只测试方法是否能正常执行
         // 实际项目中应该使用真实的 Excel 文件进行测试
         byte[] emptyExcel = new byte[0];
-        InputStream inputStream = new ByteArrayInputStream(emptyExcel);
-
-        try {
-            ExcelTool.importExcel(TestEntity.class, inputStream);
-        } catch (Exception e) {
-            // 预期会抛出异常，因为输入流是空的
-            assertTrue(e instanceof Exception);
-        } finally {
-            inputStream.close();
+        try (InputStream inputStream = new ByteArrayInputStream(emptyExcel)) {
+            assertThrows(Exception.class, () -> ExcelTool.importExcel(TestEntity.class, inputStream));
         }
     }
 

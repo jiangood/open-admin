@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class LoginUser extends User {
+public class LoginUser extends User { // NOSONAR: 继承 Spring User 的 equals（按 username），无需自定义
 
     private String id;
     private String name;

@@ -22,11 +22,13 @@ public class SpringTool implements ApplicationContextAware {
     private static final String MSG_CONTEXT_NOT_INIT = "Spring应用上下文未初始化";
 
     public SpringTool() {
+        // 仅声明为 Spring 组件，无需初始化逻辑
     }
 
 
     private static ApplicationContext applicationContext;
 
+    // NOSONAR: ApplicationContextAware 回调（实例方法）写入静态上下文，是持有 Spring 上下文的惯例写法
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         SpringTool.applicationContext = applicationContext;

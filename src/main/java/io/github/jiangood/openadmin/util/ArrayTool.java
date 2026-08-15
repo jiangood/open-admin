@@ -4,6 +4,7 @@ import cn.hutool.core.lang.Pair;
 import io.github.jiangood.openadmin.util.range.IntRange;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -115,8 +116,7 @@ public class ArrayTool {
     public static <T> int findIndex(T[] arr, Function<T, Boolean> fn) {
         for (int i = 0; i < arr.length; i++) {
             T t = arr[i];
-            Boolean result = fn.apply(t);
-            if (result) {
+            if (Boolean.TRUE.equals(fn.apply(t))) {
                 return i;
             }
         }
@@ -137,10 +137,6 @@ public class ArrayTool {
         if (arr == null || arr.length == 0) {
             return new ArrayList<>();
         }
-        List<T> list = new ArrayList<>();
-        for (T t : arr) {
-            list.add(t);
-        }
-        return list;
+        return Arrays.asList(arr);
     }
 }

@@ -86,7 +86,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
 
     public List<SysUser> findUsers(String roleId) {
-        SysRole role = roleRepository.findById(roleId).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(roleId).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         return new ArrayList<>(role.getUsers());
     }
 

@@ -123,14 +123,10 @@ class PasswordToolTest {
         assertTrue(PasswordTool.isStrengthOk("MyP@ssw0rd!23"), "复杂密码应该被认为是强密码");
         
         // 测试空密码（会抛出异常）
-        assertThrows(IllegalArgumentException.class, () -> {
-            PasswordTool.isStrengthOk("");
-        }, "空密码应该抛出IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> PasswordTool.isStrengthOk(""), "空密码应该抛出IllegalArgumentException");
         
         // 测试null密码（会抛出异常）
-        assertThrows(IllegalArgumentException.class, () -> {
-            PasswordTool.isStrengthOk(null);
-        }, "null密码应该抛出IllegalArgumentException");
+        assertThrows(IllegalArgumentException.class, () -> PasswordTool.isStrengthOk(null), "null密码应该抛出IllegalArgumentException");
         
         // 测试随机生成的密码强度
         String randomPassword = PasswordTool.random();
@@ -150,54 +146,34 @@ class PasswordToolTest {
 
     @Test
     void testValidateStrengthRejectsNonAscii() {
-        assertThrows(IllegalStateException.class, () -> {
-            PasswordTool.validateStrength("密码123");
-        }, "中文密码应该抛出IllegalStateException");
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("密码123"), "中文密码应该抛出IllegalStateException");
 
-        assertThrows(IllegalStateException.class, () -> {
-            PasswordTool.validateStrength("abc😀!@#");
-        }, "emoji 密码应该抛出IllegalStateException");
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("abc😀!@#"), "emoji 密码应该抛出IllegalStateException");
 
         assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("Abc123!@#" + "a".repeat(60)),
                 "超长 ASCII 密码应该抛出IllegalStateException");
 
-        assertDoesNotThrow(() -> {
-            PasswordTool.validateStrength("MyP@ssw0rd!23");
-        }, "正常 ASCII 密码不应抛出异常");
+        assertDoesNotThrow(() -> PasswordTool.validateStrength("MyP@ssw0rd!23"), "正常 ASCII 密码不应抛出异常");
     }
 
     @Test
     void testValidateStrength() {
         // 测试验证强密码（不应该抛出异常）
-        assertDoesNotThrow(() -> {
-            PasswordTool.validateStrength("Abc123!@#");
-        }, "强密码验证不应该抛出异常");
+        assertDoesNotThrow(() -> PasswordTool.validateStrength("Abc123!@#"), "强密码验证不应该抛出异常");
         
-        assertDoesNotThrow(() -> {
-            PasswordTool.validateStrength("MyP@ssw0rd!23");
-        }, "强密码验证不应该抛出异常");
+        assertDoesNotThrow(() -> PasswordTool.validateStrength("MyP@ssw0rd!23"), "强密码验证不应该抛出异常");
         
         // 测试验证弱密码（应该抛出异常）
-        assertThrows(IllegalStateException.class, () -> {
-            PasswordTool.validateStrength("123");
-        }, "弱密码验证应该抛出IllegalStateException");
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("123"), "弱密码验证应该抛出IllegalStateException");
         
-        assertThrows(IllegalStateException.class, () -> {
-            PasswordTool.validateStrength("abc");
-        }, "弱密码验证应该抛出IllegalStateException");
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("abc"), "弱密码验证应该抛出IllegalStateException");
         
-        assertThrows(IllegalStateException.class, () -> {
-            PasswordTool.validateStrength("password");
-        }, "弱密码验证应该抛出IllegalStateException");
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateStrength("password"), "弱密码验证应该抛出IllegalStateException");
         
         // 测试验证空密码（应该抛出异常）
-        assertThrows(IllegalArgumentException.class, () -> {
-            PasswordTool.validateStrength("");
-        }, "空密码验证应该抛出异常");
+        assertThrows(IllegalArgumentException.class, () -> PasswordTool.validateStrength(""), "空密码验证应该抛出异常");
         
         // 测试验证null密码（应该抛出异常）
-        assertThrows(IllegalArgumentException.class, () -> {
-            PasswordTool.validateStrength(null);
-        }, "null密码验证应该抛出异常");
+        assertThrows(IllegalArgumentException.class, () -> PasswordTool.validateStrength(null), "null密码验证应该抛出异常");
     }
 }

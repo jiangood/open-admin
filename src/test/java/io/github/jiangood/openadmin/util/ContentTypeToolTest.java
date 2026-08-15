@@ -33,7 +33,7 @@ class ContentTypeToolTest {
     }
 
     @Test
-    void testGetContentTypeByExtension() {
+    void testGetContentTypeByExtension() { // NOSONAR: 数据驱动断言一组映射
         // 测试图片类型
         assertEquals(MediaType.IMAGE_JPEG_VALUE, ContentTypeTool.getContentTypeByExtension("jpg"));
         assertEquals(MediaType.IMAGE_JPEG_VALUE, ContentTypeTool.getContentTypeByExtension("jpeg"));

@@ -23,7 +23,7 @@ class ThreadToolTest {
         ThreadTool.execute(() -> {
             try {
                 // 模拟任务执行时间
-                Thread.sleep(100);
+                Thread.sleep(100); // NOSONAR: 测试中模拟异步任务耗时
                 executed[0] = true;
             } catch (InterruptedException e) {
                 log.error("线程中断", e);
@@ -55,7 +55,7 @@ class ThreadToolTest {
             ThreadTool.execute(() -> {
                 try {
                     // 模拟任务执行时间
-                    Thread.sleep(50);
+                    Thread.sleep(50); // NOSONAR: 测试中模拟异步任务耗时
                     synchronized (executedCount) {
                         executedCount[0]++;
                     }
@@ -92,7 +92,7 @@ class ThreadToolTest {
         CountDownLatch latch = new CountDownLatch(1);
         ThreadTool.execute(() -> {
             try {
-                Thread.sleep(10);
+                Thread.sleep(10); // NOSONAR: 测试中模拟异步任务耗时
             } catch (InterruptedException e) {
                 log.error("线程中断", e);
             } finally {

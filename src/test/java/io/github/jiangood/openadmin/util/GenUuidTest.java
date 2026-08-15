@@ -1,9 +1,11 @@
 package io.github.jiangood.openadmin.util;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
 class GenUuidTest {
     @Test
     void genUuids() {
-        System.out.println(">>>ROLE_UUID:" + IdTool.uuidV7());
-        System.out.println(">>>USER_UUID:" + IdTool.uuidV7());
+        assertNotNull(IdTool.uuidV7());
+        assertNotEquals(IdTool.uuidV7(), IdTool.uuidV7());
     }
 }

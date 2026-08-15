@@ -233,7 +233,7 @@ public class TreeTool {
 
     public static <E> List<E> treeToList(List<E> tree, Function<E, List<E>> getChildren) {
         List<E> list = new ArrayList<>();
-        walk(tree, getChildren, e -> list.add(e));
+        walk(tree, getChildren, e -> list.add(e)); // NOSONAR: walk 有 Consumer/BiConsumer 两个重载，方法引用有歧义
         return list;
     }
 

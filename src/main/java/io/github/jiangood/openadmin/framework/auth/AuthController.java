@@ -45,30 +45,7 @@ public class AuthController {
 
         checkAttempts(username);
 
-        {
-            AuthenticationManager authenticationManager = securityHolder.getSharedObject(AuthenticationManager.class);
-            SessionAuthenticationStrategy sessionStrategy = securityHolder.getSharedObject(SessionAuthenticationStrategy.class);
-            SecurityContextRepository securityContextRepository = securityHolder.getSharedObject(SecurityContextRepository.class);
-
-            try {
-                UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-                Authentication authentication = authenticationManager.authenticate(token);
-
-                sessionStrategy.onAuthentication(authentication, request, response);
-
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                securityContextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
-                loginAttemptService.onSuccess(username);
-            }
-            catch (SessionAuthenticationException e) {
-                return AjaxResult.err("账号或密码错误");
-            }
-            catch (AuthenticationException e) {
-                loginAttemptService.onFailed(username);
-                log.error("登录失败", e);
-                return AjaxResult.err("账号或密码错误");
-            }
-        }
+        authenticate(username, password, request, response);
 
         return AjaxResult.ok("登录成功");
     }
@@ -84,6 +61,29 @@ public class AuthController {
 
         boolean locked = loginAttemptService.isAccountLocked(username);
         Assert.state(!locked, "账户已被锁定，请" + systemProperties.getLoginLockMinutes() + "分钟后再试");
+    }
+
+    private void authenticate(String username, String password, HttpServletRequest request, HttpServletResponse response) {
+        AuthenticationManager authenticationManager = securityHolder.getSharedObject(AuthenticationManager.class);
+        SessionAuthenticationStrategy sessionStrategy = securityHolder.getSharedObject(SessionAuthenticationStrategy.class);
+        SecurityContextRepository securityContextRepository = securityHolder.getSharedObject(SecurityContextRepository.class);
+
+        try {
+            UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+            Authentication authentication = authenticationManager.authenticate(token);
+
+            sessionStrategy.onAuthentication(authentication, request, response);
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            securityContextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
+            loginAttemptService.onSuccess(username);
+        } catch (SessionAuthenticationException e) {
+            throw new IllegalStateException("账号或密码错误");
+        } catch (AuthenticationException e) {
+            loginAttemptService.onFailed(username);
+            log.error("登录失败", e);
+            throw new IllegalStateException("账号或密码错误");
+        }
     }
 
     private String decodeWebPassword(String password) {

@@ -23,74 +23,45 @@ public class ContentTypeTool {
 
         extension = extension.toLowerCase();
 
-        switch (extension) {
+        return switch (extension) {
             // 图片
-            case "jpg":
-            case "jpeg":
-                return MediaType.IMAGE_JPEG_VALUE;
-            case "png":
-                return MediaType.IMAGE_PNG_VALUE;
-            case "gif":
-                return MediaType.IMAGE_GIF_VALUE;
-            case "bmp":
-                return "image/bmp";
-            case "webp":
-                return "image/webp";
-            case "svg":
-                return "image/svg+xml";
+            case "jpg", "jpeg" -> MediaType.IMAGE_JPEG_VALUE;
+            case "png" -> MediaType.IMAGE_PNG_VALUE;
+            case "gif" -> MediaType.IMAGE_GIF_VALUE;
+            case "bmp" -> "image/bmp";
+            case "webp" -> "image/webp";
+            case "svg" -> "image/svg+xml";
 
             // 视频
-            case "mp4":
-                return "video/mp4";
-            case "avi":
-                return "video/x-msvideo";
-            case "mov":
-                return "video/quicktime";
-            case "wmv":
-                return "video/x-ms-wmv";
-            case "webm":
-                return "video/webm";
-            case "mkv":
-                return "video/x-matroska";
+            case "mp4" -> "video/mp4";
+            case "avi" -> "video/x-msvideo";
+            case "mov" -> "video/quicktime";
+            case "wmv" -> "video/x-ms-wmv";
+            case "webm" -> "video/webm";
+            case "mkv" -> "video/x-matroska";
 
             // 音频
-            case "mp3":
-                return "audio/mpeg";
-            case "wav":
-                return "audio/wav";
-            case "ogg":
-                return "audio/ogg";
+            case "mp3" -> "audio/mpeg";
+            case "wav" -> "audio/wav";
+            case "ogg" -> "audio/ogg";
 
             // 文档
-            case "pdf":
-                return MediaType.APPLICATION_PDF_VALUE;
-            case "txt":
-                return MediaType.TEXT_PLAIN_VALUE;
-            case "html":
-            case "htm":
-                return MediaType.TEXT_HTML_VALUE;
-            case "xml":
-                return MediaType.APPLICATION_XML_VALUE;
-            case "json":
-                return MediaType.APPLICATION_JSON_VALUE;
+            case "pdf" -> MediaType.APPLICATION_PDF_VALUE;
+            case "txt" -> MediaType.TEXT_PLAIN_VALUE;
+            case "html", "htm" -> MediaType.TEXT_HTML_VALUE;
+            case "xml" -> MediaType.APPLICATION_XML_VALUE;
+            case "json" -> MediaType.APPLICATION_JSON_VALUE;
 
             // Office文档
-            case "doc":
-                return "application/msword";
-            case "docx":
-                return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "xls":
-                return "application/vnd.ms-excel";
-            case "xlsx":
-                return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
-            case "ppt":
-                return "application/vnd.ms-powerpoint";
-            case "pptx":
-                return "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            case "doc" -> "application/msword";
+            case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            case "xls" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "ppt" -> "application/vnd.ms-powerpoint";
+            case "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation";
 
-            default:
-                return MediaType.APPLICATION_OCTET_STREAM_VALUE;
-        }
+            default -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        };
     }
 
 }

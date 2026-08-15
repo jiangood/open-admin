@@ -255,7 +255,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
     // ===== 私有辅助方法 =====
 
     static String validateIdentifier(String name) {
-        if (!name.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+        if (!name.matches("\\w\\w*")) {
             throw new IllegalArgumentException("Invalid identifier: " + name);
         }
         return name;

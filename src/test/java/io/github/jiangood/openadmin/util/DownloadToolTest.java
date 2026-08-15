@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.util;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.*;
 import static org.junit.jupiter.api.Assertions.*;

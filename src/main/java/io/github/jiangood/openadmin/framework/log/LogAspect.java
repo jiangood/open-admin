@@ -41,7 +41,7 @@ public class LogAspect {
     private static final ObjectWriter writer = JsonMapper.builder()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
-            .changeDefaultPropertyInclusion($ -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .changeDefaultPropertyInclusion(prop -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
             .build().writerWithDefaultPrettyPrinter();
 
     @Resource

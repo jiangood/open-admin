@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MenuItem implements Cloneable {
+public class MenuItem {
     private Boolean danger;
     private Boolean disabled;
     private String extra;
@@ -26,18 +26,21 @@ public class MenuItem implements Cloneable {
 
     private String type;
 
-    @Override
-    public MenuItem clone() {
-        try {
-            MenuItem clone = (MenuItem) super.clone();
-            if (this.children != null) {
-                clone.children = this.children.stream()
-                        .map(MenuItem::clone)
-                        .toList();
-            }
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
+    public MenuItem() {
+    }
+
+    public MenuItem(MenuItem src) {
+        this.danger = src.danger;
+        this.disabled = src.disabled;
+        this.extra = src.extra;
+        this.icon = src.icon;
+        this.key = src.key;
+        this.label = src.label;
+        this.parentKey = src.parentKey;
+        this.path = src.path;
+        this.type = src.type;
+        if (src.children != null) {
+            this.children = src.children.stream().map(MenuItem::new).toList();
         }
     }
 }

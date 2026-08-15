@@ -9,7 +9,6 @@ import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,14 +25,12 @@ public class SysJobService extends BaseService<SysJob> {
 
     private final QuartzManager quartzService;
     private final SysJobLogRepository sysJobLogRepository;
-    private final Scheduler scheduler;
 
     public SysJobService(SysJobRepository repository, EntityManager entityManager,
-                         QuartzManager quartzService, SysJobLogRepository sysJobLogRepository, Scheduler scheduler) {
+                         QuartzManager quartzService, SysJobLogRepository sysJobLogRepository) {
         super(repository, entityManager);
         this.quartzService = quartzService;
         this.sysJobLogRepository = sysJobLogRepository;
-        this.scheduler = scheduler;
     }
 
 

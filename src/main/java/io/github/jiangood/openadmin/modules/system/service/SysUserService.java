@@ -158,9 +158,9 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
     private String resolveUnitId(String orgId) {
-        List<String> path = new ArrayList<>(sysOrgService.getParentIdListById(orgId));
-        path.add(orgId);
-        Collections.reverse(path);
+        List<String> reversed = new ArrayList<>(sysOrgService.getParentIdListById(orgId));
+        reversed.add(orgId);
+        List<String> path = reversed.reversed();
         for (String id : path) {
             SysOrg org = sysOrgService.findById(id).orElse(null);
             if (org != null && Integer.valueOf(1).equals(org.getType())) {
@@ -242,23 +242,19 @@ public class SysUserService extends BaseService<SysUser> {
         }
 
 
-        // 超级管理员返回所有
-        if (dataPermType == DataPermType.ALL) {
-            List<SysOrg> all = sysOrgService.findAll();
-            return all.stream().map(BaseEntity::getId).toList();
-        }
-
         String orgId = user.getUnitId();
         switch (dataPermType) {
+            case ALL:
+                return sysOrgService.findAll().stream().map(BaseEntity::getId).toList();
             case LEVEL:
                 return orgId == null ? Collections.emptyList() : Collections.singletonList(orgId);
             case CHILDREN:
                 return sysOrgService.findChildIdListWithSelfById(orgId);
             case CUSTOM:
                 return user.getDataPerms().stream().map(BaseEntity::getId).toList();
+            default:
+                throw new IllegalStateException("有未处理的类型" + dataPermType);
         }
-
-        throw new IllegalStateException("有未处理的类型" + dataPermType);
     }
 
     /**

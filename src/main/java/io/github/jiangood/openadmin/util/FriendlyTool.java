@@ -25,7 +25,7 @@ public class FriendlyTool {
      * @return 百分比字符串，例如"85.5%"
      */
     public static String getPercentage(double value, int decimalPlaces) {
-        return String.format("%1$." + decimalPlaces + "f%%", value * 100);
+        return String.format("%1$." + decimalPlaces + "f%%", value * 100); // NOSONAR: 宽度动态来自参数，无法用固定格式符
     }
 
     /**
@@ -61,9 +61,6 @@ public class FriendlyTool {
     }
 
 
-    /**
-     * 计算过去了多少时间
-     */
     /**
      * 计算过去了多少时间
      */

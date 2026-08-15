@@ -101,7 +101,7 @@ public class SystemProperties {
         /**
          * 本地上传文件路径
          */
-        private String uploadPath = "/home/files";
+        private String uploadPath = "/home/files"; // NOSONAR: 默认配置值，业务项目可覆盖
 
         /**
          * 允许上传文件的后缀，如 docx

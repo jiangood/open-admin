@@ -27,7 +27,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-
+        // 拦截器由 Security 过滤器链统一处理，此处无需注册
     }
 
     @Override

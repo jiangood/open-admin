@@ -102,15 +102,7 @@ public class ExcelTool {
                     .sorted(Comparator.comparingInt(t -> t.getAnnotation(ExcelColumn.class).seq())).toList();
             Assert.notEmpty(fieldList,"导出类的字段必须使用@ExcelColumn");
 
-            // 添加表头
-            {
-                Row row = sheet.createRow(0);
-                for (int i = 0; i < fieldList.size(); i++) {
-                    Field field = fieldList.get(i);
-                    ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                    row.createCell(i).setCellValue(column.value());
-                }
-            }
+            writeHeaderRow(sheet, fieldList);
 
             // 表体
             for (int i = 0; i < list.size(); i++) {
@@ -127,6 +119,15 @@ public class ExcelTool {
             }
 
             workbook.write(os);
+        }
+    }
+
+    private static void writeHeaderRow(XSSFSheet sheet, List<Field> fieldList) {
+        Row row = sheet.createRow(0);
+        for (int i = 0; i < fieldList.size(); i++) {
+            Field field = fieldList.get(i);
+            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+            row.createCell(i).setCellValue(column.value());
         }
     }
 
@@ -236,7 +237,7 @@ public class ExcelTool {
             if (Character.isDigit(c)) {
                 break;// 确定指定的char值是否为数字
             }
-            index = (index + 1) * 26 + (int) c - 'A';
+            index = (index + 1) * 26 + c - 'A';
         }
         return index;
     }
@@ -482,21 +483,18 @@ public class ExcelTool {
 
             CellType cellType = cell.getCellType();
             switch (cellType) {
-                case NUMERIC:
-                case FORMULA:
-                case BOOLEAN:
+                case NUMERIC, FORMULA, BOOLEAN -> {
                     return false;
-
-                case STRING:
+                }
+                case STRING -> {
                     String str = cell.getStringCellValue();
                     if (CharSequenceUtil.isNotBlank(str)) {
                         return false;
                     }
-                case _NONE:
-                case BLANK:
-                case ERROR:
-                default:
+                }
+                case _NONE, BLANK, ERROR -> {
                     // 空值单元格继续扫描
+                }
             }
         }
 

@@ -183,7 +183,7 @@ public class SysOrgController {
     public List<TreeOption> list2Tree(List<SysOrg> orgList) {
         List<TreeOption> list = orgList.stream().map(o -> {
             String title = o.getName();
-            if (!o.getEnabled()) {
+            if (!Boolean.TRUE.equals(o.getEnabled())) {
                 title = title + " [禁用]";
             }
 
