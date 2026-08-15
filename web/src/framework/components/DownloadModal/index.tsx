@@ -40,7 +40,7 @@ export interface DownloadModalProps {
   onFinish?: () => void;
 }
 
-export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
+export class DownloadModal extends React.Component<DownloadModalProps, ModalState> { // NOSONAR: state/定时器字段构造器赋值，无法全部 readonly
   private abortController: AbortController | null = null; // NOSONAR: 构造器中赋值
   private lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;

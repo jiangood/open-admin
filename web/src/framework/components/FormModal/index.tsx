@@ -10,7 +10,7 @@ export interface FormModalProps {
   children?: React.ReactNode
 }
 
-export default class FormModal extends React.Component<FormModalProps> {
+export default class FormModal extends React.Component<FormModalProps> { // NOSONAR: state 构造器中赋值
 
   readonly state = { // NOSONAR: React state 惯例
     visible: false,

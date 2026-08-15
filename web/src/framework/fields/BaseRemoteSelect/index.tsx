@@ -21,7 +21,7 @@ export interface BaseRemoteSelectProps {
  * 处理通用的数据加载、防抖搜索、竞态处理、错误提示逻辑。
  * 子类只需覆写 getLoadParams() 和 render()。
  */
-export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> {
+export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> { // NOSONAR: state/防抖字段构造器赋值
     private fetchIdRef: number = 0; // NOSONAR: 构造器中赋值
     private loadDataDebounce: ReturnType<typeof debounce>;
 
