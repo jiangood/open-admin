@@ -7,8 +7,8 @@ import java.util.Date;
 
 public class FriendlyTool {
 
-    private static final long MINUTE_1 = 60 * 1000;
-    private static final long HOUR_1 = 60 * 60 * 1000;
+    private static final long MINUTE_1 = 60L * 1000;
+    private static final long HOUR_1 = 60L * 60 * 1000;
     private static final long DAY_1 = 24 * HOUR_1;
     private static final long WEEK_1 = 7 * DAY_1;
     private static final long MONTH_1 = 30 * DAY_1;

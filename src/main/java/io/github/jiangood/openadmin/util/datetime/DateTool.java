@@ -105,7 +105,7 @@ public class DateTool {
 
         // 年
         if (begin.length() == 4) {
-            return Integer.parseInt(end) - Integer.parseInt(begin) + 1;
+            return (long) Integer.parseInt(end) - Integer.parseInt(begin) + 1;
         }
         // 年月日
         if (begin.length() == 10) {
