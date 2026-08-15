@@ -224,7 +224,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
                 return 0; // 除 id 外无其他列，无需更新
             }
             params.add(id);
-            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + " where id=?", params.toArray());
+            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + " where id=?", params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
         }
         StringJoiner cols = new StringJoiner(",");
         StringJoiner vals = new StringJoiner(",");
@@ -234,12 +234,12 @@ public class JdbcRunnerImpl implements JdbcRunner {
             vals.add("?");
             params.add(entry.getValue());
         }
-        return jdbc.update("insert into " + validateIdentifier(table) + " (" + cols + ") values (" + vals + ")", params.toArray());
+        return jdbc.update("insert into " + validateIdentifier(table) + " (" + cols + ") values (" + vals + ")", params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
     }
 
     @Override
     public int deleteById(String table, Object id) {
-        return jdbc.update("delete from " + validateIdentifier(table) + " where id=?", id);
+        return jdbc.update("delete from " + validateIdentifier(table) + " where id=?", id); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
     }
 
     @Override

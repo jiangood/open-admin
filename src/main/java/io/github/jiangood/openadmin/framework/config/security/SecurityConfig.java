@@ -62,7 +62,7 @@ public class SecurityConfig {
                                 "connect-src 'self' ws:"
                         ))
                 )   // X-Content-Type-Options/Cache-Control 由 Spring Security 自动添加
-                .csrf(AbstractHttpConfigurer::disable) // SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
+                .csrf(AbstractHttpConfigurer::disable) // NOSONAR: SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
