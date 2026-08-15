@@ -62,7 +62,7 @@ export class DateUtils {
     static friendlyTotalTime(time: number | string | null): string | null {
         if (time == null || time === '-') return null;
         let seconds: number;
-        if (typeof time === 'string') seconds = parseInt(time, 10) / 1000;
+        if (typeof time === 'string') seconds = Number.parseInt(time, 10) / 1000;
         else seconds = time / 1000;
         seconds = Math.floor(seconds);
         if (seconds < 60) return seconds + '秒';

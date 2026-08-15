@@ -34,7 +34,7 @@ export class TabLayout extends React.Component {
         const pathname = qIndex === -1 ? url : url.substring(0, qIndex);
         const search = qIndex === -1 ? '' : url.substring(qIndex);
         this.setState(prev => ({
-            tabs: prev.tabs.find(t => t.key === url) ? prev.tabs
+            tabs: prev.tabs.some(t => t.key === url) ? prev.tabs
                 : [...prev.tabs, {key: url, label: getLabel(pathname, search, this.props.pathMenuMap), refreshKey: 0}],
             activeKey: url,
         }));
@@ -42,7 +42,7 @@ export class TabLayout extends React.Component {
 
     closeTab = (key) => {
         this.setState(prev => {
-            if (!prev.tabs.find(t => t.key === key)) return null;
+            if (!prev.tabs.some(t => t.key === key)) return null;
             const next = prev.tabs.filter(t => t.key !== key);
             if (next.length === 0) {
                 setTimeout(() => history.push('/'), 0);

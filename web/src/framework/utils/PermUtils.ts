@@ -13,7 +13,7 @@ export class PermUtils {
         const permissions = PermUtils.getPermissions();
         if (permissions.length === 0) return false;
         if (ArrayUtils.contains(permissions, "*")) return true;
-        return permissions.indexOf(perm) > -1;
+        return permissions.includes(perm);
     }
 
     static isPermitted(p: string | null | undefined): boolean {

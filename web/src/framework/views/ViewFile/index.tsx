@@ -24,6 +24,7 @@ export class ViewFile extends React.Component {
                 src={url}
                 width='99%'
                 frameBorder={0}
+                title="文件预览"
                 style={{height}}
             />
         }
@@ -35,6 +36,7 @@ export class ViewFile extends React.Component {
                     src={url}
                     width='99%'
                     frameBorder={0}
+                    title="文件预览"
                     style={{height}}
                 />
             </div>

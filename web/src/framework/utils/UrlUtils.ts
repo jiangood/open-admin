@@ -28,7 +28,7 @@ export class UrlUtils {
         if (!params) return "";
         const buffer: string[] = [];
         for (const k in params) {
-            if (Object.prototype.hasOwnProperty.call(params, k)) {
+            if (Object.hasOwn(params, k)) {
                 const v = params[k];
                 if (v !== null && v !== undefined) {
                     buffer.push(`${k}=${v}`);

@@ -6,7 +6,7 @@ import type {FieldProps} from '../types';
 const SP = StringUtils.ISO_SPLITTER;
 
 /** 数字范围值，形如 "1/100"（起止以 / 分隔） */
-export type FieldNumberRangeValue = string;
+export type FieldNumberRangeValue = string; // NOSONAR: npm 包导出类型，业务项目引用
 
 export type RangePartValue = number | string | null;
 
@@ -27,12 +27,8 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     };
 
     merge(a: RangePartValue, b: RangePartValue): string {
-        if (a == null) {
-            a = '';
-        }
-        if (b == null) {
-            b = '';
-        }
+        a = a ?? '';
+        b = b ?? '';
         return a + SP + b;
     }
 
@@ -54,9 +50,7 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     render() {
         const {defaultValue} = this.props;
         let {value} = this.props;
-        if (value == null) {
-            value = defaultValue;
-        }
+        value = value ?? defaultValue;
         const {a, b} = this.parse(value);
 
         return <div style={{display: 'flex', alignItems: 'center'}}>

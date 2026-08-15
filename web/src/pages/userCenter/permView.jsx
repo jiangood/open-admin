@@ -66,12 +66,12 @@ export default class PermView extends React.Component {
                     <Tag color='processing'>{data.dataPermLabel || '-'}</Tag>
                 </span>
             </div>
-            {data.orgRows && data.orgRows.length
+            {data.orgRows?.length
                 ? <Table size='small' rowKey='key' columns={orgColumns} dataSource={data.orgRows}
                          pagination={false} expandable={{defaultExpandAllRows: true}}/>
                 : <Empty description='暂无机构数据'/>}
             <Gap/>
-            {data.menuRows && data.menuRows.length
+            {data.menuRows?.length
                 ? <Table size='small' rowKey='key' columns={menuColumns} dataSource={data.menuRows}
                          pagination={false} expandable={{defaultExpandAllRows: true}}/>
                 : <Empty description='暂无权限数据'/>}

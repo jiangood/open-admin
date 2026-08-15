@@ -142,16 +142,24 @@ export class Layouts extends React.Component<LayoutsProps> {
         return (
             <ErrorBoundary minimal>
                 <ConfigProvider {...baseConfigProps} theme={getThemeConfig()}>
-                    {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/> : (
-                        <PageLoading messages={[
-                            !siteInfoLoaded && '加载站点信息...',
-                            !loginChecked && '检查登录中...',
-                        ].filter(Boolean)}/>
-                    )}
+                    {this.renderContent(showPageFrame, ready, pathname, search)}
                     {this.renderLoginExpiredModal()}
                 </ConfigProvider>
             </ErrorBoundary>
         );
+    }
+
+    renderContent(showPageFrame: boolean, ready: boolean, pathname: string, search: string) {
+        if (showPageFrame) {
+            return <PageFrame url={pathname + search}/>;
+        }
+        if (ready) {
+            return <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/>;
+        }
+        return <PageLoading messages={[
+            !this.state.siteInfoLoaded && '加载站点信息...',
+            !this.state.loginChecked && '检查登录中...',
+        ].filter(Boolean)}/>;
     }
 
     renderLoginExpiredModal() {

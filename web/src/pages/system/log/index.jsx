@@ -39,9 +39,7 @@ export default class LogPage extends React.Component {
             title: '结果',
             dataIndex: 'success',
             render(v) {
-                return <>
-                    <Tag color={v ? 'green' : 'red'}>{v ? '成功' : '失败'}</Tag>
-                </>
+                return <Tag color={v ? 'green' : 'red'}>{v ? '成功' : '失败'}</Tag>
             }
         },
         {

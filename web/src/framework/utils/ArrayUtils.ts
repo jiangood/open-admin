@@ -1,6 +1,6 @@
 export class ArrayUtils {
     static contains<T>(arr: T[], item: T): boolean {
-        return arr.indexOf(item) !== -1;
+        return arr.includes(item);
     }
 
     static containsAny<T>(arr: T[], ...items: T[]): boolean {

@@ -197,7 +197,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
         if (prevState.cropRatio !== this.state.cropRatio && this.cropperRef) {
             if (!this.state.cropRatio) {
                 const box = this.cropperRef.getCropBoxData();
-                this.cropperRef.setAspectRatio(NaN);
+                this.cropperRef.setAspectRatio(Number.NaN);
                 this.cropperRef.setCropBoxData(box);
             } else {
                 this.cropperRef.setAspectRatio(this.state.cropRatio.width / this.state.cropRatio.height);
@@ -227,7 +227,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
         const init = () => {
             if (this.cropperRef) this.cropperRef.destroy();
             this.cropperRef = new Cropper(el, {
-                aspectRatio: this.state.cropRatio ? this.state.cropRatio.width / this.state.cropRatio.height : NaN,
+                aspectRatio: this.state.cropRatio ? this.state.cropRatio.width / this.state.cropRatio.height : Number.NaN,
                 viewMode: 1,
                 autoCropArea: 0.85,
                 dragMode: 'move',
@@ -387,6 +387,16 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
         );
     };
 
+    private renderCanvas = (preview, canvasImg, originalUrl) => {
+        if (this.state.tool === 'crop') {
+            return <img key="crop-canvas" ref={this.imgRef} src={preview?.cUrl || originalUrl} style={{maxWidth: '100%', maxHeight: '100%'}} alt="待裁切"/>;
+        }
+        if (canvasImg?.url) {
+            return <img src={canvasImg.url} style={{maxWidth: '100%', maxHeight: '100%'}} alt="预览"/>;
+        }
+        return <div style={{color: '#999'}}>生成中...</div>;
+    };
+
     render() {
         const {objectNames, accept, compressWidth, compressSize, cropRatio, cropperReady, fullPreviewUrl, maxCount, modalOpen, originalUrl, preview, tool, uploading} = this.state;
 
@@ -483,13 +493,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                                 flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 background: '#f5f5f5', borderRadius: 8, border: '1px dashed #d9d9d9', position: 'relative', overflow: 'hidden',
                             }}>
-                                {tool === 'crop' ? (
-                                    <img key="crop-canvas" ref={this.imgRef} src={preview?.cUrl || originalUrl} style={{maxWidth: '100%', maxHeight: '100%'}} alt="待裁切"/>
-                                ) : canvasImg?.url ? (
-                                    <img src={canvasImg.url} style={{maxWidth: '100%', maxHeight: '100%'}} alt="预览"/>
-                                ) : (
-                                    <div style={{color: '#999'}}>生成中...</div>
-                                )}
+                                {this.renderCanvas(preview, canvasImg, originalUrl)}
                             </div>
                         </div>
 

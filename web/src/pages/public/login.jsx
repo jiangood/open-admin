@@ -17,11 +17,11 @@ function postLogin(values, query, success, error) {
     HttpClient.post('/admin/auth/login', values, null, rs => {
         EventBus.emit('loginSuccess')
         history.push(getRedirect(query))
-        success && success(rs)
+        success?.(rs)
     }, e => {
         console.error('[Login] 登录失败:', e);
         message.error(HttpClient.errToMsg(e))
-        error && error(e)
+        error?.(e)
     })
 }
 
@@ -41,7 +41,7 @@ export default class LoginPage extends React.Component {
 
     componentDidMount() {
         const siteInfo = GlobalData.getSiteInfo()
-        if (siteInfo && siteInfo.title) {
+        if (siteInfo?.title) {
             this.setState({siteInfo})
             return
         }

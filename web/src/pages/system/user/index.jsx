@@ -104,7 +104,8 @@ export default class UserPage extends React.Component {
             title: '状态',
             dataIndex: 'enabled',
             render(v) {
-                return v == null ? null : (v ? '是' : '否')
+                if (v == null) return null;
+                return v ? '是' : '否';
             },
         },
         {
@@ -142,7 +143,7 @@ export default class UserPage extends React.Component {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
         HttpClient.post(url, values, null, result => {
-            if (result && result.password) {
+            if (result?.password) {
                 this.setState({
                     addResultModal: {
                         open: true,

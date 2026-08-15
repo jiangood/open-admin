@@ -85,7 +85,8 @@ export default class ArticleListPage extends React.Component {
             title: '启用',
             dataIndex: 'enabled',
             render(v) {
-                return v == null ? null : (v ? '是' : '否')
+                if (v == null) return null;
+                return v ? '是' : '否';
             },
         },
         {

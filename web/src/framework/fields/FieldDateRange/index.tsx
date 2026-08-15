@@ -10,7 +10,7 @@ import type {FieldProps} from '../types';
 const SP = StringUtils.ISO_SPLITTER;
 
 /** 日期范围值，形如 "2024-01-01/2024-01-31"（起止以 / 分隔） */
-export type FieldDateRangeValue = string;
+export type FieldDateRangeValue = string; // NOSONAR: npm 包导出类型，业务项目引用
 
 export interface FieldDateRangeProps extends FieldProps<FieldDateRangeValue> {
     /** 日期类型，如 YYYY-MM-DD、YYYY-MM、HH:mm:ss 等，默认 YYYY-MM-DD */

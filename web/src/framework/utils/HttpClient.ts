@@ -156,9 +156,9 @@ export class HttpClient {
                     const match = /filename\*?=(?:['"]?)(?:UTF-8''|)(.+?)(?:['"]?$|;)/i.exec(contentDisposition);
                     let parsedName = match?.[1] ? match[1].trim() : 'download.file';
                     try {
-                        parsedName = decodeURIComponent(parsedName.replace(/"/g, ''));
+                        parsedName = decodeURIComponent(parsedName.replaceAll('"', ''));
                     } catch {
-                        parsedName = parsedName.replace(/"/g, '');
+                        parsedName = parsedName.replaceAll('"', '');
                     }
                     filename = parsedName;
                 }
@@ -171,7 +171,7 @@ export class HttpClient {
             link.download = filename || 'download.file';
             document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
+            link.remove();
             window.URL.revokeObjectURL(objectUrl);
             success?.(blob);
         }).catch((e: unknown) => {

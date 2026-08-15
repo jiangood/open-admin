@@ -26,7 +26,7 @@ export default class UserCenterPage extends React.Component {
     }
 
     pwdValidator = (rule, value) => new Promise((resolve, reject) => {
-        HttpClient.get("admin/sysUser/pwd-strength", {password: value}, resolve, (e) => reject(e.message))
+        HttpClient.get("admin/sysUser/pwd-strength", {password: value}, resolve, (e) => reject(new Error(e.message)))
     })
 
     render() {

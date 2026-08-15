@@ -103,6 +103,22 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     this.setState({open: false, status: ''});
   };
 
+  renderFooter = () => {
+    const {status} = this.state;
+    if (status === 'downloading') {
+      return <Button danger onClick={this.handleCancel}>取消下载</Button>;
+    }
+    if (status === 'failed') {
+      return (
+        <>
+          <Button onClick={this.handleClose}>关闭</Button>
+          <Button type="primary" onClick={this.handleRetry}>重试</Button>
+        </>
+      );
+    }
+    return null;
+  };
+
   private handleRetry = () => {
     if (this.lastOptions) {
       this.startDownload(this.lastOptions);
@@ -267,16 +283,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
         mask={{closable: false}}
         closable={status !== 'downloading'}
         onCancel={this.handleClose}
-        footer={
-          status === 'downloading' ? (
-            <Button danger onClick={this.handleCancel}>取消下载</Button>
-          ) : status === 'failed' ? (
-            <>
-              <Button onClick={this.handleClose}>关闭</Button>
-              <Button type="primary" onClick={this.handleRetry}>重试</Button>
-            </>
-          ) : null
-        }
+        footer={this.renderFooter()}
         destroyOnHidden
       >
         <div style={{padding: '20px 0'}}>

@@ -156,7 +156,7 @@ export default class FilePage extends React.Component {
                         <Button type='primary' icon={<CloudUploadOutlined/>} onClick={() => this.setState({formOpen: true})}>上传文件</Button>
                         <PermActions
                             actions={[{
-                                label: `批量删除${selection.selectedRowKeys.length ? `(${selection.selectedRowKeys.length})` : ''}`,
+                                label: '批量删除' + (selection.selectedRowKeys.length ? `(${selection.selectedRowKeys.length})` : ''),
                                 perm: 'sys-file:delete',
                                 danger: true,
                                 disabled: !selection.selectedRowKeys.length,

@@ -63,7 +63,7 @@ export class StringUtils {
     static getWidth(str: string | null | undefined): number {
         if (str == null || str.length === 0) return 0;
         return str.split('').reduce((pre, cur) => {
-            const charCode = cur.charCodeAt(0);
+            const charCode = cur.codePointAt(0);
             return pre + (charCode >= 0 && charCode <= 128 ? 1 : 2);
         }, 0);
     }
@@ -71,7 +71,7 @@ export class StringUtils {
     static cutByWidth(str: string, maxWidth: number): string {
         let showLength = 0;
         return str.split('').reduce((pre, cur) => {
-            const charCode = cur.charCodeAt(0);
+            const charCode = cur.codePointAt(0);
             const charWidth = (charCode >= 0 && charCode <= 128) ? 1 : 2;
             if (showLength + charWidth <= maxWidth) {
                 showLength += charWidth;

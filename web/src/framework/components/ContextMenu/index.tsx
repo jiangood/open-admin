@@ -18,6 +18,11 @@ interface ContextMenuProps {
 }
 
 export class ContextMenu extends React.Component<ContextMenuProps> {
+    menuItemColor = (item): string => {
+        if (item.danger) return '#ff4d4f';
+        if (item.disabled) return 'rgba(0,0,0,0.25)';
+        return '#333';
+    };
     menuRef = React.createRef<HTMLDivElement>();
     timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -111,7 +116,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                 padding: '5px 12px',
                                 fontSize: 13,
                                 cursor: item.disabled ? 'not-allowed' : 'pointer',
-                                color: item.danger ? '#ff4d4f' : item.disabled ? 'rgba(0,0,0,0.25)' : '#333',
+                                color: this.menuItemColor(item),
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 8,
