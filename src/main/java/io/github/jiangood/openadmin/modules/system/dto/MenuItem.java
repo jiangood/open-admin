@@ -13,6 +13,7 @@ public class MenuItem implements Cloneable {
     private Boolean danger;
     private Boolean disabled;
     private String extra;
+    /** Ant Design 图标组件名，取值见 https://ant-design.antgroup.com/components/icon-cn */
     private String icon;
     private String key;
     private String label;

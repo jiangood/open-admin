@@ -25,7 +25,7 @@ public class MenuDefinition {
     /** 菜单显示名称 */
     private String name;
 
-    /** Ant Design 图标组件名 */
+    /** Ant Design 图标组件名，取值见 https://ant-design.antgroup.com/components/icon-cn */
     private String icon;
 
     /** 前端路由路径 */
