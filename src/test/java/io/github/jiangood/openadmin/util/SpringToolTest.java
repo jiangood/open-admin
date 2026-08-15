@@ -20,14 +20,14 @@ import java.util.Set;
 class SpringToolTest {
 
     @Test
-    public void testGetBasePackageNames() {
+    void testGetBasePackageNames() {
         String[] basePackageNames = SpringTool.getBasePackageNames();
         Assertions.assertNotNull(basePackageNames);
         Assertions.assertTrue(basePackageNames.length > 0);
     }
 
     @Test
-    public void testGetBasePackageClasses() {
+    void testGetBasePackageClasses() {
         Set<Class<?>> basePackageClasses = SpringTool.getBasePackageClasses();
         Assertions.assertNotNull(basePackageClasses);
         Assertions.assertTrue(basePackageClasses.size() > 0);
@@ -35,79 +35,79 @@ class SpringToolTest {
     }
 
     @Test
-    public void testGetBeanByName() {
+    void testGetBeanByName() {
         SpringTool springTool = SpringTool.getBean("springTool", SpringTool.class);
         Assertions.assertNotNull(springTool);
     }
 
     @Test
-    public void testGetBeanByClass() {
+    void testGetBeanByClass() {
         SpringTool springTool = SpringTool.getBean(SpringTool.class);
         Assertions.assertNotNull(springTool);
     }
 
     @Test
-    public void testGetBeanByClassWhenNull() {
+    void testGetBeanByClassWhenNull() {
         // 测试不存在的Bean
         TestBean testBean = SpringTool.getBean(TestBean.class);
         Assertions.assertNull(testBean);
     }
 
     @Test
-    public void testGetBeansOfType() {
+    void testGetBeansOfType() {
         Map<String, SpringTool> beansOfType = SpringTool.getBeansOfType(SpringTool.class);
         Assertions.assertNotNull(beansOfType);
         Assertions.assertTrue(beansOfType.size() > 0);
     }
 
     @Test
-    public void testGetBeanNames() {
+    void testGetBeanNames() {
         Collection<String> beanNames = SpringTool.getBeanNames(SpringTool.class);
         Assertions.assertNotNull(beanNames);
         Assertions.assertTrue(beanNames.size() > 0);
     }
 
     @Test
-    public void testGetBeans() {
+    void testGetBeans() {
         List<SpringTool> beans = SpringTool.getBeans(SpringTool.class);
         Assertions.assertNotNull(beans);
         Assertions.assertTrue(beans.size() > 0);
     }
 
     @Test
-    public void testGetBeanNamesForType() {
+    void testGetBeanNamesForType() {
         String[] beanNamesForType = SpringTool.getBeanNamesForType(SpringTool.class);
         Assertions.assertNotNull(beanNamesForType);
         Assertions.assertTrue(beanNamesForType.length > 0);
     }
 
     @Test
-    public void testGetProperty() {
+    void testGetProperty() {
         // 配置文件中可能没有设置，所以允许为null
         assertDoesNotThrow(() -> SpringTool.getProperty("spring.application.name"));
     }
 
     @Test
-    public void testGetApplicationName() {
+    void testGetApplicationName() {
         // 配置文件中可能没有设置，所以允许为null
         assertDoesNotThrow(SpringTool::getApplicationName);
     }
 
     @Test
-    public void testGetActiveProfiles() {
+    void testGetActiveProfiles() {
         String[] activeProfiles = SpringTool.getActiveProfiles();
         Assertions.assertNotNull(activeProfiles);
     }
 
     @Test
-    public void testHasProfile() {
+    void testHasProfile() {
         boolean hasProfile = SpringTool.hasProfile("test");
         // 可能没有test环境，所以结果可能为false
         Assertions.assertFalse(hasProfile);
     }
 
     @Test
-    public void testHasProfileWhenNull() {
+    void testHasProfileWhenNull() {
         // 测试name为null的情况
         boolean hasProfile = SpringTool.hasProfile(null);
         // 应该返回false
@@ -115,7 +115,7 @@ class SpringToolTest {
     }
 
     @Test
-    public void testPublishEvent() {
+    void testPublishEvent() {
         // 测试发布事件，不抛出异常即可
         SpringTool.publishEvent(new TestEvent(this));
         // 测试发布普通对象
@@ -123,14 +123,14 @@ class SpringToolTest {
     }
 
     @Test
-    public void testPublishEventAsync() {
+    void testPublishEventAsync() {
         // 测试异步发布事件，不抛出异常即可
         SpringTool.publishEventAsync(new TestEvent(this));
     }
 
 
     @Test
-    public void testGetBeanByNameAndClassWhenNull() {
+    void testGetBeanByNameAndClassWhenNull() {
         // 测试name为null的情况
         assertThrows(Exception.class, () -> SpringTool.getBean(null, SpringTool.class));
     }

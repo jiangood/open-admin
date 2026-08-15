@@ -39,31 +39,8 @@ public class ExcelTool {
 
             removeEmptyRows(sheet);         // 删除空行
 
-            // 解析注解
-            Map<String, String> labelField = new HashMap<>();
-            Field[] declaredFields = FieldUtils.getAllFields(cls);
-            for (Field field : declaredFields) {
-                ExcelColumn ann = field.getAnnotation(ExcelColumn.class);
-                if (ann != null) {
-                    labelField.put(ann.value(), field.getName()); //  eg 年龄，age
-                }
-            }
-
-
-            XSSFRow header = sheet.getRow(0); // 表头
-            Map<Integer, String> indexField = new HashMap<>();
-            for (Cell cell : header) {
-                int columnIndex = cell.getColumnIndex();
-                String label = cell.getStringCellValue();
-                if (label != null) {
-                    label = label.trim();
-
-                    if (labelField.containsKey(label)) {
-                        indexField.put(columnIndex, labelField.get(label));
-                    }
-                }
-            }
-
+            Map<String, String> labelField = buildLabelFieldMap(cls);
+            Map<Integer, String> indexField = buildIndexFieldMap(sheet.getRow(0), labelField);
 
             List<T> list = new ArrayList<>(sheet.getLastRowNum() + 1);
             for (Row row : sheet) {
@@ -72,18 +49,47 @@ public class ExcelTool {
                 }
                 T t = cls.getConstructor().newInstance();
                 list.add(t);
-
-                for (Cell cell : row) {
-                    Object cellValue = getCellValue((XSSFCell) cell);
-                    if (!StrUtil.isBlankIfStr(cellValue)) {
-                        String fieldName = indexField.get(cell.getColumnIndex());
-                        if (fieldName != null) {
-                            BeanUtil.setFieldValue(t, fieldName, cellValue);
-                        }
-                    }
-                }
+                fillRow(t, row, indexField);
             }
             return list;
+        }
+    }
+
+    private static Map<String, String> buildLabelFieldMap(Class<?> cls) {
+        Map<String, String> labelField = new HashMap<>();
+        for (Field field : FieldUtils.getAllFields(cls)) {
+            ExcelColumn ann = field.getAnnotation(ExcelColumn.class);
+            if (ann != null) {
+                labelField.put(ann.value(), field.getName()); //  eg 年龄，age
+            }
+        }
+        return labelField;
+    }
+
+    private static Map<Integer, String> buildIndexFieldMap(XSSFRow header, Map<String, String> labelField) {
+        Map<Integer, String> indexField = new HashMap<>();
+        if (header == null) {
+            return indexField;
+        }
+        for (Cell cell : header) {
+            int columnIndex = cell.getColumnIndex();
+            String label = cell.getStringCellValue();
+            if (label != null && labelField.containsKey(label.trim())) {
+                indexField.put(columnIndex, labelField.get(label.trim()));
+            }
+        }
+        return indexField;
+    }
+
+    private static <T> void fillRow(T t, Row row, Map<Integer, String> indexField) {
+        for (Cell cell : row) {
+            Object cellValue = getCellValue((XSSFCell) cell);
+            if (!StrUtil.isBlankIfStr(cellValue)) {
+                String fieldName = indexField.get(cell.getColumnIndex());
+                if (fieldName != null) {
+                    BeanUtil.setFieldValue(t, fieldName, cellValue);
+                }
+            }
         }
     }
 

@@ -161,25 +161,12 @@ public class FilePreviewController {
             return new long[0];
         }
 
-        long rangeStart;
-        long rangeEnd;
-        try {
-            if (startPart.isEmpty()) {
-                // 后缀范围，如 bytes=-500，取文件末尾 500 字节
-                long suffixLength = Long.parseLong(endPart);
-                if (suffixLength <= 0) {
-                    return new long[0];
-                }
-                rangeStart = Math.max(0, fileSize - suffixLength);
-                rangeEnd = fileSize - 1;
-            } else {
-                rangeStart = Long.parseLong(startPart);
-                rangeEnd = endPart == null || endPart.isEmpty() ? fileSize - 1 : Long.parseLong(endPart);
-            }
-        } catch (NumberFormatException e) {
+        long[] range = computeRange(startPart, endPart, fileSize);
+        if (range == null) {
             return new long[0];
         }
-
+        long rangeStart = range[0];
+        long rangeEnd = range[1];
         if (rangeStart < 0 || rangeStart >= fileSize || rangeStart > rangeEnd) {
             return new long[0];
         }
@@ -187,6 +174,24 @@ public class FilePreviewController {
             rangeEnd = fileSize - 1;
         }
         return new long[]{rangeStart, rangeEnd};
+    }
+
+    private static long[] computeRange(String startPart, String endPart, long fileSize) {
+        try {
+            if (startPart.isEmpty()) {
+                // 后缀范围，如 bytes=-500，取文件末尾 500 字节
+                long suffixLength = Long.parseLong(endPart);
+                if (suffixLength <= 0) {
+                    return null;
+                }
+                return new long[]{Math.max(0, fileSize - suffixLength), fileSize - 1};
+            }
+            long rangeStart = Long.parseLong(startPart);
+            long rangeEnd = endPart == null || endPart.isEmpty() ? fileSize - 1 : Long.parseLong(endPart);
+            return new long[]{rangeStart, rangeEnd};
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private static String stripLeadingSlash(String objectName) {

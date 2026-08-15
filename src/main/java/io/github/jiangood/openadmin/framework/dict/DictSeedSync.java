@@ -91,26 +91,31 @@ public class DictSeedSync implements StartupHook {
             String label = getLabel(constant);
             String color = getColor(constant);
             itemRepository.findByTypeCodeAndCode(typeCode, code)
-                    .ifPresentOrElse(item -> {
-                        boolean changed = false;
-                        if (!label.equals(item.getLabel())) { item.setLabel(label); changed = true; }
-                        if (!Objects.equals(color, item.getColor())) { item.setColor(color); changed = true; }
-                        if (!Boolean.TRUE.equals(item.getEnabled())) { item.setEnabled(true); changed = true; }
-                        if (!Objects.equals(seq, item.getSeq())) { item.setSeq(seq); changed = true; }
-                        if (changed) itemRepository.save(item);
-                    }, () -> {
-                        SysDictItem item = new SysDictItem();
-                        item.setTypeCode(typeCode);
-                        item.setCode(code);
-                        item.setLabel(label);
-                        item.setColor(color);
-                        item.setEnabled(true);
-                        item.setSeq(seq);
-                        itemRepository.save(item);
-                    });
+                    .ifPresentOrElse(item -> mergeItem(itemRepository, item, label, color, seq),
+                            () -> insertItem(itemRepository, typeCode, code, label, color, seq));
             count++;
         }
         return count;
+    }
+
+    private void mergeItem(SysDictItemRepository itemRepository, SysDictItem item, String label, String color, int seq) {
+        boolean changed = false;
+        if (!label.equals(item.getLabel())) { item.setLabel(label); changed = true; }
+        if (!Objects.equals(color, item.getColor())) { item.setColor(color); changed = true; }
+        if (!Boolean.TRUE.equals(item.getEnabled())) { item.setEnabled(true); changed = true; }
+        if (!Objects.equals(seq, item.getSeq())) { item.setSeq(seq); changed = true; }
+        if (changed) itemRepository.save(item);
+    }
+
+    private void insertItem(SysDictItemRepository itemRepository, String typeCode, String code, String label, String color, int seq) {
+        SysDictItem item = new SysDictItem();
+        item.setTypeCode(typeCode);
+        item.setCode(code);
+        item.setLabel(label);
+        item.setColor(color);
+        item.setEnabled(true);
+        item.setSeq(seq);
+        itemRepository.save(item);
     }
 
     // ---------- @DictType 枚举自动发现 ----------

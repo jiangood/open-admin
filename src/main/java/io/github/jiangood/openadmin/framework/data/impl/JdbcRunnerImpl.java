@@ -310,19 +310,23 @@ public class JdbcRunnerImpl implements JdbcRunner {
     private void setFieldValue(Field field, Object bean, Object value) {
         Class<?> type = field.getType();
         if (value instanceof Number n) {
-            if (type == Integer.class || type == int.class) ReflectionUtils.setField(field, bean, n.intValue());
-            else if (type == Long.class || type == long.class) ReflectionUtils.setField(field, bean, n.longValue());
-            else if (type == Float.class || type == float.class) ReflectionUtils.setField(field, bean, n.floatValue());
-            else if (type == Double.class || type == double.class) ReflectionUtils.setField(field, bean, n.doubleValue());
-            else if (type == Short.class || type == short.class) ReflectionUtils.setField(field, bean, n.shortValue());
-            else if (type == Byte.class || type == byte.class) ReflectionUtils.setField(field, bean, n.byteValue());
-            else ReflectionUtils.setField(field, bean, value);
+            Object converted = convertNumber(n, type);
+            ReflectionUtils.setField(field, bean, converted);
         } else if (value instanceof Timestamp t) {
-            if (type == LocalDateTime.class) ReflectionUtils.setField(field, bean, t.toLocalDateTime());
-            else ReflectionUtils.setField(field, bean, t);
+            ReflectionUtils.setField(field, bean, type == LocalDateTime.class ? t.toLocalDateTime() : t);
         } else {
             ReflectionUtils.setField(field, bean, value);
         }
+    }
+
+    private static Object convertNumber(Number n, Class<?> type) {
+        if (type == Integer.class || type == int.class) return n.intValue();
+        if (type == Long.class || type == long.class) return n.longValue();
+        if (type == Float.class || type == float.class) return n.floatValue();
+        if (type == Double.class || type == double.class) return n.doubleValue();
+        if (type == Short.class || type == short.class) return n.shortValue();
+        if (type == Byte.class || type == byte.class) return n.byteValue();
+        return n;
     }
 
     private Map<String, Object> mapToMap(ResultSet rs) throws SQLException {

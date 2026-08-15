@@ -36,63 +36,51 @@ public class ConvertTool {
             value = l.intValue();
         }
 
-        if (type.isAssignableFrom(List.class) && genericTypes != null && genericTypes.length == 1) {
-            Type genType = genericTypes[0];
+        T listResult = convertList(type, value, genericTypes);
+        if (listResult != null) {
+            return listResult;
+        }
 
-            if (genType == Integer.class) {
-                TypeReference<List<Integer>> typeRef = new TypeReference<>() {
-                };
-                List<Integer> list = Convert.convert(typeRef, value);
-                @SuppressWarnings("unchecked")
-                T result = (T) list;
-                return result;
-            }
+        // 特殊处理数值范围检查
+        if (!numericParseable(type, value)) {
+            return null;
         }
 
         try {
-            // 特殊处理数值范围检查
-            if (type == Byte.class && value instanceof String s1) {
-                try {
-                    Byte.parseByte(s1);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            } else if (type == Short.class && value instanceof String s2) {
-                try {
-                    Short.parseShort(s2);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            } else if (type == Integer.class && value instanceof String s3) {
-                try {
-                    Integer.parseInt(s3);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            } else if (type == Long.class && value instanceof String s4) {
-                try {
-                    Long.parseLong(s4);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            } else if (type == Float.class && value instanceof String s5) {
-                try {
-                    Float.parseFloat(s5);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            } else if (type == Double.class && value instanceof String s6) {
-                try {
-                    Double.parseDouble(s6);
-                } catch (NumberFormatException e) {
-                    return null;
-                }
-            }
-
             return Convert.convert(type, value);
         } catch (Exception e) {
             // 处理转换失败的情况，返回null
             return null;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> T convertList(Class<T> type, Object value, Type[] genericTypes) {
+        if (!type.isAssignableFrom(List.class) || genericTypes == null || genericTypes.length != 1) {
+            return null;
+        }
+        if (genericTypes[0] != Integer.class) {
+            return null;
+        }
+        TypeReference<List<Integer>> typeRef = new TypeReference<>() {
+        };
+        return (T) Convert.convert(typeRef, value);
+    }
+
+    private static boolean numericParseable(Class<?> type, Object value) {
+        if (!(value instanceof String str)) {
+            return true;
+        }
+        try {
+            if (type == Byte.class) Byte.parseByte(str);
+            else if (type == Short.class) Short.parseShort(str);
+            else if (type == Integer.class) Integer.parseInt(str);
+            else if (type == Long.class) Long.parseLong(str);
+            else if (type == Float.class) Float.parseFloat(str);
+            else if (type == Double.class) Double.parseDouble(str);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

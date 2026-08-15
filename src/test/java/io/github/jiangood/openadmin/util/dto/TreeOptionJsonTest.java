@@ -11,7 +11,7 @@ class TreeOptionJsonTest {
     private final ObjectMapper om = new ObjectMapper();
 
     @Test
-    public void serializedJsonContainsValueEqualToKey() throws Exception {
+    void serializedJsonContainsValueEqualToKey() throws Exception {
         TreeOption node = new TreeOption("总部", "org-1", null);
         String json = om.writeValueAsString(node);
         System.out.println("JSON = " + json);
@@ -19,7 +19,7 @@ class TreeOptionJsonTest {
     }
 
     @Test
-    public void setKeySyncsValue() throws Exception {
+    void setKeySyncsValue() throws Exception {
         TreeOption node = new TreeOption();
         node.setKey("org-2");
         String json = om.writeValueAsString(node);
@@ -28,14 +28,14 @@ class TreeOptionJsonTest {
     }
 
     @Test
-    public void setValueSyncsKey() {
+    void setValueSyncsKey() {
         TreeOption node = new TreeOption();
         node.setValue("org-3");
         assertTrue(node.getKey().equals("org-3"));
     }
 
     @Test
-    public void keyNullOmitsValueDueToNonNull() throws Exception {
+    void keyNullOmitsValueDueToNonNull() throws Exception {
         TreeOption node = new TreeOption();
         String json = om.writeValueAsString(node);
         assertFalse(json.contains("\"value\""));

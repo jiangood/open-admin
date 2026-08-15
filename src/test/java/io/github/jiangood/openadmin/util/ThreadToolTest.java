@@ -14,7 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ThreadToolTest {
 
     @Test
-    public void testExecute() throws InterruptedException {
+    void testExecute() throws InterruptedException {
         // 使用CountDownLatch来等待异步任务执行完成
         CountDownLatch latch = new CountDownLatch(1);
         final boolean[] executed = {false};
@@ -39,13 +39,13 @@ class ThreadToolTest {
     }
 
     @Test
-    public void testExecuteWhenRunnableNull() {
+    void testExecuteWhenRunnableNull() {
         // 测试runnable为null的情况
         assertThrows(NullPointerException.class, () -> ThreadTool.execute(null));
     }
 
     @Test
-    public void testExecuteMultipleTasks() throws InterruptedException {
+    void testExecuteMultipleTasks() throws InterruptedException {
         // 测试执行多个异步任务
         int taskCount = 5;
         CountDownLatch latch = new CountDownLatch(taskCount);
@@ -74,7 +74,7 @@ class ThreadToolTest {
     }
 
     @Test
-    public void testExecutorServiceSingleton() throws Exception {
+    void testExecutorServiceSingleton() throws Exception {
         // 测试线程池的单例特性：静态持有者模式保证全局唯一
         Class<?> holderClass = Class.forName("io.github.jiangood.openadmin.util.ThreadTool$AsyncExecutorHolder");
         java.lang.reflect.Field instanceField = holderClass.getDeclaredField("INSTANCE");
@@ -87,7 +87,7 @@ class ThreadToolTest {
     }
 
     @Test
-    public void testExecutorServiceLazyInitialization() throws Exception {
+    void testExecutorServiceLazyInitialization() throws Exception {
         // 静态持有者模式：仅首次访问时初始化，此处验证任务能正常异步执行
         CountDownLatch latch = new CountDownLatch(1);
         ThreadTool.execute(() -> {
