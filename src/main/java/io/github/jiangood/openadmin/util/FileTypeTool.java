@@ -1,6 +1,9 @@
 package io.github.jiangood.openadmin.util;
 
 public class FileTypeTool {
+    private FileTypeTool() {
+    }
+
 
     public static boolean isImage(String name) {
         if (name == null) {

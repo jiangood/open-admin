@@ -5,6 +5,9 @@ import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
 
 public class ContentTypeTool {
+    private ContentTypeTool() {
+    }
+
 
     public static boolean isVideo(String contentType) {
         return CharSequenceUtil.startWith(contentType, "video");

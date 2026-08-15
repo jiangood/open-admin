@@ -8,6 +8,9 @@ import jakarta.persistence.criteria.*;
  * 自动处理 Join 和 Path 导航。
  */
 public class ExpressionTool {
+    private ExpressionTool() {
+    }
+
 
     /**
      * 根据字段路径表达式获取 JPA Criteria 查询的 Path。

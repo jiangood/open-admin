@@ -14,6 +14,9 @@ import java.util.function.Function;
  */
 @Slf4j
 public class BeanTool {
+    private BeanTool() {
+    }
+
 
     /**
      * 通过无参构造器创建类的实例

@@ -21,6 +21,9 @@ import java.util.Map;
  */
 @Slf4j
 public class JsonTool {
+    private JsonTool() {
+    }
+
 
     // singleton ,as to initialize need much TIME
     private static final ObjectMapper om = JsonMapper.builder()

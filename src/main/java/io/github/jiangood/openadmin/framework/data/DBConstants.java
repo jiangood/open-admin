@@ -2,6 +2,9 @@ package io.github.jiangood.openadmin.framework.data;
 
 
 public class DBConstants {
+    private DBConstants() {
+    }
+
 
 
     // 用于存储大量二进制数据，如图片、音频、视频等

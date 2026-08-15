@@ -16,6 +16,9 @@ import java.io.InputStream;
  */
 @Slf4j
 public class DownloadTool {
+    private DownloadTool() {
+    }
+
 
 
     public static void download(String fileName, byte[] fileBytes, HttpServletResponse response) {

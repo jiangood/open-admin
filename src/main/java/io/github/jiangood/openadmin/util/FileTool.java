@@ -5,6 +5,9 @@ import cn.hutool.core.io.FileUtil;
 import java.io.File;
 
 public class FileTool {
+    private FileTool() {
+    }
+
 
     public static File findParentByName(File file, String parentName) {
         while (file != null) {

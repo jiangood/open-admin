@@ -18,6 +18,9 @@ import java.util.List;
  * 日期工具类，提供日期处理相关的工具方法
  */
 public class DateTool {
+    private DateTool() {
+    }
+
 
     /**
      * 判断字符串是否为ISO格式的日期范围

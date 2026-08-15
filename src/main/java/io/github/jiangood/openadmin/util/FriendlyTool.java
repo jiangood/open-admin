@@ -6,6 +6,9 @@ import cn.hutool.core.io.unit.DataSizeUtil;
 import java.util.Date;
 
 public class FriendlyTool {
+    private FriendlyTool() {
+    }
+
 
     private static final long MINUTE_1 = 60L * 1000;
     private static final long HOUR_1 = 60L * 60 * 1000;

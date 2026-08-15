@@ -10,6 +10,9 @@ import java.util.Collections;
 import java.util.List;
 
 public class PasswordTool {
+    private PasswordTool() {
+    }
+
 
     private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder() ;
 

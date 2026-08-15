@@ -11,6 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class RequestTool {
+    private RequestTool() {
+    }
+
 
     /**
      * 获取基础URL， 如http://127.0.0.1

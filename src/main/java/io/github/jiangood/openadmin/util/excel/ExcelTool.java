@@ -26,6 +26,9 @@ import java.util.function.Consumer;
  * 推荐构造单独的 bean用于导入导出
  */
 public class ExcelTool {
+    private ExcelTool() {
+    }
+
 
 
     public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws Exception {

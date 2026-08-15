@@ -22,6 +22,9 @@ import java.util.Set;
  */
 @Slf4j
 public class ExceptionToMessageTool {
+    private ExceptionToMessageTool() {
+    }
+
 
     public static String convert(Throwable throwable) {
         if (throwable == null) {

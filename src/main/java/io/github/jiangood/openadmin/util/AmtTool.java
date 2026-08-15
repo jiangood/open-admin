@@ -7,6 +7,9 @@ import java.math.RoundingMode;
  * 金额处理类, 默认单位为元
  */
 public class AmtTool {
+    private AmtTool() {
+    }
+
 
     /**
      * 元转分

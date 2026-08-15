@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 public class FileLogTool {
+    private FileLogTool() {
+    }
+
 
     /**
      * 获取日志

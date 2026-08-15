@@ -12,6 +12,9 @@ import java.util.function.Function;
  * 数组工具类，提供数组处理相关的工具方法
  */
 public class ArrayTool {
+    private ArrayTool() {
+    }
+
 
     /**
      * 检查数组中是否包含指定类型的元素

@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class URLTool {
+    private URLTool() {
+    }
+
 
     public static String removeQueryString(String url) {
         return CharSequenceUtil.subBefore(url, '?', true);

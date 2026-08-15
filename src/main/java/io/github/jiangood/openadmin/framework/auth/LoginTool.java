@@ -20,6 +20,9 @@ import java.util.List;
 
 @Slf4j
 public class LoginTool {
+    private LoginTool() {
+    }
+
 
     private static final String SESSION_ORG_ID = "currentOrgId";
 

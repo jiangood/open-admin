@@ -7,6 +7,9 @@ import java.lang.reflect.Method;
 
 @Slf4j
 public class RemarkTool {
+    private RemarkTool() {
+    }
+
 
     public static String getRemark(Field field) {
         if (field == null) {

@@ -14,6 +14,9 @@ import java.util.function.Predicate;
  * 树工具类，提供树构建、遍历、查询等静态方法
  */
 public class TreeTool {
+    private TreeTool() {
+    }
+
 
     /**
      * 判断节点是否为叶子

@@ -5,6 +5,9 @@ import cn.hutool.core.text.CharSequenceUtil;
 import java.math.BigDecimal;
 
 public class RangeTool {
+    private RangeTool() {
+    }
+
 
     // ISO 标准的分隔符， 如日期
     public static final String SPLITTER = "/";

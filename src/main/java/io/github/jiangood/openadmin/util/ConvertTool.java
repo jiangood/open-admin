@@ -7,6 +7,9 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class ConvertTool {
+    private ConvertTool() {
+    }
+
 
     /**
      * 转换器

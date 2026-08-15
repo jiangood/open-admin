@@ -11,6 +11,9 @@ import java.lang.reflect.Type;
  */
 @SuppressWarnings("rawtypes")
 public class ReflectTool {
+    private ReflectTool() {
+    }
+
 
     private static final Logger logger = LoggerFactory.getLogger(ReflectTool.class);
 

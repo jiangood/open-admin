@@ -6,6 +6,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class MapTool {
+    private MapTool() {
+    }
+
 
     public static <K, V> Map<K, V> removeNullOrEmptyValue(Map<K, V> map) {
         if (map.isEmpty()) {

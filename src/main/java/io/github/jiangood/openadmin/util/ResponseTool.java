@@ -18,6 +18,9 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class ResponseTool {
+    private ResponseTool() {
+    }
+
 
     public static final String CONTENT_TYPE_EXCEL = "application/vnd.ms-excel;charset=utf-8";
     public static final String CONTENT_TYPE_PDF = "application/pdf";

@@ -11,6 +11,9 @@ import java.util.Map;
 
 // 树拖拽排序
 public class TreeDropTool {
+    private TreeDropTool() {
+    }
+
 
 
     /**

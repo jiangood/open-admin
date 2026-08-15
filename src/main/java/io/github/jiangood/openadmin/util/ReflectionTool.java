@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReflectionTool {
+    private ReflectionTool() {
+    }
+
 
     /**
      * 获取指定类的所有getter方法, 包括is如 isEnabled
