@@ -42,8 +42,8 @@ public class SysFileController {
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysFile> q = Spec.of();
         q.betweenDateRange("createTime", dateRange, true);
-        q.eq(SysFile.Fields.originName, originName);
-        q.eq(SysFile.Fields.objectName, objectName);
+        q.like(SysFile.Fields.originName, originName);
+        q.like(SysFile.Fields.objectName, objectName);
         q.eq(SysFile.Fields.status, status);
         q.eq(SysFile.Fields.type, type);
 
