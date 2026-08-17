@@ -21,7 +21,7 @@ public class SysFileLogController {
     @Resource
     private FileLogService fileLogService;
 
-    @GetMapping("{key}")
+    @GetMapping("{*key}")
     public void log(@PathVariable String key, HttpServletResponse response) throws IOException {
         response.setCharacterEncoding("utf-8");
         response.setContentType("text/plain; utf-8");
