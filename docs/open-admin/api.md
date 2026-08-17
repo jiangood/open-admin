@@ -142,7 +142,7 @@ import { PermActions } from '@jiangood/open-admin';
 
 #### ProTable
 
-`request` 为 Promise 式：接收 `(params)`（params 含 `{page, size, sort}` 及搜索表单值），返回解析为 `{content, totalElements, extData}` 的 Promise（Spring Data Page 序列化结构）。ProTable **自动解包 `HttpClient` 返回的 `AjaxResult`**（取 `data`），业务侧直接返回 HttpClient 的 Promise 即可；手动返回分页结构亦可。失败时 `HttpClient` 自动弹错，ProTable 静默复位 loading。`actionRef` 暴露 `reload()` / `clearSelection()`，`formRef` 暴露搜索表单实例：
+`request` 为 Promise 式：接收 `(params)`（params 含 `{page, size, sort}` 及搜索表单值），返回 `HttpClient` 的 Promise，ProTable 自动取 `AjaxResult` 的 `data`（Spring Data Page 序列化结构 `{content, totalElements, extData}`）。失败时 `HttpClient` 自动弹错，ProTable 静默复位 loading。`actionRef` 暴露 `reload()` / `clearSelection()`，`formRef` 暴露搜索表单实例：
 
 ```jsx
 <ProTable
