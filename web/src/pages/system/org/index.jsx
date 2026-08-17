@@ -72,12 +72,11 @@ export default class OrgPage extends React.Component {
         this.modalRef.current.open({...this.state.selectedOrg})
     }
 
-    handleModalFinish = values => {
+    handleModalFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/sysOrg/create' : 'admin/sysOrg/update'
-        HttpClient.post(url, values, null, () => {
-            this.loadTree()
-        })
+        await HttpClient.post(url, values)
+        this.loadTree()
     }
 
     onDraggableChange = e => {

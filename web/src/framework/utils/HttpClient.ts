@@ -5,10 +5,12 @@ import {message as messageApi} from "antd";
 import {EventBus} from "./EventBus";
 
 /**
- * 回调式 HTTP 工具类（纯回调，所有方法均不返回 Promise）
+ * 回调 + Promise 双风格 HTTP 工具类（所有请求方法均返回 Promise，同时兼容回调）
  *
  * 核心规则：
- * - 传了 error 回调 → 异常完全交给调用方，框架不自动弹错
+ * - 请求方法返回 Promise<T>：成功 resolve(data)，失败 reject(AjaxError {code, message})
+ * - 返回值被忽略也安全：内部已对返回的 Promise 挂 no-op catch，不会产生 unhandled rejection
+ * - 传了 error 回调 → 异常完全交给调用方，框架不自动弹错（Promise 仍会 reject）
  * - 没传 error 回调 → 框架自动 console.warn + message.error
  * - 成功永不自动弹 toast，是否提示由业务方在 success 回调里自行决定
  * - error 回调统一收到 AjaxError {code, message}：业务失败 code 为后端业务码，
@@ -17,7 +19,10 @@ import {EventBus} from "./EventBus";
  *
  * 用法：
  * ```ts
- * // 失败自动弹错；成功自控提示
+ * // Promise 风格：失败自动弹错并 reject，可用 await 感知结果（如 FormModal 提交失败保持弹窗）
+ * await HttpClient.post('admin/sysUser/create', values);
+ *
+ * // 回调风格：失败自动弹错；成功自控提示
  * HttpClient.post('admin/sysUser/delete', {id}, null, () => {
  *     messageApi.success('删除成功');
  *     reload();
@@ -72,23 +77,23 @@ const axiosInstance = axios.create({
 });
 
 export class HttpClient {
-    static ajax<T = unknown>(settings: AjaxSettings<T>): void {
+    static ajax<T = unknown>(settings: AjaxSettings<T>): Promise<T> {
         const {url, method = 'GET', params, data, headers, success, error} = settings;
-        HttpClient.coreRequest<T>({
+        return HttpClient.coreRequest<T>({
             url, method, params, data, headers, success, error
         });
     }
 
-    static get<T = unknown>(url: string, params: unknown = null, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
-        HttpClient.ajax<T>({url, method: 'GET', params, success, error});
+    static get<T = unknown>(url: string, params: unknown = null, success?: (data: T) => void, error?: (e: AjaxError) => void): Promise<T> {
+        return HttpClient.ajax<T>({url, method: 'GET', params, success, error});
     }
 
-    static post<T = unknown>(url: string, data: unknown = null, params: unknown = null, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
-        HttpClient.ajax<T>({url, method: 'POST', data, params, success, error});
+    static post<T = unknown>(url: string, data: unknown = null, params: unknown = null, success?: (data: T) => void, error?: (e: AjaxError) => void): Promise<T> {
+        return HttpClient.ajax<T>({url, method: 'POST', data, params, success, error});
     }
 
-    static postForm<T = unknown>(url: string, data: unknown, success?: (data: T) => void, error?: (e: AjaxError) => void): void {
-        HttpClient.ajax<T>({
+    static postForm<T = unknown>(url: string, data: unknown, success?: (data: T) => void, error?: (e: AjaxError) => void): Promise<T> {
+        return HttpClient.ajax<T>({
             url,
             method: 'POST',
             data: qs.stringify(data),
@@ -220,7 +225,7 @@ export class HttpClient {
         return url.startsWith('admin') ? '/' + url : url;
     }
 
-    private static coreRequest<T = unknown>(settings: AjaxSettings<T>): void {
+    private static coreRequest<T = unknown>(settings: AjaxSettings<T>): Promise<T> {
         const {url, method, params, data, headers, success, error} = settings;
         const config: AxiosRequestConfig = {url: HttpClient.prefixUrl(url), method, params, data, headers};
 
@@ -231,41 +236,52 @@ export class HttpClient {
 
         const hasError = typeof error === 'function';
 
-        const fail = (e: unknown) => {
-            if (axios.isAxiosError(e) && e.response?.status === 401) {
-                EventBus.emit('loginExpired');
-                const err: AjaxError = {code: 401, message: '登录过期'};
+        const promise = new Promise<T>((resolve, reject) => {
+            const fail = (e: unknown) => {
+                if (axios.isAxiosError(e) && e.response?.status === 401) {
+                    EventBus.emit('loginExpired');
+                    const err: AjaxError = {code: 401, message: '登录过期'};
+                    if (hasError) {
+                        error!(err);
+                    } else {
+                        messageApi.error('登录过期');
+                    }
+                    reject(err);
+                    return;
+                }
+                const err = HttpClient.toAjaxError(e);
                 if (hasError) {
                     error!(err);
                 } else {
-                    messageApi.error('登录过期');
+                    console.warn(`[HttpClient] 请求失败: ${url}`, err.message);
+                    messageApi.error(err.message);
                 }
-                return;
-            }
-            const err = HttpClient.toAjaxError(e);
-            if (hasError) {
-                error!(err);
-            } else {
-                console.warn(`[HttpClient] 请求失败: ${url}`, err.message);
-                messageApi.error(err.message);
-            }
-        };
+                reject(err);
+            };
 
-        axiosInstance(config).then((response) => {
-            const body = response.data;
-            const {success: ok, message, data: result} = body;
-            if (ok == undefined) {
-                success?.(response as unknown as T);
-                return;
-            }
-            if (!ok) {
-                if (body.code === 401) {
-                    EventBus.emit('loginExpired');
+            axiosInstance(config).then((response) => {
+                const body = response.data;
+                const {success: ok, message, data: result} = body;
+                if (ok == undefined) {
+                    const rs = response as unknown as T;
+                    success?.(rs);
+                    resolve(rs);
+                    return;
                 }
-                fail({code: body.code, message: message || '操作失败'});
-                return;
-            }
-            success?.(result);
-        }).catch(fail);
+                if (!ok) {
+                    if (body.code === 401) {
+                        EventBus.emit('loginExpired');
+                    }
+                    fail({code: body.code, message: message || '操作失败'});
+                    return;
+                }
+                resolve(result);
+                success?.(result);
+            }).catch(fail);
+        });
+
+        // 调用方忽略返回值时兜底，避免 unhandled rejection；await 的调用方仍能正常收到 reject
+        promise.catch(() => {});
+        return promise;
     }
 }

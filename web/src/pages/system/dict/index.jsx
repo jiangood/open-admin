@@ -69,12 +69,11 @@ export default class DictPage extends React.Component {
         })
     }
 
-    handleTypeFormFinish = values => {
+    handleTypeFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/type-create' : 'admin/dict/type-update'
-        HttpClient.post(url, values, null, () => {
-            this.loadTree()
-        })
+        await HttpClient.post(url, values)
+        this.loadTree()
     }
 
     findNode = (nodes, key) => {
@@ -123,12 +122,11 @@ export default class DictPage extends React.Component {
         })
     }
 
-    onItemFormFinish = values => {
+    onItemFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/create' : 'admin/dict/update'
-        HttpClient.post(url, values, null, () => {
-            this.tableRef.current.reload()
-        })
+        await HttpClient.post(url, values)
+        this.tableRef.current.reload()
     }
 
     columns = [

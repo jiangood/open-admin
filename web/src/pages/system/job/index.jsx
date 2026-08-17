@@ -83,12 +83,11 @@ export default class JobPage extends React.Component {
         })
     }
 
-    onFinish = values => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/job/create' : 'admin/job/update';
-        HttpClient.post(url, values, null, () => {
-            this.tableRef.current.reload()
-        })
+        await HttpClient.post(url, values)
+        this.tableRef.current.reload()
     }
 
     handleDelete = row => {

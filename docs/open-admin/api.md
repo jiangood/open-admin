@@ -76,7 +76,7 @@ public class DataSyncJob extends BaseJob {
 
 #### FormModal
 
-表单弹框，推荐替代静态 `Modal.confirm()` 表单场景。通过 ref 调用 `open(values)` 打开（传入值则回填表单，否则重置），`onFinish` 返回 `Promise` 时自动控制提交 loading，完成后关闭弹框：
+表单弹框，推荐替代静态 `Modal.confirm()` 表单场景。通过 ref 调用 `open(values)` 打开（传入值则回填表单，否则重置），`onFinish` 返回 `Promise` 时自动控制提交 loading；`onFinish` 的 Promise **resolve 后关闭弹框，reject 时保持打开**（如后端业务校验失败，错误提示由 `HttpClient` 弹出，表单数据保留以便修改重试）：
 
 ```jsx
 import { FormModal, HttpClient } from '@jiangood/open-admin';
@@ -85,9 +85,11 @@ class CustomerPage extends React.Component {
   modalRef = React.createRef();
   handleAdd = () => this.modalRef.current.open({});
   handleEdit = record => this.modalRef.current.open({...record});
-  handleSubmit = values =>
-    HttpClient.post(values.id ? 'admin/customer/update' : 'admin/customer/create', values, null,
-      () => this.tableRef.current.reload());
+  handleSubmit = async values => {
+    // await 提交：失败时 HttpClient 自动弹错并 reject，弹框保持打开
+    await HttpClient.post(values.id ? 'admin/customer/update' : 'admin/customer/create', values);
+    this.tableRef.current.reload();
+  };
 
   render() {
     return <FormModal ref={this.modalRef} title="客户信息" onFinish={this.handleSubmit}>
@@ -336,7 +338,7 @@ location /file/public/ {
 
 | 类 | 主要方法 |
 |----|---------|
-| `HttpClient` | `get` / `post` / `postForm` / `download`（回调式 axios 封装，自动 context-path，`success` 回调直接收 `data`，`error` 回调统一收 `{code, message}`） |
+| `HttpClient` | `get` / `post` / `postForm` / `download`（axios 封装，自动 context-path；请求方法返回 `Promise`，成功 `resolve(data)`、失败 `reject({code, message})` 并自动弹错；同时兼容回调：`success` 直接收 `data`，`error` 统一收 `{code, message}`） |
 | `UrlUtils` | `contextPath(path)` 拼接 context-path / `getParams` / `setParam` / `getPathname` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `walk` / `findByKey` / `flattenTree` / `getKeyList` / `getChildRecursive` |

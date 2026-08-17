@@ -35,12 +35,11 @@ export default class UserPage extends React.Component {
         })
     }
 
-    onFinishResetPwd = values => {
-        HttpClient.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password}, null, () => {
-            message.success('重置密码成功')
-            this.setState({resetPwdUser: null})
-            this.tableRef.current?.reload()
-        })
+    onFinishResetPwd = async values => {
+        await HttpClient.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
+        message.success('重置密码成功')
+        this.setState({resetPwdUser: null})
+        this.tableRef.current?.reload()
     }
 
     handleDelete = r => {
@@ -139,22 +138,21 @@ export default class UserPage extends React.Component {
         },
     ];
 
-    onFinish = values => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
-        HttpClient.post(url, values, null, result => {
-            if (result?.password) {
-                this.setState({
-                    addResultModal: {
-                        open: true,
-                        name: values.name,
-                        account: values.account,
-                        password: result.password,
-                    }
-                })
-            }
-            this.tableRef.current.reload()
-        })
+        const result = await HttpClient.post(url, values);
+        if (result?.password) {
+            this.setState({
+                addResultModal: {
+                    open: true,
+                    name: values.name,
+                    account: values.account,
+                    password: result.password,
+                }
+            })
+        }
+        this.tableRef.current.reload()
     }
 
     render() {

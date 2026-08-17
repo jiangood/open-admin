@@ -49,6 +49,8 @@ export default class FormModal extends React.Component<FormModalProps> { // NOSO
       if (values == null) return
       await this.props.onFinish?.(values)
       this.setState({visible: false})
+    } catch {
+      // 提交失败（错误提示已由 HttpClient 弹出），保持弹窗打开以便用户修改后重试
     } finally {
       this.setState({confirmLoading: false})
     }

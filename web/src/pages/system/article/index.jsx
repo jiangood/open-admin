@@ -39,12 +39,11 @@ export default class ArticleListPage extends React.Component {
         PageUtils.open('/article/' + record.code, record.title)
     }
 
-    onFinish = values => {
+    onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/article/create' : 'admin/article/update';
-        HttpClient.post(url, values, null, () => {
-            this.tableRef.current.reload()
-        })
+        await HttpClient.post(url, values)
+        this.tableRef.current.reload()
     }
 
     handleDelete = record => {
