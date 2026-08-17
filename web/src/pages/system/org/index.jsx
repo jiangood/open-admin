@@ -187,9 +187,6 @@ export default class OrgPage extends React.Component {
                 <Form.Item label='名称' name='name' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
-                <Form.Item label='序号' name='seq'>
-                    <InputNumber/>
-                </Form.Item>
                 <Form.Item label='类型' name='type' rules={[{required: true}]}>
                     <FieldRemoteSelect url='admin/sysOrg/type-options' placeholder='请选择类型'/>
                 </Form.Item>
@@ -198,6 +195,9 @@ export default class OrgPage extends React.Component {
                 </Form.Item>
                 <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
                     <FieldBoolean/>
+                </Form.Item>
+                <Form.Item label='序号' name='seq'>
+                    <InputNumber/>
                 </Form.Item>
                 <Form.Item label='扩展字段1' name='extra1'>
                     <Input/>
