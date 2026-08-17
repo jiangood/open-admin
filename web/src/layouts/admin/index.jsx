@@ -50,7 +50,7 @@ export default class AdminLayout extends React.Component {
 
     initMenu = () => {
         this.setState({menuLoading: true})
-        HttpClient.get('/admin/menu-info', null, info => {
+        HttpClient.get('/admin/menu-info', null, {toastError: false}).then(info => {
             const {menuTree, pathMenuMap, menuMap} = info
             this.setState({menuMap})
 
@@ -88,7 +88,7 @@ export default class AdminLayout extends React.Component {
             this.setState({menuTree, pathMenuMap, topMenus, sideMenus, activeTopMenuKey, currentMenuKey})
             this.setState({menuLoading: false})
 
-        }, err => {
+        }).catch(err => {
             console.error('加载菜单失败:', err)
             this.setState({menuTree: [], topMenus: [], sideMenus: []})
             this.setState({menuLoading: false})

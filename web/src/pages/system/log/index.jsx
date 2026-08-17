@@ -55,7 +55,7 @@ export default class LogPage extends React.Component {
     render() {
         return <Page title="操作日志" description="查看系统操作日志">
             <ProTable
-                request={(params, success, error) => HttpClient.get('admin/sysLog/page', params, success, error)}
+                request={(params) => HttpClient.get('admin/sysLog/page', params)}
                 columns={this.columns}
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>

@@ -58,9 +58,9 @@ export default class JobPage extends React.Component {
     modalRef = React.createRef()
 
     componentDidMount() {
-        HttpClient.get('admin/job/job-class-options', null, rs => {
+        HttpClient.get('admin/job/job-class-options', null, {toastError: false}).then(rs => {
             this.setState({jobClassOptions: rs})
-        }, e => {
+        }).catch(e => {
             console.error('[Job] 加载任务类选项失败:', e);
         })
     }
@@ -76,9 +76,9 @@ export default class JobPage extends React.Component {
     }
 
     loadJobParamFields(className, jobData) {
-        HttpClient.post("admin/job/get-job-param-fields", jobData || {}, {className}, rs => {
+        HttpClient.post("admin/job/get-job-param-fields", jobData || {}, {className}, {toastError: false}).then(rs => {
             this.setState({paramList: rs})
-        }, e => {
+        }).catch(e => {
             console.error('[Job] 加载任务参数字段失败:', e);
         })
     }
@@ -92,19 +92,19 @@ export default class JobPage extends React.Component {
 
     handleDelete = row => {
         const hide = message.loading("删除任务中...")
-        HttpClient.post('admin/job/delete', {id: row.id}, null, () => {
+        HttpClient.post('admin/job/delete', {id: row.id}, null, {toastError: false}).then(() => {
             hide();
             this.tableRef.current.reload();
-        }, e => {
+        }).catch(e => {
             console.error('[Job] 删除任务失败:', e);
             hide();
         })
     }
 
     handleTriggerJob = row => {
-        HttpClient.post('admin/job/trigger-job', {id: row.id}, null, () => {
+        HttpClient.post('admin/job/trigger-job', {id: row.id}, null, {toastError: false}).then(() => {
             this.tableRef.current.reload();
-        }, e => {
+        }).catch(e => {
             console.error('[Job] 触发任务失败:', e);
         })
     }
@@ -167,9 +167,9 @@ export default class JobPage extends React.Component {
 
     showStatus = () => {
         this.setState({statusOpen: true})
-        HttpClient.get('admin/job/status', null, rs => {
+        HttpClient.get('admin/job/status', null, {toastError: false}).then(rs => {
             this.setState({status: rs})
-        }, e => {
+        }).catch(e => {
             console.error('[Job] 加载状态失败:', e);
         })
     };
@@ -189,7 +189,7 @@ export default class JobPage extends React.Component {
                         <Button perm='job:read' onClick={this.showStatus}>查看状态</Button>
                     </PermActions>
                 )}
-                request={(params, success, error) => HttpClient.get('admin/job/page', params, success, error)}
+                request={(params) => HttpClient.get('admin/job/page', params)}
                 columns={this.columns}
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
@@ -295,9 +295,9 @@ export default class JobPage extends React.Component {
                             return <a href={url} target='_blank'>日志</a>;
                         },
                     }
-                ]} request={(params, success, error) => {
+                ]} request={(params) => {
                     params.jobId = this.state.selectedRecord.id
-                    return HttpClient.get('admin/job/execute-record', params, success, error);
+                    return HttpClient.get('admin/job/execute-record', params);
                 }}></ProTable>
 
             </Modal>

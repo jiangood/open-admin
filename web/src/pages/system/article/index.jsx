@@ -47,7 +47,7 @@ export default class ArticleListPage extends React.Component {
     }
 
     handleDelete = record => {
-        HttpClient.post('admin/article/delete', {id: record.id}, null, () => {
+        HttpClient.post('admin/article/delete', {id: record.id}, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -117,7 +117,7 @@ export default class ArticleListPage extends React.Component {
                         <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params, success, error) => HttpClient.get('admin/article/page', params, success, error)}
+                request={(params) => HttpClient.get('admin/article/page', params)}
                 columns={this.columns}
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>

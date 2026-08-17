@@ -15,13 +15,13 @@ export default class FilePage extends React.Component {
     formRef = React.createRef()
 
     handleDelete = row => {
-        HttpClient.post('admin/sysFile/delete', {value: row.objectName}, null, () => {
+        HttpClient.post('admin/sysFile/delete', {value: row.objectName}, null).then(() => {
             this.tableRef.current.reload()
         })
     }
 
     handleBatchDelete = ids => {
-        HttpClient.post('admin/sysFile/deleteBatch', ids, null, () => {
+        HttpClient.post('admin/sysFile/deleteBatch', ids, null).then(() => {
             this.tableRef.current.reload()
             this.tableRef.current.clearSelection()
         })
@@ -166,8 +166,8 @@ export default class FilePage extends React.Component {
                         />
                     </Space>
                 )}
-                request={(params, success, error) => {
-                    return HttpClient.get('admin/sysFile/page', params, success, error);
+                request={(params) => {
+                    return HttpClient.get('admin/sysFile/page', params);
                 }}
 
                 columns={this.columns}

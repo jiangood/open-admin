@@ -387,12 +387,13 @@ export default class extends React.Component {
 
     handleAdd = () => this.modalRef.current.open({})
     handleEdit = record => this.modalRef.current.open({...record})
-    handleSubmit = values => {
+    handleSubmit = async values => {
         const url = values.id ? 'admin/customer/update' : 'admin/customer/create'
-        HttpClient.post(url, values, null, () => this.tableRef.current.reload())
+        await HttpClient.post(url, values)
+        this.tableRef.current.reload()
     }
     handleDelete = record => {
-        HttpClient.post('admin/customer/delete', {id: record.id}, null, () => this.tableRef.current.reload())
+        HttpClient.post('admin/customer/delete', {id: record.id}, null).then(() => this.tableRef.current.reload())
     }
 
     render() {
@@ -404,7 +405,7 @@ export default class extends React.Component {
                         <Button perm='customer:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params, success, error) => HttpClient.get('admin/customer/page', params, success, error)}
+                request={(params) => HttpClient.get('admin/customer/page', params)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <Form.Item label='名称' name='name'>

@@ -14,11 +14,11 @@ function getRedirect(query) {
 }
 
 function postLogin(values, query, success, error) {
-    HttpClient.post('/admin/auth/login', values, null, rs => {
+    HttpClient.post('/admin/auth/login', values, null, {toastError: false}).then(rs => {
         EventBus.emit('loginSuccess')
         history.push(getRedirect(query))
         success?.(rs)
-    }, e => {
+    }).catch(e => {
         console.error('[Login] 登录失败:', e);
         message.error(HttpClient.errToMsg(e))
         error?.(e)
@@ -46,10 +46,10 @@ export default class LoginPage extends React.Component {
             return
         }
         // localStorage 中无站点信息，从服务端重新加载
-        HttpClient.get('/admin/public/site-info', null, rs => {
+        HttpClient.get('/admin/public/site-info', null, {toastError: false}).then(rs => {
             GlobalData.setSiteInfo(rs)
             this.setState({siteInfo: rs})
-        }, () => {
+        }).catch(() => {
             console.error('[Login] 加载站点信息失败');
             message.error('加载站点信息失败，请刷新页面重试')
         })

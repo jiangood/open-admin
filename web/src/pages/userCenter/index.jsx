@@ -14,20 +14,21 @@ export default class UserCenterPage extends React.Component {
     }
 
     componentDidMount() {
-        HttpClient.get('admin/userCenter/info', null, rs => {
+        HttpClient.get('admin/userCenter/info', null).then(rs => {
             this.setState({info: rs})
         })
     }
 
     onPwdFinish = (values) => {
-        HttpClient.post('admin/userCenter/update-pwd', values, null, () => {
+        HttpClient.post('admin/userCenter/update-pwd', values, null).then(() => {
             this.setState({changePwdOpen: false, changePwdSuccess: true});
         })
     }
 
-    pwdValidator = (rule, value) => new Promise((resolve, reject) => {
-        HttpClient.get("admin/sysUser/pwd-strength", {password: value}, resolve, (e) => reject(new Error(e.message)))
-    })
+    pwdValidator = (rule, value) => HttpClient.get("admin/sysUser/pwd-strength", {password: value}, {toastError: false})
+        .catch(e => {
+            throw new Error(e.message)
+        })
 
     render() {
         const {info, changePwdOpen, changePwdSuccess} = this.state;

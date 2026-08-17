@@ -1,9 +1,8 @@
 import React from "react";
-import {Button, Form, Table, message} from 'antd';
+import {Button, Form, Table} from 'antd';
 import type {FormInstance, TableProps} from 'antd';
 
 import {StringUtils} from "../../utils";
-import type {AjaxError} from "../../utils";
 
 import './index.less'
 
@@ -26,14 +25,11 @@ export interface ProTableRequestResult<T = unknown> {
 
 export interface ProTableProps<T = unknown> {
     /**
-     * 数据请求（回调式），框架自动注入 page/size/sort 参数。
-     * 页面实现需把 success/error 透传给 HttpClient：request = (params, success, error) => HttpClient.get(url, params, success, error)
+     * 数据请求（Promise 式），框架自动注入 page/size/sort 参数。
+     * 页面实现直接返回 HttpClient 的 Promise：request = (params) => HttpClient.get(url, params)
+     * 失败时 HttpClient 默认自动弹错，ProTable 内部静默复位 loading。
      */
-    request: (
-        params: Record<string, unknown>,
-        success: (data: ProTableRequestResult<T>) => void,
-        error?: (e: AjaxError) => void
-    ) => void;
+    request: (params: Record<string, unknown>) => Promise<ProTableRequestResult<T>>;
     /** antd Table 列定义 */
     columns: TableProps<T>['columns'];
     /** 获取表格操作句柄（reload） */
@@ -159,7 +155,7 @@ export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, Pro
 
 
         this.setState({loading: true})
-        request(params, (rs: ProTableRequestResult<T>) => {
+        request(params).then((rs: ProTableRequestResult<T>) => {
             const {content, totalElements, size, extData} = rs;
 
             this.setState({dataSource: content, total: Number(totalElements), pageSize: size})
@@ -168,9 +164,9 @@ export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, Pro
             }
             this.updateSelectedRows(content)
             this.setState({loading: false})
-        }, (e: AjaxError) => {
+        }).catch(() => {
+            // 错误提示已由 HttpClient 默认弹出，此处仅复位 loading
             this.setState({loading: false})
-            message.error(e.message)
         })
     }
 

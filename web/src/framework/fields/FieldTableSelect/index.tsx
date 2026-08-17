@@ -66,9 +66,9 @@ export class FieldTableSelect extends React.Component<FieldTableSelectProps, Fie
                         }}>选择</Button>;
                 }
             }]}
-            request={(params, success, error) => {
+            request={(params) => {
                 params.selected = this.props.value;
-                return HttpClient.get(this.props.url, params, success, error);
+                return HttpClient.get(this.props.url, params);
             }}>
         </ProTable>;
     };

@@ -9,7 +9,7 @@ export default class PermView extends React.Component {
     }
 
     componentDidMount() {
-        HttpClient.get('admin/userCenter/perms', null, rs => {
+        HttpClient.get('admin/userCenter/perms', null).then(rs => {
             this.setState({data: rs})
         })
     }

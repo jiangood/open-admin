@@ -29,7 +29,7 @@ export default class RolePage extends React.Component {
 
     handleEditUser = record => {
         this.setState({usersModalOpen: true, selectedRecord: record})
-        HttpClient.get('admin/sysRole/user-list', {id: record.id}, rs => {
+        HttpClient.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
             this.setState({userList: rs.list, targetKeys: rs.selectedKeys})
         })
     }
@@ -42,7 +42,7 @@ export default class RolePage extends React.Component {
     }
 
     handleDelete = record => {
-        HttpClient.post('admin/sysRole/delete', {id: record.id}, null, () => {
+        HttpClient.post('admin/sysRole/delete', {id: record.id}, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -127,9 +127,9 @@ export default class RolePage extends React.Component {
             id: this.state.selectedRecord.id,
             userIdList: this.state.targetKeys
         }
-        HttpClient.post('admin/sysRole/grant-users', params, null, () => {
+        HttpClient.post('admin/sysRole/grant-users', params, null, {toastError: false}).then(() => {
             this.setState({usersModalOpen: false, usersModalLoading: false})
-        }, () => {
+        }).catch(() => {
             this.setState({usersModalLoading: false})
         })
     }
@@ -146,7 +146,7 @@ export default class RolePage extends React.Component {
                         <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params, success, error) => HttpClient.get('admin/sysRole/page', params, success, error)}
+                request={(params) => HttpClient.get('admin/sysRole/page', params)}
                 columns={this.columns}
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>

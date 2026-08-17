@@ -42,10 +42,10 @@ export default class DictPage extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpClient.get('admin/dict/type-tree', null, rs => {
+        HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
             this.setState({typeTree: rs})
             this.setState({treeLoading: false})
-        }, () => {
+        }).catch(() => {
             this.setState({treeLoading: false})
         })
     }
@@ -63,7 +63,7 @@ export default class DictPage extends React.Component {
     handleTypeDelete = () => {
         const {selectedType} = this.state
         if (!selectedType) return
-        HttpClient.post('admin/dict/type-delete', {id: selectedType.id}, null, () => {
+        HttpClient.post('admin/dict/type-delete', {id: selectedType.id}, null).then(() => {
             this.setState({selectedType: null, selectedTypeCode: null})
             this.loadTree()
         })
@@ -117,7 +117,7 @@ export default class DictPage extends React.Component {
     }
 
     handleItemDelete = row => {
-        HttpClient.post('admin/dict/delete', row, null, () => {
+        HttpClient.post('admin/dict/delete', row, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -221,9 +221,9 @@ export default class DictPage extends React.Component {
                         {hasTypeSelected && <ProTable
                                 rowKey='uid'
                                 actionRef={this.tableRef}
-                                request={(params, success, error) => {
+                                request={(params) => {
                                     params.typeCode = selectedTypeCode
-                                    return HttpClient.get('admin/dict/page', params, success, error)
+                                    return HttpClient.get('admin/dict/page', params)
                                 }}
                                 columns={this.columns}
                             />

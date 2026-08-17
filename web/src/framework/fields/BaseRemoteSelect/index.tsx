@@ -79,12 +79,12 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
             }
         };
 
-        HttpClient.get(url, this.getLoadParams(searchText), (data) => {
+        HttpClient.get(url, this.getLoadParams(searchText), {toastError: false}).then((data) => {
             if (fetchId === this.fetchIdRef) {
                 this.setState({ data: data || [] });
             }
             done();
-        }, (error) => {
+        }).catch((error) => {
             console.warn('[BaseRemoteSelect] 加载失败:', error);
             if (fetchId === this.fetchIdRef) {
                 this.setState({ data: [] });

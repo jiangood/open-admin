@@ -74,16 +74,16 @@ export class Layouts extends React.Component<LayoutsProps> {
     }
 
     loadSiteInfo() {
-        HttpClient.get("/admin/public/site-info", null, data => {
+        HttpClient.get("/admin/public/site-info", null, {toastError: false}).then(data => {
             GlobalData.setSiteInfo(data);
             this.setState({siteInfoLoaded: true});
-        }, () => {
+        }).catch(() => {
             console.error('[Layout] 加载站点信息失败');
         });
     }
 
     loadLoginInfo() {
-        HttpClient.get('/admin/public/login-info', null, data => {
+        HttpClient.get('/admin/public/login-info', null, {toastError: false}).then(data => {
             GlobalData.setDictInfo(data.dictInfo);
             GlobalData.setLoginInfo(data.loginInfo);
             GlobalData.setSiteArticles(data.siteArticles);
@@ -95,7 +95,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             }
 
             this.setState({loginChecked: true});
-        }, () => {
+        }).catch(() => {
             console.error('[Layout] 初始化应用失败');
             PageUtils.redirectToLogin();
         });

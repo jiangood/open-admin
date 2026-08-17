@@ -5,15 +5,16 @@ import {HttpClient, history} from "../../framework";
 export default class ForceUpdatePwdPage extends React.Component {
 
     onFinish = (values) => {
-        HttpClient.post('admin/userCenter/update-pwd', values, null, () => {
+        HttpClient.post('admin/userCenter/update-pwd', values, null).then(() => {
             message.success('修改密码成功，请重新登录');
             history.push('/public/login');
         })
     }
 
-    validator = (rule, value) => new Promise((resolve, reject) => {
-        HttpClient.get("admin/sysUser/pwd-strength", {password: value}, resolve, (e) => reject(new Error(e.message)))
-    })
+    validator = (rule, value) => HttpClient.get("admin/sysUser/pwd-strength", {password: value}, {toastError: false})
+        .catch(e => {
+            throw new Error(e.message)
+        })
 
     render() {
         return (

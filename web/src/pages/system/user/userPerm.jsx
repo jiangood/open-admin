@@ -20,7 +20,7 @@ export default class UserPerm extends React.Component {
     show(item) { // NOSONAR: ref 暴露给父组件调用的公共 API
         this.setState({visible: true})
 
-        HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}, rs => {
+        HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
             this.setState({formValues: rs})
             this.formRef.current.setFieldsValue(rs)
         })
@@ -34,13 +34,13 @@ export default class UserPerm extends React.Component {
         })
 
 
-        HttpClient.post('admin/sysUser/grant-perm', values, null, () => {
+        HttpClient.post('admin/sysUser/grant-perm', values, null, {toastError: false}).then(() => {
             this.setState({
                 visible: false,
                 confirmLoading: false
             })
             this.props.onOk()
-        }, e => {
+        }).catch(e => {
             message.error(HttpClient.errToMsg(e))
             this.setState({
                 confirmLoading: false

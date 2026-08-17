@@ -37,10 +37,10 @@ export default class OrgPage extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpClient.get('admin/sysOrg/tree', this.state.params, rs => {
+        HttpClient.get('admin/sysOrg/tree', this.state.params, {toastError: false}).then(rs => {
             this.setState({treeData: rs})
             this.setState({treeLoading: false});
-        }, () => {
+        }).catch(() => {
             this.setState({treeLoading: false});
         })
     }
@@ -52,7 +52,7 @@ export default class OrgPage extends React.Component {
     handleDelete = () => {
         const {selectedOrg} = this.state
         if (!selectedOrg) return
-        HttpClient.post('admin/sysOrg/delete', {id: selectedOrg.id}, null, () => {
+        HttpClient.post('admin/sysOrg/delete', {id: selectedOrg.id}, null).then(() => {
             this.setState({selectedOrg: null, deleteModalOpen: false})
             this.loadTree()
         })
@@ -63,7 +63,7 @@ export default class OrgPage extends React.Component {
             this.setState({selectedOrg: null})
             return
         }
-        HttpClient.get("admin/sysOrg/detail", {id: selectedKeys[0]}, rs => {
+        HttpClient.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
             this.setState({selectedOrg: rs})
         })
     }
@@ -229,7 +229,7 @@ export default class OrgPage extends React.Component {
         const dragKey = dragNode.key;
         const dropPos = e.node.pos.split('-');
         const dropPosition = e.dropPosition - Number(dropPos[dropPos.length - 1]);
-        HttpClient.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}, null, () => this.loadTree())
+        HttpClient.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}, null).then(() => this.loadTree())
     };
 }
 

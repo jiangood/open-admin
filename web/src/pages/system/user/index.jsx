@@ -43,7 +43,7 @@ export default class UserPage extends React.Component {
     }
 
     handleDelete = r => {
-        HttpClient.post('admin/sysUser/delete', {id: r.id}, null, () => {
+        HttpClient.post('admin/sysUser/delete', {id: r.id}, null).then(() => {
             this.tableRef.current.reload();
         })
     }
@@ -173,9 +173,9 @@ export default class UserPage extends React.Component {
                                 <Button perm='sys-user:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                             </PermActions>
                         )}
-                        request={(params, success, error) => {
+                        request={(params) => {
                             params.orgId = this.state.currentOrgId
-                            return HttpClient.get('admin/sysUser/page', params, success, error)
+                            return HttpClient.get('admin/sysUser/page', params)
                         }}
                         columns={this.columns}
                         searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例

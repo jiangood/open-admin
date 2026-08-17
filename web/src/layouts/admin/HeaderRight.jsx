@@ -28,10 +28,10 @@ export class HeaderRight extends React.Component {
     }
 
     logout = () => {
-        HttpClient.post('admin/auth/logout', null, null, () => {
+        HttpClient.post('admin/auth/logout', null, null, {toastError: false}).then(() => {
             localStorage.clear()
             this.setState({alertVisible: true})
-        }, e => {
+        }).catch(e => {
             console.error('[HeaderRight] 退出登录失败:', e);
             this.setState({confirmVisible: true})
         })
