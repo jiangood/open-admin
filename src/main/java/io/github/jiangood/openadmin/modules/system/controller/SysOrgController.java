@@ -137,7 +137,7 @@ public class SysOrgController {
     public AjaxResult typeOptions() {
         List<Option> options = orgTypeProviders.stream()
                 .sorted(java.util.Comparator.comparingInt(OrgTypeProvider::getOrder))
-                .map(p -> new Option(p.getType().toString(), p.getLabel()))
+                .map(p -> new Option(p.getType(), p.getLabel()))
                 .toList();
         return AjaxResult.ok().data(options);
     }
