@@ -223,7 +223,7 @@ public class FilePreviewController {
         @Override
         public void writeTo(OutputStream outputStream) throws IOException {
             try {
-                if (start > 0) {
+                if (contentLength > 0) {
                     IOUtils.skipFully(inputStream, start);
                     IOUtils.copyLarge(inputStream, outputStream, 0, contentLength);
                 } else {

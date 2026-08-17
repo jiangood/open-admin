@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.io.ByteArrayInputStream;
@@ -16,6 +17,9 @@ import java.io.ByteArrayInputStream;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +74,81 @@ class FilePreviewControllerTest {
                 .andExpect(status().isOk());
 
         verify(service).getFileStreamByObjectName(thumbObjectName);
+    }
+
+    @Test
+    void preview_range_shouldStreamOnlyRequestedBytesWhenStartIsZero() throws Exception {
+        byte[] content = new byte[1000];
+        for (int i = 0; i < content.length; i++) {
+            content[i] = (byte) i;
+        }
+        SysFile file = new SysFile("id-1");
+        file.setObjectName("public/video.mp4");
+        file.setSuffix("mp4");
+        file.setSize(1000L);
+        file.setUpdateTime(java.time.LocalDateTime.now());
+
+        when(service.findByObjectName(file.getObjectName())).thenReturn(file);
+        when(service.getFileStreamByObjectName(file.getObjectName()))
+                .thenReturn(new ByteArrayInputStream(content));
+
+        MvcResult mvcResult = mockMvc.perform(get("/file/" + file.getObjectName()).header("Range", "bytes=0-99"))
+                .andExpect(request().asyncStarted())
+                .andExpect(status().isPartialContent())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isPartialContent())
+                .andExpect(content().bytes(java.util.Arrays.copyOf(content, 100)));
+    }
+
+    @Test
+    void preview_range_shouldStreamRequestedBytesWhenStartIsPositive() throws Exception {
+        byte[] content = new byte[1000];
+        for (int i = 0; i < content.length; i++) {
+            content[i] = (byte) i;
+        }
+        SysFile file = new SysFile("id-1");
+        file.setObjectName("public/video.mp4");
+        file.setSuffix("mp4");
+                file.setSize(1000L);
+        file.setUpdateTime(java.time.LocalDateTime.now());
+
+        when(service.findByObjectName(file.getObjectName())).thenReturn(file);
+        when(service.getFileStreamByObjectName(file.getObjectName()))
+                .thenReturn(new ByteArrayInputStream(content));
+
+        MvcResult mvcResult = mockMvc.perform(get("/file/" + file.getObjectName()).header("Range", "bytes=10-19"))
+                .andExpect(request().asyncStarted())
+                .andExpect(status().isPartialContent())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isPartialContent())
+                .andExpect(content().bytes(java.util.Arrays.copyOfRange(content, 10, 20)));
+    }
+
+    @Test
+    void preview_range_shouldStreamFullFileWhenRangeOpenEndedFromZero() throws Exception {
+        byte[] content = new byte[1000];
+        for (int i = 0; i < content.length; i++) {
+            content[i] = (byte) i;
+        }
+        SysFile file = new SysFile("id-1");
+        file.setObjectName("public/video.mp4");
+        file.setSuffix("mp4");
+                file.setSize(1000L);
+        file.setUpdateTime(java.time.LocalDateTime.now());
+
+        when(service.findByObjectName(file.getObjectName())).thenReturn(file);
+        when(service.getFileStreamByObjectName(file.getObjectName()))
+                .thenReturn(new ByteArrayInputStream(content));
+
+        MvcResult mvcResult = mockMvc.perform(get("/file/" + file.getObjectName()).header("Range", "bytes=0-"))
+                .andExpect(request().asyncStarted())
+                .andExpect(status().isPartialContent())
+                .andReturn();
+        mockMvc.perform(asyncDispatch(mvcResult))
+                .andExpect(status().isPartialContent())
+                .andExpect(content().bytes(content));
     }
 
     @Test
