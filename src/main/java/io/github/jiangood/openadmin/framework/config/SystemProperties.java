@@ -90,11 +90,11 @@ public class SystemProperties {
     public static class FileStorage {
 
         public enum StoreType {
-            LOCAL, MINIO, CUSTOM
+            LOCAL, MINIO
         }
 
         /**
-         * 存储类型: LOCAL / MINIO；自定义实现请注册 @Bean @Primary FileOperator
+         * 存储类型: LOCAL / MINIO
          */
         private StoreType storeType = StoreType.LOCAL;
 

@@ -87,7 +87,7 @@ scripts\start-frontend.bat start|stop|restart|status
 - **菜单加载**: `classpath*:application-menu*.yml` YAML 定义菜单（Map 格式，key 为菜单 id），也支持数据库存储
 - **权限控制**: `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
 - **ID 生成**: 默认 UUIDv7（时间排序，MySQL 友好）
-- **文件存储**: 支持 `local` / `minio` / `custom`，通过 `FileOperator` 接口抽象
+- **文件存储**: 支持 `local` / `minio`，通过 `FileOperator` 接口抽象
 - **操作日志**: `@Log` 注解 + AOP 切面，异步记录
 - **页面生命周期**: 多 Tab 下页面保持 mounted，通过 `PageFrame` 的 `show` prop + ref 机制自动调用组件 `onShow()` 方法（首次打开 / Tab 切回时触发）
 

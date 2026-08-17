@@ -7,7 +7,6 @@
  *
  * <ul>
  *   <li>{@link io.github.jiangood.openadmin.framework.spi.OrgTypeProvider} — 自定义机构类型</li>
- *   <li>{@link io.github.jiangood.openadmin.framework.spi.FileOperator} — 自定义文件存储</li>
  *   <li>{@link io.github.jiangood.openadmin.framework.spi.StartupHook} — 系统启动钩子</li>
  * </ul>
  */
