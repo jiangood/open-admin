@@ -51,7 +51,7 @@ export default class AdminLayout extends React.Component {
     initMenu = () => {
         this.setState({menuLoading: true})
         HttpClient.get('/admin/menu-info', null, {toastError: false}).then(info => {
-            const {menuTree, pathMenuMap, menuMap} = info
+            const {menuTree, pathMenuMap, menuMap} = info.data
             this.setState({menuMap})
 
             const pathname = PageUtils.currentPathname();

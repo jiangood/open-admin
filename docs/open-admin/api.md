@@ -142,7 +142,7 @@ import { PermActions } from '@jiangood/open-admin';
 
 #### ProTable
 
-`request` 为 Promise 式：接收 `(params)`（params 含 `{page, size, sort}` 及搜索表单值），返回解析为 `{content, totalElements, extData}` 的 Promise（Spring Data Page 序列化结构）；失败时 `HttpClient` 自动弹错，ProTable 静默复位 loading。`actionRef` 暴露 `reload()` / `clearSelection()`，`formRef` 暴露搜索表单实例：
+`request` 为 Promise 式：接收 `(params)`（params 含 `{page, size, sort}` 及搜索表单值），返回解析为 `{content, totalElements, extData}` 的 Promise（Spring Data Page 序列化结构）。ProTable **自动解包 `HttpClient` 返回的 `AjaxResult`**（取 `data`），业务侧直接返回 HttpClient 的 Promise 即可；手动返回分页结构亦可。失败时 `HttpClient` 自动弹错，ProTable 静默复位 loading。`actionRef` 暴露 `reload()` / `clearSelection()`，`formRef` 暴露搜索表单实例：
 
 ```jsx
 <ProTable
@@ -338,7 +338,7 @@ location /file/public/ {
 
 | 类 | 主要方法 |
 |----|---------|
-| `HttpClient` | `get` / `post` / `postForm` / `download`（axios 封装，自动 context-path；所有请求方法返回 `Promise`：成功 `resolve(data)`、失败 `reject({code, message})` 且默认自动弹错，传 `{toastError: false}` 可静默仅 reject） |
+| `HttpClient` | `get` / `post` / `postForm` / `download` / `ajax`（axios 封装，自动 context-path；所有请求方法返回 `Promise<AjaxBody>`：成功 resolve 整个 AjaxResult 响应体（`{success, code, data, message, traceId, ...}`，业务取数据用 `rs.data`、提示文案用 `rs.message`），失败 `reject({code, message})` 且默认自动弹错；成功时后端返回了 `message` 会自动 `message.success` 弹出（传 `{toastSuccess: false}` 关闭），失败弹错传 `{toastError: false}` 可静默仅 reject） |
 | `UrlUtils` | `contextPath(path)` 拼接 context-path / `getParams` / `setParam` / `getPathname` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `walk` / `findByKey` / `flattenTree` / `getKeyList` / `getChildRecursive` |

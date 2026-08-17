@@ -21,8 +21,8 @@ export default class UserPerm extends React.Component {
         this.setState({visible: true})
 
         HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
-            this.setState({formValues: rs})
-            this.formRef.current.setFieldsValue(rs)
+            this.setState({formValues: rs.data})
+            this.formRef.current.setFieldsValue(rs.data)
         })
     }
 

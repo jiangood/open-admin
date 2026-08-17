@@ -30,7 +30,7 @@ export default class RolePage extends React.Component {
     handleEditUser = record => {
         this.setState({usersModalOpen: true, selectedRecord: record})
         HttpClient.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
-            this.setState({userList: rs.list, targetKeys: rs.selectedKeys})
+            this.setState({userList: rs.data.list, targetKeys: rs.data.selectedKeys})
         })
     }
 

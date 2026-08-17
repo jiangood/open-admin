@@ -19,8 +19,8 @@ export class OrgSwitcher extends React.Component<Record<string, never>, {tree: O
 
     componentDidMount() {
         HttpClient.get("admin/myOrgs", null).then(data => {
-            if (data) {
-                this.setState({tree: data.tree || [], currentOrgId: data.currentOrgId || null});
+            if (data.data) {
+                this.setState({tree: data.data.tree || [], currentOrgId: data.data.currentOrgId || null});
             }
         });
     }

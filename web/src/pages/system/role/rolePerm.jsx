@@ -63,15 +63,15 @@ export default class RolePermPage extends React.Component {
             }
         };
         HttpClient.get('admin/sysRole/get', {id: this.roleId}).then(rs => {
-            this.setState({roleInfo: rs})
+            this.setState({roleInfo: rs.data})
             onFinish()
         });
         HttpClient.get('admin/sysRole/perm-tree-table', {id: this.roleId}).then(rs => {
-            this.setState({dataSource: rs})
+            this.setState({dataSource: rs.data})
             onFinish()
         });
         HttpClient.get('admin/sysRole/own-perms', {id: this.roleId}).then(rs => {
-            this.setState({rowSelectedKeys: rs})
+            this.setState({rowSelectedKeys: rs.data})
             onFinish()
         });
     }

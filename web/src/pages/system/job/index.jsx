@@ -59,7 +59,7 @@ export default class JobPage extends React.Component {
 
     componentDidMount() {
         HttpClient.get('admin/job/job-class-options', null, {toastError: false}).then(rs => {
-            this.setState({jobClassOptions: rs})
+            this.setState({jobClassOptions: rs.data})
         }).catch(e => {
             console.error('[Job] 加载任务类选项失败:', e);
         })
@@ -77,7 +77,7 @@ export default class JobPage extends React.Component {
 
     loadJobParamFields(className, jobData) {
         HttpClient.post("admin/job/get-job-param-fields", jobData || {}, {className}, {toastError: false}).then(rs => {
-            this.setState({paramList: rs})
+            this.setState({paramList: rs.data})
         }).catch(e => {
             console.error('[Job] 加载任务参数字段失败:', e);
         })
@@ -168,7 +168,7 @@ export default class JobPage extends React.Component {
     showStatus = () => {
         this.setState({statusOpen: true})
         HttpClient.get('admin/job/status', null, {toastError: false}).then(rs => {
-            this.setState({status: rs})
+            this.setState({status: rs.data})
         }).catch(e => {
             console.error('[Job] 加载状态失败:', e);
         })

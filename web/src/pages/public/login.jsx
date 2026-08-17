@@ -47,8 +47,8 @@ export default class LoginPage extends React.Component {
         }
         // localStorage 中无站点信息，从服务端重新加载
         HttpClient.get('/admin/public/site-info', null, {toastError: false}).then(rs => {
-            GlobalData.setSiteInfo(rs)
-            this.setState({siteInfo: rs})
+            GlobalData.setSiteInfo(rs.data)
+            this.setState({siteInfo: rs.data})
         }).catch(() => {
             console.error('[Login] 加载站点信息失败');
             message.error('加载站点信息失败，请刷新页面重试')

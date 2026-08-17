@@ -43,7 +43,7 @@ export default class DictPage extends React.Component {
     loadTree = () => {
         this.setState({treeLoading: true})
         HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
-            this.setState({typeTree: rs})
+            this.setState({typeTree: rs.data})
             this.setState({treeLoading: false})
         }).catch(() => {
             this.setState({treeLoading: false})

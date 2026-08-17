@@ -81,7 +81,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
         HttpClient.get(url, this.getLoadParams(searchText), {toastError: false}).then((data) => {
             if (fetchId === this.fetchIdRef) {
-                this.setState({ data: data || [] });
+                this.setState({ data: data.data || [] });
             }
             done();
         }).catch((error) => {

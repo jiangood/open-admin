@@ -75,7 +75,7 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     loadSiteInfo() {
         HttpClient.get("/admin/public/site-info", null, {toastError: false}).then(data => {
-            GlobalData.setSiteInfo(data);
+            GlobalData.setSiteInfo(data.data);
             this.setState({siteInfoLoaded: true});
         }).catch(() => {
             console.error('[Layout] 加载站点信息失败');
@@ -84,11 +84,11 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     loadLoginInfo() {
         HttpClient.get('/admin/public/login-info', null, {toastError: false}).then(data => {
-            GlobalData.setDictInfo(data.dictInfo);
-            GlobalData.setLoginInfo(data.loginInfo);
-            GlobalData.setSiteArticles(data.siteArticles);
+            GlobalData.setDictInfo(data.data.dictInfo);
+            GlobalData.setLoginInfo(data.data.loginInfo);
+            GlobalData.setSiteArticles(data.data.siteArticles);
 
-            if (data.needUpdatePwd) {
+            if (data.data.needUpdatePwd) {
                 this.setState({loginChecked: true});
                 history.push('/standalone/forceUpdatePwd');
                 return;

@@ -38,7 +38,7 @@ export default class OrgPage extends React.Component {
     loadTree = () => {
         this.setState({treeLoading: true})
         HttpClient.get('admin/sysOrg/tree', this.state.params, {toastError: false}).then(rs => {
-            this.setState({treeData: rs})
+            this.setState({treeData: rs.data})
             this.setState({treeLoading: false});
         }).catch(() => {
             this.setState({treeLoading: false});
@@ -64,7 +64,7 @@ export default class OrgPage extends React.Component {
             return
         }
         HttpClient.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
-            this.setState({selectedOrg: rs})
+            this.setState({selectedOrg: rs.data})
         })
     }
 

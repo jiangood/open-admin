@@ -8,8 +8,10 @@ import {EventBus} from "./EventBus";
  * 单一 Promise 风格 HTTP 工具类（所有请求方法均返回 Promise，无 success/error 回调）
  *
  * 核心规则：
- * - 请求方法返回 Promise<T>：成功 resolve(data)，失败 reject(AjaxError {code, message})
- * - 成功永不自动弹 toast，是否提示由业务方自行决定
+ * - 请求方法返回 Promise<AjaxBody<T>>：成功 resolve 整个 AjaxResult 响应体，失败 reject(AjaxError {code, message})
+ * - 成功 resolve 的是原始响应体 {success, code, data, message, traceId, ...}（extData 等附加字段在顶层），
+ *   业务取数据用 rs.data，取提示文案用 rs.message
+ * - 成功且后端返回了 message 时自动 message.success(body.message)，传 {toastSuccess: false} 可关闭
  * - 失败默认自动 console.warn + message.error，并 reject(AjaxError)；传 {toastError: false} 可完全静默（仅 reject）
  * - 返回值被忽略也安全：内部已对返回的 Promise 挂 no-op catch，不会产生 unhandled rejection
  * - reject 的 AjaxError {code, message}：业务失败 code 为后端业务码，网络异常 code 为 HTTP 状态码，message 始终为人类可读提示
@@ -17,21 +19,24 @@ import {EventBus} from "./EventBus";
  *
  * 用法：
  * ```ts
- * // 失败自动弹错并 reject，可用 await 感知结果（如 FormModal 提交失败保持弹窗）
+ * // 提交：成功自动弹后端 message（如"更新成功"），失败自动弹错并 reject（可用 await 感知结果，如 FormModal 提交失败保持弹窗）
  * await HttpClient.post('admin/sysUser/create', values);
  *
- * // 成功自控提示
- * await HttpClient.post('admin/sysUser/delete', {id});
+ * // 取返回数据与后端提示文案
+ * const {data, message} = await HttpClient.post('admin/sysUser/create', values);
+ *
+ * // 成功自控提示（关闭自动弹后由业务决定）
+ * await HttpClient.post('admin/sysUser/delete', {id}, null, {toastSuccess: false});
  * messageApi.success('删除成功');
  * reload();
  *
  * // 失败由调用方接管，不弹错（静默探测）
  * HttpClient.get('admin/public/site-info', null, {toastError: false})
- *     .then((data) => render(data))
+ *     .then(({data}) => render(data))
  *     .catch((e) => myHandle(e));
  *
  * // $.ajax 形态
- * HttpClient.ajax({url: 'admin/sysUser/page', method: 'GET', params}).then((rs) => render(rs));
+ * HttpClient.ajax({url: 'admin/sysUser/page', method: 'GET', params}).then((rs) => render(rs.data));
  *
  * // 下载（返回 Promise<Blob>，成功已触发浏览器保存）
  * HttpClient.download({url: 'admin/sysUser/export', method: 'POST', data: {deptId: 1},
@@ -45,10 +50,21 @@ export interface AjaxError {
     message: string;
 }
 
-/** 请求选项：headers 自定义请求头；toastError=false 时失败不自动弹错（完全静默，仅 reject） */
+/** 后端统一响应结构 AjaxResult；putExtData 附加字段在顶层，data 为业务数据 */
+export interface AjaxBody<T = unknown> {
+    success: boolean;
+    code: number;
+    data: T;
+    message?: string;
+    traceId?: string;
+    [key: string]: unknown;
+}
+
+/** 请求选项：headers 自定义请求头；toastError=false 时失败不自动弹错（完全静默，仅 reject）；toastSuccess=false 时成功不自动弹后端 message */
 export interface RequestOptions {
     headers?: AxiosRequestConfig['headers'];
     toastError?: boolean;
+    toastSuccess?: boolean;
 }
 
 interface AjaxSettings {
@@ -58,6 +74,7 @@ interface AjaxSettings {
     data?: unknown;
     headers?: AxiosRequestConfig['headers'];
     toastError?: boolean;
+    toastSuccess?: boolean;
 }
 
 interface DownloadSettings {
@@ -78,22 +95,22 @@ const axiosInstance = axios.create({
 });
 
 export class HttpClient {
-    static ajax<T = unknown>(settings: AjaxSettings<T>): Promise<T> {
-        const {url, method = 'GET', params, data, headers, toastError} = settings;
+    static ajax<T = unknown>(settings: AjaxSettings): Promise<AjaxBody<T>> {
+        const {url, method = 'GET', params, data, headers, toastError, toastSuccess} = settings;
         return HttpClient.coreRequest<T>({
-            url, method, params, data, headers, toastError
+            url, method, params, data, headers, toastError, toastSuccess
         });
     }
 
-    static get<T = unknown>(url: string, params: unknown = null, opts?: RequestOptions): Promise<T> {
+    static get<T = unknown>(url: string, params: unknown = null, opts?: RequestOptions): Promise<AjaxBody<T>> {
         return HttpClient.ajax<T>({url, method: 'GET', params, ...opts});
     }
 
-    static post<T = unknown>(url: string, data: unknown = null, params: unknown = null, opts?: RequestOptions): Promise<T> {
+    static post<T = unknown>(url: string, data: unknown = null, params: unknown = null, opts?: RequestOptions): Promise<AjaxBody<T>> {
         return HttpClient.ajax<T>({url, method: 'POST', data, params, ...opts});
     }
 
-    static postForm<T = unknown>(url: string, data: unknown, opts?: RequestOptions): Promise<T> {
+    static postForm<T = unknown>(url: string, data: unknown, opts?: RequestOptions): Promise<AjaxBody<T>> {
         return HttpClient.ajax<T>({
             url,
             method: 'POST',
@@ -112,15 +129,6 @@ export class HttpClient {
     static download(settings: DownloadSettings): Promise<Blob> {
         const {url, method = 'GET', params, data, fileName, onDownloadProgress, toastError = true} = settings;
 
-        const finishError = (e: unknown) => {
-            const err = HttpClient.toAjaxError(e);
-            if (toastError) {
-                console.warn(`[HttpClient] 下载失败: ${url}`, err.message);
-                messageApi.error(err.message);
-            }
-            return err;
-        };
-
         return new Promise<Blob>((resolve, reject) => {
             axiosInstance({
                 url: HttpClient.prefixUrl(url),
@@ -138,16 +146,16 @@ export class HttpClient {
 
                 if (blob.type === 'application/json') {
                     const reader = new FileReader();
-                    reader.onerror = () => reject(finishError({message: '读取下载数据失败'}));
+                    reader.onerror = () => HttpClient.fail(url, toastError, reject, {message: '读取下载数据失败'}, '下载失败');
                     reader.onload = () => {
                         try {
                             const rs = JSON.parse(reader.result as string);
                             if (rs.code === 401) {
                                 EventBus.emit('loginExpired');
                             }
-                            reject(finishError({code: rs.code, message: rs.message || '下载失败'}));
+                            HttpClient.fail(url, toastError, reject, {code: rs.code, message: rs.message || '下载失败'}, '下载失败');
                         } catch {
-                            reject(finishError({message: '解析错误响应失败'}));
+                            HttpClient.fail(url, toastError, reject, {message: '解析错误响应失败'}, '下载失败');
                         }
                     };
                     reader.readAsText(blob, 'utf-8');
@@ -180,16 +188,7 @@ export class HttpClient {
                 window.URL.revokeObjectURL(objectUrl);
                 resolve(blob);
             }).catch((e: unknown) => {
-                if (axios.isAxiosError(e) && e.response?.status === 401) {
-                    EventBus.emit('loginExpired');
-                    const err: AjaxError = {code: 401, message: '登录过期'};
-                    if (toastError) {
-                        messageApi.error('登录过期');
-                    }
-                    reject(err);
-                    return;
-                }
-                reject(finishError(e));
+                HttpClient.fail(url, toastError, reject, e, '下载失败');
             });
         });
     }
@@ -225,8 +224,8 @@ export class HttpClient {
         return url.startsWith('admin') ? '/' + url : url;
     }
 
-    private static coreRequest<T = unknown>(settings: AjaxSettings<T>): Promise<T> {
-        const {url, method, params, data, headers, toastError = true} = settings;
+    private static coreRequest<T = unknown>(settings: AjaxSettings): Promise<AjaxBody<T>> {
+        const {url, method, params, data, headers, toastError = true, toastSuccess = true} = settings;
         const config: AxiosRequestConfig = {url: HttpClient.prefixUrl(url), method, params, data, headers};
 
         // FormData 请求交由浏览器自动生成带 boundary 的 multipart Content-Type
@@ -234,46 +233,51 @@ export class HttpClient {
             config.headers = {...config.headers, 'Content-Type': undefined};
         }
 
-        const promise = new Promise<T>((resolve, reject) => {
-            const fail = (e: unknown) => {
-                if (axios.isAxiosError(e) && e.response?.status === 401) {
-                    EventBus.emit('loginExpired');
-                    const err: AjaxError = {code: 401, message: '登录过期'};
-                    if (toastError) {
-                        messageApi.error('登录过期');
-                    }
-                    reject(err);
-                    return;
-                }
-                const err = HttpClient.toAjaxError(e);
-                if (toastError) {
-                    console.warn(`[HttpClient] 请求失败: ${url}`, err.message);
-                    messageApi.error(err.message);
-                }
-                reject(err);
-            };
-
+        const promise = new Promise<AjaxBody<T>>((resolve, reject) => {
             axiosInstance(config).then((response) => {
-                const body = response.data;
-                const {success: ok, message, data: result} = body;
+                const body = response.data as AjaxBody<T>;
+                const {success: ok, message} = body;
                 if (ok == undefined) {
-                    const rs = response as unknown as T;
-                    resolve(rs);
+                    resolve(body);
                     return;
                 }
                 if (!ok) {
                     if (body.code === 401) {
                         EventBus.emit('loginExpired');
                     }
-                    fail({code: body.code, message: message || '操作失败'});
+                    HttpClient.fail(url, toastError, reject, {code: body.code, message: message || '操作失败'});
                     return;
                 }
-                resolve(result);
-            }).catch(fail);
+                if (toastSuccess && message) {
+                    messageApi.success(message);
+                }
+                resolve(body);
+            }).catch((e: unknown) => {
+                HttpClient.fail(url, toastError, reject, e);
+            });
         });
 
         // 调用方忽略返回值时兜底，避免 unhandled rejection；await 的调用方仍能正常收到 reject
         promise.catch(() => {});
         return promise;
+    }
+
+    /** 统一的失败处理：HTTP 401 广播 loginExpired 并弹"登录过期"，其余提取可读消息后按 toastError 决定是否弹错，最终 reject(AjaxError) */
+    private static fail(url: string, toastError: boolean, reject: (reason?: unknown) => void, e: unknown, label = '请求失败'): void {
+        if (axios.isAxiosError(e) && e.response?.status === 401) {
+            EventBus.emit('loginExpired');
+            const err: AjaxError = {code: 401, message: '登录过期'};
+            if (toastError) {
+                messageApi.error('登录过期');
+            }
+            reject(err);
+            return;
+        }
+        const err = HttpClient.toAjaxError(e);
+        if (toastError) {
+            console.warn(`[HttpClient] ${label}: ${url}`, err.message);
+            messageApi.error(err.message);
+        }
+        reject(err);
     }
 }

@@ -15,7 +15,7 @@ export default class UserCenterPage extends React.Component {
 
     componentDidMount() {
         HttpClient.get('admin/userCenter/info', null).then(rs => {
-            this.setState({info: rs})
+            this.setState({info: rs.data})
         })
     }
 

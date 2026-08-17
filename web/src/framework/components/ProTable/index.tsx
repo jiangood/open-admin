@@ -2,7 +2,7 @@ import React from "react";
 import {Button, Form, Table} from 'antd';
 import type {FormInstance, TableProps} from 'antd';
 
-import {StringUtils} from "../../utils";
+import {StringUtils, type AjaxBody} from "../../utils";
 
 import './index.less'
 
@@ -27,9 +27,10 @@ export interface ProTableProps<T = unknown> {
     /**
      * 数据请求（Promise 式），框架自动注入 page/size/sort 参数。
      * 页面实现直接返回 HttpClient 的 Promise：request = (params) => HttpClient.get(url, params)
+     * ProTable 会自动解包 AjaxResult 取 data；手动返回分页结构 {content, totalElements, extData} 亦可。
      * 失败时 HttpClient 默认自动弹错，ProTable 内部静默复位 loading。
      */
-    request: (params: Record<string, unknown>) => Promise<ProTableRequestResult<T>>;
+    request: (params: Record<string, unknown>) => Promise<ProTableRequestResult<T> | AjaxBody<ProTableRequestResult<T>>>;
     /** antd Table 列定义 */
     columns: TableProps<T>['columns'];
     /** 获取表格操作句柄（reload） */
@@ -155,8 +156,9 @@ export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, Pro
 
 
         this.setState({loading: true})
-        request(params).then((rs: ProTableRequestResult<T>) => {
-            const {content, totalElements, size, extData} = rs;
+        request(params).then((rs: ProTableRequestResult<T> | AjaxBody<ProTableRequestResult<T>>) => {
+            const pageData = this.normalizePageResult(rs);
+            const {content, totalElements, size, extData} = pageData;
 
             this.setState({dataSource: content, total: Number(totalElements), pageSize: size})
             if (extData) {
@@ -168,6 +170,19 @@ export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, Pro
             // 错误提示已由 HttpClient 默认弹出，此处仅复位 loading
             this.setState({loading: false})
         })
+    }
+
+    /**
+     * 归一化 request 返回值：AjaxBody 取 data，已是分页结构（含 content/totalElements）原样使用，其余透传。
+     */
+    private normalizePageResult(rs: ProTableRequestResult<T> | AjaxBody<ProTableRequestResult<T>>): ProTableRequestResult<T> {
+        if (rs && typeof rs === 'object' && 'content' in rs && 'totalElements' in rs) {
+            return rs as ProTableRequestResult<T>;
+        }
+        if (rs && typeof rs === 'object' && 'success' in rs) {
+            return (rs as AjaxBody<ProTableRequestResult<T>>).data;
+        }
+        return rs as ProTableRequestResult<T>;
     }
 
 

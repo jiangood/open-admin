@@ -13,7 +13,7 @@ export default class ArticlePage extends React.Component {
         const code = this.props.params?.code
         if (code) {
             HttpClient.get('admin/article/getByCode', {code}, {toastError: false}).then(rs => {
-                this.setState({article: rs, loading: false})
+                this.setState({article: rs.data, loading: false})
             }).catch(() => {
                 this.setState({loading: false})
             })

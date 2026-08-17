@@ -23,7 +23,7 @@ export class RoleTree extends React.Component<RoleTreeProps, RoleTreeState> {
 
     componentDidMount() {
         HttpClient.get('admin/sysRole/biz-tree', null).then(tree => {
-            this.setState({treeData: tree, treeDataLoading: false})
+            this.setState({treeData: tree.data, treeDataLoading: false})
         })
     }
 

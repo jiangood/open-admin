@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Form, Input, Modal, Select, Splitter, Typography, message} from 'antd';
+import {Button, Card, Form, Input, Modal, Select, Splitter, Typography} from 'antd';
 import React from 'react';
 import {
     PermActions,
@@ -37,7 +37,6 @@ export default class UserPage extends React.Component {
 
     onFinishResetPwd = async values => {
         await HttpClient.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
-        message.success('重置密码成功')
         this.setState({resetPwdUser: null})
         this.tableRef.current?.reload()
     }
@@ -142,13 +141,13 @@ export default class UserPage extends React.Component {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
         const result = await HttpClient.post(url, values);
-        if (result?.password) {
+        if (result?.data?.password) {
             this.setState({
                 addResultModal: {
                     open: true,
                     name: values.name,
                     account: values.account,
-                    password: result.password,
+                    password: result.data.password,
                 }
             })
         }
