@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -19,13 +20,11 @@ import java.util.Optional;
  */
 public abstract class BaseService<T extends Persistable<String>> {
 
-    protected final BaseRepository<T, String> repository;
-    private final EntityManager entityManager;
+    @Autowired
+    protected BaseRepository<T, String> repository;
 
-    protected BaseService(BaseRepository<T, String> repository, EntityManager entityManager) {
-        this.repository = repository;
-        this.entityManager = entityManager;
-    }
+    @Autowired
+    private EntityManager entityManager;
 
     public List<T> findAll() {
         return repository.findAll();

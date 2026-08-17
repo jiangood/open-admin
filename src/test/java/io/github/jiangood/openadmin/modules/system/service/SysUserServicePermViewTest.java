@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashSet;
 import java.util.List;
@@ -52,8 +53,10 @@ class SysUserServicePermViewTest {
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
-        sysUserService = new SysUserService(sysUserRepository, entityManager, sysUserRepository, roleRepository, sysOrgService,
+        sysUserService = new SysUserService(sysUserRepository, roleRepository, sysOrgService,
                 sysMenuRepository, userConverter, permissionStaleService, passwordEncoder);
+        ReflectionTestUtils.setField(sysUserService, "repository", sysUserRepository);
+        ReflectionTestUtils.setField(sysUserService, "entityManager", entityManager);
     }
 
     private MenuDefinition menuWithPerms() {

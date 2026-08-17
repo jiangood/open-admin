@@ -13,10 +13,6 @@ import java.util.List;
 @Service
 public class SysDictItemService extends BaseService<SysDictItem> {
 
-    public SysDictItemService(SysDictItemRepository repository, EntityManager entityManager) {
-        super(repository, entityManager);
-    }
-
     @Transactional
     public SysDictItem save(SysDictItem input, List<String> requestKeys) {
         if (input.isNew()) {

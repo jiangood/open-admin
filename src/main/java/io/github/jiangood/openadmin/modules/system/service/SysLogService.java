@@ -15,10 +15,6 @@ import java.util.List;
 @Service
 public class SysLogService extends BaseService<SysLog> {
 
-    public SysLogService(SysLogRepository repository, EntityManager entityManager) {
-        super(repository, entityManager);
-    }
-
     @Async("operationLogExecutor")
     public void saveOperationLogAsync(SysLog sysLog) {
         repository.save(sysLog);

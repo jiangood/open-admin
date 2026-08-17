@@ -11,7 +11,7 @@ import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,19 +28,13 @@ import java.util.Map;
 import java.util.Optional;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 @CacheConfig(cacheNames = "sys_org")
 public class SysOrgService extends BaseService<SysOrg> {
 
     private final SysOrgRepository sysOrgRepository;
     private final SysUserRepository sysUserRepository;
-
-    public SysOrgService(SysOrgRepository repository, EntityManager entityManager,
-                         SysOrgRepository sysOrgRepository, SysUserRepository sysUserRepository) {
-        super(repository, entityManager);
-        this.sysOrgRepository = sysOrgRepository;
-        this.sysUserRepository = sysUserRepository;
-    }
 
     public Optional<SysOrg> findByThirdId(String thirdId) {
         return sysOrgRepository.findByThirdId(thirdId);

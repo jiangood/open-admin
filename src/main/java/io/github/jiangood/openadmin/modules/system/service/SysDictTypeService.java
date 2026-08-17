@@ -7,22 +7,18 @@ import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class SysDictTypeService extends BaseService<SysDictType> {
 
     private final SysDictItemRepository itemRepository;
-
-    public SysDictTypeService(SysDictTypeRepository repository, EntityManager entityManager, SysDictItemRepository itemRepository) {
-        super(repository, entityManager);
-        this.itemRepository = itemRepository;
-    }
 
     public List<SysDictType> getTypeTree() {
         List<SysDictType> all = repository.findAll(Sort.by(SysDictType.Fields.seq));

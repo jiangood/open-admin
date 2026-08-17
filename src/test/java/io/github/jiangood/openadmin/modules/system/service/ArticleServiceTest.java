@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +45,9 @@ class ArticleServiceTest {
 
     @BeforeEach
     void setUp() {
-        articleService = new ArticleService(articleRepository, entityManager, articleRepository, sysUserService, sysFileService);
+        articleService = new ArticleService(articleRepository, sysUserService, sysFileService);
+        ReflectionTestUtils.setField(articleService, "repository", articleRepository);
+        ReflectionTestUtils.setField(articleService, "entityManager", entityManager);
     }
 
     @Test

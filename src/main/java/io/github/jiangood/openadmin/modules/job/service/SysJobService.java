@@ -7,7 +7,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
@@ -20,19 +20,12 @@ import org.springframework.util.Assert;
 import java.util.List;
 
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class SysJobService extends BaseService<SysJob> {
 
     private final QuartzManager quartzService;
     private final SysJobLogRepository sysJobLogRepository;
-
-    public SysJobService(SysJobRepository repository, EntityManager entityManager,
-                         QuartzManager quartzService, SysJobLogRepository sysJobLogRepository) {
-        super(repository, entityManager);
-        this.quartzService = quartzService;
-        this.sysJobLogRepository = sysJobLogRepository;
-    }
-
 
     @Transactional(rollbackFor = Exception.class)
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {

@@ -24,7 +24,7 @@
 
 ## 后端要点
 
-- 强制构造器注入，禁止 `@Autowired` 字段注入
+- 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入
 - 业务异常抛 `ServiceException`，Controller 不做 try-catch
 - 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
 - 方法参数校验用 `@Valid` / `@Validated`
