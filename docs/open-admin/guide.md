@@ -94,7 +94,7 @@ web/
 | 功能 | 说明 |
 |------|------|
 | 定时任务 | 基于 Quartz，动态创建/暂停/恢复，继承 `BaseJob` + `@JobDescription` |
-| 文件管理 | `sys.file.store-type` 配置（`LOCAL` / `S3` / `CUSTOM`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
+| 文件管理 | `sys.file.store-type` 配置（`LOCAL` / `MINIO` / `CUSTOM`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
 | 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
 | 运行日志查看 | 在线查看日志文件 |
 

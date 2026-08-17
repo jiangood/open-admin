@@ -90,11 +90,11 @@ public class SystemProperties {
     public static class FileStorage {
 
         public enum StoreType {
-            LOCAL, S3, CUSTOM
+            LOCAL, MINIO, CUSTOM
         }
 
         /**
-         * 存储类型: LOCAL / S3；自定义实现请注册 @Bean @Primary FileOperator
+         * 存储类型: LOCAL / MINIO；自定义实现请注册 @Bean @Primary FileOperator
          */
         private StoreType storeType = StoreType.LOCAL;
 
@@ -114,18 +114,16 @@ public class SystemProperties {
         private int cleanUnclaimedMinutes = 120;
 
         /**
-         * S3 兼容存储配置（支持 AWS S3 / Minio / Cloudflare R2 等）
+         * MinIO 对象存储配置
          */
-        private S3 s3 = new S3();
+        private Minio minio = new Minio();
 
         @Data
-        public static class S3 {
+        public static class Minio {
             private String endpoint;
-            private String region = "us-east-1";
             private String accessKey;
             private String secretKey;
             private String bucketName;
-            private Boolean pathStyleAccess = true;
         }
     }
 

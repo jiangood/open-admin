@@ -19,10 +19,8 @@ sys:
   file:
     store-type: LOCAL
     upload-path: /tmp/test-uploads
-    s3:
+    minio:
       endpoint: http://localhost:9000
-      region: us-east-1
       access-key: test-access-key
       secret-key: test-secret-key
       bucket-name: test-bucket
-      path-style-access: true

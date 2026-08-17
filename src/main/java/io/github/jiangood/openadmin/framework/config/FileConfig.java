@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.framework.config;
 
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.file.LocalFileOperator;
-import io.github.jiangood.openadmin.modules.system.file.S3FileOperator;
+import io.github.jiangood.openadmin.modules.system.file.MinioFileOperator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,9 +21,9 @@ public class FileConfig {
         switch (file.getStoreType()) {
             case LOCAL:
                 return new LocalFileOperator(file.getUploadPath());
-            case S3: {
-                var s3 = file.getS3();
-                return new S3FileOperator(s3.getEndpoint(), s3.getRegion(), s3.getAccessKey(), s3.getSecretKey(), s3.getBucketName(), s3.getPathStyleAccess());
+            case MINIO: {
+                var minio = file.getMinio();
+                return new MinioFileOperator(minio.getEndpoint(), minio.getAccessKey(), minio.getSecretKey(), minio.getBucketName());
             }
             default:
                 throw new IllegalArgumentException("store-type 为 custom 时请注册 @Bean @Primary FileOperator");
