@@ -94,7 +94,6 @@ createRoot(document.getElementById('root')).render(
 | `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
 | `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
 
-**按需使用**：可只加后端依赖（REST API 访问管理功能），或只加前端依赖（对接自有后端 API）。
 
 ## 文档
 
