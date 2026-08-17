@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Popover, Space, Spin, Splitter, Switch, Tree, Typography} from 'antd';
+import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Modal, Popover, Space, Spin, Splitter, Switch, Tree, Typography} from 'antd';
 import React from 'react';
 import {
     FieldBoolean,
@@ -26,6 +26,7 @@ export default class OrgPage extends React.Component {
         treeData: [],
         treeLoading: false,
         draggable: false,
+        deleteModalOpen: false,
     }
     modalRef = React.createRef();
     treeRef = React.createRef();
@@ -44,11 +45,15 @@ export default class OrgPage extends React.Component {
         })
     }
 
+    openDeleteModal = () => {
+        this.setState({deleteModalOpen: true})
+    }
+
     handleDelete = () => {
         const {selectedOrg} = this.state
         if (!selectedOrg) return
         HttpClient.post('admin/sysOrg/delete', {id: selectedOrg.id}, null, () => {
-            this.setState({selectedOrg: null})
+            this.setState({selectedOrg: null, deleteModalOpen: false})
             this.loadTree()
         })
     }
@@ -153,8 +158,8 @@ export default class OrgPage extends React.Component {
                                         label: '删除',
                                         perm: 'sys-org:delete',
                                         icon: <DeleteOutlined/>,
-                                        confirm: '是否确定删除组织机构',
-                                        onClick: this.handleDelete,
+                                        danger: true,
+                                        onClick: this.openDeleteModal,
                                     },
                                 ]}/>
                             )}
@@ -208,6 +213,13 @@ export default class OrgPage extends React.Component {
                     <Input/>
                 </Form.Item>
             </FormModal>
+
+            <Modal open={this.state.deleteModalOpen} title="删除确认" okText="删除" cancelText="取消"
+                   okButtonProps={{danger: true}}
+                   onCancel={() => this.setState({deleteModalOpen: false})}
+                   onOk={this.handleDelete}>
+                是否确定删除组织机构「{selectedOrg?.name}」？
+            </Modal>
         </Page>
     }
 
