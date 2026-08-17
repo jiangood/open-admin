@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Form, Input, Modal, Select, Splitter, message} from 'antd';
+import {Button, Card, Form, Input, Modal, Select, Splitter, Typography, message} from 'antd';
 import React from 'react';
 import {
     PermActions,
@@ -20,7 +20,7 @@ export default class UserPage extends React.Component {
 
     state = {
         currentOrgId: null,
-        addResultModal: { open: false, account: '', password: '' },
+        addResultModal: { open: false, name: '', account: '', password: '' },
         resetPwdUser: null,
     }
     permRef = React.createRef();
@@ -147,6 +147,7 @@ export default class UserPage extends React.Component {
                 this.setState({
                     addResultModal: {
                         open: true,
+                        name: values.name,
                         account: values.account,
                         password: result.password,
                     }
@@ -236,27 +237,25 @@ export default class UserPage extends React.Component {
             <Modal
                 title="添加用户成功"
                 open={this.state.addResultModal.open}
-                onOk={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}
-                onCancel={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}
+                onOk={() => this.setState({addResultModal: {open: false, name: '', account: '', password: ''}})}
+                onCancel={() => this.setState({addResultModal: {open: false, name: '', account: '', password: ''}})}
                 width={420}
                 footer={
-                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: 8}}>
-                        <Button onClick={() => {
-                            navigator.clipboard.writeText(`账号：${this.state.addResultModal.account}\n密码：${this.state.addResultModal.password}`);
-                            message.success('复制成功')
-                        }}>复制</Button>
-                        <Button type="primary" onClick={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}>确定</Button>
-                    </div>
+                    <Button type="primary" onClick={() => this.setState({addResultModal: {open: false, name: '', account: '', password: ''}})}>确定</Button>
                 }
             >
-                <div>
-                    <div style={{marginBottom: 8}}>
-                        账号：{this.state.addResultModal.account}
-                    </div>
-                    <div>
-                        密码：{this.state.addResultModal.password}
-                    </div>
-                </div>
+                <Typography.Paragraph
+                    copyable={{
+                        text: `系统访问地址：${window.location.origin}\n姓名：${this.state.addResultModal.name}\n账号：${this.state.addResultModal.account}\n密码：${this.state.addResultModal.password}`,
+                        tooltips: '点击复制',
+                    }}
+                    style={{marginBottom: 0}}
+                >
+                    <div>系统访问地址：{window.location.origin}</div>
+                    <div>姓名：{this.state.addResultModal.name}</div>
+                    <div>账号：{this.state.addResultModal.account}</div>
+                    <div>密码：{this.state.addResultModal.password}</div>
+                </Typography.Paragraph>
             </Modal>
 
             <FormModal ref={this.resetPwdRef} title='重置密码' onFinish={this.onFinishResetPwd} width={420}>
