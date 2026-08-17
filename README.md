@@ -3,7 +3,7 @@
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.jiangood/open-admin)
 ![npm](https://img.shields.io/npm/v/@jiangood/open-admin)
 
-open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业务项目通过添加 Maven 和 npm 依赖即可获得完整的后台管理能力**，无需从零搭建用户管理、角色权限、数据字典等功能。
+open-admin 是一个后台管理系统框架（脚手架），**业务项目无需从零搭建用户管理、角色权限、数据字典等功能。
 
 ## 快速集成
 
@@ -33,7 +33,7 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
 
 ```bash
 # 创建数据库
-CREATE DATABASE open_admin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE open_admin;
 
 # 修改 src/main/resources/application.yml 数据库连接
 git clone https://github.com/jiangood/open-admin.git
