@@ -6,7 +6,9 @@ export interface FormModalProps {
   onFinish?: (values: Record<string, unknown>) => Promise<void> | void
   onValuesChange?: (changedValues: Record<string, unknown>, allValues: Record<string, unknown>) => void
   width?: number
+  layout?: 'horizontal' | 'vertical' | 'inline'
   labelCol?: Record<string, unknown>
+  wrapperCol?: Record<string, unknown>
   children?: React.ReactNode
 }
 
@@ -67,7 +69,10 @@ export default class FormModal extends React.Component<FormModalProps> { // NOSO
         destroyOnHidden
         width={this.props.width ?? 600}
       >
-        <Form ref={this.formRef} labelCol={this.props.labelCol ?? {flex: '100px'}}
+        <Form ref={this.formRef}
+              layout={this.props.layout}
+              labelCol={this.props.layout ? undefined : (this.props.labelCol ?? {flex: '100px'})}
+              wrapperCol={this.props.wrapperCol}
               onValuesChange={this.props.onValuesChange}>
           <Form.Item name='id' noStyle/>
           {this.props.children}
