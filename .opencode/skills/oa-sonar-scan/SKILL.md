@@ -7,7 +7,7 @@ description: Use when scanning the open-admin framework repo (or code it produce
 
 ## Overview
 
-Runs the open-admin repo through the local SonarQube (http://localhost:9000) with real JaCoCo coverage, then triages and fixes findings (bugs / vulnerabilities / code smells) one at a time, verifying each fix with a re-scan before committing.
+Runs the open-admin repo through the local SonarQube (http://192.168.100.101:9000) with real JaCoCo coverage, then triages and fixes findings (bugs / vulnerabilities / code smells) one at a time, verifying each fix with a re-scan before committing.
 
 ## When to Use
 
@@ -18,69 +18,111 @@ Runs the open-admin repo through the local SonarQube (http://localhost:9000) wit
 ## Prerequisites
 
 - Local SonarQube running (port 9000, docker-compose under `/ws/sonarqube`)
-- Maven + local SonarQube token (defaults baked into `scripts/sonar-scan.sh` / `scripts/sonar-scan.bat`)
+- Maven + local SonarQube token（环境变量 `SONAR_TOKEN` 或用下面示例中的默认值）
 - H2 test DB — no MySQL needed (Repository/Service tests use H2)
 
 ## Immediate Execution
 
 **When invoked, begin executing immediately — do NOT ask "What would you like me to do?".** Run the scan first, then present the metrics, then triage findings **one by one**, pausing for the user to confirm each fix (per user's working style).
 
+## 环境变量配置
+
+开始执行前，打印以下提示让用户确认环境变量：
+
+```
+SonarQube 扫描需要以下环境变量（直接回车使用默认值）：
+
+  SONAR_TOKEN    [默认: squ_156b1e2938c4f5cac460156c4881ff06c6209d5e]
+  SONAR_HOST_URL [默认: http://192.168.100.101:9000]
+  SONAR_PROJECT  [默认: open-admin]
+
+请输入 SONAR_TOKEN:
+```
+
+等待用户输入后继续执行。如果用户直接回车，则使用默认值。
+
 ## Workflow
 
 ### 1. Run the Scan
 
-Framework 仓库（脚本封装好 token / projectKey / 覆盖率路径，**sh/bat 双版本**）：
-
 ```bash
-scripts/sonar-scan.sh        # Linux/macOS
-scripts\sonar-scan.bat       # Windows（cmd）
-```
+export TOKEN="${SONAR_TOKEN:-squ_156b1e2938c4f5cac460156c4881ff06c6209d5e}"
+export HOST="${SONAR_HOST_URL:-http://192.168.100.101:9000}"
+export PROJECT="${SONAR_PROJECT:-open-admin}"
 
-业务项目（无该脚本，直接用 mvn 命令，按需替换 `projectKey`）：
-
-```bash
 mvn -B -ntp verify sonar:sonar \
-  -Dsonar.login="$SONAR_TOKEN" \
-  -Dsonar.host.url="$SONAR_HOST_URL" \
-  -Dsonar.projectKey=<业务项目Key> \
-  -Dsonar.projectName=<业务项目名> \
-  -Dsonar.sources=src/main/java \
+  -Dsonar.login="$TOKEN" \
+  -Dsonar.host.url="$HOST" \
+  -Dsonar.projectKey="$PROJECT" \
+  -Dsonar.projectName="$PROJECT" \
+  -Dsonar.sources=src/main/java,web/src \
   -Dsonar.java.binaries=target/classes \
-  -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+  -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
+  -Dsonar.exclusions='**/docs/**,**/test/**,web/dist/**,web/coverage/**,web/playwright-report/**'
 ```
 
-This runs `mvn verify` (all tests + JaCoCo report) then `sonar:sonar`, output ends with `ANALYSIS SUCCESSFUL` and the dashboard URL.
+业务项目按需替换 `PROJECT` 和 `sources` 参数。
 
 ### 2. Fetch Metrics
 
-框架仓库直接用封装好的查询脚本（**Node 实现，跨平台**，Windows/Linux/macOS 均可用；等价 curl 命令见 `scripts/sonar-api.js` 源码）：
+等待 ~10s（服务器端处理），然后用 curl 查询指标：
 
 ```bash
-node scripts/sonar-api.js metrics      # bugs / vulnerabilities / code_smells / coverage
-node scripts/sonar-api.js newcode      # new_* 指标（period）
-node scripts/sonar-api.js gate         # Quality Gate 状态（逐条件）
-node scripts/sonar-api.js bugs         # 未解决 BUG 统计 + 明细
-node scripts/sonar-api.js vulns        # 未解决 VULNERABILITY
-node scripts/sonar-api.js issues <rule>      # 指定规则未解决问题
-node scripts/sonar-api.js issues-after <ISO> # createdAfter 之后的问题（定位 new code 引入）
-node scripts/sonar-api.js history      # 指标历史趋势
-node scripts/sonar-api.js analyses     # 分析历史（找 leak period 起点）
+export AUTH=$(echo -n "$TOKEN:" | base64)
+
+# 总指标
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/measures/search?projectKeys=$PROJECT&metricKeys=bugs,vulnerabilities,code_smells,coverage,duplicated_lines_density&ps=20" \
+  | jq -r '.measures[] | "\(.metric) = \(.value)"'
+
+# New Code 指标
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/measures/component?component=$PROJECT&metricKeys=new_violations,new_bugs,new_vulnerabilities,new_code_smells,new_lines,new_coverage" \
+  | jq -r '.component.measures[] | "\(.metric) = \(.period.value // "")"'
+
+# Quality Gate 状态
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/qualitygates/project_status?projectKey=$PROJECT" \
+  | jq -r '.projectStatus | "status: \(.status)\n\(.conditions[] | " - \(.metricKey) actual=\(.actualValue) error=\(.errorThreshold) | \(.status)")"'
 ```
-
-Wait ~10s after `ANALYSIS SUCCESSFUL` before querying (server-side processing).
-
-业务项目（无脚本）：`SONAR_TOKEN=xxx SONAR_HOST_URL=http://localhost:9000 SONAR_PROJECT=<key>` 前缀同一命令即可；无该脚本时再照抄 `scripts/sonar-api.js` 里的逻辑。
 
 ### 3. List Unresolved Issues
 
-Always filter `resolved=false` — default search **includes already-fixed (CLOSED) issues** and will confuse the counts:
+Always filter `resolved=false` — default search includes already-fixed issues:
 
 ```bash
-node scripts/sonar-api.js bugs
-node scripts/sonar-api.js vulns
+# 未解决 BUG
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/issues/search?projectKeys=$PROJECT&types=BUG&resolved=false&ps=200" \
+  | jq -r '"total \(.total)\n\(.issues[] | " - \(.rule) | \(.component | split(":")[-1]) : \(.line)")"'
+
+# 未解决 VULNERABILITY
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/issues/search?projectKeys=$PROJECT&types=VULNERABILITY&resolved=false&ps=200" \
+  | jq -r '"total \(.total)\n\(.issues[] | " - \(.rule) | \(.component | split(":")[-1]) : \(.line)")"'
 ```
 
-Also list the full details (rule / line / message) before fixing anything (add `issues <rule>` or a raw `api/issues/search` call per `sonar-api.js` source).
+其他查询：
+
+```bash
+# 指定规则的未解决问题
+RULE="typescript:S6756"
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/issues/search?projectKeys=$PROJECT&rules=$(urlencode $RULE)&resolved=false&ps=200"
+
+# 定位新引入的问题（createdAfter 之后）
+AFTER="2026-08-15T07:00:00%2B0000"
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/issues/search?projectKeys=$PROJECT&createdAfter=$AFTER&resolved=false&ps=200"
+
+# 指标历史趋势
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/measures/search_history?component=$PROJECT&metrics=bugs,code_smells,coverage&ps=30"
+
+# 分析历史（找 leak period 起点）
+curl -s -H "Authorization: Basic $AUTH" \
+  "$HOST/api/project_analyses/search?project=$PROJECT&ps=10"
+```
 
 ### 4. Triage & Fix One By One
 
@@ -114,19 +156,14 @@ Test commands after fixes:
 ```bash
 mvn test -Dtest='<AffectedTestClass>'           # targeted
 mvn test -Dtest='!*RepositoryTest,!*ServiceTest' # fast unit set
-mvn test                                        # full 468-test suite before committing big changes
+mvn test                                        # full suite before committing big changes
 ```
 
-Commit style (matches repo):
-
-```bash
-fix(excel): ... (sonar S2095)
-fix(npe): ... (sonar S2259)
-```
+Commit style: `fix(excel): ... (sonar S2095)`
 
 ### 5. Re-scan to Verify
 
-Re-run `scripts/sonar-scan.sh` (或 Windows 下 `scripts\sonar-scan.bat`), then confirm with the **unresolved** counts (Step 2/3). Iterate until `Bugs=0`, `Vulnerabilities=0`, and `new_violations=0`.
+重新执行 Step 1 的 mvn 命令，然后用 Step 2/3 的 curl 命令确认 **unresolved** 计数。迭代直到 `Bugs=0`、`Vulnerabilities=0`、`new_violations=0`。
 
 ## Quality Gate Notes
 
@@ -137,7 +174,7 @@ Re-run `scripts/sonar-scan.sh` (或 Windows 下 `scripts\sonar-scan.bat`), then 
 
 - Forgetting `resolved=false` → counts include already-fixed issues
 - Trusting `api/issues/search` totals while server is still indexing (wait ~10s; if counts disagree with `api/measures`, re-query)
-- **Using `api/measures/search` for new-code metrics** → new_* returns `undefined`; use `api/measures/component` (i.e. `node scripts/sonar-api.js newcode`)
+- **Using `api/measures/search` for new-code metrics** → new_* returns `undefined`; use `api/measures/component`
 - **Trusting `sinceLeakPeriod=true`** → does NOT work on SonarQube 26.8 (returns all issues); use `createdAfter=<leak period start analysis time>` instead
 - **Putting `// NOSONAR` on the wrong line** → must be on the same line as the finding (S1848 case)
 - **"Fixing" S1082 with `role="button"`** → triggers S6819 (new violation). Use native `<button>` from the start
@@ -148,14 +185,6 @@ Re-run `scripts/sonar-scan.sh` (或 Windows 下 `scripts\sonar-scan.bat`), then 
 
 ## Verifying a Fix
 
-- Frontend has **no typecheck script** (Vite/esbuild, no tsconfig) — verify with `cd web && npm run build`
+- Frontend: verify with `cd web && npm run build`
 - Backend: `mvn clean compile` or targeted test
-- After each fix batch: re-scan, then confirm **both** overall counts (bugs/vulns) AND `new_violations` (`node scripts/sonar-api.js newcode`) went down / stayed 0
-
-## Repository-Specific
-
-- Framework 仓库内可用封装脚本：
-  - `scripts/sonar-scan.sh` / `scripts/sonar-scan.bat` — 全量扫描（mvn verify + sonar:sonar），sh/bat 双版本、自定位仅扫本仓库
-  - `scripts/sonar-api.js` — 只读查询辅助（Node 实现，跨平台；metrics / newcode / gate / bugs / vulns / issues / issues-after / history / analyses）
-  - 业务项目无这些脚本，直接用上面的 mvn 命令与 curl 查询
-- oa-sonar-scan skill 随 `oa-crud`/`oa-upgrade` 一起打包进框架 JAR，并在业务项目启动时同步到其根目录 `.opencode/skills/`（修改 = 修改框架对外 API）；`oa-publishing-release` 才是不进 JAR 的仓库专属 skill
+- After each fix batch: re-scan, then confirm **both** overall counts (bugs/vulns) AND `new_violations` went down / stayed 0
