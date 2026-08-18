@@ -112,6 +112,7 @@ createRoot(document.getElementById('root')).render(
 |-------|------|
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
+| `oa-sonar-scan` | SonarQube 扫描与问题修复 |
 
 ### 自动同步到业务项目
 
@@ -120,6 +121,7 @@ createRoot(document.getElementById('root')).render(
 ```
 <项目根>/.opencode/skills/oa-crud/SKILL.md
 <项目根>/.opencode/skills/oa-upgrade/SKILL.md
+<项目根>/.opencode/skills/oa-sonar-scan/SKILL.md
 <项目根>/docs/open-admin/*.md     # 即本文档（guide/api/config/development/AGENTS）
 <项目根>/AGENTS.md                # opencode 开发指引（仅首次生成，不覆盖本地自定义）
 ```
@@ -127,7 +129,7 @@ createRoot(document.getElementById('root')).render(
 - 同步按**内容比对**：无变更不写入，升级新版本后首次启动自动覆盖更新
 - `docs/open-admin/` 全量镜像（删除该目录下孤儿文件）；`.opencode/skills/` 仅覆盖框架 skill，不删除业务本地 skill
 - 根目录 `AGENTS.md` 仅在不存在时生成（便于 opencode 开发，业务可自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
-- 目标目录为项目根（向上查找最近 `pom.xml`），生产部署目录无 `pom.xml` 时仅生成 `AGENTS.md` 副本
+- 目标目录为项目根（向上查找最近 `pom.xml`），生产 jar 部署（向上查找无 `pom.xml`）时跳过同步，不写入任何文件
 - 无需任何配置，默认开启
 
 > 首次接入无需手动复制，启动一次后端即可；升级后下次启动即自动更新。

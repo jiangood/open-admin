@@ -96,7 +96,7 @@ scripts\start-frontend.bat start|stop|restart|status
 - Java 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入
 - 业务异常抛 `ServiceException`，Controller 不做 try-catch
 - Controller 统一返回 `AjaxResult`，权限用 `@HasPermission("resource:action")`（全小写两段式，如 `sys-user:read`）
-- REST API 约定：`admin/xxx/page`(分页) / `admin/xxx/{id}`(详情) / `admin/xxx/create`(POST) / `admin/xxx/update`(POST) / `admin/xxx/delete`(POST)
+- REST API 约定：`admin/xxx/page`(分页) / `admin/xxx/info/{id}`(详情) / `admin/xxx/create`(POST) / `admin/xxx/update`(POST) / `admin/xxx/delete`(POST)
 - 枚举字典用 `@DictItem` 注解（自动扫描入库），不用 `@Remark`
 - 前端优先用框架组件：`ProTable`、`Page`、`Field*`、`PermActions`；页面文件小写开头才注册路由，大驼峰视为普通组件
 - 跨组件通信用 `EventBus`（`emit/on/once/off`），禁止 `document.dispatchEvent`；对话框用 `<Modal open={...}>`，避免静态 `Modal.info()/confirm()`

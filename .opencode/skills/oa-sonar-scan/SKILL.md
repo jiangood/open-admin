@@ -158,4 +158,4 @@ Re-run `scripts/sonar-scan.sh` (或 Windows 下 `scripts\sonar-scan.bat`), then 
   - `scripts/sonar-scan.sh` / `scripts/sonar-scan.bat` — 全量扫描（mvn verify + sonar:sonar），sh/bat 双版本、自定位仅扫本仓库
   - `scripts/sonar-api.js` — 只读查询辅助（Node 实现，跨平台；metrics / newcode / gate / bugs / vulns / issues / issues-after / history / analyses）
   - 业务项目无这些脚本，直接用上面的 mvn 命令与 curl 查询
-- Skill 随 `oa-crud`/`oa-upgrade` 一起打包进框架 JAR，并在业务项目启动时同步到其根目录 `.opencode/skills/`（修改 = 修改框架对外 API）；`oa-publishing-release` 才是不进 JAR 的仓库专属 skill
+- oa-sonar-scan skill 随 `oa-crud`/`oa-upgrade` 一起打包进框架 JAR，并在业务项目启动时同步到其根目录 `.opencode/skills/`（修改 = 修改框架对外 API）；`oa-publishing-release` 才是不进 JAR 的仓库专属 skill

@@ -29,6 +29,7 @@
 |-------|------|
 | `oa-crud` | 创建 CRUD 业务模块（Entity→Repository→Service→Controller→前端页面→菜单配置） |
 | `oa-upgrade` | 升级框架版本（依赖版本 + 代码迁移 + 验证） |
+| `oa-sonar-scan` | SonarQube 扫描与问题修复 |
 
 使用 opencode 进行开发时，优先调用上述 skill。
 
