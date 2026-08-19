@@ -104,6 +104,64 @@ createRoot(document.getElementById('root')).render(
 | [docs/open-admin/config.md](docs/open-admin/config.md) | 全部 `sys.*` 配置 / 文件存储 / 未认领文件清理 / context-path / 主题定制 |
 | [docs/open-admin/development.md](docs/open-admin/development.md) | 后端命名 / REST API 规范 / 前后端开发要点 |
 
+## 开发（框架本仓库）
+
+### 双项目工作流
+
+```
+D:/ws/
+├── open-admin/              # 框架项目（本仓库）
+│   ├── src/main/java/
+│   ├── web/src/framework/   # 前端框架源码 (npm publish)
+│   └── pom.xml
+└── open-admin-example/      # 示例业务项目（依赖框架）
+```
+
+修改框架后需先执行 `mvn clean install -DskipTests`。
+
+### 开发命令
+
+```bash
+mvn clean compile                                          # 编译
+mvn test -Dtest=BeanToolTest                               # 运行单个测试
+mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试，跳过 SpringBootTest 集成测试（更快）
+mvn clean package                                          # 打包
+mvn -Pdev spring-boot:run                                  # 独立应用启动
+mvn clean install -DskipTests                              # 安装到本地仓库
+node scripts/bump-version.js <新版本号>                     # 升级 pom.xml + web/package.json 版本号
+cd web && npm install                                         # 前端安装依赖
+cd web && npm run dev                                         # 前端开发模式
+cd web && npm run build                                       # 前端构建
+cd web && npm run test:e2e                                    # Playwright 端到端测试
+```
+
+测试使用 H2 内存数据库，无需 MySQL。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
+
+E2E（`web/e2e/`）自动拉起后端（`mvn spring-boot:run` profiles=lib,e2e，端口 8080）与前端（端口 3000），运行前需释放这两个端口。
+
+### 启动脚本
+
+日常开发优先用 `scripts/` 下的脚本（后台 nohup 运行，日志落 `logs/`，PID 在 `logs/*.pid`，`logs/` 已被 gitignore）：
+
+```bash
+scripts/start-all.sh                                    # 一键后台启动前后端
+scripts/start-backend.sh {start|stop|restart|status}    # 后端: mvn -Pdev spring-boot:run（devtools 热重载）
+scripts/start-frontend.sh {start|stop|restart|status}   # 前端: npm run dev（端口 3000，缺 node_modules 自动安装）
+scripts/bug-scan.sh [模型]                              # 本地 AI bug 扫描（opencode + gh），产物在 target/bug-scan/
+```
+
+Windows 下用同名 `.bat`（cmd/双击），用法与 `.sh` 一致，日志同样落 `logs/`：
+
+```bat
+scripts\start-all.bat
+scripts\start-backend.bat start|stop|restart|status
+scripts\start-frontend.bat start|stop|restart|status
+```
+
+- 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
+- Windows 版内调 PowerShell `Start-Process cmd.exe` 后台启动、`taskkill /T` 结束整棵进程树，PID 同样记录在 `logs/*.pid`
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，需本地 MySQL 8+，连接参数见其中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
+
 ## Skills (opencode)
 
 ### 内置 skills
@@ -125,10 +183,10 @@ createRoot(document.getElementById('root')).render(
 <项目根>/.opencode/skills/oa-sync-docs/SKILL.md
 <项目根>/.opencode/skills/oa-sonar-scan/SKILL.md
 <项目根>/docs/open-admin/*.md     # 即本文档（guide/api/config/development/AGENTS）
-<项目根>/AGENTS.md                # opencode 开发指引（仅首次生成，不覆盖本地自定义）
+<项目根>/AGENTS.md                # opencode 开发指引（不存在时生成；已存在且不同时询问确认后更新）
 ```
 
 - 同步按**内容比对**：无变更不写入
 - `docs/open-admin/` 全量镜像（删除该目录下孤儿文件）；`.opencode/skills/` 仅覆盖框架 skill，不删除业务本地 skill
-- 根目录 `AGENTS.md` 仅在不存在时生成（便于 opencode 开发，业务可自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
+- 根目录 `AGENTS.md` 不存在时生成；已存在且与框架新版内容不同时，`oa-sync-docs` 会展示 diff 并询问开发者确认后再更新（避免无提示覆盖本地自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
 - 升级框架后调用 `oa-upgrade` skill 会自动在末尾调用 `oa-sync-docs` 同步新版本框架文件

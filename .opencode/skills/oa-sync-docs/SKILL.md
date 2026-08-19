@@ -30,7 +30,7 @@ description: 在业务项目中同步 open-admin 框架的 skills + docs + AGENT
 |------|------|
 | `<根>/.opencode/skills/` | 仅覆盖框架 skill（`oa-crud`、`oa-upgrade`、`oa-sync-docs`、`oa-sonar-scan`），不删除业务本地 skill |
 | `<根>/docs/open-admin/` | 全量镜像（删除该目录下 ZIP 之外的孤儿文件） |
-| `<根>/AGENTS.md` | 仅当不存在时生成（不覆盖本地自定义内容）；新版本随 `docs/open-admin/AGENTS.md` 提供 |
+| `<根>/AGENTS.md` | 不存在则生成；已存在且内容与框架新版不同时，展示 diff 询问开发者确认后再更新；新版本随 `docs/open-admin/AGENTS.md` 提供 |
 
 - 同步按**内容比对**：无变更不写入。
 - ZIP 内部结构：`docs/open-admin/**`、`.opencode/skills/**`。
@@ -86,10 +86,17 @@ find . -type f | while read -r f; do
 done
 cd "$PROJ_ROOT" || exit 1
 
-# 3c. 根目录 AGENTS.md —— 仅当不存在时生成
-if [ ! -f "$PROJ_ROOT/AGENTS.md" ] && [ -f "$SRC/docs/open-admin/AGENTS.md" ]; then
-  cp "$SRC/docs/open-admin/AGENTS.md" "$PROJ_ROOT/AGENTS.md"
-  echo "生成 AGENTS.md（项目根目录）"
+# 3c. 根目录 AGENTS.md —— 不存在则生成，存在则按内容比对，不同时询问开发者确认后更新
+if [ -f "$SRC/docs/open-admin/AGENTS.md" ]; then
+  if [ ! -f "$PROJ_ROOT/AGENTS.md" ]; then
+    cp "$SRC/docs/open-admin/AGENTS.md" "$PROJ_ROOT/AGENTS.md"
+    echo "生成 AGENTS.md（项目根目录）"
+  elif ! cmp -s "$SRC/docs/open-admin/AGENTS.md" "$PROJ_ROOT/AGENTS.md"; then
+    echo "检测到 AGENTS.md 与框架新版内容不同，差异如下："
+    diff "$PROJ_ROOT/AGENTS.md" "$SRC/docs/open-admin/AGENTS.md" || true
+    # 用 question 工具询问开发者是否更新（覆盖本地自定义内容前必须确认）
+    echo "等待开发者确认后执行：cp $SRC/docs/open-admin/AGENTS.md $PROJ_ROOT/AGENTS.md"
+  fi
 fi
 ```
 
@@ -101,9 +108,16 @@ $src = "C:\Temp\oa-framework-files"
 Copy-Item "$src\.opencode\skills\*" "$PWD\.opencode\skills\" -Recurse -Force
 # 3b. 镜像 docs（含删除孤儿，酌情处理）
 Copy-Item "$src\docs\open-admin\*" "$PWD\docs\open-admin\" -Recurse -Force
-# 3c. 生成 AGENTS.md
-if (-not (Test-Path "$PWD\AGENTS.md")) {
-  Copy-Item "$src\docs\open-admin\AGENTS.md" "$PWD\AGENTS.md"
+# 3c. AGENTS.md —— 不存在则生成，存在且不同时询问确认后更新
+if (Test-Path "$src\docs\open-admin\AGENTS.md") {
+  if (-not (Test-Path "$PWD\AGENTS.md")) {
+    Copy-Item "$src\docs\open-admin\AGENTS.md" "$PWD\AGENTS.md"
+  } elseif (-not (Compare-Object (Get-Content "$PWD\AGENTS.md") (Get-Content "$src\docs\open-admin\AGENTS.md") -SyncWindow 0)) {
+    # 内容一致，无操作
+  } else {
+    Write-Host "AGENTS.md 与框架新版不同，先与开发者确认后再覆盖："
+    Compare-Object (Get-Content "$PWD\AGENTS.md") (Get-Content "$src\docs\open-admin\AGENTS.md")
+  }
 }
 ```
 
@@ -125,7 +139,7 @@ ls -la .opencode/skills/oa-sync-docs/SKILL.md docs/open-admin/guide.md
 
 - [ ] `.opencode/skills/oa-crud|oa-upgrade|oa-sync-docs|oa-sonar-scan/SKILL.md` 已更新
 - [ ] `docs/open-admin/*.md` 已镜像，孤儿文件已删除
-- [ ] `AGENTS.md` 仅在不存在时生成（未覆盖业务自定义）
+- [ ] `AGENTS.md` 不存在时已生成；已存在且与框架新版不同时，已询问开发者并更新（或开发者明确保留旧版）
 - [ ] 无变更文件未被无谓写入
 
 ## 故障排查

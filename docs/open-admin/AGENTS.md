@@ -2,7 +2,7 @@
 
 本文件为 AI 编程助手（opencode / Claude Code 等）提供本业务项目的开发指引。
 
-> 本文件由 open-admin 框架通过 `oa-sync-docs` skill 同步到业务项目根目录（仅当不存在时生成，不覆盖本地自定义内容）；升级框架后新版本会在 `docs/open-admin/AGENTS.md` 提供更新版本文档。
+> 本文件由 open-admin 框架通过 `oa-sync-docs` skill 同步到业务项目根目录：不存在时生成，已存在且与框架新版不同时展示 diff 并询问开发者确认后再更新；升级框架后新版本会在 `docs/open-admin/AGENTS.md` 提供更新版本文档。
 
 ## 项目概览
 
