@@ -186,6 +186,9 @@ public class SysOrgService extends BaseService<SysOrg> {
     @Transactional
     public void sort(String dragKey, DropResult result) {
         SysOrg dragOrg = sysOrgRepository.findById(dragKey).orElse(null);
+        Assert.state(!dragKey.equals(result.getParentKey()), "父节点不能和本节点一致，请重新选择父节点");
+        List<String> childIdListById = this.findChildIdListById(dragKey);
+        Assert.state(!childIdListById.contains(result.getParentKey()), "父节点不能为本节点的子节点，请重新选择父节点");
         dragOrg.setPid(result.getParentKey());
 
         List<String> sortedKeys = result.getSortedKeys();
