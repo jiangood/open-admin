@@ -68,6 +68,10 @@ public class SysRoleService extends BaseService<SysRole> {
         List<MenuDefinition> menuList = new LinkedList<>();
 
         for (SysRole role : roles) {
+            if (!Boolean.TRUE.equals(role.getEnabled())) {
+                continue;
+            }
+
             List<MenuDefinition> menus = this.ownMenu(role.getId()); // NOSONAR: ownMenu(Iterable) 已开启事务
             menuList.addAll(menus);
         }

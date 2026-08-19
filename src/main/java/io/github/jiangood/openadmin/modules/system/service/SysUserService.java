@@ -358,6 +358,10 @@ public class SysUserService extends BaseService<SysUser> {
         log.debug("获取用户权限:{}", user.getName());
         Set<String> result = new TreeSet<>();
         for (SysRole role : user.getRoles()) {
+            if (!Boolean.TRUE.equals(role.getEnabled())) {
+                continue;
+            }
+
             // 添加角色，格式必须以 ROLE_ 开头，如 ROLE_ADMIN
             String rolePerm = "ROLE_" + role.getCode();
             result.add(rolePerm);
