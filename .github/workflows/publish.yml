@@ -146,15 +146,31 @@ jobs:
         uses: aaronbarnaby/get-tag@v1.0.0
         with:
           without_prefix_v: true
-      - name: Create Release (if not exists)
+      - name: Build framework-files.zip
+        run: |
+          ZIP_DIR=$(mktemp -d)
+          mkdir -p "$ZIP_DIR/docs" "$ZIP_DIR/.opencode"
+          cp -r docs/open-admin "$ZIP_DIR/docs/open-admin"
+          mkdir -p "$ZIP_DIR/.opencode/skills"
+          cp -r .opencode/skills/oa-crud "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-upgrade "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-sync-docs "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-sonar-scan "$ZIP_DIR/.opencode/skills/"
+          (cd "$ZIP_DIR" && zip -qr "$GITHUB_WORKSPACE/framework-files.zip" docs .opencode)
+          echo "✓ framework-files.zip 构建完成"
+
+      - name: Create Release & Upload Asset (if not exists)
         run: |
           if gh release view "${{ github.ref_name }}" &>/dev/null; then
-            echo "Release ${{ github.ref_name }} 已存在，跳过"
+            echo "Release ${{ github.ref_name }} 已存在"
           else
             gh release create "${{ github.ref_name }}" \
               --title "Release v${{ steps.tag.outputs.tag }}" \
               --latest \
               --generate-notes
           fi
+          gh release upload "${{ github.ref_name }}" framework-files.zip \
+            --clobber --repo jiangood/open-admin
+          echo "✓ framework-files.zip 已上传"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

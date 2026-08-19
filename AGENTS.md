@@ -11,7 +11,7 @@ open-admin 是一个可嵌入的后台管理系统框架（本仓库即框架本
 
 - 后端框架源码 `src/main/java`；前端框架 + 内置页面 `web/src/**`（npm 包 `@jiangood/open-admin` 的发布内容，入口 `web/src/index.ts`，页面由 `web/vite-plugin` 扫描 `src/pages` 自动注册路由）
 - `web/src/pages/test/*` 不打进 npm 包（package.json `files` 排除）
-- `docs/open-admin/` 与 `.opencode/skills/oa-crud`、`oa-upgrade`、`oa-sonar-scan` 会被打包进 JAR，并在**业务项目启动后端时自动同步**到其根目录（`FrameworkFileSyncer` 按内容比对）。修改这些文件 = 修改框架对外 API。`oa-publishing-release` skill 仅本仓库使用，不打进 JAR
+- `docs/open-admin/` 与 `.opencode/skills/oa-crud`、`oa-upgrade`、`oa-sync-docs`、`oa-sonar-scan` 会被打包进 release 的 `framework-files.zip`，业务项目通过 `oa-sync-docs` skill 从 GitHub Release 下载并同步到其根目录。修改这些文件 = 修改框架对外 API。`oa-publishing-release` skill 仅本仓库使用，不打进 ZIP
 
 ## Tech Stack
 

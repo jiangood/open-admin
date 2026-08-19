@@ -14,7 +14,7 @@
 | `sys.session-idle-time` | Session 超时（分钟） | 180 |
 | `sys.job-enable` | 定时任务开关 | true |
 
-> 框架启动时会自动同步 `.opencode/skills/` 与 `docs/open-admin/` 到业务项目根目录（内容比对，无变更不写入），并在根目录生成 `AGENTS.md`（仅当不存在时）。无需配置；生产 jar 部署（向上查找无 `pom.xml`）时跳过同步，不写入任何文件。
+> 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-sync-docs` skill 从框架 GitHub Release 下载 `framework-files.zip` 同步到业务项目根目录（内容比对，无变更不写入），并在根目录生成 `AGENTS.md`（仅当不存在时）。无需配置。
 
 ## 文件存储
 
