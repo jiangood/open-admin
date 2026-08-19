@@ -9,6 +9,8 @@ import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.CronExpression;
+import org.quartz.Job;
 import org.quartz.SchedulerException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,6 +43,12 @@ public class SysJobService extends BaseService<SysJob> {
             db = repository.findById(input.getId()).orElse(null);
         }
 
+        // 先校验调度参数，确保后续 Quartz 操作不会因参数错误失败：
+        // 否则若先删除旧任务后 scheduleJob 抛出异常，数据库回滚但旧任务在 Quartz 中已丢失
+        if (db.getEnabled()) {
+            validateSchedulable(db);
+        }
+
         // 改名场景：先按变更前的旧 name 清理 Quartz 任务/触发器，避免残留任务继续触发
         quartzService.deleteJobByName(oldName);
         quartzService.deleteJob(db);
@@ -49,6 +57,22 @@ public class SysJobService extends BaseService<SysJob> {
         }
 
         return null;
+    }
+
+    /** 校验启用任务的 cron 表达式与执行类，失败时抛出异常，保证 Quartz 调度操作前的参数合法性 */
+    private void validateSchedulable(SysJob job) {
+        if (job.getCron() == null || !CronExpression.isValidExpression(job.getCron())) {
+            throw new IllegalArgumentException("cron 表达式不合法: " + job.getCron());
+        }
+        Class<?> cls;
+        try {
+            cls = Class.forName(job.getJobClass());
+        } catch (ClassNotFoundException e) {
+            throw new IllegalArgumentException("任务执行类不存在: " + job.getJobClass());
+        }
+        if (!Job.class.isAssignableFrom(cls)) {
+            throw new IllegalArgumentException("任务执行类未实现 Job 接口: " + job.getJobClass());
+        }
     }
 
 
