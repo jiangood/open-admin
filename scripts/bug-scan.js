@@ -144,16 +144,25 @@ function main() {
   // ---------- 去重 + 建 Issue ----------
   let created = 0;
   let skipped = 0;
-  const reportItems = [];
+  const createdItems = [];
+  const skippedItems = [];
+  const failedItems = [];
 
   for (const f of findings) {
     const title = String(f.title || '').trim();
     if (!title) continue;
 
-    const check = gh(['issue', 'list', '--state', 'open', '--label', 'bug-scan', '--search', `"${title}"`, '--json', 'number', '--limit', '1']);
+    const searchTitle = title.replace(/"/g, '');
+    let check = '[]';
+    try {
+      check = gh(['issue', 'list', '--state', 'open', '--label', 'bug-scan', '--search', `"${searchTitle}"`, '--json', 'number', '--limit', '1']);
+    } catch (e) {
+      console.warn(`⚠️  去重检查失败，跳过: ${title} (${String(e.stderr || e).trim()})`);
+    }
     if (JSON.parse(check || '[]').length > 0) {
       console.log(`重复跳过: ${title}`);
       skipped++;
+      skippedItems.push(f);
       continue;
     }
 
@@ -169,23 +178,28 @@ function main() {
       const url = gh(['issue', 'create', '--label', 'bug-scan', '--title', title, '--body', body]);
       console.log(`已创建: ${url}`);
       created++;
+      createdItems.push(f);
     } catch (e) {
       console.error(`创建失败: ${title}: ${String(e.stderr || e).trim()}`);
+      failedItems.push(f);
       continue;
     }
-    reportItems.push(f);
   }
 
   // ---------- 报告 ----------
-  const reportLines = reportItems.map(
-    (f) => `- [${(f.severity || 'medium').toUpperCase()}] ${f.title || ''} (\`${f.file || '?'}:${f.line || '?'}\`)`,
-  );
+  const reportLine = (f, status) =>
+    `- [${(f.severity || 'medium').toUpperCase()}] ${f.title || ''} (\`${f.file || '?'}:${f.line || '?'}\`) — ${status}`;
+  const reportLines = [
+    ...createdItems.map((f) => reportLine(f, '已创建')),
+    ...skippedItems.map((f) => reportLine(f, '重复跳过')),
+    ...failedItems.map((f) => reportLine(f, '创建失败')),
+  ];
   fs.writeFileSync(
     REPORT_PATH,
-    `# AI Bug Scan 报告\n\n共发现 ${findings.length} 条，新建 ${created} 条，重复跳过 ${skipped} 条。\n\n${reportLines.join('\n')}\n`,
+    `# AI Bug Scan 报告\n\n共发现 ${findings.length} 条，新建 ${created} 条，重复跳过 ${skipped} 条，创建失败 ${failedItems.length} 条。\n\n${reportLines.join('\n')}\n`,
     'utf8',
   );
-  console.log(`共发现 ${findings.length} 条，新建 ${created} 条，重复跳过 ${skipped} 条`);
+  console.log(`共发现 ${findings.length} 条，新建 ${created} 条，重复跳过 ${skipped} 条，创建失败 ${failedItems.length} 条`);
 }
 
 main();

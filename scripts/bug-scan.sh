@@ -57,6 +57,47 @@ FRONTEND_CHUNKS=(
 
 SCAN_DIR="src/main/java/io/github/jiangood/openadmin"
 WEB_DIR="web/src"
+MAX_CHARS=84000
+MAX_TOKENS="${BUG_SCAN_MAX_TOKENS:-16000}"
+
+# ---------------------------------------------------------------- 分片内容构建
+# 递归收集目录下全部代码，按 84K 上限整文件跳过（避免截断产生半截代码）
+# 用法: build_content <base_dir> <java|web> <目录或文件...>
+build_content() {
+  local base="$1" lang="$2"
+  shift 2
+  local content="" file_block full_path rel f limit="$MAX_CHARS"
+  for d in "$@"; do
+    full_path="$base/$d"
+    if [ -d "$full_path" ]; then
+      while IFS= read -r -d '' f; do
+        case "$lang" in
+          java) [ "${f##*.}" = "java" ] || continue ;;
+          web)  case "$f" in *.ts|*.tsx|*.js|*.jsx) ;; *) continue ;; esac ;;
+        esac
+        rel="${f#$ROOT/}"
+        file_block="--- $rel ---
+$(cat "$f")
+"
+        if [ $(( ${#content} + ${#file_block} )) -gt "$limit" ]; then
+          echo "    ⚠️  超过 ${limit} 字符上限，跳过剩余文件..." >&2
+          return 0
+        fi
+        content+="$file_block"
+      done < <(find "$full_path" -type f -print0)
+    elif [ -f "$full_path" ]; then
+      file_block="--- $full_path ---
+$(cat "$full_path")
+"
+      if [ $(( ${#content} + ${#file_block} )) -gt "$limit" ]; then
+        echo "    ⚠️  超过 ${limit} 字符上限，跳过该文件..." >&2
+      else
+        content+="$file_block"
+      fi
+    fi
+  done
+  printf '%s' "$content"
+}
 
 # ---------------------------------------------------------------- API 调用函数
 call_api() {
@@ -72,6 +113,7 @@ call_api() {
     const content = process.argv[1];
     const model = process.argv[2];
     const prompt = process.argv[3];
+    const maxTokens = parseInt(process.argv[4], 10) || 16000;
     const body = JSON.stringify({
       model: model,
       messages: [
@@ -79,10 +121,10 @@ call_api() {
         { role: "user", content: prompt + "\n\n## 代码内容\n" + content }
       ],
       temperature: 0,
-      max_tokens: 16000
+      max_tokens: maxTokens
     });
     console.log(body);
-  ' -- "$files_content" "$MODEL" "$prompt")
+  ' -- "$files_content" "$MODEL" "$prompt" "$MAX_TOKENS")
 
   echo "  📡 调用 API..." >&2
   local response
@@ -162,33 +204,11 @@ for chunk in "${BACKEND_CHUNKS[@]}"; do
   IFS=',' read -ra dirs <<< "$chunk"
   echo "  [后端 $idx/${#BACKEND_CHUNKS[@]}] ${dirs[*]}"
 
-  content=""
-  for d in "${dirs[@]}"; do
-    full_path="$SCAN_DIR/$d"
-    if [ -d "$full_path" ]; then
-      while IFS= read -r -d '' f; do
-        rel="${f#$ROOT/}"
-        content+="--- $rel ---
-$(cat "$f")
-"
-      done < <(find "$full_path" -name '*.java' -print0 -maxdepth 1)
-    elif [ -f "$full_path" ]; then
-      content+="--- $full_path ---
-$(cat "$full_path")
-"
-    fi
-  done
-
-  # 检查字符数
-  char_count=${#content}
-  echo "    字符数: $char_count"
-  if [ "$char_count" -gt 84000 ]; then
-    echo "    ⚠️  超过 84K 限制，将截断..."
-    content="${content:0:82000}"
-  fi
+  content=$(build_content "$SCAN_DIR" "java" "${dirs[@]}")
+  echo "    字符数: ${#content}"
 
   count=$(call_api "$idx" "backend" "$content" "logic" "$BACKEND_PROMPT") || true
-  echo "    发现: $count 条"
+  echo "    发现: ${count:-0} 条"
 done
 # ---------------------------------------------------------------- 前端扫描
 FRONTEND_PROMPT='
@@ -219,28 +239,11 @@ for chunk in "${FRONTEND_CHUNKS[@]}"; do
   IFS=',' read -ra dirs <<< "$chunk"
   echo "  [前端 $idx/${#FRONTEND_CHUNKS[@]}] ${dirs[*]}"
 
-  content=""
-  for d in "${dirs[@]}"; do
-    full_path="$WEB_DIR/$d"
-    if [ -d "$full_path" ]; then
-      while IFS= read -r -d '' f; do
-        rel="${f#$ROOT/}"
-        content+="--- $rel ---
-$(cat "$f")
-"
-      done < <(find "$full_path" \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) -print0 -maxdepth 1)
-    fi
-  done
-
-  char_count=${#content}
-  echo "    字符数: $char_count"
-  if [ "$char_count" -gt 84000 ]; then
-    echo "    ⚠️  超过 84K 限制，将截断..."
-    content="${content:0:82000}"
-  fi
+  content=$(build_content "$WEB_DIR" "web" "${dirs[@]}")
+  echo "    字符数: ${#content}"
 
   count=$(call_api "$idx" "frontend" "$content" "interaction" "$FRONTEND_PROMPT") || true
-  echo "    发现: $count 条"
+  echo "    发现: ${count:-0} 条"
 done
 
 # ---------------------------------------------------------------- 合并结果
