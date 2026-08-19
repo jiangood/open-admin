@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -28,6 +29,7 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
 
     private final PermissionStaleService staleService;
     private final UserDetailsService userDetailsService;
+    private final SecurityHolder securityHolder;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -51,6 +53,11 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
                     );
 
                     SecurityContextHolder.getContext().setAuthentication(newAuth);
+
+                    SecurityContextRepository contextRepository = securityHolder.getSharedObject(SecurityContextRepository.class);
+                    if (contextRepository != null) {
+                        contextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
+                    }
 
                     staleService.clearStaleMark(username);
                     staleService.recordChecked(username);
