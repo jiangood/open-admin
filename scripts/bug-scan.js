@@ -15,6 +15,10 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const OUT_DIR = path.join(ROOT, 'target', 'bug-scan');
 const FINDINGS_PATH = path.join(OUT_DIR, 'findings.json');
+const BACKEND_FINDINGS_PATH = path.join(OUT_DIR, 'backend-findings.json');
+const FRONTEND_FINDINGS_PATH = path.join(OUT_DIR, 'frontend-findings.json');
+const BACKEND_SCAN_PATH = path.join(OUT_DIR, 'backend-scan.jsonl');
+const FRONTEND_SCAN_PATH = path.join(OUT_DIR, 'frontend-scan.jsonl');
 const SCAN_OUTPUT_PATH = path.join(OUT_DIR, 'scan-output.jsonl');
 const REPORT_PATH = path.join(OUT_DIR, 'bug-scan-report.md');
 const DRY_RUN = process.argv.includes('--dry-run');
@@ -33,46 +37,51 @@ function readJson(file) {
   }
 }
 
-/** 从 scan-output.jsonl 中提取最后一条消息里的 JSON 数组（复刻原 python extract_from_output 逻辑） */
-function extractFromOutput() {
+/** 从 scan-output.jsonl 或 {backend,frontend}-scan.jsonl 中提取 JSON 数组 */
+function extractFromOutput(scanPath) {
   let lines;
   try {
-    lines = stripBom(fs.readFileSync(SCAN_OUTPUT_PATH, 'utf8')).split(/\r?\n/);
+    lines = stripBom(fs.readFileSync(scanPath, 'utf8')).split(/\r?\n/);
   } catch {
     return null;
   }
 
   for (const rawLine of lines) {
     const line = rawLine.trim();
-    if (!line.startsWith('{')) continue;
+    if (!line.startsWith('[') && !line.startsWith('{')) continue;
 
-    let event;
-    try {
-      event = JSON.parse(line);
-    } catch {
-      continue;
+    // Direct JSON array
+    if (line.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(line);
+        if (Array.isArray(parsed)) return parsed;
+      } catch { continue; }
     }
-    if (event.type !== 'text') continue;
 
-    let stripped = ((event.part || {}).text || '').trim();
-    if (!stripped) continue;
+    // JSONL event
+    if (line.startsWith('{')) {
+      let event;
+      try { event = JSON.parse(line); } catch { continue; }
+      if (event.type !== 'text') continue;
 
-    if (stripped.startsWith('```')) {
-      stripped = stripped.replace(/^`+|`+$/g, '');
-      for (const prefix of ['json', 'JSON']) {
-        if (stripped.startsWith(prefix)) {
-          stripped = stripped.slice(prefix.length).replace(/^\s+/, '');
+      let stripped = ((event.part || {}).text || '').trim();
+      if (!stripped) continue;
+
+      if (stripped.startsWith('```')) {
+        stripped = stripped.replace(/^`+|`+$/g, '');
+        for (const prefix of ['json', 'JSON']) {
+          if (stripped.startsWith(prefix)) {
+            stripped = stripped.slice(prefix.length).replace(/^\s+/, '');
+          }
         }
       }
-    }
-    stripped = stripped.trim();
+      stripped = stripped.trim();
 
-    if (stripped.startsWith('[') && stripped.endsWith(']')) {
-      try {
-        const parsed = JSON.parse(stripped);
-        if (Array.isArray(parsed)) return parsed;
-      } catch {
-        continue;
+      if (stripped.startsWith('[') && stripped.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(stripped);
+          if (Array.isArray(parsed)) return parsed;
+        } catch { continue; }
       }
     }
   }
@@ -86,16 +95,43 @@ function gh(args) {
 function main() {
   console.log('📂 输出目录:', OUT_DIR);
 
-  // ---------- 加载 findings ----------
-  let findings = fs.existsSync(FINDINGS_PATH) ? readJson(FINDINGS_PATH) : null;
-  if (findings === null) {
-    console.log('⚠️  findings.json 缺失或无效，尝试从 scan-output.jsonl 提取');
-    findings = extractFromOutput();
+  // ---------- 加载 findings（合并后端 + 前端分片） ----------
+  let findings = [];
+
+  // 优先读分片 findings（chunk-*-backend/frontend-findings.json，兼容单文件 backend/frontend-findings.json）
+  const singleFindings = new Set([path.basename(BACKEND_FINDINGS_PATH), path.basename(FRONTEND_FINDINGS_PATH)]);
+  const findingsFiles = fs.existsSync(OUT_DIR)
+    ? fs
+        .readdirSync(OUT_DIR)
+        .filter((f) => /^chunk-\d+-(backend|frontend)-findings\.json$/.test(f) || singleFindings.has(f))
+        .sort()
+    : [];
+  for (const ff of findingsFiles) {
+    const arr = readJson(path.join(OUT_DIR, ff));
+    if (arr) findings = findings.concat(arr);
   }
-  if (!findings || findings.length === 0) {
+
+  // 兼容旧版：无分片时尝试 findings.json
+  if (findings.length === 0 && fs.existsSync(FINDINGS_PATH)) {
+    findings = findings.concat(readJson(FINDINGS_PATH) || []);
+  }
+
+  // 最后兜底：从 jsonl 提取
+  if (findings.length === 0) {
+    console.log('⚠️  findings 缺失或无效，尝试从 scan-output.jsonl 提取');
+    for (const p of [BACKEND_SCAN_PATH, FRONTEND_SCAN_PATH, SCAN_OUTPUT_PATH]) {
+      const extracted = extractFromOutput(p);
+      if (extracted) findings = findings.concat(extracted);
+    }
+  }
+
+  if (findings.length === 0) {
     console.log('未发现确凿 bug 或提取失败，结束');
     process.exit(0);
   }
+
+  // 合并写入 findings.json 供后续使用
+  fs.writeFileSync(FINDINGS_PATH, JSON.stringify(findings, null, 2), 'utf8');
 
   if (DRY_RUN) {
     console.log(`🚫 dry-run 模式：共发现 ${findings.length} 条，不创建 Issue`);

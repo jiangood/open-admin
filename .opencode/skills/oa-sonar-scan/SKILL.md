@@ -18,7 +18,7 @@ Runs the open-admin repo through the local SonarQube (http://192.168.100.101:900
 ## Prerequisites
 
 - Local SonarQube running (port 9000, docker-compose under `/ws/sonarqube`)
-- Maven + local SonarQube token（环境变量 `SONAR_TOKEN` 或用下面示例中的默认值）
+- Maven + local SonarQube token（`~/.config/open-admin.env` 或环境变量 `SONAR_TOKEN`，或用下面示例中的默认值）
 - H2 test DB — no MySQL needed (Repository/Service tests use H2)
 
 ## Immediate Execution
@@ -27,7 +27,9 @@ Runs the open-admin repo through the local SonarQube (http://192.168.100.101:900
 
 ## 环境变量配置
 
-开始执行前，打印以下提示让用户确认环境变量：
+优先读取框架统一环境变量文件 `~/.config/open-admin.env`（含 `SONAR_TOKEN` / `SONAR_HOST_URL` / `SONAR_PROJECT`）。若该文件存在且已设置相关变量，直接使用，无需再询问用户。
+
+仅当上述变量在 env 文件与当前环境变量中均未设置时，才打印以下提示让用户确认：
 
 ```
 SonarQube 扫描需要以下环境变量（直接回车使用默认值）：
@@ -46,6 +48,8 @@ SonarQube 扫描需要以下环境变量（直接回车使用默认值）：
 ### 1. Run the Scan
 
 ```bash
+# 优先读取框架统一环境变量文件（含 SONAR_TOKEN / SONAR_HOST_URL / SONAR_PROJECT）
+[ -f "$HOME/.config/open-admin.env" ] && . "$HOME/.config/open-admin.env"
 export TOKEN="${SONAR_TOKEN:-squ_156b1e2938c4f5cac460156c4881ff06c6209d5e}"
 export HOST="${SONAR_HOST_URL:-http://192.168.100.101:9000}"
 export PROJECT="${SONAR_PROJECT:-open-admin}"
