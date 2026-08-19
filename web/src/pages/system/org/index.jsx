@@ -11,6 +11,7 @@ import {
     NamedIcon,
     Page,
     PermActions,
+    PermUtils,
     ViewSwitch,
 } from "../../../framework";
 
@@ -91,6 +92,7 @@ export default class OrgPage extends React.Component {
     render() {
         const {selectedOrg} = this.state
         const params = this.state.params
+        const canSort = PermUtils.hasPermission('sys-org:update')
 
         return <Page title="组织机构" description="管理组织机构树" actions={
             <Button type='primary' perm='sys-org:create' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
@@ -122,6 +124,7 @@ export default class OrgPage extends React.Component {
                                     <div>
                                         拖拽排序&nbsp;<Switch
                                         value={this.state.draggable}
+                                        disabled={!canSort}
                                         onChange={this.onDraggableChange}/>
                                     </div>
                                     <Button size='small' shape='round' icon={<SyncOutlined/>} onClick={this.loadTree}>刷新</Button>
@@ -224,6 +227,7 @@ export default class OrgPage extends React.Component {
     }
 
     onDrop = (e) => {
+        if (!PermUtils.hasPermission('sys-org:update')) return;
         const {dragNode, dropToGap, node} = e;
         const dropKey = node.key;
         const dragKey = dragNode.key;

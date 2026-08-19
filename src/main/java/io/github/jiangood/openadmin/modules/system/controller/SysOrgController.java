@@ -151,7 +151,7 @@ public class SysOrgController {
     }
 
     @PostMapping("sort")
-    @HasPermission("sys-org:create")
+    @HasPermission("sys-org:update")
     public AjaxResult sort(@RequestBody DropEvent e) {
         List<SysOrg> nodes = sysOrgService.findAll();
         List<TreeOption> tree = list2Tree(nodes);
