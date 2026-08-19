@@ -93,7 +93,7 @@ scripts\start-frontend.bat start|stop|restart|status
 
 ## Development Conventions
 
-- Java 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入
+- Java 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入；Quartz 任务（extends `BaseJob`）按框架约定用 `@Resource` 字段注入（单构造器时构造器注入也可用，见 `docs/open-admin/development.md`「定时任务（Quartz）」）
 - 业务异常抛 `ServiceException`，Controller 不做 try-catch
 - Controller 统一返回 `AjaxResult`，权限用 `@HasPermission("resource:action")`（全小写两段式，如 `sys-user:read`）
 - REST API 约定：`admin/xxx/page`(分页) / `admin/xxx/info/{id}`(详情) / `admin/xxx/create`(POST) / `admin/xxx/update`(POST) / `admin/xxx/delete`(POST)

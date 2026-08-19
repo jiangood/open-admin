@@ -35,7 +35,7 @@
 
 ## 开发规范
 
-- Java 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入
+- Java 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入；Quartz 任务（extends `BaseJob`）按框架约定用 `@Resource` 字段注入（单构造器时构造器注入也可用，见 development.md「定时任务（Quartz）」）
 - 业务实体继承 `BaseEntity`；Repository 继承 `BaseRepository<T, String>`；Service 继承 `BaseService<T>`
 - Controller 统一返回 `AjaxResult`，权限用 `@HasPermission("resource:action")`
 - 前端优先使用框架组件：`ProTable`、`Page`、`Field*`、`PermActions`
