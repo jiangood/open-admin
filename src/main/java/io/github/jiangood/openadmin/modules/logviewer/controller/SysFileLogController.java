@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.logviewer.controller;
 
+import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.logviewer.service.FileLogService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ public class SysFileLogController {
     @Resource
     private FileLogService fileLogService;
 
+    @HasPermission("job:read")
     @GetMapping("{*key}")
     public void log(@PathVariable String key, HttpServletResponse response) throws IOException {
         response.setCharacterEncoding("utf-8");
