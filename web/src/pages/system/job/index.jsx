@@ -231,8 +231,9 @@ export default class JobPage extends React.Component {
                                    name={['jobData', p.name]}
                                    key={p.name}
                                    initialValue={p.defaultValue}
+                                   valuePropName={p.valueType === 'boolean' ? 'checked' : 'value'}
                                    rules={[{required: p.required}]}>
-                            {ValueType.renderField(p.componentType, {
+                            {ValueType.renderField(p.valueType, {
                                 ...p.componentProps,
                                 placeholder: p.placeholder || '请输入'
                             })}

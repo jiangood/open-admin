@@ -1,4 +1,4 @@
-import {Input} from "antd";
+import {Input, InputNumber, Switch} from "antd";
 
 import {ViewPassword, ViewBoolean, ViewImage, ViewText} from "../../views";
 import {FieldDictSelect, FieldRemoteSelect} from "../../fields";
@@ -6,6 +6,14 @@ import {FieldDictSelect, FieldRemoteSelect} from "../../fields";
 
 export const fieldRegistry = {
     'text':Input,
+    'string': Input,
+
+    'number': InputNumber,
+
+    'boolean': Switch,
+
+    'img': Input,
+    'img_base64': Input,
 
     'dict':FieldDictSelect,
     'password':Input.Password,
