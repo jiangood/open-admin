@@ -146,9 +146,11 @@ class SysRoleServiceTest {
         SysRole role1 = new SysRole();
         role1.setId("1");
         role1.setCode("admin");
+        role1.setEnabled(true);
         SysRole role2 = new SysRole();
         role2.setId("2");
         role2.setCode("normal");
+        role2.setEnabled(true);
         role2.setMenus(Arrays.asList("sys"));
 
         MenuDefinition menu1 = new MenuDefinition();

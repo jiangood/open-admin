@@ -92,6 +92,7 @@ class SysUserServicePermViewTest {
         SysRole admin = new SysRole();
         admin.setCode("admin");
         admin.setName("管理员");
+        admin.setEnabled(true);
         user.setRoles(new HashSet<>(Set.of(admin)));
 
         when(sysUserRepository.findById("u1")).thenReturn(Optional.of(user));
@@ -125,6 +126,7 @@ class SysUserServicePermViewTest {
         SysRole operator = new SysRole();
         operator.setCode("operator");
         operator.setName("运营");
+        operator.setEnabled(true);
         operator.setPerms(List.of("sys-user:read"));
         user.setRoles(new HashSet<>(Set.of(operator)));
         user.setDataPerms(List.of(org("org2", "运营部", null)));
@@ -157,6 +159,7 @@ class SysUserServicePermViewTest {
         SysRole admin = new SysRole();
         admin.setCode("admin");
         admin.setName("管理员");
+        admin.setEnabled(true);
         user.setRoles(new HashSet<>(Set.of(admin)));
 
         MenuDefinition parent = new MenuDefinition();
