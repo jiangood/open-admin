@@ -21,7 +21,7 @@
 通过 `sys.file.store-type` 选择后端（`LOCAL` / `MINIO`）：
 
 - `LOCAL` — 本地文件系统，保存到 `sys.file.upload-path`，按 `public/`、`private/` 子目录区分可见性
-- `MINIO` — MinIO 对象存储（官方 `io.minio:minio` 客户端），配置 `sys.file.minio.{endpoint,accessKey,secretKey,bucketName}`；`endpoint` 需带协议前缀（如 `http://localhost:9000`），bucket 需提前创建
+- `MINIO` — MinIO 对象存储（官方 `io.minio:minio` 客户端），配置 `sys.file.minio.{endpoint,accessKey,secretKey,bucketName}`；`endpoint` 需带协议前缀（如 `http://localhost:9000`），bucket 需提前创建。业务项目需自行添加 `io.minio:minio` 与 `com.squareup.okhttp3:okhttp-jvm` 依赖（minio 9.x 的 Maven 元数据引用的 okhttp 为空壳，实际类在 okhttp-jvm）
 
 文件 `objectName` 带可见性前缀（如 `public/202607/xxx.jpg` / `private/202607/xxx.pdf`），本地磁盘路径 = `sys.file.upload-path` + `objectName`，与 URL `/file/{objectName}` 完全一致。
 
