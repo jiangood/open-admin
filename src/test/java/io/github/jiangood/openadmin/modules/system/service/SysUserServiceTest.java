@@ -216,6 +216,14 @@ class SysUserServiceTest {
     }
 
     @Test
+    void testResetPwd_whenUserNotExists_shouldThrow() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.resetPwd("no-such-id", "NewP@ss123"));
+        verify(sysUserRepository, never()).save(any(SysUser.class));
+    }
+
+    @Test
     void testFindValid() {
         SysUser user1 = new SysUser();
         user1.setEnabled(true);

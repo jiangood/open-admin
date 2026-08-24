@@ -205,6 +205,7 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public void resetPwd(String id, String plainPassword) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
+        Assert.notNull(sysUser, "用户不存在");
         PasswordTool.validateStrength(plainPassword);
 
         sysUser.setPassword(PasswordTool.encode(plainPassword));
