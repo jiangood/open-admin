@@ -15,7 +15,7 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @Table(name = "sys_article")
 @FieldNameConstants
-public class Article extends BaseEntity {
+public class Article extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     @Column(unique = true, length = 32, nullable = false)
     private String code;

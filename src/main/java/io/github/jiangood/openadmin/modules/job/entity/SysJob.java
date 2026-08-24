@@ -21,7 +21,7 @@ import java.util.Map;
 @Entity
 @Table(name = "sys_job")
 @FieldNameConstants
-public class SysJob extends BaseEntity {
+public class SysJob extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     public static final String JOB_SUFFIX = "Job";
     @Column(unique = true)

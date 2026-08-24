@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @FieldNameConstants
-public class SysJobLog extends BaseEntity {
+public class SysJobLog extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
