@@ -6,39 +6,31 @@ import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
 import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * 基于 Apache Commons Lang FastDateFormat 的高性能线程安全 DateFormat 适配器
  */
 public class SafeDateFormat extends DateFormat {
     private static final String DEFAULT_PATTERN = "yyyy-MM-dd HH:mm:ss";
-    private final FastDateFormat fastDateFormat;
+    private final FastDateFormat fdf;
 
     public SafeDateFormat() {
-        this.fastDateFormat = FastDateFormat.getInstance(DEFAULT_PATTERN);
+        this(DEFAULT_PATTERN);
     }
 
     public SafeDateFormat(String pattern) {
-        this.fastDateFormat = FastDateFormat.getInstance(pattern);
-    }
-
-    public SafeDateFormat(String pattern, TimeZone timeZone) {
-        this.fastDateFormat = FastDateFormat.getInstance(pattern, timeZone);
+        this.fdf = FastDateFormat.getInstance(pattern);
     }
 
     @Override
     public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
-        return fastDateFormat.format(date, toAppendTo, fieldPosition);
+        return fdf.format(date, toAppendTo, fieldPosition);
     }
 
     @Override
     public Date parse(String source, ParsePosition pos) {
-        return fastDateFormat.parse(source, pos);
+        return fdf.parse(source, pos);
     }
 
-    @Override
-    public void setTimeZone(TimeZone zone) {
-        throw new  UnsupportedOperationException();
-    }
+
 }
