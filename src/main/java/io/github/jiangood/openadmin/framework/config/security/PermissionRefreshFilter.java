@@ -36,10 +36,8 @@ public class PermissionRefreshFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            if (!refreshIfStale(authentication, request, response)) {
-                return;
-            }
+        if (authentication != null && authentication.isAuthenticated() && !refreshIfStale(authentication, request, response)) {
+            return;
         }
 
         filterChain.doFilter(request, response);
