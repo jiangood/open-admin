@@ -39,6 +39,6 @@ public class SafeDateFormat extends DateFormat {
 
     @Override
     public void setTimeZone(TimeZone zone) {
-        super.setTimeZone(zone);
+        throw new  UnsupportedOperationException();
     }
 }
