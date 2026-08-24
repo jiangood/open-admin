@@ -223,6 +223,7 @@ public class SysUserService extends BaseService<SysUser> {
     // 数据范围
     public List<String> getOrgPermissions(String userId) {
         SysUser user = sysUserRepository.findById(userId).orElse(null);
+        Assert.notNull(user, "用户不存在");
         DataPermType dataPermType = user.getDataPermType();
         if (dataPermType == null) {
             dataPermType = DataPermType.CHILDREN;
