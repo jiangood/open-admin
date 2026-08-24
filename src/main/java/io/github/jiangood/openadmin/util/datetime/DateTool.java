@@ -16,6 +16,10 @@ import java.util.List;
  * 日期工具类，提供日期处理相关的工具方法
  */
 public class DateTool {
+
+    // 标准日期范围格式的长度， 如：2021-01-01/2021-01-02
+    public static final int ISO_DATE_LEN = 21;
+
     private DateTool() {
     }
 
@@ -27,16 +31,19 @@ public class DateTool {
      * @return 如果是ISO格式的日期范围返回true，否则返回false
      */
     public static boolean isIsoDateRange(String s) {
-        return s.length() == 21 && !s.contains("/") && CharSequenceUtil.count(s, "-") == 4;
+        if (s == null) {
+            return false;
+        }
+        return s.length() == ISO_DATE_LEN && !s.contains("/") && CharSequenceUtil.count(s, "-") == 4;
     }
 
 
     /**
      * 判断日期是否在指定的时间范围内
      *
-     * @param date 待检查的日期
+     * @param date  待检查的日期
      * @param begin 开始时间
-     * @param end 结束时间
+     * @param end   结束时间
      * @return 如果日期在范围内返回true，否则返回false
      */
     public static boolean isBetween(String date, String begin, String end) {
