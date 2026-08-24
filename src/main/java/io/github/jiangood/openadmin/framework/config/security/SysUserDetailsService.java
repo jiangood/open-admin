@@ -34,7 +34,7 @@ public class SysUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException("用户不存在: " + username);
         }
-        if (!user.getEnabled()) {
+        if (!Boolean.TRUE.equals(user.getEnabled())) {
             throw new UsernameNotFoundException("用户被禁用: " + username);
         }
 

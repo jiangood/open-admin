@@ -59,7 +59,7 @@ public class QuartzManager {
     }
 
     public void triggerJob(SysJob job) throws SchedulerException, ClassNotFoundException {
-        if (job.getEnabled()) {
+        if (Boolean.TRUE.equals(job.getEnabled())) {
             JobKey jobKey = JobKey.jobKey(job.getName());
             scheduler.triggerJob(jobKey);
         } else {
