@@ -14,7 +14,7 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @FieldNameConstants
 @Table(name = "sys_dict_item", uniqueConstraints = @UniqueConstraint(name = "uk_sys_dict_item", columnNames = {"typeCode", "code"}))
-public class SysDictItem extends BaseEntity {
+public class SysDictItem extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
 
     @Column(length = 20)

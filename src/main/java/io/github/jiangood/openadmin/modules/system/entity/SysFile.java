@@ -25,7 +25,7 @@ import java.io.InputStream;
         @Index(name = "idx_sys_file_unclaimed", columnList = "join_table, join_id, create_time")
 })
 @FieldNameConstants
-public class SysFile extends BaseEntity {
+public class SysFile extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     /**
      * 文件名称（上传时候的文件名）

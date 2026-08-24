@@ -24,7 +24,7 @@ import java.util.Set;
 @Table(name = "sys_user")
 @FieldNameConstants
 @Remark("系统用户")
-public class SysUser extends BaseEntity {
+public class SysUser extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)

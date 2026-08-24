@@ -21,7 +21,7 @@ import java.util.List;
 @Entity
 @Table(name = "sys_org")
 @FieldNameConstants
-public class SysOrg extends BaseEntity {
+public class SysOrg extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
 
     @Transient
