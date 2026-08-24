@@ -47,6 +47,8 @@ import java.util.stream.Collectors;
 @Service
 public class SysUserService extends BaseService<SysUser> {
 
+    private static final String MSG_USER_NOT_EXIST = "用户不存在";
+
     private final SysUserRepository sysUserRepository;
 
     private final SysRoleRepository roleRepository;
@@ -162,7 +164,7 @@ public class SysUserService extends BaseService<SysUser> {
     public void deleteById(String id) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
         if (sysUser == null) {
-            throw new IllegalStateException("用户不存在");
+            throw new IllegalStateException(MSG_USER_NOT_EXIST);
         }
         try {
             sysUserRepository.delete(sysUser);
@@ -176,7 +178,7 @@ public class SysUserService extends BaseService<SysUser> {
     public void updatePwd(String userId, String oldPassword, String newPassword) {
         Assert.hasText(newPassword, "请输入新密码");
         SysUser sysUser = sysUserRepository.findById(userId).orElse(null);
-        Assert.notNull(sysUser, "用户不存在");
+        Assert.notNull(sysUser, MSG_USER_NOT_EXIST);
         // 强制改密（首次登录或密码被管理员重置，lastPasswordChangeTime 为空）时无旧密码可校验，直接放行
         if (sysUser.getLastPasswordChangeTime() != null) {
             Assert.state(passwordEncoder.matches(oldPassword, sysUser.getPassword()), "旧密码不正确");
@@ -205,7 +207,7 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public void resetPwd(String id, String plainPassword) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
-        Assert.notNull(sysUser, "用户不存在");
+        Assert.notNull(sysUser, MSG_USER_NOT_EXIST);
         PasswordTool.validateStrength(plainPassword);
 
         sysUser.setPassword(PasswordTool.encode(plainPassword));
@@ -223,7 +225,7 @@ public class SysUserService extends BaseService<SysUser> {
     // 数据范围
     public List<String> getOrgPermissions(String userId) {
         SysUser user = sysUserRepository.findById(userId).orElse(null);
-        Assert.notNull(user, "用户不存在");
+        Assert.notNull(user, MSG_USER_NOT_EXIST);
         DataPermType dataPermType = user.getDataPermType();
         if (dataPermType == null) {
             dataPermType = DataPermType.CHILDREN;
@@ -400,7 +402,7 @@ public class SysUserService extends BaseService<SysUser> {
 
     public GrantUserPermReq getPermInfo(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
-        Assert.notNull(user, "用户不存在");
+        Assert.notNull(user, MSG_USER_NOT_EXIST);
 
         GrantUserPermReq p = new GrantUserPermReq();
         p.setId(user.getId());
@@ -414,7 +416,7 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public SysUser grantPerm(String id, List<String> roleIds, DataPermType dataPermType, List<String> orgIdList) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
-        Assert.notNull(user, "用户不存在");
+        Assert.notNull(user, MSG_USER_NOT_EXIST);
         List<SysOrg> orgs = CollUtil.isNotEmpty(orgIdList) ? sysOrgService.findAllById(orgIdList) : Collections.emptyList();
         user.setDataPerms(orgs);
         user.setDataPermType(dataPermType);
