@@ -46,6 +46,7 @@ class SysJobControllerTest {
     static class TestTypedJob implements Job {
         @Override
         public void execute(JobExecutionContext context) {
+            throw new UnsupportedOperationException("仅用于注解反射测试，不参与 Quartz 调度");
         }
     }
 
