@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.text.SimpleDateFormat;
+import io.github.jiangood.openadmin.util.datetime.SafeDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
@@ -52,7 +52,7 @@ public class LogAspect {
 
     private static final ObjectWriter writer = JsonMapper.builder()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+            .defaultDateFormat(new SafeDateFormat())
             .changeDefaultPropertyInclusion(prop -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
             .addMixIn(Object.class, SensitiveMaskMixin.class)
             .filterProvider(new SimpleFilterProvider()

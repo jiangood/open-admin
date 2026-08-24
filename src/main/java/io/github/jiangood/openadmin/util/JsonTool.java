@@ -9,7 +9,7 @@ import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import io.github.jiangood.openadmin.util.datetime.SafeDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +29,7 @@ public class JsonTool {
     private static final ObjectMapper om = JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+            .defaultDateFormat(new SafeDateFormat())
             .build();
 
     /**
