@@ -105,21 +105,17 @@ public class SysOrgService extends BaseService<SysOrg> {
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(key = "#input.id", condition = "#input.id != null")
     public SysOrg save(SysOrg input, List<String> requestKeys) {
-        boolean isNew = input.isNew();
-
-        if (!isNew) {
-            String id = Objects.requireNonNull(input.getId(), "节点ID不能为空"); // !isNew 时 id 必非 null（isNew 即 id==null）
-            Assert.state(!id.equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
-            List<String> childIdListById = this.findChildIdListById(id);
-            Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
-        }
-
         if (input.isNew()) {
             return sysOrgRepository.save(input);
         }
 
+        String id = Objects.requireNonNull(input.getId(), "节点ID不能为空"); // isNew 已提前返回，此处 id 必非 null
+        Assert.state(!id.equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
+        List<String> childIdListById = this.findChildIdListById(id);
+        Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
+
         this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return sysOrgRepository.findById(input.getId()).orElse(null);
+        return sysOrgRepository.findById(id).orElse(null);
     }
 
     public List<SysOrg> getLeafs(Collection<SysOrg> orgs) {
