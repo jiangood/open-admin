@@ -239,6 +239,14 @@ class SysUserServiceTest {
     }
 
     @Test
+    void testGrantPerm_whenUserNotExists_shouldThrow() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.grantPerm("no-such-id", null, null, null));
+        verify(roleRepository, never()).findAllById(any());
+    }
+
+    @Test
     void testGetOrgPermissions_whenUserNotExists_shouldThrow() {
         when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
 

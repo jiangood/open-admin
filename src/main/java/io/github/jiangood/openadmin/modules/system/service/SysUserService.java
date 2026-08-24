@@ -414,6 +414,7 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public SysUser grantPerm(String id, List<String> roleIds, DataPermType dataPermType, List<String> orgIdList) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
+        Assert.notNull(user, "用户不存在");
         List<SysOrg> orgs = CollUtil.isNotEmpty(orgIdList) ? sysOrgService.findAllById(orgIdList) : Collections.emptyList();
         user.setDataPerms(orgs);
         user.setDataPermType(dataPermType);
