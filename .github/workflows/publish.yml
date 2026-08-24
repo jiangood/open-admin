@@ -154,7 +154,7 @@ jobs:
           mkdir -p "$ZIP_DIR/.opencode/skills"
           cp -r .opencode/skills/oa-crud "$ZIP_DIR/.opencode/skills/"
           cp -r .opencode/skills/oa-upgrade "$ZIP_DIR/.opencode/skills/"
-          cp -r .opencode/skills/oa-sync-docs "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-upgrade-docs "$ZIP_DIR/.opencode/skills/"
           cp -r .opencode/skills/oa-sonar-scan "$ZIP_DIR/.opencode/skills/"
           (cd "$ZIP_DIR" && zip -qr "$GITHUB_WORKSPACE/framework-files.zip" docs .opencode)
           echo "✓ framework-files.zip 构建完成"

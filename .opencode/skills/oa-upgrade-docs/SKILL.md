@@ -1,9 +1,9 @@
 ---
-name: oa-sync-docs
+name: oa-upgrade-docs
 description: 在业务项目中同步 open-admin 框架的 skills + docs + AGENTS.md —— 从 GitHub Release 下载 framework-files.zip 并按规则覆盖写入到项目根目录。适用于以 Maven JAR + npm 包方式引入 open-admin 的业务项目。
 ---
 
-# oa-sync-docs — 框架文件同步指南
+# oa-upgrade-docs — 框架文件同步指南
 
 ## 适用范围
 
@@ -28,7 +28,7 @@ description: 在业务项目中同步 open-admin 框架的 skills + docs + AGENT
 
 | 目标 | 规则 |
 |------|------|
-| `<根>/.opencode/skills/` | 仅覆盖框架 skill（`oa-crud`、`oa-upgrade`、`oa-sync-docs`、`oa-sonar-scan`），不删除业务本地 skill |
+| `<根>/.opencode/skills/` | 仅覆盖框架 skill（`oa-crud`、`oa-upgrade`、`oa-upgrade-docs`、`oa-sonar-scan`），不删除业务本地 skill |
 | `<根>/docs/open-admin/` | 全量镜像（删除该目录下 ZIP 之外的孤儿文件） |
 | `<根>/AGENTS.md` | 不存在则生成；已存在且内容与框架新版不同时，展示 diff 询问开发者确认后再更新；新版本随 `docs/open-admin/AGENTS.md` 提供 |
 
@@ -69,7 +69,7 @@ SRC=/tmp/oa-framework-files
 
 # 3a. .opencode/skills/ —— 仅覆盖框架 skill，不删除本地 skill
 mkdir -p "$PROJ_ROOT/.opencode/skills"
-for skill in oa-crud oa-upgrade oa-sync-docs oa-sonar-scan; do
+for skill in oa-crud oa-upgrade oa-upgrade-docs oa-sonar-scan; do
   if [ -d "$SRC/.opencode/skills/$skill" ]; then
     mkdir -p "$PROJ_ROOT/.opencode/skills/$skill"
     cp -r "$SRC/.opencode/skills/$skill/." "$PROJ_ROOT/.opencode/skills/$skill/"
@@ -131,13 +131,13 @@ rm -rf /tmp/oa-framework-files /tmp/oa-framework-files.zip
 
 ```bash
 # 确认关键文件存在且为期望版本内容
-ls -la .opencode/skills/oa-sync-docs/SKILL.md docs/open-admin/guide.md
+ls -la .opencode/skills/oa-upgrade-docs/SKILL.md docs/open-admin/guide.md
 # 抽查文档内容包含框架版本关键字（可选）
 ```
 
 ## 验证清单
 
-- [ ] `.opencode/skills/oa-crud|oa-upgrade|oa-sync-docs|oa-sonar-scan/SKILL.md` 已更新
+- [ ] `.opencode/skills/oa-crud|oa-upgrade|oa-upgrade-docs|oa-sonar-scan/SKILL.md` 已更新
 - [ ] `docs/open-admin/*.md` 已镜像，孤儿文件已删除
 - [ ] `AGENTS.md` 不存在时已生成；已存在且与框架新版不同时，已询问开发者并更新（或开发者明确保留旧版）
 - [ ] 无变更文件未被无谓写入

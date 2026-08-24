@@ -112,10 +112,10 @@ jobs:
           rm -rf docs/open-admin
           mkdir -p docs/open-admin
           cp -r "$GITHUB_WORKSPACE"/docs/open-admin/. docs/open-admin/
-          mkdir -p .opencode/skills/oa-crud .opencode/skills/oa-upgrade .opencode/skills/oa-sync-docs
+          mkdir -p .opencode/skills/oa-crud .opencode/skills/oa-upgrade .opencode/skills/oa-upgrade-docs
           cp "$GITHUB_WORKSPACE/.opencode/skills/oa-crud/SKILL.md" .opencode/skills/oa-crud/SKILL.md
           cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade/SKILL.md" .opencode/skills/oa-upgrade/SKILL.md
-          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-sync-docs/SKILL.md" .opencode/skills/oa-sync-docs/SKILL.md
+          cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade-docs/SKILL.md" .opencode/skills/oa-upgrade-docs/SKILL.md
           if [ ! -f AGENTS.md ]; then
             cp docs/open-admin/AGENTS.md AGENTS.md
           fi

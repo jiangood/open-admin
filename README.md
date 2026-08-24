@@ -21,7 +21,7 @@ open-admin 是一个后台管理系统框架（脚手架），**业务项目无�
 }
 ```
 
-添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。框架的 skills 与文档通过 `oa-sync-docs` skill 从 GitHub Release 同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
+添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。框架的 skills 与文档通过 `oa-upgrade-docs` skill 从 GitHub Release 同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
 
 ## 快速开始
 
@@ -170,17 +170,17 @@ scripts\start-frontend.bat start|stop|restart|status
 |-------|------|
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
-| `oa-sync-docs` | 从 GitHub Release 同步框架文件（skills + docs + AGENTS.md） |
+| `oa-upgrade-docs` | 从 GitHub Release 同步框架文件（skills + docs + AGENTS.md） |
 | `oa-sonar-scan` | SonarQube 扫描与问题修复 |
 
 ### 从 Release 同步到业务项目
 
-框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目通过 **`oa-sync-docs` skill** 从 `https://github.com/jiangood/open-admin/releases/download/v{版本}/framework-files.zip` 下载并同步到项目根目录：
+框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目通过 **`oa-upgrade-docs` skill** 从 `https://github.com/jiangood/open-admin/releases/download/v{版本}/framework-files.zip` 下载并同步到项目根目录：
 
 ```
 <项目根>/.opencode/skills/oa-crud/SKILL.md
 <项目根>/.opencode/skills/oa-upgrade/SKILL.md
-<项目根>/.opencode/skills/oa-sync-docs/SKILL.md
+<项目根>/.opencode/skills/oa-upgrade-docs/SKILL.md
 <项目根>/.opencode/skills/oa-sonar-scan/SKILL.md
 <项目根>/docs/open-admin/*.md     # 即本文档（guide/api/config/development/AGENTS）
 <项目根>/AGENTS.md                # opencode 开发指引（不存在时生成；已存在且不同时询问确认后更新）
@@ -188,5 +188,5 @@ scripts\start-frontend.bat start|stop|restart|status
 
 - 同步按**内容比对**：无变更不写入
 - `docs/open-admin/` 全量镜像（删除该目录下孤儿文件）；`.opencode/skills/` 仅覆盖框架 skill，不删除业务本地 skill
-- 根目录 `AGENTS.md` 不存在时生成；已存在且与框架新版内容不同时，`oa-sync-docs` 会展示 diff 并询问开发者确认后再更新（避免无提示覆盖本地自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
-- 升级框架后调用 `oa-upgrade` skill 会自动在末尾调用 `oa-sync-docs` 同步新版本框架文件
+- 根目录 `AGENTS.md` 不存在时生成；已存在且与框架新版内容不同时，`oa-upgrade-docs` 会展示 diff 并询问开发者确认后再更新（避免无提示覆盖本地自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
+- 升级框架后调用 `oa-upgrade` skill 会自动在末尾调用 `oa-upgrade-docs` 同步新版本框架文件
