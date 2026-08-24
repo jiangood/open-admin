@@ -27,30 +27,6 @@ public class SafeDateFormat extends DateFormat {
         this.fastDateFormat = FastDateFormat.getInstance(pattern, timeZone);
     }
 
-    public static SafeDateFormat of() {
-        return new SafeDateFormat();
-    }
-
-    public static SafeDateFormat of(String pattern) {
-        return new SafeDateFormat(pattern);
-    }
-
-    public static SafeDateFormat of(String pattern, TimeZone timeZone) {
-        return new SafeDateFormat(pattern, timeZone);
-    }
-
-    public static SafeDateFormat create() {
-        return new SafeDateFormat();
-    }
-
-    public static SafeDateFormat create(String pattern) {
-        return new SafeDateFormat(pattern);
-    }
-
-    public static SafeDateFormat create(String pattern, TimeZone timeZone) {
-        return new SafeDateFormat(pattern, timeZone);
-    }
-
     @Override
     public StringBuffer format(Date date, StringBuffer toAppendTo, FieldPosition fieldPosition) {
         return fastDateFormat.format(date, toAppendTo, fieldPosition);
