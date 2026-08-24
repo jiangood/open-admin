@@ -15,8 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 
 @Slf4j
 public class MinioFileOperator implements FileOperator {
@@ -41,9 +39,9 @@ public class MinioFileOperator implements FileOperator {
             minioClient.putObject(PutObjectArgs.builder()
                     .bucket(bucketName)
                     .object(key)
-                    .stream(inputStream, -1, PART_SIZE)
+                    .stream(inputStream, -1L, PART_SIZE)
                     .build());
-        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (MinioException e) {
             throw new IOException("上传文件到 MinIO 失败: " + key, e);
         }
     }
@@ -56,7 +54,7 @@ public class MinioFileOperator implements FileOperator {
                     .object(key)
                     .filename(file.getAbsolutePath())
                     .build());
-        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (MinioException e) {
             throw new IOException("上传文件到 MinIO 失败: " + key, e);
         }
     }
@@ -68,7 +66,7 @@ public class MinioFileOperator implements FileOperator {
                     .bucket(bucketName)
                     .object(key)
                     .build());
-        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (MinioException e) {
             throw new IOException("从 MinIO 读取文件失败: " + key, e);
         }
     }
@@ -87,7 +85,7 @@ public class MinioFileOperator implements FileOperator {
                     .bucket(bucketName)
                     .object(key)
                     .build());
-        } catch (MinioException | InvalidKeyException | NoSuchAlgorithmException e) {
+        } catch (MinioException e) {
             throw new IOException("从 MinIO 删除文件失败: " + key, e);
         }
     }
