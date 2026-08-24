@@ -68,7 +68,7 @@ public class SysOrgController {
     @Log("机构-创建")
     @HasPermission("sys-org:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody OrgReq input) throws Exception {
+    public AjaxResult create(@RequestBody OrgReq input) {
         if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
             input.setLeader(null);
         }
@@ -85,7 +85,7 @@ public class SysOrgController {
     @Log("机构-更新")
     @HasPermission("sys-org:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
+    public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) {
         if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
             input.setLeader(null);
         }

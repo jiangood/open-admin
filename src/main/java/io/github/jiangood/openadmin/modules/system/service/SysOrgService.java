@@ -104,7 +104,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     @Transactional(rollbackFor = Exception.class)
     @CacheEvict(key = "#input.id", condition = "#input.id != null")
-    public SysOrg save(SysOrg input, List<String> requestKeys) throws Exception {
+    public SysOrg save(SysOrg input, List<String> requestKeys) {
         boolean isNew = input.isNew();
 
         if (!isNew) {

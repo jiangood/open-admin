@@ -126,7 +126,7 @@ public class SysJobController {
     }
 
     @PostMapping("get-job-param-fields")
-    public AjaxResult getJobParamFields(String className, @RequestBody Map<String, Object> jobData) throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, JacksonException {
+    public AjaxResult getJobParamFields(String className, @RequestBody Map<String, Object> jobData) throws ClassNotFoundException, JacksonException {
         Class<?> jobCls = validateJobClass(className);
         String name = jobCls.getName();
 

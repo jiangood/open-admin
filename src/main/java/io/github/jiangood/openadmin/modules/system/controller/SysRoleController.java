@@ -72,7 +72,7 @@ public class SysRoleController {
     @Log("角色-创建")
     @HasPermission("sys-role:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody RoleReq req) throws Exception {
+    public AjaxResult create(@RequestBody RoleReq req) {
         SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, null);
 
@@ -89,7 +89,7 @@ public class SysRoleController {
     @Log("角色-更新")
     @HasPermission("sys-role:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody RoleReq req, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody RoleReq req, RequestBodyKeys updateFields) {
         SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, updateFields);
 
