@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -107,8 +108,9 @@ public class SysOrgService extends BaseService<SysOrg> {
         boolean isNew = input.isNew();
 
         if (!isNew) {
-            Assert.state(!input.getId().equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
-            List<String> childIdListById = this.findChildIdListById(input.getId());
+            String id = Objects.requireNonNull(input.getId(), "节点ID不能为空"); // !isNew 时 id 必非 null（isNew 即 id==null）
+            Assert.state(!id.equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
+            List<String> childIdListById = this.findChildIdListById(id);
             Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
         }
 
