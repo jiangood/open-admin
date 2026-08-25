@@ -25,8 +25,6 @@ spring:
   jpa:
     generate-ddl: true
     show-sql: false
-    # 注意：如果使用 MySQL 5.7，请添加以下配置覆盖默认的 Hibernate 方言：
-    # spring.jpa.properties.hibernate.dialect: org.hibernate.community.dialect.MySQLLegacyDialect
   data:
     web:
       pageable:

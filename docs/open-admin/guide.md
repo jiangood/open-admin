@@ -143,7 +143,6 @@ src/main/resources/
 
 脚本编号需大于框架内置的 `V10000__framework__seed_data.sql`，Flyway 对每个脚本只执行一次（记录 checksum），幂等性由版本化迁移保证。框架的 seed 脚本与业务项目的脚本互不干扰（不同命名）。
 
-**MySQL 5.7 兼容？** 添加 `hibernate-community-dialects` 依赖，配置 `spring.jpa.properties.hibernate.dialect=org.hibernate.community.dialect.MySQLLegacyDialect`。
 
 **前端依赖安装失败？** `npm install --registry=https://registry.npmmirror.com`
 
