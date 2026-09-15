@@ -33,7 +33,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
-import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
+import static io.github.jiangood.openadmin.framework.MessageConst.MSG_FORBIDDEN;
 import static io.github.jiangood.openadmin.framework.MessageConst.MSG_UNAUTHORIZED;
 
 /**
@@ -51,10 +51,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public AjaxResult handleAccessDeniedException(AccessDeniedException ex) {
         if (systemProperties.isPrintGlobalException()) {
-            log.error(MGS_FORBIDDEN, ex);
+            log.error(MSG_FORBIDDEN, ex);
         }
         String msg = ex.getMessage();
-        if (msg.startsWith(MGS_FORBIDDEN)) {
+        if (msg.startsWith(MSG_FORBIDDEN)) {
             return AjaxResult.err(HttpStatus.FORBIDDEN.value(), msg);
         }
         return AjaxResult.FORBIDDEN;

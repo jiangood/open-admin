@@ -13,6 +13,3 @@ logging.file.path: ${logging.file.path}
 
 文件上传地址：${sys.file.upload-path}
 
-
-Writing to the console can be very slow. Avoid logging to the  console in production environments, especially in high volume systems.
-

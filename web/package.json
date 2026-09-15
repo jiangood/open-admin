@@ -40,8 +40,7 @@
   "type": "module",
   "files": [
     "src/*",
-    "vite-plugin/*",
-    "!src/pages/test/*"
+    "vite-plugin/*"
   ],
   "main": "src/index.ts",
   "exports": {

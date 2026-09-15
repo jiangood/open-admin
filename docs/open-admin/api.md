@@ -260,12 +260,25 @@ class ReportPage extends React.Component {
 | `FieldBoolean` | 布尔值选择（`type`：select/radio/checkbox/switch） |
 | `FieldDate` / `FieldDateRange` | 日期/日期范围（`type`：如 `YYYY-MM-DD`、`YYYY-MM`、`YYYY-QQ`、`YYYY-MM-DD HH:mm:ss`、`HH:mm:ss`） |
 | `FieldNumberRange` | 数字范围（值形如 `"1/100"`） |
-| `FieldSysOrgTree` / `FieldSysOrgTreeSelect` | 系统组织树 / 树选择（`type`：dept/unit/shop） |
+| `FieldSysOrgTree` / `FieldSysOrgTreeSelect` | 系统组织树 / 树选择（`type`：dept/unit） |
 | `FieldUploadFile` | 通用文件上传（`/admin/sysFile/upload`） |
 | `FieldUploadImage` | 图片上传（裁剪/压缩，`/admin/sysFile/uploadImage`） |
 | `FieldEditor` | 富文本编辑器 |
 | `FieldPercent` | 百分比输入（0~100，内部按 0~1 存储） |
 | `FieldTable` / `FieldTableSelect` | 可编辑表格 / 下拉表格选择 |
+
+#### 业务快捷组件
+
+系统数据的预配置快捷组件（内部已绑定对应系统端点，无需 `url`）：
+
+| 组件 | 用途 |
+|------|------|
+| `FieldUserSelect` | 系统用户下拉（`/admin/sysUser/options`） |
+| `FieldUserSelectMultiple` | 系统用户多选 |
+| `FieldUnitTreeSelect` | 系统单位树选择（`/admin/sysOrg/unit-tree`） |
+| `FieldDeptTreeSelect` | 系统部门树选择（`/admin/sysOrg/dept-tree`） |
+| `FieldOrgTreeSelect` | `FieldDeptTreeSelect` 的别名 |
+| `FieldOrgTreeMultipleSelect` | 系统部门树多选 |
 
 #### 文件上传字段
 

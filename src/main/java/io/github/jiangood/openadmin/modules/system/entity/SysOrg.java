@@ -41,7 +41,7 @@ public class SysOrg extends BaseEntity { // NOSONAR: 实体以 id 为业务键�
     private Integer seq;
     @Column(nullable = false)
     private Boolean enabled;
-    /** 机构类型：1=单位, 2=部门, 3=店铺。扩展类型用 OrgTypeProvider */
+    /** 机构类型：1=单位, 2=部门。扩展类型用 OrgTypeProvider */
     @NotNull
     private Integer type;
     // 部门领导

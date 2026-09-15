@@ -24,8 +24,6 @@ target/
 /web/config/dist/
 
 # 自动生成的
-/web/spring-shell.log
-
 /.env
 /src/main/resources/application-dev.yml
 .flattened-pom.xml
@@ -33,13 +31,8 @@ target/
 /.vscode/
 /.trae/
 /logs/
-/data/
-/static/
-/docs/superpowers/
-.claude/settings.local.json
-.superpowers/
-.playwright-mcp/
 /.opencode/plans/
+.playwright-mcp/
 *.log
 *.tgz
 /web/test-results/*

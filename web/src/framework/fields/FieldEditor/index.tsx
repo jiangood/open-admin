@@ -62,7 +62,7 @@ export class FieldEditor extends React.Component<FieldEditorProps, {loading: boo
                     plugins: [
                         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                         'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                        'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount',
+                        'insertdatetime', 'media', 'table', 'help', 'wordcount',
                         'emoticons'
                     ],
                     image_description: false,

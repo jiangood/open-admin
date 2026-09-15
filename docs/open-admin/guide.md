@@ -36,7 +36,8 @@ src/main/java/io/github/jiangood/openadmin/
 │   ├── data/           # BaseEntity, BaseRepository, Spec
 │   ├── perm/           # @HasPermission 注解 + 切面
 │   ├── log/            # @Log 操作日志注解 + 切面
-│   └── common/         # 通用（登录/认证/站点信息）
+│   ├── auth/           # 登录认证（AuthController, LoginTool）
+│   └── common/         # 通用端点（站点信息、工具）
 ├── util/               # 工具类库（BeanTool, JsonTool, TreeTool, ExcelTool 等）
 └── modules/
     ├── system/         # 用户/角色/菜单/组织/字典/文件/日志

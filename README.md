@@ -86,13 +86,7 @@ createRoot(document.getElementById('root')).render(
 - 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
 - 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](docs/open-admin/api.md#页面生命周期)）
 
-**目录约定**（无需配置，自动识别）：
-
-| 目录 | 路由前缀 | 是否需要登录 | 是否需要 AdminLayout |
-|------|---------|-------------|-------------------|
-| `pages/` | `/` | ✅ 是 | ✅ 是 |
-| `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
-| `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
+**目录约定**（无需配置，自动识别）：`src/pages/` 下按目录区分页面类型——`pages/` 后台页（需登录 + 后台布局）、`pages/public/` 免登录无布局（如登录页）、`pages/standalone/` 需登录无布局（如强制改密页），详见 [development.md](docs/open-admin/development.md#页面目录约定)。
 
 
 ## 文档
@@ -175,18 +169,4 @@ scripts\start-frontend.bat start|stop|restart|status
 
 ### 从 Release 同步到业务项目
 
-框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目通过 **`oa-upgrade-docs` skill** 从 `https://github.com/jiangood/open-admin/releases/download/v{版本}/framework-files.zip` 下载并同步到项目根目录：
-
-```
-<项目根>/.opencode/skills/oa-crud/SKILL.md
-<项目根>/.opencode/skills/oa-upgrade/SKILL.md
-<项目根>/.opencode/skills/oa-upgrade-docs/SKILL.md
-<项目根>/.opencode/skills/oa-sonar-scan/SKILL.md
-<项目根>/docs/open-admin/*.md     # 即本文档（guide/api/config/development/AGENTS）
-<项目根>/AGENTS.md                # opencode 开发指引（不存在时生成；已存在且不同时询问确认后更新）
-```
-
-- 同步按**内容比对**：无变更不写入
-- `docs/open-admin/` 全量镜像（删除该目录下孤儿文件）；`.opencode/skills/` 仅覆盖框架 skill，不删除业务本地 skill
-- 根目录 `AGENTS.md` 不存在时生成；已存在且与框架新版内容不同时，`oa-upgrade-docs` 会展示 diff 并询问开发者确认后再更新（避免无提示覆盖本地自定义）；框架更新版随 `docs/open-admin/AGENTS.md` 提供
-- 升级框架后调用 `oa-upgrade` skill 会自动在末尾调用 `oa-upgrade-docs` 同步新版本框架文件
+框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目调用 **`oa-upgrade-docs` skill** 下载并同步到项目根目录：内容比对无变更不写入；`docs/open-admin/` 全量镜像（删除孤儿文件），`.opencode/skills/` 仅覆盖框架 skill（不删业务本地 skill）；根目录 `AGENTS.md` 不存在时生成，已存在且内容不同时展示 diff 询问确认后更新。同步细节与验证步骤见 `oa-upgrade-docs` skill；升级框架后调用 `oa-upgrade` skill 会自动在末尾触发同步。

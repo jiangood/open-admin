@@ -134,9 +134,8 @@ npm run build
 
 ## 代码规范
 
-- Java import 使用框架的全限定名
-- 前端 import 使用 `@jiangood/open-admin` 包名
-- 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类允许 `@Autowired` 字段注入
+- 迁移后的代码遵循 [development.md](../../../docs/open-admin/development.md) 开发规范（命名、构造器注入、`AjaxResult` 等）
+- Java import 使用框架的全限定名；前端 import 使用 `@jiangood/open-admin` 包名
 - 使用 Release Notes 中推荐的新 API 替代废弃 API
 
 ## 参考

@@ -26,7 +26,7 @@ public class AjaxResult {
     public static final int FAILURE = 500;
 
 
-    public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), MessageConst.MGS_FORBIDDEN);
+    public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), MessageConst.MSG_FORBIDDEN);
 
 
     public static final AjaxResult UNAUTHORIZED = AjaxResult.err(HttpStatus.UNAUTHORIZED.value(), MessageConst.MSG_UNAUTHORIZED);
