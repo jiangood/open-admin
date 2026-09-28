@@ -67,7 +67,7 @@ menus:
       - {name: 删除, code: delete}
   sys-log:
     pid: sys
-    name: 审计日志
+    name: 操作日志
     path: /system/log
     icon: FileSearchOutlined
     perms:
