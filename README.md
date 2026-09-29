@@ -21,7 +21,7 @@ open-admin 是一个后台管理系统框架（脚手架），**业务项目无�
 }
 ```
 
-添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。框架的 skills 与文档通过 `oa-upgrade-docs` skill 从 GitHub Release 同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
+添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理、代码生成等功能开箱即用。框架的 skills 与文档通过 `oa-upgrade-docs` skill 从 GitHub Release 同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
 
 ## 快速开始
 

@@ -82,3 +82,11 @@ menus:
       - {name: 创建, code: create}
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
+  sys-codegen:
+    pid: sys
+    name: 代码生成
+    path: /system/codegen
+    icon: CodeOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 生成, code: generate}

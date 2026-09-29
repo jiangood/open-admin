@@ -120,7 +120,7 @@ web/
 5. **菜单** — `src/main/resources/application-menu*.yml` 定义菜单树
 6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
 
-> 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 从框架 Release 同步到 `.opencode/skills/`）。
+> 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 从框架 Release 同步到 `.opencode/skills/`）。也可在「系统管理 → 代码生成」中选中已建好的实体，一键生成 Repository / Service / Controller / 前端页面 / 菜单 代码并写入项目源码目录（先预览确认）。
 
 ## 内置模块
 
@@ -129,6 +129,7 @@ web/
 | system | `modules/system/` | 用户/角色/菜单/组织/字典/文件/日志管理 |
 | job | `modules/job/` | Quartz 定时任务 |
 | logviewer | `modules/logviewer/` | 运行日志在线查看 |
+| codegen | `modules/codegen/` | 实体扫描与 CRUD 代码生成（系统管理 →「代码生成」） |
 
 ## FAQ
 

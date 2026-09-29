@@ -86,6 +86,35 @@ public class SystemProperties {
      */
     private FileStorage file = new FileStorage();
 
+    /**
+     * 代码生成配置
+     */
+    private Codegen codegen = new Codegen();
+
+    @Data
+    public static class Codegen {
+
+        /**
+         * 后端源码根目录（相对项目根目录）
+         */
+        private String backendDir = "src/main/java";
+
+        /**
+         * 资源目录（菜单 YAML 输出位置，相对项目根目录）
+         */
+        private String resourceDir = "src/main/resources";
+
+        /**
+         * 前端页面根目录（相对项目根目录）
+         */
+        private String frontendDir = "web/src/pages";
+
+        /**
+         * 生成页面引入框架组件的模块名。留空时自动识别：框架仓库用相对路径，业务项目用 @jiangood/open-admin
+         */
+        private String frontendImport = "";
+    }
+
     @Data
     public static class FileStorage {
 

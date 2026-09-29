@@ -37,6 +37,11 @@ spring:
 sys:
   file:
     upload-path: /data/upload
+  codegen:
+    backend-dir: src/main/java
+    resource-dir: src/main/resources
+    frontend-dir: web/src/pages
+    frontend-import: ""
 
 logging:
   file:

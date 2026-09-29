@@ -47,6 +47,33 @@ public class DataSyncJob extends BaseJob {
 }
 ```
 
+### 代码生成
+
+系统管理 →「代码生成」页面：动态扫描已注册实体（继承 `BaseEntity` 且标注 `@Entity`），按选中实体生成常见 CRUD 代码并写入项目源码目录（先预览确认，再写入）。
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/codegen/entity-options` | GET | `sys-codegen:read` | 扫描实体列表（`value` 全限定类名，`label` 中文名，`data` 含 `module`/`packageName`/`frameworkEntity`） |
+| `admin/codegen/entity-info` | GET | `sys-codegen:read` | 单实体字段元数据（`className`） |
+| `admin/codegen/preview` | POST | `sys-codegen:generate` | 只生成不写盘，返回各文件路径/内容/是否已存在 |
+| `admin/codegen/generate` | POST | `sys-codegen:generate` | 写入文件，返回 `written`/`skipped` |
+
+请求体（`CodegenReq`）：`className`（必填）、`module`（缺省取类名 kebab-case）、`label`（缺省取实体 `@Remark`）、`parentMenu`（默认 `sys`）、`overwrite`（是否覆盖已存在文件）。
+
+生成物：
+
+| 类型 | 路径 | 说明 |
+|------|------|------|
+| Repository | `{实体包去掉 .entity}/repository/{Entity}Repository.java` | 继承 `BaseRepository<Entity, String>` |
+| Service | `{模块包}/service/{Entity}Service.java` | 继承 `BaseService`，含 `@FileField` 时自动生成 claim/unclaim 事务方法 |
+| Controller | `{模块包}/controller/{Entity}Controller.java` | `admin/{module}` 下 `page/info/create/update/delete`，`@HasPermission` + `@Log` |
+| 前端页面 | `web/src/pages/{module}/index.jsx` | `ProTable` + `FormModal`，按字段类型选用 `Field*`/`View*` 组件 |
+| 菜单 | `src/main/resources/application-menu-{module}.yml` | 挂在指定父菜单（默认 `sys`），含读/建/改/删权限 |
+
+字段映射：String→`Input`、`@Lob`/TEXT→`Input.TextArea`、数字→`InputNumber`、布尔→`FieldBoolean`、日期→`FieldDate`、枚举（`@DictType`）→`FieldDictSelect`、`@FileField(html=true)`→`FieldEditor`、图片类文件→`FieldUploadImage`、其他文件→`FieldUploadFile`；查询条件为可搜索 String 字段的 `searchText` 模糊匹配 + 枚举/布尔等值过滤。
+
+写盘根目录由 `sys.codegen.*` 配置（见 [config.md](config.md)），路径越界会被拒绝；目标文件已存在且未开启 `overwrite` 时跳过。
+
 ## 前端
 
 ### 组件
