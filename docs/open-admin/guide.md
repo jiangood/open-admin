@@ -22,7 +22,7 @@
 │  │ (业务层) │ │  (框架层) │ │ (工具) │ │  (配置)  │ │
 │  └──────────┘ └──────────┘ └────────┘ └──────────┘ │
 ├─────────────────── JDBC ────────────────────────────┤
-│                    MySQL 8+                          │
+│          H2（默认，文件模式） / MySQL 8+             │
 └─────────────────────────────────────────────────────┘
 ```
 
@@ -82,7 +82,7 @@ web/
 |------|------|
 | 前端 | React 19, Ant Design 6, Vite 8, TypeScript |
 | 后端 | Java 21, Spring Boot 4+, JPA (Hibernate), Spring Security, Quartz |
-| 数据库 | MySQL 8+ |
+| 数据库 | H2（默认，文件模式，零外部依赖） / MySQL 8+（可选） |
 | 构建 | Maven (后端), npm (前端) |
 
 ## 核心功能
@@ -133,17 +133,11 @@ web/
 
 ## FAQ
 
-**种子数据如何管理？** 框架使用 Flyway 管理种子数据的版本化迁移。框架内置的种子数据位于 `classpath:db/migration/V10000__framework__seed_data.sql`，首次启动时自动执行。
+**种子数据如何管理？** 框架内置的种子数据（默认字典类型、机构、管理员用户/角色、默认文章、清理任务）在首次启动、JPA 建表完成后由 `SeedDataInitializer`（`framework/config/SeedDataInitializer.java`）写入：每条记录先按 id 判断是否已存在，存在则跳过，不覆盖后续修改，因此可重复启动、幂等执行，且不依赖数据库方言（H2 / MySQL 均可）。
 
-**业务项目如何添加自己的种子数据？** 在 `src/main/resources/db/migration/` 目录下放置 Flyway 迁移脚本即可：
+**业务项目如何添加自己的种子数据？** 实现 `StartupHook` 并注册为 Spring Bean，在 `afterSeedDataInitialize()` 中写入业务数据（框架会先写内置种子数据，再调用该方法）。建议同样采用「按业务键判断是否已存在，存在则跳过」的幂等写法。业务数据通过 JPA Repository 保存即可，无需 Flyway 等版本化迁移工具。
 
-```
-src/main/resources/
-└── db/migration/
-    └── V10001__seed__init_biz_data.sql
-```
-
-脚本编号需大于框架内置的 `V10000__framework__seed_data.sql`，Flyway 对每个脚本只执行一次（记录 checksum），幂等性由版本化迁移保证。框架的 seed 脚本与业务项目的脚本互不干扰（不同命名）。
+> 框架不再使用 Flyway：早期内置的 `db/migration/*.sql` 已移除，历史库表的兼容迁移由业务项目按需自行处理。
 
 
 **前端依赖安装失败？** `npm install --registry=https://registry.npmmirror.com`

@@ -27,20 +27,19 @@ open-admin 是一个后台管理系统框架（脚手架），**业务项目无�
 
 ### 环境要求
 
-- **JDK 21+** / **MySQL 8.0+** / **Node.js 18+**
+- **JDK 21+** / **Node.js 18+**（数据库内置 H2，无需安装；可选 MySQL 8.0+）
 
 ### 后端启动
 
 ```bash
-# 创建数据库
-CREATE DATABASE open_admin;
-
-# 修改 src/main/resources/application.yml 数据库连接
 git clone https://github.com/jiangood/open-admin.git
 cd open-admin
 mvn clean compile
-mvn -Pdev spring-boot:run   # 开发模式启动
+mvn -Pdev spring-boot:run   # 开发模式启动（内置 H2，首次启动自动建表 + 初始化数据）
 ```
+
+数据库文件默认在 `/data/db/open-admin`（本地开发可用 `-Ddb_path=./data/db/open-admin` 覆盖）；
+切换 MySQL 见 `application-mysql.yml`：`mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=mysql`。
 
 ### 前端启动
 
@@ -55,6 +54,19 @@ npm run dev                    # 默认 http://localhost:3000
 | 账号 | 密码 |
 |------|------|
 | admin | Open@1234 |
+
+### Docker 一键部署
+
+镜像内置 H2 数据库，无需外部 MySQL，数据、日志、上传文件持久化在 `/data`：
+
+```bash
+# docker compose（首次自动构建镜像）
+docker compose -f docker-compose/docker-compose.yml up -d --build
+
+# 或手动构建 / 运行
+docker build -t open-admin .
+docker run -d --name open-admin -p 8080:8080 -v ./data:/data open-admin
+```
 
 ### 集成到已有项目
 
@@ -154,7 +166,7 @@ scripts\start-frontend.bat start|stop|restart|status
 
 - 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
 - Windows 版内调 PowerShell `Start-Process cmd.exe` 后台启动、`taskkill /T` 结束整棵进程树，PID 同样记录在 `logs/*.pid`
-- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，需本地 MySQL 8+，连接参数见其中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
 
 ## Skills (opencode)
 

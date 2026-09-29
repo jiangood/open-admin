@@ -83,7 +83,7 @@ https://github.com/jiangood/open-admin/releases/tag/v{target_version}
 | 配置变更 | 更新 application.yml 中的配置项 |
 | 前端组件变更 | 更新 JSX 中的组件引用 |
 | 注解变化 | 更新 `@HasPermission`、`@Log` 等注解的用法 |
-| 数据库迁移 | 执行 Flyway 迁移脚本或 DDL |
+| 数据库迁移 | 执行 DDL 或数据迁移脚本（框架已不再使用 Flyway） |
 
 ### 6. 编译与测试验证
 
