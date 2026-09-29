@@ -176,9 +176,9 @@ scripts\start-frontend.bat start|stop|restart|status
 |-------|------|
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
-| `oa-upgrade-docs` | 从 GitHub Release 同步框架文件（skills + docs + AGENTS.md） |
+| `oa-upgrade-docs` | 从 GitHub Release 同步框架文件（skills + docs） |
 | `oa-sonar-scan` | SonarQube 扫描与问题修复 |
 
 ### 从 Release 同步到业务项目
 
-框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目调用 **`oa-upgrade-docs` skill** 下载并同步到项目根目录：内容比对无变更不写入；`docs/open-admin/` 全量镜像（删除孤儿文件），`.opencode/skills/` 仅覆盖框架 skill（不删业务本地 skill）；根目录 `AGENTS.md` 不存在时生成，已存在且内容不同时展示 diff 询问确认后更新。同步细节与验证步骤见 `oa-upgrade-docs` skill；升级框架后调用 `oa-upgrade` skill 会自动在末尾触发同步。
+框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目调用 **`oa-upgrade-docs` skill** 下载并同步到项目根目录：内容比对无变更不写入；`docs/open-admin/` 全量镜像（删除孤儿文件），`.opencode/skills/` 仅覆盖框架 skill（不删业务本地 skill）。同步细节与验证步骤见 `oa-upgrade-docs` skill；升级框架后调用 `oa-upgrade` skill 会自动在末尾触发同步。

@@ -18,7 +18,7 @@
 | `sys.codegen.frontend-dir` | 代码生成前端页面根目录 | web/src/pages |
 | `sys.codegen.frontend-import` | 生成页面引入框架组件的模块名；留空自动识别（框架仓库用相对路径，业务项目用 `@jiangood/open-admin`） | 空 |
 
-> 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-upgrade-docs` skill 从框架 GitHub Release 下载 `framework-files.zip` 同步到业务项目根目录（内容比对，无变更不写入），并在根目录生成 `AGENTS.md`（不存在时生成，已存在且不同时询问确认后更新）。无需配置。
+> 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-upgrade-docs` skill 从框架 GitHub Release 下载 `framework-files.zip` 同步到业务项目根目录（内容比对，无变更不写入）。无需配置。
 
 ## 数据库
 

@@ -116,9 +116,6 @@ jobs:
           cp "$GITHUB_WORKSPACE/.opencode/skills/oa-crud/SKILL.md" .opencode/skills/oa-crud/SKILL.md
           cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade/SKILL.md" .opencode/skills/oa-upgrade/SKILL.md
           cp "$GITHUB_WORKSPACE/.opencode/skills/oa-upgrade-docs/SKILL.md" .opencode/skills/oa-upgrade-docs/SKILL.md
-          if [ ! -f AGENTS.md ]; then
-            cp docs/open-admin/AGENTS.md AGENTS.md
-          fi
 
       - name: 设置 JDK 21
         if: steps.check.outputs.skip != 'true'
