@@ -3,12 +3,16 @@ rem =====================================================================
 rem  release.bat - open-admin release helper for Windows / cmd
 rem
 rem  Usage:
+rem    scripts\release.bat 3.1.3 [--skip-tests] [--no-push]
+rem                                 [--dry-run] [--no-rollback]
 rem    scripts\release.bat status
 rem    scripts\release.bat check
-rem    scripts\release.bat run <x.y.z> [--skip-tests] [--no-push]
-rem                                    [--dry-run] [--no-rollback]
 rem
-rem  run options:
+rem  "run" is optional: scripts\release.bat 3.1.3 and scripts\release.bat run 3.1.3
+rem  are the same. The version may be written with or without the leading "v";
+rem  the git tag is always created and pushed as v<version>, e.g. v3.1.3.
+rem
+rem  options:
 rem    --skip-tests   skip "mvn -B clean test" and "npm run build"
 rem    --no-push      commit and tag locally, do not push to origin
 rem    --dry-run      inspect only, change no repo file
@@ -29,8 +33,9 @@ rem    - whitelist: */pom.xml and web/package.json are the only files a
 rem      release may modify
 rem =====================================================================
 
+rem no chcp here: this script only prints ASCII and the tee switches the console
+rem code page to UTF-8 on its own. The original value is put back at the end.
 for /f "tokens=2 delims=:" %%c in ('chcp') do set "OLDCP=%%c"
-chcp 65001 >nul
 setlocal
 cd /d "%~dp0.."
 
@@ -74,10 +79,27 @@ rem  entry
 rem =====================================================================
 :main
 if "%~1"=="" goto usage
-if /I "%~1"=="--help" goto usage
-if /I "%~1"=="-h" goto usage
-set "CMD=%~1"
+set "ARG1=%~1"
+if /I "%ARG1%"=="--help" goto usage
+if /I "%ARG1%"=="-h" goto usage
+if /I "%ARG1%"=="status" goto set_cmd
+if /I "%ARG1%"=="check" goto set_cmd
+if /I "%ARG1%"=="run" goto set_cmd
+if "%ARG1:~0,1%"=="-" goto set_cmd_run
+rem bare form: scripts\release.bat 3.1.3
+set "CMD=run"
+set "VERSION=%ARG1%"
 shift
+goto parse_args
+
+:set_cmd
+set "CMD=%ARG1%"
+shift
+goto parse_args
+
+:set_cmd_run
+set "CMD=run"
+goto parse_args
 
 :parse_args
 if "%~1"=="" goto args_done
@@ -134,9 +156,13 @@ call :msg ""
 call :msg "  open-admin release helper"
 call :msg ""
 call :msg "  Usage:"
+call :msg "    scripts\release.bat 3.1.3 [--skip-tests] [--no-push] [--dry-run] [--no-rollback]"
 call :msg "    scripts\release.bat status"
 call :msg "    scripts\release.bat check"
-call :msg "    scripts\release.bat run x.y.z [--skip-tests] [--no-push] [--dry-run] [--no-rollback]"
+call :msg ""
+call :msg "  scripts\release.bat 3.1.3 and scripts\release.bat run 3.1.3 are the same."
+call :msg "  the leading v is optional, e.g. scripts\release.bat v3.1.3"
+call :msg "  the git tag is always created and pushed as v3.1.3"
 call :msg ""
 call :msg "  Exit codes: 0 ok / 1 usage / 2 tests / 3 workspace / 4 git / 5 conflict"
 call :msg ""
@@ -185,20 +211,10 @@ set "BASE=%REMOTE_TAG%"
 if "%BASE%"=="" set "BASE=%LOCAL_TAG%"
 set "BASE=%BASE:v=%"
 if "%BASE%"=="" set "BASE=%POM_VERSION%"
+set "BASE_VERSION=%BASE%"
 
-echo %BASE%| findstr /r "^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$" >nul
+call :compute_next
 if errorlevel 1 goto check_bad_base
-set "V_MAJOR=0"
-set "V_MINOR=0"
-set "V_PATCH=0"
-for /f "tokens=1,2,3 delims=." %%a in ("%BASE%") do (
-  set "V_MAJOR=%%a"
-  set "V_MINOR=%%b"
-  set "V_PATCH=%%c"
-)
-set /a NEXT_PATCH=%V_PATCH%+1 >nul
-set /a NEXT_MINOR=%V_MINOR%+1 >nul
-set /a NEXT_MAJOR=%V_MAJOR%+1 >nul
 
 set "WORKSPACE=clean"
 if not "%WS_WHITELIST_OK%"=="1" set "WORKSPACE=dirty-outside-whitelist"
@@ -210,10 +226,10 @@ echo POM_VERSION=%POM_VERSION%
 echo NPM_VERSION=%PKG_VERSION%
 echo LATEST_TAG_LOCAL=%LOCAL_TAG%
 echo LATEST_TAG_REMOTE=%REMOTE_TAG%
-echo BASE_VERSION=%BASE%
-echo NEXT_PATCH=%V_MAJOR%.%V_MINOR%.%NEXT_PATCH%
-echo NEXT_MINOR=%V_MAJOR%.%NEXT_MINOR%.0
-echo NEXT_MAJOR=%NEXT_MAJOR%.0.0
+echo BASE_VERSION=%BASE_VERSION%
+echo NEXT_PATCH=%PATCH_VERSION%
+echo NEXT_MINOR=%MINOR_VERSION%
+echo NEXT_MAJOR=%MAJOR_VERSION%
 echo WORKSPACE=%WORKSPACE%
 if not "%REMOTE_CHECK_OK%"=="1" echo TAGS_IN_SYNC=unknown
 if "%REMOTE_CHECK_OK%"=="1" if "%LOCAL_TAG%"=="%REMOTE_TAG%" echo TAGS_IN_SYNC=yes
@@ -223,16 +239,17 @@ exit /b 0
 
 :check_bad_base
 call :msg ""
-call :msg "  ERROR: cannot parse latest tag: %BASE%"
+call :msg "  ERROR: cannot parse latest tag: %BASE_VERSION%"
 exit /b 1
 
 rem =====================================================================
 rem  run - the release itself
 rem =====================================================================
 :cmd_run
-if "%VERSION%"=="" goto run_no_version
-
-node -e "process.exit(/^\d+\.\d+\.\d+$/.test(process.argv[1])?0:1)" "%VERSION%" 2>nul
+if not defined VERSION goto run_no_version
+call :normalize_version
+if not defined VERSION goto run_bad_version
+call :valid_version "%VERSION%"
 if errorlevel 1 goto run_bad_version
 set "TAG=v%VERSION%"
 
@@ -337,7 +354,7 @@ if defined RESUME goto tests_done
 if defined OPT_SKIP_TESTS goto tests_skipped
 call :log "    mvn -B clean test"
 set "REL_CMD=mvn -B clean test"
-call :run_logged
+call :run_logged_ansi
 if errorlevel 1 goto fail_backend_tests
 call :ok "backend tests passed"
 if exist "web\node_modules" goto frontend_build
@@ -435,12 +452,14 @@ rem  failures
 rem =====================================================================
 :run_no_version
 call :msg ""
-call :msg "  ERROR: run needs a version, e.g. scripts\release.bat run 3.1.3"
+call :msg "  ERROR: no version given"
+call :msg "  use: scripts\release.bat 3.1.3"
 goto usage
 
 :run_bad_version
 call :msg ""
 call :msg "  ERROR: invalid version '%VERSION%', expected x.y.z"
+call :msg "  the leading v is optional, the tag is always v-prefixed"
 exit /b 1
 
 :fail_preflight
@@ -557,9 +576,18 @@ set "LOG=%ROOT%\logs\release-v%VERSION%-%STAMP%.log"
 echo open-admin release v%VERSION% > "%LOG%"
 exit /b 0
 
-rem run %REL_CMD%, tee stdout+stderr to console and %LOG%, return its exit code
+rem run %REL_CMD%, tee stdout+stderr to the console and to %LOG% (UTF-8).
+rem node 24 (bump-version.js, npm) writes UTF-8 into a pipe, so this variant
+rem decodes UTF-8. Use :run_logged_ansi for java (maven, surefire forks).
+rem The console code page is switched by powershell and restored by the caller.
 :run_logged
-powershell -NoProfile -ExecutionPolicy Bypass -Command "[Console]::OutputEncoding=[Text.UTF8Encoding]::new($false); $w=New-Object System.IO.StreamWriter($env:LOG,$true,[Text.UTF8Encoding]::new($false)); cmd.exe /c $env:REL_CMD 2>&1 | ForEach-Object { Write-Host $_; $w.WriteLine($_) }; $w.Close(); exit $LASTEXITCODE"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$old=[Console]::OutputEncoding; [Console]::OutputEncoding=[Text.UTF8Encoding]::new($false); $w=New-Object System.IO.StreamWriter($env:LOG,$true,[Text.UTF8Encoding]::new($false)); cmd.exe /c $env:REL_CMD 2>&1 | ForEach-Object { Write-Host $_; $w.WriteLine($_) }; $w.Close(); [Console]::OutputEncoding=$old; exit $LASTEXITCODE"
+exit /b %ERRORLEVEL%
+
+rem same, but lets powershell decode with the console code page, which is what
+rem java writes into a pipe on Windows. The log is still written as UTF-8.
+:run_logged_ansi
+powershell -NoProfile -ExecutionPolicy Bypass -Command "$w=New-Object System.IO.StreamWriter($env:LOG,$true,[Text.UTF8Encoding]::new($false)); cmd.exe /c $env:REL_CMD 2>&1 | ForEach-Object { Write-Host $_; $w.WriteLine($_) }; $w.Close(); exit $LASTEXITCODE"
 exit /b %ERRORLEVEL%
 
 rem during run: abort with message %~1 before modifying files
@@ -653,6 +681,45 @@ exit /b 0
 set "DIRTY_COUNT=0"
 for /f "delims=" %%l in ('git status --porcelain 2^>nul') do set /a DIRTY_COUNT+=1
 exit /b 0
+
+rem compute NEXT_PATCH/NEXT_MINOR/NEXT_MAJOR from the latest tag or the current
+rem version; errorlevel 1 when the base is not x.y.z
+:compute_next
+set "BASE=%REMOTE_TAG%"
+if "%BASE%"=="" set "BASE=%LOCAL_TAG%"
+set "BASE=%BASE:v=%"
+if "%BASE%"=="" set "BASE=%POM_VERSION%"
+set "BASE_VERSION=%BASE%"
+echo %BASE%| findstr /r "^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$" >nul
+if errorlevel 1 exit /b 1
+set "V_MAJOR=0"
+set "V_MINOR=0"
+set "V_PATCH=0"
+for /f "tokens=1,2,3 delims=." %%a in ("%BASE%") do (
+  set "V_MAJOR=%%a"
+  set "V_MINOR=%%b"
+  set "V_PATCH=%%c"
+)
+set /a NEXT_PATCH=%V_PATCH%+1 >nul
+set /a NEXT_MINOR=%V_MINOR%+1 >nul
+set /a NEXT_MAJOR=%V_MAJOR%+1 >nul
+set "PATCH_VERSION=%V_MAJOR%.%V_MINOR%.%NEXT_PATCH%"
+set "MINOR_VERSION=%V_MAJOR%.%NEXT_MINOR%.0"
+set "MAJOR_VERSION=%NEXT_MAJOR%.0.0"
+exit /b 0
+
+rem drop spaces and one leading v/V, so "v3.1.3", "3.1.3" and " 3.1.3 " all
+rem become 3.1.3
+:normalize_version
+if not defined VERSION exit /b 0
+set "VERSION=%VERSION: =%"
+if /I "%VERSION:~0,1%"=="v" set "VERSION=%VERSION:~1%"
+exit /b 0
+
+rem %~1 = version, errorlevel 0 when it is x.y.z
+:valid_version
+node -e "process.exit(/^\d+\.\d+\.\d+$/.test(process.argv[1])?0:1)" "%~1" 2>nul
+exit /b %ERRORLEVEL%
 
 rem errorlevel 0 = only whitelisted files are modified, 1 = something else is there
 :check_whitelist
