@@ -23,6 +23,15 @@ export interface ProTableRequestResult<T = unknown> {
     };
 }
 
+/** 工具栏（含右侧插槽）渲染函数签名 */
+export type ProTableToolBarRender<T = unknown> = (
+    params: Record<string, unknown>,
+    selection: {
+        selectedRows: T[];
+        selectedRowKeys: React.Key[];
+    }
+) => React.ReactNode;
+
 export interface ProTableProps<T = unknown> {
     /**
      * 数据请求（Promise 式），框架自动注入 page/size/sort 参数。
@@ -37,11 +46,10 @@ export interface ProTableProps<T = unknown> {
     actionRef?: React.RefObject<ProTableActionRef | undefined>;
     /** 获取搜索表单实例 */
     formRef?: React.RefObject<FormInstance | undefined>;
-    /** 工具栏渲染，参数为当前搜索值与行选择状态 */
-    toolBarRender?: (params: Record<string, unknown>, selection: {
-        selectedRows: T[];
-        selectedRowKeys: React.Key[];
-    }) => React.ReactNode;
+    /** 工具栏渲染（左侧），参数为当前搜索值与行选择状态 */
+    toolBarRender?: ProTableToolBarRender<T>;
+    /** 工具栏右侧渲染，参数同 toolBarRender；用于导出/清理/刷新等右侧操作 */
+    toolBarRightRender?: ProTableToolBarRender<T>;
     rowKey?: string;
     /** 行选择：true 为默认 checkbox，对象可覆盖 type/onChange */
     rowSelection?: boolean | {
@@ -185,6 +193,7 @@ this.setState({loading: true})
     render() {
         const {
             toolBarRender,
+            toolBarRightRender,
             columns,
             rowSelection,
             rowKey = "id",
@@ -194,10 +203,13 @@ this.setState({loading: true})
         return <div className={'oa-pro-table '} id={this.id}>
             {this.renderForm()}
             <div className="pro-table-wrapper">
-                {toolBarRender && <div className="pro-table-toolbar">
-                    <div className="pro-table-toolbar-left">
+                {(toolBarRender || toolBarRightRender) && <div className="pro-table-toolbar">
+                    {toolBarRender && <div className="pro-table-toolbar-left">
                         {this.getToolBarRenderNode(toolBarRender)}
-                    </div>
+                    </div>}
+                    {toolBarRightRender && <div className="pro-table-toolbar-right">
+                        {this.getToolBarRenderNode(toolBarRightRender)}
+                    </div>}
                 </div>}
 
 
@@ -268,7 +280,7 @@ this.setState({loading: true})
         )
     };
 
-    getToolBarRenderNode(toolBarRender: NonNullable<ProTableProps<T>['toolBarRender']>) {
+    getToolBarRenderNode(toolBarRender: ProTableToolBarRender<T>) {
         if (!toolBarRender) {
             return
         }

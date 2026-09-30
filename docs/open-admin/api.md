@@ -186,6 +186,9 @@ import { PermActions } from '@jiangood/open-admin';
   toolBarRender={(params, {selectedRows, selectedRowKeys}) => (
     <Button type="primary" onClick={this.handleAdd}>新增</Button>
   )}
+  toolBarRightRender={(params) => (
+    <Button danger onClick={this.handleClean}>清理失败记录</Button>
+  )}
   defaultPageSize={20}
   scrollY={500}
 />
@@ -198,6 +201,7 @@ import { PermActions } from '@jiangood/open-admin';
 | `actionRef` | 表格操作句柄（`reload` / `clearSelection`） |
 | `formRef` | 搜索表单实例（`getFieldsValue` 等） |
 | `toolBarRender` | 工具栏渲染，参数为当前搜索值 + 行选择状态 |
+| `toolBarRightRender` | 工具栏右侧渲染，参数同 `toolBarRender`；用于导出/清理/刷新等右侧操作 |
 | `rowSelection` | 行选择：`true` 为 checkbox，对象可覆盖 `type`/`onChange` |
 | `treeMode` | 树形数据模式，关闭分页 |
 | `searchFormRender` | 搜索表单渲染函数，返回 `Form.Item` 列表 |

@@ -407,6 +407,16 @@ export default class extends React.Component {
 }
 ```
 
+> **工具栏右侧插槽**：需要把「导出/清理/刷新」等操作放到工具栏右侧时，用 `toolBarRightRender`（签名与 `toolBarRender` 相同，参数为 `params` + `{selectedRows, selectedRowKeys}`），示例：
+>
+> ```jsx
+> toolBarRightRender={(params, {selectedRowKeys}) => (
+>     <Button danger disabled={!selectedRowKeys.length} onClick={this.handleClean}>清理失败记录</Button>
+> )}
+> ```
+>
+> 左右插槽可单独或同时使用；不要再写 CSS 覆盖 `.pro-table-toolbar-left` 来绕过。
+
 ### 页面生命周期
 
 多 Tab 布局中所有页面保持 mounted（仅 `display` 切换），页面组件可实现 `onShow()` 在首次加载或 Tab 切回时自动刷新数据。完整规则与代码示例见[页面生命周期](../../../docs/open-admin/api.md#页面生命周期)。
