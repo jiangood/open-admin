@@ -47,7 +47,7 @@ logging:
   file:
     path: /data/logs
   level:
-    io.github.jiangood: debug
+    io.github.jiangood: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
