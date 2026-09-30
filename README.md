@@ -134,7 +134,8 @@ mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试�
 mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
-node scripts/bump-version.js <新版本号>                     # 升级 pom.xml + web/package.json 版本号
+node scripts/bump-version.js <新版本号>                     # 仅升级 pom.xml + web/package.json 版本号
+scripts\release.bat run <新版本号>                          # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
@@ -167,6 +168,26 @@ scripts\start-frontend.bat start|stop|restart|status
 - 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
 - Windows 版内调 PowerShell `Start-Process cmd.exe` 后台启动、`taskkill /T` 结束整棵进程树，PID 同样记录在 `logs/*.pid`
 - 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
+
+### 发版
+
+发版流程固化在 `scripts\release.bat`（Windows / cmd，输出纯 ASCII 避免乱码），日志落 `logs\release-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）：
+
+```bat
+scripts\release.bat status                              # 当前分支 / 版本 / tag / 工作区状态
+scripts\release.bat check                               # 只读检查，输出 KEY=VALUE 候选版本号
+scripts\release.bat run 3.1.3                           # bump + mvn test + npm build + commit + tag + push
+scripts\release.bat run 3.1.3 --dry-run                 # 只跑检查、打印计划，不改动仓库文件（仅写 logs/ 日志）
+scripts\release.bat run 3.1.3 --no-push                 # 本地演练：commit + tag 但不推送
+scripts\release.bat --help                              # 全部参数与退出码
+```
+
+- 前置条件：`gh` 已登录、当前分支为 `main`、工作区干净
+- 白名单：一次发版只允许修改 `*/pom.xml` 与 `web/package.json`，出现别的改动直接中止（退出码 3）
+- 退出码：`0` 成功 / `1` 前置条件 / `2` 测试失败 / `3` 工作区不干净 / `4` git 失败 / `5` 版本或 tag 冲突
+- 失败自动回滚版本号改动；若 commit + tag 已建、只是推送失败，重跑同一条命令会进入 resume 模式只补推送
+- push tag 后由 `.github/workflows/publish.yml` 自动发布 Maven Central + npm 并创建 GitHub Release（Release Notes 由 CI 生成）
+- 排障：脚本失败时会打印恢复命令与日志路径；`scripts\release.bat --help` 列出全部参数与退出码
 
 ## Skills (opencode)
 
