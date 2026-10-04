@@ -70,3 +70,15 @@ scripts\release.bat 3.1.3 --dry-run
 # 发布 3.1.3（跳过测试）
 scripts\release.bat 3.1.3 --skip-tests
 ```
+
+### 常见问题
+
+- **工作区不干净**：release.bat 只允许修改 `*/pom.xml` 和 `web/package.json`。若改动了其他文件（如 `AGENTS.md`、`docs/`、`.opencode/skills/`），请先 `git add && git commit` 再发布。
+- **gh 未登录**：运行 `gh auth login` 后再发布。
+- **push 失败自动回滚**：默认情况下，push 失败会自动回滚版本变更、提交和 tag。若要保留本地变更，请加 `--no-rollback`。
+- **使用了 --no-push**：本地已提交和打 tag，需手动执行 `git push origin main && git push origin v<version>` 完成发布。
+- **发布后校验**：
+  - `npm view @jiangood/open-admin version` - 检查 npm 最新版本
+  - 查看 Maven 最新版本：`https://repo1.maven.org/maven2/io/github/jiangood/open-admin/maven-metadata.xml`
+  - `gh release view v<version>` - 检查 GitHub Release
+- **CI 状态**：`gh run list --limit 5 --repo jiangood/open-admin` - 查看 CI 流水线状态
