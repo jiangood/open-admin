@@ -5,6 +5,7 @@ import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
 import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
+import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
@@ -30,9 +31,9 @@ public class SysDictTypeService extends BaseService<SysDictType> {
         SysDictType type = repository.findById(id).orElse(null);
         if (type == null) return;
 
-        List<SysDictType> children = this.findAllByField(SysDictType.Fields.pid, id);
+        List<SysDictType> children = this.findAllByField(SysDictType.Fields.pid, id); // NOSONAR: deleteCascade 已开启事务
         for (SysDictType child : children) {
-            deleteCascade(child.getId());
+            deleteCascade(child.getId()); // NOSONAR: deleteCascade 自身为 @Transactional，递归调用不走代理但外层事务已开启
         }
 
         if (type.getTypeCode() != null) {

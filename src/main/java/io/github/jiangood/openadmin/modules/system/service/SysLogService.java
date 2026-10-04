@@ -19,12 +19,12 @@ public class SysLogService extends BaseService<SysLog> {
     }
 
     @Transactional
-    public SysLog save(SysLog input, List<String> requestKeys) throws Exception {
+    public SysLog save(SysLog input, List<String> requestKeys) {
         if (input.isNew()) {
             return repository.save(input);
         }
 
-        this.updateField(input, requestKeys);
-        return repository.findById(input.getId()).orElse(null);
+        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
+        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 }

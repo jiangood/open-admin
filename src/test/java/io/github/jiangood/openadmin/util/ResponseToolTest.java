@@ -1,11 +1,11 @@
 package io.github.jiangood.openadmin.util;
 
+import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.io.*;
 
@@ -21,16 +21,16 @@ class ResponseToolTest {
     @BeforeEach
     void setUp() throws IOException {
         // 创建模拟的 HttpServletResponse
-        mockResponse = Mockito.mock(HttpServletResponse.class);
+        mockResponse = mock(HttpServletResponse.class);
         // 创建模拟的 HttpServletRequest
-        mockRequest = Mockito.mock(HttpServletRequest.class);
+        mockRequest = mock(HttpServletRequest.class);
         // 创建 StringWriter 来捕获响应输出
         responseWriter = new StringWriter();
         when(mockResponse.getWriter()).thenReturn(new PrintWriter(responseWriter));
     }
 
     @Test
-    void testSetDownloadHeader() throws IOException {
+    void testSetDownloadHeader() {
         String filename = "test.txt";
         String contentType = "text/plain";
         
@@ -44,7 +44,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testSetDownloadExcelHeader() throws IOException {
+    void testSetDownloadExcelHeader() {
         String filename = "test.xlsx";
         
         // 调用方法
@@ -73,7 +73,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testResponseJson() throws IOException {
+    void testResponseJson() {
         // 创建测试数据
         AjaxResult result = AjaxResult.ok().msg("Success");
         
@@ -91,7 +91,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testResponseExceptionError() throws IOException {
+    void testResponseExceptionError() {
         Integer code = 500;
         String message = "Internal Server Error";
         
@@ -142,7 +142,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testResponseJsonWithNullData() throws IOException {
+    void testResponseJsonWithNullData() {
         // 调用方法，传入null数据
         ResponseTool.responseJson(mockResponse, null);
         
@@ -207,7 +207,7 @@ class ResponseToolTest {
     @Test
     void testResponseHtmlBlockWithImgContent() throws IOException {
         String title = "Test Title";
-        String content = "<p>Test Content</p><img src=\"https://example.com/sysFile/preview/test.jpg\" alt=\"Test\" />";
+        String content = "<p>Test Content</p><img src=\"https://example.com" + SysFileConstants.FILE_URL_PATTERN.replace("{id}", "") + "test.jpg\" alt=\"Test\" />";
         
         // 调用方法
         ResponseTool.responseHtmlBlock(mockResponse, title, content);
@@ -219,11 +219,11 @@ class ResponseToolTest {
         String responseContent = responseWriter.toString();
         assertNotNull(responseContent);
         assertTrue(responseContent.contains(title));
-        assertTrue(responseContent.contains("<img src=\"/sysFile/preview/test.jpg\" alt=\"Test\" />"));
+        assertTrue(responseContent.contains("<img src=\"" + SysFileConstants.FILE_URL_PATTERN.replace("{id}", "") + "test.jpg\" alt=\"Test\" />"));
     }
 
     @Test
-    void testSetDownloadHeaderWithSpecialCharacters() throws IOException {
+    void testSetDownloadHeaderWithSpecialCharacters() {
         String filename = "测试文件.txt";
         String contentType = "text/plain";
         
@@ -237,7 +237,7 @@ class ResponseToolTest {
     }
 
     @Test
-    void testSetDownloadExcelHeaderWithSpecialCharacters() throws IOException {
+    void testSetDownloadExcelHeaderWithSpecialCharacters() {
         String filename = "测试表格.xlsx";
         
         // 调用方法

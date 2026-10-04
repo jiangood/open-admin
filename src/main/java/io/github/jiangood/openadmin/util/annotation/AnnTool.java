@@ -4,6 +4,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 public class AnnTool {
+    private AnnTool() {
+    }
+
 
     public static boolean hasAnn(Field field, String annName) {
         Annotation[] anns = field.getAnnotations();

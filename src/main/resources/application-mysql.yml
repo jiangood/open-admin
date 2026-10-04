@@ -1,0 +1,19 @@
+# 可选：切换到 MySQL 数据库（框架独立运行 / 示例应用）。
+# 用法：mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=mysql
+# 或容器部署：--spring.profiles.active=prod,mysql（后面的 profile 优先生效）
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${db_ip}:${db_port}/${db_database}?allowPublicKeyRetrieval=true&autoReconnect=true&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=CONVERT_TO_NULL&useSSL=false&nullCatalogMeansCurrent=true
+    username: ${db_username}
+    password: ${db_password}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+db_ip: 127.0.0.1
+db_port: 3306
+db_database: open-admin
+db_username: root
+db_password: 123456

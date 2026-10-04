@@ -38,9 +38,9 @@ class ClassToolTest {
         boolean hasSubClass1 = false;
         boolean hasSubClass2 = false;
         for (Class<TestSuperClass> cls : result) {
-            if (cls.getName().equals(TestSubClass1.class.getName())) {
+            if (TestSubClass1.class.isAssignableFrom(cls)) {
                 hasSubClass1 = true;
-            } else if (cls.getName().equals(TestSubClass2.class.getName())) {
+            } else if (TestSubClass2.class.isAssignableFrom(cls)) {
                 hasSubClass2 = true;
             }
         }
@@ -49,7 +49,7 @@ class ClassToolTest {
         // 验证返回的集合不包含非子类
         boolean hasNonSubClass = false;
         for (Class<TestSuperClass> cls : result) {
-            if (cls.getName().equals(TestNonSubClass.class.getName())) {
+            if (TestNonSubClass.class.isAssignableFrom(cls)) {
                 hasNonSubClass = true;
                 break;
             }

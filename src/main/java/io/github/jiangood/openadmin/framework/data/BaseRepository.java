@@ -11,6 +11,6 @@ import org.springframework.data.repository.NoRepositoryBean;
  * 业务 Repository 继承此接口即可获得完整 CRUD + 动态查询能力。
  */
 @NoRepositoryBean
-public interface BaseRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecificationExecutor<T> {
+public interface BaseRepository<T, K> extends JpaRepository<T, K>, JpaSpecificationExecutor<T> {
 
 }

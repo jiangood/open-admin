@@ -19,24 +19,26 @@ import java.util.*;
 /**
  * 系统角色service接口实现类
  */
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class SysRoleService extends BaseService<SysRole> {
+
+    private static final String MSG_ROLE_NOT_EXIST = "角色不存在";
 
     private final SysRoleRepository roleRepository;
     private final SysMenuRepository sysMenuRepository;
     private final SysUserRepository sysUserRepository;
-
 
     public Optional<SysRole> findByCode(String code) {
         return roleRepository.findByCode(code);
     }
 
 
+    @Override
     @Transactional
     public void deleteById(String id) {
-        SysRole db = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         roleRepository.deleteById(id);
     }
 
@@ -47,13 +49,15 @@ public class SysRoleService extends BaseService<SysRole> {
 
     @Transactional
     public List<MenuDefinition> ownMenu(String id) {
-        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         List<MenuDefinition> menuList;
 
         if (role.isAdmin()) {
             menuList = sysMenuRepository.findAll();
         } else {
-            menuList = sysMenuRepository.findAllById(role.getMenus());
+            List<String> menuIds = role.getMenus();
+            menuList = (menuIds == null || menuIds.isEmpty()) ? List.of()
+                    : sysMenuRepository.findAllById(menuIds);
         }
 
         return menuList.stream().distinct().sorted(Comparator.comparing(MenuDefinition::getSeq)).toList();
@@ -64,7 +68,11 @@ public class SysRoleService extends BaseService<SysRole> {
         List<MenuDefinition> menuList = new LinkedList<>();
 
         for (SysRole role : roles) {
-            List<MenuDefinition> menus = this.ownMenu(role.getId());
+            if (!Boolean.TRUE.equals(role.getEnabled())) {
+                continue;
+            }
+
+            List<MenuDefinition> menus = this.ownMenu(role.getId()); // NOSONAR: ownMenu(Iterable) 已开启事务
             menuList.addAll(menus);
         }
 
@@ -74,7 +82,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
 
     public List<SysUser> findUsers(String roleId) {
-        SysRole role = roleRepository.findById(roleId).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(roleId).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         return new ArrayList<>(role.getUsers());
     }
 
@@ -107,7 +115,7 @@ public class SysRoleService extends BaseService<SysRole> {
 
     @Transactional
     public SysRole grantUsers(String id, List<String> userIdList) {
-        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
         role.getUsers().clear();
         if (userIdList != null && !userIdList.isEmpty()) {
             List<SysUser> userList = sysUserRepository.findAllById(userIdList);
@@ -128,8 +136,13 @@ public class SysRoleService extends BaseService<SysRole> {
             finalMenus.addAll(pids);
         }
 
-        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("角色不存在"));
-        role.setPerms(perms);
+        SysRole role = roleRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(MSG_ROLE_NOT_EXIST));
+        if (role.isAdmin()) {
+            // 管理员角色保持通配符权限，避免被授权页勾选结果覆盖
+            role.setPerms(List.of("*"));
+        } else {
+            role.setPerms(perms);
+        }
         role.setMenus(finalMenus);
         return roleRepository.save(role);
     }
@@ -140,7 +153,7 @@ public class SysRoleService extends BaseService<SysRole> {
             return repository.save(input);
         }
 
-        this.updateField(input, requestKeys);
-        return repository.findById(input.getId()).orElse(null);
+        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
+        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 }

@@ -14,6 +14,9 @@ import java.util.function.Predicate;
  * 树工具类，提供树构建、遍历、查询等静态方法
  */
 public class TreeTool {
+    private TreeTool() {
+    }
+
 
     /**
      * 判断节点是否为叶子
@@ -109,9 +112,7 @@ public class TreeTool {
 
     public static Map<String, TreeOption> treeToMap(List<TreeOption> tree) {
         Map<String, TreeOption> map = new HashMap<>();
-        walk(tree, TreeOption::getChildren, node -> {
-            map.put(node.getKey(), node);
-        });
+        walk(tree, TreeOption::getChildren, node -> map.put(node.getKey(), node));
         return map;
     }
 
@@ -232,7 +233,7 @@ public class TreeTool {
 
     public static <E> List<E> treeToList(List<E> tree, Function<E, List<E>> getChildren) {
         List<E> list = new ArrayList<>();
-        walk(tree, getChildren, e -> list.add(e));
+        walk(tree, getChildren, e -> list.add(e)); // NOSONAR: walk 有 Consumer/BiConsumer 两个重载，方法引用有歧义
         return list;
     }
 

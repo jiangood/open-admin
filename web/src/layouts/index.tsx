@@ -3,23 +3,21 @@ import {ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {history, PageFrame} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, PageFrame, PageLoading, PageUtils, history, getThemeConfig, setThemeColors, EventBus} from "../framework";
+import type {ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
-import {HttpUtils, PageLoading, PageUtils, GlobalData, getThemeConfig, EventBus} from "../framework";
-import {ErrorBoundary} from "../framework";
 
 import '../style/global.less'
 import './index.less'
 
 dayjs.locale('zh-cn');
 
-const configProps = {
+const baseConfigProps = {
     input: {autoComplete: 'off'},
     form: {validateMessages: {required: '必填项'}, colon: false},
     button: {autoInsertSpace: false},
     locale: zhCN,
-    theme: getThemeConfig(),
 };
 
 export interface HeaderExtraContext {
@@ -29,6 +27,9 @@ export interface HeaderExtraContext {
 
 interface LayoutsProps {
     headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
+    showOrgSwitcher?: (context: HeaderExtraContext) => boolean;
+    /** 主题颜色覆盖，不传使用框架默认主题 */
+    colors?: Partial<ThemeColors>;
 }
 
 export class Layouts extends React.Component<LayoutsProps> {
@@ -41,6 +42,12 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     unlisten: (() => void) | null = null;
     unsubscribeLoginExpired: (() => void) | null = null;
+    unsubscribeLogoutSuccess: (() => void) | null = null;
+
+    constructor(props: LayoutsProps) {
+        super(props);
+        setThemeColors(props.colors);
+    }
 
     onLocationChange = ({location}: { location: typeof history.location }) => {
         this.setState({location});
@@ -67,8 +74,8 @@ export class Layouts extends React.Component<LayoutsProps> {
     }
 
     loadSiteInfo() {
-        HttpUtils.get("/admin/public/site-info").then(data => {
-            GlobalData.setSiteInfo(data);
+        HttpClient.get("/admin/public/site-info", null, {toastError: false}).then(data => {
+            GlobalData.setSiteInfo(data.data);
             this.setState({siteInfoLoaded: true});
         }).catch(() => {
             console.error('[Layout] 加载站点信息失败');
@@ -76,12 +83,13 @@ export class Layouts extends React.Component<LayoutsProps> {
     }
 
     loadLoginInfo() {
-        HttpUtils.get('/admin/public/login-info').then(data => {
-            GlobalData.setDictInfo(data.dictInfo);
-            GlobalData.setLoginInfo(data.loginInfo);
-            GlobalData.setSiteArticles(data.siteArticles);
+        HttpClient.get('/admin/public/login-info', null, {toastError: false}).then(data => {
+            GlobalData.setDictInfo(data.data.dictInfo);
+            GlobalData.setLoginInfo(data.data.loginInfo);
+            GlobalData.setSiteArticles(data.data.siteArticles);
 
-            if (data.needUpdatePwd) {
+            if (data.data.needUpdatePwd) {
+                this.setState({loginChecked: true});
                 history.push('/standalone/forceUpdatePwd');
                 return;
             }
@@ -100,10 +108,13 @@ export class Layouts extends React.Component<LayoutsProps> {
                 this.setState({loginExpiredVisible: true});
             }
         });
+        this.unsubscribeLogoutSuccess = EventBus.on('logoutSuccess', () => {
+            this.setState({loginChecked: false});
+        });
         this.loadData();
     }
 
-    componentDidUpdate(prevProps: {}, prevState: typeof this.state) {
+    componentDidUpdate(prevProps: LayoutsProps, prevState: typeof this.state) {
         if (this.state.location !== prevState.location) {
             this.loadData();
         }
@@ -116,6 +127,9 @@ export class Layouts extends React.Component<LayoutsProps> {
         if (this.unsubscribeLoginExpired) {
             this.unsubscribeLoginExpired();
         }
+        if (this.unsubscribeLogoutSuccess) {
+            this.unsubscribeLogoutSuccess();
+        }
     }
 
     render() {
@@ -127,17 +141,25 @@ export class Layouts extends React.Component<LayoutsProps> {
 
         return (
             <ErrorBoundary minimal>
-                <ConfigProvider {...configProps}>
-                    {showPageFrame ? <PageFrame url={pathname + search}/> : ready ? <AdminLayout headerExtra={this.props.headerExtra} loginInfo={GlobalData.getLoginInfo()}/> : (
-                        <PageLoading messages={[
-                            !siteInfoLoaded && '加载站点信息...',
-                            !loginChecked && '检查登录中...',
-                        ].filter(Boolean)}/>
-                    )}
+                <ConfigProvider {...baseConfigProps} theme={getThemeConfig()}>
+                    {this.renderContent(showPageFrame, ready, pathname, search)}
                     {this.renderLoginExpiredModal()}
                 </ConfigProvider>
             </ErrorBoundary>
         );
+    }
+
+    renderContent(showPageFrame: boolean, ready: boolean, pathname: string, search: string) {
+        if (showPageFrame) {
+            return <PageFrame url={pathname + search}/>;
+        }
+        if (ready) {
+            return <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/>;
+        }
+        return <PageLoading messages={[
+            !this.state.siteInfoLoaded && '加载站点信息...',
+            !this.state.loginChecked && '检查登录中...',
+        ].filter(Boolean)}/>;
     }
 
     renderLoginExpiredModal() {
@@ -145,7 +167,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             <Modal open={this.state.loginExpiredVisible} title="确认操作" okText="确定"
                    onCancel={() => this.setState({loginExpiredVisible: false})}
                    onOk={() => {
-                       this.setState({loginExpiredVisible: false});
+                       this.setState({loginExpiredVisible: false, loginChecked: false});
                        PageUtils.redirectToLogin();
                    }}>
                 登录已过期，请重新登录

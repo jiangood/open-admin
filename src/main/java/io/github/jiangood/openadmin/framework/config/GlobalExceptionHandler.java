@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ExceptionToMessageTool;
 import io.github.jiangood.openadmin.util.HttpServletTool;
@@ -26,13 +26,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
 
-import static io.github.jiangood.openadmin.framework.MessageConst.MGS_FORBIDDEN;
+import static io.github.jiangood.openadmin.framework.MessageConst.MSG_FORBIDDEN;
 import static io.github.jiangood.openadmin.framework.MessageConst.MSG_UNAUTHORIZED;
 
 /**
@@ -50,10 +51,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public AjaxResult handleAccessDeniedException(AccessDeniedException ex) {
         if (systemProperties.isPrintGlobalException()) {
-            log.error(MGS_FORBIDDEN, ex);
+            log.error(MSG_FORBIDDEN, ex);
         }
         String msg = ex.getMessage();
-        if (msg.startsWith(MGS_FORBIDDEN)) {
+        if (msg.startsWith(MSG_FORBIDDEN)) {
             return AjaxResult.err(HttpStatus.FORBIDDEN.value(), msg);
         }
         return AjaxResult.FORBIDDEN;
@@ -94,7 +95,7 @@ public class GlobalExceptionHandler {
     public AjaxResult missParamException(MissingServletRequestParameterException e) {
         log.warn("请求参数缺失：{}", e.getMessage());
         String parameterName = e.getParameterName();
-        String message = StrUtil.format("缺少请求的参数{}", parameterName);
+        String message = CharSequenceUtil.format("缺少请求的参数{}", parameterName);
         return AjaxResult.err().code(500).msg(message);
     }
 
@@ -164,13 +165,13 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(TransactionSystemException.class)
-    public AjaxResult TransactionSystemException(TransactionSystemException e) {
+    public AjaxResult transactionSystemException(TransactionSystemException e) {
         log.error("事务异常", e);
         return AjaxResult.err().msg(ExceptionToMessageTool.convert(e));
     }
 
     @ExceptionHandler(InvalidDataAccessApiUsageException.class)
-    public AjaxResult InvalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e, HttpServletRequest request) {
+    public AjaxResult invalidDataAccessApiUsageException(InvalidDataAccessApiUsageException e, HttpServletRequest request) {
         log.error("数据访问API使用异常", e);
         Throwable throwable = e.getCause();
         return AjaxResult.err().msg(throwable.getMessage());
@@ -195,6 +196,15 @@ public class GlobalExceptionHandler {
         return ResponseEntity.noContent().build();
     }
 
+
+    /**
+     * 上传文件超过大小限制
+     */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public AjaxResult maxUploadSizeExceededException(MaxUploadSizeExceededException e) {
+        log.warn("上传文件超过大小限制: {}", e.getMessage());
+        return AjaxResult.err().msg("上传文件过大，请压缩后再试");
+    }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public AjaxResult httpMessageNotReadableException(HttpMessageNotReadableException e) {

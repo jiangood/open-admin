@@ -8,6 +8,9 @@ import jakarta.persistence.criteria.*;
  * 自动处理 Join 和 Path 导航。
  */
 public class ExpressionTool {
+    private ExpressionTool() {
+    }
+
 
     /**
      * 根据字段路径表达式获取 JPA Criteria 查询的 Path。
@@ -19,7 +22,7 @@ public class ExpressionTool {
      * @param field 字段路径表达式，如 "name" 或 "dept.name"
      * @return 对应的 Expression
      */
-    public static Expression<?> getPath(Root<?> root, String field) {
+    public static Expression<?> getPath(Root<?> root, String field) { // NOSONAR: JPA Criteria API 返回通配类型，无法具体化
         // 如果字段名中没有点号，直接返回一级路径
         if (!field.contains(".")) {
             return root.get(field);

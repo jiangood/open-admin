@@ -59,7 +59,25 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 8px;
         margin: 8px;
+
+        .pro-table-toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .pro-table-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            /* 只提供右侧插槽时，space-between 退化为 flex-start，靠 auto 兜住右对齐 */
+            margin-left: auto;
+        }
     }
 }
 

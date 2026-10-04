@@ -6,7 +6,9 @@ import type {FieldProps} from '../types';
 const SP = StringUtils.ISO_SPLITTER;
 
 /** 数字范围值，形如 "1/100"（起止以 / 分隔） */
-export type FieldNumberRangeValue = string;
+export type FieldNumberRangeValue = string; // NOSONAR: npm 包导出类型，业务项目引用
+
+export type RangePartValue = number | string | null;
 
 export interface FieldNumberRangeProps extends FieldProps<FieldNumberRangeValue> {
     /** 默认值（形如 "1/100"），value 为空时挂载后回填 */
@@ -14,23 +16,21 @@ export interface FieldNumberRangeProps extends FieldProps<FieldNumberRangeValue>
 }
 
 export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
-    onChangeA = (a: number | string | null) => {
+    onChangeA = (a: RangePartValue) => {
         const {b} = this.parse(this.props.value);
-        this.props.onChange && this.props.onChange(this.merge(a, b));
+        this.props.onChange?.(this.merge(this.toPart(a), this.toPart(b)));
     };
 
-    onChangeB = (b: number | string | null) => {
+    onChangeB = (b: RangePartValue) => {
         const {a} = this.parse(this.props.value);
-        this.props.onChange && this.props.onChange(this.merge(a, b));
+        this.props.onChange?.(this.merge(this.toPart(a), this.toPart(b)));
     };
 
-    merge(a: number | string | null, b: number | string | null): string {
-        if (a == null) {
-            a = '';
-        }
-        if (b == null) {
-            b = '';
-        }
+    private toPart(v: RangePartValue): number | string {
+        return v ?? '';
+    }
+
+    merge(a: number | string, b: number | string): string {
         return a + SP + b;
     }
 
@@ -45,15 +45,14 @@ export class FieldNumberRange extends React.Component<FieldNumberRangeProps> {
     componentDidMount() {
         const {value, defaultValue, onChange} = this.props;
         if (value == null && defaultValue) {
-            onChange && onChange(defaultValue);
+            onChange?.(defaultValue);
         }
     }
 
     render() {
-        let {value, defaultValue} = this.props;
-        if (value == null) {
-            value = defaultValue;
-        }
+        const {defaultValue} = this.props;
+        let {value} = this.props;
+        value = value ?? defaultValue;
         const {a, b} = this.parse(value);
 
         return <div style={{display: 'flex', alignItems: 'center'}}>

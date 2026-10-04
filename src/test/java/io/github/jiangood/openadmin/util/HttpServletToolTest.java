@@ -6,10 +6,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 /**
  * HttpServletTool工具类的单元测试
@@ -24,13 +24,13 @@ class HttpServletToolTest {
     @BeforeEach
     void setUp() {
         // 模拟RequestContextHolder
-        requestContextHolderMock = Mockito.mockStatic(RequestContextHolder.class);
+        requestContextHolderMock = mockStatic(RequestContextHolder.class);
         // 模拟ServletRequestAttributes
-        requestAttributes = Mockito.mock(ServletRequestAttributes.class);
+        requestAttributes = mock(ServletRequestAttributes.class);
         // 模拟HttpServletRequest
-        request = Mockito.mock(HttpServletRequest.class);
+        request = mock(HttpServletRequest.class);
         // 模拟HttpServletResponse
-        response = Mockito.mock(HttpServletResponse.class);
+        response = mock(HttpServletResponse.class);
     }
 
     @AfterEach
@@ -46,16 +46,14 @@ class HttpServletToolTest {
         // 测试当RequestAttributes为null时的情况
         requestContextHolderMock.when(RequestContextHolder::getRequestAttributes).thenReturn(null);
         // 当RequestAttributes为null时，应该抛出IllegalStateException异常
-        assertThrows(IllegalStateException.class, () -> {
-            HttpServletTool.getRequest();
-        });
+        assertThrows(IllegalStateException.class, HttpServletTool::getRequest);
     }
 
     @Test
     void testGetRequestWithValidAttributes() {
         // 测试当RequestAttributes为非null时的情况
         requestContextHolderMock.when(RequestContextHolder::getRequestAttributes).thenReturn(requestAttributes);
-        Mockito.when(requestAttributes.getRequest()).thenReturn(request);
+        when(requestAttributes.getRequest()).thenReturn(request);
         HttpServletRequest result = HttpServletTool.getRequest();
         assertNotNull(result);
         assertEquals(request, result);
@@ -66,16 +64,14 @@ class HttpServletToolTest {
         // 测试当RequestAttributes为null时的情况
         requestContextHolderMock.when(RequestContextHolder::getRequestAttributes).thenReturn(null);
         // 当RequestAttributes为null时，应该抛出IllegalStateException异常
-        assertThrows(IllegalStateException.class, () -> {
-            HttpServletTool.getResponse();
-        });
+        assertThrows(IllegalStateException.class, HttpServletTool::getResponse);
     }
 
     @Test
     void testGetResponseWithValidAttributes() {
         // 测试当RequestAttributes为非null时的情况
         requestContextHolderMock.when(RequestContextHolder::getRequestAttributes).thenReturn(requestAttributes);
-        Mockito.when(requestAttributes.getResponse()).thenReturn(response);
+        when(requestAttributes.getResponse()).thenReturn(response);
         HttpServletResponse result = HttpServletTool.getResponse();
         assertNotNull(result);
         assertEquals(response, result);

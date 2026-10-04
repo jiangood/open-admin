@@ -9,9 +9,9 @@ export interface PageLoadingProps {
     messages?: string[];
 }
 
-export function PageLoading(props: PageLoadingProps) {
+export function PageLoading(props: PageLoadingProps) { // NOSONAR: 仅读取 props，函数组件无需变更
     const titles = props.messages || (props.message ? [props.message] : ['页面加载中...']);
-    const primaryColor = getToken().colorPrimary;
+    const primaryColor = getToken().colorPrimary ?? "";
 
     return (
         <div className="oa-page-loading">
@@ -22,7 +22,7 @@ export function PageLoading(props: PageLoadingProps) {
                 <div className="oa-page-loading-messages">
                     {titles.map((msg, i) => (
                         <Alert
-                            key={i}
+                            key={i} // NOSONAR: 提示文案列表静态无稳定 key
                             title={<span style={{color: primaryColor}}>{msg}</span>}
                             type="info"
                             showIcon

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Button, Form, Input, message} from 'antd';
 import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import {EventBus, HttpUtils, GlobalData, history} from "../../framework";
+import {EventBus, HttpClient, GlobalData, history} from "../../framework";
 
 import "./login.less"
 
@@ -13,54 +13,61 @@ function getRedirect(query) {
     return redirect;
 }
 
-function postLogin(values, query) {
-    return new Promise((resolve, reject) => {
-        HttpUtils.post('/admin/auth/login', values).then(rs => {
-            EventBus.emit('loginSuccess')
-            history.push(getRedirect(query))
-            resolve(rs)
-        }).catch(e => {
-            console.error('[Login] 登录失败:', e);
-            reject(e)
-        })
+function postLogin(values, query, success, error) {
+    HttpClient.post('/admin/auth/login', values, null, {toastError: false}).then(rs => {
+        EventBus.emit('loginSuccess')
+        history.push(getRedirect(query))
+        success?.(rs)
+    }).catch(e => {
+        console.error('[Login] 登录失败:', e);
+        message.error(HttpClient.errToMsg(e))
+        error?.(e)
     })
 }
 
 function encodePassword(pwd) {
     const chars = [];
     for (let i = 0; i < pwd.length; i++)
-        chars.push(pwd.charCodeAt(i) + i + 2);
-    return btoa(String.fromCharCode(...chars));
+        chars.push(pwd.codePointAt(i) + i + 2);
+    return btoa(String.fromCodePoint(...chars));
 }
 
-export default class extends React.Component {
+export default class LoginPage extends React.Component {
 
     state = {
         logging: false,
         siteInfo: {}
     }
 
-    async componentDidMount() {
+    componentDidMount() {
         const siteInfo = GlobalData.getSiteInfo()
-        if (siteInfo && siteInfo.title) {
+        if (siteInfo?.title) {
             this.setState({siteInfo})
             return
         }
         // localStorage 中无站点信息，从服务端重新加载
-        try {
-            const rs = await HttpUtils.get('/admin/public/site-info', null, { showError: false })
-            GlobalData.setSiteInfo(rs)
-            this.setState({siteInfo: rs})
-        } catch (e) {
-            console.error('[Login] 加载站点信息失败:', e);
+        HttpClient.get('/admin/public/site-info', null, {toastError: false}).then(rs => {
+            GlobalData.setSiteInfo(rs.data)
+            this.setState({siteInfo: rs.data})
+        }).catch(() => {
+            console.error('[Login] 加载站点信息失败');
             message.error('加载站点信息失败，请刷新页面重试')
-        }
+        })
     }
 
     submit = values => {
         this.setState({logging: true})
-        values.password = encodePassword(values.password)
-        postLogin(values, this.props.location?.query).finally(() => {
+        try {
+            values.password = encodePassword(values.password)
+        } catch (e) {
+            console.error('[Login] 密码编码失败:', e);
+            this.setState({logging: false})
+            message.error('密码含不支持字符，请联系管理员重置')
+            return
+        }
+        postLogin(values, this.props.location?.query, () => {
+            this.setState({logging: false})
+        }, () => {
             this.setState({logging: false})
         })
     }
@@ -76,14 +83,14 @@ export default class extends React.Component {
             <section className='login-page' style={pageStyle}>
                 <div className="login-content">
                     <h1>{siteInfo.title}</h1>
-                    {this.getForm(siteInfo)}
+                    {this.getForm()}
                     {this.renderFormBottom()}
                 </div>
             </section>
         );
     }
 
-    getForm = siteInfo => {
+    getForm = () => {
         const form = (
             <Form
                 name="normal_login"

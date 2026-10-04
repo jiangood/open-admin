@@ -5,18 +5,21 @@ import lombok.Getter;
 @Getter
 public class BusinessException extends IllegalStateException {
 
-    private int code;
+    private final int code;
 
     public BusinessException() {
         super();
+        this.code = 0;
     }
 
     public BusinessException(String message) {
         super(message);
+        this.code = 0;
     }
 
     public BusinessException(String prefixMessage, Throwable e) {
         super(prefixMessage + ": " + e.getMessage());
+        this.code = 0;
     }
 
     public BusinessException(int code, String message) {

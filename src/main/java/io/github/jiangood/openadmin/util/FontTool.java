@@ -13,6 +13,9 @@ import java.util.Set;
  * 也可以命令行安装 sudo yum install google-noto-sans-cjk-ttc-fonts 或者 sudo apt install fonts-noto-cjk
  */
 public class FontTool {
+    private FontTool() {
+    }
+
 
     private static final String[] PATHS = {
             "C:/Windows/Fonts/simhei.ttf",

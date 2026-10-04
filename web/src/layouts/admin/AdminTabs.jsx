@@ -43,7 +43,16 @@ export class AdminTabs extends React.Component {
                         <div
                             key={tab.key}
                             className={`admin-tab${tab.key === activeKey ? ' active' : ''}`}
+                            role="tab"
+                            tabIndex={tab.key === activeKey ? 0 : -1}
+                            aria-selected={tab.key === activeKey}
                             onClick={() => onChange(tab.key)}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault();
+                                    onChange(tab.key);
+                                }
+                            }}
                             onContextMenu={e => this.handleContextMenu(e, tab.key)}
                         >
                             <span className="admin-tab-label">{tab.label}</span>

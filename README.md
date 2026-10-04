@@ -3,7 +3,7 @@
 ![Maven Central](https://img.shields.io/maven-central/v/io.github.jiangood/open-admin)
 ![npm](https://img.shields.io/npm/v/@jiangood/open-admin)
 
-open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业务项目通过添加 Maven 和 npm 依赖即可获得完整的后台管理能力**，无需从零搭建用户管理、角色权限、数据字典等功能。
+open-admin 是一个后台管理系统框架（脚手架），**业务项目无需从零搭建用户管理、角色权限、数据字典等功能。
 
 ## 快速集成
 
@@ -21,26 +21,25 @@ open-admin 是一个可嵌入的后台管理系统框架（脚手架），**业�
 }
 ```
 
-添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理等功能开箱即用。
+添加依赖后，用户管理、角色权限、数据字典、Quartz 调度、文件管理、代码生成等功能开箱即用。框架的 skills 与文档通过 `oa-upgrade-docs` skill 从 GitHub Release 同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
 
 ## 快速开始
 
 ### 环境要求
 
-- **JDK 21+** / **MySQL 8.0+** / **Node.js 18+**
+- **JDK 21+** / **Node.js 18+**（数据库内置 H2，无需安装；可选 MySQL 8.0+）
 
 ### 后端启动
 
 ```bash
-# 创建数据库
-CREATE DATABASE open_admin DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
-# 修改 src/main/resources/application.yml 数据库连接
 git clone https://github.com/jiangood/open-admin.git
 cd open-admin
 mvn clean compile
-mvn -Pdev spring-boot:run   # 开发模式启动
+mvn -Pdev spring-boot:run   # 开发模式启动（内置 H2，首次启动自动建表 + 初始化数据）
 ```
+
+数据库文件默认在 `/data/db/open-admin`（本地开发可用 `-Ddb_path=./data/db/open-admin` 覆盖）；
+切换 MySQL 见 `application-mysql.yml`：`mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=mysql`。
 
 ### 前端启动
 
@@ -55,6 +54,19 @@ npm run dev                    # 默认 http://localhost:3000
 | 账号 | 密码 |
 |------|------|
 | admin | Open@1234 |
+
+### Docker 一键部署
+
+镜像内置 H2 数据库，无需外部 MySQL，数据、日志、上传文件持久化在 `/data`：
+
+```bash
+# docker compose（首次自动构建镜像）
+docker compose -f docker-compose/docker-compose.yml up -d --build
+
+# 或手动构建 / 运行
+docker build -t open-admin .
+docker run -d --name open-admin -p 8080:8080 -v ./data:/data open-admin
+```
 
 ### 集成到已有项目
 
@@ -84,389 +96,102 @@ createRoot(document.getElementById('root')).render(
 - 页面文件放在 `src/pages/` 下，扩展名 `.jsx` 或 `.tsx`，文件名首字母小写（大写开头视为普通组件不注册路由）
 - `src/pages/product/index.jsx` → 路由 `/product`；`$code.jsx` → 动态段 `/:code`
 - 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
-- 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](#页面生命周期)）
+- 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](docs/open-admin/api.md#页面生命周期)）
 
-**目录约定**（无需配置，自动识别）：
+**目录约定**（无需配置，自动识别）：`src/pages/` 下按目录区分页面类型——`pages/` 后台页（需登录 + 后台布局）、`pages/public/` 免登录无布局（如登录页）、`pages/standalone/` 需登录无布局（如强制改密页），详见 [development.md](docs/open-admin/development.md#页面目录约定)。
 
-| 目录 | 路由前缀 | 是否需要登录 | 是否需要 AdminLayout |
-|------|---------|-------------|-------------------|
-| `pages/` | `/` | ✅ 是 | ✅ 是 |
-| `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
-| `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
 
-**按需使用**：可只加后端依赖（REST API 访问管理功能），或只加前端依赖（对接自有后端 API）。
+## 文档
 
-## 架构设计
-
-```
-┌─────────────────────────────────────────────────────┐
-│  前端: React 19 + Ant Design 6 + Vite 8             │
-│  ┌─────────────────────────────────────────────┐    │
-│  │ @jiangood/open-admin (组件库 + 管理页面)     │    │
-│  └─────────────────────────────────────────────┘    │
-├─────────────────── HTTP API ────────────────────────┤
-│  后端: Java 21 + Spring Boot 4.0 + JPA + Security   │
-│  ┌──────────┐ ┌──────────┐ ┌────────┐ ┌──────────┐ │
-│  │ modules  │ │framework │ │  util  │ │  config  │ │
-│  │ (业务层) │ │  (框架层) │ │ (工具) │ │  (配置)  │ │
-│  └──────────┘ └──────────┘ └────────┘ └──────────┘ │
-├─────────────────── JDBC ────────────────────────────┤
-│                    MySQL 8+                          │
-└─────────────────────────────────────────────────────┘
-```
-
-### 项目结构
-
-```
-src/main/java/io/github/jiangood/openadmin/
-├── framework/          # 框架基础层
-│   ├── spi/            # 扩展点接口（OrgTypeProvider, FileOperator, StartupHook）
-│   ├── config/         # Spring 配置（Security, JPA, Jackson）
-│   ├── data/           # BaseEntity, BaseRepository, Spec
-│   ├── perm/           # @HasPermission 注解 + 切面
-│   ├── log/            # @Log 操作日志注解 + 切面
-│   └── common/         # 通用（登录/认证/站点信息）
-├── util/               # 工具类库（BeanTool, JsonTool, TreeTool, ExcelTool 等）
-└── modules/
-    ├── system/         # 用户/角色/菜单/组织/字典/文件/日志
-    └── job/            # Quartz 定时任务
-web/
-├── src/framework/      # @jiangood/open-admin 框架组件库
-├── src/pages/          # 业务页面
-└── src/layouts/        # 布局组件
-```
-
-### 自动配置机制
-
-框架通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册 `OpenAdminConfiguration`（含 `@ComponentScan` / `@EntityScan` / `@EnableJpaRepositories`，扫描包 `io.github.jiangood.openadmin`）。默认配置在 `application-lib.yml`，业务项目通过 `spring.config.import` 引入。
-
-### 框架扩展点 (`framework.spi`)
-
-`io.github.jiangood.openadmin.framework.spi` 包集中存放框架的 SPI 接口，业务项目通过实现这些接口来扩展框架行为：
-
-| 接口 | 用途 | 注册方式 |
-|------|------|---------|
-| `OrgTypeProvider` | 自定义机构类型（如新增"门店"类型） | `@Component` |
-| `FileOperator` | 自定义文件存储后端（注册 `@Bean @Primary FileOperator` 覆盖默认） | `@ConditionalOnMissingBean` |
-| `StartupHook` | 系统启动钩子（JPA 建表前/种子数据前后） | `@Component` |
-
-实现类被 `@ComponentScan` 自动发现，无需手动注册。
-
-## 技术栈
-
-| 层级 | 技术 |
+| 文档 | 内容 |
 |------|------|
-| 前端 | React 19, Ant Design 6, Vite 8, TypeScript |
-| 后端 | Java 21, Spring Boot 4.0, JPA (Hibernate), Spring Security, Quartz |
-| 数据库 | MySQL 8+ |
-| 构建 | Maven (后端), npm (前端) |
+| [docs/open-admin/guide.md](docs/open-admin/guide.md) | 架构设计 / 核心功能 / 添加业务模块 / 内置模块 / FAQ |
+| [docs/open-admin/api.md](docs/open-admin/api.md) | 后端（Spec/注解/工具类/定时任务）+ 前端（组件/生命周期/字段组件/文件上传/工具类）API 参考 |
+| [docs/open-admin/config.md](docs/open-admin/config.md) | 全部 `sys.*` 配置 / 文件存储 / 未认领文件清理 / context-path / 主题定制 |
+| [docs/open-admin/development.md](docs/open-admin/development.md) | 后端命名 / REST API 规范 / 前后端开发要点 |
 
-## 核心功能
+## 开发（框架本仓库）
 
-### 用户权限管理
-
-- **用户管理**：列表/创建/编辑/重置密码/授权数据
-- **角色管理**：列表/创建/编辑/分配权限（菜单 + 按钮）
-- **权限控制**：后端 `@HasPermission("resource:action")` 注解 + AOP 切面，支持 SpEL；前端 `<Button perm="xxx:yyy" />`（配合 `PermActions`）和 `<Perm code="xxx">` 组件
-- **权限码格式**：全小写两段式 `{资源}:{操作}`，资源 kebab-case（如 `sys-user:read`、`sys-role:grant-permission`）
-- **YAML 定义**：`application-menu*.yml` 中用 `perms` 对象列表定义
-
-### 数据字典
-
-- **预设字典**：`orgType`、`approveStatus`、`sex`、`yesNo`、`dataPermType`、`statusColor`
-- **前端使用**：`<FieldDictSelect typeCode="sex" />` 字典选择器；`DictUtils.dictList("sex")` / `DictUtils.dictLabel("sex", "MALE")` / `DictUtils.dictTag("approveStatus", "APPROVED")`
-- **扩展**：通过管理界面或 `DictDataInitializer` 钩子添加
-
-### 其他内置功能
-
-| 功能 | 说明 |
-|------|------|
-| 作业调度 | 基于 Quartz，动态创建/暂停/恢复，继承 `BaseJob` + `@JobDescription` |
-| 文件管理 | `sys.file.store-type` 配置（`local` / `s3` / `custom`），统一上传下载预览 |
-| 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
-| 运行日志查看 | 在线查看日志文件 |
-
-## 开发规范
-
-### 后端命名
-
-| 项 | 规范 |
-|----|------|
-| Entity | 大驼峰单数，继承 `BaseEntity`，`@Table(name = "t_xxx")` |
-| Repository | 继承 `BaseRepository<T, String>`，简单条件用派生查询，复杂用 `Spec` |
-| Service | 继承 `BaseService<T>`，构造器注入，`@Transactional(readOnly = true)`，VO 不暴露 Entity |
-| Controller | `admin/` 前缀 + kebab-case 复数，`@HasPermission` 控制权限，统一返回 `AjaxResult` |
-| DTO | `XxxCreateReq` / `XxxUpdateReq` / `XxxPageQuery` / `XxxVO` |
-
-### REST API 规范
-
-| 操作 | HTTP | URL | 方法 |
-|------|------|-----|------|
-| 分页查询 | GET | `admin/xxx/page` | `page(Pageable)` |
-| 详情 | GET | `admin/xxx/{id}` | `getById(@PathVariable id)` |
-| 创建 | POST | `admin/xxx/create` | `create(@RequestBody dto)` |
-| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, RequestBodyKeys keys)` |
-| 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
-
-### 后端要点
-
-- 强制构造器注入，禁止 `@Autowired` 字段注入
-- 业务异常抛 `ServiceException`，Controller 不做 try-catch
-- 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
-- 方法参数校验用 `@Valid` / `@Validated`
-
-### 前端要点
-
-- 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）
-- 使用 ES6+，强制 `const`/`let`，解构赋值
-- 优先使用框架组件：`ProTable`、`Page`、`FieldDictSelect` 等
-- 权限控制：`<PermActions>` 包裹 `<Button perm="...">`、`<Perm code="...">`
-- 跨组件通信使用 `EventBus`（`emit` / `on` / `once` / `off`），不要使用 `document.dispatchEvent`
-- 对话框优先使用 `<Modal>` 组件（state 控制 `open`），避免 `Modal.info()` / `Modal.confirm()` 等静态方法
-- 页面生命周期：页面组件实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用，详见[页面生命周期](#页面生命周期)
-
-## API 参考
-
-### 后端
-
-#### Spec 动态查询
-
-```java
-Spec<User> spec = Spec.of()
-    .eq("status", 1).like("name", "张")
-    .between("createTime", start, end)
-    .or(Spec.of().like("name", "张"), Spec.of().like("name", "李"))
-    .eq("user.id", userId);  // 关联查询
-repository.findAll(spec, pageable);
-```
-
-#### 注解
-
-| 注解 | 用途 |
-|------|------|
-| `@HasPermission("resource:action")` | 权限控制 |
-| `@Log` | 操作日志 |
-| `@RateLimit(count=10, duration=60)` | IP 限流 |
-| `@JobDescription` | 定时任务定义 |
-| `@ValidateMobile` / `@ValidateIdCard` / ... | 字段格式校验 |
-
-#### 工具类
-
-| 类 | 主要方法 |
-|----|---------|
-| `ExcelTool` | `importExcel` / `exportExcel` |
-| `JdbcRunner` (framework.data) | `findById` / `findAll` / `save` / `deleteById` / `count` |
-| `LoginTool` | `getUserId` / `getUser` / `getPermissions` / `isAdmin` |
-| `TreeTool` | `buildTree` / `walk` / `treeToList` / `getLeafs` |
-| `BeanTool` / `JsonTool` / `StringTool` | 常用对象/JSON/字符串操作 |
-| `PasswordTool` / `AesTool` | 密码加密 / AES 加解密 |
-
-#### 定时任务
-
-```java
-@JobDescription(label = "数据同步", params = {
-    @FieldDescription(name = "syncType", label = "同步类型", required = true)
-})
-public class DataSyncJob extends BaseJob {
-    public String execute(JobDataMap data, Logger logger) { ... }
-}
-```
-
-### 前端
-
-#### 组件
-
-| 组件 | 用途 |
-|------|------|
-| `Page` | 页面容器（标题/描述/右侧操作区） |
-| `ProTable` | 数据表格，分页/筛选/工具栏/树形模式，`request`/`columns`/`treeMode`/`toolBarRender` |
-| `LinkButton` | 链接跳转按钮 |
-| `NamedIcon` | 通过名称渲染 Ant Design 图标 |
-| `PermActions` | 按子元素 `perm` 属性过滤的权限操作区 |
-| `Perm` | 权限控制容器（`code` 属性） |
-| `ViewText` / `ViewBoolean` / `ViewFile` / `ViewImage` 等 | 展示组件 |
-| `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
-
-#### 页面生命周期
-
-多 Tab 布局中，所有页面保持 mounted（仅 `display` 切换）。框架提供 `onShow()` 生命周期方法，在页面首次加载或从其他 Tab 切回时自动调用。
-
-```jsx
-export default class extends React.Component {
-  tableRef = React.createRef()
-
-  onShow() {
-    this.tableRef.current?.reload()
-  }
-
-  render() {
-    return <ProTable actionRef={this.tableRef} ... />
-  }
-}
-```
-
-| 触发场景 | onShow 是否调用 |
-|---------|:--------------:|
-| 首次打开 Tab | ✅ |
-| 切换到其他 Tab 再切回来 | ✅ |
-| 右键「刷新」Tab | ✅（组件重建后立即调用） |
-| Tab 始终激活（无切换） | ❌ |
-
-> 注：仅 class 组件支持，方法名固定为 `onShow`。
-
-#### 下载弹框
-
-通过 ref 调用 `download()` 方法触发下载，`title` 可自定义对话框标题，`onFinish` 在下载完成后回调：
-
-```jsx
-import { DownloadModal } from '@jiangood/open-admin';
-
-class ReportPage extends React.Component {
-  dlRef = React.createRef();
-
-  handleExport = () => {
-    this.dlRef.current.download({
-      url: '/admin/report/export',
-      params: { type: 'monthly', year: 2026, month: 7 },
-    });
-  };
-
-  // POST 请求，指定文件名
-  handleBatchExport = () => {
-    this.dlRef.current.download({
-      url: '/admin/report/export',
-      method: 'POST',
-      data: { ids: ['1', '2', '3'] },
-      fileName: '批量导出.xlsx',
-    });
-  };
-
-  render() {
-    return (
-      <>
-        <Button onClick={this.handleExport}>导出报表</Button>
-        <DownloadModal ref={this.dlRef} title="导出报表" onFinish={() => this.tableRef.refresh()} />
-      </>
-    );
-  }
-}
-```
-
-弹框展示三种状态：下载中（进度条 + 已下载/总计 + 速度）、已完成（✅ + 文件大小）、失败（❌ + 错误消息）。下载中不可关闭弹框，失败后可重试。
-
-#### 字段组件
-
-| 组件 | 用途 |
-|------|------|
-| `FieldRemoteSelect` | 远程搜索选择框 |
-| `FieldDictSelect` | 字典选择 |
-| `FieldBoolean` | 布尔值选择（select/radio/checkbox/switch） |
-| `FieldDate` / `FieldDateRange` | 日期/日期范围 |
-| `FieldSysOrgTreeSelect` | 系统组织树选择 |
-| `FieldUploadFile` | 文件上传（`/admin/sysFile/upload`） |
-| `FieldEditor` | 富文本编辑器 |
-| `FieldPercent` | 百分比输入 |
-| `FieldTable` / `FieldTableSelect` | 表格字段/选择 |
-
-#### 文件上传预览
-
-`/preview/{fileId}` 原图，`/preview/{fileId}?w=400` 缩略图（懒生成 + 缓存）。
-
-#### 工具类
-
-| 类 | 主要方法 |
-|----|---------|
-| `HttpUtils` | `get` / `post` / `postForm`（axios 封装，自动 context-path） |
-| `DownloadModal` | `download` 实例方法，弹框显示下载进度和状态，支持取消/重试 |
-| `UrlUtils` | `contextPath(path)` 拼接 context-path / URL 参数处理 |
-| `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
-| `TreeUtils` | `buildTree` / `treeToList` / `walk` |
-| `DateUtils` | `formatDate` / `formatTime` / `formatDateTime` |
-| `EventBus` | `on` / `once` / `emit` / `off` — 跨组件通信，优先使用，替代 `document.dispatchEvent` |
-
-## 配置参考
-
-### 系统配置 (`sys.*` in `application.yml`)
-
-| 配置 | 说明 | 默认值 |
-|------|------|--------|
-| `sys.title` | 系统标题（必填） | 管理系统 |
-| `sys.captcha-enable` | 登录验证码 | true |
-| `sys.default-password` | 默认密码 | Open@1234 |
-| `sys.show-logo` | 是否显示 Logo | true |
-| `sys.file.store-type` | 文件存储 (`local`/`s3`/`custom`) | local |
-| `sys.file.upload-path` | 本地上传路径 | /home/files |
-| `sys.file.s3.*` | S3 兼容存储配置 | — |
-| `sys.session-idle-time` | Session 超时（分钟） | 180 |
-| `sys.job-enable` | 定时任务开关 | true |
-
-### 文件存储
-
-通过 `sys.file.store-type` 选择后端（`local` / `s3` / `custom`）：
-
-- `local` — 本地文件系统，保存到 `sys.file.upload-path`
-- `s3` — S3 兼容存储（Minio / AWS S3 / R2 / 阿里云 OSS 等），配置 `sys.file.s3.{endpoint,region,accessKey,secretKey,bucketName,pathStyleAccess}`
-- 自定义 — 实现 `framework.spi.FileOperator` 接口并注册 `@Bean @Primary FileOperator`，框架自动跳过默认创建
-
-完整配置项见 `SystemProperties.java`。
-
-### Servlet Context-Path
-
-| 位置 | 配置 |
-|------|------|
-| 后端 `application.yml` | `server.servlet.context-path` |
-| 前端 `web/.env` | `VITE_SERVER_SERVLET_CONTEXT_PATH` |
-
-前端 `HttpUtils` 自动带上 context-path 前缀；硬编码 URL 用 `UrlUtils.contextPath(path)` 拼接。
-
-### 主题定制
-
-`web/.env` 配置：
+### 双项目工作流
 
 ```
-VITE_THEME_PRIMARY_COLOR=#1961AC
-VITE_THEME_SUCCESS_COLOR=#52c41a
-VITE_THEME_WARNING_COLOR=#faad14
-VITE_THEME_ERROR_COLOR=#ff4d4f
-VITE_THEME_BACKGROUND_COLOR=#f5f5f5
+D:/ws/
+├── open-admin/              # 框架项目（本仓库）
+│   ├── src/main/java/
+│   ├── web/src/framework/   # 前端框架源码 (npm publish)
+│   └── pom.xml
+└── open-admin-example/      # 示例业务项目（依赖框架）
 ```
 
-## 添加业务模块
+修改框架后需先执行 `mvn clean install -DskipTests`。
 
-1. **Entity** — 继承 `BaseEntity`，JPA 自动建表
-2. **Repository** — 继承 `BaseRepository<T, String>`，通用 CRUD + 动态查询
-3. **Service** — 继承 `BaseService<T>`，通用业务逻辑
-4. **Controller** — RESTful，返回 `AjaxResult`，`@HasPermission` 控制权限
-5. **菜单** — `src/main/resources/application-menu*.yml` 定义菜单树
-6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
+### 开发命令
 
-## 内置模块
-
-| 模块 | 包路径 | 功能 |
-|------|--------|------|
-| system | `modules/system/` | 用户/角色/菜单/组织/字典/文件/日志管理 |
-| job | `modules/job/` | Quartz 定时任务 |
-| logviewer | `modules/logviewer/` | 运行日志在线查看 |
-
-## FAQ
-
-**种子数据如何管理？** 框架使用 Flyway 管理种子数据的版本化迁移。框架内置的种子数据位于 `classpath:db/migration/open-admin/V1__seed__init_data.sql`，首次启动时自动执行。
-
-**业务项目如何添加自己的种子数据？** 在 `src/main/resources/db/migration/` 目录下放置 Flyway 迁移脚本即可：
-
-```
-src/main/resources/
-└── db/migration/
-    └── V1__seed__init_biz_data.sql
+```bash
+mvn clean compile                                          # 编译
+mvn test -Dtest=BeanToolTest                               # 运行单个测试
+mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试，跳过 SpringBootTest 集成测试（更快）
+mvn clean package                                          # 打包
+mvn -Pdev spring-boot:run                                  # 独立应用启动
+mvn clean install -DskipTests                              # 安装到本地仓库
+node scripts/bump-version.js <新版本号>                     # 仅升级 pom.xml + web/package.json 版本号
+scripts\release.bat <新版本号>                              # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
+cd web && npm install                                         # 前端安装依赖
+cd web && npm run dev                                         # 前端开发模式
+cd web && npm run build                                       # 前端构建
+cd web && npm run test:e2e                                    # Playwright 端到端测试
 ```
 
-脚本使用 `INSERT IGNORE` 确保幂等性。框架的 seed 脚本与业务项目的脚本互不干扰（不同目录）。
+测试使用 H2 内存数据库，无需 MySQL。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
 
-**MySQL 5.7 兼容？** 添加 `hibernate-community-dialects` 依赖，配置 `spring.jpa.properties.hibernate.dialect=org.hibernate.community.dialect.MySQLLegacyDialect`。
+E2E（`web/e2e/`）自动拉起后端（`mvn spring-boot:run` profiles=lib,e2e，端口 8080）与前端（端口 3000），运行前需释放这两个端口。
 
-**前端依赖安装失败？** `npm install --registry=https://registry.npmmirror.com`
+### 启动脚本
 
-**端口被占用？** 后端默认 8080，前端默认 8000，可通过环境变量 `SERVER_PORT` 修改后端端口。
+日常开发优先用 `scripts/` 下的脚本（后台 nohup 运行，日志落 `logs/`，PID 在 `logs/*.pid`，`logs/` 已被 gitignore）：
+
+```bash
+scripts/start-all.sh                                    # 一键后台启动前后端
+scripts/start-backend.sh {start|stop|restart|status}    # 后端: mvn -Pdev spring-boot:run（devtools 热重载）
+scripts/start-frontend.sh {start|stop|restart|status}   # 前端: npm run dev（端口 3000，缺 node_modules 自动安装）
+scripts/bug-scan.sh [模型]                              # 本地 AI bug 扫描（opencode + gh），产物在 target/bug-scan/
+```
+
+Windows 下用同名 `.bat`（cmd/双击），用法与 `.sh` 一致，日志同样落 `logs/`：
+
+```bat
+scripts\start-all.bat
+scripts\start-backend.bat start|stop|restart|status
+scripts\start-frontend.bat start|stop|restart|status
+```
+
+- 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
+- Windows 版内调 PowerShell `Start-Process cmd.exe` 后台启动、`taskkill /T` 结束整棵进程树，PID 同样记录在 `logs/*.pid`
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
+
+### 发版
+
+发版流程固化在 `scripts\release.bat`（Windows / cmd，输出纯 ASCII 避免乱码），日志落 `logs\release-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。**只给一个版本号参数**即可：
+
+```bat
+scripts\release.bat 3.1.3                    # bump + 全量测试 + commit + tag + push，触发 CI 发布
+scripts\release.bat v3.1.3                   # 版本号带不带 v 都行（推的 tag 一律带 v）
+scripts\release.bat 3.1.3 --dry-run          # 只跑检查、打印计划，不改动仓库文件（仅写 logs/ 日志）
+scripts\release.bat 3.1.3 --no-push          # 本地演练：commit + tag 但不推送
+scripts\release.bat 3.1.3 --skip-tests       # 跳过 mvn test 与 npm build（发版不建议）
+scripts\release.bat status                   # 当前分支 / 版本 / tag / 工作区状态
+scripts\release.bat check                    # 只读检查，输出 KEY=VALUE（当前版本 + 候选版本号）
+scripts\release.bat --help                   # 全部参数与退出码
+```
+
+- 版本号可带或不带 `v` 前缀（`3.1.3` / `v3.1.3` 等价）；推送到远端的 tag 一律带 `v`（`v3.1.3`），`publish.yml` 正是按 `v*` 触发
+- 前置条件：`gh` 已登录、当前分支为 `main`、工作区干净
+- 白名单：一次发版只允许修改 `*/pom.xml` 与 `web/package.json`，出现别的改动直接中止（退出码 3）
+- 退出码：`0` 成功 / `1` 参数或前置条件 / `2` 测试失败 / `3` 工作区不干净 / `4` git 失败 / `5` 版本或 tag 冲突
+- 失败自动回滚版本号改动；若 commit + tag 已建、只是推送失败，重跑同一条命令会进入 resume 模式只补推送
+- push tag 后由 `.github/workflows/publish.yml` 自动发布 Maven Central + npm 并创建 GitHub Release（Release Notes 由 CI 生成）
+- 排障：失败时会打印恢复命令与日志路径
+- 手工等价命令见 README「开发命令」；从别的 `.bat` 里调用请用 `call scripts\release.bat ...`
 
 ## Skills (opencode)
 
@@ -476,7 +201,9 @@ src/main/resources/
 |-------|------|
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
+| `oa-upgrade-docs` | 从 GitHub Release 同步框架文件（skills + docs） |
+| `oa-sonar-scan` | SonarQube 扫描与问题修复 |
 
-### 安装到业务项目
+### 从 Release 同步到业务项目
 
-复制 .opencode/skills 目录到业务项目
+框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目调用 **`oa-upgrade-docs` skill** 下载并同步到项目根目录：内容比对无变更不写入；`docs/open-admin/` 全量镜像（删除孤儿文件），`.opencode/skills/` 仅覆盖框架 skill（不删业务本地 skill）。同步细节与验证步骤见 `oa-upgrade-docs` skill；升级框架后调用 `oa-upgrade` skill 会自动在末尾触发同步。

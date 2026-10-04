@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined, SettingOutlined, SyncOutlined} from '@ant-design/icons';
-import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Popconfirm, Popover, Space, Spin, Splitter, Switch, Tree, Typography} from 'antd';
+import {Button, Card, Checkbox, Descriptions, Form, Input, InputNumber, Modal, Popover, Space, Spin, Splitter, Switch, Tree, Typography} from 'antd';
 import React from 'react';
 import {
     FieldBoolean,
@@ -7,13 +7,15 @@ import {
     FieldRemoteTreeSelect,
     FieldUserSelect,
     FormModal, Gap,
-    HttpUtils,
+    HttpClient,
     NamedIcon,
     Page,
+    PermActions,
+    PermUtils,
     ViewSwitch,
 } from "../../../framework";
 
-export default class extends React.Component {
+export default class OrgPage extends React.Component {
 
     state = {
         selectedOrg: null,
@@ -25,6 +27,7 @@ export default class extends React.Component {
         treeData: [],
         treeLoading: false,
         draggable: false,
+        deleteModalOpen: false,
     }
     modalRef = React.createRef();
     treeRef = React.createRef();
@@ -35,18 +38,23 @@ export default class extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpUtils.get('admin/sysOrg/tree', this.state.params).then(rs => {
-            this.setState({treeData: rs})
-        }).finally(() => {
+        HttpClient.get('admin/sysOrg/tree', this.state.params, {toastError: false}).then(rs => {
+            this.setState({treeData: rs.data})
+            this.setState({treeLoading: false});
+        }).catch(() => {
             this.setState({treeLoading: false});
         })
+    }
+
+    openDeleteModal = () => {
+        this.setState({deleteModalOpen: true})
     }
 
     handleDelete = () => {
         const {selectedOrg} = this.state
         if (!selectedOrg) return
-        HttpUtils.post('admin/sysOrg/delete', {id: selectedOrg.id}).then(() => {
-            this.setState({selectedOrg: null})
+        HttpClient.post('admin/sysOrg/delete', {id: selectedOrg.id}, null).then(() => {
+            this.setState({selectedOrg: null, deleteModalOpen: false})
             this.loadTree()
         })
     }
@@ -56,8 +64,8 @@ export default class extends React.Component {
             this.setState({selectedOrg: null})
             return
         }
-        HttpUtils.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
-            this.setState({selectedOrg: rs})
+        HttpClient.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
+            this.setState({selectedOrg: rs.data})
         })
     }
 
@@ -73,7 +81,7 @@ export default class extends React.Component {
     handleModalFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/sysOrg/create' : 'admin/sysOrg/update'
-        await HttpUtils.post(url, values)
+        await HttpClient.post(url, values)
         this.loadTree()
     }
 
@@ -84,6 +92,7 @@ export default class extends React.Component {
     render() {
         const {selectedOrg} = this.state
         const params = this.state.params
+        const canSort = PermUtils.hasPermission('sys-org:update')
 
         return <Page title="组织机构" description="管理组织机构树" actions={
             <Button type='primary' perm='sys-org:create' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
@@ -115,6 +124,7 @@ export default class extends React.Component {
                                     <div>
                                         拖拽排序&nbsp;<Switch
                                         value={this.state.draggable}
+                                        disabled={!canSort}
                                         onChange={this.onDraggableChange}/>
                                     </div>
                                     <Button size='small' shape='round' icon={<SyncOutlined/>} onClick={this.loadTree}>刷新</Button>
@@ -130,7 +140,7 @@ export default class extends React.Component {
                                   onSelect={this.onSelect}
                                   showIcon
                                   blockNode
-                                  icon={item => <NamedIcon name={item.data.iconName}/>}
+                                  icon={item => <NamedIcon name={item.data.iconName}/>} // NOSONAR: AntD 渲染函数惯例
                                   draggable={this.state.draggable}
                                   onDrop={this.onDrop}
                                   showLine
@@ -145,18 +155,21 @@ export default class extends React.Component {
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
                             <Typography.Text strong>机构信息</Typography.Text>
                             {selectedOrg && (
-                                <span>
-                                    <Button size='small' icon={<EditOutlined/>} perm='sys-org:update'
-                                            onClick={this.handleEdit} style={{marginRight: 4}}>编辑</Button>
-                                    <Popconfirm perm='sys-org:delete' title='是否确定删除组织机构'
-                                                onConfirm={this.handleDelete}>
-                                        <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
-                                    </Popconfirm>
-                                </span>
+                                <PermActions size='small' actions={[
+                                    {label: '编辑', perm: 'sys-org:update', icon: <EditOutlined/>, onClick: this.handleEdit},
+                                    {
+                                        label: '删除',
+                                        perm: 'sys-org:delete',
+                                        icon: <DeleteOutlined/>,
+                                        danger: true,
+                                        onClick: this.openDeleteModal,
+                                    },
+                                ]}/>
                             )}
                         </div>
                         {selectedOrg && (
                             <Descriptions size='small' column={2}>
+                                <Descriptions.Item label="唯一标识">{selectedOrg.id}</Descriptions.Item>
                                 <Descriptions.Item label="名称">{selectedOrg.name}</Descriptions.Item>
                                 <Descriptions.Item label="类型">{selectedOrg.typeLabel}</Descriptions.Item>
                                 <Descriptions.Item label="上级机构">{selectedOrg.parentName || '-'}</Descriptions.Item>
@@ -181,9 +194,6 @@ export default class extends React.Component {
                 <Form.Item label='名称' name='name' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
-                <Form.Item label='序号' name='seq'>
-                    <InputNumber/>
-                </Form.Item>
                 <Form.Item label='类型' name='type' rules={[{required: true}]}>
                     <FieldRemoteSelect url='admin/sysOrg/type-options' placeholder='请选择类型'/>
                 </Form.Item>
@@ -192,6 +202,9 @@ export default class extends React.Component {
                 </Form.Item>
                 <Form.Item label='启用' name='enabled' rules={[{required: true}]}>
                     <FieldBoolean/>
+                </Form.Item>
+                <Form.Item label='序号' name='seq'>
+                    <InputNumber/>
                 </Form.Item>
                 <Form.Item label='扩展字段1' name='extra1'>
                     <Input/>
@@ -203,16 +216,24 @@ export default class extends React.Component {
                     <Input/>
                 </Form.Item>
             </FormModal>
+
+            <Modal open={this.state.deleteModalOpen} title="删除确认" okText="删除" cancelText="取消"
+                   okButtonProps={{danger: true}}
+                   onCancel={() => this.setState({deleteModalOpen: false})}
+                   onOk={this.handleDelete}>
+                是否确定删除组织机构「{selectedOrg?.name}」？
+            </Modal>
         </Page>
     }
 
     onDrop = (e) => {
+        if (!PermUtils.hasPermission('sys-org:update')) return;
         const {dragNode, dropToGap, node} = e;
         const dropKey = node.key;
         const dragKey = dragNode.key;
         const dropPos = e.node.pos.split('-');
         const dropPosition = e.dropPosition - Number(dropPos[dropPos.length - 1]);
-        HttpUtils.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}).then(this.loadTree)
+        HttpClient.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}, null).then(() => this.loadTree())
     };
 }
 

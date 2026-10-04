@@ -1,8 +1,12 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
+import io.github.jiangood.openadmin.framework.dict.DictSeedSync;
+import io.github.jiangood.openadmin.util.dto.TreeOption;
+import io.github.jiangood.openadmin.util.tree.TreeTool;
+import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterPermVO;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.framework.config.security.PermissionStaleService;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
@@ -32,14 +36,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Service
 public class SysUserService extends BaseService<SysUser> {
+
+    private static final String MSG_USER_NOT_EXIST = "用户不存在";
 
     private final SysUserRepository sysUserRepository;
 
@@ -54,7 +62,6 @@ public class SysUserService extends BaseService<SysUser> {
     private final PermissionStaleService permissionStaleService;
 
     private final PasswordEncoder passwordEncoder;
-
 
     public UserVO findOneDto(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
@@ -95,10 +102,10 @@ public class SysUserService extends BaseService<SysUser> {
         query.like(SysUser.Fields.phone, phone);
         query.eq(SysUser.Fields.enabled, enabled);
 
-        if (StrUtil.isNotEmpty(orgId)) {
+        if (CharSequenceUtil.isNotEmpty(orgId)) {
             query.or(Spec.<SysUser>of().eq(SysUser.Fields.unitId, orgId), Spec.<SysUser>of().eq(SysUser.Fields.orgId, orgId));
         }
-        if (StrUtil.isNotEmpty(roleId)) {
+        if (CharSequenceUtil.isNotEmpty(roleId)) {
             query.isMember(SysUser.Fields.roles, new SysRole(roleId));
         }
 
@@ -126,20 +133,39 @@ public class SysUserService extends BaseService<SysUser> {
             SysUser.Fields.dataPermType,
             SysUser.Fields.lastPasswordChangeTime
         ));
-        fieldsToUpdate.add(SysUser.Fields.unitId);
+        if (fieldsToUpdate.contains(SysUser.Fields.orgId) || fieldsToUpdate.contains(SysUser.Fields.unitId)) {
+            fieldsToUpdate.add(SysUser.Fields.unitId);
+        }
         return super.update(input, fieldsToUpdate);
     }
 
     private void resolveOrg(SysUser input) {
         String inputOrgId = input.getOrgId();
         if (inputOrgId == null) return;
-        input.setUnitId(inputOrgId);
+        input.setUnitId(resolveUnitId(inputOrgId));
+    }
+
+    private String resolveUnitId(String orgId) {
+        List<String> reversed = new ArrayList<>(sysOrgService.getParentIdListById(orgId));
+        reversed.add(orgId);
+        List<String> path = reversed.reversed();
+        for (String id : path) {
+            SysOrg org = sysOrgService.findById(id).orElse(null);
+            if (org != null && Integer.valueOf(1).equals(org.getType())) {
+                return org.getId();
+            }
+        }
+        return orgId;
     }
 
 
+    @Override
     @Transactional
     public void deleteById(String id) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
+        if (sysUser == null) {
+            throw new IllegalStateException(MSG_USER_NOT_EXIST);
+        }
         try {
             sysUserRepository.delete(sysUser);
         } catch (Exception e) {
@@ -152,13 +178,16 @@ public class SysUserService extends BaseService<SysUser> {
     public void updatePwd(String userId, String oldPassword, String newPassword) {
         Assert.hasText(newPassword, "请输入新密码");
         SysUser sysUser = sysUserRepository.findById(userId).orElse(null);
-        Assert.notNull(sysUser, "用户不存在");
-        Assert.state(passwordEncoder.matches(oldPassword, sysUser.getPassword()), "旧密码不正确");
+        Assert.notNull(sysUser, MSG_USER_NOT_EXIST);
+        // 强制改密（首次登录或密码被管理员重置，lastPasswordChangeTime 为空）时无旧密码可校验，直接放行
+        if (sysUser.getLastPasswordChangeTime() != null) {
+            Assert.state(passwordEncoder.matches(oldPassword, sysUser.getPassword()), "旧密码不正确");
+        }
 
         PasswordTool.validateStrength(newPassword);
 
         sysUser.setPassword(PasswordTool.encode(newPassword));
-        sysUser.setLastPasswordChangeTime(new Date());
+        sysUser.setLastPasswordChangeTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysUserRepository.save(sysUser);
     }
 
@@ -178,6 +207,7 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public void resetPwd(String id, String plainPassword) {
         SysUser sysUser = sysUserRepository.findById(id).orElse(null);
+        Assert.notNull(sysUser, MSG_USER_NOT_EXIST);
         PasswordTool.validateStrength(plainPassword);
 
         sysUser.setPassword(PasswordTool.encode(plainPassword));
@@ -195,29 +225,130 @@ public class SysUserService extends BaseService<SysUser> {
     // 数据范围
     public List<String> getOrgPermissions(String userId) {
         SysUser user = sysUserRepository.findById(userId).orElse(null);
+        Assert.notNull(user, MSG_USER_NOT_EXIST);
         DataPermType dataPermType = user.getDataPermType();
         if (dataPermType == null) {
             dataPermType = DataPermType.CHILDREN;
         }
 
 
-        // 超级管理员返回所有
-        if (dataPermType == DataPermType.ALL) {
-            List<SysOrg> all = sysOrgService.findAll();
-            return all.stream().map(BaseEntity::getId).collect(Collectors.toList());
-        }
-
         String orgId = user.getUnitId();
         switch (dataPermType) {
+            case ALL:
+                return sysOrgService.findAll().stream().map(BaseEntity::getId).toList();
             case LEVEL:
                 return orgId == null ? Collections.emptyList() : Collections.singletonList(orgId);
             case CHILDREN:
                 return sysOrgService.findChildIdListWithSelfById(orgId);
             case CUSTOM:
-                return user.getDataPerms().stream().map(BaseEntity::getId).collect(Collectors.toList());
+                return user.getDataPerms().stream().map(BaseEntity::getId).toList();
+            default:
+                throw new IllegalStateException("有未处理的类型" + dataPermType);
+        }
+    }
+
+    /**
+     * 个人中心"我的权限"视图：机构树（含授权状态）、数据权限类型、菜单权限树（权限名称聚合+授权状态）。
+     * <p>
+     * 整体加事务以支持懒加载（角色/自定义数据权限机构），getUserPerms 为自调用不走代理，
+     * 依赖本方法开启的外层事务完成懒加载。
+     */
+    @Transactional
+    public UserCenterPermVO getPermView(String userId) {
+        SysUser user = sysUserRepository.findById(userId).orElse(null);
+        UserCenterPermVO vo = new UserCenterPermVO();
+        if (user == null) {
+            return vo;
+        }
+        vo.setDataPermLabel(user.getDataPermType() == null ? null : DictSeedSync.getLabel(user.getDataPermType()));
+
+        // 有效数据权限机构 id 集
+        Set<String> orgPermIds = new HashSet<>(getOrgPermissions(userId));
+
+        // 机构全量树 + 授权状态
+        List<TreeOption> orgOptions = sysOrgService.findAll().stream()
+                .map(org -> new TreeOption(org.getName(), org.getId(), org.getPid()))
+                .toList();
+        vo.setOrgRows(toOrgRows(TreeTool.buildTree(orgOptions), user.getUnitId(), user.getOrgId(), orgPermIds));
+
+        // 已拥有权限码（过滤 ROLE_/ORG_ 前缀）
+        Set<String> owned = new TreeSet<>();
+        for (String perm : getUserPerms(userId)) { // NOSONAR: getPermView 已开启外层事务，注释见方法头
+            if (!perm.startsWith("ROLE_") && !perm.startsWith("ORG_")) {
+                owned.add(perm);
+            }
         }
 
-        throw new IllegalStateException("有未处理的类型" + dataPermType);
+        // 菜单全量树 + 权限名称聚合 + 授权状态（权限不再挂子节点）
+        List<MenuDefinition> menus = sysMenuRepository.findAll().stream()
+                .filter(menu -> menu.getDisabled() == null || !menu.getDisabled())
+                .toList();
+        List<TreeOption> menuOptions = menus.stream().map(menu -> {
+            TreeOption node = new TreeOption(menu.getName(), menu.getId(), menu.getPid());
+            List<String> codes = menu.getPermCodes();
+            List<String> names = menu.getPermNames();
+            List<TreeOption> permLeaves = new ArrayList<>();
+            for (int i = 0; i < codes.size(); i++) {
+                TreeOption leaf = new TreeOption(names.get(i), codes.get(i), null);
+                leaf.setLeaf(true);
+                permLeaves.add(leaf);
+            }
+            node.setChildren(permLeaves);
+            return node;
+        }).toList();
+        vo.setMenuRows(toMenuRows(TreeTool.buildTree(menuOptions), owned));
+
+        return vo;
+    }
+
+    /** 机构树 -> 表格行，标注 mine/owned 状态 */
+    private List<UserCenterPermVO.OrgRow> toOrgRows(List<TreeOption> nodes, String unitId, String orgId, Set<String> orgPermIds) {
+        List<UserCenterPermVO.OrgRow> rows = new ArrayList<>();
+        for (TreeOption node : nodes) {
+            UserCenterPermVO.OrgRow row = new UserCenterPermVO.OrgRow();
+            row.setKey(node.getKey());
+            row.setTitle(node.getTitle());
+            if (node.getKey().equals(unitId) || node.getKey().equals(orgId)) {
+                row.setStatus("mine");
+            } else if (orgPermIds.contains(node.getKey())) {
+                row.setStatus("owned");
+            }
+            if (CollUtil.isNotEmpty(node.getChildren())) {
+                row.setChildren(toOrgRows(node.getChildren(), unitId, orgId, orgPermIds));
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    /** 菜单树 -> 表格行，权限名称聚合到 perms，标注 all/partial 状态 */
+    private List<UserCenterPermVO.MenuRow> toMenuRows(List<TreeOption> nodes, Set<String> owned) {
+        List<UserCenterPermVO.MenuRow> rows = new ArrayList<>();
+        for (TreeOption node : nodes) {
+            UserCenterPermVO.MenuRow row = new UserCenterPermVO.MenuRow();
+            row.setKey(node.getKey());
+            row.setTitle(node.getTitle());
+
+            List<TreeOption> leaves = node.getChildren() == null ? List.of()
+                    : node.getChildren().stream().filter(c -> Boolean.TRUE.equals(c.getLeaf())).toList();
+            List<TreeOption> subMenus = node.getChildren() == null ? List.of()
+                    : node.getChildren().stream().filter(c -> !Boolean.TRUE.equals(c.getLeaf())).toList();
+
+            row.setPerms(leaves.stream().map(TreeOption::getTitle).toList());
+            int ownedCount = (int) leaves.stream().filter(leaf -> owned.contains(leaf.getKey())).count();
+            if (!leaves.isEmpty()) {
+                if (ownedCount == leaves.size()) {
+                    row.setStatus("all");
+                } else if (ownedCount > 0) {
+                    row.setStatus("partial");
+                }
+            }
+            if (CollUtil.isNotEmpty(subMenus)) {
+                row.setChildren(toMenuRows(subMenus, owned));
+            }
+            rows.add(row);
+        }
+        return rows;
     }
 
     @Cacheable(value = "userPerms", key = "#id", sync = true, condition = "#id != null")
@@ -231,6 +362,10 @@ public class SysUserService extends BaseService<SysUser> {
         log.debug("获取用户权限:{}", user.getName());
         Set<String> result = new TreeSet<>();
         for (SysRole role : user.getRoles()) {
+            if (!Boolean.TRUE.equals(role.getEnabled())) {
+                continue;
+            }
+
             // 添加角色，格式必须以 ROLE_ 开头，如 ROLE_ADMIN
             String rolePerm = "ROLE_" + role.getCode();
             result.add(rolePerm);
@@ -267,12 +402,13 @@ public class SysUserService extends BaseService<SysUser> {
 
     public GrantUserPermReq getPermInfo(String id) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
+        Assert.notNull(user, MSG_USER_NOT_EXIST);
 
         GrantUserPermReq p = new GrantUserPermReq();
         p.setId(user.getId());
         p.setDataPermType(user.getDataPermType());
-        p.setOrgIds(user.getDataPerms().stream().map(BaseEntity::getId).collect(Collectors.toList()));
-        p.setRoleIds(user.getRoles().stream().map(BaseEntity::getId).collect(Collectors.toList()));
+        p.setOrgIds(user.getDataPerms().stream().map(BaseEntity::getId).toList());
+        p.setRoleIds(user.getRoles().stream().map(BaseEntity::getId).toList());
 
         return p;
     }
@@ -280,6 +416,7 @@ public class SysUserService extends BaseService<SysUser> {
     @Transactional
     public SysUser grantPerm(String id, List<String> roleIds, DataPermType dataPermType, List<String> orgIdList) {
         SysUser user = sysUserRepository.findById(id).orElse(null);
+        Assert.notNull(user, MSG_USER_NOT_EXIST);
         List<SysOrg> orgs = CollUtil.isNotEmpty(orgIdList) ? sysOrgService.findAllById(orgIdList) : Collections.emptyList();
         user.setDataPerms(orgs);
         user.setDataPermType(dataPermType);

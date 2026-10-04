@@ -8,7 +8,7 @@ function getComponent(registry, type) {
     if (!type) {
         return
     }
-    for (let key in registry) {
+    for (const key in registry) {
         if (key.toLowerCase() === type.toLowerCase()) {
             return registry[key]
         }

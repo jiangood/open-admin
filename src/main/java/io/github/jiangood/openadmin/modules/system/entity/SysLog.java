@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 系统操作日志表
@@ -17,7 +17,7 @@ import java.util.Date;
 @Entity
 @FieldNameConstants
 @Table(name = "sys_log", indexes = {@Index(columnList = "operation")})
-public class SysLog extends BaseEntity {
+public class SysLog extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     @Column(nullable = false, length = 100)
     private String operation;
@@ -57,6 +57,6 @@ public class SysLog extends BaseEntity {
     @Column(length = 64)
     private String ip;
 
-    private Date operationTime;
+    private LocalDateTime operationTime;
 
 }

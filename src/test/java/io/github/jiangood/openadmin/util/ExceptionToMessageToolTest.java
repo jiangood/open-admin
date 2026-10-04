@@ -1,16 +1,10 @@
 package io.github.jiangood.openadmin.util;
 
 import org.junit.jupiter.api.Test;
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.ConstraintViolation;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.transaction.TransactionSystemException;
-import jakarta.persistence.RollbackException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Set;
-import java.util.HashSet;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * ExceptionToMessageTool工具类的单元测试

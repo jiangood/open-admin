@@ -1,6 +1,6 @@
-import {Form, Modal} from 'antd';
+import {Form, Modal, message} from 'antd';
 import React from 'react';
-import {FieldDictSelect, FieldRemoteSelect, FieldSysOrgTree, HttpUtils} from "../../../framework";
+import {FieldDictSelect, FieldRemoteSelect, FieldSysOrgTree, HttpClient} from "../../../framework";
 
 
 export default class UserPerm extends React.Component {
@@ -15,14 +15,14 @@ export default class UserPerm extends React.Component {
             dataPermType: null
         },
     }
-    formRef = React.createRef()
+    formRef = React.createRef() // NOSONAR: React ref，内部通过 this.formRef 使用
 
-    show(item) {
+    show(item) { // NOSONAR: ref 暴露给父组件调用的公共 API
         this.setState({visible: true})
 
-        HttpUtils.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
-            this.setState({formValues: rs})
-            this.formRef.current.setFieldsValue(rs)
+        HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
+            this.setState({formValues: rs.data})
+            this.formRef.current.setFieldsValue(rs.data)
         })
     }
 
@@ -34,17 +34,17 @@ export default class UserPerm extends React.Component {
         })
 
 
-        HttpUtils.post('admin/sysUser/grant-perm', values).then(rs => {
+        HttpClient.post('admin/sysUser/grant-perm', values, null, {toastError: false}).then(() => {
             this.setState({
                 visible: false,
                 confirmLoading: false
             })
             this.props.onOk()
-        }).finally(() => {
+        }).catch(e => {
+            message.error(HttpClient.errToMsg(e))
             this.setState({
                 confirmLoading: false
             })
-
         })
     }
 
@@ -77,11 +77,11 @@ export default class UserPerm extends React.Component {
                 </Form.Item>
 
 
-                {this.state.formValues.dataPermType === 'CUSTOM' && <>
+                {this.state.formValues.dataPermType === 'CUSTOM' &&
                     <Form.Item label='组织机构' name='orgIds'>
                         <FieldSysOrgTree/>
                     </Form.Item>
-                </>}
+                }
 
 
             </Form>

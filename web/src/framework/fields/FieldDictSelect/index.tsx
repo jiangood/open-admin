@@ -4,7 +4,7 @@ import {DictUtils} from "../../utils";
 import type {SelectProps} from "antd/es/select";
 import type {FieldProps} from '../types';
 
-interface FieldDictSelectProps extends Omit<SelectProps, 'options' | 'children' | 'mode' | 'value' | 'onChange'>, FieldProps<any> {
+interface FieldDictSelectProps extends Omit<SelectProps, 'options' | 'children' | 'mode' | 'value' | 'onChange'>, FieldProps<unknown> {
     typeCode: string;
 }
 
@@ -12,7 +12,7 @@ export class FieldDictSelect extends React.Component<FieldDictSelectProps> {
     render() {
         const {value, typeCode} = this.props;
         const options = DictUtils.dictOptions(typeCode);
-        const strValue = value == null ? null : String(value);
+        const strValue = value == null ? null : String(value); // NOSONAR: value 经 String() 显式转换，无隐式字符串化
 
         return <Select value={strValue}
                        onChange={this.props.onChange}

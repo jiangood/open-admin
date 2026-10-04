@@ -15,13 +15,13 @@ import org.springframework.util.Assert;
 import java.util.Collections;
 import java.util.Map;
 
-@Remark("作业")
+@Remark("定时任务")
 @Getter
 @Setter
 @Entity
 @Table(name = "sys_job")
 @FieldNameConstants
-public class SysJob extends BaseEntity {
+public class SysJob extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     public static final String JOB_SUFFIX = "Job";
     @Column(unique = true)
@@ -35,7 +35,7 @@ public class SysJob extends BaseEntity {
     // 参数
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "TEXT")
-    Map<String, Object> jobData;
+    Map<String, Object> jobData; // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     // 扩展字段
     String extraInfo;
 
@@ -57,6 +57,11 @@ public class SysJob extends BaseEntity {
         }
 
         return Collections.emptyMap();
+    }
+
+    @Transient
+    public String getJobClassName() {
+        return jobClass == null ? null : jobClass.substring(jobClass.lastIndexOf('.') + 1);
     }
 
 

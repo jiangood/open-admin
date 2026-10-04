@@ -12,7 +12,7 @@ const iconLoaders: Record<string, () => Promise<{ default: IconComponent }>> = {
 for (const [path, loader] of Object.entries(
     import.meta.glob('/node_modules/@ant-design/icons/es/icons/*.js')
 )) {
-    const name = /([^/]+)\.js$/.exec(path)?.[1];
+    const name = /([^/]+)\.js$/.exec(path)?.[1]; // NOSONAR: 提取文件名，已最简
     if (name) {
         iconLoaders[name] = loader as () => Promise<{ default: IconComponent }>;
     }
@@ -52,7 +52,7 @@ export function NamedIcon(props: NamedIconProps): React.ReactElement {
         };
     }, [name]);
 
-    const Icon = (loaded && loaded.name === name) ? loaded.comp : iconCache.get(name);
+    const Icon = (loaded?.name === name) ? loaded.comp : iconCache.get(name);
 
     if (Icon) {
         return <Icon {...rest} />;

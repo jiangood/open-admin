@@ -27,9 +27,7 @@ public class ResourceTool {
         String classPath = "classpath*:" + path;
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        Resource[] resources = resolver.getResources(classPath);
-
-        return resources;
+        return resolver.getResources(classPath);
     }
 
     @SneakyThrows
@@ -105,7 +103,7 @@ public class ResourceTool {
         if (r instanceof UrlResource ur) {
             String[] orders = {
                     "/org/springframework/",
-                    OpenAdminConfiguration.class.getPackageName().replaceAll("\\.", "/"),
+                    OpenAdminConfiguration.class.getPackageName().replace(".", "/"),
             };
             for (int i = 0; i < orders.length; i++) {
                 String order = orders[i];
@@ -124,7 +122,7 @@ public class ResourceTool {
     }
 
 
-    public static Resource findOne(String path) throws IOException {
+    public static Resource findOne(String path) {
         return new ClassPathResource(path);
     }
 

@@ -10,6 +10,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ClassTool {
+    private ClassTool() {
+    }
+
 
     private static final CachingMetadataReaderFactory cachingMetadataReaderFactory = new CachingMetadataReaderFactory();
 

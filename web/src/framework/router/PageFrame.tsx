@@ -10,7 +10,7 @@ interface PageFrameProps {
 }
 
 export class PageFrame extends React.Component<PageFrameProps> {
-    componentRef = React.createRef<any>();
+    componentRef = React.createRef<{onShow?: () => void}>();
 
     componentDidMount() {
         this.callOnShowIfActive();

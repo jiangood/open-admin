@@ -2,8 +2,9 @@ package io.github.jiangood.openadmin.util;
 
 
 import cn.hutool.core.util.CharsetUtil;
-import cn.hutool.core.util.URLUtil;
+import cn.hutool.core.net.URLEncodeUtil;
 import cn.hutool.http.ContentType;
+import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,22 +18,25 @@ import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class ResponseTool {
+    private ResponseTool() {
+    }
+
 
     public static final String CONTENT_TYPE_EXCEL = "application/vnd.ms-excel;charset=utf-8";
     public static final String CONTENT_TYPE_PDF = "application/pdf";
 
     public static final String CONTENT_TYPE_STREAM = "application/octet-stream";
 
-    public static void setDownloadHeader(String filename, String contentType, HttpServletResponse response) throws IOException {
-        filename = URLUtil.encode(filename, StandardCharsets.UTF_8);
+    public static void setDownloadHeader(String filename, String contentType, HttpServletResponse response) {
+        filename = URLEncodeUtil.encode(filename, StandardCharsets.UTF_8);
 
         response.setContentType(contentType);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setHeader("Access-Control-Expose-Headers", "content-disposition");
     }
 
-    public static void setDownloadExcelHeader(String filename, HttpServletResponse response) throws IOException {
-        filename = URLUtil.encode(filename, StandardCharsets.UTF_8);
+    public static void setDownloadExcelHeader(String filename, HttpServletResponse response) {
+        filename = URLEncodeUtil.encode(filename, StandardCharsets.UTF_8);
         response.setContentType(CONTENT_TYPE_EXCEL);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setHeader("Access-Control-Expose-Headers", "content-disposition");
@@ -59,11 +63,9 @@ public class ResponseTool {
     }
 
     private static String removeImgPrefix(String content) {
-        String reg = "(<img.*?)(https?://.*?)(/sysFile/preview.*?>)";
+        String reg = "(<img.*?)(https?://.*?)(" + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", "") + ".*?>)";
 
-        String result = content.replaceAll(reg, "$1$3");
-
-        return result;
+        return content.replaceAll(reg, "$1$3");
     }
 
 

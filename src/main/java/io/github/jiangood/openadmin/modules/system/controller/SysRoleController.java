@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
@@ -12,6 +13,7 @@ import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserToRoleReq;
+import io.github.jiangood.openadmin.modules.system.dto.request.RoleReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.SaveRolePermReq;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -45,9 +47,9 @@ public class SysRoleController {
     private final SysUserService sysUserService;
 
     @HasPermission("sys-role:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String name, String code,
-                           @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws Exception {
+                           @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysRole> q = Spec.of();
         q.like(SysRole.Fields.name, name);
         q.like(SysRole.Fields.code, code);
@@ -70,7 +72,8 @@ public class SysRoleController {
     @Log("角色-创建")
     @HasPermission("sys-role:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody SysRole role) throws Exception {
+    public AjaxResult create(@RequestBody RoleReq req) {
+        SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, null);
 
         for (SysUser user : role.getUsers()) {
@@ -86,7 +89,8 @@ public class SysRoleController {
     @Log("角色-更新")
     @HasPermission("sys-role:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody SysRole role, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody RoleReq req, RequestBodyKeys updateFields) {
+        SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, updateFields);
 
         for (SysUser user : role.getUsers()) {
@@ -97,7 +101,7 @@ public class SysRoleController {
     }
 
 
-    @RequestMapping("biz-tree")
+    @GetMapping("biz-tree")
     public AjaxResult bizTree() {
         List<SysRole> list = sysRoleService.findValid();
 
@@ -114,19 +118,23 @@ public class SysRoleController {
     }
 
     @HasPermission("sys-role:read")
-    @RequestMapping("own-perms")
+    @GetMapping("own-perms")
     public AjaxResult ownPerms(String id) {
         SysRole role = sysRoleService.findById(id).orElse(null);
-        List<String> rolePerms = role.getPerms();
+        if (role == null) {
+            return AjaxResult.err("角色不存在");
+        }
+        List<String> rolePerms = CollUtil.emptyIfNull(role.getPerms());
+        // 通配符 '*' 表示拥有全部权限，此时所有权限码均视为已选
+        boolean wildcard = rolePerms.contains("*");
 
         List<MenuDefinition> menuList = sysRoleService.ownMenu(id);
 
         Map<String, Collection<String>> permsMap = new HashMap<>();
         for (MenuDefinition menuDef : menuList) {
             if (CollUtil.isNotEmpty(menuDef.getPermCodes())) {
-                Set<String> menuPerms = new HashSet<>(menuDef.getPermCodes());
-
-                List<String> ownMenuPerms = menuPerms.stream().filter(rolePerms::contains).toList();
+                List<String> ownMenuPerms = wildcard ? new ArrayList<>(menuDef.getPermCodes())
+                        : menuDef.getPermCodes().stream().filter(rolePerms::contains).toList();
                 permsMap.put(menuDef.getId(), ownMenuPerms);
             }
         }
@@ -142,13 +150,13 @@ public class SysRoleController {
      * @return
      */
     @HasPermission("sys-role:grant-permission")
-    @RequestMapping("perm-tree-table")
+    @GetMapping("perm-tree-table")
     public AjaxResult menuTree() {
-        return AjaxResult.ok().data(sysMenuService.menuTree());
+        return AjaxResult.ok().data(sysMenuService.menuPermTree());
     }
 
     @HasPermission("sys-role:update")
-    @RequestMapping("save-perms")
+    @PostMapping("save-perms")
     public AjaxResult savePerms(@RequestBody SaveRolePermReq request) {
         SysRole sysRole = sysRoleService.savePerms(request.getId(), request.getPerms(), request.getMenus());
         for (SysUser user : sysRole.getUsers()) {
@@ -159,7 +167,7 @@ public class SysRoleController {
 
 
     @HasPermission("sys-role:read")
-    @RequestMapping("user-list")
+    @GetMapping("user-list")
     public AjaxResult userList(String id) {
         List<SysUser> users = sysUserService.findAll();
         List<Dict> list = users.stream().map(u -> Dict.of("key", u.getId(), "title", u.getName())).toList();
@@ -183,11 +191,11 @@ public class SysRoleController {
 
 
     @HasPermission("sys-role:grant-permission")
-    @RequestMapping("grant-users")
+    @PostMapping("grant-users")
     public AjaxResult saveUserList(@RequestBody GrantUserToRoleReq request) {
         List<String> oldUserIds = sysRoleService.findUsers(request.getId())
             .stream().map(BaseEntity::getId).toList();
-        SysRole sysRole = sysRoleService.grantUsers(request.getId(), request.getUserIdList());
+        sysRoleService.grantUsers(request.getId(), request.getUserIdList());
 
         Set<String> affected = new HashSet<>(oldUserIds);
         if (request.getUserIdList() != null) {
@@ -200,7 +208,7 @@ public class SysRoleController {
         return AjaxResult.ok().msg("授权用户成功");
     }
 
-    @RequestMapping("options")
+    @GetMapping("options")
     public AjaxResult options(DropdownReq dropdownRequest) {
         String searchText = dropdownRequest.getSearchText();
         List<SysRole> list = sysRoleService.findValid();

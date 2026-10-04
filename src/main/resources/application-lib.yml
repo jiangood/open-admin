@@ -13,6 +13,11 @@ spring:
   autoconfigure:
     exclude:
       - org.springframework.boot.security.autoconfigure.web.servlet.ServletWebSecurityAutoConfiguration
+  servlet:
+    multipart:
+      # 图片前端已压缩，此处留足空间给大文件/富文本直传
+      max-file-size: 20MB
+      max-request-size: 20MB
   cache:
     type: caffeine
     caffeine:
@@ -20,8 +25,6 @@ spring:
   jpa:
     generate-ddl: true
     show-sql: false
-    # 注意：如果使用 MySQL 5.7，请添加以下配置覆盖默认的 Hibernate 方言：
-    # spring.jpa.properties.hibernate.dialect: org.hibernate.community.dialect.MySQLLegacyDialect
   data:
     web:
       pageable:
@@ -31,11 +34,20 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     locale: zh_CN
 
+sys:
+  file:
+    upload-path: /data/upload
+  codegen:
+    backend-dir: src/main/java
+    resource-dir: src/main/resources
+    frontend-dir: web/src/pages
+    frontend-import: ""
+
 logging:
   file:
-    path: ./logs
+    path: /data/logs
   level:
-    io.github.jiangood: debug
+    io.github.jiangood: info
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [trace-id=%X{traceId}] %5p --- [%t] %logger{40} : %m%n"

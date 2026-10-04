@@ -12,6 +12,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class PageTool {
+    private PageTool() {
+    }
+
 
     /**
      * 将分页对象中的每个元素转换为 Map 形式

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {FieldRemoteSelect, FieldRemoteTreeSelect} from "../fields";
 import React, {type ComponentProps} from "react";
 
@@ -26,14 +27,9 @@ class InnerFieldDeptTreeSelect extends React.Component<ComponentProps<typeof Fie
         return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...this.props} />;
     }
 }
-class InnerFieldOrgTreeSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
-    render() {
-        return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...this.props} />;
-    }
-}
 class InnerFieldOrgTreeMultipleSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
     render() {
-        return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" multiple {...this.props} />;
+        return <InnerFieldDeptTreeSelect multiple {...this.props} />;
     }
 }
 
@@ -41,6 +37,7 @@ export const FieldUserSelect = InnerFieldUserSelect;
 export const FieldUserSelectMultiple = InnerFieldUserSelectMultiple;
 export const FieldUnitTreeSelect = InnerFieldUnitTreeSelect;
 export const FieldDeptTreeSelect = InnerFieldDeptTreeSelect;
-export const FieldOrgTreeSelect = InnerFieldOrgTreeSelect;
+/** FieldDeptTreeSelect 的别名 */
+export const FieldOrgTreeSelect = InnerFieldDeptTreeSelect;
 export const FieldOrgTreeMultipleSelect = InnerFieldOrgTreeMultipleSelect;
 

@@ -5,6 +5,7 @@ import React from "react";
 import dayjs from "dayjs";
 import {DatePicker, TimePicker} from "antd";
 import {DateUtils} from "../../utils";
+import {DATE_PICKER_SPECS} from '../datePickerSpecs';
 import type {FieldProps} from '../types';
 
 export interface FieldDateProps extends FieldProps<string> {
@@ -17,77 +18,30 @@ export interface FieldDateProps extends FieldProps<string> {
     /** 自定义样式 */
     style?: React.CSSProperties;
     /** 其余属性透传给 DatePicker/TimePicker */
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 export class FieldDate extends React.Component<FieldDateProps> {
-    static defaultProps = {
+    static readonly defaultProps = {
         type: 'YYYY-MM-DD'
     };
 
     render() {
         const {type, value, onChange, ...rest} = this.props;
         const formattedType = DateUtils.convertTypeToFormat(type as string);
+        const spec = DATE_PICKER_SPECS[formattedType];
 
-        switch (formattedType) {
-            case 'YYYY':
-                return <DatePicker
-                    value={this.strToDate(value, formattedType)}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY'))}
-                    picker="year"
-                    {...rest}
-                />;
-            case 'YYYY-MM':
-                return <DatePicker
-                    value={this.strToDate(value, 'YYYY-MM')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM'))}
-                    picker="month"
-                    {...rest}
-                />;
-            case 'YYYY-QQ':
-                return <DatePicker
-                    value={this.strToDate(value, 'YYYY-QQ')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-QQ'))}
-                    picker="quarter"
-                    {...rest}
-                />;
-            case 'YYYY-MM-DD':
-                return <DatePicker
-                    value={this.strToDate(value, 'YYYY-MM-DD')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD'))}
-                    {...rest}
-                ></DatePicker>;
-            case 'YYYY-MM-DD HH:mm':
-                return <DatePicker
-                    value={this.strToDate(value, 'YYYY-MM-DD HH:mm')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm'))}
-                    format='YYYY-MM-DD HH:mm'
-                    showTime
-                    {...rest}
-                ></DatePicker>;
-            case 'YYYY-MM-DD HH:mm:ss':
-                return <DatePicker
-                    value={this.strToDate(value, 'YYYY-MM-DD HH:mm:ss')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'YYYY-MM-DD HH:mm:ss'))}
-                    showTime
-                    {...rest}
-                ></DatePicker>;
-            case 'HH:mm':
-                return <TimePicker
-                    format='HH:mm'
-                    value={this.strToDate(value, 'HH:mm')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm'))}
-                    {...rest}
-                ></TimePicker>;
-            case 'HH:mm:ss':
-                return <TimePicker
-                    value={this.strToDate(value, 'HH:mm:ss')}
-                    onChange={v => onChange && onChange(this.dateToStr(v, 'HH:mm:ss'))}
-                    {...rest}
-                ></TimePicker>;
-            default:
-                return <div>未知组件 {formattedType}</div>;
+        if (!spec) {
+            return <div>未知组件 {formattedType}</div>;
         }
+
+        const Picker = spec.time ? TimePicker : DatePicker;
+        return <Picker
+            value={this.strToDate(value, formattedType)}
+            onChange={v => onChange?.(this.dateToStr(v, formattedType))}
+            {...spec}
+            {...rest}
+        />;
 
     }
 

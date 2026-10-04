@@ -36,6 +36,7 @@ public class HibernateEntityCommentIntegrator implements Integrator {
 
     @Override
     public void disintegrate(SessionFactoryImplementor sessionFactoryImplementor, SessionFactoryServiceRegistry sessionFactoryServiceRegistry) {
+        // 无清理逻辑，实现为空
     }
 
 

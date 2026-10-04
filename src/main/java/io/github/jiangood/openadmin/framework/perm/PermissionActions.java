@@ -5,6 +5,9 @@ package io.github.jiangood.openadmin.framework.perm;
  * 提供标准化的操作动词，避免重复和歧义
  */
 public class PermissionActions {
+    private PermissionActions() {
+    }
+
 
     // =============== 基础数据操作（CRUD） ===============
     /**

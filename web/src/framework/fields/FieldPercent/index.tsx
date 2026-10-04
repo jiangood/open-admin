@@ -12,7 +12,7 @@ export interface FieldPercentProps extends Omit<InputNumberProps, 'value' | 'onC
  * 数字的百分数输入框
  */
 export class FieldPercent extends React.Component<FieldPercentProps> {
-    static defaultProps = {
+    static readonly defaultProps = {
         precision: 2,
     };
 
@@ -28,7 +28,7 @@ export class FieldPercent extends React.Component<FieldPercentProps> {
                     onChange={v => {
                         if (v != null) {
                             const percentValue = Number((v / 100).toFixed(precision));
-                            onChange && onChange(percentValue);
+                            onChange?.(percentValue);
                         }
                     }}
                     {...rest}

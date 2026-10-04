@@ -1,10 +1,10 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal, Popconfirm, Select, Transfer, Tree} from 'antd'
+import {Button, Form, Input, InputNumber, Modal, Transfer} from 'antd'
 import React from 'react'
-import {FieldBoolean, FormModal, HttpUtils, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
+import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
 
 
-export default class extends React.Component {
+export default class RolePage extends React.Component {
 
     state = {
         usersModalOpen: false,
@@ -14,12 +14,6 @@ export default class extends React.Component {
         userList: [],
         targetKeys: [],
         selectedKeys: [],
-
-        menuOpen: false,
-        menuTree: [],
-        menuTreeLoading: false,
-        menuChecked: [],
-        menuHalfChecked: []
     }
 
     modalRef = React.createRef()
@@ -35,20 +29,20 @@ export default class extends React.Component {
 
     handleEditUser = record => {
         this.setState({usersModalOpen: true, selectedRecord: record})
-        HttpUtils.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
-            this.setState({userList: rs.list, targetKeys: rs.selectedKeys})
+        HttpClient.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
+            this.setState({userList: rs.data.list, targetKeys: rs.data.selectedKeys})
         })
     }
 
     onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysRole/create' : 'admin/sysRole/update';
-        await HttpUtils.post(url, values)
+        await HttpClient.post(url, values)
         this.tableRef.current.reload()
     }
 
     handleDelete = record => {
-        HttpUtils.post('admin/sysRole/delete', {id: record.id}).then(rs => {
+        HttpClient.post('admin/sysRole/delete', {id: record.id}, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -89,7 +83,8 @@ export default class extends React.Component {
 
 
             render(v) {
-                return v == null ? null : (v ? '是' : '否')
+                if (v == null) return null;
+                return v ? '是' : '否';
             },
 
 
@@ -112,22 +107,16 @@ export default class extends React.Component {
             dataIndex: 'option',
             render: (_, record) => {
 
-                return (
-                    <PermActions>
-                        <Button size='small' perm='sys-role:grant-permission'
-                                onClick={() => this.handleEditUser(record)}>用户设置</Button>
-
-                        <Button size='small' perm='sys-role:grant-permission'
-                                onClick={() => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')}>权限设置</Button>
-
-                        <Button size='small' perm='sys-role:update'
-                                onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm perm='sys-role:delete' title='是否确定删除系统角色'
-                                    onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </PermActions>
-                );
+                return <PermActions
+                    more
+                    size="small"
+                    actions={[
+                        {label: '用户设置', perm: 'sys-role:grant-permission', onClick: () => this.handleEditUser(record)},
+                        {label: '权限设置', perm: 'sys-role:grant-permission', onClick: () => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')},
+                        {label: '编辑', perm: 'sys-role:update', onClick: () => this.handleEdit(record)},
+                        {label: '删除', perm: 'sys-role:delete', confirm: '是否确定删除系统角色', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
     ]
@@ -138,29 +127,10 @@ export default class extends React.Component {
             id: this.state.selectedRecord.id,
             userIdList: this.state.targetKeys
         }
-        HttpUtils.post('admin/sysRole/grant-users', params).then(rs => {
+        HttpClient.post('admin/sysRole/grant-users', params, null, {toastError: false}).then(() => {
             this.setState({usersModalOpen: false, usersModalLoading: false})
         }).catch(() => {
             this.setState({usersModalLoading: false})
-        })
-    }
-
-    handleEditMenu = (record) => {
-        this.setState({menuOpen: true, selectedRecord: record, menuTreeLoading: true})
-        HttpUtils.get('admin/sysRole/ownMenu', {id: record.id}).then(rs => {
-            this.setState({menuChecked: rs.checked, menuHalfChecked: rs.halfChecked})
-        })
-        HttpUtils.get('admin/sysRole/menuTree').then(rs => {
-            this.setState({menuTree: rs, menuTreeLoading: false})
-        })
-    }
-    handleGrantMenu = () => {
-        const params = {
-            id: this.state.selectedRecord.id,
-            menuIds: [...this.state.menuChecked, ...this.state.menuHalfChecked]
-        }
-        HttpUtils.post('admin/sysRole/grantMenu', params).then(rs => {
-            this.setState({menuOpen: false})
         })
     }
 
@@ -171,14 +141,14 @@ export default class extends React.Component {
         >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => (
+                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/sysRole/page', params)}
+                request={(params) => HttpClient.get('admin/sysRole/page', params)}
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='角色名称' name='name'>
                             <Input/>
@@ -233,7 +203,7 @@ export default class extends React.Component {
                     targetKeys={this.state.targetKeys}
                     selectedKeys={this.state.selectedKeys}
                     render={item => item.title}
-                    onChange={(nextTargetKeys, direction, moveKeys) => {
+                    onChange={(nextTargetKeys, _direction, _moveKeys) => {
                         this.setState({
                             targetKeys: nextTargetKeys
                         })
@@ -247,31 +217,6 @@ export default class extends React.Component {
                 />
 
 
-            </Modal>
-
-            <Modal title={'角色授权菜单权限' + "【" + this.state.selectedRecord?.name + '】'}
-                   open={this.state.menuOpen}
-                   destroyOnHidden
-                   mask={{ closable: false }}
-                   width={800}
-                   onCancel={() => this.setState({menuOpen: false})}
-                   onOk={this.handleGrantMenu}
-                   loading={this.state.menuTreeLoading}
-            >
-                <Tree
-                    height={600}
-                    treeData={this.state.menuTree}
-                    multiple
-                    checkable
-                    checkedKeys={{checked: this.state.menuChecked}}
-                    onCheck={(keys, e) => {
-                        this.setState({menuChecked: keys, menuHalfChecked: e.halfCheckedKeys})
-                    }}
-                    defaultExpandAll
-                    titleRender={node => {
-                        return <span title={node.perm}>{node.title}</span>
-                    }}
-                />
             </Modal>
         </Page>
 

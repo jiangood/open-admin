@@ -1,20 +1,21 @@
 package io.github.jiangood.openadmin.modules.system.enums;
 
-import io.github.jiangood.openadmin.util.annotation.Remark;
+import io.github.jiangood.openadmin.framework.dict.DictItem;
+import io.github.jiangood.openadmin.framework.dict.DictType;
 
-@Remark("文章显示位置")
+@DictType(code = "articlePosition", label = "文章显示位置")
 public enum ArticlePosition {
 
-    @Remark("顶部导航-头像-下拉菜单")
+    @DictItem(label = "顶部导航-头像-下拉菜单")
     HEADER_AVATAR_DROPDOWN,
 
-    @Remark("顶部导航-左侧")
+    @DictItem(label = "顶部导航-左侧")
     HEADER_LEFT,
 
-    @Remark("顶部导航-右侧")
+    @DictItem(label = "顶部导航-右侧")
     HEADER_RIGHT,
 
-    @Remark("不显示")
+    @DictItem(label = "不显示")
     NONE
 
 }

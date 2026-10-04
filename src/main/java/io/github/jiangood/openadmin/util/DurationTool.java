@@ -3,6 +3,9 @@ package io.github.jiangood.openadmin.util;
 import java.time.Duration;
 
 public class DurationTool {
+    private DurationTool() {
+    }
+
 
     public static String format(Duration duration) {
         if (duration == null) {

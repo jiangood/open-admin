@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.framework.file.FileField;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import jakarta.persistence.*;
@@ -14,7 +15,7 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @Table(name = "sys_article")
 @FieldNameConstants
-public class Article extends BaseEntity {
+public class Article extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     @Column(unique = true, length = 32, nullable = false)
     private String code;
@@ -22,6 +23,11 @@ public class Article extends BaseEntity {
     @Column(length = 200, nullable = false)
     private String title;
 
+    @FileField
+    @Column(name = "main_image", length = 200)
+    private String mainImage;
+
+    @FileField(html = true)
     @Lob
     @Column(columnDefinition = "TEXT")
     private String content;
@@ -33,6 +39,12 @@ public class Article extends BaseEntity {
     private Integer seq;
 
     private Boolean enabled;
+
+    /**
+     * 发布人姓名（查询时由 createUser 关联 SysUser 填充，不落库）
+     */
+    @Transient
+    private String createUserLabel;
 
     @PrePersist
     public void prePersist() {

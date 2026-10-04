@@ -1,7 +1,8 @@
 import React from "react";
-import {HttpUtils, Page} from "../../framework";
+import {HttpClient, Page, UrlUtils} from "../../framework";
+import "./article.less";
 
-export default class extends React.Component {
+export default class ArticlePage extends React.Component {
 
     state = {
         article: null,
@@ -11,8 +12,8 @@ export default class extends React.Component {
     componentDidMount() {
         const code = this.props.params?.code
         if (code) {
-            HttpUtils.get('admin/article/getByCode', {code}).then(rs => {
-                this.setState({article: rs, loading: false})
+            HttpClient.get('admin/article/getByCode', {code}, {toastError: false}).then(rs => {
+                this.setState({article: rs.data, loading: false})
             }).catch(() => {
                 this.setState({loading: false})
             })
@@ -36,8 +37,26 @@ export default class extends React.Component {
             </Page>
         }
 
-        return <Page title={article.title}>
-            <div dangerouslySetInnerHTML={{__html: article.content}}/>
+        return <Page>
+            <div className="oa-article">
+                <div className="oa-article-title">
+                    <h1>{article.title}</h1>
+                    <div className="oa-article-meta">
+                        {article.createUserLabel && <span>发布人：{article.createUserLabel}</span>}
+                        {article.createTime && <span>发布时间：{article.createTime}</span>}
+                    </div>
+                </div>
+                {article.mainImage && (
+                    <div style={{marginBottom: 16, textAlign: 'center'}}>
+                        <img
+                            src={UrlUtils.contextPath('/file/' + article.mainImage)}
+                            style={{maxWidth: '100%', maxHeight: 400, borderRadius: 4}}
+                            alt='主图'
+                        />
+                    </div>
+                )}
+                <div dangerouslySetInnerHTML={{__html: article.content}}/>
+            </div>
         </Page>
     }
 }

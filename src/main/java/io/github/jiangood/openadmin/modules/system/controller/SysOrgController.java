@@ -1,6 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropEvent;
@@ -39,7 +39,7 @@ public class SysOrgController {
     private final SysUserService sysUserService;
     private final List<OrgTypeProvider> orgTypeProviders;
 
-    @RequestMapping("tree")
+    @GetMapping("tree")
     public AjaxResult tree(boolean onlyShowEnabled, boolean onlyShowUnit, String searchText, Integer type) {
         Spec<SysOrg> q = Spec.of();
 
@@ -68,11 +68,9 @@ public class SysOrgController {
     @Log("机构-创建")
     @HasPermission("sys-org:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody OrgReq input) throws Exception {
-        if (input.getLeader() != null) {
-            if (StrUtil.isEmpty(input.getLeader().getId())) {
-                input.setLeader(null);
-            }
+    public AjaxResult create(@RequestBody OrgReq input) {
+        if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
+            input.setLeader(null);
         }
         SysOrg input2 = BeanTool.copy(input, new SysOrg());
         input2.setType(input.getType());
@@ -87,11 +85,9 @@ public class SysOrgController {
     @Log("机构-更新")
     @HasPermission("sys-org:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) throws Exception {
-        if (input.getLeader() != null) {
-            if (StrUtil.isEmpty(input.getLeader().getId())) {
-                input.setLeader(null);
-            }
+    public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) {
+        if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
+            input.setLeader(null);
         }
         SysOrg input2 = BeanTool.copy(input, new SysOrg());
         input2.setType(input.getType());
@@ -126,7 +122,7 @@ public class SysOrgController {
         vo.setSeq(org.getSeq());
         vo.setEnabled(org.getEnabled());
         vo.setType(org.getType());
-        vo.setTypeLabel(resolveTypeLabel(org.getType()));
+        vo.setTypeLabel(OrgTypeProvider.resolveTypeLabel(org.getType(), orgTypeProviders));
         if (org.getPid() != null) {
             vo.setParentName(sysOrgService.getNameById(org.getPid()));
         }
@@ -141,18 +137,9 @@ public class SysOrgController {
     public AjaxResult typeOptions() {
         List<Option> options = orgTypeProviders.stream()
                 .sorted(java.util.Comparator.comparingInt(OrgTypeProvider::getOrder))
-                .map(p -> new Option(p.getType().toString(), p.getLabel()))
+                .map(p -> new Option(p.getType(), p.getLabel()))
                 .toList();
         return AjaxResult.ok().data(options);
-    }
-
-    private String resolveTypeLabel(Integer type) {
-        if (type == null) return null;
-        return orgTypeProviders.stream()
-                .filter(p -> p.getType().equals(type))
-                .findFirst()
-                .map(OrgTypeProvider::getLabel)
-                .orElse("未知");
     }
 
     private String getIconByType(int type) {
@@ -164,7 +151,7 @@ public class SysOrgController {
     }
 
     @PostMapping("sort")
-    @HasPermission("sys-org:create")
+    @HasPermission("sys-org:update")
     public AjaxResult sort(@RequestBody DropEvent e) {
         List<SysOrg> nodes = sysOrgService.findAll();
         List<TreeOption> tree = list2Tree(nodes);
@@ -196,7 +183,7 @@ public class SysOrgController {
     public List<TreeOption> list2Tree(List<SysOrg> orgList) {
         List<TreeOption> list = orgList.stream().map(o -> {
             String title = o.getName();
-            if (!o.getEnabled()) {
+            if (!Boolean.TRUE.equals(o.getEnabled())) {
                 title = title + " [禁用]";
             }
 

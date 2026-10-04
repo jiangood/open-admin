@@ -1,5 +1,5 @@
 import {PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Form, Input, Modal, Popconfirm, Select, Splitter, message} from 'antd';
+import {Button, Card, Form, Input, Modal, Select, Splitter, Typography} from 'antd';
 import React from 'react';
 import {
     PermActions,
@@ -8,7 +8,7 @@ import {
     FieldRemoteSelect,
     FieldSysOrgTreeSelect,
     FormModal,
-    HttpUtils,
+    HttpClient,
     OrgTree,
     Page,
     ProTable,
@@ -16,11 +16,11 @@ import {
 } from "../../../framework";
 import UserPerm from "./userPerm";
 
-export default class extends React.Component {
+export default class UserPage extends React.Component {
 
     state = {
         currentOrgId: null,
-        addResultModal: { open: false, account: '', password: '' },
+        addResultModal: { open: false, name: '', account: '', password: '' },
         resetPwdUser: null,
     }
     permRef = React.createRef();
@@ -36,14 +36,13 @@ export default class extends React.Component {
     }
 
     onFinishResetPwd = async values => {
-        await HttpUtils.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
-        message.success('重置密码成功')
+        await HttpClient.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
         this.setState({resetPwdUser: null})
         this.tableRef.current?.reload()
     }
 
     handleDelete = r => {
-        HttpUtils.post('admin/sysUser/delete', {id: r.id}).then(rs => {
+        HttpClient.post('admin/sysUser/delete', {id: r.id}, null).then(() => {
             this.tableRef.current.reload();
         })
     }
@@ -103,7 +102,8 @@ export default class extends React.Component {
             title: '状态',
             dataIndex: 'enabled',
             render(v) {
-                return v == null ? null : (v ? '是' : '否')
+                if (v == null) return null;
+                return v ? '是' : '否';
             },
         },
         {
@@ -123,19 +123,16 @@ export default class extends React.Component {
             dataIndex: 'option',
             fixed: 'right',
             render: (_, record) => {
-                return <PermActions>
-                    <Button size='small' perm='sys-user:update' onClick={() => this.handleEdit(record)}> 编辑 </Button>
-
-                    <Button size='small' perm='sys-user:grant-permission'
-                            onClick={() => this.permRef.current.show(record)}> 授权 </Button>
-
-                    <Button size='small' perm='sys-user:reset-password' onClick={() => this.resetPwd(record)}>重置密码</Button>
-
-                    <Popconfirm perm='sys-user:delete' title={'是否确定删除用户'}
-                                onConfirm={() => this.handleDelete(record)}>
-                        <Button size='small'>删除</Button>
-                    </Popconfirm>
-                </PermActions>;
+                return <PermActions
+                    more
+                    size="small"
+                    actions={[
+                        {label: '编辑', perm: 'sys-user:update', onClick: () => this.handleEdit(record)},
+                        {label: '授权', perm: 'sys-user:grant-permission', onClick: () => this.permRef.current.show(record)},
+                        {label: '重置密码', perm: 'sys-user:reset-password', onClick: () => this.resetPwd(record)},
+                        {label: '删除', perm: 'sys-user:delete', confirm: '是否确定删除用户', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
     ];
@@ -143,13 +140,14 @@ export default class extends React.Component {
     onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
-        const result = await HttpUtils.post(url, values)
-        if (result && result.password) {
+        const result = await HttpClient.post(url, values);
+        if (result?.data?.password) {
             this.setState({
                 addResultModal: {
                     open: true,
+                    name: values.name,
                     account: values.account,
-                    password: result.password,
+                    password: result.data.password,
                 }
             })
         }
@@ -160,7 +158,7 @@ export default class extends React.Component {
 
         return <Page title="用户管理" description="管理系统用户">
             <Splitter>
-                <Splitter.Panel defaultSize={350} style={{paddingRight: 8}}>
+                <Splitter.Panel defaultSize={240} style={{paddingRight: 8}}>
                     <Card size='small'>
                         <OrgTree onChange={this.onSelectOrg}/>
                     </Card>
@@ -169,17 +167,17 @@ export default class extends React.Component {
                     <ProTable
                         searchFormCols={3}
                         actionRef={this.tableRef}
-                        toolBarRender={() => (
+                        toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
                             <PermActions>
                                 <Button perm='sys-user:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                             </PermActions>
                         )}
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
-                            return HttpUtils.get('admin/sysUser/page', params)
+                            return HttpClient.get('admin/sysUser/page', params)
                         }}
                         columns={this.columns}
-                        searchFormRender={() => (
+                        searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                             <>
                                 <Form.Item label='姓名' name='name'>
                                     <Input/>
@@ -236,27 +234,25 @@ export default class extends React.Component {
             <Modal
                 title="添加用户成功"
                 open={this.state.addResultModal.open}
-                onOk={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}
-                onCancel={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}
+                onOk={() => this.setState({addResultModal: {open: false, name: '', account: '', password: ''}})}
+                onCancel={() => this.setState({addResultModal: {open: false, name: '', account: '', password: ''}})}
                 width={420}
                 footer={
-                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: 8}}>
-                        <Button onClick={() => {
-                            navigator.clipboard.writeText(`账号：${this.state.addResultModal.account}\n密码：${this.state.addResultModal.password}`);
-                            message.success('复制成功')
-                        }}>复制</Button>
-                        <Button type="primary" onClick={() => this.setState({addResultModal: {open: false, account: '', password: ''}})}>确定</Button>
-                    </div>
+                    <Button type="primary" onClick={() => this.setState({addResultModal: {open: false, name: '', account: '', password: ''}})}>确定</Button>
                 }
             >
-                <div>
-                    <div style={{marginBottom: 8}}>
-                        账号：{this.state.addResultModal.account}
-                    </div>
-                    <div>
-                        密码：{this.state.addResultModal.password}
-                    </div>
-                </div>
+                <Typography.Paragraph
+                    copyable={{
+                        text: `系统访问地址：${window.location.origin}\n姓名：${this.state.addResultModal.name}\n账号：${this.state.addResultModal.account}\n密码：${this.state.addResultModal.password}`,
+                        tooltips: '点击复制',
+                    }}
+                    style={{marginBottom: 0}}
+                >
+                    <div>系统访问地址：{window.location.origin}</div>
+                    <div>姓名：{this.state.addResultModal.name}</div>
+                    <div>账号：{this.state.addResultModal.account}</div>
+                    <div>密码：{this.state.addResultModal.password}</div>
+                </Typography.Paragraph>
             </Modal>
 
             <FormModal ref={this.resetPwdRef} title='重置密码' onFinish={this.onFinishResetPwd} width={420}>
@@ -270,8 +266,11 @@ export default class extends React.Component {
                         </Form.Item>
                     </>
                 )}
-                <Form.Item label="新密码" name="password" rules={[{required: true, message: '请输入新密码'}]}>
-                    <Input.Password placeholder="请输入新密码"/>
+                <Form.Item label="新密码" name="password" rules={[
+                    {required: true, message: '请输入新密码'},
+                    {pattern: /^[\x20-\x7E]{1,64}$/, message: '密码仅支持英文、数字与常见符号，长度不超过64位'}
+                ]}>
+                    <Input.Password maxLength={64} placeholder="请输入新密码"/>
                 </Form.Item>
             </FormModal>
 

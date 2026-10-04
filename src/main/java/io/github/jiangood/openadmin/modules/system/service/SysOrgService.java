@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
@@ -14,6 +13,8 @@ import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -24,11 +25,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 @Service
 @CacheConfig(cacheNames = "sys_org")
 public class SysOrgService extends BaseService<SysOrg> {
@@ -54,7 +55,9 @@ public class SysOrgService extends BaseService<SysOrg> {
         }
     }
 
+    @Override
     @Transactional
+    @CacheEvict(key = "#id", condition = "#id != null")
     public void deleteById(String id) {
         long count = sysOrgRepository.count(Spec.<SysOrg>of().eq(SysOrg.Fields.pid, id));
         Assert.state(count == 0, "请先删除子节点");
@@ -99,35 +102,33 @@ public class SysOrgService extends BaseService<SysOrg> {
         return sysOrgRepository.findAll(q, Sort.by(SysOrg.Fields.seq));
     }
 
-    @Transactional
-    public SysOrg save(SysOrg input, List<String> requestKeys) throws Exception {
-        boolean isNew = input.isNew();
-
-        if (!isNew) {
-            Assert.state(!input.getId().equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
-            List<String> childIdListById = this.findChildIdListById(input.getId());
-            Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
-        }
-
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(key = "#input.id", condition = "#input.id != null")
+    public SysOrg save(SysOrg input, List<String> requestKeys) {
         if (input.isNew()) {
             return sysOrgRepository.save(input);
         }
 
-        this.updateField(input, requestKeys);
-        return sysOrgRepository.findById(input.getId()).orElse(null);
+        String id = Objects.requireNonNull(input.getId(), "节点ID不能为空"); // isNew 已提前返回，此处 id 必非 null
+        Assert.state(!id.equals(input.getPid()), "父节点不能和本节点一致，请重新选择父节点");
+        List<String> childIdListById = this.findChildIdListById(id);
+        Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
+
+        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
+        return sysOrgRepository.findById(id).orElse(null);
     }
 
     public List<SysOrg> getLeafs(Collection<SysOrg> orgs) {
-        return orgs.stream().filter(o -> this.checkIsLeaf(o.getId())).collect(Collectors.toList());
+        return orgs.stream().filter(o -> this.checkIsLeaf(o.getId())).toList();
     }
 
     public List<String> getLeafIds(Collection<String> orgs) {
-        return orgs.stream().filter(this::checkIsLeaf).collect(Collectors.toList());
+        return orgs.stream().filter(this::checkIsLeaf).toList();
     }
 
     public List<String> findChildIdListById(String id) {
         List<SysOrg> list = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
-        return list.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return list.stream().map(BaseEntity::getId).toList();
     }
 
     public List<SysOrg> findDirectChildUnit(String id) {
@@ -144,7 +145,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     public List<SysOrg> findByTypeAndLevel(Integer type, int orgLevel) {
         List<SysOrg> all = sysOrgRepository.findAll(spec().eq(SysOrg.Fields.enabled, true).eq(SysOrg.Fields.type, type), Sort.by(SysOrg.Fields.seq));
-        return all.stream().filter(o -> this.findLevelById(o.getId()) == orgLevel).collect(Collectors.toList());
+        return all.stream().filter(o -> this.findLevelById(o.getId()) == orgLevel).toList();
     }
 
     public SysUser getDeptLeader(String userId) {
@@ -175,6 +176,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         return null;
     }
 
+    @Override
     public List<SysOrg> findAll() {
         return repository.findAll(Sort.by(SysOrg.Fields.seq));
     }
@@ -182,6 +184,9 @@ public class SysOrgService extends BaseService<SysOrg> {
     @Transactional
     public void sort(String dragKey, DropResult result) {
         SysOrg dragOrg = sysOrgRepository.findById(dragKey).orElse(null);
+        Assert.state(!dragKey.equals(result.getParentKey()), "父节点不能和本节点一致，请重新选择父节点");
+        List<String> childIdListById = this.findChildIdListById(dragKey);
+        Assert.state(!childIdListById.contains(result.getParentKey()), "父节点不能为本节点的子节点，请重新选择父节点");
         dragOrg.setPid(result.getParentKey());
 
         List<String> sortedKeys = result.getSortedKeys();
@@ -196,13 +201,14 @@ public class SysOrgService extends BaseService<SysOrg> {
         List<SysOrg> result = TreeTool.getAllChildren(findAll(), id, SysOrg::getId, SysOrg::getPid);
 
         if (type != null) {
-            result = result.stream().filter(o -> type.equals(o.getType())).collect(Collectors.toList());
+            result = result.stream().filter(o -> type.equals(o.getType())).toList();
         }
 
-        return result.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return result.stream().map(BaseEntity::getId).toList();
     }
 
     public void cleanCache() {
+        // 缓存由 @CacheEvict 注解管理，无需手动清理
     }
 
     public boolean checkIsLeaf(String id) {
@@ -221,7 +227,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     public List<String> findDirectChildUnitId(String id) {
         List<SysOrg> list = this.findDirectChildUnit(id, null);
-        return list.stream().map(BaseEntity::getId).collect(Collectors.toList());
+        return list.stream().map(BaseEntity::getId).toList();
     }
 
     public int findLevelById(String id) {
@@ -243,6 +249,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         return TreeTool.treeToMap(tree, SysOrg::getId, SysOrg::getChildren);
     }
 
+    @Cacheable(key = "#id", condition = "#id != null")
     public String getNameById(String id) {
         if (id == null) {
             return null;
@@ -257,7 +264,7 @@ public class SysOrgService extends BaseService<SysOrg> {
 
     public List<String> findChildIdListWithSelfById(String id) {
         List<String> childIdListById = this.findChildIdListById(id);
-        List<String> resultList = CollectionUtil.newArrayList(childIdListById);
+        List<String> resultList = CollUtil.newArrayList(childIdListById);
         resultList.add(id);
         return resultList;
     }

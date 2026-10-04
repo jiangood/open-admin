@@ -165,7 +165,7 @@ public interface CustomerRepository extends BaseRepository<Customer, String> {
 
 - 包：`{base}.modules.{module}.service.{Entity}Service`
 - 继承 `io.github.jiangood.openadmin.framework.data.BaseService<Entity>`
-- 使用 `@RequiredArgsConstructor` 注入 Repository
+- Repository 已由 BaseService 自动注入（`repository` 字段），一般无需重复声明；仅当需要调用 Repository 自定义方法时，才用 `@RequiredArgsConstructor` 声明 `private final {Entity}Repository {entity}Repository;`（避免与继承的 `repository` 字段同名）
 - 通用方法由 BaseService 提供：`findAll()`、`findById()`、`save()`、`create()`、`update()`、`updateField()`、`deleteById()`、`findByField()`、`isFieldExist()`、`isUnique()` 等
 - 自定义业务逻辑在此层添加
 
@@ -175,16 +175,11 @@ public interface CustomerRepository extends BaseRepository<Customer, String> {
 package com.mycompany.myproject.modules.customer.service;
 
 import com.mycompany.myproject.modules.customer.entity.Customer;
-import com.mycompany.myproject.modules.customer.repository.CustomerRepository;
 import io.github.jiangood.openadmin.framework.data.BaseService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@RequiredArgsConstructor
 @Service
 public class CustomerService extends BaseService<Customer> {
-
-    private final CustomerRepository repository;
 }
 ```
 
@@ -195,18 +190,18 @@ public class CustomerService extends BaseService<Customer> {
 @Service
 public class CustomerService extends BaseService<Customer> {
 
-    private final CustomerRepository repository;
+    private final CustomerRepository customerRepository;
 
     @Transactional
     public Customer save(Customer input, List<String> requestKeys) throws Exception {
         if (input.isNew()) {
-            if (repository.existsByCode(input.getCode())) {
+            if (customerRepository.existsByCode(input.getCode())) {
                 throw new RuntimeException("编码已存在");
             }
-            return repository.save(input);
+            return customerRepository.save(input);
         }
         this.updateField(input, requestKeys);
-        return repository.findById(input.getId()).orElse(null);
+        return customerRepository.findById(input.getId()).orElse(null);
     }
 }
 ```
@@ -229,6 +224,8 @@ public class CustomerService extends BaseService<Customer> {
 | 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + RequestBodyKeys + @Log |
 | 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq + @Log |
 | 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:read` | 下拉框数据源（非必选） |
+
+> **搜索参数契约（易踩坑）**：`ProTable` 会把搜索表单各 `Form.Item` 的 `name` 值**原样**作为 query 参数发送给 `page`/`options`，不会自动映射。因此后端方法参数名必须与前端搜索字段名**完全一致**。本模板后端 `page`/`options` 参数名统一为 `searchText`，前端搜索框也必须用 `name='searchText'`（见「第三步」模板）；若改成其他名字（如 `name`），必须同步修改后端参数名，否则搜索输入不生效。
 
 ```java
 package com.mycompany.myproject.modules.customer.controller;
@@ -311,6 +308,17 @@ public class CustomerController {
 }
 ```
 
+### 文件认领（必须）
+
+实体如果包含上传文件/图片字段（`FieldUploadFile`、`FieldUploadImage`、`FieldEditor` 富文本），业务保存后**必须认领文件**，否则文件一直处于"未认领(TEMP)"状态，默认 120 分钟后被清理任务物理删除：
+
+- 实体文件字段打 `@FileField` 注解（富文本加 `html = true`）；实体无需继承 `BaseEntity`，实现 `Persistable<String>` 即可
+- `sysFileService.claim(entity)` 认领 / `unclaim(entity)` 取消认领，joinTable/joinId 自动取实体 `@Table(name)` 与 `getId()`
+- 更新时**先 `unclaim(old)` 再 save，save 后 `claim(entity)`**；删除时先 `unclaim` 再删除
+- unclaim + save + claim 必须整体放在**同一个 `@Transactional` Service 方法**内，不要拆到 Controller 或非事务方法
+
+完整规则（事务边界、单记录独占、save/update/delete 代码示例）见[development.md「文件认领」](../../../docs/open-admin/development.md#文件认领)。若实体无任何文件/图片/富文本字段，可跳过本小节。
+
 ## 第三步：前端页面创建
 
 ### 路由机制说明
@@ -327,7 +335,7 @@ public class CustomerController {
 import {PlusOutlined} from '@ant-design/icons'
 import {Button, Form, Input, Popconfirm} from 'antd'
 import React from 'react'
-import {FormModal, HttpUtils, Page, PermActions, ProTable} from "@jiangood/open-admin";
+import {FormModal, HttpClient, Page, PermActions, ProTable} from "@jiangood/open-admin";
 
 export default class extends React.Component {
 
@@ -354,12 +362,13 @@ export default class extends React.Component {
 
     handleAdd = () => this.modalRef.current.open({})
     handleEdit = record => this.modalRef.current.open({...record})
-    handleSubmit = values => {
+    handleSubmit = async values => {
         const url = values.id ? 'admin/customer/update' : 'admin/customer/create'
-        return HttpUtils.post(url, values).then(() => this.tableRef.current.reload())
+        await HttpClient.post(url, values)
+        this.tableRef.current.reload()
     }
     handleDelete = record => {
-        HttpUtils.post('admin/customer/delete', {id: record.id}).then(() => this.tableRef.current.reload())
+        HttpClient.post('admin/customer/delete', {id: record.id}, null).then(() => this.tableRef.current.reload())
     }
 
     render() {
@@ -371,10 +380,10 @@ export default class extends React.Component {
                         <Button perm='customer:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/customer/page', params)}
+                request={(params) => HttpClient.get('admin/customer/page', params)}
                 columns={this.columns}
                 searchFormRender={() => (
-                    <Form.Item label='名称' name='name'>
+                    <Form.Item label='名称' name='searchText'>
                         <Input/>
                     </Form.Item>
                 )}
@@ -398,74 +407,62 @@ export default class extends React.Component {
 }
 ```
 
+> **工具栏右侧插槽**：需要把「导出/清理/刷新」等操作放到工具栏右侧时，用 `toolBarRightRender`（签名与 `toolBarRender` 相同，参数为 `params` + `{selectedRows, selectedRowKeys}`），示例：
+>
+> ```jsx
+> toolBarRightRender={(params, {selectedRowKeys}) => (
+>     <Button danger disabled={!selectedRowKeys.length} onClick={this.handleClean}>清理失败记录</Button>
+> )}
+> ```
+>
+> 左右插槽可单独或同时使用；不要再写 CSS 覆盖 `.pro-table-toolbar-left` 来绕过。
+
 ### 页面生命周期
 
-多 Tab 布局中，所有页面保持 mounted（仅 `display` 切换）。框架提供 `onShow()` 生命周期方法，在页面首次加载或从其他 Tab 切回时自动调用：
-
-```jsx
-export default class extends React.Component {
-  tableRef = React.createRef()
-
-  onShow() {
-    this.tableRef.current?.reload()
-  }
-
-  render() {
-    return <ProTable actionRef={this.tableRef} ... />
-  }
-}
-```
-
-| 触发场景 | onShow 是否调用 |
-|---------|:--------------:|
-| 首次打开 Tab | ✅ |
-| 切换到其他 Tab 再切回来 | ✅ |
-| 右键「刷新」Tab | ✅（组件重建后立即调用） |
-| Tab 始终激活（无切换） | ❌ |
-
-> 仅 class 组件支持，方法名固定为 `onShow`。
+多 Tab 布局中所有页面保持 mounted（仅 `display` 切换），页面组件可实现 `onShow()` 在首次加载或 Tab 切回时自动刷新数据。完整规则与代码示例见[页面生命周期](../../../docs/open-admin/api.md#页面生命周期)。
 
 ### 字段组件选用指南
 
-当字段需要特殊业务组件时，从 `@jiangood/open-admin` 引入并替换模板中的 `Input`：
+当字段需要特殊业务组件时，替换模板中的 `Input`。全部组件均从 `@jiangood/open-admin` 引入，props 详见[api.md「字段组件」](../../../docs/open-admin/api.md#字段组件)：
 
-| 业务需求 | 组件 | import |
-|---------|------|--------|
-| 字典下拉 | `FieldDictSelect typeCode="dict_type"` | `@jiangood/open-admin` |
-| 远程搜索下拉 | `FieldRemoteSelect url="admin/xxx/options"` | `@jiangood/open-admin` |
-| 远程树 | `FieldRemoteTree url="..."` | `@jiangood/open-admin` |
-| 远程树选择 | `FieldRemoteTreeSelect url="..."` | `@jiangood/open-admin` |
-| 远程树级联 | `FieldRemoteTreeCascader url="..."` | `@jiangood/open-admin` |
-| 组织树选择 | `FieldSysOrgTreeSelect` | `@jiangood/open-admin` |
-| 组织树 | `FieldSysOrgTree` | `@jiangood/open-admin` |
-| 部门树 | `FieldDeptTreeSelect` | `@jiangood/open-admin` |
-| 单位树 | `FieldUnitTreeSelect` | `@jiangood/open-admin` |
-| 用户选择 | `FieldUserSelect` | `@jiangood/open-admin` |
-| 用户多选 | `FieldUserSelectMultiple` | `@jiangood/open-admin` |
-| 组织多选 | `FieldOrgTreeMultipleSelect` | `@jiangood/open-admin` |
-| 布尔开关 | `FieldBoolean` | `@jiangood/open-admin` |
-| 日期选择 | `FieldDate` / `FieldDateRange` | `@jiangood/open-admin` |
-| 数字范围 | `FieldNumberRange` | `@jiangood/open-admin` |
-| 富文本 | `FieldEditor` | `@jiangood/open-admin` |
-| 文件上传 | `FieldUploadFile` | `@jiangood/open-admin` |
-| 表格选择 | `FieldTableSelect` | `@jiangood/open-admin` |
-| 百分比 | `FieldPercent` | `@jiangood/open-admin` |
-| 表格内嵌 | `FieldTable` | `@jiangood/open-admin` |
+| 业务需求 | 组件 |
+|---------|------|
+| 字典下拉 | `FieldDictSelect typeCode="dict_type"` |
+| 远程搜索下拉 | `FieldRemoteSelect url="admin/xxx/options"` |
+| 远程树 | `FieldRemoteTree url="..."` |
+| 远程树选择 | `FieldRemoteTreeSelect url="..."` |
+| 远程树级联 | `FieldRemoteTreeCascader url="..."` |
+| 组织树选择 | `FieldSysOrgTreeSelect` |
+| 组织树 | `FieldSysOrgTree` |
+| 部门树 | `FieldDeptTreeSelect` |
+| 单位树 | `FieldUnitTreeSelect` |
+| 用户选择 | `FieldUserSelect` |
+| 用户多选 | `FieldUserSelectMultiple` |
+| 组织多选 | `FieldOrgTreeMultipleSelect` |
+| 布尔开关 | `FieldBoolean` |
+| 日期选择 | `FieldDate` / `FieldDateRange` |
+| 数字范围 | `FieldNumberRange` |
+| 富文本 | `FieldEditor` |
+| 文件上传 | `FieldUploadFile` |
+| 图片上传（裁剪/压缩） | `FieldUploadImage` |
+| 表格选择 | `FieldTableSelect` |
+| 百分比 | `FieldPercent` |
+| 表格内嵌 | `FieldTable` |
 
 ### 展示视图组件选用指南
 
-在表格列中渲染字段值时使用：
+在表格列中渲染字段值时使用，均从 `@jiangood/open-admin` 引入，props 详见[api.md「展示组件」](../../../docs/open-admin/api.md#展示组件)：
 
-| 场景 | 组件 | import |
-|------|------|--------|
-| 布尔值（是/否） | `ViewBoolean` | `@jiangood/open-admin` |
-| 布尔值（启用/停用开关） | `ViewSwitch` | `@jiangood/open-admin` |
-| 审批状态 | `ViewApproveStatus` | `@jiangood/open-admin` |
-| 图片预览 | `ViewImage` | `@jiangood/open-admin` |
-| 文件下载 | `ViewFile` / `ViewFileButton` | `@jiangood/open-admin` |
-| 密码脱敏 | `ViewPassword` | `@jiangood/open-admin` |
-| 纯文本展示 | `ViewText` | `@jiangood/open-admin` |
-| 范围展示 | `ViewRange` | `@jiangood/open-admin` |
+| 场景 | 组件 |
+|------|------|
+| 布尔值（是/否） | `ViewBoolean` |
+| 布尔值（启用/停用开关） | `ViewSwitch` |
+| 审批状态 | `ViewApproveStatus` |
+| 图片预览 | `ViewImage` |
+| 文件下载 | `ViewFile` / `ViewFileButton` |
+| 密码脱敏 | `ViewPassword` |
+| 纯文本展示 | `ViewText` |
+| 范围展示 | `ViewRange` |
 
 ## 第四步：菜单与权限配置
 
@@ -542,13 +539,10 @@ menus:
 
 ## 代码规范约束
 
-- 业务 Service 使用构造器注入（`@RequiredArgsConstructor` + `private final`），禁止 `@Resource` / `@Autowired` 字段注入
-- 有 `BaseService<T>` 时继承，使用 `@RequiredArgsConstructor` 注入 repository
-- Controller 统一返回 `AjaxResult`
+- 后端/前端开发规范（命名、构造器注入、`AjaxResult`、REST 端点等）遵循 [development.md](../../../docs/open-admin/development.md)
 - 需要操作日志的端点加 `@Log("业务-操作描述")`
 - 敏感端点加 `@RateLimit` 限流（如登录、短信验证码）
-- Java import 使用框架的全限定名（参见上文模板）
-- 前端 import 使用 `@jiangood/open-admin` 包名（框架组件位于此包中）
+- Java import 使用框架的全限定名（参见上文模板）；前端 import 使用 `@jiangood/open-admin` 包名
 - 直接输出代码，避免冗余说明；确保代码完整可运行
 
 ## 参考

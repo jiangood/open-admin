@@ -14,7 +14,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,11 +43,16 @@ class SysUserServiceTest {
     private SysUserService sysUserService;
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private jakarta.persistence.EntityManager entityManager;
+
     @BeforeEach
     void setUp() {
         passwordEncoder = new BCryptPasswordEncoder();
         sysUserService = new SysUserService(sysUserRepository, roleRepository, sysOrgService,
                 sysMenuRepository, userConverter, permissionStaleService, passwordEncoder);
+        ReflectionTestUtils.setField(sysUserService, "repository", sysUserRepository);
+        ReflectionTestUtils.setField(sysUserService, "entityManager", entityManager);
     }
 
     @Test
@@ -147,11 +154,28 @@ class SysUserServiceTest {
         SysUser user = new SysUser();
         user.setId("1");
         user.setPassword(passwordEncoder.encode("oldPassword"));
+        user.setLastPasswordChangeTime(LocalDateTime.now());
 
         when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
         when(sysUserRepository.save(any(SysUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         sysUserService.updatePwd("1", "oldPassword", "NewP@ss123");
+
+        verify(sysUserRepository).save(user);
+        assertTrue(passwordEncoder.matches("NewP@ss123", user.getPassword()));
+        assertNotNull(user.getLastPasswordChangeTime());
+    }
+
+    @Test
+    void testUpdatePwd_forceChangeSkipsOldPassword() {
+        SysUser user = new SysUser();
+        user.setId("1");
+        user.setPassword(passwordEncoder.encode("adminSetPassword"));
+
+        when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
+        when(sysUserRepository.save(any(SysUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        sysUserService.updatePwd("1", null, "NewP@ss123");
 
         verify(sysUserRepository).save(user);
         assertTrue(passwordEncoder.matches("NewP@ss123", user.getPassword()));
@@ -168,6 +192,7 @@ class SysUserServiceTest {
         SysUser user = new SysUser();
         user.setId("1");
         user.setPassword(passwordEncoder.encode("correctOldPassword"));
+        user.setLastPasswordChangeTime(LocalDateTime.now());
         when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
 
         assertThrows(IllegalStateException.class, () -> sysUserService.updatePwd("1", "wrongOldPassword", "NewP@ss123"));
@@ -191,6 +216,14 @@ class SysUserServiceTest {
     }
 
     @Test
+    void testResetPwd_whenUserNotExists_shouldThrow() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.resetPwd("no-such-id", "NewP@ss123"));
+        verify(sysUserRepository, never()).save(any(SysUser.class));
+    }
+
+    @Test
     void testFindValid() {
         SysUser user1 = new SysUser();
         user1.setEnabled(true);
@@ -203,5 +236,27 @@ class SysUserServiceTest {
 
         assertEquals(2, result.size());
         verify(sysUserRepository).findAllByEnabledTrue();
+    }
+
+    @Test
+    void testGrantPerm_whenUserNotExists_shouldThrow() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.grantPerm("no-such-id", null, null, null));
+        verify(roleRepository, never()).findAllById(any());
+    }
+
+    @Test
+    void testGetOrgPermissions_whenUserNotExists_shouldThrow() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.getOrgPermissions("no-such-id"));
+    }
+
+    @Test
+    void testGetPermInfo_whenUserNotExists() {
+        when(sysUserRepository.findById("no-such-id")).thenReturn(Optional.empty());
+
+        assertThrows(IllegalArgumentException.class, () -> sysUserService.getPermInfo("no-such-id"));
     }
 }

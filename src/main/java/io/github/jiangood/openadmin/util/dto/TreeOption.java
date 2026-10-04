@@ -15,6 +15,8 @@ import java.util.List;
 public class TreeOption {
 
     private String key;
+    /** 选择值，恒等于 key（antd TreeSelect 等组件依赖 value 字段） */
+    private String value;
     private String title;
     private Boolean checkable;
     private Boolean disableCheckbox;
@@ -30,11 +32,18 @@ public class TreeOption {
 
     public TreeOption(String title, String key, String parentKey) {
         this.key = key;
+        this.value = key;
         this.title = title;
         this.parentKey = parentKey;
     }
 
-    public String getValue() {
-        return key;
+    public void setKey(String key) {
+        this.key = key;
+        this.value = key;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+        this.key = value;
     }
 }

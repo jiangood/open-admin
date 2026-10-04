@@ -5,11 +5,11 @@ import cn.hutool.core.util.RandomUtil;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.Assert;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class PasswordTool {
+    private PasswordTool() {
+    }
+
 
     private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder() ;
 
@@ -40,9 +40,7 @@ public class PasswordTool {
         String pad = RandomUtil.randomString(allChars, 8);
         password.append(pad);
 
-        String shuffle = StringTool.shuffle(password.toString());
-
-        return shuffle;
+        return StringTool.shuffle(password.toString());
     }
 
     /**
@@ -65,8 +63,14 @@ public class PasswordTool {
      * @param password
      */
     public static void validateStrength(String password) {
+        Assert.hasText(password, "密码不能为空");
+        Assert.state(isAscii(password), "密码仅支持英文、数字与常见符号");
         Assert.state(isStrengthOk(password), "密码强度太低");
 
+    }
+
+    public static boolean isAscii(String password) {
+        return password != null && password.matches("[\\x20-\\x7E]{1,64}");
     }
 
     public static boolean isStrengthOk(String password) {

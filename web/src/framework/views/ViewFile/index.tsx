@@ -7,15 +7,15 @@ export class ViewFile extends React.Component {
 
 
     render() {
-        const fileId = this.props.value
+        const value = this.props.value
 
-        if (!fileId) {
+        if (!value) {
             return <Empty/>;
         }
 
-        const arr = fileId.split(',');
+        const arr = value.split(',');
 
-        const urlList = arr.map(id => UrlUtils.contextPath('/admin/sysFile/preview/' + id));
+        const urlList = arr.map(objectName => UrlUtils.contextPath('/file/' + objectName));
         const height = this.props.height;
 
         if(urlList.length === 1){
@@ -23,8 +23,8 @@ export class ViewFile extends React.Component {
             return    <iframe
                 src={url}
                 width='99%'
-                frameBorder={0}
-                style={{height}}
+                title="文件预览"
+                style={{height, border: 0}}
             />
         }
 
@@ -34,8 +34,8 @@ export class ViewFile extends React.Component {
                 <iframe
                     src={url}
                     width='99%'
-                    frameBorder={0}
-                    style={{height}}
+                    title="文件预览"
+                    style={{height, border: 0}}
                 />
             </div>
         });

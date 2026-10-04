@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class ResourceToolTest {
 
     @Test
-    void testFindAll() throws IOException {
+    void testFindAll() {
         // 测试查找所有匹配的资源
         Resource[] resources = ResourceTool.findAll("*.txt");
         assertNotNull(resources);
@@ -42,7 +42,7 @@ class ResourceToolTest {
     }
 
     @Test
-    void testFindOne() throws IOException {
+    void testFindOne() {
         // 测试查找单个资源
         // 注意：这里假设项目中有 application.yml 文件
         Resource resource = ResourceTool.findOne("application.yml");

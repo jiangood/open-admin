@@ -2,19 +2,18 @@ package io.github.jiangood.openadmin.modules.system.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import lombok.Data;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class MenuItem implements Cloneable {
+public class MenuItem {
     private Boolean danger;
     private Boolean disabled;
     private String extra;
-    private AntdIcon icon;
+    /** Ant Design 图标组件名，取值见 https://ant-design.antgroup.com/components/icon-cn */
+    private String icon;
     private String key;
     private String label;
 
@@ -27,18 +26,21 @@ public class MenuItem implements Cloneable {
 
     private String type;
 
-    @Override
-    public MenuItem clone() {
-        try {
-            MenuItem clone = (MenuItem) super.clone();
-            if (this.children != null) {
-                clone.children = this.children.stream()
-                        .map(MenuItem::clone)
-                        .collect(Collectors.toList());
-            }
-            return clone;
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError();
+    public MenuItem() {
+    }
+
+    public MenuItem(MenuItem src) {
+        this.danger = src.danger;
+        this.disabled = src.disabled;
+        this.extra = src.extra;
+        this.icon = src.icon;
+        this.key = src.key;
+        this.label = src.label;
+        this.parentKey = src.parentKey;
+        this.path = src.path;
+        this.type = src.type;
+        if (src.children != null) {
+            this.children = src.children.stream().map(MenuItem::new).toList();
         }
     }
 }

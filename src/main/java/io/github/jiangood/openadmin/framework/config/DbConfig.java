@@ -4,8 +4,6 @@ package io.github.jiangood.openadmin.framework.config;
 import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import io.github.jiangood.openadmin.framework.data.impl.JdbcRunnerImpl;
 import io.github.jiangood.openadmin.framework.spi.StartupHook;
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.pattern.ValidatePattern;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.CommandLineRunner;
@@ -36,21 +34,16 @@ public class DbConfig {
         return new PreDdlDataSourceScriptDatabaseInitializer(ds, db, startupHooks);
     }
 
+    /**
+     * 在 JPA 建表后初始化种子数据：先执行前置钩子，再幂等写入框架种子数据，最后执行后置钩子
+     * （如 {@code DictSeedSync} 的枚举字典同步）。
+     */
     @Bean
     @Order(-1)
-    CommandLineRunner flywayRunner(DataSource dataSource, List<StartupHook> startupHooks) {
+    CommandLineRunner seedDataRunner(SeedDataInitializer seedDataInitializer, List<StartupHook> startupHooks) {
         return args -> {
             startupHooks.forEach(StartupHook::beforeSeedDataInitialize);
-
-            Flyway flyway = Flyway.configure()
-                    .dataSource(dataSource)
-                    .locations( "classpath:db/migration")
-                    .baselineOnMigrate(true)
-                    .baselineVersion("0")
-                    .ignoreMigrationPatterns(ValidatePattern.fromPattern("*:*"))
-                    .load();
-            flyway.migrate();
-
+            seedDataInitializer.initialize();
             startupHooks.forEach(StartupHook::afterSeedDataInitialize);
         };
     }
@@ -63,7 +56,7 @@ public class DbConfig {
         private final List<StartupHook> startupHooks;
         private final JdbcRunner db;
         public PreDdlDataSourceScriptDatabaseInitializer(DataSource dataSource, JdbcRunner db, List<StartupHook> startupHooks) {
-            super(dataSource, null);
+            super(dataSource, null); // NOSONAR: 有意不执行 SQL 脚本（见类注释），Spring 构造器参数允许 null
             this.startupHooks = startupHooks;
             this.db = db;
         }

@@ -1,21 +1,22 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Popconfirm} from 'antd'
+import {Button, Form, Input, InputNumber} from 'antd'
 import React from 'react'
 import {
     DictUtils,
     FieldBoolean,
     FieldDictSelect,
     FieldEditor,
+    FieldUploadImage,
     FormModal,
-    HttpUtils,
+    HttpClient,
     Page,
+    PageUtils,
     PermActions,
-    ProTable
+    ProTable,
+    ViewImage
 } from "../../../framework";
 
-const {TextArea} = Input;
-
-export default class extends React.Component {
+export default class ArticleListPage extends React.Component {
 
     state = {
         editing: false,
@@ -34,15 +35,19 @@ export default class extends React.Component {
         this.modalRef.current.open(record)
     }
 
+    handlePreview = record => {
+        PageUtils.open('/article/' + record.code, record.title)
+    }
+
     onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/article/create' : 'admin/article/update';
-        await HttpUtils.post(url, values)
+        await HttpClient.post(url, values)
         this.tableRef.current.reload()
     }
 
     handleDelete = record => {
-        HttpUtils.post('admin/article/delete', {id: record.id}).then(rs => {
+        HttpClient.post('admin/article/delete', {id: record.id}, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -55,6 +60,14 @@ export default class extends React.Component {
         {
             title: '标题',
             dataIndex: 'title',
+        },
+        {
+            title: '主图',
+            dataIndex: 'mainImage',
+            width: 80,
+            render(v) {
+                return <ViewImage value={v} size={48}/>
+            },
         },
         {
             title: '显示位置',
@@ -71,21 +84,23 @@ export default class extends React.Component {
             title: '启用',
             dataIndex: 'enabled',
             render(v) {
-                return v == null ? null : (v ? '是' : '否')
+                if (v == null) return null;
+                return v ? '是' : '否';
             },
         },
         {
             title: '操作',
             dataIndex: 'option',
             render: (_, record) => {
-                return (
-                    <PermActions>
-                        <Button size='small' perm='article:update' onClick={() => this.handleEdit(record)}>编辑</Button>
-                        <Popconfirm perm='article:delete' title='确定删除?' onConfirm={() => this.handleDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </PermActions>
-                );
+                return <PermActions
+                    more
+                    size="small"
+                    actions={[
+                        {label: '预览', onClick: () => this.handlePreview(record)},
+                        {label: '编辑', perm: 'article:update', onClick: () => this.handleEdit(record)},
+                        {label: '删除', perm: 'article:delete', confirm: '确定删除?', onClick: () => this.handleDelete(record)},
+                    ]}
+                />;
             },
         },
     ]
@@ -97,14 +112,14 @@ export default class extends React.Component {
         >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => (
+                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
-                request={(params) => HttpUtils.get('admin/article/page', params)}
+                request={(params) => HttpClient.get('admin/article/page', params)}
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='编码' name='code'>
                             <Input/>
@@ -124,6 +139,10 @@ export default class extends React.Component {
 
                 <Form.Item label='标题' name='title' rules={[{required: true}]}>
                     <Input/>
+                </Form.Item>
+
+                <Form.Item label='主图' name='mainImage'>
+                    <FieldUploadImage maxCount={1}/>
                 </Form.Item>
 
                 <Form.Item label='内容' name='content'>

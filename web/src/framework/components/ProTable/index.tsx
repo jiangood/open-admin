@@ -2,40 +2,54 @@ import React from "react";
 import {Button, Form, Table} from 'antd';
 import type {FormInstance, TableProps} from 'antd';
 
-import {StringUtils} from "../../utils";
+import {StringUtils, type AjaxBody} from "../../utils";
 
 import './index.less'
 
 /** 通过 actionRef 暴露的表格操作 */
 export interface ProTableActionRef {
     reload: () => void;
+    clearSelection: () => void;
 }
 
 /** request 返回结构（Spring Data Page 序列化 + 扩展数据） */
-export interface ProTableRequestResult<T = any> {
+export interface ProTableRequestResult<T = unknown> {
     content: T[];
     totalElements: number | string;
     size: number;
     extData?: {
         summary?: React.ReactNode;
-        [key: string]: any;
+        [key: string]: unknown;
     };
 }
 
-export interface ProTableProps<T = any> {
-    /** 数据请求，框架自动注入 page/size/sort 参数 */
-    request: (params: Record<string, any>) => Promise<ProTableRequestResult<T>>;
+/** 工具栏（含右侧插槽）渲染函数签名 */
+export type ProTableToolBarRender<T = unknown> = (
+    params: Record<string, unknown>,
+    selection: {
+        selectedRows: T[];
+        selectedRowKeys: React.Key[];
+    }
+) => React.ReactNode;
+
+export interface ProTableProps<T = unknown> {
+    /**
+     * 数据请求（Promise 式），框架自动注入 page/size/sort 参数。
+     * 返回 HttpClient 的 Promise：request = (params) => HttpClient.get(url, params)
+     * ProTable 自动取 AjaxResult 的 data（分页结构 {content, totalElements, extData}）。
+     * 失败时 HttpClient 默认自动弹错，ProTable 内部静默复位 loading。
+     */
+    request: (params: Record<string, unknown>) => Promise<AjaxBody<ProTableRequestResult<T>>>;
     /** antd Table 列定义 */
     columns: TableProps<T>['columns'];
     /** 获取表格操作句柄（reload） */
-    actionRef?: React.MutableRefObject<ProTableActionRef | undefined>;
+    actionRef?: React.RefObject<ProTableActionRef | undefined>;
     /** 获取搜索表单实例 */
-    formRef?: React.MutableRefObject<FormInstance | undefined>;
-    /** 工具栏渲染，参数为当前搜索值与行选择状态 */
-    toolBarRender?: (params: Record<string, any>, selection: {
-        selectedRows: T[];
-        selectedRowKeys: React.Key[];
-    }) => React.ReactNode;
+    formRef?: React.RefObject<FormInstance | undefined>;
+    /** 工具栏渲染（左侧），参数为当前搜索值与行选择状态 */
+    toolBarRender?: ProTableToolBarRender<T>;
+    /** 工具栏右侧渲染，参数同 toolBarRender；用于导出/清理/刷新等右侧操作 */
+    toolBarRightRender?: ProTableToolBarRender<T>;
     rowKey?: string;
     /** 行选择：true 为默认 checkbox，对象可覆盖 type/onChange */
     rowSelection?: boolean | {
@@ -53,12 +67,12 @@ export interface ProTableProps<T = any> {
     treeMode?: boolean;
 }
 
-interface ProTableState<T = any> {
+interface ProTableState<T = unknown> {
     selectedRowKeys: React.Key[];
     selectedRows: T[];
     tableSize: 'small' | 'middle' | 'large';
     loading: boolean;
-    params: Record<string, any>;
+    params: Record<string, unknown>;
     dataSource: T[];
     total: number;
     current: number;
@@ -69,12 +83,12 @@ interface ProTableState<T = any> {
     };
     extData: {
         summary?: React.ReactNode;
-        [key: string]: any;
+        [key: string]: unknown;
     };
     scrollY: number | string | null;
 }
 
-export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTableState<T>> {
+export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, ProTableState<T>> {
 
 
     state: ProTableState<T> = {
@@ -122,7 +136,8 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         this.loadData()
         if (this.props.actionRef) {
             this.props.actionRef.current = {
-                reload: () => this.loadData()
+                reload: () => this.loadData(),
+                clearSelection: () => this.setState({selectedRowKeys: [], selectedRows: []})
             }
         }
 
@@ -148,22 +163,21 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         }
 
 
-        this.setState({loading: true})
-        request(params).then(rs => {
-            const {content, totalElements, size,extData} = rs;
+this.setState({loading: true})
+        request(params).then((rs: AjaxBody<ProTableRequestResult<T>>) => {
+            const {content, totalElements, size, extData} = rs.data;
 
-
-            this.setState({dataSource: content, total: Number(totalElements),pageSize:size})
+            this.setState({dataSource: content, total: Number(totalElements), pageSize: size})
             if (extData) {
                 this.setState({extData})
             }
             this.updateSelectedRows(content)
-
-        }).finally(() => {
+            this.setState({loading: false})
+        }).catch(() => {
+            // 错误提示已由 HttpClient 默认弹出，此处仅复位 loading
             this.setState({loading: false})
         })
     }
-
 
     // 数据重新加载后，更新toolbar需要的已选择数据行
     updateSelectedRows = list => {
@@ -178,8 +192,8 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
 
     render() {
         const {
-            actionRef,
             toolBarRender,
+            toolBarRightRender,
             columns,
             rowSelection,
             rowKey = "id",
@@ -189,10 +203,13 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         return <div className={'oa-pro-table '} id={this.id}>
             {this.renderForm()}
             <div className="pro-table-wrapper">
-                {toolBarRender && <div className="pro-table-toolbar">
-                    <div className="pro-table-toolbar-left">
+                {(toolBarRender || toolBarRightRender) && <div className="pro-table-toolbar">
+                    {toolBarRender && <div className="pro-table-toolbar-left">
                         {this.getToolBarRenderNode(toolBarRender)}
-                    </div>
+                    </div>}
+                    {toolBarRightRender && <div className="pro-table-toolbar-right">
+                        {this.getToolBarRenderNode(toolBarRightRender)}
+                    </div>}
                 </div>}
 
 
@@ -213,7 +230,7 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
                         showTotal: (total) => `共 ${total} 条`
                     }}
 
-                    onChange={(pagination, filters, sorter, extra) => {
+                    onChange={(pagination, filters, sorter) => {
                         if (this.props.treeMode) {
                             this.setState({sorter}, this.loadData)
                         } else {
@@ -263,7 +280,7 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         )
     };
 
-    getToolBarRenderNode(toolBarRender: NonNullable<ProTableProps<T>['toolBarRender']>) {
+    getToolBarRenderNode(toolBarRender: ProTableToolBarRender<T>) {
         if (!toolBarRender) {
             return
         }
@@ -296,11 +313,11 @@ export class ProTable<T = any> extends React.Component<ProTableProps<T>, ProTabl
         };
     };
 
-    onSearch = (values: Record<string, any>) => {
+    onSearch = (values: Record<string, unknown>) => {
         this.setState({params: values, current: 1, sorter: {}}, this.loadData)
     }
 
-    changeFormValues = (values: Record<string, any>) => {
+    changeFormValues = (values: Record<string, unknown>) => { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
         if (this.formRef.current) {
             this.formRef.current.resetFields()
             this.formRef.current.setFieldsValue(values)

@@ -1,10 +1,12 @@
 package io.github.jiangood.openadmin.framework.log;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ser.std.SimpleBeanPropertyFilter;
+import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ArrayTool;
@@ -28,8 +30,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import io.github.jiangood.openadmin.util.datetime.SafeDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Aspect
 @Component
@@ -37,10 +40,23 @@ import java.util.Date;
 public class LogAspect {
 
 
+    private static final String SENSITIVE_FILTER_ID = "logSensitiveMask";
+
+    private static final String[] SENSITIVE_FIELDS = {
+            "password", "pwd", "oldPassword", "newPassword", "secret", "token", "accessToken", "refreshToken"
+    };
+
+    @JsonFilter(SENSITIVE_FILTER_ID)
+    private static class SensitiveMaskMixin {
+    }
+
     private static final ObjectWriter writer = JsonMapper.builder()
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
-            .changeDefaultPropertyInclusion($ -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .defaultDateFormat(new SafeDateFormat())
+            .changeDefaultPropertyInclusion(prop -> JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL))
+            .addMixIn(Object.class, SensitiveMaskMixin.class)
+            .filterProvider(new SimpleFilterProvider()
+                    .addFilter(SENSITIVE_FILTER_ID, SimpleBeanPropertyFilter.serializeAllExcept(SENSITIVE_FIELDS)))
             .build().writerWithDefaultPrettyPrinter();
 
     @Resource
@@ -92,7 +108,7 @@ public class LogAspect {
         SysLog sysLog = new SysLog();
         sysLog.setOperation(methodAnn.value());
         sysLog.setIp(ip);
-        sysLog.setOperationTime(new Date());
+        sysLog.setOperationTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysLog.setDuration((int) duration);
         sysLog.setParams(params);
         sysLog.setSuccess(result.isSuccess());

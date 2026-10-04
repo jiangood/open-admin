@@ -13,6 +13,7 @@ export default defineConfig(({mode, command}) => {
         plugins: [react(), openAdmin()],
         base: command === 'build' ? './' : '/',
         server: {
+            host: '0.0.0.0',
             port: port,
             proxy: {
                 [servletContext]: {

@@ -2,7 +2,7 @@ import React from "react";
 import {Result} from "antd";
 import {Page} from "../framework";
 
-export default class extends React.Component {
+export default class NotFound extends React.Component {
 
     render() {
         return <Page>

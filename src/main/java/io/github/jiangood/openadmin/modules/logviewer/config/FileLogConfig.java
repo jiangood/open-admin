@@ -84,6 +84,10 @@ public class FileLogConfig {
 
     public File buildLogFile(String key) {
         File file = new File(logPath, key + ".log");
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
         log.info("计算文件日志地址 {}", file.getAbsolutePath());
         return file;
     }

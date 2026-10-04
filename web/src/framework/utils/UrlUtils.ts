@@ -28,7 +28,7 @@ export class UrlUtils {
         if (!params) return "";
         const buffer: string[] = [];
         for (const k in params) {
-            if (Object.prototype.hasOwnProperty.call(params, k)) {
+            if (Object.hasOwn(params, k)) {
                 const v = params[k];
                 if (v !== null && v !== undefined) {
                     buffer.push(`${k}=${v}`);
@@ -66,6 +66,7 @@ export class UrlUtils {
      */
     static contextPath(path: string): string {
         const base = import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH;
-        return base + path;
+        if (base === '/' || base === '') return path;
+        return base.replace(/\/+$/, '') + path; // NOSONAR: 需去除尾部斜杠，正则已最简
     }
 }

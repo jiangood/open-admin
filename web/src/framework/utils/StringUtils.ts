@@ -3,14 +3,14 @@ export class StringUtils {
     static readonly ISO_SPLITTER: string = "/";
 
     static removePrefix(str: string | null | undefined, ch: string): string {
-        if (str != null && str.startsWith(ch)) {
+        if (str?.startsWith(ch)) {
             return str.substring(ch.length);
         }
         return str ?? '';
     }
 
     static removeSuffix(str: string | null | undefined, ch: string): string {
-        if (str != null && str.endsWith(ch)) {
+        if (str?.endsWith(ch)) {
             return str.substring(0, str.length - ch.length);
         }
         return str ?? '';
@@ -18,9 +18,11 @@ export class StringUtils {
 
     static random(length: number): string {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const values = new Uint32Array(length);
+        crypto.getRandomValues(values);
         let result = '';
         for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
+            result += characters.charAt(values[i] % characters.length);
         }
         return result;
     }
@@ -61,7 +63,7 @@ export class StringUtils {
     static getWidth(str: string | null | undefined): number {
         if (str == null || str.length === 0) return 0;
         return str.split('').reduce((pre, cur) => {
-            const charCode = cur.charCodeAt(0);
+            const charCode = cur.codePointAt(0);
             return pre + (charCode >= 0 && charCode <= 128 ? 1 : 2);
         }, 0);
     }
@@ -69,7 +71,7 @@ export class StringUtils {
     static cutByWidth(str: string, maxWidth: number): string {
         let showLength = 0;
         return str.split('').reduce((pre, cur) => {
-            const charCode = cur.charCodeAt(0);
+            const charCode = cur.codePointAt(0);
             const charWidth = (charCode >= 0 && charCode <= 128) ? 1 : 2;
             if (showLength + charWidth <= maxWidth) {
                 showLength += charWidth;
@@ -88,17 +90,17 @@ export class StringUtils {
         return StringUtils.cutByWidth(str, len) + suffix;
     }
 
-    static isString(value: any): value is string {
+    static isString(value: unknown): value is string {
         return typeof value === 'string';
     }
 
-    static split(str: any, sp: string): string[] {
+    static split(str: string | string[] | null | undefined, sp: string): string[] {
         if (str == null || str.length === 0) return [];
         if (Array.isArray(str)) return str;
         return str.split(sp);
     }
 
-    static join(arr: any, sp: string): string {
+    static join(arr: unknown, sp: string): string {
         if (arr == null || !Array.isArray(arr)) {
             return '';
         }

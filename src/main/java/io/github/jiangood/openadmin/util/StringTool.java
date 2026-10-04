@@ -1,12 +1,11 @@
 package io.github.jiangood.openadmin.util;
 
-import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.CharUtil;
+import cn.hutool.core.util.PrimitiveArrayUtil;
 import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
 import com.google.common.base.CaseFormat;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +13,9 @@ import java.util.UUID;
  * 字符串工具类，提供字符串处理相关的工具方法
  */
 public class StringTool {
+    private StringTool() {
+    }
+
 
     /**
      *  * 打乱字符串中字符的顺序
@@ -21,13 +23,13 @@ public class StringTool {
      * @return
      */
     public static String shuffle(String str) {
-        if (StrUtil.isEmpty(str) || str.length() <= 1) {
+        if (CharSequenceUtil.isEmpty(str) || str.length() <= 1) {
             return str;
         }
 
         char[] chars = str.toCharArray();
 
-        chars = ArrayUtil.shuffle(chars);
+        chars = PrimitiveArrayUtil.shuffle(chars);
         // Fisher-Yates 洗牌算法
         for (int i = chars.length - 1; i > 0; i--) {
             int j = RandomUtil.randomInt(i + 1);
@@ -187,7 +189,7 @@ public class StringTool {
      * @return 如果字符串为null或长度为0返回true，否则返回false
      */
     public static boolean isEmpty(String str) {
-        return str == null || str.length() == 0;
+        return str == null || str.isEmpty();
     }
 
     /**

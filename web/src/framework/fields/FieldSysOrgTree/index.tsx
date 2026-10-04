@@ -3,6 +3,7 @@
  */
 import React from "react";
 import {FieldRemoteTree} from "../FieldRemoteTree";
+import {orgTreeUrl} from '../orgTree';
 import type {FieldProps} from '../types';
 
 interface FieldSysOrgTreeProps extends FieldProps<string[]> {
@@ -10,16 +11,13 @@ interface FieldSysOrgTreeProps extends FieldProps<string[]> {
 }
 
 export class FieldSysOrgTree extends React.Component<FieldSysOrgTreeProps> {
-  static defaultProps = {
+  static readonly defaultProps = {
     type: 'dept',
   };
 
   render() {
     const {type, ...rest} = this.props;
-    const url = type === 'dept'?
-        '/admin/sysOrg/dept-tree':
-        '/admin/sysOrg/unit-tree';
-    return <FieldRemoteTree url={url} {...rest} />;
+    return <FieldRemoteTree url={orgTreeUrl(type)} {...rest} />;
   }
 
 }

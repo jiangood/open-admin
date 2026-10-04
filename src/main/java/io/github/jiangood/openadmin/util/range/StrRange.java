@@ -5,7 +5,7 @@ import lombok.Setter;
 
 
 /**
- * 区间，如开始日期，结束日期
+ * 字符串区间，如 "start/end"
  */
 @Getter
 @Setter

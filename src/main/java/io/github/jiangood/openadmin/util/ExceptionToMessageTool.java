@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.util.ReflectUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.annotation.RemarkTool;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,6 +22,11 @@ import java.util.Set;
  */
 @Slf4j
 public class ExceptionToMessageTool {
+    private static final String MSG_REFERENCED = "数据已被引用，请检查";
+
+    private ExceptionToMessageTool() {
+    }
+
 
     public static String convert(Throwable throwable) {
         if (throwable == null) {
@@ -54,34 +59,54 @@ public class ExceptionToMessageTool {
     }
 
     private static String convert(DataIntegrityViolationException e) {
-        if (e.getCause() != null && e.getCause().getCause() != null) {
-            Throwable ex = e.getCause().getCause();
-            String msg = ex.getMessage();
+        Throwable ex = e.getCause() != null ? e.getCause().getCause() : null;
+        if (ex == null) {
+            return MSG_REFERENCED;
+        }
+        String msg = ex.getMessage();
+        if (msg == null) {
+            return MSG_REFERENCED;
+        }
 
-            if (msg.contains("Data too long")) {
-                return "数据长度超过限制，请修改！";
+        if (msg.contains("Data too long")) {
+            return "数据长度超过限制，请修改！";
+        }
+
+        if (ex instanceof SQLIntegrityConstraintViolationException sqlEx) {
+            String dup = duplicateValue(sqlEx);
+            if (dup != null) {
+                return dup;
             }
-
-
-            if (ex instanceof SQLIntegrityConstraintViolationException) {
-                if (msg.startsWith("Duplicate")) {
-                    Matcher m = Pattern.compile("'(.*?)'").matcher(msg);
-                    if (m.find() && StrUtil.isNotBlank(m.group(1))) {
-                        return "操作失败，数据重复：" + m.group(1);
-                    }
-                }
-
-                {
-                    // Column 'file_id' cannot be null
-                    Matcher m = Pattern.compile("Column '(.*)' cannot be null").matcher(msg);
-                    if (m.find() && StrUtil.isNotEmpty(m.group(1))) {
-                        return "字段" + m.group(1) + "不能为空";
-                    }
-                }
-
+            String nullColumn = nullColumnName(sqlEx);
+            if (nullColumn != null) {
+                return nullColumn;
             }
         }
-        return "数据已被引用，请检查";
+        return MSG_REFERENCED;
+    }
+
+    private static String duplicateValue(SQLIntegrityConstraintViolationException ex) {
+        String msg = ex.getMessage();
+        if (msg == null || !msg.startsWith("Duplicate")) {
+            return null;
+        }
+        Matcher m = Pattern.compile("'(.*?)'").matcher(msg);
+        if (m.find() && CharSequenceUtil.isNotBlank(m.group(1))) {
+            return "操作失败，数据重复：" + m.group(1);
+        }
+        return null;
+    }
+
+    private static String nullColumnName(SQLIntegrityConstraintViolationException ex) {
+        String msg = ex.getMessage();
+        if (msg == null) {
+            return null;
+        }
+        Matcher m = Pattern.compile("Column '(.*)' cannot be null").matcher(msg);
+        if (m.find() && CharSequenceUtil.isNotEmpty(m.group(1))) {
+            return "字段" + m.group(1) + "不能为空";
+        }
+        return null;
     }
 
     private static String convert(ConstraintViolationException e) {
@@ -114,8 +139,8 @@ public class ExceptionToMessageTool {
             RollbackException cause = (RollbackException) e.getCause();
             if (cause != null) {
                 Throwable cause2 = cause.getCause();
-                if (cause2 instanceof ConstraintViolationException) {
-                    return convert((ConstraintViolationException) cause2);
+                if (cause2 instanceof ConstraintViolationException cve) {
+                    return convert(cve);
                 }
             }
         }

@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import cn.hutool.core.util.RandomUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -41,8 +40,8 @@ public class SystemProperties {
      */
     @NotBlank(message = "请配置系统标题")
     private String title = "管理系统";
-    private String loginBoxBottomTip = "当前非涉密网络，严禁传输处理涉密信息";
-    private String copyright = "Copyright © 2023-2024  All Rights Reserved";
+    private String loginBoxBottomTip; // "当前非涉密网络，严禁传输处理涉密信息";
+    private String copyright; // = "Copyright © 2023-2024  All Rights Reserved";
     /**
      * 是否开启水印
      */
@@ -87,22 +86,51 @@ public class SystemProperties {
      */
     private FileStorage file = new FileStorage();
 
+    /**
+     * 代码生成配置
+     */
+    private Codegen codegen = new Codegen();
+
+    @Data
+    public static class Codegen {
+
+        /**
+         * 后端源码根目录（相对项目根目录）
+         */
+        private String backendDir = "src/main/java";
+
+        /**
+         * 资源目录（菜单 YAML 输出位置，相对项目根目录）
+         */
+        private String resourceDir = "src/main/resources";
+
+        /**
+         * 前端页面根目录（相对项目根目录）
+         */
+        private String frontendDir = "web/src/pages";
+
+        /**
+         * 生成页面引入框架组件的模块名。留空时自动识别：框架仓库用相对路径，业务项目用 @jiangood/open-admin
+         */
+        private String frontendImport = "";
+    }
+
     @Data
     public static class FileStorage {
 
         public enum StoreType {
-            local, s3, custom
+            LOCAL, MINIO
         }
 
         /**
-         * 存储类型: local / s3；自定义实现请注册 @Bean @Primary FileOperator
+         * 存储类型: LOCAL / MINIO
          */
-        private StoreType storeType = StoreType.local;
+        private StoreType storeType = StoreType.LOCAL;
 
         /**
          * 本地上传文件路径
          */
-        private String uploadPath = "/home/files";
+        private String uploadPath = "/home/files"; // NOSONAR: 默认配置值，业务项目可覆盖
 
         /**
          * 允许上传文件的后缀，如 docx
@@ -110,18 +138,21 @@ public class SystemProperties {
         private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,webp,mp3,mp4,wav,txt";
 
         /**
-         * S3 兼容存储配置（支持 AWS S3 / Minio / Cloudflare R2 等）
+         * 未认领文件自动清理时间（分钟），默认 120（2 小时）
          */
-        private S3 s3 = new S3();
+        private int cleanUnclaimedMinutes = 120;
+
+        /**
+         * MinIO 对象存储配置
+         */
+        private Minio minio = new Minio();
 
         @Data
-        public static class S3 {
+        public static class Minio {
             private String endpoint;
-            private String region = "us-east-1";
             private String accessKey;
             private String secretKey;
             private String bucketName;
-            private Boolean pathStyleAccess = true;
         }
     }
 
@@ -129,7 +160,7 @@ public class SystemProperties {
 
     public String getBaseUrl() {
         String url = this.baseUrl;
-        if (StrUtil.isEmpty(url)) {
+        if (CharSequenceUtil.isEmpty(url)) {
             url = RequestTool.getBaseUrl(RequestTool.currentRequest());
         }
         return url;

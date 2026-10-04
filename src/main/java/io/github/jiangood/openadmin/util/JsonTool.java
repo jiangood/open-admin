@@ -9,7 +9,7 @@ import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import io.github.jiangood.openadmin.util.datetime.SafeDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,12 +21,15 @@ import java.util.Map;
  */
 @Slf4j
 public class JsonTool {
+    private JsonTool() {
+    }
+
 
     // singleton ,as to initialize need much TIME
     private static final ObjectMapper om = JsonMapper.builder()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
-            .defaultDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"))
+            .defaultDateFormat(new SafeDateFormat())
             .build();
 
     /**
@@ -132,7 +135,7 @@ public class JsonTool {
      * @return 转换后的对象
      * @throws IOException 如果转换失败
      */
-    public static <T> T jsonToBean(String json, Class<T> cls) throws IOException {
+    public static <T> T jsonToBean(String json, Class<T> cls) {
         if (json == null) {
             return null;
 
@@ -141,7 +144,7 @@ public class JsonTool {
         return om.readValue(json, cls);
     }
 
-    public static <T> T jsonToBean(byte[] json, Class<T> cls) throws IOException {
+    public static <T> T jsonToBean(byte[] json, Class<T> cls) {
         if (json == null) {
             return null;
 
@@ -159,8 +162,7 @@ public class JsonTool {
      * @return 转换后的对象
      * @throws IOException 如果转换失败
      */
-    public static <T> T jsonToBean(String json, TypeReference<T> valueTypeRef)
-            throws IOException {
+    public static <T> T jsonToBean(String json, TypeReference<T> valueTypeRef) {
         if (json == null) {
             return null;
 
@@ -200,7 +202,7 @@ public class JsonTool {
      */
     public static <T> List<T> jsonToBeanListQuietly(String json, Class<T> cls) {
         if (json == null) {
-            return null;
+            return List.of();
         }
         try {
             ObjectMapper mapper = om;
@@ -209,7 +211,7 @@ public class JsonTool {
         } catch (Exception e) {
             log.error("JSON转实体列表失败", e);
         }
-        return null;
+        return List.of();
     }
 
     /**
@@ -222,7 +224,7 @@ public class JsonTool {
     @SuppressWarnings("unchecked")
     public static <T> List<T> jsonToListQuietly(String json) {
         if (json == null) {
-            return null;
+            return List.of();
         }
         try {
             ObjectMapper mapper = om;
@@ -230,7 +232,7 @@ public class JsonTool {
         } catch (Exception e) {
             log.error("JSON转列表失败", e);
         }
-        return null;
+        return List.of();
     }
 
     /**
@@ -272,8 +274,7 @@ public class JsonTool {
      * @return 转换后的Map对象，如果转换失败返回空Map
      * @throws IOException 如果转换失败
      */
-    public static Map<String, Object> jsonToMap(String json)
-            throws IOException {
+    public static Map<String, Object> jsonToMap(String json) {
         if (json != null && !json.isEmpty()) {
             return om.readValue(json, new TypeReference<HashMap<String, Object>>() {
             });
@@ -289,7 +290,7 @@ public class JsonTool {
      */
     public static Map<String, String> jsonToMapStringStringQuietly(String json) {
         if (json == null) {
-            return null;
+            return Map.of();
         }
         try {
             return om.readValue(json, new TypeReference<HashMap<String, String>>() {
@@ -297,7 +298,7 @@ public class JsonTool {
         } catch (JacksonException e) {
             log.error("JSON转Map<String,String>失败", e);
         }
-        return null;
+        return Map.of();
     }
 
     /**
@@ -308,8 +309,7 @@ public class JsonTool {
      * @throws JacksonException 如果解析失败
      */
     public static JsonNode readTree(String json) throws JacksonException {
-        JsonNode node = om.reader().readTree(json);
-        return node;
+        return om.reader().readTree(json);
     }
 
     /**

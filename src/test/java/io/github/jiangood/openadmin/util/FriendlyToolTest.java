@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.util;
 
 import org.junit.jupiter.api.Test;
-import java.util.Date;
+import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -67,22 +67,22 @@ class FriendlyToolTest {
         });
 
         // 测试当前时间
-        Date now = new Date();
+        LocalDateTime now = LocalDateTime.now();
         String pastTime = FriendlyTool.getPastTime(now);
         assertNotNull(pastTime);
 
         // 测试1分钟前
-        Date oneMinuteAgo = new Date(System.currentTimeMillis() - 60 * 1000);
+        LocalDateTime oneMinuteAgo = LocalDateTime.now().minusMinutes(1);
         pastTime = FriendlyTool.getPastTime(oneMinuteAgo);
         assertNotNull(pastTime);
 
         // 测试1小时前
-        Date oneHourAgo = new Date(System.currentTimeMillis() - 60 * 60 * 1000);
+        LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
         pastTime = FriendlyTool.getPastTime(oneHourAgo);
         assertNotNull(pastTime);
 
         // 测试1天前
-        Date oneDayAgo = new Date(System.currentTimeMillis() - 24 * 60 * 60 * 1000);
+        LocalDateTime oneDayAgo = LocalDateTime.now().minusDays(1);
         pastTime = FriendlyTool.getPastTime(oneDayAgo);
         assertNotNull(pastTime);
     }
@@ -90,8 +90,8 @@ class FriendlyToolTest {
     @Test
     void testGetTimeDiffWithDates() {
         // 测试时间差计算
-        Date startTime = new Date();
-        Date endTime = new Date(startTime.getTime() + 1000);
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plusSeconds(1);
         String timeDiff = FriendlyTool.getTimeDiff(startTime, endTime);
         assertNotNull(timeDiff);
 

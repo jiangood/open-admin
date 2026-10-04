@@ -1,6 +1,6 @@
 import {Avatar, Dropdown, Modal} from "antd";
 import React from "react";
-import {DeviceUtils, HttpUtils, PageUtils, GlobalData, getToken, history, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {DeviceUtils, HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -28,17 +28,17 @@ export class HeaderRight extends React.Component {
     }
 
     logout = () => {
-        HttpUtils.post('admin/auth/logout').then(async () => {
+        HttpClient.post('admin/auth/logout', null, null, {toastError: false}).then(() => {
             localStorage.clear()
             this.setState({alertVisible: true})
-        }).catch(async e => {
+        }).catch(e => {
             console.error('[HeaderRight] 退出登录失败:', e);
             this.setState({confirmVisible: true})
         })
     }
 
     account = () => {
-        PageUtils.open('/account', '个人中心')
+        PageUtils.open('/userCenter', '个人中心')
     }
 
     openArticle = (code, title) => {
@@ -51,7 +51,8 @@ export class HeaderRight extends React.Component {
 
         if (this.state.isMobileDevice) {
             return <div className='header-right'>
-                <a onClick={this.logout}>退出</a>
+                <button type="button" style={{background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer'}}
+                        onClick={this.logout}>退出</button>
             </div>
         }
 
@@ -61,22 +62,22 @@ export class HeaderRight extends React.Component {
         }))
 
         const menuItems = [
-            {key: 'account', label: '个人中心'},
+            {key: 'userCenter', label: '个人中心'},
             ...articleItems,
             {key: 'logout', label: '退出登录'},
         ]
 
         return <div className='header-right'>
             {headerArticles.map(a => (
-                <div key={a.code} className='item' style={{cursor: 'pointer'}}
-                     onClick={() => this.openArticle(a.code, a.title)}>
+                <button key={a.code} type="button" className='item'
+                        onClick={() => this.openArticle(a.code, a.title)}>
                     {a.title}
-                </div>
+                </button>
             ))}
 
             <Dropdown menu={{
                 onClick: ({key}) => {
-                    if (key === 'account') {
+                    if (key === 'userCenter') {
                         this.account()
                     } else if (key === 'logout') {
                         this.logout();
@@ -100,6 +101,7 @@ export class HeaderRight extends React.Component {
                    onCancel={() => this.setState({alertVisible: false})}
                    onOk={() => {
                        this.setState({alertVisible: false});
+                        EventBus.emit('logoutSuccess');
                         history.replace('/public/login')
                     }}>
                  退出登录成功
@@ -109,6 +111,7 @@ export class HeaderRight extends React.Component {
                    onOk={() => {
                        this.setState({confirmVisible: false});
                        localStorage.clear();
+                       EventBus.emit('logoutSuccess');
                        history.replace('/public/login')
                    }}>
                 退出登录失败，是否清空缓存

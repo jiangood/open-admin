@@ -1,19 +1,20 @@
 import React from "react";
 import {Button, Form, Input, message} from "antd";
-import {HttpUtils, history} from "../../framework";
+import {HttpClient, history} from "../../framework";
 
-export default class extends React.Component {
+export default class ForceUpdatePwdPage extends React.Component {
 
     onFinish = (values) => {
-        HttpUtils.post('admin/userCenter/update-pwd', values).then(() => {
+        HttpClient.post('admin/userCenter/update-pwd', values, null).then(() => {
             message.success('修改密码成功，请重新登录');
             history.push('/public/login');
         })
     }
 
-    validator = (rule, value) => {
-        return HttpUtils.get("admin/sysUser/pwd-strength", {password: value}, {showError: false})
-    }
+    validator = (rule, value) => HttpClient.get("admin/sysUser/pwd-strength", {password: value}, {toastError: false})
+        .catch(e => {
+            throw new Error(e.message)
+        })
 
     render() {
         return (
@@ -42,10 +43,11 @@ export default class extends React.Component {
                                    extra={'请输入字母、数字、特殊字符'}
                                    rules={[
                                        {required: true, message: '请输入新密码'},
+                                       {pattern: /^[\x20-\x7E]{1,64}$/, message: '密码仅支持英文、数字与常见符号，长度不超过64位'},
                                        {validator: this.validator}
                                    ]}
                         >
-                            <Input.Password/>
+                            <Input.Password maxLength={64}/>
                         </Form.Item>
                         <Form.Item style={{marginTop: 40}}>
                             <Button type="primary" htmlType="submit" block size='large'>

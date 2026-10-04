@@ -27,7 +27,7 @@ public @interface ValidateIp {
         public boolean isValid(String value, ConstraintValidatorContext context) {
             if (value != null && !value.isEmpty()) {
                 // 定义正则表达式
-                String regex = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\." +
+                String regex = "^(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|[1-9])\\." + // NOSONAR: IPv4 校验需逐段限位，简化会误放非法地址
                         "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." +
                         "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)\\." +
                         "(1\\d{2}|2[0-4]\\d|25[0-5]|[1-9]\\d|\\d)$";

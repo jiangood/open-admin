@@ -1,0 +1,16 @@
+services:
+  open-admin:
+    build:
+      # 构建上下文为仓库根目录（Dockerfile、pom.xml、web/ 均在此）
+      context: ..
+      dockerfile: Dockerfile
+    image: open-admin:latest
+    ports:
+      - "8080:8080"
+    environment:
+      # 应用监听端口（对外映射到宿主机 8080）
+      - SERVER_PORT=8080
+    volumes:
+      # 数据目录：内置 H2 数据库、上传文件、日志均持久化在此
+      - "../data/:/data"
+    restart: unless-stopped

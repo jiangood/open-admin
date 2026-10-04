@@ -1,11 +1,8 @@
 package io.github.jiangood.openadmin.util;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.ServletOutputStream;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -22,7 +19,7 @@ class DownloadToolTest {
         long contentLength = 1024;
 
         // 模拟 HttpServletResponse
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         // 执行设置参数操作
         DownloadTool.setDownloadParam(fileName, contentLength, response);
@@ -30,7 +27,6 @@ class DownloadToolTest {
         // 验证响应头设置
         verify(response).reset();
         verify(response).setHeader("Content-Disposition", "attachment; filename=\"test.txt\"");
-        verify(response).setHeader("Access-Control-Allow-Origin", "*");
         verify(response).setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         verify(response).setContentType("application/octet-stream;charset=UTF-8");
         verify(response).addHeader("Content-Length", String.valueOf(contentLength));
@@ -43,7 +39,7 @@ class DownloadToolTest {
         long contentLength = 0;
 
         // 模拟 HttpServletResponse
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         // 执行设置参数操作
         DownloadTool.setDownloadParam(fileName, contentLength, response);
@@ -51,7 +47,6 @@ class DownloadToolTest {
         // 验证响应头设置
         verify(response).reset();
         verify(response).setHeader("Content-Disposition", "attachment; filename=\"test.txt\"");
-        verify(response).setHeader("Access-Control-Allow-Origin", "*");
         verify(response).setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         verify(response).setContentType("application/octet-stream;charset=UTF-8");
         // 验证 contentLength 为 0 时不设置 Content-Length 头
@@ -65,7 +60,7 @@ class DownloadToolTest {
         long contentLength = -1;
 
         // 模拟 HttpServletResponse
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
 
         // 执行设置参数操作
         DownloadTool.setDownloadParam(fileName, contentLength, response);
@@ -73,7 +68,6 @@ class DownloadToolTest {
         // 验证响应头设置
         verify(response).reset();
         verify(response).setHeader("Content-Disposition", "attachment; filename=\"test.txt\"");
-        verify(response).setHeader("Access-Control-Allow-Origin", "*");
         verify(response).setHeader("Access-Control-Expose-Headers", "Content-Disposition");
         verify(response).setContentType("application/octet-stream;charset=UTF-8");
         // 验证 contentLength 为负数时不设置 Content-Length 头
@@ -87,7 +81,7 @@ class DownloadToolTest {
         byte[] fileBytes = "Hello".getBytes();
 
         // 模拟 HttpServletResponse，使其在获取输出流时抛出异常
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.getOutputStream()).thenThrow(new IOException("Output stream error"));
 
         // 验证是否抛出 IllegalStateException
@@ -104,7 +98,7 @@ class DownloadToolTest {
         long fileSize = 5;
 
         // 模拟 HttpServletResponse，使其在获取输出流时抛出异常
-        HttpServletResponse response = Mockito.mock(HttpServletResponse.class);
+        HttpServletResponse response = mock(HttpServletResponse.class);
         when(response.getOutputStream()).thenThrow(new IOException("Output stream error"));
 
         // 验证是否抛出 IllegalStateException

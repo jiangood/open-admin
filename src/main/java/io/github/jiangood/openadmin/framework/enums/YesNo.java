@@ -1,16 +1,17 @@
 package io.github.jiangood.openadmin.framework.enums;
 
-import io.github.jiangood.openadmin.util.annotation.Remark;
+import io.github.jiangood.openadmin.framework.dict.DictItem;
+import io.github.jiangood.openadmin.framework.dict.DictType;
 
 /**
  * 是或否的枚举
  */
-@Remark("是否")
+@DictType(code = "yesNo", label = "是否")
 public enum YesNo {
 
-    @Remark("是")
+    @DictItem(label = "是", color = "SUCCESS")
     Y,
 
-    @Remark("否")
+    @DictItem(label = "否", color = "ERROR")
     N
 }

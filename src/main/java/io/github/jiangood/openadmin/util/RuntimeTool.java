@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 
 @Slf4j
 public class RuntimeTool {
+    private RuntimeTool() {
+    }
+
 
     public static int exec(File dir, String... cmd) throws IOException, InterruptedException {
         return exec(dir, true, cmd);

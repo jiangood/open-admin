@@ -1,4 +1,4 @@
-name: Publish NPM, Maven
+﻿name: Publish NPM, Maven
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract Tag
         id: tag
@@ -48,7 +48,7 @@ jobs:
           echo "✓ Maven version matches tag!"
 
       - name: Set up JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -79,7 +79,7 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Extract Tag
         id: tag
@@ -103,7 +103,7 @@ jobs:
           echo "✓ NPM version matches tag!"
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -111,7 +111,7 @@ jobs:
       - name: Build NPM package
         run: |
           cd web
-          npm ci
+          npm install
           npm run build
 
       - name: Publish NPM package (if not exists)
@@ -124,6 +124,10 @@ jobs:
             npm publish --access public --no-git-checks
           fi
 
+  sync-mirror:
+    needs: npm-publish
+    runs-on: ubuntu-latest
+    steps:
       - name: 同步阿里云镜像仓库
         run: |
           npm install -g cnpm --registry=https://registry.npmmirror.com
@@ -136,21 +140,37 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Extract Tag
         id: tag
         uses: aaronbarnaby/get-tag@v1.0.0
         with:
           without_prefix_v: true
-      - name: Create Release (if not exists)
+      - name: Build framework-files.zip
+        run: |
+          ZIP_DIR=$(mktemp -d)
+          mkdir -p "$ZIP_DIR/docs" "$ZIP_DIR/.opencode"
+          cp -r docs/open-admin "$ZIP_DIR/docs/open-admin"
+          mkdir -p "$ZIP_DIR/.opencode/skills"
+          cp -r .opencode/skills/oa-crud "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-upgrade "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-upgrade-docs "$ZIP_DIR/.opencode/skills/"
+          cp -r .opencode/skills/oa-sonar-scan "$ZIP_DIR/.opencode/skills/"
+          (cd "$ZIP_DIR" && zip -qr "$GITHUB_WORKSPACE/framework-files.zip" docs .opencode)
+          echo "✓ framework-files.zip 构建完成"
+
+      - name: Create Release & Upload Asset (if not exists)
         run: |
           if gh release view "${{ github.ref_name }}" &>/dev/null; then
-            echo "Release ${{ github.ref_name }} 已存在，跳过"
+            echo "Release ${{ github.ref_name }} 已存在"
           else
             gh release create "${{ github.ref_name }}" \
               --title "Release v${{ steps.tag.outputs.tag }}" \
               --latest \
               --generate-notes
           fi
+          gh release upload "${{ github.ref_name }}" framework-files.zip \
+            --clobber --repo jiangood/open-admin
+          echo "✓ framework-files.zip 已上传"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

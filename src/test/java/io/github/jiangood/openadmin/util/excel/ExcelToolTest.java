@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.util.excel;
 
-import io.github.jiangood.openadmin.util.annotation.Remark;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -9,9 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -61,7 +58,8 @@ class ExcelToolTest {
     @Test
     void testGetRowHeight() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
             XSSFRow row = sheet.createRow(0);
 
@@ -70,9 +68,8 @@ class ExcelToolTest {
 
             Integer height = ExcelTool.getRowHeight(row);
             assertEquals(20, height);
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
@@ -84,7 +81,8 @@ class ExcelToolTest {
     @Test
     void testSetValue() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
             // 测试设置值
@@ -92,15 +90,15 @@ class ExcelToolTest {
             XSSFCell cell = ExcelTool.getCellByCoords(sheet, "A1");
             assertNotNull(cell);
             assertEquals("Test Value", cell.getStringCellValue());
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
     void testGetCellValue() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
             XSSFRow row = sheet.createRow(0);
 
@@ -118,9 +116,8 @@ class ExcelToolTest {
             XSSFCell booleanCell = row.createCell(2);
             booleanCell.setCellValue(true);
             assertEquals(true, ExcelTool.getCellValue(booleanCell));
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
@@ -131,7 +128,8 @@ class ExcelToolTest {
     @Test
     void testRemoveRow() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
             // 创建两行数据
@@ -146,15 +144,15 @@ class ExcelToolTest {
             assertEquals(2, sheet.getLastRowNum() + 1);
             assertEquals("Row 1", sheet.getRow(0).getCell(0).getStringCellValue());
             assertEquals("Row 3", sheet.getRow(1).getCell(0).getStringCellValue());
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     @Test
     void testIsEmpty() {
         // 创建一个工作簿和工作表
-        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+        assertDoesNotThrow(() -> {
+            try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             XSSFSheet sheet = workbook.createSheet();
 
             // 测试空行
@@ -165,9 +163,8 @@ class ExcelToolTest {
             XSSFRow nonEmptyRow = sheet.createRow(1);
             nonEmptyRow.createCell(0).setCellValue("Test Value");
             assertFalse(ExcelTool.isEmpty(nonEmptyRow));
-        } catch (IOException e) {
-            fail("IOException occurred: " + e.getMessage());
         }
+        });
     }
 
     // 测试用的实体类
@@ -251,15 +248,8 @@ class ExcelToolTest {
         // 由于生成 Excel 文件比较复杂，这里只测试方法是否能正常执行
         // 实际项目中应该使用真实的 Excel 文件进行测试
         byte[] emptyExcel = new byte[0];
-        InputStream inputStream = new ByteArrayInputStream(emptyExcel);
-
-        try {
-            ExcelTool.importExcel(TestEntity.class, inputStream);
-        } catch (Exception e) {
-            // 预期会抛出异常，因为输入流是空的
-            assertTrue(e instanceof Exception);
-        } finally {
-            inputStream.close();
+        try (InputStream inputStream = new ByteArrayInputStream(emptyExcel)) {
+            assertThrows(Exception.class, () -> ExcelTool.importExcel(TestEntity.class, inputStream));
         }
     }
 

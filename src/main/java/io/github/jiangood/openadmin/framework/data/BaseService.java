@@ -3,12 +3,12 @@ package io.github.jiangood.openadmin.framework.data;
 import cn.hutool.core.bean.BeanUtil;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import jakarta.persistence.EntityManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
@@ -68,8 +68,8 @@ public abstract class BaseService<T extends Persistable<String>> {
 
     @Transactional
     public T update(T input, List<String> fieldsToUpdate) {
-        updateField(input, fieldsToUpdate);
-        return repository.findById(((BaseEntity) input).getId()).orElse(null);
+        updateField(input, fieldsToUpdate); // NOSONAR: 调用方 update() 已开启事务，自调用不重复开事务，语义一致
+        return repository.findById(((BaseEntity) input).getId()).orElse(null); // NOSONAR: update 路径 id 必非空
     }
 
     // ========== 便利查询方法 ==========

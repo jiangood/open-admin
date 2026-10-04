@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.util.excel;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.util.ResponseTool;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
@@ -25,111 +27,123 @@ import java.util.function.Consumer;
  * 推荐构造单独的 bean用于导入导出
  */
 public class ExcelTool {
+    private ExcelTool() {
+    }
 
 
-    public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws Exception {
-        XSSFWorkbook wb = new XSSFWorkbook(is);
 
-        XSSFSheet sheet = wb.getSheetAt(0);
+    public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws IOException, ReflectiveOperationException {
+        try (XSSFWorkbook wb = new XSSFWorkbook(is)) {
 
-        removeEmptyRows(sheet);         // 删除空行
+            XSSFSheet sheet = wb.getSheetAt(0);
 
-        // 解析注解
+            removeEmptyRows(sheet);         // 删除空行
+
+            Map<String, String> labelField = buildLabelFieldMap(cls);
+            Map<Integer, String> indexField = buildIndexFieldMap(sheet.getRow(0), labelField);
+
+            List<T> list = new ArrayList<>(sheet.getLastRowNum() + 1);
+            for (Row row : sheet) {
+                if (row.getRowNum() == 0) {
+                    continue; // 忽略表头
+                }
+                T t = cls.getConstructor().newInstance();
+                list.add(t);
+                fillRow(t, row, indexField);
+            }
+            return list;
+        }
+    }
+
+    private static Map<String, String> buildLabelFieldMap(Class<?> cls) {
         Map<String, String> labelField = new HashMap<>();
-        Field[] declaredFields = FieldUtils.getAllFields(cls);
-        for (Field field : declaredFields) {
+        for (Field field : FieldUtils.getAllFields(cls)) {
             ExcelColumn ann = field.getAnnotation(ExcelColumn.class);
             if (ann != null) {
                 labelField.put(ann.value(), field.getName()); //  eg 年龄，age
             }
         }
+        return labelField;
+    }
 
-
-        XSSFRow header = sheet.getRow(0); // 表头
+    private static Map<Integer, String> buildIndexFieldMap(XSSFRow header, Map<String, String> labelField) {
         Map<Integer, String> indexField = new HashMap<>();
+        if (header == null) {
+            return indexField;
+        }
         for (Cell cell : header) {
             int columnIndex = cell.getColumnIndex();
             String label = cell.getStringCellValue();
-            if (label != null) {
-                label = label.trim();
+            if (label != null && labelField.containsKey(label.trim())) {
+                indexField.put(columnIndex, labelField.get(label.trim()));
+            }
+        }
+        return indexField;
+    }
 
-                if (labelField.containsKey(label)) {
-                    indexField.put(columnIndex, labelField.get(label));
+    private static <T> void fillRow(T t, Row row, Map<Integer, String> indexField) {
+        for (Cell cell : row) {
+            Object cellValue = getCellValue((XSSFCell) cell);
+            if (!StrUtil.isBlankIfStr(cellValue)) {
+                String fieldName = indexField.get(cell.getColumnIndex());
+                if (fieldName != null) {
+                    BeanUtil.setFieldValue(t, fieldName, cellValue);
                 }
             }
         }
+    }
 
+    public static <T> void exportExcel(Class<T> cls, List<T> list, OutputStream os) throws IOException {
+        try (XSSFWorkbook workbook = new XSSFWorkbook()) {
+            XSSFSheet sheet = workbook.createSheet();
 
-        List<T> list = new ArrayList<>(sheet.getLastRowNum() + 1);
-        for (Row row : sheet) {
-            if (row.getRowNum() == 0) {
-                continue; // 忽略表头
-            }
-            T t = cls.getConstructor().newInstance();
-            list.add(t);
+            Field[] fieldArr = cls.getDeclaredFields();
+            List<Field> fieldList = Arrays.stream(fieldArr).filter(t -> t.isAnnotationPresent(ExcelColumn.class))
+                    .sorted(Comparator.comparingInt(t -> t.getAnnotation(ExcelColumn.class).seq())).toList();
+            Assert.notEmpty(fieldList,"导出类的字段必须使用@ExcelColumn");
 
-            for (Cell cell : row) {
-                Object cellValue = getCellValue((XSSFCell) cell);
-                if (!StrUtil.isBlankIfStr(cellValue)) {
-                    String fieldName = indexField.get(cell.getColumnIndex());
-                    if (fieldName != null) {
-                        BeanUtil.setFieldValue(t, fieldName, cellValue);
-                    }
+            writeHeaderRow(sheet, fieldList);
+
+            // 表体
+            for (int i = 0; i < list.size(); i++) {
+                int rowIndex = i + 1;
+                XSSFRow row = sheet.createRow(rowIndex);
+
+                T bean = list.get(i);
+                for (int col = 0; col < fieldList.size(); col++) {
+                    Field f = fieldList.get(col);
+                    Object fieldValue = BeanUtil.getFieldValue(bean, f.getName());
+                    XSSFCell cell = row.createCell(col);
+                    setValue(cell, fieldValue);
                 }
             }
+
+            workbook.write(os);
         }
-        wb.close();
-        return list;
     }
 
-    public static <T> void exportExcel(Class<T> cls, List<T> list, OutputStream os) throws Exception {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet();
-
-        Field[] fieldArr = cls.getDeclaredFields();
-        List<Field> fieldList = Arrays.stream(fieldArr).filter(t -> t.isAnnotationPresent(ExcelColumn.class))
-                .sorted(Comparator.comparingInt(t -> t.getAnnotation(ExcelColumn.class).seq())).toList();
-        Assert.notEmpty(fieldList,"导出类的字段必须使用@ExcelColumn");
-
-        // 添加表头
-        {
-            Row row = sheet.createRow(0);
-            for (int i = 0; i < fieldList.size(); i++) {
-                Field field = fieldList.get(i);
-                ExcelColumn column = field.getAnnotation(ExcelColumn.class);
-                row.createCell(i).setCellValue(column.value());
-            }
+    private static void writeHeaderRow(XSSFSheet sheet, List<Field> fieldList) {
+        Row row = sheet.createRow(0);
+        for (int i = 0; i < fieldList.size(); i++) {
+            Field field = fieldList.get(i);
+            ExcelColumn column = field.getAnnotation(ExcelColumn.class);
+            row.createCell(i).setCellValue(column.value());
         }
-
-        // 表体
-        for (int i = 0; i < list.size(); i++) {
-            int rowIndex = i + 1;
-            XSSFRow row = sheet.createRow(rowIndex);
-
-            T bean = list.get(i);
-            for (int col = 0; col < fieldList.size(); col++) {
-                Field f = fieldList.get(col);
-                Object fieldValue = BeanUtil.getFieldValue(bean, f.getName());
-                XSSFCell cell = row.createCell(col);
-                setValue(cell, fieldValue);
-            }
-        }
-
-        workbook.write(os);
-        workbook.close();
     }
 
-    public static <T> void exportExcelToResponse(Class<T> cls, List<T> list, HttpServletResponse response, String filename) throws Exception {
+    public static <T> void exportExcelToResponse(Class<T> cls, List<T> list, HttpServletResponse response, String filename) throws IOException {
         ResponseTool.setDownloadHeader(filename, ResponseTool.CONTENT_TYPE_EXCEL, response);
         exportExcel(cls, list, response.getOutputStream());
     }
 
-    public static <T> void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws Exception {
+    public static void exportExcel(Workbook workbook, String filename, HttpServletResponse response) throws IOException {
         ResponseTool.setDownloadExcelHeader(filename, response);
 
-        workbook.write(response.getOutputStream());
-
-        workbook.close();
+        try {
+            workbook.write(response.getOutputStream());
+        } finally {
+            workbook.close();
+        }
     }
 
 
@@ -181,7 +195,7 @@ public class ExcelTool {
     }
 
 
-    public static void everyCell(XSSFSheet sheet, Consumer<XSSFCell> fn) {
+    public static void forEachCell(XSSFSheet sheet, Consumer<XSSFCell> fn) {
         Iterator<Row> rowIterator = sheet.rowIterator();
 
         while (rowIterator.hasNext()) {
@@ -223,7 +237,7 @@ public class ExcelTool {
             if (Character.isDigit(c)) {
                 break;// 确定指定的char值是否为数字
             }
-            index = (index + 1) * 26 + (int) c - 'A';
+            index = (index + 1) * 26 + c - 'A';
         }
         return index;
     }
@@ -241,7 +255,7 @@ public class ExcelTool {
         }
         final StringBuilder colName = StrUtil.builder();
         do {
-            if (colName.length() > 0) {
+            if (!colName.isEmpty()) {
                 index--;
             }
             int remainder = index % 26;
@@ -345,7 +359,7 @@ public class ExcelTool {
     public static List<String> getEmptyCells(XSSFSheet sheet) {
         List<String> coordsList = new ArrayList<>();
 
-        everyCell(sheet, cell -> {
+        forEachCell(sheet, cell -> {
             String coords = getCoords(cell);
 
             Object cellValue = getCellValue(cell);
@@ -403,8 +417,8 @@ public class ExcelTool {
             cell.setBlank();
             return;
         }
-        if (value instanceof String) {
-            cell.setCellValue((String) value);
+        if (value instanceof String str) {
+            cell.setCellValue(str);
         } else if (value instanceof Number) {
             if (value instanceof Integer i) {
                 cell.setCellValue(String.valueOf(i));
@@ -469,21 +483,18 @@ public class ExcelTool {
 
             CellType cellType = cell.getCellType();
             switch (cellType) {
-                case _NONE:
-                case BLANK:
-                case ERROR:
-                    continue;
-
-                case NUMERIC:
-                case FORMULA:
-                case BOOLEAN:
+                case NUMERIC, FORMULA, BOOLEAN -> {
                     return false;
-
-                case STRING:
+                }
+                case STRING -> {
                     String str = cell.getStringCellValue();
-                    if (StrUtil.isNotBlank(str)) {
+                    if (CharSequenceUtil.isNotBlank(str)) {
                         return false;
                     }
+                }
+                case _NONE, BLANK, ERROR -> {
+                    // 空值单元格继续扫描
+                }
             }
         }
 

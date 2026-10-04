@@ -10,6 +10,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
  * HttpServlet工具类，获取当前request和response
  */
 public class HttpServletTool {
+    private HttpServletTool() {
+    }
+
 
     /**
      * 获取当前请求的request对象

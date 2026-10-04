@@ -1,8 +1,8 @@
 import React from "react";
 import {Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
-import {HttpUtils, Page} from "../../../framework";
-export default class extends React.Component {
+import {HttpClient, Page} from "../../../framework";
+export default class RolePermPage extends React.Component {
 
 
     state = {
@@ -39,9 +39,9 @@ export default class extends React.Component {
                 return <Checkbox.Group options={options}
                                        value={rowSelectedKey}
                                        onChange={(ks) => {
-                                           const rowSelectedKeys = this.state.rowSelectedKeys;
-                                           rowSelectedKeys[record.id] = ks;
-                                           this.setState({rowSelectedKeys})
+                                           this.setState(prevState => ({
+                                               rowSelectedKeys: {...prevState.rowSelectedKeys, [record.id]: ks}
+                                           }))
                                        }}/>
             }
         }
@@ -55,19 +55,25 @@ export default class extends React.Component {
 
     loadData() {
         this.setState({loading: true})
-        Promise.all([
-            HttpUtils.get('admin/sysRole/get', {id: this.roleId}).then(rs => {
-                this.setState({roleInfo: rs})
-            }),
-            HttpUtils.get('admin/sysRole/perm-tree-table', {id: this.roleId}).then(rs => {
-                this.setState({dataSource: rs})
-            }),
-            HttpUtils.get('admin/sysRole/own-perms', {id: this.roleId}).then(rs => {
-                this.setState({rowSelectedKeys: rs})
-            })
-        ]).then(rs => {
-            this.setState({loading: false})
-        })
+        const requestCount = 3;
+        let finished = 0;
+        const onFinish = () => {
+            if (++finished === requestCount) {
+                this.setState({loading: false})
+            }
+        };
+        HttpClient.get('admin/sysRole/get', {id: this.roleId}).then(rs => {
+            this.setState({roleInfo: rs.data})
+            onFinish()
+        });
+        HttpClient.get('admin/sysRole/perm-tree-table', {id: this.roleId}).then(rs => {
+            this.setState({dataSource: rs.data})
+            onFinish()
+        });
+        HttpClient.get('admin/sysRole/own-perms', {id: this.roleId}).then(rs => {
+            this.setState({rowSelectedKeys: rs.data})
+            onFinish()
+        });
     }
 
     savePerms = () => {
@@ -82,9 +88,7 @@ export default class extends React.Component {
             menus.push(menuId)
             perms.push(...ks)
         }
-        HttpUtils.post('admin/sysRole/save-perms', {id: this.roleId, perms, menus}).then(rs => {
-            //  Page.open(PageUtils.currentPathname(), PageUtils.currentLabel())
-        })
+        HttpClient.post('admin/sysRole/save-perms', {id: this.roleId, perms, menus})
     };
 
 

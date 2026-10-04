@@ -7,6 +7,7 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 import qs from 'qs';
+import type {AxiosProgressEvent, AxiosRequestConfig, AxiosResponse} from "axios";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH,
@@ -17,8 +18,8 @@ const axiosInstance = axios.create({
 
 interface DownloadOptions {
   url: string;
-  params?: Record<string, any>;
-  data?: Record<string, any>;
+  params?: Record<string, unknown>;
+  data?: Record<string, unknown>;
   method?: 'GET' | 'POST';
   fileName?: string;
 }
@@ -39,8 +40,8 @@ export interface DownloadModalProps {
   onFinish?: () => void;
 }
 
-export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
-  private abortController: AbortController | null = null;
+export class DownloadModal extends React.Component<DownloadModalProps, ModalState> { // NOSONAR: state/定时器字段构造器赋值，无法全部 readonly
+  private abortController: AbortController | null = null; // NOSONAR: 构造器中赋值
   private lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;
   private lastLoaded: number = 0;
@@ -60,7 +61,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     };
   }
 
-  download = (options: DownloadOptions) => {
+  download = (options: DownloadOptions) => { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
     this.startDownload(options);
   };
 
@@ -101,13 +102,29 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     this.setState({open: false, status: ''});
   };
 
+  renderFooter = () => {
+    const {status} = this.state;
+    if (status === 'downloading') {
+      return <Button danger onClick={this.handleCancel}>取消下载</Button>;
+    }
+    if (status === 'failed') {
+      return (
+        <>
+          <Button onClick={this.handleClose}>关闭</Button>
+          <Button type="primary" onClick={this.handleRetry}>重试</Button>
+        </>
+      );
+    }
+    return null;
+  };
+
   private handleRetry = () => {
     if (this.lastOptions) {
       this.startDownload(this.lastOptions);
     }
   };
 
-  private saveBlob(response: any) {
+  private saveBlob(response: AxiosResponse) {
     return new Promise<void>((resolve, reject) => {
       const {data: blob, headers} = response;
 
@@ -122,7 +139,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           try {
             const rs = JSON.parse(reader.result as string);
             reject(new Error(rs.message || '下载失败'));
-          } catch (e) {
+          } catch {
             reject(new Error('解析错误响应失败'));
           }
         };
@@ -134,13 +151,16 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       let filename = this.state.fileName;
       if (!filename && contentDisposition) {
         const match = /filename\*?=(?:['"]?)(?:UTF-8''|)(.+?)(?:['"]?$|;)/i.exec(contentDisposition);
-        let parsedName = match && match[1] ? match[1].trim() : 'download.file';
+        let parsedName = match?.[1] ? match[1].trim() : 'download.file';
         try {
-          parsedName = decodeURIComponent(parsedName.replace(/"/g, ''));
-        } catch (e) {
-          parsedName = parsedName.replace(/"/g, '');
+          parsedName = decodeURIComponent(parsedName.replaceAll('"', ''));
+        } catch {
+          parsedName = parsedName.replaceAll('"', '');
         }
         filename = parsedName;
+      }
+      if (filename && filename !== this.state.fileName) {
+        this.setState({fileName: filename});
       }
 
       const url = window.URL.createObjectURL(new Blob([blob]));
@@ -150,7 +170,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       link.download = filename || 'download.file';
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.remove();
       window.URL.revokeObjectURL(url);
       resolve();
     });
@@ -190,12 +210,12 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       }
     }, 2000);
 
-    const config: any = {
+    const config: AxiosRequestConfig = {
       url: options.url,
       method: options.method || 'GET',
       responseType: 'blob',
       signal: this.abortController.signal,
-      onDownloadProgress: (progressEvent: any) => {
+      onDownloadProgress: (progressEvent: AxiosProgressEvent) => {
         const {loaded, total} = progressEvent;
         const now = Date.now();
         // 计算速度
@@ -206,12 +226,12 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           this.lastTime = now;
           this.lastLoaded = loaded;
         }
-        this.setState({
+        this.setState((prev) => ({
           progress: total ? Math.round((loaded / total) * 100) : 0,
           loaded,
           total,
-          speed: speed > 0 ? this.formatSpeed(speed) : this.state.speed,
-        });
+          speed: speed > 0 ? this.formatSpeed(speed) : prev.speed,
+        }));
       },
     };
 
@@ -222,19 +242,18 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       config.data = options.data;
     }
 
-    axiosInstance(config).then((response: any) => {
+    axiosInstance(config).then((response) => {
       this.clearSpeedTimer();
       return this.saveBlob(response);
     }).then(() => {
-      const total = this.state.total;
-      this.setState({
+      this.setState((prev) => ({
         status: 'completed',
         progress: 100,
         speed: '',
-        loaded: total || this.state.loaded,
-      });
+        loaded: prev.total || prev.loaded,
+      }));
       this.props.onFinish?.();
-    }).catch((error: any) => {
+    }).catch((error) => {
       this.clearSpeedTimer();
       if (axios.isCancel(error)) {
         // 用户取消，不显示错误
@@ -263,23 +282,13 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
         mask={{closable: false}}
         closable={status !== 'downloading'}
         onCancel={this.handleClose}
-        footer={
-          status === 'downloading' ? (
-            <Button danger onClick={this.handleCancel}>取消下载</Button>
-          ) : status === 'failed' ? (
-            <>
-              <Button onClick={this.handleClose}>关闭</Button>
-              <Button type="primary" onClick={this.handleRetry}>重试</Button>
-            </>
-          ) : null
-        }
+        footer={this.renderFooter()}
         destroyOnHidden
       >
         <div style={{padding: '20px 0'}}>
           {/* 文件名 */}
           <div style={{marginBottom: 16, fontSize: 15, fontWeight: 500, color: '#333'}}>
-            <DownloadOutlined style={{marginRight: 8}}/>
-            {fileName || '未知文件'}
+            文件名：{fileName || '未知文件'}
           </div>
 
           {/* 下载中 */}

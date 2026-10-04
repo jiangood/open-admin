@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,6 +28,9 @@ class SysRoleServiceTest {
     private SysRoleRepository roleRepository;
 
     @Mock
+    private jakarta.persistence.EntityManager entityManager;
+
+    @Mock
     private SysMenuRepository sysMenuRepository;
 
     @Mock
@@ -37,6 +41,8 @@ class SysRoleServiceTest {
     @BeforeEach
     void setUp() {
         sysRoleService = new SysRoleService(roleRepository, sysMenuRepository, sysUserRepository);
+        ReflectionTestUtils.setField(sysRoleService, "repository", roleRepository);
+        ReflectionTestUtils.setField(sysRoleService, "entityManager", entityManager);
     }
 
     @Test
@@ -92,8 +98,6 @@ class SysRoleServiceTest {
         menu3.setPid("sys");
         menu3.setSeq(3);
 
-        List<MenuDefinition> allMenus = Arrays.asList(menu1, menu2, menu3);
-
         when(roleRepository.findById("2")).thenReturn(Optional.of(normalRole));
         when(sysMenuRepository.findAllById(Arrays.asList("sys", "sys-user"))).thenReturn(
             Arrays.asList(menu1, menu2)
@@ -115,7 +119,6 @@ class SysRoleServiceTest {
         normalRole.setMenus(Arrays.asList());
 
         when(roleRepository.findById("3")).thenReturn(Optional.of(normalRole));
-        when(sysMenuRepository.findAllById(Arrays.asList())).thenReturn(Arrays.asList());
 
         List<MenuDefinition> result = sysRoleService.ownMenu("3");
 
@@ -124,13 +127,30 @@ class SysRoleServiceTest {
     }
 
     @Test
+    void testOwnMenu_whenRoleMenusIsNull_shouldReturnEmptyList() {
+        SysRole normalRole = new SysRole();
+        normalRole.setId("4");
+        normalRole.setCode("normal");
+
+        when(roleRepository.findById("4")).thenReturn(Optional.of(normalRole));
+
+        List<MenuDefinition> result = sysRoleService.ownMenu("4");
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(sysMenuRepository, never()).findAllById(any());
+    }
+
+    @Test
     void testOwnMenu_withMultipleRoles() {
         SysRole role1 = new SysRole();
         role1.setId("1");
         role1.setCode("admin");
+        role1.setEnabled(true);
         SysRole role2 = new SysRole();
         role2.setId("2");
         role2.setCode("normal");
+        role2.setEnabled(true);
         role2.setMenus(Arrays.asList("sys"));
 
         MenuDefinition menu1 = new MenuDefinition();
@@ -243,5 +263,26 @@ class SysRoleServiceTest {
         assertNotNull(result.getMenus());
         assertTrue(result.getMenus().contains("sys"));
         assertTrue(result.getMenus().contains("sys-user"));
+    }
+
+    @Test
+    void testSavePerms_whenAdminRole_shouldKeepWildcardPerms() {
+        SysRole role = new SysRole();
+        role.setId("1");
+        role.setCode("admin");
+        role.setPerms(Arrays.asList("*"));
+
+        MenuDefinition menu1 = new MenuDefinition();
+        menu1.setId("sys");
+        menu1.setName("系统管理");
+
+        when(sysMenuRepository.findAll()).thenReturn(Arrays.asList(menu1));
+        when(roleRepository.findById("1")).thenReturn(Optional.of(role));
+        when(roleRepository.save(any(SysRole.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SysRole result = sysRoleService.savePerms("1", Arrays.asList("sys-user:read"), Arrays.asList("sys"));
+
+        assertNotNull(result);
+        assertEquals(Arrays.asList("*"), result.getPerms());
     }
 }

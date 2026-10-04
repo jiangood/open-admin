@@ -27,6 +27,9 @@ public class RequestBodyKeysArgumentResolver implements HandlerMethodArgumentRes
                                   WebDataBinderFactory binderFactory) throws Exception {
 
         ContentCachingRequestWrapper req = webRequest.getNativeRequest(ContentCachingRequestWrapper.class);
+        if (req == null) {
+            throw new IllegalStateException("RequestBodyKeys 参数要求请求已被 ContentCachingRequestWrapper 包装（JSON POST）");
+        }
 
         String content = req.getContentAsString();
         JsonNode tree = JsonTool.readTree(content);

@@ -1,8 +1,10 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
+import io.github.jiangood.openadmin.modules.system.dto.request.ArticleReq;
 import io.github.jiangood.openadmin.modules.system.entity.Article;
 import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;
 import io.github.jiangood.openadmin.modules.system.service.ArticleService;
@@ -24,7 +26,7 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @HasPermission("article:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String code, String title,
                            @PageableDefault(sort = "seq") Pageable pageable) {
         var spec = articleService.spec();
@@ -41,7 +43,8 @@ public class ArticleController {
     @Log("文章-创建")
     @HasPermission("article:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody Article param) throws Exception {
+    public AjaxResult create(@RequestBody ArticleReq req) {
+        Article param = BeanUtil.copyProperties(req, Article.class);
         Article result = articleService.save(param, null);
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
@@ -49,8 +52,9 @@ public class ArticleController {
     @Log("文章-更新")
     @HasPermission("article:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody Article param, RequestBodyKeys updateFields) throws Exception {
-        Article result = articleService.save(param, updateFields);
+    public AjaxResult update(@RequestBody ArticleReq req, RequestBodyKeys updateFields) {
+        Article param = BeanUtil.copyProperties(req, Article.class);
+        Article result = articleService.update(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
     }
 

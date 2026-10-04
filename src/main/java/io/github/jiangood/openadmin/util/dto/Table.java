@@ -11,9 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -40,34 +40,34 @@ public class Table<T> {
 
         boolean hasExcelAnn = Arrays.stream(cls.getDeclaredFields()).anyMatch(t -> t.isAnnotationPresent(Remark.class));
         if (hasExcelAnn) {
-            for (Field f : cls.getDeclaredFields()) {
-                if (!f.isAnnotationPresent(Remark.class)) {
-                    continue;
-                }
-
-                Class<?> type1 = f.getType();
-                if (type1.isAssignableFrom(String.class) || type1.isAssignableFrom(Number.class) || type1.isAssignableFrom(Date.class)) {
-                    String title = f.getAnnotation(Remark.class).value();
-                    tb.addColumn(title, f.getName());
-                }
-            }
-            return tb;
-        }
-
-        log.warn("实体上未配置Excel注解，将使用默认导出");
-
-        for (Field f : cls.getDeclaredFields()) {
-            if (f.isAnnotationPresent(Lob.class)) {
-                continue;
-            }
-
-            Class<?> type1 = f.getType();
-            if (type1.isAssignableFrom(String.class) || type1.isAssignableFrom(Number.class) || type1.isAssignableFrom(Date.class)) {
-                String title = f.isAnnotationPresent(Remark.class) ? f.getAnnotation(Remark.class).value() : f.getName();
-                tb.addColumn(title, f.getName());
-            }
+            addAnnotatedColumns(tb, cls);
+        } else {
+            log.warn("实体上未配置Excel注解，将使用默认导出");
+            addDefaultColumns(tb, cls);
         }
         return tb;
+    }
+
+    private static <T> void addAnnotatedColumns(Table<T> tb, Class<T> cls) {
+        for (Field f : cls.getDeclaredFields()) {
+            if (f.isAnnotationPresent(Remark.class) && isColumnType(f.getType())) {
+                tb.addColumn(f.getAnnotation(Remark.class).value(), f.getName());
+            }
+        }
+    }
+
+    private static <T> void addDefaultColumns(Table<T> tb, Class<T> cls) {
+        for (Field f : cls.getDeclaredFields()) {
+            if (f.isAnnotationPresent(Lob.class) || !isColumnType(f.getType())) {
+                continue;
+            }
+            String title = f.isAnnotationPresent(Remark.class) ? f.getAnnotation(Remark.class).value() : f.getName();
+            tb.addColumn(title, f.getName());
+        }
+    }
+
+    private static boolean isColumnType(Class<?> type) {
+        return type.isAssignableFrom(String.class) || type.isAssignableFrom(Number.class) || type.isAssignableFrom(LocalDateTime.class);
     }
 
     public TableColumn<T> addColumn(String title, String dataIndex) {
@@ -102,8 +102,8 @@ public class Table<T> {
         if (v == null) {
             return null;
         }
-        if (v instanceof Date d) {
-            return DateUtil.formatDateTime(d);
+        if (v instanceof LocalDateTime d) {
+            return DateUtil.format(d, "yyyy-MM-dd HH:mm:ss");
         }
 
         return v.toString();

@@ -1,9 +1,11 @@
 package io.github.jiangood.openadmin.util.range;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,10 +38,11 @@ class RangeToolTest {
         assertEquals("end", range.getEnd());
     }
 
-    @Test
-    void testToStrRangeWithEmptyString() {
-        // 测试空字符串
-        Range<String> range = RangeTool.toStrRange("");
+    @ParameterizedTest
+    @ValueSource(strings = {"", "  /  ", "   "})
+    void testToStrRangeWithEmptyInput(String input) {
+        // 测试空字符串/空值/纯空格
+        Range<String> range = RangeTool.toStrRange(input);
         assertNotNull(range);
         assertNull(range.getStart());
         assertNull(range.getEnd());
@@ -136,7 +139,7 @@ class RangeToolTest {
     void testToDateRange() {
         // 测试 Date 范围
         String dateStr = "2023-01-01/2023-01-31";
-        Range<Date> range = RangeTool.toDateRange(dateStr);
+        Range<LocalDateTime> range = RangeTool.toDateRange(dateStr);
         assertNotNull(range);
         assertNotNull(range.getStart());
         assertNotNull(range.getEnd());
@@ -147,12 +150,12 @@ class RangeToolTest {
     @Test
     void testToDateRangeWithNullValues() {
         // 测试 Date 范围（空值）
-        Range<Date> range1 = RangeTool.toDateRange("2023-01-01/");
+        Range<LocalDateTime> range1 = RangeTool.toDateRange("2023-01-01/");
         assertNotNull(range1);
         assertNotNull(range1.getStart());
         assertNull(range1.getEnd());
 
-        Range<Date> range2 = RangeTool.toDateRange("/2023-01-31");
+        Range<LocalDateTime> range2 = RangeTool.toDateRange("/2023-01-31");
         assertNotNull(range2);
         assertNull(range2.getStart());
         assertNotNull(range2.getEnd());
@@ -161,7 +164,7 @@ class RangeToolTest {
     @Test
     void testToDateRangeWithSingleDate() {
         // 测试单个日期
-        Range<Date> range = RangeTool.toDateRange("2023-01-01");
+        Range<LocalDateTime> range = RangeTool.toDateRange("2023-01-01");
         assertNotNull(range);
         assertNotNull(range.getStart());
         assertNull(range.getEnd());
@@ -170,7 +173,7 @@ class RangeToolTest {
     @Test
     void testToDateRangeWithEmptyString() {
         // 测试空字符串
-        Range<Date> range = RangeTool.toDateRange("");
+        Range<LocalDateTime> range = RangeTool.toDateRange("");
         assertNotNull(range);
         assertNull(range.getStart());
         assertNull(range.getEnd());
@@ -210,24 +213,6 @@ class RangeToolTest {
         assertThrows(Exception.class, () -> {
             RangeTool.toDateRange("invalid-date/2023-01-01");
         });
-    }
-
-    @Test
-    void testToStrRangeWithEmptyValues() {
-        // 测试空值
-        Range<String> range = RangeTool.toStrRange("  /  ");
-        assertNotNull(range);
-        assertNull(range.getStart());
-        assertNull(range.getEnd());
-    }
-
-    @Test
-    void testToStrRangeWithOnlySpaces() {
-        // 测试只有空格
-        Range<String> range = RangeTool.toStrRange("   ");
-        assertNotNull(range);
-        assertNull(range.getStart());
-        assertNull(range.getEnd());
     }
 
 }

@@ -47,7 +47,7 @@ class RuntimeToolTest {
     }
 
     @Test
-    void testExecWithNonExistentDirectory() throws IOException, InterruptedException {
+    void testExecWithNonExistentDirectory() {
         // 测试在不存在的目录执行命令
         File nonExistentDir = new File(testDir, "non-existent");
         String[] cmd = getEchoCommand("Hello");

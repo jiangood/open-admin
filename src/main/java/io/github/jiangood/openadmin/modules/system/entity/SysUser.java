@@ -13,7 +13,7 @@ import lombok.experimental.FieldNameConstants;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,14 +24,14 @@ import java.util.Set;
 @Table(name = "sys_user")
 @FieldNameConstants
 @Remark("系统用户")
-public class SysUser extends BaseEntity {
+public class SysUser extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "sys_user_role",
             joinColumns = @JoinColumn(name = "user_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
-    Set<SysRole> roles = new HashSet<>();
+    Set<SysRole> roles = new HashSet<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     // 数据权限类型
     @Enumerated(EnumType.STRING)
     DataPermType dataPermType;
@@ -39,7 +39,7 @@ public class SysUser extends BaseEntity {
     @Lazy
     @ManyToMany
     @JoinTable(name = "sys_user_data_perm", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "org_id"))
-    List<SysOrg> dataPerms = new ArrayList<>();
+    List<SysOrg> dataPerms = new ArrayList<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
     /**
      * 所属机构 (公司，单位级别）
      */
@@ -89,7 +89,7 @@ public class SysUser extends BaseEntity {
     private String thirdAccount;
 
     @Remark("上次密码修改时间")
-    private Date lastPasswordChangeTime;
+    private LocalDateTime lastPasswordChangeTime;
 
     public SysUser() {
     }

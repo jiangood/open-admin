@@ -26,13 +26,13 @@ public class AjaxResult {
     public static final int FAILURE = 500;
 
 
-    public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), MessageConst.MGS_FORBIDDEN);
+    public static final AjaxResult FORBIDDEN = AjaxResult.err(HttpStatus.FORBIDDEN.value(), MessageConst.MSG_FORBIDDEN);
 
 
     public static final AjaxResult UNAUTHORIZED = AjaxResult.err(HttpStatus.UNAUTHORIZED.value(), MessageConst.MSG_UNAUTHORIZED);
 
 
-    boolean success;
+    boolean success; // NOSONAR: JSON 契约字段名，前端依赖，重命名破坏兼容性
 
     Integer code;
 

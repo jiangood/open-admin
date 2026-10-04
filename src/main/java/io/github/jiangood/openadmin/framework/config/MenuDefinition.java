@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.framework.config;
 
-import io.github.jiangood.openadmin.util.dto.AntdIcon;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -26,8 +25,8 @@ public class MenuDefinition {
     /** 菜单显示名称 */
     private String name;
 
-    /** Ant Design 图标组件名 */
-    private AntdIcon icon;
+    /** Ant Design 图标组件名，取值见 https://ant-design.antgroup.com/components/icon-cn */
+    private String icon;
 
     /** 前端路由路径 */
     private String path;

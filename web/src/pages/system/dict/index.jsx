@@ -1,18 +1,29 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {Button, Card, Descriptions, Empty, Form, Input, InputNumber, Popconfirm, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
+import {AutoComplete, Button, Card, Descriptions, Empty, Form, Input, InputNumber, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
 import React from 'react';
 import {
     PermActions,
     FieldBoolean,
-    FieldDictSelect,
     FormModal,
-    HttpUtils,
+    HttpClient,
     Page,
     ProTable,
     ViewSwitch,
 } from "../../../framework";
 
-export default class extends React.Component {
+const COLOR_OPTIONS = [
+    {value: 'SUCCESS', label: '成功'},
+    {value: 'PROCESSING', label: '处理中'},
+    {value: 'ERROR', label: '错误'},
+    {value: 'WARNING', label: '警告'},
+    {value: 'DEFAULT', label: '默认'},
+    {value: 'RED', label: '红色'},
+    {value: 'BLUE', label: '蓝色'},
+    {value: 'GREEN', label: '绿色'},
+    {value: 'GRAY', label: '灰色'},
+]
+
+export default class DictPage extends React.Component {
 
     state = {
         typeTree: [],
@@ -31,9 +42,10 @@ export default class extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpUtils.get('admin/dict/type-tree').then(rs => {
-            this.setState({typeTree: rs})
-        }).finally(() => {
+        HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
+            this.setState({typeTree: rs.data})
+            this.setState({treeLoading: false})
+        }).catch(() => {
             this.setState({treeLoading: false})
         })
     }
@@ -51,7 +63,7 @@ export default class extends React.Component {
     handleTypeDelete = () => {
         const {selectedType} = this.state
         if (!selectedType) return
-        HttpUtils.post('admin/dict/type-delete', {id: selectedType.id}).then(() => {
+        HttpClient.post('admin/dict/type-delete', {id: selectedType.id}, null).then(() => {
             this.setState({selectedType: null, selectedTypeCode: null})
             this.loadTree()
         })
@@ -60,7 +72,7 @@ export default class extends React.Component {
     handleTypeFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/type-create' : 'admin/dict/type-update'
-        await HttpUtils.post(url, values)
+        await HttpClient.post(url, values)
         this.loadTree()
     }
 
@@ -87,11 +99,13 @@ export default class extends React.Component {
             this.setState({selectedType: null, selectedTypeCode: null})
             return
         }
-        const node = this.findNode(this.state.typeTree, selectedKeys[0])
-        this.setState({
-            selectedType: node,
-            selectedTypeCode: node?.typeCode || null
-        },()=>this.tableRef.current.reload())
+        this.setState((prevState) => {
+            const node = this.findNode(prevState.typeTree, selectedKeys[0])
+            return {
+                selectedType: node,
+                selectedTypeCode: node?.typeCode || null
+            }
+        }, () => this.tableRef.current.reload())
     }
 
     handleItemAdd = () => {
@@ -103,7 +117,7 @@ export default class extends React.Component {
     }
 
     handleItemDelete = row => {
-        HttpUtils.post('admin/dict/delete', row).then(rs => {
+        HttpClient.post('admin/dict/delete', row, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -111,7 +125,7 @@ export default class extends React.Component {
     onItemFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/create' : 'admin/dict/update'
-        await HttpUtils.post(url, values)
+        await HttpClient.post(url, values)
         this.tableRef.current.reload()
     }
 
@@ -134,16 +148,14 @@ export default class extends React.Component {
         {
             title: '操作', dataIndex: 'option',
             render: (_, record) => {
-                return (
-                    <PermActions>
-                        <Button size='small' perm='sys-dict:update'
-                                onClick={() => this.handleItemEdit(record)}>编辑</Button>
-                        <Popconfirm perm='sys-dict:delete' title='是否确定删除字典项'
-                                    onConfirm={() => this.handleItemDelete(record)}>
-                            <Button size='small'>删除</Button>
-                        </Popconfirm>
-                    </PermActions>
-                );
+                return <PermActions
+                    more
+                    size="small"
+                    actions={[
+                        {label: '编辑', perm: 'sys-dict:update', onClick: () => this.handleItemEdit(record)},
+                        {label: '删除', perm: 'sys-dict:delete', confirm: '是否确定删除字典项', onClick: () => this.handleItemDelete(record)},
+                    ]}
+                />;
             },
         },
     ]
@@ -159,7 +171,9 @@ export default class extends React.Component {
                           size='small'
                           title={<div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                               <Typography.Text strong>字典类型</Typography.Text>
-                              <Button size='small' perm='sys-dict:create' icon={<PlusOutlined/>} onClick={this.handleTypeAdd}>新增类型</Button>
+                              <PermActions size='small' actions={[
+                                  {label: '新增类型', perm: 'sys-dict:create', icon: <PlusOutlined/>, onClick: this.handleTypeAdd},
+                              ]}/>
                           </div>}
                     >
                         <Tree
@@ -179,14 +193,16 @@ export default class extends React.Component {
                         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
                             <Typography.Text strong>类型信息</Typography.Text>
                             {hasTypeSelected && (
-                                <span>
-                                    <Button size='small' icon={<EditOutlined/>} perm='sys-dict:update'
-                                            onClick={this.handleTypeEdit} style={{marginRight: 4}}>编辑</Button>
-                                    <Popconfirm perm='sys-dict:delete' title='是否确定删除此类型及其所有子类型和字典项？'
-                                                onConfirm={this.handleTypeDelete}>
-                                        <Button size='small' icon={<DeleteOutlined/>}>删除</Button>
-                                    </Popconfirm>
-                                </span>
+                                <PermActions size='small' actions={[
+                                    {label: '编辑', perm: 'sys-dict:update', icon: <EditOutlined/>, onClick: this.handleTypeEdit},
+                                    {
+                                        label: '删除',
+                                        perm: 'sys-dict:delete',
+                                        icon: <DeleteOutlined/>,
+                                        confirm: '是否确定删除此类型及其所有子类型和字典项？',
+                                        onClick: this.handleTypeDelete,
+                                    },
+                                ]}/>
                             )}
                         </div>
                         {hasTypeSelected && <Descriptions size='small' column={3}>
@@ -207,7 +223,7 @@ export default class extends React.Component {
                                 actionRef={this.tableRef}
                                 request={(params) => {
                                     params.typeCode = selectedTypeCode
-                                    return HttpUtils.get('admin/dict/page', params)
+                                    return HttpClient.get('admin/dict/page', params)
                                 }}
                                 columns={this.columns}
                             />
@@ -249,7 +265,15 @@ export default class extends React.Component {
                     <Input/>
                 </Form.Item>
                 <Form.Item label='颜色' name='color'>
-                    <FieldDictSelect typeCode='statusColor'/>
+                    <AutoComplete
+                        allowClear
+                        maxLength={20}
+                        options={COLOR_OPTIONS}
+                        filterOption={(input, option) => // NOSONAR: AntD AutoComplete 过滤回调惯例
+                            (option.value + option.label).toLowerCase().includes(input.toLowerCase())
+                        }
+                        placeholder='如 SUCCESS、#ff0000'
+                    />
                 </Form.Item>
                 <Form.Item label='序号' name='seq'>
                     <InputNumber/>

@@ -30,7 +30,14 @@ public class QuartzManager {
     }
 
     public void deleteJob(SysJob job) throws SchedulerException {
-        JobKey jobKey = JobKey.jobKey(job.getName());
+        deleteJobByName(job.getName());
+    }
+
+    public void deleteJobByName(String name) throws SchedulerException {
+        if (name == null) {
+            return;
+        }
+        JobKey jobKey = JobKey.jobKey(name);
         if (scheduler.checkExists(jobKey)) {
             scheduler.deleteJob(jobKey);
 
@@ -52,7 +59,7 @@ public class QuartzManager {
     }
 
     public void triggerJob(SysJob job) throws SchedulerException, ClassNotFoundException {
-        if (job.getEnabled()) {
+        if (Boolean.TRUE.equals(job.getEnabled())) {
             JobKey jobKey = JobKey.jobKey(job.getName());
             scheduler.triggerJob(jobKey);
         } else {

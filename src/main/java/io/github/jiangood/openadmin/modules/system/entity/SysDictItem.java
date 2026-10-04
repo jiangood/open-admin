@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.entity;
 
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
-import io.github.jiangood.openadmin.framework.enums.StatusColor;
 import io.github.jiangood.openadmin.util.annotation.Remark;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -15,7 +14,7 @@ import lombok.experimental.FieldNameConstants;
 @Entity
 @FieldNameConstants
 @Table(name = "sys_dict_item", uniqueConstraints = @UniqueConstraint(name = "uk_sys_dict_item", columnNames = {"typeCode", "code"}))
-public class SysDictItem extends BaseEntity {
+public class SysDictItem extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
 
 
     @Column(length = 20)
@@ -38,8 +37,7 @@ public class SysDictItem extends BaseEntity {
 
     @Remark("颜色")
     @Column(columnDefinition = "VARCHAR(20)")
-    @Enumerated(EnumType.STRING)
-    private StatusColor color;
+    private String color;
 
 
 

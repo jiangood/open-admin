@@ -14,6 +14,9 @@ import java.util.function.Function;
  */
 @Slf4j
 public class BeanTool {
+    private BeanTool() {
+    }
+
 
     /**
      * 通过无参构造器创建类的实例
@@ -139,33 +142,18 @@ public class BeanTool {
         try {
             Method[] declaredFields = ReflectionUtils.getAllDeclaredMethods(cls);
             for (Method method : declaredFields) {
-                // getter 判断
-                if (Modifier.isStatic(method.getModifiers())) {
-                    continue;
-                }
-                if (!Modifier.isPublic(method.getModifiers())) {
-                    continue;
-                }
-                if (method.getParameterCount() > 0) {
-                    continue;
-                }
-
                 String name = method.getName();
-                if (!name.startsWith("get")) {
-                    continue;
+                String k = name.startsWith("get") ? StringTool.removePreAndLowerFirst(name, "get") : null;
+                boolean isGetter = !Modifier.isStatic(method.getModifiers())
+                        && Modifier.isPublic(method.getModifiers())
+                        && method.getParameterCount() == 0
+                        && k != null
+                        && !"class".equals(k)
+                        && !ignoreList.contains(k);
+                if (isGetter) {
+                    Object v = method.invoke(bean);
+                    map.put(k, v);
                 }
-
-                String k = StringTool.removePreAndLowerFirst(name, "get");
-                if ("class".equals(k)) {
-                    continue;
-                }
-
-                if (ignoreList.contains(k)) {
-                    continue;
-                }
-
-                Object v = method.invoke(bean);
-                map.put(k, v);
             }
 
         } catch (Exception e) {

@@ -1,67 +1,77 @@
 import React from 'react';
-import {Modal} from 'antd';
+import {Image} from 'antd';
 import {UrlUtils} from '../../utils';
 
-
+/**
+ * 图片展示组件
+ *
+ * 支持的属性：
+ * - value: 图片地址，支持多个（逗号分隔或数组）。objectName（public/、private/ 开头）自动拼 /file/ 前缀
+ * - size: 缩略图尺寸（正方形边长），默认 60
+ * - borderRadius: 圆角，默认 4
+ * - preview: 是否可点击放大预览，默认 true
+ * - previewTitle: 预览弹窗标题，默认「预览图片」
+ * - placeholder: value 为空时展示的内容，默认不渲染
+ * - style: 附加到 img 的样式
+ */
 export class ViewImage extends React.Component {
 
-  state = {
-    modalOpen: false,
-    previewUrl: null,
+  static readonly previewGroupProps = {
+    preview: {
+      scaleStep: 0.3,
+    },
+  };
+
+  resolveUrl = (v) => {
+    const isAbsUrl = v.startsWith('http');
+    const isDataUrl = v.startsWith('data:');
+    const isObjectName = v.startsWith('public/') || v.startsWith('private/');
+    if (isAbsUrl || isDataUrl) {
+      return {url: v, thumb: v};
+    }
+    if (isObjectName) {
+      return {
+        url: UrlUtils.contextPath('/file/' + v),
+        thumb: UrlUtils.contextPath('/file/' + v + '?thumb=1'),
+      };
+    }
+    return {url: UrlUtils.contextPath(v), thumb: UrlUtils.contextPath(v)};
   };
 
   render() {
-    let vs = this.props.value
+    const {value, size = 60, borderRadius = 4, preview = true, previewTitle = '预览图片',
+           placeholder, style} = this.props;
 
-    if (!vs) {
-      return;
+    if (!value) {
+      return placeholder || null;
     }
 
+    let vs = value;
     if (typeof vs === 'string') {
       vs = vs.split(',');
     }
 
-    const urlList = [];
-    for (let v of vs) {
-      const isId = v.indexOf('/') === -1;
-      const isAbsUrl = v.startsWith('http');
-      const isDataUrl = v.startsWith('data:');
-      if (isAbsUrl || isDataUrl) {
-        urlList.push(v);
-        continue;
-      }
-
-      if (isId) {
-        urlList.push(UrlUtils.contextPath('/admin/sysFile/preview/' + v));
-        continue;
-      }
-
-      urlList.push(UrlUtils.contextPath(v));
+    const items = vs.map(this.resolveUrl);
+    const previewConfig = {
+      scaleStep: 0.3,
+    };
+    if (previewTitle) {
+      previewConfig.title = previewTitle;
     }
 
-    const closeModal = () => this.setState({modalOpen: false});
-
-    const imgs = urlList.map((url) => (
-      <img
-        style={{ display: 'inline-block' }}
-        key={url}
-        src={url}
-        onClick={() => this.setState({modalOpen: true, previewUrl: url})}
-        width={60}
-        height={60}
-      />
-    ));
-
     return (
-      <>
-        {imgs}
-        <Modal open={this.state.modalOpen} title="预览图片" width="70vw" footer={null}
-               onCancel={closeModal}>
-          <div style={{maxHeight:'70vh',overflow:'auto'}}>
-            <img src={this.state.previewUrl} style={{maxWidth: '100%'}}/>
-          </div>
-        </Modal>
-      </>
+      <Image.PreviewGroup preview={previewConfig}>
+        {items.map((item) => (
+          <Image
+            key={item.url}
+            src={item.thumb}
+            width={size}
+            height={size}
+            style={{display: 'inline-block', objectFit: 'cover', borderRadius, cursor: preview ? 'pointer' : undefined, ...style}}
+            preview={preview ? {src: item.url} : false}
+          />
+        ))}
+      </Image.PreviewGroup>
     );
   }
 }

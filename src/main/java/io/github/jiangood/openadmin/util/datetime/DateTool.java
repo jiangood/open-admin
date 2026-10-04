@@ -1,23 +1,28 @@
 package io.github.jiangood.openadmin.util.datetime;
 
-import cn.hutool.core.date.DateTime;
-import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.range.Range;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.util.Assert;
 
-import java.text.ParseException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Period;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
  * 日期工具类，提供日期处理相关的工具方法
  */
 public class DateTool {
+
+    // 标准日期范围格式的长度， 如：2021-01-01/2021-01-02
+    public static final int ISO_DATE_LEN = 21;
+
+    private DateTool() {
+    }
+
 
     /**
      * 判断字符串是否为ISO格式的日期范围
@@ -26,16 +31,19 @@ public class DateTool {
      * @return 如果是ISO格式的日期范围返回true，否则返回false
      */
     public static boolean isIsoDateRange(String s) {
-        return s.length() == 21 && !s.contains("/") && StrUtil.count(s, "-") == 4;
+        if (s == null) {
+            return false;
+        }
+        return s.length() == ISO_DATE_LEN && !s.contains("/") && CharSequenceUtil.count(s, "-") == 4;
     }
 
 
     /**
      * 判断日期是否在指定的时间范围内
      *
-     * @param date 待检查的日期
+     * @param date  待检查的日期
      * @param begin 开始时间
-     * @param end 结束时间
+     * @param end   结束时间
      * @return 如果日期在范围内返回true，否则返回false
      */
     public static boolean isBetween(String date, String begin, String end) {
@@ -57,11 +65,11 @@ public class DateTool {
      * @param month 月份对应的日期
      * @return 该月份所有日期的列表
      */
-    public static List<String> allDaysOfMonth(Date month) {
-        String str = DateUtil.format(month, "yyyy-MM-");
+    public static List<String> allDaysOfMonth(LocalDate month) {
+        String str = month.format(DateTimeFormatter.ofPattern("yyyy-MM-"));
 
         int d1 = 1;
-        int d2 = DateUtil.getLastDayOfMonth(month);
+        int d2 = month.lengthOfMonth();
 
         ArrayList<String> list = new ArrayList<>(31);
         for (int i = d1; i <= d2; i++) {
@@ -105,13 +113,13 @@ public class DateTool {
 
         // 年
         if (begin.length() == 4) {
-            return Integer.parseInt(end) - Integer.parseInt(begin) + 1;
+            return (long) Integer.parseInt(end) - Integer.parseInt(begin) + 1;
         }
         // 年月日
         if (begin.length() == 10) {
-            Date a = DateUtil.parseDate(begin);
-            Date b = DateUtil.parseDate(end);
-            return DateUtil.betweenDay(a, b, true) + 1;
+            LocalDate a = LocalDate.parse(begin);
+            LocalDate b = LocalDate.parse(end);
+            return ChronoUnit.DAYS.between(a, b) + 1;
         }
 
 
@@ -130,10 +138,9 @@ public class DateTool {
                 return year * 4L + quarter + 1;
             } else {
                 // 年月
-                DateTime a = DateUtil.parse(begin, "yyyy-MM");
-                DateTime b = DateUtil.parse(end, "yyyy-MM");
-
-                return DateUtil.betweenMonth(a, b, true) + 1;
+                YearMonth a = YearMonth.parse(begin);
+                YearMonth b = YearMonth.parse(end);
+                return ChronoUnit.MONTHS.between(a, b) + 1;
             }
         }
 
@@ -149,18 +156,18 @@ public class DateTool {
      */
     public static int days(LocalDateTime a, LocalDateTime b) {
 
-        return Period.between(a.toLocalDate(), b.toLocalDate()).getDays();
+        return (int) ChronoUnit.DAYS.between(a.toLocalDate(), b.toLocalDate());
     }
 
     /**
-     * 计算两个Date之间的天数差
+     * 计算两个LocalDate之间的天数差
      *
      * @param a 第一个日期
      * @param b 第二个日期
      * @return 天数差
      */
-    public static int days(Date a, Date b) {
-        return (int) DateUtil.betweenDay(a, b, true);
+    public static long days(LocalDate a, LocalDate b) {
+        return ChronoUnit.DAYS.between(a, b);
     }
 
     /**
@@ -181,8 +188,8 @@ public class DateTool {
      * @param date 日期
      * @return 年份
      */
-    public static int getYear(Date date) {
-        return DateTime.of(date).year();
+    public static int getYear(LocalDate date) {
+        return date.getYear();
     }
 
     /**
@@ -192,8 +199,8 @@ public class DateTool {
      * @return 月份，从1开始
      */
     // 月份从1开始
-    public static int getMonth(Date date) {
-        return DateTime.of(date).month() + 1;
+    public static int getMonth(LocalDate date) {
+        return date.getMonthValue();
     }
 
 
@@ -202,19 +209,18 @@ public class DateTool {
      *
      * @param yyyyMM 年月字符串，格式为yyyy-MM
      * @return 上个月的年月字符串，格式为yyyy-MM；如果不是同一年，返回null
-     * @throws ParseException 如果解析日期失败
      */
     // 获得上个月， 如果不是同一年，则返回空
-    public static String getLastMonthOfTheSameYear(String yyyyMM) throws ParseException {
-        Date date = org.apache.commons.lang3.time.DateUtils.parseDate(yyyyMM, "yyyy-MM");
-        Date lastMonth = org.apache.commons.lang3.time.DateUtils.addMonths(date, -1);
+    public static String getLastMonthOfTheSameYear(String yyyyMM) {
+        YearMonth month = YearMonth.parse(yyyyMM);
+        YearMonth lastMonth = month.minusMonths(1);
 
-        // 判断是否同一个月
-        if (DateTool.getYear(date) != DateTool.getYear(lastMonth)) {
+        // 判断是否同一年
+        if (month.getYear() != lastMonth.getYear()) {
             return null;
         }
 
-        return DateFormatUtils.format(lastMonth, "yyyy-MM");
+        return lastMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
     }
 
 

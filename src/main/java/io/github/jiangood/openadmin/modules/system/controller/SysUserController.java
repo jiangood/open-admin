@@ -1,8 +1,9 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
@@ -16,6 +17,7 @@ import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserPermReq;
+import io.github.jiangood.openadmin.modules.system.dto.request.UserReq;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysOrg;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
@@ -51,9 +53,9 @@ public class SysUserController {
 
 
     @HasPermission("sys-user:read")
-    @RequestMapping("page")
+    @GetMapping("page")
     public AjaxResult page(String orgId, String roleId, String name, String account, String phone, Boolean enabled,
-                           @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) throws Exception {
+                           @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<UserVO> page = sysUserService.getAll(orgId, roleId, name, account, phone, enabled, pageable);
 
@@ -64,19 +66,21 @@ public class SysUserController {
     @Log("用户-创建")
     @HasPermission("sys-user:create")
     @PostMapping("create")
-    public AjaxResult create(@RequestBody SysUser input) throws Exception {
+    public AjaxResult create(@RequestBody UserReq input) throws Exception {
+        SysUser entity = BeanUtil.copyProperties(input, SysUser.class);
         String plain = PasswordTool.random();
-        input.setPassword(plain);
-        sysUserService.create(input);
+        entity.setPassword(plain);
+        sysUserService.create(entity);
         return AjaxResult.ok("添加新用户成功").data("password", plain);
     }
 
     @Log("用户-更新")
     @HasPermission("sys-user:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody SysUser input, RequestBodyKeys updateFields) throws Exception {
-        sysUserService.update(input, updateFields);
-        sysUserService.markPermsStale(input.getId(), input.getAccount());
+    public AjaxResult update(@RequestBody UserReq input, RequestBodyKeys updateFields) throws Exception {
+        SysUser entity = BeanUtil.copyProperties(input, SysUser.class);
+        sysUserService.update(entity, updateFields);
+        sysUserService.markPermsStale(entity.getId(), entity.getAccount());
         return AjaxResult.ok("更新成功");
     }
 
@@ -85,6 +89,7 @@ public class SysUserController {
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         SysUser user = sysUserService.findById(idRequest.getId()).orElse(null);
+        Assert.notNull(user, "用户不存在");
         sysUserService.deleteById(idRequest.getId());
         sysUserService.markPermsStale(user.getId(), user.getAccount());
 
@@ -99,8 +104,11 @@ public class SysUserController {
      */
     @GetMapping("pwd-strength")
     public AjaxResult pwdStrength(String password) {
-        if (StrUtil.isEmpty(password)) {
+        if (CharSequenceUtil.isEmpty(password)) {
             return AjaxResult.err().msg("请输入密码");
+        }
+        if (!PasswordTool.isAscii(password)) {
+            return AjaxResult.err().msg("密码仅支持英文、数字与常见符号，长度不超过64位");
         }
 
         PasswdStrength.PASSWD_LEVEL level = PasswdStrength.getLevel(password);
@@ -116,14 +124,14 @@ public class SysUserController {
     @Log("用户-重置密码")
     @HasPermission("sys-user:reset-password")
     @PostMapping("reset-pwd")
-    public AjaxResult resetPwd(@RequestBody SysUser user) {
-        Assert.hasText(user.getPassword(), "请输入新密码");
-        sysUserService.resetPwd(user.getId(), user.getPassword());
+    public AjaxResult resetPwd(@RequestBody UserReq input) {
+        Assert.hasText(input.getPassword(), "请输入新密码");
+        sysUserService.resetPwd(input.getId(), input.getPassword());
         return AjaxResult.ok().msg("重置成功");
     }
 
 
-    @RequestMapping("options")
+    @GetMapping("options")
     public AjaxResult options(DropdownReq dropdownRequest) {
         String searchText = dropdownRequest.getSearchText();
         Spec<SysUser> query = Spec.of();
@@ -166,6 +174,7 @@ public class SysUserController {
     /**
      * 拥有数据
      */
+    @HasPermission("sys-user:grant-permission")
     @GetMapping("get-perm-info")
     public AjaxResult getPermInfo(String id) {
         GrantUserPermReq permInfo = sysUserService.getPermInfo(id);
@@ -203,7 +212,7 @@ public class SysUserController {
         List<SysUser> userList = sysUserService.findByUnit(orgPermissions);
 
         List<TreeOption> orgOptions = orgList.stream().map(o -> new TreeOption(o.getName(), o.getId(), o.getPid())).toList();
-        List<TreeOption> userOptions = userList.stream().map(u -> new TreeOption(u.getName(), u.getId(), StrUtil.emptyToDefault(u.getOrgId(), u.getUnitId()))).toList();
+        List<TreeOption> userOptions = userList.stream().map(u -> new TreeOption(u.getName(), u.getId(), CharSequenceUtil.emptyToDefault(u.getOrgId(), u.getUnitId()))).toList();
         List<TreeOption> allOptions = ListUtils.union(orgOptions, userOptions);
 
         List<TreeOption> tree = TreeTool.buildTree(allOptions);

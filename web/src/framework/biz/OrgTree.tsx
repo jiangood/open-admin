@@ -1,6 +1,6 @@
-import {Alert, Skeleton, Tree} from 'antd';
+import {Alert, Skeleton, Tree, type TreeDataNode} from 'antd';
 import React from 'react';
-import {HttpUtils} from "../utils";
+import {HttpClient} from "../utils";
 import {NamedIcon} from "../components/NamedIcon";
 
 interface OrgTreeProps {
@@ -9,7 +9,7 @@ interface OrgTreeProps {
 
 interface OrgTreeState {
     treeDataLoading: boolean;
-    treeData: any[];
+    treeData: TreeDataNode[];
     currentOrgId: string | null;
 }
 
@@ -22,8 +22,8 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
     }
 
     componentDidMount() {
-        HttpUtils.get('admin/sysOrg/tree').then(tree => {
-            this.setState({treeData: tree, treeDataLoading: false})
+        HttpClient.get('admin/sysOrg/tree', null).then(tree => {
+            this.setState({treeData: tree.data, treeDataLoading: false})
         })
     }
 
@@ -48,7 +48,11 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
             onSelect={this.onSelectOrg}
             showIcon
             blockNode
-            icon={item => item.iconName ? <NamedIcon name={item.iconName}/> : null}
+            icon={renderOrgIcon}
         />
     }
+}
+
+function renderOrgIcon(item) {
+    return item.iconName ? <NamedIcon name={item.iconName}/> : null;
 }

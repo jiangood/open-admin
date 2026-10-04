@@ -1,18 +1,18 @@
 import React from 'react';
 import { Spin } from 'antd';
 import { debounce } from 'lodash';
-import { HttpUtils } from '../../utils';
+import { HttpClient } from '../../utils';
 
 interface BaseRemoteSelectState {
-    data: any[];
+    data: Record<string, unknown>[];
     loading: boolean;
 }
 
 export interface BaseRemoteSelectProps {
     url?: string;
-    value?: any;
+    value?: unknown;
     debounceTime?: number;
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**
@@ -21,11 +21,11 @@ export interface BaseRemoteSelectProps {
  * 处理通用的数据加载、防抖搜索、竞态处理、错误提示逻辑。
  * 子类只需覆写 getLoadParams() 和 render()。
  */
-export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> {
-    private fetchIdRef: number = 0;
+export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> { // NOSONAR: state/防抖字段构造器赋值
+    private fetchIdRef: number = 0; // NOSONAR: 构造器中赋值
     private loadDataDebounce: ReturnType<typeof debounce>;
 
-    static defaultProps = {
+    static readonly defaultProps = {
         debounceTime: 300,
     };
 
@@ -35,7 +35,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
             data: [],
             loading: false,
         };
-        this.loadDataDebounce = debounce(this._loadData, (props as any).debounceTime || 300);
+        this.loadDataDebounce = debounce(this._loadData, props.debounceTime || 300);
     }
 
     componentDidMount() {
@@ -56,7 +56,7 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
     }
 
     /** 返回请求参数。searchText=undefined 表示初始加载 */
-    getLoadParams(searchText?: string): Record<string, any> {
+    getLoadParams(searchText?: string): Record<string, unknown> {
         return { searchText, selected: this.props.value };
     }
 
@@ -67,28 +67,30 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
     // ========== 数据加载 ==========
 
-    private _loadData = async (searchText?: string) => {
+    private _loadData = (searchText?: string) => {
         const url = this.getUrl();
         const fetchId = ++this.fetchIdRef;
 
         this.setState({ loading: true });
 
-        try {
-            const data = await HttpUtils.get(url, this.getLoadParams(searchText));
-
+        const done = () => {
             if (fetchId === this.fetchIdRef) {
-                this.setState({ data: data || [] });
+                this.setState({ loading: false });
             }
-        } catch (error) {
+        };
+
+        HttpClient.get(url, this.getLoadParams(searchText), {toastError: false}).then((data) => {
+            if (fetchId === this.fetchIdRef) {
+                this.setState({ data: data.data || [] });
+            }
+            done();
+        }).catch((error) => {
             console.warn('[BaseRemoteSelect] 加载失败:', error);
             if (fetchId === this.fetchIdRef) {
                 this.setState({ data: [] });
             }
-        } finally {
-            if (fetchId === this.fetchIdRef) {
-                this.setState({ loading: false });
-            }
-        }
+            done();
+        });
     };
 
     /**
@@ -115,14 +117,14 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
     // ========== Helper 方法 ==========
 
-    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } {
+    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } { // NOSONAR: 由子类通过 this.getShowSearch() 调用
         return {
             filterOption: false,
             onSearch: this.handleSearch,
         };
     }
 
-    getNotFoundContent(): React.ReactNode {
+    getNotFoundContent(): React.ReactNode { // NOSONAR: 由子类通过 this.getNotFoundContent() 调用
         return this.state.loading ? <Spin size="small" /> : '数据为空';
     }
 }

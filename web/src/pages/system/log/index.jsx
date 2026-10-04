@@ -1,8 +1,8 @@
 import React from 'react';
 import {Form, Input, Tag} from "antd";
-import {ViewText, FieldDateRange, HttpUtils, Page, ProTable} from "../../../framework";
+import {ViewText, FieldDateRange, HttpClient, Page, ProTable} from "../../../framework";
 
-export default class extends React.Component {
+export default class LogPage extends React.Component {
 
 
     columns = [
@@ -39,9 +39,7 @@ export default class extends React.Component {
             title: '结果',
             dataIndex: 'success',
             render(v) {
-                return <>
-                    <Tag color={v ? 'green' : 'red'}>{v ? '成功' : '失败'}</Tag>
-                </>
+                return <Tag color={v ? 'green' : 'red'}>{v ? '成功' : '失败'}</Tag>
             }
         },
         {
@@ -57,9 +55,9 @@ export default class extends React.Component {
     render() {
         return <Page title="操作日志" description="查看系统操作日志">
             <ProTable
-                request={(params) => HttpUtils.get('admin/sysLog/page', params)}
+                request={(params) => HttpClient.get('admin/sysLog/page', params)}
                 columns={this.columns}
-                searchFormRender={() => (
+                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
                         <Form.Item label='操作' name='operation'>
                             <Input/>

@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.util.ArrayUtil;
 import io.github.jiangood.openadmin.OpenAdminConfiguration;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -15,10 +15,14 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Component
 public class SpringTool implements ApplicationContextAware {
+
+    private static final String MSG_CONTEXT_NOT_INIT = "Spring应用上下文未初始化";
+
     public SpringTool() {
-        System.out.println("SpringTool init");
+        // 仅声明为 Spring 组件，无需初始化逻辑
     }
 
 
@@ -26,7 +30,7 @@ public class SpringTool implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringTool.applicationContext = applicationContext;
+        SpringTool.applicationContext = applicationContext; // NOSONAR: ApplicationContextAware 回调写入静态上下文，持有 Spring 上下文的惯例写法
     }
 
     public static String[] getBasePackageNames() {
@@ -39,11 +43,14 @@ public class SpringTool implements ApplicationContextAware {
      * @return
      */
     public static Set<Class<?>> getBasePackageClasses() {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         Set<Class<?>> list = new HashSet<>();
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
             Class<?> beanType = applicationContext.getType(beanName);
+            if (beanType == null) {
+                continue;
+            }
             SpringBootApplication springBootAnnotation = beanType.getAnnotation(SpringBootApplication.class);
             if (springBootAnnotation != null) {
                 list.add(beanType);
@@ -70,7 +77,7 @@ public class SpringTool implements ApplicationContextAware {
      */
     @SuppressWarnings("unchecked")
     public static <T> T getBean(String name) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return (T) applicationContext.getBean(name);
     }
 
@@ -103,7 +110,7 @@ public class SpringTool implements ApplicationContextAware {
      * @throws RuntimeException 如果Bean不存在，将抛出异常
      */
     public static <T> T getBean(String name, Class<T> clazz) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getBean(name, clazz);
     }
 
@@ -117,21 +124,19 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static <T> Map<String, T> getBeansOfType(Class<T> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getBeansOfType(type);
     }
 
     public static <T> Collection<String> getBeanNames(Class<T> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         Map<String, T> beansOfType = applicationContext.getBeansOfType(type);
-        Set<String> beanNames = beansOfType.keySet();
-        return beanNames;
-
+        return beansOfType.keySet();
     }
 
 
     public static <T> List<T> getBeans(Class<T> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         Collection<T> values = applicationContext.getBeansOfType(type).values();
         return new ArrayList<>(values);
     }
@@ -144,7 +149,7 @@ public class SpringTool implements ApplicationContextAware {
      * @since 5.3.3
      */
     public static String[] getBeanNamesForType(Class<?> type) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getBeanNamesForType(type);
     }
 
@@ -157,7 +162,7 @@ public class SpringTool implements ApplicationContextAware {
      */
     public static String getProperty(String key) {
         if(key == null) throw new NullPointerException("key is null");
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return applicationContext.getEnvironment().getProperty(key);
     }
 
@@ -179,13 +184,13 @@ public class SpringTool implements ApplicationContextAware {
      */
     public static String[] getActiveProfiles() {
         if (null == applicationContext) {
-            return null;
+            return new String[0];
         }
         return applicationContext.getEnvironment().getActiveProfiles();
     }
 
     public static boolean hasProfile(String name) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         return ArrayUtil.contains(applicationContext.getEnvironment().getActiveProfiles(), name);
     }
 
@@ -198,13 +203,12 @@ public class SpringTool implements ApplicationContextAware {
 
 
     public static void publishEventAsync(ApplicationEvent event) {
-        Assert.state(applicationContext != null, 500, "Spring应用上下文未初始化");
+        Assert.state(applicationContext != null, 500, MSG_CONTEXT_NOT_INIT);
         ThreadTool.execute(() -> {
             try {
                 applicationContext.publishEvent(event);
             } catch (Exception e) {
-                // 记录异常日志，防止异常被忽略
-                e.printStackTrace(); // 在实际项目中应使用日志框架记录
+                log.error("异步发布事件失败: {}", e.getMessage(), e);
             }
         });
     }

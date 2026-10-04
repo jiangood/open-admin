@@ -17,6 +17,7 @@ class RemarkToolTest {
 
         @Remark("Test Method")
         public void testMethod() {
+            // 空方法：仅用于反射读取 @Remark 注解
         }
     }
 

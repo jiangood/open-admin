@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.source.ConfigurationPropertyS
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
  * 后加载覆盖先加载）。最后按 seq 排序返回扁平列表。
  */
 @Slf4j
-@Component
+@Repository
 public class SysMenuRepositoryImpl implements SysMenuRepository {
 
     private final List<MenuDefinition> menus;
@@ -52,16 +52,18 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
                         .bind("menus", Bindable.mapOf(String.class, MenuDefinition.class))
                         .orElse(Map.of());
 
-                map.forEach((key, def) -> {
-                    if (def == null) return;
-                    def.setId(key);
-                    merged.merge(key, def, (oldVal, newVal) -> {
+                map = Objects.requireNonNull(map, "菜单配置 map 不应为 null");   // Sonar 误报防护：orElse(Map.of()) 永不为 null
+                for (Map.Entry<String, MenuDefinition> entry : map.entrySet()) {
+                    MenuDefinition def = entry.getValue();
+                    if (def == null) continue;
+                    def.setId(entry.getKey());
+                    merged.merge(entry.getKey(), def, (oldVal, newVal) -> {
                         // 用 newVal 的非 null 字段覆盖 oldVal
                         BeanUtil.copyProperties(newVal, oldVal,
                                 CopyOptions.create().ignoreNullValue());
                         return oldVal;
                     });
-                });
+                }
             }
 
             return merged.values().stream()
@@ -79,6 +81,9 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
 
     @Override
     public List<MenuDefinition> findAllById(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return List.of();
+        }
         Set<String> idSet = new HashSet<>(ids);
         return menus.stream().filter(m -> idSet.contains(m.getId())).toList();
     }

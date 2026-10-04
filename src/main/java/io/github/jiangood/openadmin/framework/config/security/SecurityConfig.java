@@ -50,7 +50,7 @@ public class SecurityConfig {
     @Bean
     @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http, PermissionRefreshFilter permissionRefreshFilter) throws Exception {
-        http.securityMatcher("/admin/**", "/ureport/**")
+        http.securityMatcher("/admin/**", "/file/**", "/ureport/**")
                 .headers(cfg -> cfg
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表
                         .contentSecurityPolicy(csp -> csp.policyDirectives(
@@ -62,11 +62,13 @@ public class SecurityConfig {
                                 "connect-src 'self' ws:"
                         ))
                 )   // X-Content-Type-Options/Cache-Control 由 Spring Security 自动添加
-                .csrf(AbstractHttpConfigurer::disable) // SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
+                .csrf(AbstractHttpConfigurer::disable) // NOSONAR: SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
                     authz.requestMatchers("/admin/public/**", "/admin/auth/**").permitAll()
+                            .requestMatchers("/file/public/**").permitAll()
+                            .requestMatchers("/file/**").authenticated()
                             .requestMatchers("/admin/**", "/ureport/**").authenticated();
                     if (CollUtil.isNotEmpty(systemProperties.getLoginExcludePathPatterns())) {
                         authz.requestMatchers(ArrayTool.toStrArr(systemProperties.getLoginExcludePathPatterns())).permitAll();
@@ -77,7 +79,7 @@ public class SecurityConfig {
                     log.info("设置最大并发会话数为 {}", maximumSessions);
 
                     cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-                    cfg.sessionConcurrency(configurer -> {
+                    cfg.sessionConcurrency(configurer -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
                         configurer.maximumSessions(maximumSessions)
                                 .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
                         ;
@@ -90,13 +92,12 @@ public class SecurityConfig {
         http.addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
 
 
-        http.exceptionHandling(cfg -> {
-            cfg.accessDeniedHandler((request, response, e) -> {
-                ResponseTool.response(response, AjaxResult.FORBIDDEN);
-            }).authenticationEntryPoint((request, response, e) -> {
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                ResponseTool.response(response, AjaxResult.UNAUTHORIZED);
-            });
+        http.exceptionHandling(cfg -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
+            cfg.accessDeniedHandler((request, response, e) -> ResponseTool.response(response, AjaxResult.FORBIDDEN))
+                    .authenticationEntryPoint((request, response, e) -> {
+                        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                        ResponseTool.response(response, AjaxResult.UNAUTHORIZED);
+                    });
         });
 
 
@@ -116,7 +117,7 @@ public class SecurityConfig {
      */
     @Bean
     @Order(3)
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception { // NOSONAR: Spring Security HttpSecurity.build() 强制声明 throws Exception
         http.authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
         );

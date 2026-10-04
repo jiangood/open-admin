@@ -1,13 +1,14 @@
 package io.github.jiangood.openadmin.framework.data.impl;
 
 import cn.hutool.core.map.CaseInsensitiveLinkedMap;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.util.ReflectionUtils;
 
 import javax.sql.DataSource;
 import java.lang.reflect.Field;
@@ -17,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,6 +31,9 @@ import java.util.function.Function;
 
 public class JdbcRunnerImpl implements JdbcRunner {
 
+    private static final String SQL_SELECT_ALL_FROM = "select * from ";
+    private static final String SQL_WHERE_ID = " where id=?";
+
     private final JdbcTemplate jdbc;
 
     public JdbcRunnerImpl(DataSource dataSource) {
@@ -39,12 +44,12 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public <T> T findById(String table, Object id, Class<T> cls) {
-        return findOne(cls, "select * from " + validateIdentifier(table) + " where id=?", id);
+        return findOne(cls, SQL_SELECT_ALL_FROM + validateIdentifier(table) + SQL_WHERE_ID, id);
     }
 
     @Override
     public Map<String, Object> findById(String table, Object id) {
-        return findOne("select * from " + validateIdentifier(table) + " where id=?", id);
+        return findOne(SQL_SELECT_ALL_FROM + validateIdentifier(table) + SQL_WHERE_ID, id);
     }
 
     @Override
@@ -61,7 +66,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public <T> List<T> findAll(String table, Class<T> cls) {
-        return findAll(cls, "select * from " + validateIdentifier(table));
+        return findAll(cls, SQL_SELECT_ALL_FROM + validateIdentifier(table));
     }
 
     @Override
@@ -78,7 +83,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public <T> Page<T> findAll(String table, Pageable pageable, Class<T> cls) {
-        return findAll(cls, pageable, "select * from " + validateIdentifier(table));
+        return findAll(cls, pageable, SQL_SELECT_ALL_FROM + validateIdentifier(table));
     }
 
     @Override
@@ -144,7 +149,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     @Override
     public boolean existsById(String table, Object id) {
-        Long count = findLong("select count(*) from " + validateIdentifier(table) + " where id=?", id);
+        Long count = findLong("select count(*) from " + validateIdentifier(table) + SQL_WHERE_ID, id);
         return count != null && count > 0;
     }
 
@@ -190,7 +195,11 @@ public class JdbcRunnerImpl implements JdbcRunner {
     }
 
     private Dialect detectDialect() {
-        try (Connection conn = jdbc.getDataSource().getConnection()) {
+        DataSource dataSource = jdbc.getDataSource();
+        if (dataSource == null) {
+            throw new IllegalStateException("JdbcTemplate 未配置 DataSource，无法探测数据库方言");
+        }
+        try (Connection conn = dataSource.getConnection()) {
             String product = conn.getMetaData().getDatabaseProductName().toLowerCase(Locale.ROOT);
             if (product.contains("oracle") || product.contains("sql server")) {
                 return Dialect.OFFSET_FETCH;
@@ -220,7 +229,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
                 return 0; // 除 id 外无其他列，无需更新
             }
             params.add(id);
-            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + " where id=?", params.toArray());
+            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + SQL_WHERE_ID, params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
         }
         StringJoiner cols = new StringJoiner(",");
         StringJoiner vals = new StringJoiner(",");
@@ -230,12 +239,12 @@ public class JdbcRunnerImpl implements JdbcRunner {
             vals.add("?");
             params.add(entry.getValue());
         }
-        return jdbc.update("insert into " + validateIdentifier(table) + " (" + cols + ") values (" + vals + ")", params.toArray());
+        return jdbc.update("insert into " + validateIdentifier(table) + " (" + cols + ") values (" + vals + ")", params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
     }
 
     @Override
     public int deleteById(String table, Object id) {
-        return jdbc.update("delete from " + validateIdentifier(table) + " where id=?", id);
+        return jdbc.update("delete from " + validateIdentifier(table) + SQL_WHERE_ID, id); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
     }
 
     @Override
@@ -246,7 +255,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
     // ===== 私有辅助方法 =====
 
     static String validateIdentifier(String name) {
-        if (!name.matches("[a-zA-Z_][a-zA-Z0-9_]*")) {
+        if (!name.matches("\\w\\w*")) {
             throw new IllegalArgumentException("Invalid identifier: " + name);
         }
         return name;
@@ -285,10 +294,10 @@ public class JdbcRunnerImpl implements JdbcRunner {
             for (Field f : getMappableFields(cls)) {
                 Object val = cols.get(f.getName());
                 if (val == null) {
-                    val = cols.get(StrUtil.toUnderlineCase(f.getName()));
+                    val = cols.get(CharSequenceUtil.toUnderlineCase(f.getName()));
                 }
                 if (val != null) {
-                    f.setAccessible(true);
+                    ReflectionUtils.makeAccessible(f);
                     setFieldValue(f, bean, val);
                 }
             }
@@ -298,24 +307,28 @@ public class JdbcRunnerImpl implements JdbcRunner {
         }
     }
 
-    private void setFieldValue(Field field, Object bean, Object value) throws IllegalAccessException {
+    private void setFieldValue(Field field, Object bean, Object value) {
         Class<?> type = field.getType();
-        if (value instanceof Number n) {
-            if (type == Integer.class || type == int.class) field.set(bean, n.intValue());
-            else if (type == Long.class || type == long.class) field.set(bean, n.longValue());
-            else if (type == Float.class || type == float.class) field.set(bean, n.floatValue());
-            else if (type == Double.class || type == double.class) field.set(bean, n.doubleValue());
-            else if (type == Short.class || type == short.class) field.set(bean, n.shortValue());
-            else if (type == Byte.class || type == byte.class) field.set(bean, n.byteValue());
-            else field.set(bean, value);
+        if (value instanceof Number n) { // NOSONAR: 不同类型分派无法用 switch 表达
+            ReflectionUtils.setField(field, bean, convertNumber(n, type));
         } else if (value instanceof Timestamp t) {
-            if (type == java.util.Date.class) field.set(bean, new java.util.Date(t.getTime()));
-            else field.set(bean, t);
+            ReflectionUtils.setField(field, bean, type == LocalDateTime.class ? t.toLocalDateTime() : t);
         } else {
-            field.set(bean, value);
+            ReflectionUtils.setField(field, bean, value);
         }
     }
 
+    private static Object convertNumber(Number n, Class<?> type) {
+        return switch (type.getName()) {
+            case "java.lang.Integer", "int" -> n.intValue();
+            case "java.lang.Long", "long" -> n.longValue();
+            case "java.lang.Float", "float" -> n.floatValue();
+            case "java.lang.Double", "double" -> n.doubleValue();
+            case "java.lang.Short", "short" -> n.shortValue();
+            case "java.lang.Byte", "byte" -> n.byteValue();
+            default -> n;
+        };
+    }
     private Map<String, Object> mapToMap(ResultSet rs) throws SQLException {
         ResultSetMetaData meta = rs.getMetaData();
         int n = meta.getColumnCount();

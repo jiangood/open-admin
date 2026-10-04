@@ -4,14 +4,18 @@ import cn.hutool.core.lang.Pair;
 import io.github.jiangood.openadmin.util.range.IntRange;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 /**
  * 数组工具类，提供数组处理相关的工具方法
  */
 public class ArrayTool {
+    private ArrayTool() {
+    }
+
 
     /**
      * 检查数组中是否包含指定类型的元素
@@ -109,11 +113,10 @@ public class ArrayTool {
      * @param <T> 泛型类型
      * @return 满足条件的元素的索引，如果没有找到返回-1
      */
-    public static <T> int findIndex(T[] arr, Function<T, Boolean> fn) {
+    public static <T> int findIndex(T[] arr, Predicate<T> fn) {
         for (int i = 0; i < arr.length; i++) {
             T t = arr[i];
-            Boolean result = fn.apply(t);
-            if (result) {
+            if (fn.test(t)) {
                 return i;
             }
         }
@@ -134,10 +137,6 @@ public class ArrayTool {
         if (arr == null || arr.length == 0) {
             return new ArrayList<>();
         }
-        List<T> list = new ArrayList<>();
-        for (T t : arr) {
-            list.add(t);
-        }
-        return list;
+        return Arrays.asList(arr);
     }
 }
