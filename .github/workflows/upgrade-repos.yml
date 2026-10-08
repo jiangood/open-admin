@@ -132,8 +132,6 @@ jobs:
       - name: opencode 执行升级（oa-upgrade skill）
         if: steps.check.outputs.skip != 'true'
         working-directory: repo
-        env:
-          OPENCODE_MODEL: ${{ inputs.model || 'opencode/deepseek-v4-flash-free' }}
         run: |
           opencode run --auto \
             "请使用项目内置的 oa-upgrade skill，将 open-admin 框架从当前版本升级到 v${{ steps.version.outputs.version }}。要求：
