@@ -140,7 +140,7 @@ jobs:
         env:
           OPENCODE_MODEL: ${{ inputs.model || 'opencode/deepseek-v4-flash-free' }}
         run: |
-          opencode run -m "$OPENCODE_MODEL" --auto \
+          opencode run --auto \
             "请使用项目内置的 oa-upgrade skill，将 open-admin 框架从当前版本升级到 v${{ steps.version.outputs.version }}。要求：
              1) 按 skill 流程直接执行，不要询问确认，直接升级 pom.xml 中 io.github.jiangood:open-admin 与 web/package.json 中 @jiangood/open-admin 的版本；
              2) 用 webfetch 读取 https://github.com/jiangood/open-admin/releases/tag/v${{ steps.version.outputs.version }} 的 Release Notes 与对应提交日志，处理 Breaking Changes 与代码迁移；
