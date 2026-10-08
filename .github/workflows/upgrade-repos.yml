@@ -9,11 +9,6 @@ on:
         description: '目标框架版本号（留空则自动取最新发布版本，如 3.0.10）'
         required: false
         type: string
-      model:
-        description: 'opencode 模型（默认免费模型，无需 API Key）'
-        required: false
-        type: string
-        default: 'opencode/deepseek-v4-flash-free'
       tag_prefix:
         description: '升级后打 tag 的前缀（默认 v，如 v3.0.10）'
         required: false
