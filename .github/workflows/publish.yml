@@ -60,6 +60,14 @@ jobs:
         env:
           MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE_KEY }}
 
+      # runner 镜像已升级到 Maven 3.10.0，会改变 central-publishing 的 bundle 布局，
+      # 导致 Central 校验报 "Bundle has content that does NOT have a .pom file"。
+      # 固定 3.9.16 规避（见 mavenplugins/central-publishing-maven-plugin#78）。
+      - name: Set up Maven 3.9.16
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.9.16
+
       - name: Maven Test (H2)
         run: mvn test -q
 
