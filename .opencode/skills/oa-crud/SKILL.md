@@ -497,6 +497,15 @@ menus:
     path: /customer
 ```
 
+如需在左侧菜单中用分隔线对菜单项分组，配置 `type: divider`（无需 `name`/`path`，用 `pid` + `seq` 控制分隔线位置）。分隔线仅对左侧菜单生效：
+
+```yaml
+  customer-sep:
+    pid: customer
+    type: divider
+    seq: 20500
+```
+
 ### 权限对应关系
 
 三层权限对应关系：

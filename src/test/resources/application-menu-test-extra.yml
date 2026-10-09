@@ -6,3 +6,7 @@ menus:
     path: /dev/tools/extra
     icon: StarOutlined
     seq: 90010
+  test-sep:
+    pid: test-dev
+    type: divider
+    seq: 90020

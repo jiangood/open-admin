@@ -281,6 +281,7 @@ public class SysUserService extends BaseService<SysUser> {
 
         // 菜单全量树 + 权限名称聚合 + 授权状态（权限不再挂子节点）
         List<MenuDefinition> menus = sysMenuRepository.findAll().stream()
+                .filter(menu -> !menu.isDivider())
                 .filter(menu -> menu.getDisabled() == null || !menu.getDisabled())
                 .toList();
         List<TreeOption> menuOptions = menus.stream().map(menu -> {

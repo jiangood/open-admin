@@ -94,6 +94,7 @@ web/
 - **权限控制**：后端 `@HasPermission("resource:action")` 注解 + AOP 切面，支持 SpEL；前端推荐 `<PermActions actions={[{label, perm, onClick}]} />` 数据驱动模式（旧式 `<Button perm="xxx:yyy" />` 子元素写法已不推荐）和 `<Perm code="xxx">` 组件
 - **权限码格式**：全小写两段式 `{资源}:{操作}`，资源 kebab-case（如 `sys-user:read`、`sys-role:grant-permission`）
 - **YAML 定义**：`application-menu*.yml` 中用 `perms` 对象列表定义
+- **菜单分隔线**：左侧菜单支持在 YAML 中配置分隔线（`type: divider`，无需 `name`/`path`，用 `pid` + `seq` 控制位置）对菜单项分组；顶部菜单不支持分隔线
 
 ### 数据字典
 

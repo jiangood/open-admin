@@ -28,26 +28,30 @@ public class SysMenuService {
 
     public List<TreeOption> menuTree() {
         List<MenuDefinition> all = sysMenuRepository.findAll();
-        List<TreeOption> items = all.stream().map(def -> {
-            TreeOption node = new TreeOption(def.getName(), def.getId(), def.getPid());
-            node.setDisabled(def.getDisabled());
-            return node;
-        }).toList();
+        List<TreeOption> items = all.stream()
+                .filter(def -> !def.isDivider())
+                .map(def -> {
+                    TreeOption node = new TreeOption(def.getName(), def.getId(), def.getPid());
+                    node.setDisabled(def.getDisabled());
+                    return node;
+                }).toList();
         return TreeTool.buildTree(items);
     }
 
     public List<MenuPermTreeNode> menuPermTree() {
         List<MenuDefinition> all = sysMenuRepository.findAll();
-        List<MenuPermTreeNode> nodes = all.stream().map(def -> {
-            MenuPermTreeNode node = new MenuPermTreeNode();
-            node.setId(def.getId());
-            node.setPid(def.getPid());
-            node.setName(def.getName());
-            node.setPermCodes(def.getPermCodes());
-            node.setPermNames(def.getPermNames());
-            node.setDisabled(def.getDisabled());
-            return node;
-        }).toList();
+        List<MenuPermTreeNode> nodes = all.stream()
+                .filter(def -> !def.isDivider())
+                .map(def -> {
+                    MenuPermTreeNode node = new MenuPermTreeNode();
+                    node.setId(def.getId());
+                    node.setPid(def.getPid());
+                    node.setName(def.getName());
+                    node.setPermCodes(def.getPermCodes());
+                    node.setPermNames(def.getPermNames());
+                    node.setDisabled(def.getDisabled());
+                    return node;
+                }).toList();
         return TreeTool.buildTree(nodes, MenuPermTreeNode::getId, MenuPermTreeNode::getPid,
                 MenuPermTreeNode::getChildren, MenuPermTreeNode::setChildren);
     }
@@ -60,15 +64,20 @@ public class SysMenuService {
                 .map(def -> {
                     MenuItem item = new MenuItem();
                     item.setKey(def.getId());
-                    Assert.notNull(def.getName(), "菜单名称不能为空");
-                    item.setLabel(def.getName());
-
                     item.setParentKey(def.getPid());
                     item.setIcon(def.getIcon());
                     item.setPath(CharSequenceUtil.nullToEmpty(def.getPath()));
 
-                    if (def.getPath() != null) {
-                        pathMenuMap.put(def.getPath(), def);
+                    if (def.isDivider()) {
+                        // 分隔线：透传 type，name/path 均可省略，且不参与路由映射
+                        item.setType(MenuDefinition.TYPE_DIVIDER);
+                        item.setLabel(def.getName());
+                    } else {
+                        Assert.notNull(def.getName(), "菜单名称不能为空");
+                        item.setLabel(def.getName());
+                        if (def.getPath() != null) {
+                            pathMenuMap.put(def.getPath(), def);
+                        }
                     }
                     menuMap.put(def.getId(), def);
 
@@ -78,6 +87,9 @@ public class SysMenuService {
         List<MenuItem> tree = TreeTool.buildTree(list, MenuItem::getKey, MenuItem::getParentKey, MenuItem::getChildren, MenuItem::setChildren);
 
         TreeTool.walk(tree, MenuItem::getChildren, item -> {
+            if (MenuDefinition.TYPE_DIVIDER.equals(item.getType())) {
+                return; // 分隔线保留 YAML 配置的类型，不按有无子节点推导
+            }
             if (item.getChildren() != null && !item.getChildren().isEmpty()) {
                 item.setType("directory");
             } else {

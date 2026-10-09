@@ -209,4 +209,18 @@ class MenuLoadingIntegrationTest {
         // sys-user 被两个文件定义，最后加载的文件覆盖——具体值取决于 classpath 顺序不做断言
         assertNotNull(all.stream().filter(m -> "sys-user".equals(m.getId())).findFirst().orElse(null));
     }
+
+    @Test
+    void testDividerBinding() {
+        // 验证 type: divider 能从 YAML 正确绑定，且分隔线无需 name
+        MenuDefinition divider = sysMenuRepository.findAll().stream()
+                .filter(m -> "test-sep".equals(m.getId()))
+                .findFirst().orElse(null);
+
+        assertNotNull(divider, "test-sep 分隔线应从 application-menu-test-extra.yml 绑定");
+        assertTrue(divider.isDivider());
+        assertNull(divider.getName());
+        assertEquals("test-dev", divider.getPid());
+        assertEquals(90020, divider.getSeq());
+    }
 }

@@ -57,6 +57,9 @@ export default class AdminLayout extends React.Component {
             const pathname = PageUtils.currentPathname();
 
             TreeUtils.walk(menuTree, (item) => {
+                if (item.type === 'divider') {
+                    return
+                }
                 item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 12}}/>
             })
 
@@ -101,6 +104,9 @@ export default class AdminLayout extends React.Component {
         const leafRootNodes = [];
 
         (menuTree || []).forEach(node => {
+            if (node.type === 'divider') {
+                return
+            }
             const isDir = node.type === 'directory' || (node.children && node.children.length > 0);
             if (isDir) {
                 topMenus.push(node);

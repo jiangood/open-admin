@@ -1,8 +1,11 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
+import cn.hutool.core.lang.Dict;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
+import io.github.jiangood.openadmin.modules.system.dto.MenuItem;
 import io.github.jiangood.openadmin.modules.system.dto.MenuPermTreeNode;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
+import io.github.jiangood.openadmin.util.dto.TreeOption;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -101,5 +105,74 @@ class SysMenuServiceTest {
         List<MenuPermTreeNode> tree = sysMenuService.menuPermTree();
 
         assertEquals(Boolean.TRUE, tree.get(0).getDisabled());
+    }
+
+    private MenuDefinition divider(String id, String pid) {
+        MenuDefinition def = new MenuDefinition();
+        def.setId(id);
+        def.setPid(pid);
+        def.setType(MenuDefinition.TYPE_DIVIDER);
+        return def;
+    }
+
+    @Test
+    void testMenuPermTree_shouldExcludeDivider() {
+        MenuDefinition sys = menu("sys", null, "系统管理");
+        when(sysMenuRepository.findAll()).thenReturn(Arrays.asList(sys, divider("sep", "sys")));
+
+        List<MenuPermTreeNode> tree = sysMenuService.menuPermTree();
+
+        assertEquals(1, tree.size());
+        assertEquals("sys", tree.get(0).getId());
+        assertNull(tree.get(0).getChildren());
+    }
+
+    @Test
+    void testMenuTree_shouldExcludeDivider() {
+        MenuDefinition sys = menu("sys", null, "系统管理");
+        when(sysMenuRepository.findAll()).thenReturn(Arrays.asList(sys, divider("sep", "sys")));
+
+        List<TreeOption> tree = sysMenuService.menuTree();
+
+        assertEquals(1, tree.size());
+        assertEquals("sys", tree.get(0).getKey());
+        assertNull(tree.get(0).getChildren());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testBuildMenuInfo_dividerShouldKeepTypeAndSkipNameAssertion() {
+        MenuDefinition sys = menu("sys", null, "系统管理");
+        MenuDefinition sep = divider("sep-app-setting", "sys");
+
+        Dict data = sysMenuService.buildMenuInfo(Arrays.asList(sys, sep));
+
+        List<MenuItem> tree = (List<MenuItem>) data.get("menuTree");
+        assertEquals(1, tree.size());
+        MenuItem root = tree.get(0);
+        assertEquals("sys", root.getKey());
+        assertEquals("directory", root.getType());
+
+        assertEquals(1, root.getChildren().size());
+        MenuItem dividerItem = root.getChildren().get(0);
+        assertEquals("sep-app-setting", dividerItem.getKey());
+        assertEquals("divider", dividerItem.getType());
+        assertNull(dividerItem.getLabel());
+
+        Map<String, MenuDefinition> menuMap = (Map<String, MenuDefinition>) data.get("menuMap");
+        assertTrue(menuMap.containsKey("sep-app-setting"), "分隔线仍应保留在 menuMap 中");
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testBuildMenuInfo_dividerShouldNotEnterPathMenuMap() {
+        MenuDefinition sys = menu("sys", null, "系统管理");
+        MenuDefinition sep = divider("sep", "sys");
+        sep.setPath("/should/be/ignored");
+
+        Dict data = sysMenuService.buildMenuInfo(Arrays.asList(sys, sep));
+
+        Map<String, MenuDefinition> pathMenuMap = (Map<String, MenuDefinition>) data.get("pathMenuMap");
+        assertFalse(pathMenuMap.containsKey("/should/be/ignored"), "分隔线不应进入 pathMenuMap");
     }
 }

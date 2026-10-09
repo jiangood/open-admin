@@ -16,6 +16,9 @@ import java.util.List;
 @Data
 public class MenuDefinition {
 
+    /** 节点类型：分隔线。YAML 中配置 {@code type: divider} 时生效，其余取值由后端推导 */
+    public static final String TYPE_DIVIDER = "divider";
+
     /** 菜单唯一标识，来自 YAML Map key 自动回填 */
     private String id;
 
@@ -42,6 +45,18 @@ public class MenuDefinition {
 
     /** 是否禁用（禁用时菜单不显示） */
     private Boolean disabled;
+
+    /**
+     * 节点类型。当前仅用于左侧菜单分隔线：YAML 中配置 {@code type: divider} 时，
+     * 该节点渲染为 antd Menu 的分隔线，无需 {@code name}/{@code path}。
+     * 其余取值（directory/menu）由后端按是否有子节点推导，无需在 YAML 中配置。
+     */
+    private String type;
+
+    /** 是否为左侧菜单分隔线 */
+    public boolean isDivider() {
+        return TYPE_DIVIDER.equals(type);
+    }
 
     @Data
     public static class PermDefinition {
