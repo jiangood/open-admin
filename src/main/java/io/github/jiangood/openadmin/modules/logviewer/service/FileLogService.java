@@ -18,8 +18,8 @@ public class FileLogService {
     private FileLogConfig fileLogConfig;
 
     public String readLogContent(String key) throws IOException {
-        validateKey(key);
-        File file = fileLogConfig.buildLogFile(key);
+        String normalizedKey = normalizeKey(key);
+        File file = fileLogConfig.buildLogFile(normalizedKey);
 
         if (!file.exists()) {
             return "文件不存在:" + file.getAbsolutePath();
@@ -30,19 +30,34 @@ public class FileLogService {
         }
     }
 
-    private void validateKey(String key) throws IOException {
+    /**
+     * 归一化并校验 key：控制器用 {@code {*key}} 捕获路径，捕获值带前导 {@code /}
+     * （如 {@code /job/123}），需先去掉再校验、拼接文件；同时拦截空路径段与
+     * {@code .}/{@code ..} 以阻止路径穿越。
+     */
+    private String normalizeKey(String key) throws IOException {
         if (key == null || key.isBlank()) {
             throw new IllegalArgumentException("非法的日志文件 key");
         }
-        for (String segment : key.split("/")) {
+
+        String normalized = key;
+        while (normalized.startsWith("/")) {
+            normalized = normalized.substring(1);
+        }
+        if (normalized.isBlank()) {
+            throw new IllegalArgumentException("非法的日志文件 key: " + key);
+        }
+
+        for (String segment : normalized.split("/")) {
             if (segment.isEmpty() || ".".equals(segment) || "..".equals(segment)) {
                 throw new IllegalArgumentException("非法的日志文件 key: " + key);
             }
         }
 
-        String canonicalPath = fileLogConfig.buildLogFile(key).getCanonicalPath();
+        String canonicalPath = fileLogConfig.buildLogFile(normalized).getCanonicalPath();
         String basePath = new File(fileLogConfig.getLogPath()).getCanonicalPath();
         Assert.state(canonicalPath.startsWith(basePath + File.separator),
                 "非法的日志文件 key: " + key);
+        return normalized;
     }
 }
