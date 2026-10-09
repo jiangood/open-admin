@@ -36,5 +36,9 @@ target/
 .playwright-mcp/
 *.log
 *.tgz
+
+# Python
+__pycache__/
+*.pyc
 /web/test-results/*
 /web/e2e/.auth/

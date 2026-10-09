@@ -134,8 +134,8 @@ mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试�
 mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn clean install -DskipTests                              # 安装到本地仓库
-node scripts/bump-version.js <新版本号>                     # 仅升级 pom.xml + web/package.json 版本号
-scripts\release.bat <新版本号>                              # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
+python scripts/bump-version.py <新版本号>                    # 仅升级 pom.xml + web/package.json 版本号
+python scripts/release.py <新版本号>                        # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
@@ -148,42 +148,35 @@ E2E（`web/e2e/`）自动拉起后端（`mvn spring-boot:run` profiles=lib,e2e�
 
 ### 启动脚本
 
-日常开发优先用 `scripts/` 下的脚本（后台 nohup 运行，日志落 `logs/`，PID 在 `logs/*.pid`，`logs/` 已被 gitignore）：
+日常开发用 `scripts/start.py` 管理前后端（后台运行，日志落 `logs/`，PID 在 `logs/*.pid`，`logs/` 已被 gitignore）。需 Python 3：
 
 ```bash
-scripts/start-all.sh                                    # 一键后台启动前后端
-scripts/start-backend.sh {start|stop|restart|status}    # 后端: mvn -Pdev spring-boot:run（devtools 热重载）
-scripts/start-frontend.sh {start|stop|restart|status}   # 前端: npm run dev（端口 3000，缺 node_modules 自动安装）
-scripts/bug-scan.sh [模型]                              # 本地 AI bug 扫描（opencode + gh），产物在 target/bug-scan/
+python scripts/start.py                                 # 后台启动前后端（target=all, action=start）
+python scripts/start.py backend start|stop|restart|status     # 后端: mvn -Pdev spring-boot:run（devtools 热重载）
+python scripts/start.py frontend start|stop|restart|status    # 前端: npm run dev（端口 3000，缺 node_modules 自动安装）
 ```
 
-Windows 下用同名 `.bat`（cmd/双击），用法与 `.sh` 一致，日志同样落 `logs/`：
-
-```bat
-scripts\start-all.bat
-scripts\start-backend.bat start|stop|restart|status
-scripts\start-frontend.bat start|stop|restart|status
-```
-
-- 前后端脚本均支持 `start|stop|restart|status`，参数缺省为 `start`；日志 `logs/backend.log`、`logs/frontend.log`
-- Windows 版内调 PowerShell `Start-Process cmd.exe` 后台启动、`taskkill /T` 结束整棵进程树，PID 同样记录在 `logs/*.pid`
+- `target` 可为 `all|backend|frontend`（缺省 `all`），`action` 可为 `start|stop|restart|status`（缺省 `start`）
+- 日志 `logs/backend.log`、`logs/frontend.log`，PID 记录在 `logs/*.pid`
+- Windows 下以 `cmd.exe /c` + `CREATE_NO_WINDOW` 后台启动、`taskkill /T /F` 结束整棵进程树；POSIX 下用独立会话 + 进程组 `SIGTERM/SIGKILL`
 - 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
 
 ### 发版
 
-发版流程固化在 `scripts\release.bat`（Windows / cmd，输出纯 ASCII 避免乱码），日志落 `logs\release-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。**只给一个版本号参数**即可：
+发版流程固化在 `scripts/release.py`（跨平台，输出纯 ASCII 避免乱码），日志落 `logs/release-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。**只给一个版本号参数**即可：
 
-```bat
-scripts\release.bat 3.1.3                    # bump + 全量测试 + commit + tag + push，触发 CI 发布
-scripts\release.bat v3.1.3                   # 版本号带不带 v 都行（推的 tag 一律带 v）
-scripts\release.bat 3.1.3 --dry-run          # 只跑检查、打印计划，不改动仓库文件（仅写 logs/ 日志）
-scripts\release.bat 3.1.3 --no-push          # 本地演练：commit + tag 但不推送
-scripts\release.bat 3.1.3 --skip-tests       # 跳过 mvn test 与 npm build（发版不建议）
-scripts\release.bat status                   # 当前分支 / 版本 / tag / 工作区状态
-scripts\release.bat check                    # 只读检查，输出 KEY=VALUE（当前版本 + 候选版本号）
-scripts\release.bat --help                   # 全部参数与退出码
+```bash
+python scripts/release.py 3.1.3                    # bump + 全量测试 + commit + tag + push，触发 CI 发布
+python scripts/release.py v3.1.3                   # 版本号带不带 v 都行（推的 tag 一律带 v）
+python scripts/release.py 3.1.3 --dry-run          # 只跑检查、打印计划，不改动仓库文件（仅写 logs/ 日志）
+python scripts/release.py 3.1.3 --no-push          # 本地演练：commit + tag 但不推送
+python scripts/release.py 3.1.3 --skip-tests       # 跳过 mvn test 与 npm build（发版不建议）
+python scripts/release.py status                   # 当前分支 / 版本 / tag / 工作区状态
+python scripts/release.py check                    # 只读检查，输出 KEY=VALUE（当前版本 + 候选版本号）
+python scripts/release.py --help                   # 全部参数与退出码
 ```
 
+- 跨平台（Windows / Linux / macOS），需 Python 3；不再依赖 PowerShell
 - 版本号可带或不带 `v` 前缀（`3.1.3` / `v3.1.3` 等价）；推送到远端的 tag 一律带 `v`（`v3.1.3`），`publish.yml` 正是按 `v*` 触发
 - 前置条件：`gh` 已登录、当前分支为 `main`、工作区干净
 - 白名单：一次发版只允许修改 `*/pom.xml` 与 `web/package.json`，出现别的改动直接中止（退出码 3）
@@ -191,7 +184,7 @@ scripts\release.bat --help                   # 全部参数与退出码
 - 失败自动回滚版本号改动；若 commit + tag 已建、只是推送失败，重跑同一条命令会进入 resume 模式只补推送
 - push tag 后由 `.github/workflows/publish.yml` 自动发布 Maven Central + npm 并创建 GitHub Release（Release Notes 由 CI 生成）
 - 排障：失败时会打印恢复命令与日志路径
-- 手工等价命令见 README「开发命令」；从别的 `.bat` 里调用请用 `call scripts\release.bat ...`
+- 手工等价命令见 README「开发命令」
 
 ## Skills (opencode)
 
