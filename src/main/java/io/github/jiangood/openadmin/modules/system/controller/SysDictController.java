@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
@@ -51,7 +50,7 @@ public class SysDictController {
 
     @HasPermission("sys-dict:update")
     @PostMapping("type-update")
-    public AjaxResult typeUpdate(@RequestBody DictTypeReq req, RequestBodyKeys updateFields) {
+    public AjaxResult typeUpdate(@RequestBody DictTypeReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) {
         SysDictType param = BeanUtil.copyProperties(req, SysDictType.class);
         SysDictType result = sysDictTypeService.update(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");
@@ -104,7 +103,7 @@ public class SysDictController {
     @Log("字典-更新")
     @HasPermission("sys-dict:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody DictItemReq req, RequestBodyKeys updateFields) {
+    public AjaxResult update(@RequestBody DictItemReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) {
         SysDictItem param = BeanUtil.copyProperties(req, SysDictItem.class);
         SysDictItem result = itemService.save(param, updateFields);
         return AjaxResult.ok().data(result.getId()).msg("更新成功");

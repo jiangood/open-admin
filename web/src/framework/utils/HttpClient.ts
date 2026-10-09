@@ -224,6 +224,11 @@ export class HttpClient {
         return url.startsWith('admin') ? '/' + url : url;
     }
 
+    /** 判断是否为普通对象（用于决定是否附加 X-Body-Fields） */
+    private static isPlainObject(data: unknown): data is Record<string, unknown> {
+        return data !== null && typeof data === 'object' && !Array.isArray(data);
+    }
+
     private static coreRequest<T = unknown>(settings: AjaxSettings): Promise<AjaxBody<T>> {
         const {url, method, params, data, headers, toastError = true, toastSuccess = true} = settings;
         const config: AxiosRequestConfig = {url: HttpClient.prefixUrl(url), method, params, data, headers};
@@ -231,6 +236,12 @@ export class HttpClient {
         // FormData 请求交由浏览器自动生成带 boundary 的 multipart Content-Type
         if (typeof FormData !== 'undefined' && data instanceof FormData) {
             config.headers = {...config.headers, 'Content-Type': undefined};
+        } else if (method === 'POST' && HttpClient.isPlainObject(data)) {
+            // 告知后端本次 JSON body 的顶层字段；值为 undefined 的键不会被 JSON.stringify 序列化，需排除
+            const bodyFields = Object.keys(data)
+                .filter((key) => data[key] !== undefined)
+                .join(',');
+            config.headers = {...config.headers, 'X-Body-Fields': bodyFields};
         }
 
         const promise = new Promise<AjaxBody<T>>((resolve, reject) => {

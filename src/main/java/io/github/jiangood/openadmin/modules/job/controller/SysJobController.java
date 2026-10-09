@@ -10,7 +10,6 @@ import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.util.SpringTool;
 import io.github.jiangood.openadmin.util.field.Field;
 import io.github.jiangood.openadmin.util.field.FieldDescription;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
@@ -64,7 +63,7 @@ public class SysJobController {
     @Log("定时任务-更新")
     @HasPermission("job:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody JobReq req, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody JobReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
         SysJob param = BeanUtil.copyProperties(req, SysJob.class);
         service.save(param, updateFields);
         return AjaxResult.ok().msg("更新成功");

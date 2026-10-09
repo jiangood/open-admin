@@ -221,7 +221,7 @@ public class CustomerService extends BaseService<Customer> {
 | 分页查询 | `@RequestMapping("page")` | `admin/{module}/page` | `{module}:read` | 支持 searchText 模糊搜索 + Pageable |
 | 详情 | `@GetMapping("info/{id}")` | `admin/{module}/info/{id}` | `{module}:read` | 返回单条记录 |
 | 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid + @Log |
-| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + RequestBodyKeys + @Log |
+| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + @RequestHeader("X-Body-Fields") + @Log |
 | 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq + @Log |
 | 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:read` | 下拉框数据源（非必选） |
 
@@ -232,7 +232,6 @@ package com.mycompany.myproject.modules.customer.controller;
 
 import com.mycompany.myproject.modules.customer.entity.Customer;
 import com.mycompany.myproject.modules.customer.service.CustomerService;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
@@ -284,7 +283,7 @@ public class CustomerController {
     @Log("客户-更新")
     @HasPermission("customer:update")
     @PostMapping("update")
-    public AjaxResult update(@Valid @RequestBody Customer input, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@Valid @RequestBody Customer input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
         service.save(input, updateFields);
         return AjaxResult.ok().msg("更新成功");
     }

@@ -10,7 +10,6 @@ import io.github.jiangood.openadmin.util.BeanTool;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
 import io.github.jiangood.openadmin.util.tree.drop.DropResult;
 import io.github.jiangood.openadmin.util.tree.drop.TreeDropTool;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
@@ -85,7 +84,7 @@ public class SysOrgController {
     @Log("机构-更新")
     @HasPermission("sys-org:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody OrgReq input, RequestBodyKeys requestBodyKeys) {
+    public AjaxResult update(@RequestBody OrgReq input, @RequestHeader("X-Body-Fields") List<String> requestBodyKeys) {
         if (input.getLeader() != null && CharSequenceUtil.isEmpty(input.getLeader().getId())) {
             input.setLeader(null);
         }

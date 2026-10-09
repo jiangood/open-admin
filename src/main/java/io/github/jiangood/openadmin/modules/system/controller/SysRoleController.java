@@ -8,7 +8,6 @@ import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.DropdownReq;
 import io.github.jiangood.openadmin.util.dto.Option;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
@@ -89,7 +88,7 @@ public class SysRoleController {
     @Log("角色-更新")
     @HasPermission("sys-role:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody RoleReq req, RequestBodyKeys updateFields) {
+    public AjaxResult update(@RequestBody RoleReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) {
         SysRole role = BeanUtil.copyProperties(req, SysRole.class);
         role = sysRoleService.save(role, updateFields);
 

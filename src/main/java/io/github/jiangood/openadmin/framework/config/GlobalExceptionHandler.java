@@ -20,6 +20,7 @@ import org.springframework.transaction.TransactionSystemException;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -97,6 +98,15 @@ public class GlobalExceptionHandler {
         String parameterName = e.getParameterName();
         String message = CharSequenceUtil.format("缺少请求的参数{}", parameterName);
         return AjaxResult.err().code(500).msg(message);
+    }
+
+    /**
+     * 请求头缺失异常
+     */
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    public AjaxResult missingRequestHeaderException(MissingRequestHeaderException e) {
+        log.warn("请求头缺失：{}", e.getMessage());
+        return AjaxResult.err().code(400).msg(CharSequenceUtil.format("缺少请求头 {}", e.getHeaderName()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

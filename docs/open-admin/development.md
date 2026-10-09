@@ -19,8 +19,10 @@
 | 分页查询 | GET | `admin/xxx/page` | `page(Pageable)` |
 | 详情 | GET | `admin/xxx/info/{id}` | `info(@PathVariable id)` |
 | 创建 | POST | `admin/xxx/create` | `create(@RequestBody dto)` |
-| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, RequestBodyKeys keys)` |
+| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, @RequestHeader("X-Body-Fields") List<String> fields)` |
 | 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
+
+> **部分更新语义**：`update` 采用 PATCH 式语义 —— 请求头 `X-Body-Fields` 携带本次 body 的顶层字段名（逗号分隔），后端只更新其中列出的字段，未列出的保持原值；显式传 `null` 的字段会被清空。前端 `HttpClient` 对 POST 的普通对象 body 会自动附加该请求头（值为 `undefined` 的键会被序列化丢弃，故不在其中），业务页面无需手动处理。
 
 ## 后端要点
 

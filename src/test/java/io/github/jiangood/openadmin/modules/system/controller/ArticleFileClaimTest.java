@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.modules.system.dto.request.ArticleReq;
@@ -201,7 +200,7 @@ class ArticleFileClaimTest {
         return article.getId();
     }
 
-    private RequestBodyKeys keys() {
-        return new RequestBodyKeys(List.of("code", "title", "mainImage", "content", "position", "seq", "enabled"));
+    private List<String> keys() {
+        return List.of("code", "title", "mainImage", "content", "position", "seq", "enabled");
     }
 }

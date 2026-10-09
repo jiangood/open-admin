@@ -4,7 +4,6 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.PasswdStrength;
 import cn.hutool.core.text.CharSequenceUtil;
-import io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
@@ -77,7 +76,7 @@ public class SysUserController {
     @Log("用户-更新")
     @HasPermission("sys-user:update")
     @PostMapping("update")
-    public AjaxResult update(@RequestBody UserReq input, RequestBodyKeys updateFields) throws Exception {
+    public AjaxResult update(@RequestBody UserReq input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
         SysUser entity = BeanUtil.copyProperties(input, SysUser.class);
         sysUserService.update(entity, updateFields);
         sysUserService.markPermsStale(entity.getId(), entity.getAccount());

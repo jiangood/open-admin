@@ -168,8 +168,7 @@ public final class BackendTemplates {
         return """
                 package %s.controller;
 
-                %simport io.github.jiangood.openadmin.framework.config.RequestBodyKeys;
-                import io.github.jiangood.openadmin.framework.log.Log;
+                %simport io.github.jiangood.openadmin.framework.log.Log;
                 import io.github.jiangood.openadmin.framework.perm.HasPermission;
                 import io.github.jiangood.openadmin.util.dto.AjaxResult;
                 import io.github.jiangood.openadmin.util.dto.IdReq;
@@ -179,6 +178,8 @@ public final class BackendTemplates {
                 import org.springframework.data.domain.Sort;
                 import org.springframework.data.web.PageableDefault;
                 import org.springframework.web.bind.annotation.*;
+
+                import java.util.List;
 
                 @RestController
                 @RequestMapping("admin/%s")
@@ -212,7 +213,7 @@ public final class BackendTemplates {
                     @Log("%s-更新")
                     @HasPermission("%s:update")
                     @PostMapping("update")
-                    public AjaxResult update(@RequestBody %s input, RequestBodyKeys updateFields) throws Exception {
+                    public AjaxResult update(@RequestBody %s input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
                         service.save(input, updateFields);
                         return AjaxResult.ok().msg("更新成功");
                     }
