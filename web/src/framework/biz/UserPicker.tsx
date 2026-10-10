@@ -17,7 +17,7 @@ export interface UserPickerProps {
     value?: string[];
     /** 弹窗宽度，默认 1080 */
     width?: number;
-    /** 内容区高度，默认 560（可容纳默认每页 10 行，避免表格内部纵向滚动） */
+    /** 内容区高度，默认 530（刚好容纳默认每页 10 行，不出现表格内部纵向滚动） */
     height?: number;
     /** 分页数据源地址，默认 admin/sysUser/page */
     requestUrl?: string;
@@ -201,7 +201,7 @@ export class UserPicker extends React.Component<UserPickerProps, UserPickerState
             onOk={this.handleOk}
             onCancel={onCancel}
         >
-            <Splitter style={{height: height || 560}}>
+            <Splitter style={{height: height || 530}}>
                 <Splitter.Panel defaultSize={320} min={180} max={560} style={{paddingRight: 8}}>
                     <div style={{height: '100%', overflow: 'auto'}}>
                         <MemoOrgTree onChange={this.onSelectOrg}/>
