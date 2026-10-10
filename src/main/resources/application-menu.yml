@@ -1,8 +1,10 @@
 ## 框架预设菜单结构。业务项目可在 resources/ 下加 application-menu-*.yml 扩展或覆盖。
+## 同级菜单按声明顺序排列（seq 相同时保持 YAML 顺序）；type: divider 的条目渲染为左侧菜单分隔线（无需 name/path），用于对菜单分组。
 menus:
   sys:
     name: 系统管理
     seq: 10000
+  ## ----- 权限与组织 -----
   sys-user:
     pid: sys
     name: 用户管理
@@ -15,16 +17,6 @@ menus:
       - {name: 删除, code: delete}
       - {name: 重置密码, code: reset-password}
       - {name: 分配权限, code: grant-permission}
-  sys-org:
-    pid: sys
-    name: 组织机构
-    path: /system/org
-    icon: ApartmentOutlined
-    perms:
-      - {name: 读取, code: read}
-      - {name: 创建, code: create}
-      - {name: 更新, code: update}
-      - {name: 删除, code: delete}
   sys-role:
     pid: sys
     name: 角色管理
@@ -36,6 +28,32 @@ menus:
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
       - {name: 分配权限, code: grant-permission}
+  sys-org:
+    pid: sys
+    name: 组织机构
+    path: /system/org
+    icon: ApartmentOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 更新, code: update}
+      - {name: 删除, code: delete}
+  ## 分隔线：权限与组织 | 基础功能
+  sys-sep-basic:
+    pid: sys
+    type: divider
+  ## ----- 基础功能 -----
+  job:
+    pid: sys
+    name: 定时任务
+    path: /system/job
+    icon: ClockCircleOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 创建, code: create}
+      - {name: 更新, code: update}
+      - {name: 删除, code: delete}
+      - {name: 执行一次, code: trigger}
   sys-dict:
     pid: sys
     name: 字典管理
@@ -46,17 +64,21 @@ menus:
       - {name: 创建, code: create}
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
-  job:
+  article:
     pid: sys
-    name: 定时任务
-    path: /system/job
-    icon: OrderedListOutlined
+    name: 文章管理
+    path: /system/article
+    icon: FileTextOutlined
     perms:
       - {name: 读取, code: read}
       - {name: 创建, code: create}
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
-      - {name: 执行一次, code: trigger}
+  ## 分隔线：基础功能 | 系统运维
+  sys-sep-ops:
+    pid: sys
+    type: divider
+  ## ----- 系统运维 -----
   sys-file:
     pid: sys
     name: 文件管理
@@ -69,19 +91,14 @@ menus:
     pid: sys
     name: 操作日志
     path: /system/log
-    icon: FileSearchOutlined
+    icon: HistoryOutlined
     perms:
       - {name: 读取, code: read}
-  article:
+  ## 分隔线：系统运维 | 开发工具
+  sys-sep-dev:
     pid: sys
-    name: 文章管理
-    path: /system/article
-    icon: FileTextOutlined
-    perms:
-      - {name: 读取, code: read}
-      - {name: 创建, code: create}
-      - {name: 更新, code: update}
-      - {name: 删除, code: delete}
+    type: divider
+  ## ----- 开发工具 -----
   sys-codegen:
     pid: sys
     name: 代码生成

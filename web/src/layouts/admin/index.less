@@ -95,7 +95,11 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 12px 16px;
+      /* 与顶栏同高，保证 logo 基线与一级菜单对齐 */
+      height: 48px;
+      padding: 0 16px;
+      /* 底边线：与右侧顶栏/标签栏分隔线连成一线；色值由侧栏文字变量派生，避免硬编码 */
+      border-bottom: 1px solid color-mix(in srgb, var(--oa-sider-text, rgba(255, 255, 255, 0.85)) 14%, transparent);
 
       .logo-img {
         height: 36px;
@@ -115,8 +119,23 @@
         margin: 0;
         font-size: 14px;
         line-height: 1;
+        /* 允许在 flex 中收缩，长站点名省略号截断而不溢出侧栏 */
+        min-width: 0;
+        overflow: hidden;
         white-space: nowrap;
+
+        a {
+          display: block;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
       }
+    }
+
+    /* 折叠态：logo 居中，去掉左侧内边距 */
+    &.ant-layout-sider-collapsed .sider-header {
+      justify-content: center;
+      padding-inline: 0;
     }
 
     &.ant-layout-sider-collapsed .sider-header h3 {
@@ -128,6 +147,11 @@
       overflow: auto;
       scrollbar-width: thin;
       scrollbar-color: unset;
+
+      /* 菜单分隔线：加大上下间距，让不同菜单分组更清晰 */
+      .ant-menu-item-divider {
+        margin-block: 8px;
+      }
 
       .ant-menu-submenu-selected {
         &>div {
