@@ -94,13 +94,13 @@ export default class OrgPage extends React.Component {
         const params = this.state.params
         const canSort = PermUtils.hasPermission('sys-org:update')
 
-        return <Page title="组织机构" description="管理组织机构树" actions={
-            <Button type='primary' perm='sys-org:create' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
-        }>
+        return <Page>
             <Splitter>
                 <Splitter.Panel defaultSize={400} style={{paddingRight: 8}}>
 
-                    <Card size='small' >
+
+                    <Card title="机构树" extra={<Button type='primary' perm='sys-org:create'
+                                              icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>}>
                         <div style={{display: 'flex', alignItems: 'center', gap: 4}}>
                             <Input.Search placeholder='搜索' value={params.searchText} onChange={e => {
                                 params.searchText = e.target.value

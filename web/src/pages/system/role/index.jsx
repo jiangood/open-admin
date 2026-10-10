@@ -133,8 +133,6 @@ export default class RolePage extends React.Component {
 
     render() {
         return <Page
-            title="角色管理"
-            description="管理系统角色，包括角色权限分配、用户设置等"
         >
             <ProTable
                 actionRef={this.tableRef}
