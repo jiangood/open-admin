@@ -139,12 +139,9 @@ python scripts/release.py <新版本号>                        # 一键发版�
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
-cd web && npm run test:e2e                                    # Playwright 端到端测试
 ```
 
 测试使用 H2 内存数据库，无需 MySQL。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
-
-E2E（`web/e2e/`）自动拉起后端（`mvn spring-boot:run` profiles=lib,e2e，端口 8080）与前端（端口 3000），运行前需释放这两个端口。
 
 ### 启动脚本
 
@@ -159,7 +156,7 @@ python scripts/start.py frontend start|stop|restart|status    # 前端: npm run 
 - `target` 可为 `all|backend|frontend`（缺省 `all`），`action` 可为 `start|stop|restart|status`（缺省 `start`）
 - 日志 `logs/backend.log`、`logs/frontend.log`，PID 记录在 `logs/*.pid`
 - Windows 下以 `cmd.exe /c` + `CREATE_NO_WINDOW` 后台启动、`taskkill /T /F` 结束整棵进程树；POSIX 下用独立会话 + 进程组 `SIGTERM/SIGKILL`
-- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）；仅 E2E 用 `profiles=lib,e2e`（`application-e2e.yml` 切 H2 内存库）
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）
 
 ### 发版
 

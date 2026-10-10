@@ -6,7 +6,7 @@ import reactCompiler from 'eslint-plugin-react-compiler';
 import globals from 'globals';
 
 export default tseslint.config(
-    {ignores: ['dist', 'test-results', 'playwright-report', 'node_modules']},
+    {ignores: ['dist', 'node_modules']},
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {
