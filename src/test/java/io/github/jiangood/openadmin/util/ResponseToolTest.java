@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.util;
 
-import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -154,72 +153,6 @@ class ResponseToolTest {
         String responseContent = responseWriter.toString();
         assertNotNull(responseContent);
         assertEquals("null", responseContent);
-    }
-
-    @Test
-    void testResponseHtmlBlockWithNullContent() throws IOException {
-        String title = "Test Title";
-        
-        // 调用方法
-        ResponseTool.responseHtmlBlock(mockResponse, title, null);
-        
-        // 验证设置的内容类型
-        verify(mockResponse).setContentType("text/html;charset=utf-8");
-        
-        // 验证响应内容为空
-        String responseContent = responseWriter.toString();
-        assertEquals("", responseContent);
-    }
-
-    @Test
-    void testResponseHtmlBlockWithNullTitle() throws IOException {
-        String content = "<p>Test Content</p>";
-        
-        // 调用方法
-        ResponseTool.responseHtmlBlock(mockResponse, null, content);
-        
-        // 验证设置的内容类型
-        verify(mockResponse).setContentType("text/html;charset=utf-8");
-        
-        // 验证响应内容为空
-        String responseContent = responseWriter.toString();
-        assertEquals("", responseContent);
-    }
-
-    @Test
-    void testResponseHtmlBlockWithValidContent() throws IOException {
-        String title = "Test Title";
-        String content = "<p>Test Content</p>";
-        
-        // 调用方法
-        ResponseTool.responseHtmlBlock(mockResponse, title, content);
-        
-        // 验证设置的内容类型
-        verify(mockResponse).setContentType("text/html;charset=utf-8");
-        
-        // 验证响应内容包含标题和内容
-        String responseContent = responseWriter.toString();
-        assertNotNull(responseContent);
-        assertTrue(responseContent.contains(title));
-        assertTrue(responseContent.contains(content));
-    }
-
-    @Test
-    void testResponseHtmlBlockWithImgContent() throws IOException {
-        String title = "Test Title";
-        String content = "<p>Test Content</p><img src=\"https://example.com" + SysFileConstants.FILE_URL_PATTERN.replace("{id}", "") + "test.jpg\" alt=\"Test\" />";
-        
-        // 调用方法
-        ResponseTool.responseHtmlBlock(mockResponse, title, content);
-        
-        // 验证设置的内容类型
-        verify(mockResponse).setContentType("text/html;charset=utf-8");
-        
-        // 验证响应内容包含标题和处理后的图片标签（移除了前缀）
-        String responseContent = responseWriter.toString();
-        assertNotNull(responseContent);
-        assertTrue(responseContent.contains(title));
-        assertTrue(responseContent.contains("<img src=\"" + SysFileConstants.FILE_URL_PATTERN.replace("{id}", "") + "test.jpg\" alt=\"Test\" />"));
     }
 
     @Test

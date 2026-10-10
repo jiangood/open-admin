@@ -3,17 +3,12 @@ package io.github.jiangood.openadmin.util;
 
 import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.net.URLEncodeUtil;
-import cn.hutool.http.ContentType;
-import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 @Slf4j
@@ -40,32 +35,6 @@ public class ResponseTool {
         response.setContentType(CONTENT_TYPE_EXCEL);
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setHeader("Access-Control-Expose-Headers", "content-disposition");
-    }
-
-
-    public static void responseHtmlBlock(HttpServletResponse response, String title, String content) throws IOException {
-        if (content != null) {
-            content = removeImgPrefix(content);
-        }
-        response.setContentType("text/html;charset=utf-8");
-
-
-        if (content != null && title != null) {
-            ClassPathResource resource = new ClassPathResource("h5_template.html");
-            try (InputStream is = resource.getInputStream()) {
-                String h5Template = IOUtils.toString(is, StandardCharsets.UTF_8);
-
-                String html = h5Template.replace("{title}", title).replace("{content}", content);
-                response.getWriter().write(html);
-            }
-        }
-
-    }
-
-    private static String removeImgPrefix(String content) {
-        String reg = "(<img.*?)(https?://.*?)(" + SysFileConstants.FILE_URL_PATTERN.replace("{objectName}", "") + ".*?>)";
-
-        return content.replaceAll(reg, "$1$3");
     }
 
 
