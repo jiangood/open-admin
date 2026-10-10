@@ -1,6 +1,7 @@
 import {Avatar, Dropdown, Modal} from "antd";
+import {BgColorsOutlined} from "@ant-design/icons";
 import React from "react";
-import {DeviceUtils, HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {DeviceUtils, HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ThemeSettings, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -10,6 +11,7 @@ export class HeaderRight extends React.Component {
         headerArticles: [],
         alertVisible: false,
         confirmVisible: false,
+        themeSettingsVisible: false,
     };
 
     componentDidMount() {
@@ -45,14 +47,32 @@ export class HeaderRight extends React.Component {
         PageUtils.open('/article/' + code, title)
     }
 
+    renderThemeSettings = () => {
+        return (
+            <button type="button" className='item' title="界面设置" aria-label="界面设置"
+                    onClick={() => this.setState({themeSettingsVisible: true})}>
+                <BgColorsOutlined/>
+            </button>
+        )
+    }
+
+    renderThemeSettingsDrawer = () => {
+        return (
+            <ThemeSettings open={this.state.themeSettingsVisible}
+                           onClose={() => this.setState({themeSettingsVisible: false})}/>
+        )
+    }
+
     render() {
         const info = GlobalData.getLoginInfo()
         const {dropdownArticles, headerArticles} = this.state
 
         if (this.state.isMobileDevice) {
             return <div className='header-right'>
+                {this.renderThemeSettings()}
                 <button type="button" style={{background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer'}}
                         onClick={this.logout}>退出</button>
+                {this.renderThemeSettingsDrawer()}
             </div>
         }
 
@@ -74,6 +94,8 @@ export class HeaderRight extends React.Component {
                     {a.title}
                 </button>
             ))}
+
+            {this.renderThemeSettings()}
 
             <Dropdown menu={{
                 onClick: ({key}) => {
@@ -116,6 +138,8 @@ export class HeaderRight extends React.Component {
                    }}>
                 退出登录失败，是否清空缓存
             </Modal>
+
+            {this.renderThemeSettingsDrawer()}
         </div>
     }
 }

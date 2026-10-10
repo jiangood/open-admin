@@ -4,8 +4,8 @@
     overflow-x: auto;
     overflow-y: hidden;
     flex-shrink: 0;
-    border-bottom: 1px solid #e8e8e8;
-    background: #fff;
+    border-bottom: 1px solid var(--oa-color-border, #e8e8e8);
+    background: var(--oa-color-bg-container, #fff);
 
     &::-webkit-scrollbar {
         height: 0;
@@ -16,14 +16,14 @@
         align-items: center;
         gap: 4px;
         padding: 0 12px;
-        height: 32px;
-        line-height: 32px;
+        height: var(--oa-control-height, 32px);
+        line-height: var(--oa-control-height, 32px);
         font-size: 13px;
         cursor: pointer;
-        border-right: 1px solid #e8e8e8;
+        border-right: 1px solid var(--oa-color-border, #e8e8e8);
         white-space: nowrap;
-        color: rgba(0, 0, 0, 0.65);
-        background: #fafafa;
+        color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
+        background: var(--oa-color-fill, #fafafa);
         transition: color 0.2s, background 0.2s;
         position: relative;
         flex-shrink: 0;
@@ -34,7 +34,7 @@
 
         &.active {
             color: var(--primary-color);
-            background: #fff;
+            background: var(--oa-color-bg-container, #fff);
             font-weight: 500;
         }
 
@@ -52,11 +52,11 @@
             height: 16px;
             font-size: 12px;
             border-radius: 50%;
-            color: rgba(0, 0, 0, 0.45); /* NOSONAR: 次要文本颜色，设计如此 */
+            color: var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45));
 
             &:hover {
-                background: rgba(0, 0, 0, 0.08);
-                color: rgba(0, 0, 0, 0.88); /* NOSONAR: 悬停态主文本色，对比度设计如此 */
+                background: var(--oa-color-fill, rgba(0, 0, 0, 0.08));
+                color: var(--oa-color-text, rgba(0, 0, 0, 0.88));
             }
         }
     }

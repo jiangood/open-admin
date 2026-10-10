@@ -1,4 +1,5 @@
 import React from 'react';
+import {getToken} from '../../config';
 
 interface ContextMenuItem {
     key: string;
@@ -19,9 +20,10 @@ interface ContextMenuProps {
 
 export class ContextMenu extends React.Component<ContextMenuProps> {
     menuItemColor = (item): string => {
-        if (item.danger) return '#ff4d4f';
-        if (item.disabled) return 'rgba(0,0,0,0.25)';
-        return '#333';
+        const token = getToken();
+        if (item.danger) return token.colorError;
+        if (item.disabled) return String(token.colorTextDisabled);
+        return String(token.colorText);
     };
     menuRef = React.createRef<HTMLDivElement>();
     timer: ReturnType<typeof setTimeout> | null = null;
@@ -73,6 +75,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
 
     render() {
         const { x, y, items, onClick, onClose } = this.props;
+        const token = getToken();
 
         return (
             <div
@@ -82,16 +85,16 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                     left: x,
                     top: y,
                     zIndex: 1050,
-                    background: '#fff',
-                    borderRadius: 4,
+                    background: String(token.colorBgElevated ?? token.colorBgContainer),
+                    borderRadius: 'var(--oa-border-radius, 4px)',
                     padding: '4px 0',
                     minWidth: 120,
-                    boxShadow: '0 6px 16px 0 rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.12), 0 9px 28px 8px rgba(0,0,0,0.05)',
+                    boxShadow: String(token.boxShadowSecondary ?? '0 6px 16px 0 rgba(0,0,0,0.08)'),
                 }}
             >
                 {items.map(item => (
                     item.divider ? (
-                        <div key={item.key} style={{ height: 1, background: '#f0f0f0', margin: '4px 0' }} />
+                        <div key={item.key} style={{ height: 1, background: String(token.colorSplit ?? token.colorBorderSecondary), margin: '4px 0' }} />
                     ) : (
                         <div
                             key={item.key}
@@ -125,7 +128,7 @@ export class ContextMenu extends React.Component<ContextMenuProps> {
                                 userSelect: 'none',
                             }}
                             onMouseEnter={(e) => {
-                                if (!item.disabled) e.currentTarget.style.background = '#f5f5f5';
+                                if (!item.disabled) e.currentTarget.style.background = String(token.colorFillTertiary);
                             }}
                             onMouseLeave={(e) => {
                                 e.currentTarget.style.background = 'transparent';

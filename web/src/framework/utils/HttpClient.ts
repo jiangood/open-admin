@@ -1,8 +1,8 @@
 import axios from "axios";
 import type {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import qs from 'qs';
-import {message as messageApi} from "antd";
 import {EventBus} from "./EventBus";
+import {getMessageApi} from "./MessageApi";
 
 /**
  * 单一 Promise 风格 HTTP 工具类（所有请求方法均返回 Promise，无 success/error 回调）
@@ -260,7 +260,7 @@ export class HttpClient {
                     return;
                 }
                 if (toastSuccess && message) {
-                    messageApi.success(message);
+                    getMessageApi().success(message);
                 }
                 resolve(body);
             }).catch((e: unknown) => {
@@ -279,7 +279,7 @@ export class HttpClient {
             EventBus.emit('loginExpired');
             const err: AjaxError = {code: 401, message: '登录过期'};
             if (toastError) {
-                messageApi.error('登录过期');
+                getMessageApi().error('登录过期');
             }
             reject(err);
             return;
@@ -287,7 +287,7 @@ export class HttpClient {
         const err = HttpClient.toAjaxError(e);
         if (toastError) {
             console.warn(`[HttpClient] ${label}: ${url}`, err.message);
-            messageApi.error(err.message);
+            getMessageApi().error(err.message);
         }
         reject(err);
     }

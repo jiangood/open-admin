@@ -1,9 +1,9 @@
 import React from "react";
-import {ConfigProvider, Modal} from "antd";
+import {App, ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ErrorBoundary, GlobalData, HttpClient, PageFrame, PageLoading, PageUtils, history, getThemeConfig, setThemeColors, EventBus} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus} from "../framework";
 import type {ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
@@ -25,6 +25,16 @@ export interface HeaderExtraContext {
     loginInfo: { id: string; name: string; account: string };
 }
 
+/** 将 App 上下文的 message 实例注入框架，使提示跟随 ConfigProvider 主题（含暗色） */
+function MessageBridge() {
+    const {message} = App.useApp();
+    React.useEffect(() => {
+        setMessageApi(message);
+        return () => setMessageApi();
+    }, [message]);
+    return null;
+}
+
 interface LayoutsProps {
     headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
     showOrgSwitcher?: (context: HeaderExtraContext) => boolean;
@@ -38,11 +48,14 @@ export class Layouts extends React.Component<LayoutsProps> {
         siteInfoLoaded: false,
         loginChecked: false,
         loginExpiredVisible: false,
+        themeMode: getThemeMode(),
+        themeVersion: 0,
     };
 
     unlisten: (() => void) | null = null;
     unsubscribeLoginExpired: (() => void) | null = null;
     unsubscribeLogoutSuccess: (() => void) | null = null;
+    unsubscribeTheme: (() => void) | null = null;
 
     constructor(props: LayoutsProps) {
         super(props);
@@ -111,6 +124,12 @@ export class Layouts extends React.Component<LayoutsProps> {
         this.unsubscribeLogoutSuccess = EventBus.on('logoutSuccess', () => {
             this.setState({loginChecked: false});
         });
+        this.unsubscribeTheme = EventBus.on('themeChange', () => {
+            this.setState(prevState => ({
+                themeMode: getThemeMode(),
+                themeVersion: prevState.themeVersion + 1,
+            }));
+        });
         this.loadData();
     }
 
@@ -130,6 +149,9 @@ export class Layouts extends React.Component<LayoutsProps> {
         if (this.unsubscribeLogoutSuccess) {
             this.unsubscribeLogoutSuccess();
         }
+        if (this.unsubscribeTheme) {
+            this.unsubscribeTheme();
+        }
     }
 
     render() {
@@ -142,8 +164,11 @@ export class Layouts extends React.Component<LayoutsProps> {
         return (
             <ErrorBoundary minimal>
                 <ConfigProvider {...baseConfigProps} theme={getThemeConfig()}>
-                    {this.renderContent(showPageFrame, ready, pathname, search)}
-                    {this.renderLoginExpiredModal()}
+                    <App component={false}>
+                        <MessageBridge/>
+                        {this.renderContent(showPageFrame, ready, pathname, search)}
+                        {this.renderLoginExpiredModal()}
+                    </App>
                 </ConfigProvider>
             </ErrorBoundary>
         );

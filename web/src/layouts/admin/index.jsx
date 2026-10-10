@@ -1,11 +1,12 @@
 import React from 'react';
-import {Layout, Menu, Skeleton, Watermark} from 'antd';
+import {ConfigProvider, Layout, Menu, Skeleton, Watermark} from 'antd';
 
 import "./index.less"
-import {HttpClient, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT, OrgSwitcher} from "../../framework";
+import {HttpClient, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT, OrgSwitcher, getSiderThemeConfig, getLayoutMode, EventBus} from "../../framework";
 
 import { HeaderRight } from "./HeaderRight";
 import { TabLayout } from "./TabLayout";
+import { SinglePageLayout } from "./SinglePageLayout";
 const {Header, Sider, Content} = Layout;
 /**
  * 带菜单的布局，主要处理布局宇框架结构
@@ -30,8 +31,12 @@ export default class AdminLayout extends React.Component {
         siteInfo: {},
 
         headerLeftArticles: [],
+
+        layoutMode: getLayoutMode(),
     }
 
+
+    unsubscribeLayout = null;
 
     componentDidMount() {
         // 判断是否手机端，自动收起菜单
@@ -45,6 +50,16 @@ export default class AdminLayout extends React.Component {
 
         const siteArticles = GlobalData.getSiteArticles();
         this.setState({headerLeftArticles: siteArticles[ARTICLE_HEADER_LEFT] || []})
+
+        this.unsubscribeLayout = EventBus.on('layoutChange', () => {
+            this.setState({layoutMode: getLayoutMode()});
+        })
+    }
+
+    componentWillUnmount() {
+        if (this.unsubscribeLayout) {
+            this.unsubscribeLayout();
+        }
     }
 
 
@@ -189,23 +204,26 @@ export default class AdminLayout extends React.Component {
         const {siteInfo, loginInfo} = this.state
 
 return <Layout className='main-layout'>
-             <Sider id='left-sider'
-                   width={180}
-                   collapsible
-                   breakpoint={'md'}
-             >
-                <div className='sider-header'>
-                    <button type="button" className='logo-img'
-                            onClick={() => history.push('/')}>
-                        <img src="./logo.png" alt='logo'/>
-                    </button>
-                    <h3 className='hide-on-mobile'>
-                        <Link to="/" style={{color: 'rgba(255,255,255,0.85)'}}>{siteInfo.title}</Link>
-                    </h3>
-                </div>
-                {this.renderLeftMenu()}
+             {/* 侧栏单独套暗色算法，使分割线/边框在深色底上可见，并按预设覆盖侧栏底色 */}
+             <ConfigProvider theme={getSiderThemeConfig()}>
+                 <Sider id='left-sider'
+                        width={180}
+                        collapsible
+                        breakpoint={'md'}
+                 >
+                    <div className='sider-header'>
+                        <button type="button" className='logo-img'
+                                onClick={() => history.push('/')}>
+                            <img src="./logo.png" alt='logo'/>
+                        </button>
+                        <h3 className='hide-on-mobile'>
+                            <Link to="/" style={{color: 'var(--oa-sider-text, rgba(255,255,255,0.85))'}}>{siteInfo.title}</Link>
+                        </h3>
+                    </div>
+                    {this.renderLeftMenu()}
 
-            </Sider>
+                </Sider>
+             </ConfigProvider>
 
             <Layout style={{flex: 1, overflow: 'hidden'}}>
                 <Header className='header'>
@@ -250,16 +268,18 @@ return <Layout className='main-layout'>
     }
 
     renderCenterContent = () => {
-        const {siteInfo, loginInfo} = this.state
+        const {siteInfo, loginInfo, layoutMode} = this.state
         // 即使菜单为空也直接显示页面内容，不要一直显示 Skeleton
-        const tabPageRenderNode = <TabLayout pathMenuMap={this.state.pathMenuMap}/>;
+        const contentNode = layoutMode === 'single'
+            ? <SinglePageLayout/>
+            : <TabLayout pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {
             return <Watermark content={[loginInfo.name, loginInfo.account]}>
-                {tabPageRenderNode}
+                {contentNode}
             </Watermark>
         }
 
-        return tabPageRenderNode
+        return contentNode
     };
 }
 

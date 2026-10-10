@@ -1,10 +1,10 @@
 import React from "react";
-import {Button, Divider, Modal, Radio, Select, Space, Upload, message} from "antd";
+import {Button, Divider, Modal, Radio, Select, Space, Upload} from "antd";
 import {DeleteOutlined, EyeOutlined, PlusOutlined} from "@ant-design/icons";
 import Compressor from "compressorjs";
 import Cropper from "cropperjs";
 import "cropperjs/dist/cropper.css";
-import {HttpClient, ObjectUtils, UrlUtils} from "../../utils";
+import {HttpClient, getMessageApi, ObjectUtils, UrlUtils} from "../../utils";
 import type {FieldProps} from '../types';
 
 export interface FieldUploadImageProps extends FieldProps<string> {
@@ -290,19 +290,19 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             this.revokePreviewUrls();
             this.previewUrlsRef = [cUrl];
             this.setState({preview: {cUrl, cFile, cSize: cFile.size, cdims}, tool: undefined});
-            message.success(`已压缩：${cdims.width} x ${cdims.height} / ${formatSize(cFile.size)}`);
+            getMessageApi().success(`已压缩：${cdims.width} x ${cdims.height} / ${formatSize(cFile.size)}`);
         } catch {
-            message.error('压缩失败');
+            getMessageApi().error('压缩失败');
         }
     };
 
     private handleBeforeUpload = async (file: File) => {
         if (this.state.objectNames.length >= this.state.maxCount) {
-            message.warning('已达到最大上传数量');
+            getMessageApi().warning('已达到最大上传数量');
             return Upload.LIST_IGNORE;
         }
         if (!file.type.startsWith('image/')) {
-            message.error('请选择图片文件');
+            getMessageApi().error('请选择图片文件');
             return Upload.LIST_IGNORE;
         }
 
@@ -319,7 +319,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             // 默认展示原图，不做压缩处理，用户可点击「压缩」按钮手动压缩
             await this.loadOriginalPreview(file, url, dims);
         } catch {
-            message.error('读取图片失败');
+            getMessageApi().error('读取图片失败');
             this.closeModal();
             return;
         }
@@ -370,7 +370,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             );
             this.closeModal();
         } catch (e) {
-            message.error(HttpClient.errToMsg(e));
+            getMessageApi().error(HttpClient.errToMsg(e));
         } finally {
             this.setState({uploading: false});
         }

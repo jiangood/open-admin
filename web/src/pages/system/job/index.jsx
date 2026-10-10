@@ -6,14 +6,13 @@ import {
     Divider,
     Form,
     Input,
-    message,
     Modal,
     Select,
     Switch,
     Tag
 } from 'antd'
 import {PlusOutlined} from "@ant-design/icons";
-import {FormModal, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
+import {FormModal, getMessageApi, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -91,7 +90,7 @@ export default class JobPage extends React.Component {
     }
 
     handleDelete = row => {
-        const hide = message.loading("删除任务中...")
+        const hide = getMessageApi().loading("删除任务中...")
         HttpClient.post('admin/job/delete', {id: row.id}, null, {toastError: false}).then(() => {
             hide();
             this.tableRef.current.reload();

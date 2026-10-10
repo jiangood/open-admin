@@ -1,9 +1,9 @@
 import React from "react";
-import {message, Modal, Upload} from "antd";
+import {Modal, Upload} from "antd";
 import type {UploadChangeParam, UploadFile, UploadProps} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import {ViewFile} from "../../views";
-import {ObjectUtils, UrlUtils} from "../../utils";
+import {getMessageApi, ObjectUtils, UrlUtils} from "../../utils";
 import type {FieldProps} from '../types';
 
 /** 框架内使用的上传文件对象，额外携带 sysFile 的 objectName */
@@ -110,7 +110,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         }
 
         if (file.status === 'done' && rs?.success) {
-            message.success(`文件「${rs.data?.name || ''}」上传成功`);
+            getMessageApi().success(`文件「${rs.data?.name || ''}」上传成功`);
         }
 
         const newIds = this.convertComponentValueToOutput(fileList);

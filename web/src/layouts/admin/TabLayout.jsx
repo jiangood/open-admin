@@ -83,8 +83,28 @@ export class TabLayout extends React.Component {
         this.unsubscribeClosePage = EventBus.on('closePage', this.handleClosePageEvent);
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         this.activeKey = this.state.activeKey;
+        // 菜单信息晚于 Tab 创建时才加载完成：路径/菜单映射变化后回填「未命名」Tab 标题
+        if (this.props.pathMenuMap !== prevProps.pathMenuMap) {
+            this.refreshTabLabels();
+        }
+    }
+
+    refreshTabLabels() {
+        this.setState(prev => {
+            let changed = false;
+            const tabs = prev.tabs.map(t => {
+                const qIndex = t.key.indexOf('?');
+                const pathname = qIndex === -1 ? t.key : t.key.substring(0, qIndex);
+                const search = qIndex === -1 ? '' : t.key.substring(qIndex);
+                const label = getLabel(pathname, search, this.props.pathMenuMap);
+                if (label === t.label) return t;
+                changed = true;
+                return {...t, label};
+            });
+            return changed ? {tabs} : null;
+        });
     }
 
     componentWillUnmount() {

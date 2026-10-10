@@ -1,19 +1,19 @@
 .oa-article {
   max-width: 800px;
   margin: 0 auto;
-  background: #fff;
+  background: var(--oa-color-bg-container, #fff);
   padding: 24px 32px;
   border-radius: 4px;
   font-size: 15px;
   line-height: 1.8;
-  color: rgba(0, 0, 0, 0.88);
+  color: var(--oa-color-text, rgba(0, 0, 0, 0.88));
   word-wrap: break-word;
 
   .oa-article-title {
     text-align: center;
     padding-bottom: 16px;
     margin-bottom: 16px;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--oa-color-border, #eee);
 
     h1 {
       font-size: 26px;
@@ -23,7 +23,7 @@
     }
 
     .oa-article-meta {
-      color: #999;
+      color: var(--oa-color-text-tertiary, #999);
       font-size: 13px;
       display: flex;
       justify-content: center;
@@ -64,19 +64,19 @@
   }
 
   a {
-    color: #1677ff;
+    color: var(--primary-color, #1677ff);
   }
 
   blockquote {
     margin: 0 0 16px;
     padding: 8px 16px;
-    border-left: 4px solid #e8e8e8;
-    background: #fafafa;
-    color: #666;
+    border-left: 4px solid var(--oa-color-border, #e8e8e8);
+    background: var(--oa-color-fill, #fafafa);
+    color: var(--oa-color-text-secondary, #666);
   }
 
   pre {
-    background: #f6f8fa;
+    background: var(--oa-color-fill, #f6f8fa);
     padding: 12px 16px;
     border-radius: 4px;
     overflow-x: auto;
@@ -84,7 +84,7 @@
   }
 
   code {
-    background: #f6f8fa;
+    background: var(--oa-color-fill, #f6f8fa);
     padding: 2px 4px;
     border-radius: 3px;
     font-size: 90%;
@@ -102,19 +102,19 @@
   }
 
   th, td {
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--oa-color-border, #e0e0e0);
     padding: 8px 12px;
     text-align: left;
   }
 
   th {
-    background: #f5f5f5;
+    background: var(--oa-color-fill, #f5f5f5);
     font-weight: 600;
   }
 
   hr {
     border: none;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--oa-color-border, #eee);
     margin: 24px 0;
   }
 

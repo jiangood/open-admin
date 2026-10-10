@@ -68,7 +68,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
             maxHeight: 300, overflow: 'auto',
             fontSize: 12, fontFamily: 'monospace',
             whiteSpace: 'pre-wrap', wordBreak: 'break-all',
-            background: '#f5f5f5', padding: 12, borderRadius: 4,
+            background: '#f5f5f5', padding: 12, borderRadius: 'var(--oa-border-radius, 4px)',
             color: getToken().colorError,
         };
 

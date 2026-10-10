@@ -1,7 +1,7 @@
 import React from 'react';
-import {Button, Form, Input, message} from 'antd';
+import {Button, Form, Input} from 'antd';
 import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import {EventBus, HttpClient, GlobalData, history} from "../../framework";
+import {EventBus, HttpClient, GlobalData, getMessageApi, history} from "../../framework";
 
 import "./login.less"
 
@@ -20,7 +20,7 @@ function postLogin(values, query, success, error) {
         success?.(rs)
     }).catch(e => {
         console.error('[Login] 登录失败:', e);
-        message.error(HttpClient.errToMsg(e))
+        getMessageApi().error(HttpClient.errToMsg(e))
         error?.(e)
     })
 }
@@ -51,7 +51,7 @@ export default class LoginPage extends React.Component {
             this.setState({siteInfo: rs.data})
         }).catch(() => {
             console.error('[Login] 加载站点信息失败');
-            message.error('加载站点信息失败，请刷新页面重试')
+            getMessageApi().error('加载站点信息失败，请刷新页面重试')
         })
     }
 
@@ -62,7 +62,7 @@ export default class LoginPage extends React.Component {
         } catch (e) {
             console.error('[Login] 密码编码失败:', e);
             this.setState({logging: false})
-            message.error('密码含不支持字符，请联系管理员重置')
+            getMessageApi().error('密码含不支持字符，请联系管理员重置')
             return
         }
         postLogin(values, this.props.location?.query, () => {

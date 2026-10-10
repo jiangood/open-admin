@@ -66,7 +66,34 @@
 
 ## 主题定制
 
-主题颜色默认值内置框架（`#1961AC` 主色等），业务项目**零配置**即可获得默认主题。需要定制时，在入口组件 `<Layouts>` 传入 `colors` prop 覆盖：
+框架默认回归 **antd 原生主题**（主色 `#1677ff`、侧栏 `#001529`、圆角 `6`），零配置即用。顶栏右侧的调色板按钮可打开「界面设置」面板，内置多套预设主题，并可按需调整界面密度、圆角与界面布局，选择后即时生效并持久化到 `localStorage`。
+
+### 预设主题
+
+| key | 名称 | 主色 | 侧栏底色 |
+|-----|------|------|----------|
+| `antd` | Ant Design 默认 | `#1677ff` | `#001529` |
+| `cyan` | 青碧 | `#13c2c2` | `#0C2E2E` |
+| `green` | 翠竹 | `#389e0d` | `#10291A` |
+| `purple` | 紫罗兰 | `#722ed1` | `#1E1440` |
+| `red` | 中国红 | `#cf1322` | `#2A1418` |
+| `orange` | 暖橙 | `#d46b08` | `#2A1D10` |
+| `graphite` | 石墨灰 | `#2f3542` | `#1B2026` |
+
+代码中控制：
+
+```js
+import { THEME_PRESETS, applyThemePreset, getActivePresetKey, resetUserTheme } from '@jiangood/open-admin';
+
+THEME_PRESETS;              // 预设列表
+getActivePresetKey();       // 当前预设 key，默认 'antd'
+applyThemePreset('cyan');   // 应用预设
+resetUserTheme();           // 恢复默认（antd）
+```
+
+### 业务定制配色
+
+业务侧仍可在入口 `<Layouts>` 传入 `colors` prop，作为**基线**；用户选择的预设会覆盖基线，`resetUserTheme()` 回到基线：
 
 ```jsx
 <Layouts colors={{
@@ -74,8 +101,88 @@
     colorSuccess: '#52c41a',
     colorWarning: '#faad14',
     colorError: '#ff4d4f',
+    colorInfo: '#1677ff',
     colorBgLayout: '#f5f5f5',
+    // 侧栏配色，不设则用 antd 默认
+    siderBg: '#102A43',
+    siderSubBg: '#102A43',
+    siderHoverBg: 'rgba(255,255,255,0.06)',
+    siderTriggerBg: '#0B2038',
 }}/>
 ```
 
 `colors` 为可选字段，未传的项使用框架默认值。菜单/标签栏等处的 `--primary-color` CSS 变量会随主题自动同步。
+
+### 暗色模式
+
+框架内置明/暗两种模式，可通过顶栏的「界面设置」面板（调色板图标）中的「外观模式」切换。切换结果持久化在 `localStorage` 的 `oa-theme-mode`，刷新后保持。
+
+也可在代码中控制：
+
+```js
+import { getThemeMode, setThemeMode, toggleThemeMode } from '@jiangood/open-admin';
+
+getThemeMode();        // 'light' | 'dark'
+setThemeMode('dark');  // 指定模式
+toggleThemeMode();     // 明暗互切
+```
+
+- 暗色模式下 `colorBgLayout` **不再套用默认浅灰**，交由 antd 暗色算法推导；若业务显式在 `colors` 中传入 `colorBgLayout`，两种模式都会尊重。
+- 左侧栏独立套用 antd 暗色算法，因此分割线、边框在深色底上始终可见；业务无需额外处理。
+- 颜色/预设切换通过 `EventBus` 的 `themeChange` 事件广播，`Layouts` 已内置监听并重渲染，业务无需处理。
+- 自定义样式请复用框架同步的 CSS 变量以自动跟随明/暗：`--primary-color`、`--primary-color-hover`、`--oa-color-bg-container`、`--oa-color-bg-layout`、`--oa-color-border`、`--oa-color-text`、`--oa-color-text-secondary`、`--oa-color-text-tertiary`、`--oa-color-fill`、`--oa-color-primary-bg`，以及侧栏相关的 `--oa-sider-bg`、`--oa-sider-text`、`--oa-sider-hover-bg`、`--oa-sider-trigger-bg`。
+
+### 界面密度
+
+在「界面设置」面板的「界面密度」中选择 `默认` 或 `紧凑`，切换即时生效，持久化在 `localStorage` 的 `oa-theme-density`。紧凑模式叠加 antd `compactAlgorithm`，并缩小控件高度与字号。
+
+代码中控制：
+
+```js
+import { DENSITY_PRESETS, applyDensityPreset, getActiveDensityKey } from '@jiangood/open-admin';
+
+DENSITY_PRESETS;              // 密度预设列表
+getActiveDensityKey();        // 'default' | 'compact'
+applyDensityPreset('compact');// 应用紧凑
+```
+
+### 圆角
+
+「界面设置」面板的「圆角」提供 `默认 / 直角 / 圆润`（对应 `6 / 0 / 10`），默认回归 antd 原生 `6`。持久化在 `localStorage` 的 `oa-theme-radius`。
+
+```js
+import { RADIUS_PRESETS, applyRadiusPreset, getActiveRadiusKey } from '@jiangood/open-admin';
+
+RADIUS_PRESETS;               // 圆角预设列表
+getActiveRadiusKey();         // 'sharp' | 'default' | 'round'
+applyRadiusPreset('round');
+```
+
+### 界面布局
+
+「界面布局」提供 `多标签页`（默认）与 `单页` 两种模式。单页模式不显示标签栏，仅渲染当前路由页面。持久化在 `localStorage` 的 `oa-layout-tabs`。
+
+```js
+import { getLayoutMode, setLayoutMode, toggleLayoutMode } from '@jiangood/open-admin';
+
+getLayoutMode();              // 'tabs' | 'single'
+setLayoutMode('single');
+toggleLayoutMode();
+```
+
+- 布局切换通过 `EventBus` 的 `layoutChange` 事件广播，管理布局已内置监听并重渲染。
+- 单页模式下业务调用 `PageUtils.closeCurrent()` 不再关闭标签（无标签可关），由业务自行跳转。
+
+### 恢复默认
+
+「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 布局）。
+
+```js
+import { resetAllSettings, resetUserTheme, resetLayoutMode } from '@jiangood/open-admin';
+
+resetAllSettings();   // 主题 + 布局 全复位
+resetUserTheme();     // 仅主题（颜色/明暗/密度/圆角）
+resetLayoutMode();    // 仅布局
+```
+
+尺寸与圆角相关的 CSS 变量：`--oa-border-radius`、`--oa-control-height`、`--oa-font-size`，自定义样式可复用它们以跟随密度/圆角预设。

@@ -1,12 +1,12 @@
 import React from "react";
-import {Button, Form, Input, message} from "antd";
-import {HttpClient, history} from "../../framework";
+import {Button, Form, Input} from "antd";
+import {getMessageApi, getToken, HttpClient, history} from "../../framework";
 
 export default class ForceUpdatePwdPage extends React.Component {
 
     onFinish = (values) => {
         HttpClient.post('admin/userCenter/update-pwd', values, null).then(() => {
-            message.success('修改密码成功，请重新登录');
+            getMessageApi().success('修改密码成功，请重新登录');
             history.push('/public/login');
         })
     }
@@ -17,24 +17,25 @@ export default class ForceUpdatePwdPage extends React.Component {
         })
 
     render() {
+        const token = getToken();
         return (
             <div style={{
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
                 minHeight: '100vh',
-                background: '#f0f2f5'
+                background: String(token.colorBgLayout)
             }}>
                 <div style={{
-                    background: '#fff',
+                    background: String(token.colorBgContainer),
                     padding: '40px',
                     borderRadius: '8px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    boxShadow: String(token.boxShadowSecondary ?? '0 2px 8px rgba(0,0,0,0.1)'),
                     maxWidth: 400,
                     width: '100%'
                 }}>
                     <h2 style={{textAlign: 'center', marginBottom: 24}}>修改密码</h2>
-                    <p style={{textAlign: 'center', color: '#999', marginBottom: 24}}>
+                    <p style={{textAlign: 'center', color: String(token.colorTextTertiary), marginBottom: 24}}>
                         首次登录或密码已被重置，请修改密码后重新登录
                     </p>
                     <Form onFinish={this.onFinish}>

@@ -1,6 +1,6 @@
-import {Button, Collapse, Drawer, Form, Input, message, Modal, Select, Space, Switch, Tag, Typography} from 'antd'
+import {Button, Collapse, Drawer, Form, Input, Modal, Select, Space, Switch, Tag, Typography} from 'antd'
 import React from 'react'
-import {HttpClient, Page, Perm} from '../../../framework'
+import {HttpClient, getMessageApi, getToken, Page, Perm} from '../../../framework'
 
 /**
  * 代码生成：动态扫描实体，按实体生成常见 CRUD 代码并写入项目源码目录。
@@ -52,7 +52,7 @@ export default class CodegenPage extends React.Component {
 
     handlePreview = () => {
         if (!this.state.className) {
-            message.warning('请先选择实体')
+            getMessageApi().warning('请先选择实体')
             return
         }
         this.setState({loading: true})
@@ -60,13 +60,13 @@ export default class CodegenPage extends React.Component {
             this.setState({files: rs.data || [], previewOpen: true})
         }).catch(e => {
             console.error('[Codegen] 预览失败:', e)
-            message.error(e?.message || '预览失败')
+            getMessageApi().error(e?.message || '预览失败')
         }).finally(() => this.setState({loading: false}))
     }
 
     handleGenerate = () => {
         if (!this.state.className) {
-            message.warning('请先选择实体')
+            getMessageApi().warning('请先选择实体')
             return
         }
         this.setState({confirmOpen: true})
@@ -78,17 +78,17 @@ export default class CodegenPage extends React.Component {
             this.setState({result: rs.data, resultOpen: true, previewOpen: false})
         }).catch(e => {
             console.error('[Codegen] 生成失败:', e)
-            message.error(e?.message || '生成失败')
+            getMessageApi().error(e?.message || '生成失败')
         }).finally(() => this.setState({loading: false}))
     }
 
     copy = (text) => {
         if (navigator.clipboard) {
             navigator.clipboard.writeText(text)
-                .then(() => message.success('已复制'))
-                .catch(() => message.error('复制失败'))
+                .then(() => getMessageApi().success('已复制'))
+                .catch(() => getMessageApi().error('复制失败'))
         } else {
-            message.warning('当前浏览器不支持剪贴板')
+            getMessageApi().warning('当前浏览器不支持剪贴板')
         }
     }
 
@@ -164,7 +164,7 @@ export default class CodegenPage extends React.Component {
                                 <pre style={{
                                     maxHeight: 420,
                                     overflow: 'auto',
-                                    background: '#f6f8fa',
+                                    background: String(getToken().colorFillTertiary ?? '#f6f8fa'),
                                     padding: 12,
                                     borderRadius: 4,
                                 }}>{file.content}</pre>

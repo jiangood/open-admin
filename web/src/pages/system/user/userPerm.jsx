@@ -1,6 +1,6 @@
-import {Form, Modal, message} from 'antd';
+import {Form, Modal} from 'antd';
 import React from 'react';
-import {FieldDictSelect, FieldRemoteSelect, FieldSysOrgTree, HttpClient} from "../../../framework";
+import {FieldDictSelect, FieldRemoteSelect, FieldSysOrgTree, getMessageApi, HttpClient} from "../../../framework";
 
 
 export default class UserPerm extends React.Component {
@@ -41,7 +41,7 @@ export default class UserPerm extends React.Component {
             })
             this.props.onOk()
         }).catch(e => {
-            message.error(HttpClient.errToMsg(e))
+            getMessageApi().error(HttpClient.errToMsg(e))
             this.setState({
                 confirmLoading: false
             })

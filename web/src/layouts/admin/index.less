@@ -6,8 +6,8 @@
     height: 48px;
     display: flex;
     align-items: center;
-    background-color: #fff;
-    border-bottom: 1px solid #e8e8e8;
+    background-color: var(--oa-color-bg-container, #fff);
+    border-bottom: 1px solid var(--oa-color-border, #e8e8e8);
 
     .top-nav {
       flex: 1;
@@ -24,7 +24,7 @@
         padding: 0 16px;
         height: 100%;
         cursor: pointer;
-        color: rgba(0, 0, 0, 0.65);
+        color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
         transition: color 0.2s;
         white-space: nowrap;
         background: none;
@@ -32,12 +32,12 @@
         font: inherit;
 
         &:hover {
-          color: var(--primary-color, var(--primary-color, #1961AC));
+          color: var(--primary-color, #1961AC);
         }
 
         &.active {
-          color: var(--primary-color, var(--primary-color, #1961AC));
-          box-shadow: inset 0 -2px 0 var(--primary-color, var(--primary-color, #1961AC));
+          color: var(--primary-color, #1961AC);
+          box-shadow: inset 0 -2px 0 var(--primary-color, #1961AC);
         }
       }
     }
@@ -58,8 +58,8 @@
         font: inherit;
 
         &:hover {
-          background: var(--primary-color-hover, #4990CD);
-          color: white; /* NOSONAR: 主题色悬停态，对比度由主题色决定 */
+          background: var(--oa-color-fill, rgba(0, 0, 0, 0.06));
+          color: var(--primary-color, #1961AC);
         }
       }
     }
@@ -111,7 +111,7 @@
 
       .ant-menu-submenu-selected {
         &>div {
-          color: white;
+          color: var(--oa-sider-text, rgba(255, 255, 255, 0.85));
         }
       }
 
