@@ -193,7 +193,7 @@ export class UserPicker extends React.Component<UserPickerProps, UserPickerState
         return <Modal
             open={open}
             title={title}
-            width={width || 1240}
+            width={width || 1120}
             confirmLoading={confirmLoading}
             okText='确定'
             cancelText='取消'
