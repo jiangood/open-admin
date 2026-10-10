@@ -1,0 +1,17 @@
+/* 选人器左侧机构树：机构名称过长时不换行，改为容器横向滚动 */
+.oa-user-picker-tree {
+  height: 100%;
+  overflow: auto;
+
+  /* 让树按内容宽度撑开，超宽时由外层容器横向滚动 */
+  .ant-tree {
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .ant-tree-treenode,
+  .ant-tree-node-content-wrapper,
+  .ant-tree-title {
+    white-space: nowrap;
+  }
+}

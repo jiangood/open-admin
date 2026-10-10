@@ -5,6 +5,7 @@ import {CloseOutlined} from '@ant-design/icons';
 import {OrgTree} from './OrgTree';
 import {formatUserLabel, type PickerUser} from './pickerUser';
 import {HttpClient} from '../utils';
+import './UserPicker.less';
 
 export interface UserPickerProps {
     /** 是否显示 */
@@ -203,7 +204,7 @@ export class UserPicker extends React.Component<UserPickerProps, UserPickerState
         >
             <Splitter style={{height: height || 530}}>
                 <Splitter.Panel defaultSize={320} min={180} max={560} style={{paddingRight: 8}}>
-                    <div style={{height: '100%', overflow: 'auto'}}>
+                    <div className="oa-user-picker-tree">
                         <MemoOrgTree onChange={this.onSelectOrg}/>
                     </div>
                 </Splitter.Panel>
