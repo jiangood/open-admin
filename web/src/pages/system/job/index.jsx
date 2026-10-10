@@ -8,6 +8,7 @@ import {
     Input,
     Modal,
     Select,
+    Spin,
     Switch,
     Tag
 } from 'antd'
@@ -52,6 +53,10 @@ export default class JobPage extends React.Component {
         status: null,
 
         executeRecordOpen: false,
+
+        logOpen: false,
+        logLoading: false,
+        logContent: '',
     }
     tableRef = React.createRef()
     modalRef = React.createRef()
@@ -177,6 +182,19 @@ export default class JobPage extends React.Component {
         this.setState({executeRecordOpen: true, selectedRecord: record})
     }
 
+    showLog = (record) => {
+        this.setState({logOpen: true, logLoading: true, logContent: '', selectedLogRecord: record})
+        HttpClient.get('admin/sys/log/job/' + record.id, null, {toastError: false}).then(content => {
+            this.setState({
+                logContent: typeof content === 'string' ? content : JSON.stringify(content),
+                logLoading: false
+            })
+        }).catch(e => {
+            console.error('[Job] 加载任务日志失败:', e)
+            this.setState({logContent: '日志加载失败：' + (e?.message || ''), logLoading: false})
+        })
+    }
+
 
     render() {
         return <Page>
@@ -290,16 +308,36 @@ export default class JobPage extends React.Component {
                     {
                         title: '操作',
                         dataIndex: 'option',
-                        render: (_, record) => {
-                            const url = UrlUtils.contextPath('/admin/sys/log/job/' + record.id);
-                            return <a href={url} target='_blank'>日志</a>;
-                        },
+                        render: (_, record) => <a onClick={() => this.showLog(record)}>日志</a>,
                     }
                 ]} request={(params) => {
                     params.jobId = this.state.selectedRecord.id
                     return HttpClient.get('admin/job/execute-record', params);
                 }}></ProTable>
 
+            </Modal>
+
+            <Modal title='任务日志'
+                   open={this.state.logOpen}
+                   onCancel={() => this.setState({logOpen: false})}
+                   width={1024}
+                   destroyOnHidden
+                   footer={this.state.selectedLogRecord ? (
+                       <a href={UrlUtils.contextPath('/admin/sys/log/job/' + this.state.selectedLogRecord.id)}
+                          target='_blank' rel='noreferrer'>在新窗口打开</a>
+                   ) : null}
+            >
+                <Spin spinning={this.state.logLoading}>
+                    <pre style={{
+                        margin: 0,
+                        maxHeight: '60vh',
+                        overflow: 'auto',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-all',
+                        fontSize: 12,
+                        lineHeight: 1.6
+                    }}>{this.state.logContent}</pre>
+                </Spin>
             </Modal>
         </Page>
     }
