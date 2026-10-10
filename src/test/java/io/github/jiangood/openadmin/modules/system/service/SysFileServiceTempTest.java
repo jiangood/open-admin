@@ -44,27 +44,27 @@ class SysFileServiceTempTest {
     }
 
     @Test
-    void claim_shouldConfirmSingleFileField() {
+    void confirmTempFiles_shouldConfirmSingleFileField() {
         when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
 
-        sysFileService.claim(doc);
+        sysFileService.confirmTempFiles(doc);
 
         verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1", List.of("public/202607/id-a.jpg"));
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claim_shouldConfirmHtmlField() {
+    void confirmTempFiles_shouldConfirmHtmlField() {
         when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setContent("<p><img src=\"/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
                 + "<img src=\"/file/private/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg\"></p>");
 
-        sysFileService.claim(doc);
+        sysFileService.confirmTempFiles(doc);
 
         verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1", List.of(
                 "public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg",
@@ -72,57 +72,57 @@ class SysFileServiceTempTest {
     }
 
     @Test
-    void claim_shouldStripQueryStringAndContextPathFromHtml() {
+    void confirmTempFiles_shouldStripQueryStringAndContextPathFromHtml() {
         when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setContent("<img src=\"/example/file/public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg?thumb=1\">");
 
-        sysFileService.claim(doc);
+        sysFileService.confirmTempFiles(doc);
 
         verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1",
                 List.of("public/img/202607/550e8400-e29b-41d4-a716-446655440000.jpg"));
     }
 
     @Test
-    void claim_shouldSkipNullEntityOrMissingId() {
-        sysFileService.claim(null);
+    void confirmTempFiles_shouldSkipNullEntityOrMissingId() {
+        sysFileService.confirmTempFiles(null);
 
         FileDoc noId = new FileDoc();
         noId.setCover("public/202607/id-a.jpg");
-        sysFileService.claim(noId);
+        sysFileService.confirmTempFiles(noId);
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claim_shouldSkipBlankFieldValues() {
+    void confirmTempFiles_shouldSkipBlankFieldValues() {
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("  ");
         doc.setContent(null);
 
-        sysFileService.claim(doc);
+        sysFileService.confirmTempFiles(doc);
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claim_shouldFallbackToSnakeCaseClassNameWhenNoTableAnnotation() {
+    void confirmTempFiles_shouldFallbackToSnakeCaseClassNameWhenNoTableAnnotation() {
         when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of());
         NoTableDoc doc = new NoTableDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
 
-        sysFileService.claim(doc);
+        sysFileService.confirmTempFiles(doc);
 
         verify(sysFileRepository).updateJoinRefByObjectNames("no_table_doc", "doc-1", List.of("public/202607/id-a.jpg"));
     }
 
     @Test
-    void unclaim_shouldMarkFilesPendingDelete() throws Exception {
+    void discardTempFiles_shouldMarkFilesPendingDelete() throws Exception {
         stubFilePool(List.of(
                 ownedFile("public/202607/id-a.jpg"), ownedFile("public/202607/550e8400-e29b-41d4-a716-446655440000.jpg"),
                 ownedFile("private/202607/550e8400-e29b-41d4-a716-446655440000.jpg")));
@@ -132,7 +132,7 @@ class SysFileServiceTempTest {
         doc.setContent("<img src=\"/file/public/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">"
                 + "<img src=\"/file/private/202607/550e8400-e29b-41d4-a716-446655440000.jpg\">");
 
-        sysFileService.unclaim(doc);
+        sysFileService.discardTempFiles(doc);
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileRepository).updateStatusByObjectNames(List.of(
@@ -143,7 +143,7 @@ class SysFileServiceTempTest {
     }
 
     @Test
-    void unclaim_shouldReleaseUnownedFiles() throws Exception {
+    void discardTempFiles_shouldReleaseUnownedFiles() throws Exception {
         SysFile unowned = new SysFile("id-a");
         unowned.setObjectName("public/202607/id-a.jpg");
         stubFilePool(List.of(unowned));
@@ -151,25 +151,25 @@ class SysFileServiceTempTest {
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
 
-        sysFileService.unclaim(doc);
+        sysFileService.discardTempFiles(doc);
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
     }
 
     @Test
-    void unclaim_shouldSkipFilesOwnedByAnotherRecord() throws Exception {
+    void discardTempFiles_shouldSkipFilesOwnedByAnotherRecord() throws Exception {
         stubFilePool(List.of(otherOwnedFile("public/202607/id-a.jpg")));
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
 
-        sysFileService.unclaim(doc);
+        sysFileService.discardTempFiles(doc);
 
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void unclaim_shouldOnlyReleaseFilesOwnedByThisRecord() throws Exception {
+    void discardTempFiles_shouldOnlyReleaseFilesOwnedByThisRecord() throws Exception {
         String htmlFile = "public/202607/44444444-4444-4444-8444-444444444444.jpg";
         stubFilePool(List.of(otherOwnedFile("public/202607/id-a.jpg"), ownedFile(htmlFile)));
         FileDoc doc = new FileDoc();
@@ -177,7 +177,7 @@ class SysFileServiceTempTest {
         doc.setCover("public/202607/id-a.jpg");
         doc.setContent("<img src=\"/file/" + htmlFile + "\">");
 
-        sysFileService.unclaim(doc);
+        sysFileService.discardTempFiles(doc);
 
         verify(sysFileRepository, never()).updateStatusByObjectNames(List.of("public/202607/id-a.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileRepository).updateStatusByObjectNames(List.of(htmlFile), FileStatus.PENDING_DELETE);
@@ -208,37 +208,37 @@ class SysFileServiceTempTest {
     }
 
     @Test
-    void claim_shouldRejectFileOwnedByAnotherRecord() {
+    void confirmTempFiles_shouldRejectFileOwnedByAnotherRecord() {
         when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of(otherOwnedFile("public/202607/id-a.jpg")));
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
 
-        assertThrows(BusinessException.class, () -> sysFileService.claim(doc));
+        assertThrows(BusinessException.class, () -> sysFileService.confirmTempFiles(doc));
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
     }
 
     @Test
-    void claim_shouldAllowFileOwnedBySameRecord() {
+    void confirmTempFiles_shouldAllowFileOwnedBySameRecord() {
         when(sysFileRepository.findByObjectNameIn(any())).thenReturn(List.of(ownedFile("public/202607/id-a.jpg")));
         FileDoc doc = new FileDoc();
         doc.setId("doc-1");
         doc.setCover("public/202607/id-a.jpg");
 
-        sysFileService.claim(doc);
+        sysFileService.confirmTempFiles(doc);
 
         verify(sysFileRepository).updateJoinRefByObjectNames("test_doc", "doc-1", List.of("public/202607/id-a.jpg"));
     }
 
     @Test
-    void unclaim_shouldSkipNullEntityOrMissingId() {
-        sysFileService.unclaim(null);
+    void discardTempFiles_shouldSkipNullEntityOrMissingId() {
+        sysFileService.discardTempFiles(null);
 
         FileDoc noId = new FileDoc();
         noId.setCover("public/202607/id-a.jpg");
-        sysFileService.unclaim(noId);
+        sysFileService.discardTempFiles(noId);
 
         verify(sysFileRepository, never()).updateJoinRefByObjectNames(any(), any(), any());
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());

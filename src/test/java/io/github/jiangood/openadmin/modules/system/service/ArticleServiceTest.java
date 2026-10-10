@@ -57,12 +57,12 @@ class ArticleServiceTest {
         Article input = newArticle("no-such-id");
         assertThrows(IllegalArgumentException.class, () -> articleService.update(input, List.of("title"))); // NOSONAR: 单语句 lambda，方法引用不适用
 
-        verify(sysFileService, never()).unclaim(any());
-        verify(sysFileService, never()).claim(any());
+        verify(sysFileService, never()).discardTempFiles(any());
+        verify(sysFileService, never()).confirmTempFiles(any());
     }
 
     @Test
-    void update_shouldUnclaimOldBeforeClaimNew() {
+    void update_shouldDiscardOldBeforeConfirmNew() {
         Article old = newArticle("a1");
         old.setCode("old-code");
         old.setMainImage("public/img/202601/old.jpg");
@@ -81,8 +81,8 @@ class ArticleServiceTest {
         articleService.update(input, List.of("code", "title", "mainImage", "content"));
 
         InOrder inOrder = inOrder(sysFileService);
-        inOrder.verify(sysFileService).unclaim(any(Persistable.class));
-        inOrder.verify(sysFileService).claim(any(Persistable.class));
+        inOrder.verify(sysFileService).discardTempFiles(any(Persistable.class));
+        inOrder.verify(sysFileService).confirmTempFiles(any(Persistable.class));
     }
 
     @Test
@@ -97,29 +97,29 @@ class ArticleServiceTest {
 
         assertThrows(RuntimeException.class, () -> articleService.update(input, List.of("code"))); // NOSONAR: 单语句 lambda，方法引用不适用
 
-        verify(sysFileService, never()).unclaim(any());
-        verify(sysFileService, never()).claim(any());
+        verify(sysFileService, never()).discardTempFiles(any());
+        verify(sysFileService, never()).confirmTempFiles(any());
     }
 
     @Test
-    void deleteById_shouldUnclaimBeforeDelete() {
+    void deleteById_shouldDiscardBeforeDelete() {
         Article article = newArticle("a1");
         when(articleRepository.findById("a1")).thenReturn(Optional.of(article));
 
         articleService.deleteById("a1");
 
         InOrder inOrder = inOrder(sysFileService, articleRepository);
-        inOrder.verify(sysFileService).unclaim(article);
+        inOrder.verify(sysFileService).discardTempFiles(article);
         inOrder.verify(articleRepository).deleteById("a1");
     }
 
     @Test
-    void deleteById_shouldSkipUnclaimWhenNotExists() {
+    void deleteById_shouldSkipDiscardWhenNotExists() {
         when(articleRepository.findById("missing")).thenReturn(Optional.empty());
 
         articleService.deleteById("missing");
 
-        verify(sysFileService, never()).unclaim(any());
+        verify(sysFileService, never()).discardTempFiles(any());
         verify(articleRepository, never()).deleteById(any());
     }
 

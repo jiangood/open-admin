@@ -10,7 +10,7 @@ import org.springframework.data.domain.Persistable;
 
 /**
  * 不继承 BaseEntity、仅实现 Persistable 的测试实体，
- * 验证文件认领/取消认领的 joinTable/joinId 推导不依赖框架基类
+ * 验证确认/丢弃临时文件的 joinTable/joinId 推导不依赖框架基类
  */
 @Getter
 @Setter

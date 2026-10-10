@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SpringBootTest
 @Transactional
-class ArticleFileClaimTest {
+class ArticleFileTempTest {
 
     @Autowired
     private ArticleController articleController;
@@ -49,22 +49,22 @@ class ArticleFileClaimTest {
     }
 
     @Test
-    void update_shouldClaimNewMainImageAndReleaseOld() {
+    void update_shouldConfirmNewMainImageAndDiscardOld() {
         String oldImage = "public/img/202608/old-main.jpg";
         String newImage = "public/img/202608/new-main.jpg";
         saveFile(oldImage);
         saveFile(newImage);
 
-        String articleId = saveArticle("claim-about-1", oldImage, null);
-        Article claimDoc = new Article();
-        claimDoc.setId(articleId);
-        claimDoc.setMainImage(oldImage);
-        sysFileService.claim(claimDoc);
+        String articleId = saveArticle("confirm-about-1", oldImage, null);
+        Article tempDoc = new Article();
+        tempDoc.setId(articleId);
+        tempDoc.setMainImage(oldImage);
+        sysFileService.confirmTempFiles(tempDoc);
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(oldImage).getStatus());
 
         ArticleReq updateParam = new ArticleReq();
         updateParam.setId(articleId);
-        updateParam.setCode("claim-about-1");
+        updateParam.setCode("confirm-about-1");
         updateParam.setTitle("标题-改");
         updateParam.setMainImage(newImage);
         updateParam.setContent("<p>new</p>");
@@ -81,7 +81,7 @@ class ArticleFileClaimTest {
     }
 
     @Test
-    void update_shouldReleaseContentImagesRemovedFromHtml() {
+    void update_shouldDiscardContentImagesRemovedFromHtml() {
         String kept = "public/img/202608/11111111-1111-4111-8111-111111111111.jpg";
         String removed = "public/img/202608/22222222-2222-4222-8222-222222222222.jpg";
         String added = "public/img/202608/33333333-3333-4333-8333-333333333333.jpg";
@@ -90,17 +90,17 @@ class ArticleFileClaimTest {
         saveFile(added);
 
         String oldContent = "<p><img src=\"/file/" + kept + "\"> <img src=\"/file/" + removed + "\"></p>";
-        String articleId = saveArticle("claim-about-2", null, oldContent);
-        Article claimDoc = new Article();
-        claimDoc.setId(articleId);
-        claimDoc.setContent(oldContent);
-        sysFileService.claim(claimDoc);
+        String articleId = saveArticle("confirm-about-2", null, oldContent);
+        Article tempDoc = new Article();
+        tempDoc.setId(articleId);
+        tempDoc.setContent(oldContent);
+        sysFileService.confirmTempFiles(tempDoc);
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(kept).getStatus());
         assertEquals(FileStatus.IN_USE, sysFileRepository.findByObjectName(removed).getStatus());
 
         ArticleReq updateParam = new ArticleReq();
         updateParam.setId(articleId);
-        updateParam.setCode("claim-about-2");
+        updateParam.setCode("confirm-about-2");
         updateParam.setTitle("标题-改");
         updateParam.setMainImage(null);
         updateParam.setContent("<p><img src=\"/file/" + kept + "\"> <img src=\"/file/" + added + "\"></p>");
@@ -119,16 +119,16 @@ class ArticleFileClaimTest {
         String shared = "public/img/202608/shared-owned.jpg";
         saveFile(shared);
 
-        String ownerId = saveArticle("claim-owner", shared, null);
+        String ownerId = saveArticle("confirm-owner", shared, null);
         Article ownerDoc = new Article();
         ownerDoc.setId(ownerId);
         ownerDoc.setMainImage(shared);
-        sysFileService.claim(ownerDoc);
+        sysFileService.confirmTempFiles(ownerDoc);
 
-        String updaterId = saveArticle("claim-updater", null, null);
+        String updaterId = saveArticle("confirm-updater", null, null);
         ArticleReq updateParam = new ArticleReq();
         updateParam.setId(updaterId);
-        updateParam.setCode("claim-updater");
+        updateParam.setCode("confirm-updater");
         updateParam.setTitle("标题-改");
         updateParam.setMainImage(shared);
         updateParam.setContent("<p>new</p>");
@@ -150,14 +150,14 @@ class ArticleFileClaimTest {
         String shared = "public/img/202608/shared-owned-2.jpg";
         saveFile(shared);
 
-        String ownerId = saveArticle("claim-owner-2", shared, null);
+        String ownerId = saveArticle("confirm-owner-2", shared, null);
         Article ownerDoc = new Article();
         ownerDoc.setId(ownerId);
         ownerDoc.setMainImage(shared);
-        sysFileService.claim(ownerDoc);
+        sysFileService.confirmTempFiles(ownerDoc);
 
         ArticleReq param = new ArticleReq();
-        param.setCode("claim-new");
+        param.setCode("confirm-new");
         param.setTitle("新文章");
         param.setMainImage(shared);
         param.setContent("<p>new</p>");
@@ -170,7 +170,7 @@ class ArticleFileClaimTest {
         SysFile file = sysFileRepository.findByObjectName(shared);
         assertEquals(ownerId, file.getJoinId());
         assertEquals(FileStatus.IN_USE, file.getStatus());
-        assertNull(articleRepository.findByCode("claim-new"), "共享冲突时文章创建应整体回滚");
+        assertNull(articleRepository.findByCode("confirm-new"), "共享冲突时文章创建应整体回滚");
 
         // 本用例关闭测试事务（NOT_SUPPORTED），提交的数据需手动清理，避免污染共享测试库
         articleRepository.deleteById(ownerId);
@@ -182,7 +182,7 @@ class ArticleFileClaimTest {
         SysFile file = new SysFile();
         file.setObjectName(objectName);
         sysFileRepository.save(file);
-        // 认领是批量 UPDATE（不自动 flush），需先将文件落库，模拟真实场景中"上传已完成提交"
+        // 确认临时文件是批量 UPDATE（不自动 flush），需先将文件落库，模拟真实场景中"上传已完成提交"
         sysFileRepository.flush();
     }
 

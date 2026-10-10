@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * 标注实体上引用框架文件（objectName）的字段。
  * <p>
- * 配合 {@code SysFileService.claim/unclaim(Persistable)} 使用：认领/取消认领时框架自动扫描该注解字段，
+ * 配合 {@code SysFileService.confirmTempFiles/discardTempFiles(Persistable)} 使用：确认/丢弃临时文件时框架自动扫描该注解字段，
  * joinTable 取实体 {@code @Table(name)}，joinId 取 {@code Persistable.getId()}，业务方无需指定字段与表名。
  * <p>
  * 实体无需继承 {@code BaseEntity}，实现 {@code Persistable<String>} 即可。

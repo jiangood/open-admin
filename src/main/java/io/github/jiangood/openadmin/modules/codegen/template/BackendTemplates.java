@@ -85,15 +85,15 @@ public final class BackendTemplates {
                     public %s save(%s input, List<String> requestKeys) {
                         if (input.isNew()) {
                             %s result = %s.save(input);
-                            sysFileService.claim(result);
+                            sysFileService.confirmTempFiles(result);
                             return result;
                         }
                         %s old = %s.findById(input.getId()).orElse(null);
                         Assert.notNull(old, "数据不存在");
-                        sysFileService.unclaim(old);
+                        sysFileService.discardTempFiles(old);
                         this.updateField(input, requestKeys);
                         %s.flush();
-                        sysFileService.claim(input);
+                        sysFileService.confirmTempFiles(input);
                         return %s.findById(input.getId()).orElse(null);
                     }
 
@@ -104,7 +104,7 @@ public final class BackendTemplates {
                         if (entity == null) {
                             return;
                         }
-                        sysFileService.unclaim(entity);
+                        sysFileService.discardTempFiles(entity);
                         super.deleteById(id);
                     }
                 }

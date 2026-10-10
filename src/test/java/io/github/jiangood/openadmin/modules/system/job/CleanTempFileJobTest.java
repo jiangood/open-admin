@@ -62,7 +62,7 @@ class CleanTempFileJobTest {
     }
 
     @Test
-    void execute_shouldMarkUnclaimedThenDeletePending() throws Exception {
+    void execute_shouldMarkTempThenDeletePending() throws Exception {
         SysFile a = new SysFile("id-a");
         a.setObjectName("public/202607/id-a.jpg");
         SysFile b = new SysFile("id-b");
@@ -80,7 +80,7 @@ class CleanTempFileJobTest {
         verify(sysFileRepository).updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class));
         verify(sysFileService).deleteFileInternal(a);
         verify(sysFileService).deleteFileInternal(b);
-        assertTrue(result.contains("标记未认领 2 个"));
+        assertTrue(result.contains("标记临时 2 个"));
         assertTrue(result.contains("删除待删 1 个"));
     }
 

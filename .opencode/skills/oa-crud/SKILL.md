@@ -307,16 +307,16 @@ public class CustomerController {
 }
 ```
 
-### 文件认领（必须）
+### 临时文件确认（必须）
 
-实体如果包含上传文件/图片字段（`FieldUploadFile`、`FieldUploadImage`、`FieldEditor` 富文本），业务保存后**必须认领文件**，否则文件一直处于"未认领(TEMP)"状态，默认 120 分钟后被清理任务物理删除：
+实体如果包含上传文件/图片字段（`FieldUploadFile`、`FieldUploadImage`、`FieldEditor` 富文本），业务保存后**必须确认临时文件**，否则文件一直处于"临时(TEMP)"状态，默认 120 分钟后被清理任务物理删除：
 
 - 实体文件字段打 `@FileField` 注解（富文本加 `html = true`）；实体无需继承 `BaseEntity`，实现 `Persistable<String>` 即可
-- `sysFileService.claim(entity)` 认领 / `unclaim(entity)` 取消认领，joinTable/joinId 自动取实体 `@Table(name)` 与 `getId()`
-- 更新时**先 `unclaim(old)` 再 save，save 后 `claim(entity)`**；删除时先 `unclaim` 再删除
-- unclaim + save + claim 必须整体放在**同一个 `@Transactional` Service 方法**内，不要拆到 Controller 或非事务方法
+- `sysFileService.confirmTempFiles(entity)` 确认 / `discardTempFiles(entity)` 丢弃，joinTable/joinId 自动取实体 `@Table(name)` 与 `getId()`
+- 更新时**先 `discardTempFiles(old)` 再 save，save 后 `confirmTempFiles(entity)`**；删除时先 `discardTempFiles` 再删除
+- discardTempFiles + save + confirmTempFiles 必须整体放在**同一个 `@Transactional` Service 方法**内，不要拆到 Controller 或非事务方法
 
-完整规则（事务边界、单记录独占、save/update/delete 代码示例）见[development.md「文件认领」](../../../docs/open-admin/development.md#文件认领)。若实体无任何文件/图片/富文本字段，可跳过本小节。
+完整规则（事务边界、单记录独占、save/update/delete 代码示例）见[development.md「临时文件确认」](../../../docs/open-admin/development.md#临时文件确认)。若实体无任何文件/图片/富文本字段，可跳过本小节。
 
 ## 第三步：前端页面创建
 

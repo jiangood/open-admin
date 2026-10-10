@@ -450,11 +450,11 @@ public class SysFileService {
 
 
     /**
-     * 认领实体引用的文件：遍历实体上所有 {@link FileField} 字段，绑定业务记录
+     * 确认实体引用的临时文件：遍历实体上所有 {@link FileField} 字段，绑定业务记录
      * （joinTable 取实体 {@code @Table(name)}，joinId 取 {@code Persistable.getId()}）并置为使用中。
      */
     @Transactional
-    public void claim(Persistable<String> entity) {
+    public void confirmTempFiles(Persistable<String> entity) {
         if (entity == null || CharSequenceUtil.isBlank(entity.getId())) {
             return;
         }
@@ -463,19 +463,19 @@ public class SysFileService {
         for (Field field : fileFields(entity.getClass())) {
             String value = StrUtil.toStringOrNull(readFieldValue(entity, field));
             if (field.getAnnotation(FileField.class).html()) {
-                claimList(joinTable, joinId, extractObjectNamesFromHtml(value));
+                confirmTempFileList(joinTable, joinId, extractObjectNamesFromHtml(value));
             } else {
-                claimList(joinTable, joinId, objectNameList(value));
+                confirmTempFileList(joinTable, joinId, objectNameList(value));
             }
         }
     }
 
     /**
-     * 取消认领实体引用的文件：置为待删除（与 {@link #claim} 对应的释放引用操作）。
-     * 仅释放未被认领或归本记录所有的文件，被其他业务记录认领的文件不受影响。
+     * 丢弃实体引用的临时文件：置为待删除（与 {@link #confirmTempFiles} 对应的释放引用操作）。
+     * 仅释放未被确认或归本记录所有的文件，被其他业务记录引用的文件不受影响。
      */
     @Transactional
-    public void unclaim(Persistable<String> entity) {
+    public void discardTempFiles(Persistable<String> entity) {
         if (entity == null || CharSequenceUtil.isBlank(entity.getId())) {
             return;
         }
@@ -484,18 +484,36 @@ public class SysFileService {
         for (Field field : fileFields(entity.getClass())) {
             String value = StrUtil.toStringOrNull(readFieldValue(entity, field));
             if (field.getAnnotation(FileField.class).html()) {
-                releaseList(joinTable, joinId, extractObjectNamesFromHtml(value));
+                discardTempFileList(joinTable, joinId, extractObjectNamesFromHtml(value));
             } else {
-                releaseList(joinTable, joinId, objectNameList(value));
+                discardTempFileList(joinTable, joinId, objectNameList(value));
             }
         }
+    }
+
+    /**
+     * @deprecated 改用 {@link #confirmTempFiles(Persistable)}
+     */
+    @Deprecated
+    @Transactional
+    public void claim(Persistable<String> entity) {
+        confirmTempFiles(entity);
+    }
+
+    /**
+     * @deprecated 改用 {@link #discardTempFiles(Persistable)}
+     */
+    @Deprecated
+    @Transactional
+    public void unclaim(Persistable<String> entity) {
+        discardTempFiles(entity);
     }
 
     private List<String> objectNameList(String objectName) {
         return CharSequenceUtil.isBlank(objectName) ? List.of() : List.of(objectName);
     }
 
-    private void claimList(String joinTable, String joinId, List<String> objectNames) {
+    private void confirmTempFileList(String joinTable, String joinId, List<String> objectNames) {
         if (objectNames == null || objectNames.isEmpty()) {
             return;
         }
@@ -509,7 +527,7 @@ public class SysFileService {
         sysFileRepository.updateJoinRefByObjectNames(joinTable, joinId, objectNames);
     }
 
-    private void releaseList(String joinTable, String joinId, List<String> objectNames) {
+    private void discardTempFileList(String joinTable, String joinId, List<String> objectNames) {
         if (objectNames == null || objectNames.isEmpty()) {
             return;
         }
@@ -522,7 +540,7 @@ public class SysFileService {
         }
     }
 
-    /** 是否已被其他业务记录认领（joinTable/joinId 非空且与目标不同） */
+    /** 是否已被其他业务记录引用（joinTable/joinId 非空且与目标不同） */
     private boolean isOwnedByOther(SysFile file, String joinTable, String joinId) {
         return CharSequenceUtil.isNotBlank(file.getJoinTable())
                 && !(CharSequenceUtil.equals(joinTable, file.getJoinTable()) && CharSequenceUtil.equals(joinId, file.getJoinId()));

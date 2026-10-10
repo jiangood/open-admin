@@ -38,11 +38,11 @@ public class CleanTempFileJob extends BaseJob {
 
     @Override
     public String execute(JobDataMap data, Logger logger) throws Exception {
-        int cleanMinutes = systemProperties.getFile().getCleanUnclaimedMinutes();
+        int cleanMinutes = systemProperties.getFile().getCleanTempMinutes();
         LocalDateTime deadline = LocalDateTime.now(ZoneId.systemDefault()).minusMinutes(cleanMinutes);
 
-        // 1. 标记超时未认领为待删除（TEMP -> PENDING_DELETE）
-        int unclaimedCount = sysFileRepository.updateStatusByStatusAndCreateTimeBefore(
+        // 1. 标记超时临时文件为待删除（TEMP -> PENDING_DELETE）
+        int tempCount = sysFileRepository.updateStatusByStatusAndCreateTimeBefore(
                 FileStatus.TEMP, FileStatus.PENDING_DELETE, deadline);
 
         // 2. 孤儿扫描：分页只读扫描，孤儿逐个标记待删除
@@ -51,9 +51,9 @@ public class CleanTempFileJob extends BaseJob {
         // 3. 删除待删文件：逐文件物理删除并删库行
         int deletedCount = deletePendingFiles();
 
-        logger.info("临时文件清理完成，标记未认领 {} 个，标记孤儿 {} 个，删除待删 {} 个",
-                unclaimedCount, orphanCount, deletedCount);
-        return "清理完成，标记未认领 " + unclaimedCount + " 个，标记孤儿 " + orphanCount
+        logger.info("临时文件清理完成，标记临时 {} 个，标记孤儿 {} 个，删除待删 {} 个",
+                tempCount, orphanCount, deletedCount);
+        return "清理完成，标记临时 " + tempCount + " 个，标记孤儿 " + orphanCount
                 + " 个，删除待删 " + deletedCount + " 个";
     }
 

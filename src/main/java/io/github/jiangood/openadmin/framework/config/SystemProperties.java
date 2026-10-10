@@ -138,9 +138,9 @@ public class SystemProperties {
         private String allowUpload = "docx,xlsx,pdf,png,jpg,jpeg,webp,mp3,mp4,wav,txt";
 
         /**
-         * 未认领文件自动清理时间（分钟），默认 120（2 小时）
+         * 临时文件自动清理时间（分钟），默认 120（2 小时）
          */
-        private int cleanUnclaimedMinutes = 120;
+        private int cleanTempMinutes = 120;
 
         /**
          * MinIO 对象存储配置

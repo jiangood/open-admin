@@ -10,13 +10,13 @@ import io.github.jiangood.openadmin.framework.dict.DictType;
 public enum FileStatus {
 
     /**
-     * 未认领（上传后默认）
+     * 临时（上传后默认，尚未绑定业务记录）
      */
-    @DictItem(label = "未认领", color = "DEFAULT")
+    @DictItem(label = "临时", color = "DEFAULT")
     TEMP,
 
     /**
-     * 使用中（已被业务记录认领）
+     * 使用中（已被业务记录引用）
      */
     @DictItem(label = "使用中", color = "SUCCESS")
     IN_USE,

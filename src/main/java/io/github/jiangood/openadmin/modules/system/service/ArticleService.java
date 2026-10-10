@@ -29,8 +29,8 @@ public class ArticleService extends BaseService<Article> {
                 throw new BusinessException("文章编码已存在");
             }
             Article result = articleRepository.save(input);
-            // 与保存同事务认领文件：共享冲突时文章一并回滚，避免留下未认领的悬空引用
-            sysFileService.claim(result);
+            // 与保存同事务确认临时文件：共享冲突时文章一并回滚，避免留下未确认的悬空引用
+            sysFileService.confirmTempFiles(result);
             return result;
         }
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
@@ -42,8 +42,8 @@ public class ArticleService extends BaseService<Article> {
 
     /**
      * 更新文章并同步文件引用，整个流程在同一事务内：
-     * 取消认领旧文件引用 → 保存 → 认领新文件。保存失败时旧文件的取消认领一并回滚，
-     * 避免误删文章仍在引用的图片；新旧引用重合的文件会由后续认领重新置为使用中。
+     * 丢弃旧文件引用 → 保存 → 确认新临时文件。保存失败时旧文件的丢弃一并回滚，
+     * 避免误删文章仍在引用的图片；新旧引用重合的文件会由后续确认重新置为使用中。
      */
     @Transactional
     @Override
@@ -55,22 +55,22 @@ public class ArticleService extends BaseService<Article> {
             throw new BusinessException("文章编码已存在");
         }
 
-        // 先取消认领旧文件引用（与保存同事务，保存失败整体回滚）
-        sysFileService.unclaim(old);
+        // 先丢弃旧文件引用（与保存同事务，保存失败整体回滚）
+        sysFileService.discardTempFiles(old);
 
         this.updateField(input, requestKeys); // NOSONAR: 外层 update() 已开启事务
         // 冲刷文章变更，避免随后带 clearAutomatically 的批量更新清空持久化上下文导致变更丢失
         articleRepository.flush();
 
-        // 保存成功后认领新文件
-        sysFileService.claim(input);
+        // 保存成功后确认新临时文件
+        sysFileService.confirmTempFiles(input);
 
         return articleRepository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
     }
 
     /**
-     * 删除文章并取消认领其引用的文件，整个流程在同一事务内：
-     * 删除失败时取消认领一并回滚，避免误删仍被引用或删除未生效的文件。
+     * 删除文章并丢弃其引用的文件，整个流程在同一事务内：
+     * 删除失败时丢弃临时文件一并回滚，避免误删仍被引用或删除未生效的文件。
      */
     @Transactional
     @Override
@@ -79,7 +79,7 @@ public class ArticleService extends BaseService<Article> {
         if (article == null) {
             return;
         }
-        sysFileService.unclaim(article);
+        sysFileService.discardTempFiles(article);
         super.deleteById(id);
     }
 

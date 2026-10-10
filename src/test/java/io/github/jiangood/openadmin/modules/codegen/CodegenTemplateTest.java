@@ -68,8 +68,8 @@ class CodegenTemplateTest {
 
         String service = BackendTemplates.service(meta, true);
         assertTrue(service.contains("class ArticleService extends BaseService<Article>"));
-        assertTrue(service.contains("sysFileService.claim(result)"));
-        assertTrue(service.contains("sysFileService.unclaim(old)"));
+        assertTrue(service.contains("sysFileService.confirmTempFiles(result)"));
+        assertTrue(service.contains("sysFileService.discardTempFiles(old)"));
 
         String simpleService = BackendTemplates.service(meta, false);
         assertFalse(simpleService.contains("sysFileService"));
