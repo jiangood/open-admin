@@ -8,11 +8,17 @@
   width: 100vw;
   height: 100vh;
 
-
   .login-content {
-    padding: 40px;
-    background: #15184b44;
-    width: 350px;
+    /* 面板内复用的局部变量，统一玻璃质感与文字层级 */
+    --login-text: rgba(255, 255, 255, 0.94);
+    --login-text-dim: rgba(255, 255, 255, 0.6);
+    --login-hairline: rgba(255, 255, 255, 0.16);
+    --login-field-bg: rgba(255, 255, 255, 0.08);
+    --login-radius: calc(var(--oa-border-radius, 6px) + 10px);
+    --login-field-radius: calc(var(--oa-border-radius, 6px) + 2px);
+
+    box-sizing: border-box;
+    width: 384px;
     max-width: calc(100vw - 48px);
     max-height: calc(100vh - 48px);
     overflow: auto;
@@ -21,40 +27,247 @@
     /* 垂直居中，矮屏下不再溢出 */
     top: 50%;
     transform: translateY(-50%);
+    padding: 40px 36px 30px;
 
-    .ant-form-item-label > label{
-      color: white;
+    /* 深色磨砂玻璃：主题深色底（保证层次）+ 顶部主色微光 + backdrop-filter 虚化 */
+    background-color: color-mix(in srgb, var(--oa-sider-bg, #0b1220) 55%, transparent);
+    background-image: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--primary-color, #1677ff) 16%, transparent) 0%,
+            transparent 140px
+    );
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    /* 细描边沿用主题主色；顶边内高光模拟玻璃反光 */
+    border: 1px solid color-mix(in srgb, var(--primary-color, #1677ff) 26%, var(--login-hairline));
+    border-radius: var(--login-radius);
+    box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6),
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+
+    animation: login-panel-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    .ant-form-item-label > label {
+      color: var(--login-text);
+      /* 玻璃更透明后，浅色文字加轻微阴影保证可读性 */
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
     }
+  }
+}
+
+/* 面板入场：轻微上浮淡入 */
+@keyframes login-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-50% + 16px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%);
+  }
+}
+
+/* 不支持 backdrop-filter 的浏览器：提高底色不透明度，保证白字对比度 */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .login-page .login-content {
+    background-color: color-mix(in srgb, var(--oa-sider-bg, #0b1220) 92%, transparent);
+  }
+}
+
+/* 品牌区：logo + 站点标题，与后台侧栏保持同一品牌识别 */
+.login-brand {
+  margin-bottom: 26px;
+  text-align: center;
+
+  .login-brand-logo {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: var(--login-radius);
+    background: color-mix(in srgb, var(--primary-color, #1677ff) 16%, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--login-hairline);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+    img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+    }
+
+    /* logo 加载失败时回退到此矢量标记 */
+    .anticon {
+      color: var(--login-text);
+      font-size: 26px;
+    }
+  }
+}
+
+.login-page.login-page h1 {
+  margin: 0;
+  text-align: center;
+  color: var(--login-text);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  line-height: 1.4;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+/* 表单：占满面板，输入框改为玻璃质感并跟随主题主色聚焦 */
+.login-form {
+  width: 100%;
+  margin: 0;
+
+  .ant-form-item {
+    margin-bottom: 18px;
+  }
+
+  .ant-input-affix-wrapper {
+    height: 46px;
+    padding: 0 14px;
+    border-radius: var(--login-field-radius);
+    background-color: var(--login-field-bg);
+    border: 1px solid var(--login-hairline);
+    box-shadow: none;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    &:focus-within,
+    &.ant-input-affix-wrapper-focused {
+      background-color: rgba(255, 255, 255, 0.14);
+      border-color: var(--primary-color, #1677ff);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color, #1677ff) 28%, transparent);
+    }
+
+    .ant-input-prefix {
+      margin-inline-end: 10px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 16px;
+    }
+
+    /* 密码可见性切换按钮 */
+    .ant-input-suffix {
+      color: rgba(255, 255, 255, 0.55);
+    }
+  }
+
+  .ant-input {
+    color: var(--login-text);
+    font-size: 15px;
+    background: transparent;
+
+    &::placeholder {
+      color: var(--login-text-dim);
+    }
+
+    /* 浏览器自动填充时保持玻璃底与浅色文字 */
+    &:-webkit-autofill {
+      -webkit-text-fill-color: var(--login-text);
+      caret-color: var(--login-text);
+      transition: background-color 9999s ease-out;
+    }
+  }
+
+  .ant-form-item-explain-error {
+    margin-top: 4px;
+    color: color-mix(in srgb, var(--oa-color-error, #ff4d4f) 55%, #fff);
+    font-size: 13px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  /* 提交按钮：主色渐变 + 悬浮辉光，作为面板唯一强视觉锚点 */
+  .login-submit {
+    margin-bottom: 0;
+
+    .ant-btn-primary {
+      height: 46px;
+      border: none;
+      border-radius: var(--login-field-radius);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-indent: 0.3em;
+      background: linear-gradient(
+              135deg,
+              var(--primary-color, #1677ff),
+              var(--primary-color-hover, #4096ff)
+      );
+      box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--primary-color, #1677ff) 85%, transparent);
+      transition: filter 0.2s, box-shadow 0.2s, transform 0.16s;
+
+      &:hover:not(:disabled) {
+        filter: brightness(1.07);
+        box-shadow: 0 16px 32px -12px color-mix(in srgb, var(--primary-color, #1677ff) 95%, transparent);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(1px);
+        filter: brightness(0.98);
+      }
+    }
+  }
+}
+
+/* 校验失败态：描边与文案提亮到深色玻璃上仍可读。
+   多加 .login-page 提升特异性，盖过 antd 聚焦态注入的白底 */
+.login-page .login-form .ant-form-item-has-error {
+  .ant-input-affix-wrapper,
+  .ant-input-affix-wrapper:hover,
+  .ant-input-affix-wrapper:focus,
+  .ant-input-affix-wrapper:focus-within {
+    background-color: color-mix(in srgb, var(--oa-color-error, #ff4d4f) 12%, transparent);
+    border-color: color-mix(in srgb, var(--oa-color-error, #ff4d4f) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--oa-color-error, #ff4d4f) 24%, transparent);
+  }
+
+  .ant-input {
+    background-color: transparent;
+  }
+}
+
+/* 登录框底部提示：与表单之间用分隔线区隔，保持次要文字层级 */
+.login-bottom-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--login-text-dim);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+
+  .anticon {
+    flex: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page .login-content {
+    animation: none;
   }
 }
 
 @media screen and (max-width: 768px) {
   .login-page {
-    padding-top: 30%;
+    padding-top: 20%;
 
     .login-content {
-      width: calc(100% - 100px);
-      padding: 24px;
+      width: calc(100% - 64px);
+      padding: 28px 22px;
       position: static;
       margin: 0 auto;
       transform: none;
+      animation: none;
     }
   }
 }
-
-
-.login-form {
-  max-width: 300px;
-  margin: 0 auto;
-}
-
-
-
-
-.login-page.login-page h1 {
-  margin-bottom: 50px;
-  text-align: center;
-  color: white;
-  font-size: x-large;
-}
-

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Button, Form, Input} from 'antd';
-import {LockOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
+import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
 import {EventBus, HttpClient, GlobalData, getMessageApi, history} from "../../framework";
 
 import "./login.less"
@@ -36,7 +36,9 @@ export default class LoginPage extends React.Component {
 
     state = {
         logging: false,
-        siteInfo: {}
+        siteInfo: {},
+        /* logo.png 缺失或加载失败时，回退到矢量标记，避免首屏出现破损图 */
+        logoError: false
     }
 
     componentDidMount() {
@@ -73,8 +75,6 @@ export default class LoginPage extends React.Component {
     }
 
     render() {
-        const {siteInfo} = this.state
-
         const pageStyle = {
             backgroundImage: `url("./login_bg.jpg")`
         }
@@ -82,12 +82,26 @@ export default class LoginPage extends React.Component {
         return (
             <section className='login-page' style={pageStyle}>
                 <div className="login-content">
-                    <h1>{siteInfo.title}</h1>
+                    {this.renderBrand()}
                     {this.getForm()}
                     {this.renderFormBottom()}
                 </div>
             </section>
         );
+    }
+
+    renderBrand() {
+        const {siteInfo = {}, logoError} = this.state
+        return (
+            <div className="login-brand">
+                <span className="login-brand-logo">
+                    {logoError
+                        ? <SafetyCertificateOutlined/>
+                        : <img src="./logo.png" alt="" onError={() => this.setState({logoError: true})}/>}
+                </span>
+                {siteInfo.title && <h1>{siteInfo.title}</h1>}
+            </div>
+        )
     }
 
     getForm = () => {
@@ -109,7 +123,7 @@ export default class LoginPage extends React.Component {
                     />
                 </Form.Item>
 
-                <Form.Item style={{marginTop: 10}}>
+                <Form.Item className="login-submit">
                     <Button loading={this.state.logging} type="primary" htmlType="submit"
                             block size='large'>
                         登录
@@ -125,10 +139,10 @@ export default class LoginPage extends React.Component {
     };
 
     renderFormBottom() {
-        const siteInfo = this.state.siteInfo;
+        const siteInfo = this.state.siteInfo || {};
         if (siteInfo.loginBoxBottomTip) {
             return (
-                <div style={{color: 'white', marginTop: 50, fontSize: '14px', textAlign: 'center'}}>
+                <div className="login-bottom-tip">
                     <WarningOutlined/> {siteInfo.loginBoxBottomTip}
                 </div>
             )
