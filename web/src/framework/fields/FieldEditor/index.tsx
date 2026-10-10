@@ -94,11 +94,11 @@ export class FieldEditor extends React.Component<FieldEditorProps, {loading: boo
                         alignItems: 'center',
                         justifyContent: 'center',
                         gap: 8,
-                        background: '#fff',
+                        background: 'var(--oa-color-bg-container, #fff)',
                         zIndex: 1,
                     }}>
                         <Spin/>
-                        <span style={{color: '#999'}}>编辑器加载中...</span>
+                        <span style={{color: 'var(--oa-color-text-tertiary, #999)'}}>编辑器加载中...</span>
                     </div>
                 )}
             </div>

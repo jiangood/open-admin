@@ -226,7 +226,7 @@ this.setState({loading: true})
                         total: this.state.total,
                         pageSize: this.state.pageSize,
                         current: this.state.current,
-                        pageSizeOptions: [10, 20, 50, 100, 500, 1000, 5000],
+                        pageSizeOptions: [10, 20, 50, 100],
                         showTotal: (total) => `共 ${total} 条`
                     }}
 
@@ -261,7 +261,7 @@ this.setState({loading: true})
         return (
             <Form
                 className="filter-bar"
-                style={{gridTemplateColumns: `repeat(${this.props.searchFormCols ?? 4}, 1fr)`}}
+                style={{'--oa-filter-cols': this.props.searchFormCols ?? 4} as React.CSSProperties}
                 onFinish={(values) => this.onSearch(values)}
                 ref={(instance) => {
                     this.formRef.current = instance;

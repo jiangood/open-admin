@@ -1,7 +1,8 @@
 .oa-pro-table {
     .filter-bar {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        /* 列数由 searchFormCols 通过 --oa-filter-cols 注入，窄窗口下按断点收敛 */
+        grid-template-columns: repeat(var(--oa-filter-cols, 4), 1fr);
         gap: 12px 20px;
         align-items: center;
         padding: 16px 20px;
@@ -77,6 +78,23 @@
             flex-shrink: 0;
             /* 只提供右侧插槽时，space-between 退化为 flex-start，靠 auto 兜住右对齐 */
             margin-left: auto;
+        }
+    }
+
+    /* 桌面窄窗口下收敛搜索栏列数，避免标签+输入挤压/溢出 */
+    @media (max-width: 1400px) {
+        .filter-bar {
+            --oa-filter-cols: 3 !important;
+        }
+    }
+
+    @media (max-width: 1100px) {
+        .filter-bar {
+            --oa-filter-cols: 2 !important;
+
+            .filter-actions {
+                grid-column: 1 / -1;
+            }
         }
     }
 }

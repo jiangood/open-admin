@@ -390,7 +390,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
         if (canvasImg?.url) {
             return <img src={canvasImg.url} style={{maxWidth: '100%', maxHeight: '100%'}} alt="预览"/>;
         }
-        return <div style={{color: '#999'}}>生成中...</div>;
+        return <div style={{color: 'var(--oa-color-text-tertiary, #999)'}}>生成中...</div>;
     };
 
     render() {
@@ -487,14 +487,14 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                         <div style={{flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 12}}>
                             <div style={{
                                 flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                background: '#f5f5f5', borderRadius: 8, border: '1px dashed #d9d9d9', position: 'relative', overflow: 'hidden',
+                                background: 'var(--oa-color-fill, #f5f5f5)', borderRadius: 8, border: '1px dashed var(--oa-color-border, #d9d9d9)', position: 'relative', overflow: 'hidden',
                             }}>
                                 {this.renderCanvas(preview, canvasImg, originalUrl)}
                             </div>
                         </div>
 
                         {/* 右侧属性栏 */}
-                        <div style={{width: 240, flexShrink: 0, borderLeft: '1px solid #f0f0f0', paddingLeft: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
+                        <div style={{width: 240, flexShrink: 0, borderLeft: '1px solid var(--oa-color-border, #f0f0f0)', paddingLeft: 16, display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
                             <div style={{flex: 1, overflowY: 'auto'}}>
                                 {/* 工具栏（横排） */}
                                 {tool !== 'crop' && (
@@ -520,14 +520,14 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                                         >
                                             {CROP_RATIOS.map((r) => (
                                                 <Radio key={r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free'} value={r.ratio ? `${r.ratio.width}:${r.ratio.height}` : 'free'}>
-                                                    {r.label}{r.desc ? <span style={{color: '#999', fontSize: 12}}>（{r.desc}）</span> : null}
+                                                    {r.label}{r.desc ? <span style={{color: 'var(--oa-color-text-tertiary, #999)', fontSize: 12}}>（{r.desc}）</span> : null}
                                                 </Radio>
                                             ))}
                                         </Radio.Group>
                                 ) : (
                                     <>
                                         {canvasImg && (
-                                            <div style={{color: '#666'}}>
+                                            <div style={{color: 'var(--oa-color-text-secondary, #666)'}}>
                                                 <div>尺寸：{canvasImg.dims ? `${canvasImg.dims.width} x ${canvasImg.dims.height}` : '--'}</div>
                                                 <div>体积：{formatSize(canvasImg.size)}</div>
                                             </div>
@@ -537,7 +537,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                                         <Divider style={{margin: '12px 0'}}/>
                                         <div style={{fontWeight: 600, marginBottom: 8}}>压缩处理</div>
                                         <div style={{marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8}}>
-                                            <span style={{color: '#666', flexShrink: 0}}>最大宽度</span>
+                                            <span style={{color: 'var(--oa-color-text-secondary, #666)', flexShrink: 0}}>最大宽度</span>
                                             <Select
                                                 value={compressWidth}
                                                 onChange={(v) => this.setState({compressWidth: v})}
@@ -555,7 +555,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                                             />
                                         </div>
                                         <div style={{marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8}}>
-                                            <span style={{color: '#666', flexShrink: 0}}>最大体积</span>
+                                            <span style={{color: 'var(--oa-color-text-secondary, #666)', flexShrink: 0}}>最大体积</span>
                                             <Select
                                                 value={compressSize}
                                                 onChange={(v) => this.setState({compressSize: v})}

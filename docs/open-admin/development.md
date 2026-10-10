@@ -112,6 +112,7 @@ public void deleteById(String id) {
 
 ## 前端要点
 
+- **UI 定位**：面向正常业务人员的**桌面端**后台，**不要求无障碍（a11y）与移动端适配**（不强制 tablist/键盘导航、触摸目标、移动布局等）；样式优先使用 `--oa-*` CSS 变量 / antd token，**禁止硬编码颜色**（须同时兼容明暗主题）
 - 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）
 - 使用 ES6+，强制 `const`/`let`，解构赋值
 - 优先使用框架组件：`ProTable`、`Page`、`FieldDictSelect` 等

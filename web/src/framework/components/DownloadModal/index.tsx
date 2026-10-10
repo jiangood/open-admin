@@ -287,7 +287,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       >
         <div style={{padding: '20px 0'}}>
           {/* 文件名 */}
-          <div style={{marginBottom: 16, fontSize: 15, fontWeight: 500, color: '#333'}}>
+          <div style={{marginBottom: 16, fontSize: 15, fontWeight: 500, color: 'var(--oa-color-text, #333)'}}>
             文件名：{fileName || '未知文件'}
           </div>
 
@@ -295,7 +295,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           {status === 'downloading' && (
             <>
               <Progress percent={progress} status="active" strokeColor="var(--ant-color-primary)"/>
-              <div style={{marginTop: 8, fontSize: 13, color: '#999'}}>
+              <div style={{marginTop: 8, fontSize: 13, color: 'var(--oa-color-text-tertiary, #999)'}}>
                 <span>{this.formatSize(loaded)}</span>
                 {total > 0 && <span> / {this.formatSize(total)}</span>}
                 {speed && <span style={{marginLeft: 12}}>{speed}</span>}
@@ -310,7 +310,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           {status === 'completed' && (
             <>
               <Progress percent={100} status="success"/>
-              <div style={{marginTop: 8, fontSize: 13, color: '#999'}}>
+              <div style={{marginTop: 8, fontSize: 13, color: 'var(--oa-color-text-tertiary, #999)'}}>
                 {loaded > 0 && <span>文件大小：{this.formatSize(loaded)}</span>}
               </div>
               <div style={{marginTop: 8}}>
@@ -323,7 +323,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
           {status === 'failed' && (
             <>
               <Progress percent={progress} status="exception"/>
-              <div style={{marginTop: 8, fontSize: 13, color: '#ff4d4f'}}>
+              <div style={{marginTop: 8, fontSize: 13, color: 'var(--oa-color-error, #ff4d4f)'}}>
                 <CloseCircleOutlined style={{marginRight: 4}}/>
                 {errorMessage}
               </div>

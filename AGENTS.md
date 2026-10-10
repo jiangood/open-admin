@@ -13,6 +13,7 @@
 - 改动前先分清作用域：框架源码 `src/main/java` + 前端框架 `web/src/**`；`docs/open-admin/` 与 `.opencode/skills/oa-*` 会打进 release ZIP 并同步到业务项目，修改这些文件 = 修改框架对外 API
 - 修改框架后需先 `mvn clean install -DskipTests`
 - 新增业务模块六步流程见 guide.md「添加业务模块」
+- **前端 UI 定位**：面向正常业务人员的**桌面端**后台，**不把无障碍（a11y）与移动端适配**作为设计/评审关注点；样式优先走 `--oa-*` CSS 变量与 antd token，禁止硬编码颜色（否则暗色主题割裂）
 
 ## 版本发布
 

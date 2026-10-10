@@ -59,6 +59,11 @@ export const DEFAULT_COLORS: ThemeColors = {
 
 export const DEFAULT_PRESET_KEY = 'antd';
 
+/** 侧栏默认底色（预设未指定 siderBg 时的预览/回退值） */
+export const DEFAULT_SIDER_BG = '#001529';
+/** 侧栏折叠触发条默认底色 */
+export const DEFAULT_SIDER_TRIGGER_BG = '#002140';
+
 /** 界面密度预设：默认保持 antd 原生，紧凑叠加 compactAlgorithm */
 export const DENSITY_PRESETS: ThemeDensityPreset[] = [
     { key: 'default', name: '默认' },
@@ -373,15 +378,16 @@ function syncCssVars(token: Record<string, unknown>) {
     setVar(el, '--oa-color-text-tertiary', token.colorTextTertiary);
     setVar(el, '--oa-color-fill', token.colorFillTertiary);
     setVar(el, '--oa-color-primary-bg', token.colorPrimaryBg);
+    setVar(el, '--oa-color-error', token.colorError);
     // 尺寸/圆角变量，供 less 复用，使自定义样式跟随密度与圆角预设
     setPxVar(el, '--oa-border-radius', token.borderRadius);
     setPxVar(el, '--oa-control-height', token.controlHeight);
     setPxVar(el, '--oa-font-size', token.fontSize);
     // 侧栏相关变量
-    setVar(el, '--oa-sider-bg', merged.siderBg || '#001529');
+    setVar(el, '--oa-sider-bg', merged.siderBg || DEFAULT_SIDER_BG);
     setVar(el, '--oa-sider-text', 'rgba(255,255,255,0.85)');
     setVar(el, '--oa-sider-hover-bg', merged.siderHoverBg || 'transparent');
-    setVar(el, '--oa-sider-trigger-bg', merged.siderTriggerBg || '#002140');
+    setVar(el, '--oa-sider-trigger-bg', merged.siderTriggerBg || DEFAULT_SIDER_TRIGGER_BG);
     el.dataset.oaTheme = currentMode;
     el.style.colorScheme = currentMode;
 }

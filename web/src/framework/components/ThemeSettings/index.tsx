@@ -4,6 +4,7 @@ import { CheckOutlined } from '@ant-design/icons';
 import {
     THEME_PRESETS,
     DEFAULT_COLORS,
+    DEFAULT_SIDER_BG,
     applyThemePreset,
     getActivePresetKey,
     getThemeMode,
@@ -61,7 +62,7 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
         (RADIUS_PRESETS.find(p => p.key === key)?.token.borderRadius as number) ?? 6;
 
     return (
-        <Drawer title="界面设置" open={open} onClose={onClose} width={340}>
+        <Drawer title="界面设置" open={open} onClose={onClose} size={340}>
             <div style={{ fontWeight: 600 }}>外观模式</div>
             <Segmented
                 block
@@ -78,7 +79,7 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
                 {THEME_PRESETS.map(preset => {
                     const primary = preset.colors.colorPrimary || DEFAULT_COLORS.colorPrimary || '#1677ff';
-                    const sider = preset.colors.siderBg || '#001529';
+                    const sider = preset.colors.siderBg || DEFAULT_SIDER_BG;
                     const active = preset.key === activeKey;
                     return (
                         <button

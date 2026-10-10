@@ -75,7 +75,7 @@ export default class AdminLayout extends React.Component {
                 if (item.type === 'divider') {
                     return
                 }
-                item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 12}}/>
+                item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 16}}/>
             })
 
             const {topMenus} = this.classifyMenus(menuTree);
@@ -134,7 +134,7 @@ export default class AdminLayout extends React.Component {
             const defaultGroup = {
                 key: '_default_group',
                 label: '业务模块',
-                icon: <NamedIcon name="AppstoreOutlined" style={{fontSize: 12}}/>,
+                icon: <NamedIcon name="AppstoreOutlined" style={{fontSize: 16}}/>,
                 children: leafRootNodes,
                 type: 'directory',
             };

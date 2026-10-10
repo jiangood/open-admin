@@ -35,7 +35,7 @@ export class OrgSwitcher extends React.Component<Record<string, never>, {tree: O
         const {tree, currentOrgId} = this.state;
 
         if (countUnits(tree) === 0) {
-            return <span style={{marginRight: 8, color: "#999"}}>暂无组织机构</span>;
+            return <span style={{marginRight: 8, color: 'var(--oa-color-text-tertiary, #999)'}}>暂无组织机构</span>;
         }
 
         if (countUnits(tree) === 1) {

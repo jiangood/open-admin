@@ -31,7 +31,7 @@ export class ViewText extends React.Component {
                         style={{
                             background: 'none',
                             border: 'none',
-                            borderBottom: '1px dashed #d9d9d9',
+                            borderBottom: '1px dashed var(--oa-color-border, #d9d9d9)',
                             padding: 0,
                             font: 'inherit',
                             cursor: 'pointer',

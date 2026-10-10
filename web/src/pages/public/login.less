@@ -1,4 +1,6 @@
 .login-page {
+  /* 背景图加载前的兜底底色，保证白色文字始终可读 */
+  background-color: #16233f;
   background-size: cover;
   background-repeat: no-repeat;
   background-position: bottom;
@@ -11,9 +13,14 @@
     padding: 40px;
     background: #15184b44;
     width: 350px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 48px);
+    overflow: auto;
     position: fixed;
     right: 15%;
-    top: 20%;
+    /* 垂直居中，矮屏下不再溢出 */
+    top: 50%;
+    transform: translateY(-50%);
 
     .ant-form-item-label > label{
       color: white;
@@ -30,6 +37,7 @@
       padding: 24px;
       position: static;
       margin: 0 auto;
+      transform: none;
     }
   }
 }
