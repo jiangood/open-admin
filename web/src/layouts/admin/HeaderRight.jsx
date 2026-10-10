@@ -1,12 +1,11 @@
 import {Avatar, Dropdown, Modal} from "antd";
 import {BgColorsOutlined} from "@ant-design/icons";
 import React from "react";
-import {DeviceUtils, HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ThemeSettings, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ThemeSettings, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
     state = {
-        isMobileDevice: false,
         dropdownArticles: [],
         headerArticles: [],
         alertVisible: false,
@@ -15,9 +14,6 @@ export class HeaderRight extends React.Component {
     };
 
     componentDidMount() {
-        if (DeviceUtils.isMobileDevice()) {
-            this.setState({isMobileDevice: true})
-        }
         this.loadArticles()
     }
 
@@ -66,15 +62,6 @@ export class HeaderRight extends React.Component {
     render() {
         const info = GlobalData.getLoginInfo()
         const {dropdownArticles, headerArticles} = this.state
-
-        if (this.state.isMobileDevice) {
-            return <div className='header-right'>
-                {this.renderThemeSettings()}
-                <button type="button" style={{background: 'none', border: 'none', padding: 0, font: 'inherit', cursor: 'pointer'}}
-                        onClick={this.logout}>退出</button>
-                {this.renderThemeSettingsDrawer()}
-            </div>
-        }
 
         const articleItems = dropdownArticles.map(a => ({
             key: 'article:' + a.code,

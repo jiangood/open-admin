@@ -1,5 +1,5 @@
 import React from "react";
-import {Button, Form, Table} from 'antd';
+import {Button, Empty, Form, Table} from 'antd';
 import type {FormInstance, TableProps} from 'antd';
 
 import {StringUtils, type AjaxBody} from "../../utils";
@@ -198,6 +198,8 @@ this.setState({loading: true})
             rowSelection,
             rowKey = "id",
         } = this.props
+        // 有筛选条件时区分「无匹配结果」与「暂无数据」，避免业务人员误以为数据丢失
+        const hasFilter = Object.keys(this.state.params || {}).length > 0
 
 
         return <div className={'oa-pro-table '} id={this.id}>
@@ -244,6 +246,10 @@ this.setState({loading: true})
 
                     footer={this.state.extData.summary ? () => this.state.extData.summary : null}
                     bordered={this.props.bordered ?? false}
+                    locale={{
+                        emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                           description={hasFilter ? '没有符合条件的数据' : '暂无数据'}/>,
+                    }}
                 />
             </div>
         </div>

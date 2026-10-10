@@ -214,7 +214,7 @@ return <Layout className='main-layout'>
                     <div className='sider-header'>
                         <button type="button" className='logo-img'
                                 onClick={() => history.push('/')}>
-                            <img src="./logo.png" alt='logo'/>
+                            <img src="./logo.png" alt={siteInfo.title || '首页'}/>
                         </button>
                         <h3 className='hide-on-mobile'>
                             <Link to="/" style={{color: 'var(--oa-sider-text, rgba(255,255,255,0.85))'}}>{siteInfo.title}</Link>

@@ -101,10 +101,10 @@ export default class LoginPage extends React.Component {
                 colon={false}
             >
                 <Form.Item name="username" rules={[{required: true, message: '请输入用户名!'}]}>
-                    <Input size='large' prefix={<UserOutlined/>} placeholder="用户名" autoComplete="off"/>
+                    <Input size='large' prefix={<UserOutlined/>} placeholder="用户名" autoComplete="username"/>
                 </Form.Item>
                 <Form.Item name="password" rules={[{required: true, message: '请输入密码!'}]}>
-                    <Input.Password autoComplete="off" prefix={<LockOutlined/>} placeholder="密码"
+                    <Input.Password autoComplete="current-password" prefix={<LockOutlined/>} placeholder="密码"
                            size='large'
                     />
                 </Form.Item>
