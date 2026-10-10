@@ -306,6 +306,7 @@ class ReportPage extends React.Component {
 |------|------|
 | `FieldUserSelect` | 系统用户下拉（`/admin/sysUser/options`） |
 | `FieldUserSelectMultiple` | 系统用户多选 |
+| `FieldUserPicker` | 用户选择弹窗（机构树 + 服务端分页多选，`value` 为用户 id 数组，适合同名多、用户量大的场景；默认数据源 `/admin/sysUser/page`、回显 `/admin/sysUser/by-ids`，可用 `requestUrl`/`usersUrl` 覆盖） |
 | `FieldUnitTreeSelect` | 系统单位树选择（`/admin/sysOrg/unit-tree`） |
 | `FieldDeptTreeSelect` | 系统部门树选择（`/admin/sysOrg/dept-tree`） |
 | `FieldOrgTreeSelect` | `FieldDeptTreeSelect` 的别名 |

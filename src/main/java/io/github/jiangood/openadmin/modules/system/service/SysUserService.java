@@ -95,6 +95,16 @@ public class SysUserService extends BaseService<SysUser> {
         return sysUserRepository.findAllById(ids);
     }
 
+    /**
+     * 按 id 批量查询用户视图（含机构名称），用于选择器回显已选人员。
+     */
+    public List<UserVO> findVOByIds(Collection<String> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        return userConverter.toResponse(sysUserRepository.findAllById(ids));
+    }
+
     public Page<UserVO> getAll(String orgId, String roleId, String name, String account, String phone, Boolean enabled, Pageable pageable) {
         Spec<SysUser> query = Spec.of();
         query.like(SysUser.Fields.name, name);

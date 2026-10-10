@@ -81,10 +81,6 @@ export default class UserPage extends React.Component {
 
 
         {
-            title: '手机',
-            dataIndex: 'phone'
-        },
-        {
             title: '邮箱',
             dataIndex: 'email'
         },

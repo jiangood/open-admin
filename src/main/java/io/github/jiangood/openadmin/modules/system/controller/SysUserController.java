@@ -62,6 +62,13 @@ public class SysUserController {
     }
 
 
+    @HasPermission("sys-user:read")
+    @GetMapping("by-ids")
+    public AjaxResult listByIds(@RequestParam(value = "ids", required = false) List<String> ids) {
+        return AjaxResult.ok().data(sysUserService.findVOByIds(ids));
+    }
+
+
     @Log("用户-创建")
     @HasPermission("sys-user:create")
     @PostMapping("create")

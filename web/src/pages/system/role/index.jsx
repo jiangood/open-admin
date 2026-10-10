@@ -1,19 +1,17 @@
 import {PlusOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber, Modal, Transfer} from 'antd'
+import {Button, Form, Input, InputNumber} from 'antd'
 import React from 'react'
-import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, ViewText} from "../../../framework";
+import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, UserPicker, ViewText} from "../../../framework";
 
 
 export default class RolePage extends React.Component {
 
     state = {
-        usersModalOpen: false,
+        pickerOpen: false,
         usersModalLoading: false,
         selectedRecord: null,
 
-        userList: [],
         targetKeys: [],
-        selectedKeys: [],
     }
 
     modalRef = React.createRef()
@@ -28,9 +26,8 @@ export default class RolePage extends React.Component {
     }
 
     handleEditUser = record => {
-        this.setState({usersModalOpen: true, selectedRecord: record})
         HttpClient.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
-            this.setState({userList: rs.data.list, targetKeys: rs.data.selectedKeys})
+            this.setState({pickerOpen: true, selectedRecord: record, targetKeys: rs.data?.selectedKeys || []})
         })
     }
 
@@ -121,14 +118,14 @@ export default class RolePage extends React.Component {
         },
     ]
 
-    handleSaveUsers = () => {
+    handleSaveUsers = userIdList => {
         this.setState({usersModalLoading: true})
         const params = {
             id: this.state.selectedRecord.id,
-            userIdList: this.state.targetKeys
+            userIdList
         }
         HttpClient.post('admin/sysRole/grant-users', params, null, {toastError: false}).then(() => {
-            this.setState({usersModalOpen: false, usersModalLoading: false})
+            this.setState({pickerOpen: false, usersModalLoading: false})
         }).catch(() => {
             this.setState({usersModalLoading: false})
         })
@@ -185,39 +182,16 @@ export default class RolePage extends React.Component {
             </FormModal>
 
 
-            <Modal title={'角色用户' + "【" + this.state.selectedRecord?.name + '】'}
-                   open={this.state.usersModalOpen}
-                   confirmLoading={this.state.usersModalLoading}
-                   destroyOnHidden
-                   mask={{ closable: false }}
-                   width={800}
-                   onCancel={() => this.setState({usersModalOpen: false})}
-                   onOk={this.handleSaveUsers}
-            >
-
-
-                <Transfer
-                    styles={{ section: { height: '60vh', width: 300 } }}
-
-                    dataSource={this.state.userList} titles={["未选择", "已选择"]}
-                    targetKeys={this.state.targetKeys}
-                    selectedKeys={this.state.selectedKeys}
-                    render={item => item.title}
-                    onChange={(nextTargetKeys, _direction, _moveKeys) => {
-                        this.setState({
-                            targetKeys: nextTargetKeys
-                        })
-                    }}
-                    onSelectChange={(sourceSelectedKeys, targetSelectedKeys) => {
-                        this.setState({
-                            selectedKeys: [...sourceSelectedKeys, ...targetSelectedKeys]
-                        })
-                    }}
-                    showSearch
-                />
-
-
-            </Modal>
+            <UserPicker
+                open={this.state.pickerOpen}
+                title={'为「' + (this.state.selectedRecord?.name || '') + '」角色分配用户'}
+                value={this.state.targetKeys}
+                confirmLoading={this.state.usersModalLoading}
+                requestUrl='admin/sysRole/user-page'
+                usersUrl='admin/sysRole/user-by-ids'
+                onOk={this.handleSaveUsers}
+                onCancel={() => this.setState({pickerOpen: false})}
+            />
         </Page>
 
 

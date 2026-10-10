@@ -14,6 +14,7 @@ export * from './FieldTable'
 export * from './FieldTableSelect'
 export * from './FieldSysOrgTreeSelect'
 export * from './FieldSysOrgTree'
+export * from './FieldUserPicker'
 export * from './FieldPercent'
 export * from './FieldUploadFile';
 export * from './FieldUploadImage';

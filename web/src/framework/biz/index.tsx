@@ -6,6 +6,8 @@ export * from './PermActions'
 export * from './Perm'
 export * from './OrgTree'
 export * from './RoleTree'
+export * from './UserPicker'
+export * from './pickerUser'
 
 class InnerFieldUserSelect extends React.Component<ComponentProps<typeof FieldRemoteSelect>> {
     render() {

@@ -14,6 +14,7 @@ import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.modules.system.dto.request.GrantUserToRoleReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.RoleReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.SaveRolePermReq;
+import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
@@ -168,17 +169,33 @@ public class SysRoleController {
     @HasPermission("sys-role:read")
     @GetMapping("user-list")
     public AjaxResult userList(String id) {
-        List<SysUser> users = sysUserService.findAll();
-        List<Dict> list = users.stream().map(u -> Dict.of("key", u.getId(), "title", u.getName())).toList();
-
         List<SysUser> ownUser = sysRoleService.findUsers(id);
         List<String> ownList = ownUser.stream().map(BaseEntity::getId).toList();
 
         Map<String, Object> data = new HashMap<>();
-        data.put("list", list);
         data.put("selectedKeys", ownList);
 
         return AjaxResult.ok().data(data);
+    }
+
+    /**
+     * 角色用户设置：分页查询用户，数据源已由角色权限守卫，避免依赖 sys-user:read。
+     */
+    @HasPermission("sys-role:read")
+    @GetMapping("user-page")
+    public AjaxResult userPage(String orgId, String name, String account, String phone, Boolean enabled,
+                               @PageableDefault(sort = "updateTime", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<UserVO> page = sysUserService.getAll(orgId, null, name, account, phone, enabled, pageable);
+        return AjaxResult.ok().data(page);
+    }
+
+    /**
+     * 角色用户设置：按 id 批量查询用户详情，用于回显已选人员。
+     */
+    @HasPermission("sys-role:read")
+    @GetMapping("user-by-ids")
+    public AjaxResult userByIds(@RequestParam(value = "ids", required = false) List<String> ids) {
+        return AjaxResult.ok().data(sysUserService.findVOByIds(ids));
     }
 
     @HasPermission("sys-role:read")
