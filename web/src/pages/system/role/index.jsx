@@ -1,4 +1,4 @@
-import {PlusOutlined} from '@ant-design/icons'
+import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber} from 'antd'
 import React from 'react'
 import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, UserPicker, ViewText} from "../../../framework";
@@ -136,20 +136,21 @@ export default class RolePage extends React.Component {
         >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                toolBarRightRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button perm='sys-role:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
                 )}
                 request={(params) => HttpClient.get('admin/sysRole/page', params)}
                 columns={this.columns}
+                searchInline
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
-                        <Form.Item label='角色名称' name='name'>
-                            <Input/>
+                        <Form.Item name='name' noStyle>
+                            <Input prefix={<SearchOutlined/>} placeholder='角色名称' allowClear/>
                         </Form.Item>
-                        <Form.Item label='角色编码' name='code'>
-                            <Input/>
+                        <Form.Item name='code' noStyle>
+                            <Input placeholder='角色编码' allowClear/>
                         </Form.Item>
                     </>
                 )}

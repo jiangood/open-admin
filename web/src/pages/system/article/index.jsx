@@ -1,4 +1,4 @@
-import {PlusOutlined} from '@ant-design/icons'
+import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import {Button, Form, Input, InputNumber} from 'antd'
 import React from 'react'
 import {
@@ -112,7 +112,8 @@ export default class ArticleListPage extends React.Component {
         >
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                searchInline
+                toolBarRightRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
                     </PermActions>
@@ -121,11 +122,11 @@ export default class ArticleListPage extends React.Component {
                 columns={this.columns}
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
-                        <Form.Item label='编码' name='code'>
-                            <Input/>
+                        <Form.Item name='code' noStyle>
+                            <Input prefix={<SearchOutlined/>} placeholder='文章编码' allowClear/>
                         </Form.Item>
-                        <Form.Item label='标题' name='title'>
-                            <Input/>
+                        <Form.Item name='title' noStyle>
+                            <Input placeholder='文章标题' allowClear/>
                         </Form.Item>
                     </>
                 )}

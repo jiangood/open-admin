@@ -12,7 +12,7 @@ import {
     Switch,
     Tag
 } from 'antd'
-import {PlusOutlined} from "@ant-design/icons";
+import {PlusOutlined, SearchOutlined} from "@ant-design/icons";
 import {FormModal, getMessageApi, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
 
 
@@ -200,7 +200,8 @@ export default class JobPage extends React.Component {
         return <Page>
             <ProTable
                 actionRef={this.tableRef}
-                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                searchInline
+                toolBarRightRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <PermActions>
                         <Button type='primary' perm='job:create' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button>
                         <Button perm='job:read' onClick={this.showStatus}>查看状态</Button>
@@ -210,11 +211,11 @@ export default class JobPage extends React.Component {
                 columns={this.columns}
                 searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
                     <>
-                        <Form.Item label='名称' name='name'>
-                            <Input/>
+                        <Form.Item name='name' noStyle>
+                            <Input prefix={<SearchOutlined/>} placeholder='任务名称' allowClear/>
                         </Form.Item>
-                        <Form.Item label='执行类' name='jobClass'>
-                            <Input/>
+                        <Form.Item name='jobClass' noStyle>
+                            <Input placeholder='执行类' allowClear/>
                         </Form.Item>
                     </>
                 )}
