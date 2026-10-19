@@ -12,6 +12,9 @@
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
 | `sys.file.minio.*` | MinIO 对象存储配置 | — |
 | `sys.session-idle-time` | Session 超时（分钟） | 180 |
+| `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时踢出旧会话 | 1 |
+| `sys.concurrent-login-message` | 被并发登录顶下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
+| `sys.login-expired-message` | 会话空闲超时/未登录时的提示文案（经 `/admin/public/site-info` 下发给前端） | 登录已过期，请重新登录 |
 | `sys.job-enable` | 定时任务开关 | true |
 | `sys.codegen.backend-dir` | 代码生成后端源码根目录（相对项目根） | src/main/java |
 | `sys.codegen.resource-dir` | 代码生成资源目录（菜单 YAML 输出位置） | src/main/resources |

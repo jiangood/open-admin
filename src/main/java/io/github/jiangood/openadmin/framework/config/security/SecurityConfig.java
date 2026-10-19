@@ -82,7 +82,8 @@ public class SecurityConfig {
                     cfg.sessionConcurrency(configurer -> {
                         configurer.maximumSessions(maximumSessions)
                                 .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
-                        ;
+                                // 被顶下线的请求返回 401 + JSON，而非 Spring Security 默认的 200 纯文本
+                                .expiredSessionStrategy(new ConcurrentSessionExpiredStrategy(systemProperties));
                     });
 
                 });

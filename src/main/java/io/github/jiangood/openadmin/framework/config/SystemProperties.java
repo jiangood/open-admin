@@ -36,6 +36,14 @@ public class SystemProperties {
      */
     private int maximumSessions = 1;
     /**
+     * 并发登录被顶下线时的提示文案
+     */
+    private String concurrentLoginMessage = "您的账号已在别处登录，请重新登录";
+    /**
+     * 会话空闲超时/未登录时的提示文案
+     */
+    private String loginExpiredMessage = "登录已过期，请重新登录";
+    /**
      * 系统标题
      */
     @NotBlank(message = "请配置系统标题")
