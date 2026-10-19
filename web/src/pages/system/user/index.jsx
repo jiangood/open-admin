@@ -163,17 +163,17 @@ export default class UserPage extends React.Component {
                     <ProTable
                         searchFormCols={3}
                         actionRef={this.tableRef}
-                        toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
-                            <PermActions>
-                                <Button perm='sys-user:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
-                            </PermActions>
+                        toolBarRightRender={() => (
+                            <PermActions actions={[
+                                {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: 'sys-user:create', onClick: this.handleAdd},
+                            ]}/>
                         )}
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
                             return HttpClient.get('admin/sysUser/page', params)
                         }}
                         columns={this.columns}
-                        searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                        searchFormRender={() => (
                             <>
                                 <Form.Item label='姓名' name='name'>
                                     <Input/>

@@ -25,7 +25,7 @@ public final class FrontendTemplates {
     public static String page(EntityMetaVO meta, String module, String label, String frontendImport) {
         List<FieldMetaVO> fields = meta.getFields();
 
-        Set<String> antd = new LinkedHashSet<>(List.of("Button", "Form"));
+        Set<String> antd = new LinkedHashSet<>(List.of("Form"));
         Set<String> framework = new LinkedHashSet<>(List.of(
                 "FormModal", "HttpClient", "Page", "PermActions", "ProTable"));
 
@@ -147,14 +147,14 @@ public final class FrontendTemplates {
                         return <Page>
                             <ProTable
                                 actionRef={this.tableRef}
-                                toolBarRender={() => ( // NOSONAR: AntD 渲染函数惯例
-                                    <PermActions>
-                                        <Button perm='%1$s:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
-                                    </PermActions>
+                                toolBarRightRender={() => (
+                                    <PermActions actions={[
+                                        {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: '%1$s:create', onClick: this.handleAdd},
+                                    ]}/>
                                 )}
                                 request={(params) => HttpClient.get('admin/%1$s/page', params)}
                                 columns={this.columns}
-                                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                                searchFormRender={() => (
                                     <>
                 """.formatted(module));
         if (!searchItems.isEmpty()) {

@@ -80,7 +80,7 @@ public class DataSyncJob extends BaseJob {
 
 | 组件 | 用途 |
 |------|------|
-| `Page` | 页面容器（标题/描述/右侧操作区），`padding`/`backgroundGray`/`debug`/`title`/`description`/`actions` |
+| `Page` | 页面容器（标题/描述/右侧操作区），`padding`/`backgroundGray`/`debug`/`title`/`description`/`actions`（推荐传 `PermAction[]`，兼容带 `perm` 属性的节点） |
 | `PageLoading` | 页面加载中提示（`message` 单条 / `messages` 多阶段） |
 | `ProTable` | 数据表格，分页/筛选/工具栏/树形模式，详见[下方](#protable) |
 | `LinkButton` | 链接跳转按钮（`path` + `label`，通过 `PageUtils.open` 打开页面） |
@@ -184,11 +184,11 @@ import { PermActions } from '@jiangood/open-admin';
     <Form.Item label="名称" name="name"><Input/></Form.Item>
   )}
   searchInline                           // 搜索表单内联到工具栏左侧（单条件页面），默认 false
-  toolBarRender={(params, {selectedRows, selectedRowKeys}) => (
+  toolBarRightRender={(params, {selectedRowKeys}) => (        // 操作按钮统一放右侧
     <Button type="primary" onClick={this.handleAdd}>新增</Button>
   )}
-  toolBarRightRender={(params) => (
-    <Button danger onClick={this.handleClean}>清理失败记录</Button>
+  toolBarRender={(params) => (                          // 左侧只放状态/说明类内容（如「已选 N 项」）
+    <span>已选 {params.selectedRowKeys?.length ?? 0} 项</span>
   )}
   defaultPageSize={20}
   scrollY={500}
@@ -201,8 +201,8 @@ import { PermActions } from '@jiangood/open-admin';
 | `columns` | antd Table 列定义 |
 | `actionRef` | 表格操作句柄（`reload` / `clearSelection`） |
 | `formRef` | 搜索表单实例（`getFieldsValue` 等） |
-| `toolBarRender` | 工具栏渲染，参数为当前搜索值 + 行选择状态 |
-| `toolBarRightRender` | 工具栏右侧渲染，参数同 `toolBarRender`；用于导出/清理/刷新等右侧操作 |
+| `toolBarRender` | 工具栏左侧渲染，参数为当前搜索值 + 行选择状态；**只放状态/说明类内容**（如「已选 N 项」），操作按钮请用右侧插槽 |
+| `toolBarRightRender` | 工具栏右侧渲染，参数同 `toolBarRender`；**操作按钮统一放这里**（新增/导出/清理/刷新等） |
 | `rowSelection` | 行选择：`true` 为 checkbox，对象可覆盖 `type`/`onChange` |
 | `treeMode` | 树形数据模式，关闭分页 |
 | `searchFormRender` | 搜索表单渲染函数，返回 `Form.Item` 列表 |
