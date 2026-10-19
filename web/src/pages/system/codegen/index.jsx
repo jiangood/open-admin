@@ -96,9 +96,7 @@ export default class CodegenPage extends React.Component {
 
     render() {
         const selected = this.selectedOption()
-        return <Page title='代码生成'
-                     description='扫描实体，生成 Repository / Service / Controller / 前端页面 / 菜单 代码并写入项目源码目录'
-                     actions={
+        return <Page actions={
                          <Space>
                              <Perm code='sys-codegen:generate'>
                                  <Button type='primary' loading={this.state.loading} onClick={this.handlePreview}>预览</Button>

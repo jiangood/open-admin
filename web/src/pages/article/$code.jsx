@@ -26,13 +26,13 @@ export default class ArticlePage extends React.Component {
         const {article, loading} = this.state
 
         if (loading) {
-            return <Page title="加载中...">
+            return <Page>
                 <div>加载中...</div>
             </Page>
         }
 
         if (!article) {
-            return <Page title="文章不存在">
+            return <Page>
                 <div>文章不存在或已禁用</div>
             </Page>
         }
