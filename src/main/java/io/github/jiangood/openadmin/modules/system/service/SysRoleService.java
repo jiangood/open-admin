@@ -72,7 +72,7 @@ public class SysRoleService extends BaseService<SysRole> {
                 continue;
             }
 
-            List<MenuDefinition> menus = this.ownMenu(role.getId()); // NOSONAR: ownMenu(Iterable) 已开启事务
+            List<MenuDefinition> menus = this.ownMenu(role.getId());
             menuList.addAll(menus);
         }
 
@@ -153,7 +153,7 @@ public class SysRoleService extends BaseService<SysRole> {
             return repository.save(input);
         }
 
-        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
+        this.updateField(input, requestKeys);
+        return repository.findById(input.getId()).orElse(null);
     }
 }

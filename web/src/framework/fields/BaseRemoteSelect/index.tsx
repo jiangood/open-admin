@@ -21,8 +21,8 @@ export interface BaseRemoteSelectProps {
  * 处理通用的数据加载、防抖搜索、竞态处理、错误提示逻辑。
  * 子类只需覆写 getLoadParams() 和 render()。
  */
-export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> { // NOSONAR: state/防抖字段构造器赋值
-    private fetchIdRef: number = 0; // NOSONAR: 构造器中赋值
+export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelectProps> extends React.Component<P, BaseRemoteSelectState> {
+    private fetchIdRef: number = 0;
     private loadDataDebounce: ReturnType<typeof debounce>;
 
     static readonly defaultProps = {
@@ -117,14 +117,14 @@ export class BaseRemoteSelect<P extends BaseRemoteSelectProps = BaseRemoteSelect
 
     // ========== Helper 方法 ==========
 
-    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } { // NOSONAR: 由子类通过 this.getShowSearch() 调用
+    getShowSearch(): { filterOption: false; onSearch: (value: string) => void } {
         return {
             filterOption: false,
             onSearch: this.handleSearch,
         };
     }
 
-    getNotFoundContent(): React.ReactNode { // NOSONAR: 由子类通过 this.getNotFoundContent() 调用
+    getNotFoundContent(): React.ReactNode {
         return this.state.loading ? <Spin size="small" /> : '数据为空';
     }
 }

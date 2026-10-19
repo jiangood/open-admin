@@ -57,7 +57,7 @@ export default class LogPage extends React.Component {
             <ProTable
                 request={(params) => HttpClient.get('admin/sysLog/page', params)}
                 columns={this.columns}
-                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                searchFormRender={() => (
                     <>
                         <Form.Item label='操作' name='operation'>
                             <Input/>

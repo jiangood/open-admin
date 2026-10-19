@@ -52,7 +52,6 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
                         .bind("menus", Bindable.mapOf(String.class, MenuDefinition.class))
                         .orElse(Map.of());
 
-                map = Objects.requireNonNull(map, "菜单配置 map 不应为 null");   // Sonar 误报防护：orElse(Map.of()) 永不为 null
                 for (Map.Entry<String, MenuDefinition> entry : map.entrySet()) {
                     MenuDefinition def = entry.getValue();
                     if (def == null) continue;

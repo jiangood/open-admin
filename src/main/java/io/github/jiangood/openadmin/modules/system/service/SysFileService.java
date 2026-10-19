@@ -83,7 +83,7 @@ public class SysFileService {
         if (sysFile == null) {
             return;
         }
-        deleteFileInternal(sysFile); // NOSONAR: deleteByObjectName 已开启事务
+        deleteFileInternal(sysFile);
     }
 
     /**
@@ -99,7 +99,7 @@ public class SysFileService {
         }
         int success = 0;
         for (SysFile file : sysFileRepository.findAllById(ids)) {
-            if (deleteFileInternal(file)) { // NOSONAR: deleteBatch 已开启事务
+            if (deleteFileInternal(file)) {
                 success++;
             }
         }

@@ -62,7 +62,7 @@ public class SecurityConfig {
                                 "connect-src 'self' ws:"
                         ))
                 )   // X-Content-Type-Options/Cache-Control 由 Spring Security 自动添加
-                .csrf(AbstractHttpConfigurer::disable) // NOSONAR: SPA 前后端分离 + Token 在请求体传输，天然免疫 CSRF；若改为传统 Form-Cookie 渲染需重新启用
+                .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authz -> {
@@ -79,7 +79,7 @@ public class SecurityConfig {
                     log.info("设置最大并发会话数为 {}", maximumSessions);
 
                     cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
-                    cfg.sessionConcurrency(configurer -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
+                    cfg.sessionConcurrency(configurer -> {
                         configurer.maximumSessions(maximumSessions)
                                 .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
                         ;
@@ -92,7 +92,7 @@ public class SecurityConfig {
         http.addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
 
 
-        http.exceptionHandling(cfg -> { // NOSONAR: fluent 链式风格，保留块结构便于阅读
+        http.exceptionHandling(cfg -> {
             cfg.accessDeniedHandler((request, response, e) -> ResponseTool.response(response, AjaxResult.FORBIDDEN))
                     .authenticationEntryPoint((request, response, e) -> {
                         response.setStatus(HttpStatus.UNAUTHORIZED.value());
@@ -117,7 +117,7 @@ public class SecurityConfig {
      */
     @Bean
     @Order(3)
-    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception { // NOSONAR: Spring Security HttpSecurity.build() 强制声明 throws Exception
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
         );

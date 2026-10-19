@@ -91,7 +91,7 @@ function readDims(url: string): Promise<Dims> {
 
 function compressToFile(source: Blob, options: {maxWidth?: number; maxHeight?: number; width?: number; height?: number; quality?: number}): Promise<File> {
     return new Promise((resolve, reject) => {
-        new Compressor(source, { // NOSONAR (typescript:S1848) — compressorjs 通过构造函数副作用异步压缩，回调内 resolve/reject，实例无需保留
+        new Compressor(source, {
             maxWidth: options.maxWidth,
             maxHeight: options.maxHeight,
             width: options.width,
@@ -139,9 +139,9 @@ async function compressToTarget(source: Blob, maxWidth: number | undefined, targ
     return best;
 }
 
-export class FieldUploadImage extends React.Component<FieldUploadImageProps, FieldUploadImageState> { // NOSONAR: state 构造器中按 props 初始化，无法全部 readonly
+export class FieldUploadImage extends React.Component<FieldUploadImageProps, FieldUploadImageState> {
 
-    state: FieldUploadImageState = { // NOSONAR: 构造器中按 props 初始化，无法 readonly
+    state: FieldUploadImageState = {
         // 传入的参数
         maxCount: 1,
         thumbWidth: 300,
@@ -170,7 +170,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
         if (props.value) this.state.objectNames = props.value.split(',');
     }
 
-    componentDidUpdate(prevProps: FieldUploadImageProps, prevState: FieldUploadImageState) { // NOSONAR: 顺序同步多个 props 到 state，拆分反而更难读
+    componentDidUpdate(prevProps: FieldUploadImageProps, prevState: FieldUploadImageState) {
         const next: Partial<FieldUploadImageState> = {};
         if (this.props.maxCount !== prevProps.maxCount) next.maxCount = this.props.maxCount;
         if (this.props.thumbWidth !== prevProps.thumbWidth) next.thumbWidth = this.props.thumbWidth;

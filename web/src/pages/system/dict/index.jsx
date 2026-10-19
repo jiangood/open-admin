@@ -269,7 +269,7 @@ export default class DictPage extends React.Component {
                         allowClear
                         maxLength={20}
                         options={COLOR_OPTIONS}
-                        filterOption={(input, option) => // NOSONAR: AntD AutoComplete 过滤回调惯例
+                        filterOption={(input, option) =>
                             (option.value + option.label).toLowerCase().includes(input.toLowerCase())
                         }
                         placeholder='如 SUCCESS、#ff0000'

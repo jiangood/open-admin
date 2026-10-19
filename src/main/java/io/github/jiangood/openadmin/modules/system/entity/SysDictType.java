@@ -15,10 +15,10 @@ import java.util.List;
 @Entity
 @Table(name = "sys_dict_type")
 @FieldNameConstants
-public class SysDictType extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
+public class SysDictType extends BaseEntity {
 
     @Transient
-    List<SysDictType> children; // NOSONAR: 仅 Jackson 序列化，加 transient 会丢失 JSON 输出
+    List<SysDictType> children;
 
     private String pid;
 

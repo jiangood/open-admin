@@ -20,14 +20,14 @@ import java.util.Set;
 @Getter
 @Setter
 @FieldNameConstants
-public class SysRole extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
+public class SysRole extends BaseEntity {
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "sys_user_role",
             inverseJoinColumns = @JoinColumn(name = "user_id", nullable = false),
             joinColumns = @JoinColumn(name = "role_id", nullable = false))
-    Set<SysUser> users = new HashSet<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
+    Set<SysUser> users = new HashSet<>();
     @Remark("名称")
     @Column(length = 50, unique = true)
     private String name;

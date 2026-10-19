@@ -283,7 +283,7 @@ public class SysUserService extends BaseService<SysUser> {
 
         // 已拥有权限码（过滤 ROLE_/ORG_ 前缀）
         Set<String> owned = new TreeSet<>();
-        for (String perm : getUserPerms(userId)) { // NOSONAR: getPermView 已开启外层事务，注释见方法头
+        for (String perm : getUserPerms(userId)) {
             if (!perm.startsWith("ROLE_") && !perm.startsWith("ORG_")) {
                 owned.add(perm);
             }

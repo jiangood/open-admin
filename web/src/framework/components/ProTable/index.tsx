@@ -364,7 +364,7 @@ this.setState({loading: true})
         this.setState({params: values, current: 1, sorter: {}}, this.loadData)
     }
 
-    changeFormValues = (values: Record<string, unknown>) => { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
+    changeFormValues = (values: Record<string, unknown>) => {
         if (this.formRef.current) {
             this.formRef.current.resetFields()
             this.formRef.current.setFieldsValue(values)

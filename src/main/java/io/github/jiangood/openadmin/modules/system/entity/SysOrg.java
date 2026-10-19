@@ -21,11 +21,11 @@ import java.util.List;
 @Entity
 @Table(name = "sys_org")
 @FieldNameConstants
-public class SysOrg extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
+public class SysOrg extends BaseEntity {
 
 
     @Transient
-    List<SysOrg> children; // NOSONAR: 仅 Jackson 序列化，加 transient 会丢失 JSON 输出
+    List<SysOrg> children;
     /**
      * 父id, 如果是根节点，则为空
      */

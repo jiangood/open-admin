@@ -36,8 +36,8 @@ public class ArticleService extends BaseService<Article> {
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
             throw new BusinessException("文章编码已存在");
         }
-        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return articleRepository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
+        this.updateField(input, requestKeys);
+        return articleRepository.findById(input.getId()).orElse(null);
     }
 
     /**
@@ -48,7 +48,7 @@ public class ArticleService extends BaseService<Article> {
     @Transactional
     @Override
     public Article update(Article input, List<String> requestKeys) {
-        Article old = articleRepository.findById(input.getId()).orElse(null); // NOSONAR: update 路径 id 必非空
+        Article old = articleRepository.findById(input.getId()).orElse(null);
         Assert.notNull(old, "文章不存在");
 
         if (input.getCode() != null && !this.isUnique(input.getId(), Article.Fields.code, input.getCode())) {
@@ -58,14 +58,14 @@ public class ArticleService extends BaseService<Article> {
         // 先丢弃旧文件引用（与保存同事务，保存失败整体回滚）
         sysFileService.discardTempFiles(old);
 
-        this.updateField(input, requestKeys); // NOSONAR: 外层 update() 已开启事务
+        this.updateField(input, requestKeys);
         // 冲刷文章变更，避免随后带 clearAutomatically 的批量更新清空持久化上下文导致变更丢失
         articleRepository.flush();
 
         // 保存成功后确认新临时文件
         sysFileService.confirmTempFiles(input);
 
-        return articleRepository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
+        return articleRepository.findById(input.getId()).orElse(null);
     }
 
     /**

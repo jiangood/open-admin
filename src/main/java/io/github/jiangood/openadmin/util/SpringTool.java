@@ -30,7 +30,7 @@ public class SpringTool implements ApplicationContextAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
-        SpringTool.applicationContext = applicationContext; // NOSONAR: ApplicationContextAware 回调写入静态上下文，持有 Spring 上下文的惯例写法
+        SpringTool.applicationContext = applicationContext;
     }
 
     public static String[] getBasePackageNames() {

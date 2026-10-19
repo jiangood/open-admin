@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Entity
 @FieldNameConstants
 @Table(name = "sys_log", indexes = {@Index(columnList = "operation")})
-public class SysLog extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
+public class SysLog extends BaseEntity {
 
     @Column(nullable = false, length = 100)
     private String operation;

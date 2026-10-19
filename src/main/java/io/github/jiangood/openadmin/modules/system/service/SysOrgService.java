@@ -114,7 +114,7 @@ public class SysOrgService extends BaseService<SysOrg> {
         List<String> childIdListById = this.findChildIdListById(id);
         Assert.state(!childIdListById.contains(input.getPid()), "父节点不能为本节点的子节点，请重新选择父节点");
 
-        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
+        this.updateField(input, requestKeys);
         return sysOrgRepository.findById(id).orElse(null);
     }
 

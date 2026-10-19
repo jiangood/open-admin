@@ -12,9 +12,9 @@ export interface FormModalProps {
   children?: React.ReactNode
 }
 
-export default class FormModal extends React.Component<FormModalProps> { // NOSONAR: state 构造器中赋值
+export default class FormModal extends React.Component<FormModalProps> {
 
-  readonly state = { // NOSONAR: React state 惯例
+  readonly state = {
     visible: false,
     confirmLoading: false,
   }
@@ -22,11 +22,11 @@ export default class FormModal extends React.Component<FormModalProps> { // NOSO
   private pendingValues: Record<string, unknown> | null = null
   private formRef = React.createRef<FormInstance>()
 
-  get formInstance() { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
+  get formInstance() {
     return this.formRef.current
   }
 
-  open = (values?: Record<string, unknown>) => { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
+  open = (values?: Record<string, unknown>) => {
     this.pendingValues = values || {}
     this.setState({visible: true})
   }

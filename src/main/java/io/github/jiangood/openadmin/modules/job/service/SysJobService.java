@@ -39,7 +39,7 @@ public class SysJobService extends BaseService<SysJob> {
             SysJob old = repository.findById(input.getId()).orElse(null);
             Assert.notNull(old, "任务不存在");
             oldName = old.getName();
-            this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
+            this.updateField(input, requestKeys);
             db = repository.findById(input.getId()).orElse(null);
         }
 
@@ -85,7 +85,7 @@ public class SysJobService extends BaseService<SysJob> {
 
         sysJobLogRepository.deleteBySysJobId(id);
 
-        deleteById(id); // NOSONAR: deleteJob 已开启事务
+        deleteById(id);
     }
 
 

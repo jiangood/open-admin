@@ -24,14 +24,14 @@ import java.util.Set;
 @Table(name = "sys_user")
 @FieldNameConstants
 @Remark("系统用户")
-public class SysUser extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
+public class SysUser extends BaseEntity {
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "sys_user_role",
             joinColumns = @JoinColumn(name = "user_id", nullable = false),
             inverseJoinColumns = @JoinColumn(name = "role_id", nullable = false))
-    Set<SysRole> roles = new HashSet<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
+    Set<SysRole> roles = new HashSet<>();
     // 数据权限类型
     @Enumerated(EnumType.STRING)
     DataPermType dataPermType;
@@ -39,7 +39,7 @@ public class SysUser extends BaseEntity { // NOSONAR: 实体以 id 为业务键�
     @Lazy
     @ManyToMany
     @JoinTable(name = "sys_user_data_perm", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "org_id"))
-    List<SysOrg> dataPerms = new ArrayList<>(); // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
+    List<SysOrg> dataPerms = new ArrayList<>();
     /**
      * 所属机构 (公司，单位级别）
      */

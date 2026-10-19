@@ -40,8 +40,8 @@ export interface DownloadModalProps {
   onFinish?: () => void;
 }
 
-export class DownloadModal extends React.Component<DownloadModalProps, ModalState> { // NOSONAR: state/定时器字段构造器赋值，无法全部 readonly
-  private abortController: AbortController | null = null; // NOSONAR: 构造器中赋值
+export class DownloadModal extends React.Component<DownloadModalProps, ModalState> {
+  private abortController: AbortController | null = null;
   private lastOptions: DownloadOptions | null = null;
   private lastTime: number = 0;
   private lastLoaded: number = 0;
@@ -61,7 +61,7 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
     };
   }
 
-  download = (options: DownloadOptions) => { // NOSONAR: ref 暴露给父组件/业务项目调用的公共 API
+  download = (options: DownloadOptions) => {
     this.startDownload(options);
   };
 

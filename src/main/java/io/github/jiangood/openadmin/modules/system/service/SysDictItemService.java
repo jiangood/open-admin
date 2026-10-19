@@ -17,7 +17,7 @@ public class SysDictItemService extends BaseService<SysDictItem> {
             return repository.save(input);
         }
 
-        this.updateField(input, requestKeys); // NOSONAR: save() 已开启事务
-        return repository.findById(input.getId()).orElse(null); // NOSONAR: 非新实体路径下 id 必非空
+        this.updateField(input, requestKeys);
+        return repository.findById(input.getId()).orElse(null);
     }
 }

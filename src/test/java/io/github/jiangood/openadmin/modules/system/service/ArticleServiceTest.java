@@ -55,7 +55,7 @@ class ArticleServiceTest {
         when(articleRepository.findById("no-such-id")).thenReturn(Optional.empty());
 
         Article input = newArticle("no-such-id");
-        assertThrows(IllegalArgumentException.class, () -> articleService.update(input, List.of("title"))); // NOSONAR: 单语句 lambda，方法引用不适用
+        assertThrows(IllegalArgumentException.class, () -> articleService.update(input, List.of("title")));
 
         verify(sysFileService, never()).discardTempFiles(any());
         verify(sysFileService, never()).confirmTempFiles(any());
@@ -95,7 +95,7 @@ class ArticleServiceTest {
         Article input = newArticle("a1");
         input.setCode("dup-code");
 
-        assertThrows(RuntimeException.class, () -> articleService.update(input, List.of("code"))); // NOSONAR: 单语句 lambda，方法引用不适用
+        assertThrows(RuntimeException.class, () -> articleService.update(input, List.of("code")));
 
         verify(sysFileService, never()).discardTempFiles(any());
         verify(sysFileService, never()).confirmTempFiles(any());

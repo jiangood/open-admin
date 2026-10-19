@@ -6,7 +6,7 @@ import type {FieldProps} from '../types';
 const SP = StringUtils.ISO_SPLITTER;
 
 /** 数字范围值，形如 "1/100"（起止以 / 分隔） */
-export type FieldNumberRangeValue = string; // NOSONAR: npm 包导出类型，业务项目引用
+export type FieldNumberRangeValue = string;
 
 export type RangePartValue = number | string | null;
 

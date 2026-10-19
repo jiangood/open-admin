@@ -21,7 +21,7 @@ import java.util.Map;
 @Entity
 @Table(name = "sys_job")
 @FieldNameConstants
-public class SysJob extends BaseEntity { // NOSONAR: 实体以 id 为业务键，继承的 equals 即按 id 比较
+public class SysJob extends BaseEntity {
 
     public static final String JOB_SUFFIX = "Job";
     @Column(unique = true)
@@ -35,7 +35,7 @@ public class SysJob extends BaseEntity { // NOSONAR: 实体以 id 为业务键�
     // 参数
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "TEXT")
-    Map<String, Object> jobData; // NOSONAR: 仅 Jackson 序列化，不走 Java Serializable
+    Map<String, Object> jobData;
     // 扩展字段
     String extraInfo;
 

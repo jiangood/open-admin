@@ -112,7 +112,7 @@ export default class AdminLayout extends React.Component {
             this.setState({menuLoading: false})
         })
     }
-    actionRef = React.createRef() // NOSONAR: React ref 由父组件通过 ref 访问
+    actionRef = React.createRef()
 
     classifyMenus = (menuTree) => {
         const topMenus = [];

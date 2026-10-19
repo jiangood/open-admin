@@ -12,7 +12,7 @@ export class FieldDictSelect extends React.Component<FieldDictSelectProps> {
     render() {
         const {value, typeCode} = this.props;
         const options = DictUtils.dictOptions(typeCode);
-        const strValue = value == null ? null : String(value); // NOSONAR: value 经 String() 显式转换，无隐式字符串化
+        const strValue = value == null ? null : String(value);
 
         return <Select value={strValue}
                        onChange={this.props.onChange}

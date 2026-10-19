@@ -229,7 +229,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
                 return 0; // 除 id 外无其他列，无需更新
             }
             params.add(id);
-            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + SQL_WHERE_ID, params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
+            return jdbc.update("update " + validateIdentifier(table) + " set " + sets + SQL_WHERE_ID, params.toArray());
         }
         StringJoiner cols = new StringJoiner(",");
         StringJoiner vals = new StringJoiner(",");
@@ -239,12 +239,12 @@ public class JdbcRunnerImpl implements JdbcRunner {
             vals.add("?");
             params.add(entry.getValue());
         }
-        return jdbc.update("insert into " + validateIdentifier(table) + " (" + cols + ") values (" + vals + ")", params.toArray()); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
+        return jdbc.update("insert into " + validateIdentifier(table) + " (" + cols + ") values (" + vals + ")", params.toArray());
     }
 
     @Override
     public int deleteById(String table, Object id) {
-        return jdbc.update("delete from " + validateIdentifier(table) + SQL_WHERE_ID, id); // NOSONAR: 标识符经 validateIdentifier 白名单，值参数绑定
+        return jdbc.update("delete from " + validateIdentifier(table) + SQL_WHERE_ID, id);
     }
 
     @Override
@@ -309,7 +309,7 @@ public class JdbcRunnerImpl implements JdbcRunner {
 
     private void setFieldValue(Field field, Object bean, Object value) {
         Class<?> type = field.getType();
-        if (value instanceof Number n) { // NOSONAR: 不同类型分派无法用 switch 表达
+        if (value instanceof Number n) {
             ReflectionUtils.setField(field, bean, convertNumber(n, type));
         } else if (value instanceof Timestamp t) {
             ReflectionUtils.setField(field, bean, type == LocalDateTime.class ? t.toLocalDateTime() : t);

@@ -192,7 +192,6 @@ python scripts/release.py --help                   # 全部参数与退出码
 | `oa-crud` | 创建 CRUD 业务模块 |
 | `oa-upgrade` | 升级框架版本 |
 | `oa-upgrade-docs` | 从 GitHub Release 同步框架文件（skills + docs） |
-| `oa-sonar-scan` | SonarQube 扫描与问题修复 |
 
 ### 从 Release 同步到业务项目
 

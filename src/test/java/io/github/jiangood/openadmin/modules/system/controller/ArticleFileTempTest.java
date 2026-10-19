@@ -136,7 +136,7 @@ class ArticleFileTempTest {
         updateParam.setSeq(0);
         updateParam.setEnabled(true);
 
-        assertThrows(BusinessException.class, () -> articleController.update(updateParam, keys())); // NOSONAR: 单语句 lambda，方法引用不适用
+        assertThrows(BusinessException.class, () -> articleController.update(updateParam, keys()));
 
         SysFile file = sysFileRepository.findByObjectName(shared);
         assertEquals("sys_article", file.getJoinTable());
