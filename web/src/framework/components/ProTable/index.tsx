@@ -57,8 +57,14 @@ export interface ProTableProps<T = unknown> {
         onChange?: (selectedRowKeys: React.Key[], selectedRows: T[]) => void;
     };
     defaultPageSize?: number;
-    /** 搜索栏每行列数，默认 4 */
+    /** 搜索栏每行列数，默认 4（searchInline 时忽略） */
     searchFormCols?: number;
+    /**
+     * 搜索表单内联渲染到工具栏左侧，与操作按钮同一行（单条件页面省一行空间）。
+     * 内联模式不渲染「查询/重置」按钮：回车提交，条件清空后自动回到无筛选状态。
+     * 默认 false = 现有独立筛选卡
+     */
+    searchInline?: boolean;
     /** 搜索表单渲染函数，返回 Form.Item 列表 */
     searchFormRender?: () => React.ReactNode;
     scrollY?: number | string;
@@ -201,13 +207,15 @@ this.setState({loading: true})
         // 有筛选条件时区分「无匹配结果」与「暂无数据」，避免业务人员误以为数据丢失
         const hasFilter = Object.keys(this.state.params || {}).length > 0
 
+        const inlineSearch = this.renderInlineSearch()
 
         return <div className={'oa-pro-table '} id={this.id}>
             {this.renderForm()}
             <div className="pro-table-wrapper">
-                {(toolBarRender || toolBarRightRender) && <div className="pro-table-toolbar">
-                    {toolBarRender && <div className="pro-table-toolbar-left">
-                        {this.getToolBarRenderNode(toolBarRender)}
+                {(inlineSearch || toolBarRender || toolBarRightRender) && <div className="pro-table-toolbar">
+                    {(inlineSearch || toolBarRender) && <div className={'pro-table-toolbar-left' + (inlineSearch ? ' has-inline-search' : '')}>
+                        {inlineSearch}
+                        {toolBarRender && this.getToolBarRenderNode(toolBarRender)}
                     </div>}
                     {toolBarRightRender && <div className="pro-table-toolbar-right">
                         {this.getToolBarRenderNode(toolBarRightRender)}
@@ -258,10 +266,9 @@ this.setState({loading: true})
 
 
     renderForm = () => {
-        if (this.props.children) {
-            throw new Error('[ProTable] children 已废弃，请使用 searchFormRender prop 替代')
-        }
-        const searchContent = this.props.searchFormRender?.()
+        // 内联模式：搜索表单改由工具栏渲染（见 renderInlineSearch）
+        if (this.props.searchInline) return
+        const searchContent = this.getSearchContent()
         if (!searchContent) return
 
         return (
@@ -269,10 +276,7 @@ this.setState({loading: true})
                 className="filter-bar"
                 style={{'--oa-filter-cols': this.props.searchFormCols ?? 4} as React.CSSProperties}
                 onFinish={(values) => this.onSearch(values)}
-                ref={(instance) => {
-                    this.formRef.current = instance;
-                    if (this.props.formRef) this.props.formRef.current = instance;
-                }}
+                ref={this.bindFormRef}
             >
                 {searchContent}
                 <div className="filter-actions">
@@ -285,6 +289,43 @@ this.setState({loading: true})
             </Form>
         )
     };
+
+    /** 内联搜索：单条件页面把搜索控件放到工具栏左侧，回车即查询，复用 onSearch 的取数逻辑 */
+    renderInlineSearch = () => {
+        if (!this.props.searchInline) return
+        const searchContent = this.getSearchContent()
+        if (!searchContent) return
+
+        return (
+            <Form
+                className="pro-table-search-inline"
+                onFinish={(values) => this.onSearch(values)}
+                onValuesChange={(changedValues) => {
+                    // 条件被清空（allowClear 等）后自动回到无筛选状态，否则用户还要再按一次回车
+                    const cleared = Object.values(changedValues).some(v => v == null || v === '' || (Array.isArray(v) && v.length === 0))
+                    if (cleared) this.formRef.current?.submit()
+                }}
+                ref={this.bindFormRef}
+            >
+                {searchContent}
+                {/* 视觉隐藏的提交按钮：多字段内联时也能回车提交 */}
+                <Button className="pro-table-search-submit" htmlType="submit" tabIndex={-1} aria-hidden/>
+            </Form>
+        )
+    };
+
+    /** 校验已废弃的 children 用法，返回搜索表单内容（无搜索表单时返回空） */
+    getSearchContent = () => {
+        if (this.props.children) {
+            throw new Error('[ProTable] children 已废弃，请使用 searchFormRender prop 替代')
+        }
+        return this.props.searchFormRender?.()
+    }
+
+    bindFormRef = (instance: FormInstance | null) => {
+        this.formRef.current = instance;
+        if (this.props.formRef) this.props.formRef.current = instance;
+    }
 
     getToolBarRenderNode(toolBarRender: ProTableToolBarRender<T>) {
         if (!toolBarRender) {

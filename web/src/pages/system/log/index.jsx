@@ -53,7 +53,7 @@ export default class LogPage extends React.Component {
 
 
     render() {
-        return <Page title="操作日志" description="查看系统操作日志">
+        return <Page>
             <ProTable
                 request={(params) => HttpClient.get('admin/sysLog/page', params)}
                 columns={this.columns}

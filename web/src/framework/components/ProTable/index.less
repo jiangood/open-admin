@@ -69,6 +69,11 @@
             gap: 8px;
             flex: 1;
             min-width: 0;
+
+            /* 仅内联搜索时允许换行，存量工具栏布局与之前完全一致 */
+            &.has-inline-search {
+                flex-wrap: wrap;
+            }
         }
 
         .pro-table-toolbar-right {
@@ -78,6 +83,45 @@
             flex-shrink: 0;
             /* 只提供右侧插槽时，space-between 退化为 flex-start，靠 auto 兜住右对齐 */
             margin-left: auto;
+        }
+    }
+
+    /* searchInline：搜索控件内联在工具栏左侧，与操作按钮同一行 */
+    .pro-table-search-inline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 0;
+
+        /* 定宽由 --oa-search-inline-width 控制，业务侧可覆盖；noStyle 的输入控件同样收敛 */
+        > .ant-form-item,
+        > .ant-input,
+        > .ant-input-affix-wrapper,
+        > .ant-picker,
+        > .ant-select {
+            width: var(--oa-search-inline-width, 260px);
+            max-width: 100%;
+        }
+
+        .ant-form-item {
+            margin: 0;
+        }
+
+        /* 视觉隐藏的提交按钮：保留回车提交能力，且不占位（不用 display:none，避免浏览器忽略默认提交按钮） */
+        .pro-table-search-submit {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            min-width: 0;
+            padding: 0;
+            margin: -1px;
+            border: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            clip-path: inset(50%);
+            opacity: 0;
+            pointer-events: none;
         }
     }
 

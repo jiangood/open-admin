@@ -183,6 +183,7 @@ import { PermActions } from '@jiangood/open-admin';
   searchFormRender={() => (
     <Form.Item label="名称" name="name"><Input/></Form.Item>
   )}
+  searchInline                           // 搜索表单内联到工具栏左侧（单条件页面），默认 false
   toolBarRender={(params, {selectedRows, selectedRowKeys}) => (
     <Button type="primary" onClick={this.handleAdd}>新增</Button>
   )}
@@ -205,12 +206,31 @@ import { PermActions } from '@jiangood/open-admin';
 | `rowSelection` | 行选择：`true` 为 checkbox，对象可覆盖 `type`/`onChange` |
 | `treeMode` | 树形数据模式，关闭分页 |
 | `searchFormRender` | 搜索表单渲染函数，返回 `Form.Item` 列表 |
-| `searchFormCols` | 搜索栏每行列数，默认 4 |
+| `searchFormCols` | 搜索栏每行列数，默认 4（`searchInline` 时忽略） |
+| `searchInline` | 搜索表单内联到工具栏左侧，与操作按钮同一行（单条件页面省一行空间）；默认 `false` = 独立筛选卡 |
 | `defaultPageSize` | 默认每页条数 |
 | `scrollY` | 表格纵向滚动高度 |
 | `bordered` | 是否显示边框 |
 
 `extData.summary` 会渲染为表格底部汇总行（见 `PageExt`）。
+
+`searchInline` 只建议用于**单条件**页面（如「主机」「镜像」这种只按关键词搜索的列表）：搜索控件内联在工具栏左侧，与 `toolBarRightRender` 的操作按钮同一行，省掉整张筛选卡。内联模式不渲染「查询/重置」按钮——回车即提交，条件被清空时自动回到无筛选状态；`searchFormRender` 无返回时按无搜索表单处理。多条件页面继续用默认筛选卡，行为不变。搜索框宽度可用 `--oa-search-inline-width` 覆盖（默认 260px）。
+
+> 限制：只有文本框符合「输入后回车」的自然交互。`Select`/日期等控件**选中后不会自动查询**（仅在清空时自动查询），需要用户在表单内按回车（在日期框里按回车同样会提交）；若希望选中即查询，可在业务侧 `onChange` 里调用 `formRef.current.submit()`，或继续使用默认筛选卡。
+
+```jsx
+<ProTable
+  searchInline
+  searchFormRender={() => (
+    <Form.Item name="searchText" noStyle>
+      <Input prefix={<SearchOutlined/>} placeholder="搜索主机名 / IP" allowClear/>
+    </Form.Item>
+  )}
+  toolBarRightRender={() => <Button type="primary" perm="host:save">新增</Button>}
+  request={(params) => HttpClient.get('admin/host/page', params)}
+  columns={columns}
+/>
+```
 
 ### 页面生命周期
 
