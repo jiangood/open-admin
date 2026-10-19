@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import qs from 'qs';
 import type {AxiosProgressEvent, AxiosRequestConfig, AxiosResponse} from "axios";
+import {EventBus} from "../../utils/EventBus";
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_SERVER_SERVLET_CONTEXT_PATH,
@@ -263,6 +264,12 @@ export class DownloadModal extends React.Component<DownloadModalProps, ModalStat
       let msg = '下载失败';
       if (error.message) {
         msg = error.message;
+      }
+      // 登录失效：交由全局登录失效弹窗提示，避免在此显示「Request failed with status code 401」
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
+        EventBus.emit('loginExpired');
+        this.setState({open: false, status: ''});
+        return;
       }
       console.error('[DownloadModal] 下载失败:', msg);
       this.setState({

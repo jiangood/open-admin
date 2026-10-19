@@ -15,7 +15,8 @@ import {getMessageApi} from "./MessageApi";
  * - 失败默认自动 console.warn + message.error，并 reject(AjaxError)；传 {toastError: false} 可完全静默（仅 reject）
  * - 返回值被忽略也安全：内部已对返回的 Promise 挂 no-op catch，不会产生 unhandled rejection
  * - reject 的 AjaxError {code, message}：业务失败 code 为后端业务码，网络异常 code 为 HTTP 状态码，message 始终为人类可读提示
- * - HTTP 401 或业务 code=401 均广播 loginExpired（全局关注点），弹错仍按 toastError 决定
+ * - HTTP 401 或业务 code=401 均广播 loginExpired，载荷为 {message, reason}，交由全局登录失效弹窗统一提示（不再单独弹错）
+ * - 非 AjaxResult 响应体（如纯文本、HTML 错误页）一律按失败处理，不再当成功 resolve，避免掩盖登录失效
  *
  * 用法：
  * ```ts
@@ -48,6 +49,8 @@ import {getMessageApi} from "./MessageApi";
 export interface AjaxError {
     code?: number | string;
     message: string;
+    /** 登录失效原因（仅 code=401 时可能携带），见 LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN */
+    loginExpiredReason?: string;
 }
 
 /** 后端统一响应结构 AjaxResult；putExtData 附加字段在顶层，data 为业务数据 */
@@ -57,7 +60,23 @@ export interface AjaxBody<T = unknown> {
     data: T;
     message?: string;
     traceId?: string;
+    /** 登录失效原因（框架在 401 响应中透传，如并发登录被顶下线） */
+    loginExpiredReason?: string;
     [key: string]: unknown;
+}
+
+/**
+ * 登录失效原因：同一账号并发登录被顶下线（后端扩展字段 loginExpiredReason 的取值之一）。
+ * 全局登录失效弹窗据此使用后端下发的定制文案，而非站点级默认文案。
+ */
+export const LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN = 'CONCURRENT_LOGIN';
+
+/** loginExpired 事件载荷 */
+export interface LoginExpiredPayload {
+    /** 提示文案，来自后端 401 响应体的 message */
+    message?: string;
+    /** 原因标识，来自后端 401 响应体的扩展字段 loginExpiredReason */
+    reason?: string;
 }
 
 /** 请求选项：headers 自定义请求头；toastError=false 时失败不自动弹错（完全静默，仅 reject）；toastSuccess=false 时成功不自动弹后端 message */
@@ -144,16 +163,13 @@ export class HttpClient {
             }).then((response) => {
                 const blob: Blob = response.data;
 
-                if (blob.type === 'application/json') {
+                if (blob.type.toLowerCase().startsWith('application/json')) {
                     const reader = new FileReader();
                     reader.onerror = () => HttpClient.fail(url, toastError, reject, {message: '读取下载数据失败'}, '下载失败');
                     reader.onload = () => {
                         try {
                             const rs = JSON.parse(reader.result as string);
-                            if (rs.code === 401) {
-                                EventBus.emit('loginExpired');
-                            }
-                            HttpClient.fail(url, toastError, reject, {code: rs.code, message: rs.message || '下载失败'}, '下载失败');
+                            HttpClient.fail(url, toastError, reject, rs, '下载失败', rs.code === 401 ? 401 : undefined);
                         } catch {
                             HttpClient.fail(url, toastError, reject, {message: '解析错误响应失败'}, '下载失败');
                         }
@@ -246,21 +262,29 @@ export class HttpClient {
 
         const promise = new Promise<AjaxBody<T>>((resolve, reject) => {
             axiosInstance(config).then((response) => {
-                const body = response.data as AjaxBody<T>;
-                const {success: ok, message} = body;
-                if (ok == undefined) {
-                    resolve(body);
+                const body = response.data as AjaxBody<T> | undefined;
+
+                // 非 AjaxResult 响应体（如被过滤器/Servlet 容器拦截返回的纯文本、HTML 错误页）
+                // 一律按失败处理：曾经被当成成功 resolve，会掩盖登录失效等错误
+                // （axios 默认对 4xx/5xx 直接 reject，这里主要覆盖 2xx 却是非 JSON 的响应；401 分支为自定义 validateStatus 等场景兜底）
+                if (body == null || typeof body !== 'object' || body.success === undefined) {
+                    HttpClient.fail(url, toastError, reject, {
+                        code: response.status,
+                        message: response.status === 401 ? '登录过期' : `响应格式错误（HTTP ${response.status}）`,
+                    }, '请求失败', response.status);
                     return;
                 }
-                if (!ok) {
-                    if (body.code === 401) {
-                        EventBus.emit('loginExpired');
-                    }
-                    HttpClient.fail(url, toastError, reject, {code: body.code, message: message || '操作失败'});
+
+                if (!body.success) {
+                    HttpClient.fail(url, toastError, reject, {
+                        code: body.code,
+                        message: body.message || '操作失败',
+                        loginExpiredReason: body.loginExpiredReason,
+                    }, '请求失败', body.code === 401 ? 401 : undefined);
                     return;
                 }
-                if (toastSuccess && message) {
-                    getMessageApi().success(message);
+                if (toastSuccess && body.message) {
+                    getMessageApi().success(body.message);
                 }
                 resolve(body);
             }).catch((e: unknown) => {
@@ -273,14 +297,28 @@ export class HttpClient {
         return promise;
     }
 
-    /** 统一的失败处理：HTTP 401 广播 loginExpired 并弹"登录过期"，其余提取可读消息后按 toastError 决定是否弹错，最终 reject(AjaxError) */
-    private static fail(url: string, toastError: boolean, reject: (reason?: unknown) => void, e: unknown, label = '请求失败'): void {
-        if (axios.isAxiosError(e) && e.response?.status === 401) {
-            EventBus.emit('loginExpired');
-            const err: AjaxError = {code: 401, message: '登录过期'};
-            if (toastError) {
-                getMessageApi().error('登录过期');
-            }
+    /** 从 axios 异常 / AjaxResult / AjaxError 中提取登录失效文案与原因 */
+    private static loginExpiredInfo(e: unknown): {message: string; loginExpiredReason?: string} {
+        const data = (axios.isAxiosError(e) ? e.response?.data : e) as AjaxError | undefined;
+        return {
+            message: typeof data?.message === 'string' && data.message ? data.message : '登录过期',
+            loginExpiredReason: typeof data?.loginExpiredReason === 'string' ? data.loginExpiredReason : undefined,
+        };
+    }
+
+    /**
+     * 统一的失败处理：
+     * - HTTP 401 / 业务 code=401：广播 loginExpired（载荷含后端文案与原因），由全局登录失效弹窗统一提示，
+     *   不再单独弹错，避免与弹窗重复；最终 reject(AjaxError)
+     * - 其余：提取可读消息后按 toastError 决定是否弹错，最终 reject(AjaxError)
+     */
+    private static fail(url: string, toastError: boolean, reject: (reason?: unknown) => void, e: unknown, label = '请求失败', httpStatus?: number): void {
+        const status = httpStatus ?? (axios.isAxiosError(e) ? e.response?.status : undefined);
+        if (status === 401) {
+            const {message, loginExpiredReason} = HttpClient.loginExpiredInfo(e);
+            const payload: LoginExpiredPayload = {message, reason: loginExpiredReason};
+            EventBus.emit('loginExpired', payload);
+            const err: AjaxError = {code: 401, message, loginExpiredReason};
             reject(err);
             return;
         }

@@ -8,6 +8,8 @@ const SITE_ARTICLES_KEY = "siteArticles";
 export interface SiteInfo {
     title?: string;
     waterMark?: boolean;
+    /** 登录失效（空闲超时/未登录）时全局弹窗的提示文案，对应 sys.login-expired-message */
+    loginExpiredMessage?: string;
     [key: string]: unknown;
 }
 

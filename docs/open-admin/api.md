@@ -403,7 +403,7 @@ location /file/public/ {
 
 | 类 | 主要方法 |
 |----|---------|
-| `HttpClient` | `get` / `post` / `postForm` / `download` / `ajax`（axios 封装，自动 context-path；所有请求方法返回 `Promise<AjaxBody>`：成功 resolve 整个 AjaxResult 响应体（`{success, code, data, message, traceId, ...}`，业务取数据用 `rs.data`、提示文案用 `rs.message`），失败 `reject({code, message})` 且默认自动弹错；成功时后端返回了 `message` 会自动 `message.success` 弹出（传 `{toastSuccess: false}` 关闭），失败弹错传 `{toastError: false}` 可静默仅 reject） |
+| `HttpClient` | `get` / `post` / `postForm` / `download` / `ajax`（axios 封装，自动 context-path；所有请求方法返回 `Promise<AjaxBody>`：成功 resolve 整个 AjaxResult 响应体（`{success, code, data, message, traceId, ...}`，业务取数据用 `rs.data`、提示文案用 `rs.message`），失败 `reject({code, message})` 且默认自动弹错；成功时后端返回了 `message` 会自动 `message.success` 弹出（传 `{toastSuccess: false}` 关闭），失败弹错传 `{toastError: false}` 可静默仅 reject。**例外**：`401`（HTTP 401 或业务 code=401）不单独弹错，而是广播 `loginExpired` 由全局登录失效弹窗提示；非 `AjaxResult` 结构的响应体一律按失败处理） |
 | `UrlUtils` | `contextPath(path)` 拼接 context-path / `getParams` / `setParam` / `getPathname` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `walk` / `findByKey` / `flattenTree` / `getKeyList` / `getChildRecursive` |
@@ -417,6 +417,8 @@ location /file/public/ {
 | `EventBus` | `on` / `once` / `emit` / `off` — 跨组件通信，优先使用，替代 `document.dispatchEvent` |
 
 `EventBus.on` / `once` 返回取消订阅函数；`on` 支持传 `ctx`（this）。`PageUtils.open(path, label)` 用于跳转到页面（`label` 会作为 Tab 标题，通过 `currentLabel()` 读取）。
+
+框架内置事件：登录失效时 `HttpClient` 广播 `loginExpired`（载荷 `{message, reason}`，`reason` 为 `CONCURRENT_LOGIN` 表示同一账号并发登录被顶下线），`Layouts` 已内置监听并弹出提示，业务无需处理；提示文案由 `sys.login-expired-message` / `sys.concurrent-login-message` 配置（见 [config.md](config.md)）。
 
 ### 路由
 

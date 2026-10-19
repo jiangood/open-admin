@@ -3,8 +3,8 @@ import {App, ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ErrorBoundary, GlobalData, HttpClient, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus} from "../framework";
-import type {ThemeColors} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus} from "../framework";
+import type {LoginExpiredPayload, ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
 
@@ -42,12 +42,15 @@ interface LayoutsProps {
     colors?: Partial<ThemeColors>;
 }
 
+const DEFAULT_LOGIN_EXPIRED_MESSAGE = '登录已过期，请重新登录';
+
 export class Layouts extends React.Component<LayoutsProps> {
     state = {
         location: history.location,
         siteInfoLoaded: false,
         loginChecked: false,
         loginExpiredVisible: false,
+        loginExpiredMessage: DEFAULT_LOGIN_EXPIRED_MESSAGE,
         themeMode: getThemeMode(),
         themeVersion: 0,
     };
@@ -56,6 +59,8 @@ export class Layouts extends React.Component<LayoutsProps> {
     unsubscribeLoginExpired: (() => void) | null = null;
     unsubscribeLogoutSuccess: (() => void) | null = null;
     unsubscribeTheme: (() => void) | null = null;
+    /** 本次登录失效弹窗的原因。同步字段（非 state）：同一次失效会并发上报多个 401，setState 异步可能读到旧值 */
+    private loginExpiredReason: string = '';
 
     constructor(props: LayoutsProps) {
         super(props);
@@ -64,6 +69,29 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     onLocationChange = ({location}: { location: typeof history.location }) => {
         this.setState({location});
+    };
+
+    /**
+     * 处理登录失效事件并从后端载荷解析弹窗文案。
+     * 一次登录失效会并发触发多个请求（各自返回 401、各自上报），已经拿到更具体的原因（并发被顶下线）时不再降级，
+     * 避免后到的通用 401 覆盖掉「已在别处登录」文案
+     */
+    onLoginExpired = (payload?: LoginExpiredPayload) => {
+        const concurrent = payload?.reason === LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN;
+        if (this.loginExpiredReason === LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN && !concurrent) {
+            this.setState({loginExpiredVisible: true});
+            return;
+        }
+        this.loginExpiredReason = concurrent ? LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN : '';
+        this.setState({
+            loginExpiredVisible: true,
+            loginExpiredMessage: this.resolveLoginExpiredMessage(payload),
+        });
+    };
+
+    closeLoginExpiredModal = () => {
+        this.loginExpiredReason = '';
+        this.setState({loginExpiredVisible: false});
     };
 
     getPageType(pathname): 'public' | 'standalone' | 'protected' {
@@ -116,11 +144,7 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     componentDidMount() {
         this.unlisten = history.listen(this.onLocationChange);
-        this.unsubscribeLoginExpired = EventBus.on('loginExpired', () => {
-            if (!this.state.loginExpiredVisible) {
-                this.setState({loginExpiredVisible: true});
-            }
-        });
+        this.unsubscribeLoginExpired = EventBus.on('loginExpired', this.onLoginExpired);
         this.unsubscribeLogoutSuccess = EventBus.on('logoutSuccess', () => {
             this.setState({loginChecked: false});
         });
@@ -152,6 +176,18 @@ export class Layouts extends React.Component<LayoutsProps> {
         if (this.unsubscribeTheme) {
             this.unsubscribeTheme();
         }
+    }
+
+    /**
+     * 解析登录失效弹窗文案：
+     * - 并发被顶下线：优先用后端随 401 下发的文案（sys.concurrent-login-message）
+     * - 其它（空闲超时/未登录）：用站点信息里的文案（sys.login-expired-message）
+     */
+    resolveLoginExpiredMessage(payload?: LoginExpiredPayload): string {
+        if (payload?.reason === LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN && payload.message) {
+            return payload.message;
+        }
+        return GlobalData.getSiteInfo().loginExpiredMessage || payload?.message || DEFAULT_LOGIN_EXPIRED_MESSAGE;
     }
 
     render() {
@@ -190,12 +226,13 @@ export class Layouts extends React.Component<LayoutsProps> {
     renderLoginExpiredModal() {
         return (
             <Modal open={this.state.loginExpiredVisible} title="确认操作" okText="确定"
-                   onCancel={() => this.setState({loginExpiredVisible: false})}
+                   onCancel={this.closeLoginExpiredModal}
                    onOk={() => {
-                       this.setState({loginExpiredVisible: false, loginChecked: false});
+                       this.closeLoginExpiredModal();
+                       this.setState({loginChecked: false});
                        PageUtils.redirectToLogin();
                    }}>
-                登录已过期，请重新登录
+                {this.state.loginExpiredMessage}
             </Modal>
         );
     }

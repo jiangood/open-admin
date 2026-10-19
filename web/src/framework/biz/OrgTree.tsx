@@ -24,6 +24,10 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
     componentDidMount() {
         HttpClient.get('admin/sysOrg/tree', null).then(tree => {
             this.setState({treeData: tree.data, treeDataLoading: false})
+        }).catch(() => {
+            // 失败时结束 loading 并置空（组件会显示空状态提示），避免一直停留在骨架屏；
+            // 401 由 HttpClient 广播 loginExpired（全局弹窗提示），其余错误仍按 toastError 弹错
+            this.setState({treeData: [], treeDataLoading: false})
         })
     }
 
