@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 @Service
 public class FileLogService {
@@ -28,6 +29,16 @@ public class FileLogService {
         try (FileInputStream is = new FileInputStream(file)) {
             return IOUtils.toString(is, StandardCharsets.UTF_8);
         }
+    }
+
+    /**
+     * 删除日志文件，文件不存在时忽略
+     *
+     * @param key 日志 key，如 job/{logId}
+     */
+    public void deleteLog(String key) throws IOException {
+        String normalizedKey = normalizeKey(key);
+        Files.deleteIfExists(fileLogConfig.buildLogFile(normalizedKey).toPath());
     }
 
     /**

@@ -179,6 +179,19 @@ public class SysJobController {
 
 
     @HasPermission("job:read")
+    @GetMapping("progress")
+    public AjaxResult allProgress() {
+        return AjaxResult.ok().data(service.listProgress());
+    }
+
+    @HasPermission("job:read")
+    @GetMapping("progress/{jobId}")
+    public AjaxResult progress(@PathVariable String jobId) {
+        return AjaxResult.ok().data(service.getProgress(jobId));
+    }
+
+
+    @HasPermission("job:read")
     @GetMapping("status")
     public AjaxResult info() throws SchedulerException {
         SchedulerMetaData meta = scheduler.getMetaData();

@@ -6,13 +6,15 @@ import {
     Form,
     Input,
     Modal,
+    Progress,
     Select,
     Spin,
     Switch,
-    Tag
+    Tag,
+    Tooltip
 } from 'antd'
 import {PlusOutlined, SearchOutlined} from "@ant-design/icons";
-import {FormModal, getMessageApi, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
+import {FormModal, DictUtils, FieldDictSelect, getMessageApi, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -56,15 +58,51 @@ export default class JobPage extends React.Component {
         logOpen: false,
         logLoading: false,
         logContent: '',
+
+        progressMap: {},
     }
     tableRef = React.createRef()
     modalRef = React.createRef()
+    progressTimer = null
 
     componentDidMount() {
         HttpClient.get('admin/job/job-class-options', null, {toastError: false}).then(rs => {
             this.setState({jobClassOptions: rs.data})
         }).catch(e => {
             console.error('[Job] 加载任务类选项失败:', e);
+        })
+        this.startProgressPolling()
+    }
+
+    componentWillUnmount() {
+        this.stopProgressPolling()
+    }
+
+    startProgressPolling = () => {
+        this.loadProgress()
+        this.progressTimer = setInterval(() => {
+            if (!document.hidden) {
+                this.loadProgress()
+            }
+        }, 3000)
+    }
+
+    stopProgressPolling = () => {
+        if (this.progressTimer) {
+            clearInterval(this.progressTimer)
+            this.progressTimer = null
+        }
+    }
+
+    loadProgress = () => {
+        HttpClient.get('admin/job/progress', null, {toastError: false}).then(rs => {
+            const progressMap = {}
+            ;(rs.data || []).forEach(p => {
+                progressMap[p.jobId] = p
+            })
+            this.setState({progressMap})
+        }).catch(e => {
+            console.error('[Job] 加载任务进度失败:', e);
         })
     }
 
@@ -107,6 +145,7 @@ export default class JobPage extends React.Component {
     handleTriggerJob = row => {
         HttpClient.post('admin/job/trigger-job', {id: row.id}, null, {toastError: false}).then(() => {
             this.tableRef.current.reload();
+            this.loadProgress()
         }).catch(e => {
             console.error('[Job] 触发任务失败:', e);
         })
@@ -148,6 +187,38 @@ export default class JobPage extends React.Component {
         },
 
         {
+            title: '日志聚合',
+            dataIndex: 'logAggregation',
+            render: v => DictUtils.dictTag('jobLogAggregation', v) || '每次执行',
+        },
+
+        {
+            title: '运行状态',
+            dataIndex: 'progress',
+            width: 220,
+            render: (_, record) => {
+                const p = this.state.progressMap[record.id]
+                if (!p) {
+                    return <Tag>未运行</Tag>
+                }
+                return <div>
+                    <Tag color={p.stateColor || 'default'}>{p.stateLabel}</Tag>
+                    {p.percent != null && <Progress percent={p.percent} size='small'/>}
+                    {p.message && <Tooltip title={p.message}>
+                        <div style={{
+                            fontSize: 12,
+                            color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65))',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                            maxWidth: 200
+                        }}>{p.message}</div>
+                    </Tooltip>}
+                </div>
+            },
+        },
+
+        {
             title: '操作',
             dataIndex: 'option',
             fixed: 'right',
@@ -179,6 +250,27 @@ export default class JobPage extends React.Component {
 
     showExecuteRecord(record) {
         this.setState({executeRecordOpen: true, selectedRecord: record})
+        this.loadProgress()
+    }
+
+    /**
+     * 执行记录弹窗顶部：当前任务的运行中进度（内存态）
+     */
+    renderRunningProgress() {
+        const {selectedRecord, progressMap} = this.state
+        const p = selectedRecord ? progressMap[selectedRecord.id] : null
+        if (!p || p.state !== 'RUNNING') {
+            return null
+        }
+        return <Alert
+            type='info'
+            showIcon
+            style={{marginBottom: 12}}
+            title={<div>
+                <div style={{marginBottom: 6}}>{p.message || '任务运行中'}</div>
+                {p.percent != null && <Progress percent={p.percent} size='small'/>}
+            </div>}
+        />
     }
 
     showLog = (record) => {
@@ -241,6 +333,11 @@ export default class JobPage extends React.Component {
                     <Switch/>
                 </Form.Item>
 
+                <Form.Item label='日志聚合' name='logAggregation' initialValue='PER_RUN'
+                           help='高频任务建议按天聚合：一天只保留一条执行记录，日志文件按天合并'>
+                    <FieldDictSelect typeCode='jobLogAggregation'/>
+                </Form.Item>
+
                 {this.state.paramList?.map(p => (
                     <div key={p.name}>
                         <Divider>任务参数</Divider>
@@ -276,6 +373,7 @@ export default class JobPage extends React.Component {
                    width={1024}
                    destroyOnHidden
             >
+                {this.renderRunningProgress()}
                 <ProTable columns={[{
                     title: '开始时间',
                     dataIndex: 'beginTime',
@@ -288,6 +386,24 @@ export default class JobPage extends React.Component {
                         title: '耗时',
                         dataIndex: 'jobRunTimeLabel',
 
+                    },
+                    {
+                        title: '执行次数',
+                        dataIndex: 'executeCount',
+                        width: 90,
+                        render: v => v == null ? 1 : v,
+                    },
+                    {
+                        title: '失败次数',
+                        dataIndex: 'failCount',
+                        width: 90,
+                        render: v => (v == null || v === 0) ? '-' : <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{v}</span>,
+                    },
+                    {
+                        title: '累计耗时',
+                        dataIndex: 'totalRunTimeLabel',
+                        width: 100,
+                        render: v => v || '-',
                     },
                     {
                         title: '是否成功',

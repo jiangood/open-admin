@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.job.dto.request;
 
+import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import lombok.Data;
 
 import java.util.Map;
@@ -13,4 +14,5 @@ public class JobReq {
     String jobClass;
     Map<String, Object> jobData;
     String extraInfo;
+    JobLogAggregation logAggregation;
 }

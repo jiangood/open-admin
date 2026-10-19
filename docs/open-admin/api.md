@@ -47,6 +47,35 @@ public class DataSyncJob extends BaseJob {
 }
 ```
 
+进度上报（`BaseJob` 受保护方法，供前端「定时任务」页面轮询展示）：
+
+| 方法 | 说明 |
+|------|------|
+| `progress(int percent, String message)` | 直接上报百分比（0-100） |
+| `progress(long current, long total, String message)` | 上报「已处理/总数」，百分比自动计算 |
+| `progress(String message)` | 仅更新描述，进度未知时使用 |
+
+进度只保存在内存（`JobProgressRegistry`），重启后丢失；执行结果仍由 `sys_job_log` 落库。
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/job/progress` | GET | `job:read` | 全部任务运行进度快照，按开始时间倒序 |
+| `admin/job/progress/{jobId}` | GET | `job:read` | 单个任务进度，从未运行时 `data` 为 `null` |
+
+快照字段：`jobId` / `jobName` / `logId` / `state`(`RUNNING`/`SUCCESS`/`FAILED`) / `stateLabel` / `stateColor` / `percent` / `current` / `total` / `message` / `beginTime` / `updateTime` / `endTime` / `runTime` / `result`。
+
+### 日志聚合
+
+`SysJob.logAggregation`（新建/编辑任务时选择，字典 `jobLogAggregation`）控制执行记录与日志文件粒度：
+
+| 取值 | 执行记录 | 日志文件 |
+|---|---|---|
+| `PER_RUN` 每次执行（默认） | 每次一行 | 每次一个文件 |
+| `HOURLY` 按小时 | 每任务每小时一行 | 每任务每小时一个文件 |
+| `DAILY` 按天 | 每任务每天一行 | 每任务每天一个文件 |
+
+聚合记录的 `SysJobLog` 额外字段：`logBucket`（聚合桶）、`executeCount`（执行次数）、`failCount`（失败次数）、`totalRunTime`（累计耗时）/`totalRunTimeLabel`；`jobRunTime`/`result` 为最近一次，`success` 表示周期内是否全部成功。执行记录与日志文件按 `sys.job-log-retain-days`（默认 30 天）自动清理。
+
 ### 代码生成
 
 系统管理 →「代码生成」页面：动态扫描已注册实体（继承 `BaseEntity` 且标注 `@Entity`），按选中实体生成常见 CRUD 代码并写入项目源码目录（先预览确认，再写入）。

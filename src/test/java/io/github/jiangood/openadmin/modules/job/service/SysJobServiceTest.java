@@ -2,9 +2,12 @@ package io.github.jiangood.openadmin.modules.job.service;
 
 import io.github.jiangood.openadmin.framework.data.BaseRepository;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
+import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.example.HelloWorldJob;
+import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
+import io.github.jiangood.openadmin.modules.logviewer.service.FileLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,11 +33,17 @@ class SysJobServiceTest {
     @Mock
     private SysJobLogRepository sysJobLogRepository;
 
+    @Mock
+    private JobProgressRegistry jobProgressRegistry;
+
+    @Mock
+    private FileLogService fileLogService;
+
     private SysJobService service;
 
     @BeforeEach
     void setUp() {
-        service = new SysJobService(quartzService, sysJobLogRepository);
+        service = new SysJobService(quartzService, sysJobLogRepository, jobProgressRegistry, fileLogService);
         ReflectionTestUtils.setField(service, "repository", repository);
     }
 
@@ -89,5 +98,24 @@ class SysJobServiceTest {
 
         verify(quartzService).deleteJob(any());
         verify(quartzService, never()).scheduleJob(any());
+    }
+
+    @Test
+    void deleteJob_shouldDeleteLogsAndFiles() throws Exception {
+        SysJob job = new SysJob("job-1");
+        job.setName("job-1");
+        when(repository.findById("job-1")).thenReturn(java.util.Optional.of(job));
+
+        SysJobLog log = new SysJobLog();
+        log.setId("log-1");
+        when(sysJobLogRepository.findBySysJobId("job-1")).thenReturn(java.util.List.of(log));
+
+        service.deleteJob("job-1");
+
+        verify(quartzService).deleteJob(job);
+        verify(sysJobLogRepository).deleteAll(java.util.List.of(log));
+        verify(fileLogService).deleteLog("job/log-1");
+        verify(repository).deleteById("job-1");
+        verify(jobProgressRegistry).remove("job-1");
     }
 }

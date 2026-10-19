@@ -4,9 +4,12 @@ import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
+import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
+import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
+import io.github.jiangood.openadmin.modules.logviewer.service.FileLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronExpression;
@@ -28,6 +31,8 @@ public class SysJobService extends BaseService<SysJob> {
 
     private final QuartzManager quartzService;
     private final SysJobLogRepository sysJobLogRepository;
+    private final JobProgressRegistry jobProgressRegistry;
+    private final FileLogService fileLogService;
 
     @Transactional(rollbackFor = Exception.class)
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {
@@ -83,9 +88,18 @@ public class SysJobService extends BaseService<SysJob> {
         Assert.notNull(job, "该任务已被删除，请勿重复操作");
         quartzService.deleteJob(job);
 
-        sysJobLogRepository.deleteBySysJobId(id);
+        List<SysJobLog> logs = sysJobLogRepository.findBySysJobId(id);
+        sysJobLogRepository.deleteAll(logs);
+        for (SysJobLog jobLog : logs) {
+            try {
+                fileLogService.deleteLog("job/" + jobLog.getId());
+            } catch (Exception e) {
+                log.warn("删除任务日志文件失败: logId={}, {}", jobLog.getId(), e.getMessage());
+            }
+        }
 
         deleteById(id);
+        jobProgressRegistry.remove(id);
     }
 
 
@@ -95,5 +109,19 @@ public class SysJobService extends BaseService<SysJob> {
 
     public Page<SysJob> page(String name, String jobClass, Pageable pageable) throws SchedulerException {
         return repository.findAll(Spec.<SysJob>of().like(SysJob.Fields.name, name).like(SysJob.Fields.jobClass, jobClass), pageable);
+    }
+
+    /**
+     * 全部任务运行进度（内存态），按开始时间倒序
+     */
+    public List<JobProgress> listProgress() {
+        return jobProgressRegistry.listAll();
+    }
+
+    /**
+     * 单个任务运行进度，不存在返回 null
+     */
+    public JobProgress getProgress(String jobId) {
+        return jobProgressRegistry.get(jobId);
     }
 }

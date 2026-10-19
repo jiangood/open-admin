@@ -37,6 +37,27 @@ public class SysJobLog extends BaseEntity {
     @Column(length = 10)
     String executeDate;
 
+    /**
+     * 日志聚合桶：null 表示每次执行；按小时如 2026-10-19-14；按天如 2026-10-19
+     */
+    @Column(length = 20)
+    String logBucket;
+
+    /**
+     * 本周期执行次数
+     */
+    Integer executeCount;
+
+    /**
+     * 本周期失败次数
+     */
+    Integer failCount;
+
+    /**
+     * 本周期累计耗时（毫秒）
+     */
+    Long totalRunTime;
+
 
     @Transient
     public String getJobRunTimeLabel() {
@@ -46,11 +67,28 @@ public class SysJobLog extends BaseEntity {
         return null;
     }
 
+    @Transient
+    public String getTotalRunTimeLabel() {
+        if (totalRunTime != null) {
+            return DateUtil.formatBetween(totalRunTime, BetweenFormatter.Level.SECOND);
+        }
+        return null;
+    }
+
     @PrePersist
     public void prePersist() {
         this.executeDate = beginTime == null ? null : beginTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         if (success == null) {
             success = true;
+        }
+        if (executeCount == null) {
+            executeCount = 1;
+        }
+        if (failCount == null) {
+            failCount = 0;
+        }
+        if (totalRunTime == null) {
+            totalRunTime = 0L;
         }
     }
 }

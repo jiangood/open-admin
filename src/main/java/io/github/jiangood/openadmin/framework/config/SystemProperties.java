@@ -80,6 +80,10 @@ public class SystemProperties {
      */
     private boolean jobEnable = true;
     /**
+     * 定时任务执行记录保留天数，&lt;=0 表示不清理
+     */
+    private int jobLogRetainDays = 30;
+    /**
      *  是否打印全局捕获的异常， 通常指web请求异常
      */
     private boolean printGlobalException = true;
