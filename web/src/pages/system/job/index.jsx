@@ -2,7 +2,6 @@ import React from 'react'
 import {
     Alert,
     AutoComplete,
-    Button,
     Divider,
     Form,
     Input,
@@ -201,15 +200,15 @@ export default class JobPage extends React.Component {
             <ProTable
                 actionRef={this.tableRef}
                 searchInline
-                toolBarRightRender={() => ( // NOSONAR: AntD 渲染函数惯例
-                    <PermActions>
-                        <Button type='primary' perm='job:create' icon={<PlusOutlined/>} onClick={() => this.handleAdd()}>新增</Button>
-                        <Button perm='job:read' onClick={this.showStatus}>查看状态</Button>
-                    </PermActions>
+                toolBarRightRender={() => (
+                    <PermActions actions={[
+                        {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: 'job:create', onClick: () => this.handleAdd()},
+                        {label: '查看状态', perm: 'job:read', onClick: this.showStatus},
+                    ]}/>
                 )}
                 request={(params) => HttpClient.get('admin/job/page', params)}
                 columns={this.columns}
-                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                searchFormRender={() => (
                     <>
                         <Form.Item name='name' noStyle>
                             <Input prefix={<SearchOutlined/>} placeholder='任务名称' allowClear/>
@@ -349,7 +348,7 @@ export default class JobPage extends React.Component {
             const option = this.state.jobClassOptions.find(o => o.value === changed.jobClass)
             if (option) {
                 const {label} = option;
-                const match = label.match(/[（(](.*?)[）)]/); // NOSONAR: 匹配中英文括号内内容，已最简
+                const match = label.match(/[（(](.*?)[）)]/);
                 if (match) { // 取括号内中文描述设置为name
                     this.modalRef.current.formInstance.setFieldValue("name", match[1])
                 }

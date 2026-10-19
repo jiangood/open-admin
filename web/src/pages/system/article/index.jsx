@@ -1,5 +1,5 @@
 import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
-import {Button, Form, Input, InputNumber} from 'antd'
+import {Form, Input, InputNumber} from 'antd'
 import React from 'react'
 import {
     DictUtils,
@@ -106,21 +106,18 @@ export default class ArticleListPage extends React.Component {
     ]
 
     render() {
-        return <Page
-            title="文章管理"
-            description="管理系统文章，如关于、帮助等页面"
-        >
+        return <Page>
             <ProTable
                 actionRef={this.tableRef}
                 searchInline
-                toolBarRightRender={() => ( // NOSONAR: AntD 渲染函数惯例
-                    <PermActions>
-                        <Button perm='article:create' type='primary' icon={<PlusOutlined/>} onClick={this.handleAdd}>新增</Button>
-                    </PermActions>
+                toolBarRightRender={() => (
+                    <PermActions actions={[
+                        {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: 'article:create', onClick: this.handleAdd},
+                    ]}/>
                 )}
                 request={(params) => HttpClient.get('admin/article/page', params)}
                 columns={this.columns}
-                searchFormRender={() => ( // NOSONAR: AntD 渲染函数惯例
+                searchFormRender={() => (
                     <>
                         <Form.Item name='code' noStyle>
                             <Input prefix={<SearchOutlined/>} placeholder='文章编码' allowClear/>
