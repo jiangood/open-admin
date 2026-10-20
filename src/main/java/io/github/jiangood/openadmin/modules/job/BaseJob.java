@@ -6,7 +6,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
-import io.github.jiangood.openadmin.modules.logviewer.util.FileLogTool;
+import io.github.jiangood.openadmin.modules.logviewer.util.FileLog;
 import jakarta.annotation.Resource;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -60,7 +60,8 @@ public abstract class BaseJob implements Job {
 
         jobProgressRegistry.start(job, jobLog.getId());
 
-        Logger logger = FileLogTool.getLogger("job/" + jobLog.getId());
+        FileLog.bind(JobLogPermissionProvider.KEY_PREFIX + "/" + jobLog.getId());
+        Logger logger = FileLog.logger();
         if (jobLog.getLogBucket() != null) {
             int nextRun = (jobLog.getExecuteCount() == null ? 0 : jobLog.getExecuteCount()) + 1;
             logger.info("===== 第 {} 次执行 =====", nextRun);
@@ -89,7 +90,7 @@ public abstract class BaseJob implements Job {
                 finishLog(jobLog, success, result, System.currentTimeMillis() - startMillis);
                 logger.info("执行结束 返回值{}", result);
             } finally {
-                FileLogTool.clear();
+                FileLog.unbind();
             }
         }
     }

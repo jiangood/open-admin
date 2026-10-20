@@ -8,13 +8,12 @@ import {
     Modal,
     Progress,
     Select,
-    Spin,
     Switch,
     Tag,
     Tooltip
 } from 'antd'
 import {PlusOutlined, SearchOutlined} from "@ant-design/icons";
-import {FormModal, DictUtils, FieldDictSelect, getMessageApi, HttpClient, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
+import {FormModal, DictUtils, FieldDictSelect, getMessageApi, HttpClient, LogViewer, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
 
 
 const cronOptions = [
@@ -56,8 +55,6 @@ export default class JobPage extends React.Component {
         executeRecordOpen: false,
 
         logOpen: false,
-        logLoading: false,
-        logContent: '',
 
         progressMap: {},
     }
@@ -274,16 +271,19 @@ export default class JobPage extends React.Component {
     }
 
     showLog = (record) => {
-        this.setState({logOpen: true, logLoading: true, logContent: '', selectedLogRecord: record})
-        HttpClient.get('admin/sys/log/job/' + record.id, null, {toastError: false}).then(content => {
-            this.setState({
-                logContent: typeof content === 'string' ? content : JSON.stringify(content),
-                logLoading: false
-            })
-        }).catch(e => {
-            console.error('[Job] 加载任务日志失败:', e)
-            this.setState({logContent: '日志加载失败：' + (e?.message || ''), logLoading: false})
-        })
+        this.setState({logOpen: true, selectedLogRecord: record})
+    }
+
+    /**
+     * 该执行记录对应的日志是否仍在写入：用进度快照里的 logId 精确匹配
+     */
+    isLogRunning = () => {
+        const {selectedLogRecord, progressMap} = this.state
+        if (!selectedLogRecord) {
+            return false
+        }
+        return Object.values(progressMap).some(p =>
+            p.logId === selectedLogRecord.id && p.state === 'RUNNING')
     }
 
 
@@ -439,21 +439,16 @@ export default class JobPage extends React.Component {
                    width={1024}
                    destroyOnHidden
                    footer={this.state.selectedLogRecord ? (
-                       <a href={UrlUtils.contextPath('/admin/sys/log/job/' + this.state.selectedLogRecord.id)}
+                       <a href={UrlUtils.contextPath('/admin/sys/log/raw/job/' + this.state.selectedLogRecord.id)}
                           target='_blank' rel='noreferrer'>在新窗口打开</a>
                    ) : null}
             >
-                <Spin spinning={this.state.logLoading}>
-                    <pre style={{
-                        margin: 0,
-                        maxHeight: '60vh',
-                        overflow: 'auto',
-                        whiteSpace: 'pre-wrap',
-                        wordBreak: 'break-all',
-                        fontSize: 12,
-                        lineHeight: 1.6
-                    }}>{this.state.logContent}</pre>
-                </Spin>
+                {this.state.selectedLogRecord && (
+                    <LogViewer key={this.state.selectedLogRecord.id}
+                               logKey={'job/' + this.state.selectedLogRecord.id}
+                               running={this.isLogRunning()}
+                               height={480}/>
+                )}
             </Modal>
         </Page>
     }

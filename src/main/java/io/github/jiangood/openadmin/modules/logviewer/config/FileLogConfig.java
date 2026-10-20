@@ -23,7 +23,7 @@ import java.io.File;
 
 /**
  * 根据 mdc设置的key记录日志到单独文件
- * （可使用封装的FileLogUtils)
+ * （使用封装的 {@link io.github.jiangood.openadmin.modules.logviewer.util.FileLog}）
  */
 @Slf4j
 @Getter
@@ -61,6 +61,9 @@ public class FileLogConfig {
                 appender.setContext(context);
                 appender.setName("file-" + key);
                 appender.setFile(buildLogFile(key).getAbsolutePath());
+                // 同一 key 的日志会跨次追加（如定时任务日志聚合按天/小时复用同一 logId），
+                // 必须保持追加模式，不能像一次性任务那样每次截断
+                appender.setAppend(true);
 
                 PatternLayoutEncoder encoder = new PatternLayoutEncoder();
                 encoder.setContext(context);
@@ -88,7 +91,7 @@ public class FileLogConfig {
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
         }
-        log.info("计算文件日志地址 {}", file.getAbsolutePath());
+        log.debug("计算文件日志地址 {}", file.getAbsolutePath());
         return file;
     }
 }

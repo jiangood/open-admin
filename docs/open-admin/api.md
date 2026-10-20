@@ -76,6 +76,33 @@ public class DataSyncJob extends BaseJob {
 
 聚合记录的 `SysJobLog` 额外字段：`logBucket`（聚合桶）、`executeCount`（执行次数）、`failCount`（失败次数）、`totalRunTime`（累计耗时）/`totalRunTimeLabel`；`jobRunTime`/`result` 为最近一次，`success` 表示周期内是否全部成功。执行记录与日志文件按 `sys.job-log-retain-days`（默认 30 天）自动清理。
 
+### 运行日志
+
+前端展示的文件日志（定时任务、以及业务模块自己的异步任务）统一由 `modules/logviewer/` 提供：日志写入、增量读取与查看权限按 key 前缀解耦。
+
+写入（`FileLog`）：`bind(key)` 把当前线程绑定到 `${logging.file.path}/{key}.log`，`logger()` 取日志 logger，`unbind()` 解绑；写入哪个文件只取决于当前线程绑定的 key，与包名/类名无关。
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/sys/log/{key}` | GET | 按 key 前缀注册（见下） | 增量读取日志，返回 `{content, nextOffset, eof}` |
+| `admin/sys/log/raw/{key}` | GET | 同上 | 纯文本返回完整日志，供新窗口打开 |
+
+`admin/sys/log/{key}` 查询参数：`offset`（起始字节偏移，默认 0）、`length`（单次最多读取字节数，默认 256KB，上限 4MB）。日志会随任务持续增长，前端按返回的 `nextOffset` 反复请求即可只取新增部分；读取按 UTF-8 字符边界切分，不会截断多字节字符。
+
+查看权限由各模块通过实现 `LogKeyPermissionProvider` 声明（key 前缀 → 权限），通用模块不写死业务权限，未注册的前缀一律拒绝：
+
+```java
+@Component
+public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
+    @Override
+    public Map<String, String> logKeyPermissions() {
+        return Map.of("order", "order:read");   // order/{logId} 需要 order:read
+    }
+}
+```
+
+前端可直接使用框架的 `LogViewer` 组件增量跟随运行中的日志（参见[组件](#组件)）。
+
 ### 代码生成
 
 系统管理 →「代码生成」页面：动态扫描已注册实体（继承 `BaseEntity` 且标注 `@Entity`），按选中实体生成常见 CRUD 代码并写入项目源码目录（先预览确认，再写入）。
@@ -125,6 +152,7 @@ public class DataSyncJob extends BaseJob {
 | `ValueType` | 按类型渲染字段/视图（`renderField(type, props)` / `renderView(type, props)`） |
 | `View*` | 展示组件，见[展示组件](#展示组件) |
 | `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
+| `LogViewer` | 文件日志查看器，按字节偏移增量读取；`logKey` + `running` 时自动轮询新内容、任务结束自动补拉最后一段 |
 
 #### PageFrame
 

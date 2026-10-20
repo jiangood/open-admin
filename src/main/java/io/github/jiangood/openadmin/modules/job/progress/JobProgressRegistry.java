@@ -152,6 +152,24 @@ public class JobProgressRegistry {
     }
 
     /**
+     * 按日志 id 查询运行进度，用于判断某份日志对应的任务是否仍在运行；不存在返回 null。
+     * <p>
+     * 内存态数据量很小（只保留当前/最近一次），直接遍历即可，无需额外索引。
+     */
+    public JobProgress getByLogId(String logId) {
+        if (logId == null) {
+            return null;
+        }
+        sweep();
+        for (JobProgress p : byJobId.values()) {
+            if (logId.equals(p.getLogId())) {
+                return p;
+            }
+        }
+        return null;
+    }
+
+    /**
      * 移除任务进度（任务被删除时调用）
      */
     public void remove(String jobId) {

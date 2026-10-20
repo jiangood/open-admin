@@ -206,4 +206,14 @@ class JobProgressRegistryTest {
 
         assertNotNull(registry.get("job-1"));
     }
+
+    @Test
+    void getByLogId_shouldFindRunningSnapshot() {
+        registry.start(job("job-1", "同步"), "log-1");
+        registry.start(job("job-2", "部署"), "log-2");
+
+        assertEquals("job-2", registry.getByLogId("log-2").getJobId());
+        assertNull(registry.getByLogId("no-such-log"));
+        assertNull(registry.getByLogId(null));
+    }
 }

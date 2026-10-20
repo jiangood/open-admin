@@ -74,6 +74,14 @@ return "同步完成 " + rows.size() + " 条";
 - 聚合记录字段：`beginTime` 为周期内第一次执行时间，`jobRunTime` 为最近一次耗时，`totalRunTime` 为累计耗时，`executeCount`/`failCount` 为执行/失败次数，`success` 表示周期内是否全部成功，`result` 为最近一次返回值。
 - 过期执行记录与日志文件由 `sys.job-log-retain-days`（默认 30 天，`<=0` 不清理）每天 03:00 自动清理；删除任务时也会一并删除其执行记录与日志文件。
 
+### 日志写入与在线查看
+
+任务的 `logger` 参数由 `BaseJob` 通过 `FileLog` 绑定到 `job/{logId}`，任务内所有日志都会写入该文件；日志文件为**追加**模式，聚合模式下同一周期的内容会持续追加到同一文件。
+
+前端「执行记录 → 日志」弹窗使用框架 `LogViewer` 组件：任务运行中按 1.5s 增量拉取新增内容（只读文件新增字节，不会整文件重读），任务结束后停止轮询并补拉最后一段；「在新窗口打开」走 `admin/sys/log/raw/job/{logId}` 返回纯文本。
+
+`admin/sys/log/{key}` 的查看权限按 key 前缀注册（定时任务日志注册为 `job:read`）。业务模块自己的文件日志（如 `FileLog.bind("order/" + id)`）需要实现 `LogKeyPermissionProvider` 声明前缀权限，否则该日志一律拒绝访问——详见 [api.md](api.md#运行日志)。
+
 ## 临时文件确认
 
 上传文件/图片后，`SysFile` 记录默认处于 **临时（TEMP）** 状态；只有业务数据保存时调用 `SysFileService` 的确认方法才会转为 **使用中（IN_USE）** 并记录关联表/关联 ID。临时文件默认 120 分钟（`sys.file.clean-temp-minutes`）后被 `CleanTempFileJob` 物理删除，因此**包含文件/图片/富文本字段的业务模块必须在保存后确认临时文件**，否则上传的图片会莫名其妙消失。

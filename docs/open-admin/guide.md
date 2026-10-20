@@ -129,7 +129,7 @@ web/
 |------|--------|------|
 | system | `modules/system/` | 用户/角色/菜单/组织/字典/文件/日志管理 |
 | job | `modules/job/` | Quartz 定时任务 |
-| logviewer | `modules/logviewer/` | 运行日志在线查看 |
+| logviewer | `modules/logviewer/` | 运行日志在线查看（写入 `FileLog` + 增量读取接口 + 按 key 前缀鉴权） |
 | codegen | `modules/codegen/` | 实体扫描与 CRUD 代码生成（系统管理 →「代码生成」） |
 
 ## FAQ
