@@ -32,7 +32,7 @@ export default class UserCenterPage extends React.Component {
 
     render() {
         const {info, changePwdOpen, changePwdSuccess} = this.state;
-        return <Page backgroundGray>
+        return <Page>
 
             <Card title="个人信息"
                   style={{marginBottom: 16}}

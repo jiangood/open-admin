@@ -106,7 +106,10 @@ resetUserTheme();           // 恢复默认（antd）
     colorWarning: '#faad14',
     colorError: '#ff4d4f',
     colorInfo: '#1677ff',
+    // 页面底色：colorBgLayout 仅浅色模式生效
     colorBgLayout: '#f5f5f5',
+    // 暗色模式页面底色（非 antd token）；不设则由 antd 暗色算法推导（#000000）
+    darkColorBgLayout: '#0f1115',
     // 侧栏配色，不设则用 antd 默认
     siderBg: '#102A43',
     siderSubBg: '#102A43',
@@ -131,10 +134,10 @@ setThemeMode('dark');  // 指定模式
 toggleThemeMode();     // 明暗互切
 ```
 
-- 暗色模式下 `colorBgLayout` **不再套用默认浅灰**，交由 antd 暗色算法推导；若业务显式在 `colors` 中传入 `colorBgLayout`，两种模式都会尊重。
+- 页面底色分模式生效：浅色用 `colors.colorBgLayout`，暗色用 `colors.darkColorBgLayout`（框架自定义字段，非 antd token）。暗色下**不再复用** `colorBgLayout`，未传 `darkColorBgLayout` 时由 antd 暗色算法推导（`#000000`）。暗色下若只传了浅色的 `colorBgLayout`，控制台会提示一次迁移，避免配置静默失效。
 - 左侧栏独立套用 antd 暗色算法，因此分割线、边框在深色底上始终可见；业务无需额外处理。
 - 颜色/预设切换通过 `EventBus` 的 `themeChange` 事件广播，`Layouts` 已内置监听并重渲染，业务无需处理。
-- 自定义样式请复用框架同步的 CSS 变量以自动跟随明/暗：`--primary-color`、`--primary-color-hover`、`--oa-color-bg-container`、`--oa-color-bg-layout`、`--oa-color-border`、`--oa-color-text`、`--oa-color-text-secondary`、`--oa-color-text-tertiary`、`--oa-color-fill`、`--oa-color-primary-bg`，以及侧栏相关的 `--oa-sider-bg`、`--oa-sider-text`、`--oa-sider-hover-bg`、`--oa-sider-trigger-bg`。
+- 自定义样式请复用框架同步的 CSS 变量以自动跟随明/暗：`--primary-color`、`--primary-color-hover`、`--oa-color-bg-container`、`--oa-color-bg-layout`、`--oa-color-border`、`--oa-color-text`、`--oa-color-text-secondary`、`--oa-color-text-tertiary`、`--oa-color-fill`、`--oa-color-fill-quaternary`、`--oa-color-primary-bg`，以及侧栏相关的 `--oa-sider-bg`、`--oa-sider-text`、`--oa-sider-hover-bg`、`--oa-sider-trigger-bg`。
 
 ### 界面密度
 

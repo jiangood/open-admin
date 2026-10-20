@@ -136,7 +136,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 | 组件 | 用途 |
 |------|------|
-| `Page` | 页面容器（标题/描述/右侧操作区），`padding`/`backgroundGray`/`debug`/`title`/`description`/`actions`（推荐传 `PermAction[]`，兼容带 `perm` 属性的节点） |
+| `Page` | 页面容器（标题/描述/右侧操作区），`padding`/`debug`/`title`/`description`/`actions`（推荐传 `PermAction[]`，兼容带 `perm` 属性的节点）；`backgroundGray` 已废弃（页面底色默认跟随布局底色，该参数不再产生差异） |
 | `PageLoading` | 页面加载中提示（`message` 单条 / `messages` 多阶段） |
 | `ProTable` | 数据表格，分页/筛选/工具栏/树形模式，详见[下方](#protable) |
 | `LinkButton` | 链接跳转按钮（`path` + `label`，通过 `PageUtils.open` 打开页面） |

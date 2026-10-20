@@ -12,7 +12,13 @@ export interface ThemeColors {
     colorWarning?: string;
     colorError?: string;
     colorInfo?: string;
+    /** 页面底色（antd token），仅浅色模式生效；暗色模式请用 darkColorBgLayout */
     colorBgLayout?: string;
+    /**
+     * 暗色模式页面底色（框架自定义字段，非 antd token）。
+     * 不设置时由 antd 暗色算法推导（#000000）。
+     */
+    darkColorBgLayout?: string;
     /** 侧栏底色（深色系）；不设置时使用 antd 默认值 */
     siderBg?: string;
     /** 侧栏子菜单底色；缺省与 siderBg 相同 */
@@ -266,8 +272,22 @@ function getMergedColors(): ThemeColors {
     };
 }
 
-function hasExplicitBgLayout(): boolean {
-    return businessColors?.colorBgLayout != null || getActivePreset()?.colors.colorBgLayout != null;
+/** 页面底色：浅色用 colorBgLayout；暗色只认 darkColorBgLayout，未传则交给 antd 暗色算法推导 */
+function resolveBgLayout(mode: ThemeMode): string | undefined {
+    if (mode === 'dark') {
+        return businessColors?.darkColorBgLayout ?? getActivePreset()?.colors.darkColorBgLayout;
+    }
+    return getMergedColors().colorBgLayout;
+}
+
+let warnedBgLayoutIgnored = false;
+
+/** 暗色模式下浅色 colorBgLayout 被忽略时提示一次，避免业务配置静默失效 */
+function warnIfBgLayoutIgnored() {
+    if (warnedBgLayoutIgnored || currentMode !== 'dark') return;
+    if (businessColors?.colorBgLayout == null || businessColors.darkColorBgLayout != null) return;
+    warnedBgLayoutIgnored = true;
+    console.warn('[open-admin] 暗色模式下 colors.colorBgLayout 不生效，请改用 colors.darkColorBgLayout 指定暗色页面底色。');
 }
 
 function invalidate() {
@@ -295,10 +315,11 @@ function buildConfig(): ThemeConfig {
         colorError: merged.colorError,
         colorInfo: merged.colorInfo,
     };
-    // colorBgLayout 仅浅色模式默认覆盖；暗色模式交给算法推导，避免被强制成浅灰。
-    // 业务/预设显式传入 colorBgLayout 时两种模式都尊重。
-    if (currentMode === 'light' || hasExplicitBgLayout()) {
-        token.colorBgLayout = merged.colorBgLayout;
+    // 页面底色：浅色用 colorBgLayout；暗色只认 darkColorBgLayout，未传则交给算法推导，
+    // 避免业务按浅色习惯传入的浅灰把暗色页面染成浅底。
+    const bgLayout = resolveBgLayout(currentMode);
+    if (bgLayout != null) {
+        token.colorBgLayout = bgLayout;
     }
 
     const resolved = getDesignToken({ token, algorithm } as ThemeConfig);
@@ -377,6 +398,7 @@ function syncCssVars(token: Record<string, unknown>) {
     setVar(el, '--oa-color-text-secondary', token.colorTextSecondary);
     setVar(el, '--oa-color-text-tertiary', token.colorTextTertiary);
     setVar(el, '--oa-color-fill', token.colorFillTertiary);
+    setVar(el, '--oa-color-fill-quaternary', token.colorFillQuaternary);
     setVar(el, '--oa-color-primary-bg', token.colorPrimaryBg);
     setVar(el, '--oa-color-error', token.colorError);
     // 尺寸/圆角变量，供 less 复用，使自定义样式跟随密度与圆角预设
@@ -397,6 +419,7 @@ export function setThemeColors(colors?: Partial<ThemeColors>) {
     businessColors = colors || null;
     invalidate();
     syncCssVars(getToken());
+    warnIfBgLayoutIgnored();
 }
 
 export function getThemeConfig(): ThemeConfig {
@@ -487,6 +510,7 @@ export function setThemeMode(mode: ThemeMode) {
     }
     invalidate();
     syncCssVars(getToken());
+    warnIfBgLayoutIgnored();
     EventBus.emit('themeChange', mode);
 }
 

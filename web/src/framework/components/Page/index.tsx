@@ -1,7 +1,6 @@
 import React from "react";
 import { Space, Typography } from "antd";
 import './index.less'
-import {getToken} from "../../config";
 import { PermActions, type PermAction } from "../../biz/PermActions";
 import { PermUtils } from "../../utils";
 
@@ -17,6 +16,7 @@ function renderActionNodes(nodes: React.ReactNode) {
 
 interface PageProps {
     padding?: boolean;
+    /** @deprecated 页面底色已默认跟随布局底色，该参数不再产生差异；保留仅为兼容旧写法 */
     backgroundGray?: boolean;
     debug?: boolean;
     title?: React.ReactNode;
@@ -28,22 +28,16 @@ interface PageProps {
 
 export class Page extends React.Component<PageProps> {
     render() {
-        const { padding = true, backgroundGray = false, debug = false, title, description, actions, children } = this.props;
+        const { padding = true, debug = false, title, description, actions, children } = this.props;
         const hasHeader = title != null || description != null || actions != null;
         const style: React.CSSProperties = {};
 
         if (padding) {
             style.padding = 16;
         }
-        const token = getToken();
-        if (backgroundGray) {
-            style.backgroundColor = token.colorBgLayout;
-        }
+        // 页面底色由 .oa-page 统一使用 --oa-color-bg-layout，避免内联值脱离变量体系
         if (debug) {
             style.backgroundColor = 'rgba(255, 0, 0, 0.08)';
-        }
-        if (!style.backgroundColor) {
-            style.backgroundColor = token.colorBgLayout;
         }
 
         return <div className={'oa-page'} style={style}>
