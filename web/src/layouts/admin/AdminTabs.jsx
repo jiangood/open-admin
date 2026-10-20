@@ -9,6 +9,38 @@ export class AdminTabs extends React.Component {
         contextMenuTabKey: null,
     };
 
+    barRef = React.createRef();
+    activeTabRef = React.createRef();
+
+    componentDidMount() {
+        this.scrollActiveIntoView();
+    }
+
+    componentDidUpdate(prevProps) {
+        if (prevProps.activeKey !== this.props.activeKey) {
+            this.scrollActiveIntoView();
+        }
+    }
+
+    /** 激活的标签被滚动到可视区外时（标签过多），横向带入视野 */
+    scrollActiveIntoView = () => {
+        const bar = this.barRef.current;
+        const tab = this.activeTabRef.current;
+        if (!bar || !tab) return;
+        const margin = 8;
+        const barRect = bar.getBoundingClientRect();
+        const tabRect = tab.getBoundingClientRect();
+        let delta = 0;
+        if (tabRect.left < barRect.left + margin) {
+            delta = tabRect.left - barRect.left - margin;
+        } else if (tabRect.right > barRect.right - margin) {
+            delta = tabRect.right - barRect.right + margin;
+        }
+        if (delta !== 0) {
+            bar.scrollTo({left: bar.scrollLeft + delta, behavior: 'smooth'});
+        }
+    };
+
     handleContextMenu = (e, key) => {
         e.preventDefault();
         this.setState({
@@ -38,12 +70,14 @@ export class AdminTabs extends React.Component {
 
         return (
             <>
-                <div className="admin-tabs-bar">
+                <div className="admin-tabs-bar" ref={this.barRef}>
                     {tabs.map(tab => (
                         <div
                             key={tab.key}
+                            ref={tab.key === activeKey ? this.activeTabRef : null}
                             className={`admin-tab${tab.key === activeKey ? ' active' : ''}`}
                             role="tab"
+                            title={tab.label}
                             tabIndex={tab.key === activeKey ? 0 : -1}
                             aria-selected={tab.key === activeKey}
                             onClick={() => onChange(tab.key)}
