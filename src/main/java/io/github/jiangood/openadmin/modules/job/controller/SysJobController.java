@@ -168,6 +168,7 @@ public class SysJobController {
         return AjaxResult.ok().data(result);
     }
 
+    @HasPermission("job:read")
     @GetMapping("execute-record")
     public AjaxResult executeRecordPage(@RequestParam String jobId, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysJobLog> q = Spec.of();

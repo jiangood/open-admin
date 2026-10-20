@@ -225,7 +225,7 @@ export default class JobPage extends React.Component {
                     more
                     size="small"
                     actions={[
-                        {label: '执行记录', onClick: () => this.showExecuteRecord(record)},
+                        {label: '执行情况', perm: 'job:read', onClick: () => this.showExecuteRecord(record)},
                         {label: '执行一次', perm: 'job:trigger', onClick: () => this.handleTriggerJob(record)},
                         {label: '编辑', perm: 'job:update', onClick: () => this.handleEdit(record)},
                         {label: '删除', perm: 'job:delete', confirm: '是否确定删除?', onClick: () => this.handleDelete(record)},
@@ -284,6 +284,14 @@ export default class JobPage extends React.Component {
         }
         return Object.values(progressMap).some(p =>
             p.logId === selectedLogRecord.id && p.state === 'RUNNING')
+    }
+
+    /** 结束时间与开始时间为同一天时只显示时分秒，避免重复日期 */
+    formatRecordEndTime = (beginTime, endTime) => {
+        if (!beginTime || !endTime) {
+            return endTime || '-'
+        }
+        return endTime.slice(0, 10) === beginTime.slice(0, 10) ? endTime.slice(11) : endTime
     }
 
 
@@ -374,56 +382,54 @@ export default class JobPage extends React.Component {
                    destroyOnHidden
             >
                 {this.renderRunningProgress()}
-                <ProTable columns={[{
-                    title: '开始时间',
-                    dataIndex: 'beginTime',
-                },
+                <ProTable columns={[
                     {
-                        title: '结束时间',
-                        dataIndex: 'endTime',
+                        title: '开始 / 结束时间',
+                        dataIndex: 'beginTime',
+                        width: 170,
+                        render: (v, record) => <div style={{lineHeight: 1.45}}>
+                            <div>{v || '-'}</div>
+                            <div style={{
+                                fontSize: 12,
+                                color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                                whiteSpace: 'nowrap'
+                            }}>{record.endTime
+                                ? '至 ' + this.formatRecordEndTime(v, record.endTime)
+                                : '运行中…'}</div>
+                        </div>
                     },
                     {
-                        title: '耗时',
-                        dataIndex: 'jobRunTimeLabel',
-
-                    },
-                    {
-                        title: '执行次数',
+                        title: '成功/失败',
                         dataIndex: 'executeCount',
-                        width: 90,
-                        render: v => v == null ? 1 : v,
-                    },
-                    {
-                        title: '失败次数',
-                        dataIndex: 'failCount',
-                        width: 90,
-                        render: v => (v == null || v === 0) ? '-' : <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{v}</span>,
-                    },
-                    {
-                        title: '累计耗时',
-                        dataIndex: 'totalRunTimeLabel',
-                        width: 100,
-                        render: v => v || '-',
-                    },
-                    {
-                        title: '是否成功',
-                        dataIndex: 'success',
-                        width: 200,
-                        render: v => {
-                            if (v != null) {
-                                return v ? '成功' : '异常'
+                        width: 150,
+                        render: (v, record) => {
+                            const count = v == null ? 1 : v
+                            // 旧版本升级上来的记录没有 failCount，用 success 兜底
+                            const failCount = record.failCount == null
+                                ? (record.success === false ? 1 : 0)
+                                : record.failCount
+                            const successCount = Math.max(count - failCount, 0)
+                            if (successCount === 0 && failCount === 0) {
+                                return '-'
                             }
-                        }
+                            return <span>
+                                {successCount > 0 &&
+                                    <Tag color='success' style={{marginRight: 4}}>成功 {successCount}</Tag>}
+                                {failCount > 0 &&
+                                    <Tag color='error' style={{marginRight: 0}}>失败 {failCount}</Tag>}
+                            </span>
+                        },
                     },
                     {
                         title: '返回结果',
                         dataIndex: 'result',
-                        width: 300
+                        render: v => (v == null || v === '') ? '-' : v,
                     },
-
                     {
                         title: '操作',
                         dataIndex: 'option',
+                        width: 64,
+                        fixed: 'right',
                         render: (_, record) => <a onClick={() => this.showLog(record)}>日志</a>,
                     }
                 ]} request={(params) => {
