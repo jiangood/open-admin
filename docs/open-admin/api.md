@@ -87,6 +87,8 @@ public class DataSyncJob extends BaseJob {
 | `admin/sys/log/{key}` | GET | 按 key 前缀注册（见下） | 增量读取日志，返回 `{content, nextOffset, eof}` |
 | `admin/sys/log/raw/{key}` | GET | 同上 | 纯文本返回完整日志，供新窗口打开 |
 
+> **升级注意（3.1.9）**：`admin/sys/log/{key}` 在 3.1.8 及之前返回 `text/plain` 全量内容，3.1.9 起改为增量 JSON（纯文本改用 `admin/sys/log/raw/{key}`）；查看权限由硬编码 `job:read` 改为按 key 前缀注册，未注册的前缀一律拒绝。原 `FileLogTool` 已更名为 `FileLog`。
+
 `admin/sys/log/{key}` 查询参数：`offset`（起始字节偏移，默认 0）、`length`（单次最多读取字节数，默认 256KB，上限 4MB）。日志会随任务持续增长，前端按返回的 `nextOffset` 反复请求即可只取新增部分；读取按 UTF-8 字符边界切分，不会截断多字节字符。
 
 查看权限由各模块通过实现 `LogKeyPermissionProvider` 声明（key 前缀 → 权限），通用模块不写死业务权限，未注册的前缀一律拒绝：
@@ -102,6 +104,8 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 ```
 
 前端可直接使用框架的 `LogViewer` 组件增量跟随运行中的日志（参见[组件](#组件)）。
+
+日志如果属于业务数据、需要行级/数据权限校验，不要复用上面的通用接口（它只能校验权限码）：由业务模块自己提供读取接口，并让 `LogViewer` 通过 `url` 指向它，返回同样的 `{content, nextOffset, eof}` 即可复用增量跟随。
 
 ### 代码生成
 
@@ -152,7 +156,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | `ValueType` | 按类型渲染字段/视图（`renderField(type, props)` / `renderView(type, props)`） |
 | `View*` | 展示组件，见[展示组件](#展示组件) |
 | `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
-| `LogViewer` | 文件日志查看器，按字节偏移增量读取；`logKey` + `running` 时自动轮询新内容、任务结束自动补拉最后一段 |
+| `LogViewer` | 文件日志查看器，按字节偏移增量读取；`logKey` + `running` 时自动轮询新内容、任务结束自动补拉最后一段；`url` 可指向业务模块自建接口 |
 
 #### PageFrame
 

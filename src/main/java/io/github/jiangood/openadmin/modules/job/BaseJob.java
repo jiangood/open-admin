@@ -60,7 +60,7 @@ public abstract class BaseJob implements Job {
 
         jobProgressRegistry.start(job, jobLog.getId());
 
-        FileLog.bind(JobLogPermissionProvider.KEY_PREFIX + "/" + jobLog.getId());
+        String previousLogKey = FileLog.bind(JobLogPermissionProvider.KEY_PREFIX + "/" + jobLog.getId());
         Logger logger = FileLog.logger();
         if (jobLog.getLogBucket() != null) {
             int nextRun = (jobLog.getExecuteCount() == null ? 0 : jobLog.getExecuteCount()) + 1;
@@ -90,7 +90,7 @@ public abstract class BaseJob implements Job {
                 finishLog(jobLog, success, result, System.currentTimeMillis() - startMillis);
                 logger.info("执行结束 返回值{}", result);
             } finally {
-                FileLog.unbind();
+                FileLog.unbind(previousLogKey);
             }
         }
     }

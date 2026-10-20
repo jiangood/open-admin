@@ -36,6 +36,28 @@ class FileLogTest {
     }
 
     @Test
+    void bind_shouldRestoreOuterBindingWhenNested() {
+        FileLog.bind("job/outer");
+        String previous = FileLog.bind("order/inner");
+
+        assertEquals("order/inner", FileLog.currentKey());
+
+        FileLog.unbind(previous);
+
+        // 内层结束后恢复外层绑定，避免任务里调用带文件日志的方法后日志串到 DEFAULT
+        assertEquals("job/outer", FileLog.currentKey());
+    }
+
+    @Test
+    void unbindWithNullPrevious_shouldClearBinding() {
+        String previous = FileLog.bind("job/1");
+
+        FileLog.unbind(previous);
+
+        assertNull(FileLog.currentKey());
+    }
+
+    @Test
     void logger_shouldUseSharedFileLoggerName() {
         assertNotNull(FileLog.logger());
         assertEquals(FileLogConfig.LOGGER_NAME, FileLog.logger().getName());

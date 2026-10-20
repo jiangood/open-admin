@@ -12,6 +12,13 @@ const DEFAULT_POLL_INTERVAL = 1500;
 export interface LogViewerProps {
     /** 日志 key，如 `job/{logId}`；与后端 `admin/sys/log/{*key}` 对应 */
     logKey?: string;
+    /**
+     * 自定义读取地址，覆盖默认的 `admin/sys/log/{logKey}`。
+     * <p>
+     * 用于「带行级/数据权限、由业务模块自己提供读取接口」的场景：
+     * 只要接口返回同样的 `{content, nextOffset, eof}` 结构，就能复用本组件的增量跟随。
+     */
+    url?: string;
     /** 任务是否仍在运行：为 true 时按 `pollInterval` 增量轮询，false 时只读一次 */
     running?: boolean;
     /** 运行中的轮询间隔（毫秒），默认 1500 */
@@ -73,7 +80,7 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
     }
 
     componentDidUpdate(prevProps: LogViewerProps) {
-        if (prevProps.logKey !== this.props.logKey) {
+        if (prevProps.logKey !== this.props.logKey || prevProps.url !== this.props.url) {
             this.reload();
             return;
         }
@@ -120,8 +127,10 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
     }
 
     private fetchChunk(initial: boolean) {
-        const { logKey } = this.props;
-        if (!logKey) {
+        const { logKey, url } = this.props;
+        // 业务模块自建接口（带行级权限）可通过 url 覆盖默认的通用日志接口
+        const requestUrl = url || (logKey ? `admin/sys/log/${logKey}` : null);
+        if (!requestUrl) {
             return;
         }
         if (this.fetching) {
@@ -134,7 +143,7 @@ export class LogViewer extends React.Component<LogViewerProps, LogViewerState> {
         const offset = initial ? 0 : this.state.nextOffset;
 
         HttpClient.get<{ content: string; nextOffset: number; eof: boolean }>(
-            `admin/sys/log/${logKey}`,
+            requestUrl,
             { offset, length: DEFAULT_LENGTH },
             { toastError: false }
         ).then(rs => {

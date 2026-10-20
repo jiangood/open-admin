@@ -25,6 +25,8 @@ import org.slf4j.MDC;
  *     FileLog.unbind();
  * }
  * }</pre>
+ * 嵌套绑定（外层已绑定，内层调用另一个带文件日志的方法）时保留 {@code bind} 的返回值，
+ * 内层结束时用 {@code unbind(previous)} 恢复外层 key，避免把外层日志写进内层文件。
  */
 public class FileLog {
     private FileLog() {
@@ -42,9 +44,13 @@ public class FileLog {
      * 把当前线程绑定到 {@code key} 对应的日志文件。
      *
      * @param key 日志标识，即日志文件名（不含 .log），如 {@code job/{logId}}
+     * @return 绑定前的 key（没有绑定时为 {@code null}），嵌套绑定后可用
+     * {@link #unbind(String)} 恢复外层绑定
      */
-    public static void bind(String key) {
+    public static String bind(String key) {
+        String previous = MDC.get(FileLogConfig.DISCRIMINATOR_KEY);
         MDC.put(FileLogConfig.DISCRIMINATOR_KEY, key);
+        return previous;
     }
 
     /**
@@ -54,6 +60,19 @@ public class FileLog {
      */
     public static void unbind() {
         MDC.remove(FileLogConfig.DISCRIMINATOR_KEY);
+    }
+
+    /**
+     * 恢复到 {@link #bind(String)} 之前的绑定，用于嵌套场景：内层结束后不应把外层的 key 一起清掉。
+     *
+     * @param previous {@link #bind(String)} 的返回值；为 {@code null} 时等同于 {@link #unbind()}
+     */
+    public static void unbind(String previous) {
+        if (previous == null) {
+            unbind();
+            return;
+        }
+        MDC.put(FileLogConfig.DISCRIMINATOR_KEY, previous);
     }
 
     /**

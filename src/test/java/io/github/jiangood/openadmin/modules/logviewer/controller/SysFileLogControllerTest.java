@@ -84,4 +84,15 @@ class SysFileLogControllerTest {
         verify(logKeyPermissionRegistry).checkPermission("/job/123");
         verify(fileLogService).readLogContent("/job/123");
     }
+
+    @Test
+    void rawWithoutKey_shouldReturnBadRequestInsteadOfBeingCapturedAsKey() throws Exception {
+        mockMvc.perform(get("/admin/sys/log/raw"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.message").value("缺少日志文件 key"));
+
+        // 不能把 "raw" 当成日志 key 去查权限
+        verify(logKeyPermissionRegistry, org.mockito.Mockito.never()).checkPermission(anyString());
+    }
 }

@@ -63,4 +63,15 @@ public class SysFileLogController {
         PrintWriter out = response.getWriter();
         out.print(fileLogService.readLogContent(key));
     }
+
+    /**
+     * 缺少日志 key 的 raw 访问（如 {@code admin/sys/log/raw}）。
+     * <p>
+     * 不加这个映射时会被 {@code {*key}} 兜底捕获，把 "raw" 当成日志 key 去查权限，
+     * 返回一个让人摸不着头脑的 403。
+     */
+    @GetMapping({"raw", "raw/"})
+    public AjaxResult rawWithoutKey() {
+        return AjaxResult.err(400, "缺少日志文件 key");
+    }
 }
