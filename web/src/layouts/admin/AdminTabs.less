@@ -1,15 +1,24 @@
+.admin-tabs-wrap {
+    position: relative;
+    display: flex;
+    flex-shrink: 0;
+    min-width: 0;
+}
+
 .admin-tabs-bar {
     display: flex;
     flex-wrap: nowrap;
-    align-items: flex-end;
-    gap: 2px;
+    align-items: stretch;
     overflow-x: auto;
     overflow-y: hidden;
-    flex-shrink: 0;
-    padding: 4px 8px 0;
-    border-bottom: 1px solid var(--oa-color-border, #e8e8e8);
-    /* 条带用页面底色，与白色顶栏拉开层次；选中标签再用容器色浮起 */
-    background: var(--oa-color-bg-layout, #f5f5f5);
+    scrollbar-width: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: var(--oa-control-height, 32px);
+    padding: 0 8px;
+    /* 条带与顶栏同色，和灰色页面拉开层次；底线用 inset 阴影绘制，选中标签可盖住 */
+    box-shadow: inset 0 -1px 0 var(--oa-color-border, #e8e8e8);
+    background: var(--oa-color-bg-container, #fff);
 
     &::-webkit-scrollbar {
         height: 0;
@@ -19,23 +28,26 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        padding: 0 8px 0 12px;
-        height: var(--oa-control-height, 32px);
-        line-height: var(--oa-control-height, 32px);
+        padding: 0 8px 0 10px;
         font-size: 13px;
+        line-height: 1.4;
         cursor: pointer;
         white-space: nowrap;
         color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
         background: transparent;
-        border-right: none;
-        border-radius: var(--oa-border-radius, 6px) var(--oa-border-radius, 6px) 0 0;
-        transition: color 0.2s, background 0.2s;
-        position: relative;
+        /* 方形标签，标签之间仅用 1px 竖线分隔，贴近系统 / IDEA 原生观感 */
+        border-radius: 0;
+        transition: color 0.15s, background 0.15s;
         flex-shrink: 0;
+
+        /* 分隔线画在相邻标签之间，条带首尾不留多余竖线 */
+        & + .admin-tab {
+            border-left: 1px solid var(--oa-color-border, #e8e8e8);
+        }
 
         &:hover {
             color: var(--oa-color-text, rgba(0, 0, 0, 0.88));
-            background: color-mix(in srgb, var(--oa-color-text, rgba(0, 0, 0, 0.88)) 6%, transparent);
+            background: var(--oa-color-fill, rgba(0, 0, 0, 0.06));
         }
 
         &:focus-visible {
@@ -44,11 +56,9 @@
         }
 
         &.active {
+            /* IDEA 式：选中标签用页面底色盖住条带底线，文字用主色点明选中项 */
             color: var(--primary-color, #1677ff);
-            background: var(--oa-color-bg-container, #fff);
-            font-weight: 500;
-            /* 顶部主色指示条；inset 保证不撑高标签 */
-            box-shadow: inset 0 2px 0 var(--primary-color, #1677ff);
+            background: var(--oa-color-bg-layout, #f5f5f5);
         }
 
         .admin-tab-label {
@@ -79,6 +89,54 @@
         &:hover .admin-tab-close,
         &.active .admin-tab-close {
             opacity: 1;
+        }
+    }
+}
+
+/* 标签溢出：右侧渐隐 + 全部标签入口，改由按钮触发下拉 */
+.admin-tabs-wrap.overflowing {
+    .admin-tabs-bar {
+        /* 给右侧按钮让位，滚到最右时最后一个标签不会被遮住 */
+        padding-right: 40px;
+    }
+
+    .admin-tabs-fade {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 1px;
+        width: 44px;
+        pointer-events: none;
+        background: linear-gradient(to right, transparent, var(--oa-color-bg-container, #fff) 68%);
+    }
+
+    .admin-tabs-more {
+        position: absolute;
+        top: 50%;
+        right: 6px;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: none;
+        border-radius: var(--oa-border-radius, 6px);
+        background: var(--oa-color-bg-container, #fff);
+        color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
+        font-size: 12px;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+
+        &:hover {
+            background: var(--oa-color-fill, rgba(0, 0, 0, 0.06));
+            color: var(--oa-color-text, rgba(0, 0, 0, 0.88));
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--primary-color, #1677ff);
+            outline-offset: -2px;
         }
     }
 }
