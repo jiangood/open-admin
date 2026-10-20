@@ -1,4 +1,4 @@
-import {Button, Card, Collapse, Drawer, Form, Input, Modal, Select, Space, Switch, Tag, Typography} from 'antd'
+import {Button, Card, Checkbox, Collapse, Drawer, Form, Input, Modal, Select, Tag, Typography} from 'antd'
 import React from 'react'
 import {HttpClient, getMessageApi, getToken, Page, Perm} from '../../../framework'
 
@@ -13,9 +13,9 @@ export default class CodegenPage extends React.Component {
         module: '',
         label: '',
         parentMenu: 'sys',
-        overwrite: false,
 
         files: [],
+        selectedPaths: [],
         previewOpen: false,
         confirmOpen: false,
 
@@ -47,7 +47,6 @@ export default class CodegenPage extends React.Component {
         module: this.state.module,
         label: this.state.label,
         parentMenu: this.state.parentMenu,
-        overwrite: this.state.overwrite,
     })
 
     handlePreview = () => {
@@ -57,7 +56,13 @@ export default class CodegenPage extends React.Component {
         }
         this.setState({loading: true})
         HttpClient.post('admin/codegen/preview', this.buildReq(), null, {toastError: false}).then(rs => {
-            this.setState({files: rs.data || [], previewOpen: true})
+            const files = rs.data || []
+            this.setState({
+                files,
+                // 默认只勾选新增文件，已存在文件需手动勾选后才会覆盖
+                selectedPaths: files.filter(file => !file.exists).map(file => file.path),
+                previewOpen: true,
+            })
         }).catch(e => {
             console.error('[Codegen] 预览失败:', e)
             getMessageApi().error(e?.message || '预览失败')
@@ -74,12 +79,27 @@ export default class CodegenPage extends React.Component {
 
     doGenerate = () => {
         this.setState({confirmOpen: false, loading: true})
-        HttpClient.post('admin/codegen/generate', this.buildReq(), null, {toastError: false}).then(rs => {
+        const params = {...this.buildReq(), paths: this.state.selectedPaths}
+        HttpClient.post('admin/codegen/generate', params, null, {toastError: false}).then(rs => {
             this.setState({result: rs.data, resultOpen: true, previewOpen: false})
         }).catch(e => {
             console.error('[Codegen] 生成失败:', e)
             getMessageApi().error(e?.message || '生成失败')
         }).finally(() => this.setState({loading: false}))
+    }
+
+    togglePath = (path, checked) => {
+        this.setState(state => ({
+            selectedPaths: checked
+                ? [...state.selectedPaths, path]
+                : state.selectedPaths.filter(item => item !== path),
+        }))
+    }
+
+    toggleAll = checked => {
+        this.setState(state => ({
+            selectedPaths: checked ? state.files.map(file => file.path) : [],
+        }))
     }
 
     copy = (text) => {
@@ -96,14 +116,10 @@ export default class CodegenPage extends React.Component {
 
     render() {
         const selected = this.selectedOption()
-        return <Page actions={
-                         <Space>
-                             <Perm code='sys-codegen:generate'>
-                                 <Button type='primary' loading={this.state.loading} onClick={this.handlePreview}>预览</Button>
-                             </Perm>
-                             <Button onClick={this.loadEntities}>刷新实体</Button>
-                         </Space>
-                     }>
+        const {files, selectedPaths} = this.state
+        const allSelected = files.length > 0 && selectedPaths.length === files.length
+        const overwriteCount = files.filter(file => file.exists && selectedPaths.includes(file.path)).length
+        return <Page>
             <Card size='small'>
                 <Form layout='vertical' style={{maxWidth: 720}}>
                     <Form.Item label='实体' required>
@@ -134,11 +150,10 @@ export default class CodegenPage extends React.Component {
                         <Input value={this.state.parentMenu}
                                onChange={e => this.setState({parentMenu: e.target.value})}/>
                     </Form.Item>
-                    <Form.Item label='覆盖已存在文件'>
-                        <Switch checked={this.state.overwrite}
-                                onChange={checked => this.setState({overwrite: checked})}/>
-                    </Form.Item>
                 </Form>
+                <Perm code='sys-codegen:generate'>
+                    <Button type='primary' loading={this.state.loading} onClick={this.handlePreview}>预览</Button>
+                </Perm>
             </Card>
 
             <Drawer title='生成预览' width={960}
@@ -146,34 +161,58 @@ export default class CodegenPage extends React.Component {
                     onClose={() => this.setState({previewOpen: false})}
                     extra={
                         <Perm code='sys-codegen:generate'>
-                            <Button type='primary' loading={this.state.loading} onClick={this.handleGenerate}>生成并写入</Button>
+                            <Button type='primary'
+                                    disabled={selectedPaths.length === 0}
+                                    loading={this.state.loading}
+                                    onClick={this.handleGenerate}>
+                                生成并写入（{selectedPaths.length}）
+                            </Button>
                         </Perm>
                     }>
+                <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12}}>
+                    <Checkbox checked={allSelected}
+                              indeterminate={selectedPaths.length > 0 && !allSelected}
+                              onChange={e => this.toggleAll(e.target.checked)}>
+                        全选
+                    </Checkbox>
+                    <Typography.Text type='secondary'>
+                        已选 {selectedPaths.length} / 共 {files.length} 个文件，默认勾选新增文件
+                    </Typography.Text>
+                </div>
                 <Collapse
-                    items={this.state.files.map((file, index) => ({
-                        key: String(index),
-                        label: (
-                            <Space>
-                                <span>{file.path}</span>
-                                {file.exists
-                                    ? <Tag color='orange'>已存在</Tag>
-                                    : <Tag color='green'>新增</Tag>}
-                            </Space>
-                        ),
-                        children: (
-                            <>
-                                <Button size='small' style={{marginBottom: 8}}
-                                        onClick={() => this.copy(file.content)}>复制</Button>
-                                <pre style={{
-                                    maxHeight: 420,
-                                    overflow: 'auto',
-                                    background: String(getToken().colorFillTertiary ?? '#f6f8fa'),
-                                    padding: 12,
-                                    borderRadius: 4,
-                                }}>{file.content}</pre>
-                            </>
-                        ),
-                    }))}
+                    items={files.map((file, index) => {
+                        const checked = selectedPaths.includes(file.path)
+                        return {
+                            key: String(index),
+                            label: (
+                                <span onClick={e => e.stopPropagation()}
+                                      style={{display: 'flex', alignItems: 'center', gap: 8, minWidth: 0}}>
+                                    <Checkbox checked={checked}
+                                              onChange={e => this.togglePath(file.path, e.target.checked)}/>
+                                    <span title={file.path}
+                                          style={{flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>
+                                        {file.path}
+                                    </span>
+                                    {file.exists
+                                        ? <Tag color='orange' style={{marginInlineEnd: 0}}>{checked ? '将覆盖' : '已存在'}</Tag>
+                                        : <Tag color='green' style={{marginInlineEnd: 0}}>新增</Tag>}
+                                </span>
+                            ),
+                            children: (
+                                <>
+                                    <Button size='small' style={{marginBottom: 8}}
+                                            onClick={() => this.copy(file.content)}>复制</Button>
+                                    <pre style={{
+                                        maxHeight: 420,
+                                        overflow: 'auto',
+                                        background: String(getToken().colorFillTertiary ?? '#f6f8fa'),
+                                        padding: 12,
+                                        borderRadius: 4,
+                                    }}>{file.content}</pre>
+                                </>
+                            ),
+                        }
+                    })}
                 />
             </Drawer>
 
@@ -184,7 +223,7 @@ export default class CodegenPage extends React.Component {
                    onCancel={() => this.setState({confirmOpen: false})}>
                 <p>将按以下配置生成代码到项目源码目录：</p>
                 <p>模块名：{this.state.module}</p>
-                <p>覆盖已存在文件：{this.state.overwrite ? '是' : '否'}</p>
+                <p>写入 {selectedPaths.length} 个文件{overwriteCount > 0 ? `，其中覆盖 ${overwriteCount} 个已存在文件` : ''}。</p>
             </Modal>
 
             <Modal title='生成结果'
@@ -194,7 +233,7 @@ export default class CodegenPage extends React.Component {
                 <p>已写入 {this.state.result?.written?.length || 0} 个文件，跳过 {this.state.result?.skipped?.length || 0} 个。</p>
                 {this.state.result?.skipped?.length > 0 &&
                     <>
-                        <Typography.Text type='warning'>以下文件已存在已跳过（可勾选“覆盖已存在文件”后重新生成）：</Typography.Text>
+                        <Typography.Text type='warning'>以下文件未勾选，已跳过：</Typography.Text>
                         <ul>
                             {this.state.result.skipped.map(path => <li key={path}>{path}</li>)}
                         </ul>

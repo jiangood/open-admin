@@ -79,7 +79,7 @@ class CodegenControllerTest {
 
         mockMvc.perform(post("/admin/codegen/generate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"className\":\"com.demo.Customer\",\"overwrite\":true}"))
+                        .content("{\"className\":\"com.demo.Customer\",\"paths\":[\"a.java\"]}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.written[0]").value("a.java"))
                 .andExpect(jsonPath("$.message").value("生成完成：写入 1 个，跳过 0 个"));

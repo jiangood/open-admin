@@ -9,6 +9,7 @@ import io.github.jiangood.openadmin.modules.codegen.dto.GeneratedFileVO;
 import io.github.jiangood.openadmin.modules.codegen.template.BackendTemplates;
 import io.github.jiangood.openadmin.modules.codegen.template.FrontendTemplates;
 import io.github.jiangood.openadmin.modules.codegen.template.MenuTemplate;
+import io.github.jiangood.openadmin.util.BusinessException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -17,7 +18,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 代码生成编排：扫描实体 → 生成各层文件 → 预览或写入。
@@ -44,14 +47,22 @@ public class CodegenService {
 
     public CodegenResultVO generate(CodegenReq req) throws IOException {
         List<GeneratedFileVO> files = buildFiles(req);
+        Set<String> selected = req.getPaths() == null
+                ? Set.of()
+                : new HashSet<>(req.getPaths());
+        if (selected.isEmpty()) {
+            throw new BusinessException("请至少选择一个要生成的文件");
+        }
         CodegenResultVO result = new CodegenResultVO();
         result.setFiles(files);
         for (GeneratedFileVO file : files) {
-            if (writer.write(file, req.isOverwrite())) {
-                result.getWritten().add(file.getPath());
-            } else {
+            if (!selected.contains(file.getPath())) {
                 result.getSkipped().add(file.getPath());
+                continue;
             }
+            // 勾选即代表允许覆盖，已存在文件按用户选择直接写入
+            writer.write(file, true);
+            result.getWritten().add(file.getPath());
         }
         return result;
     }

@@ -17,6 +17,6 @@ public class CodegenResultVO {
     /** 实际写入的文件（相对路径） */
     private List<String> written = new ArrayList<>();
 
-    /** 因已存在且未开启覆盖而跳过的文件（相对路径） */
+    /** 因未被勾选而跳过的文件（相对路径） */
     private List<String> skipped = new ArrayList<>();
 }
