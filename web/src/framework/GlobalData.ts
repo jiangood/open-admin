@@ -7,6 +7,8 @@ const SITE_ARTICLES_KEY = "siteArticles";
 
 export interface SiteInfo {
     title?: string;
+    /** 系统简称，用于侧栏等空间受限处；未配置时前端回退到 title */
+    shortTitle?: string;
     waterMark?: boolean;
     /** 登录失效（空闲超时/未登录）时全局弹窗的提示文案，对应 sys.login-expired-message */
     loginExpiredMessage?: string;

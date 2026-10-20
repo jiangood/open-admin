@@ -48,6 +48,10 @@ public class SystemProperties {
      */
     @NotBlank(message = "请配置系统标题")
     private String title = "管理系统";
+    /**
+     * 系统简称，用于左侧菜单等空间受限的位置；留空则使用 title
+     */
+    private String shortTitle;
     private String loginBoxBottomTip; // "当前非涉密网络，严禁传输处理涉密信息";
     private String copyright; // = "Copyright © 2023-2024  All Rights Reserved";
     /**

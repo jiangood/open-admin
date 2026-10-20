@@ -202,6 +202,8 @@ export default class AdminLayout extends React.Component {
 
     render() {
         const {siteInfo, loginInfo} = this.state
+        // 侧栏空间有限，优先显示系统简称；未配置时回退完整标题
+        const siderTitle = (siteInfo.shortTitle || '').trim() || siteInfo.title || '首页';
 
 return <Layout className='main-layout'>
              {/* 侧栏单独套暗色算法，使分割线/边框在深色底上可见，并按预设覆盖侧栏底色 */}
@@ -217,7 +219,8 @@ return <Layout className='main-layout'>
                             <img src="./logo.png" alt={siteInfo.title || '首页'}/>
                         </button>
                         <h3 className='hide-on-mobile'>
-                            <Link to="/" style={{color: 'var(--oa-sider-text, rgba(255,255,255,0.85))'}}>{siteInfo.title}</Link>
+                            <Link to="/" title={siteInfo.title || siderTitle}
+                                  style={{color: 'var(--oa-sider-text, rgba(255,255,255,0.85))'}}>{siderTitle}</Link>
                         </h3>
                     </div>
                     {this.renderLeftMenu()}

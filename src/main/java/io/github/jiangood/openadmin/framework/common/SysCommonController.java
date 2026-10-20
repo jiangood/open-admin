@@ -48,6 +48,7 @@ public class SysCommonController {
         data.put("copyright", systemProperties.getCopyright());
         data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
         data.put("title", systemProperties.getTitle());
+        data.put("shortTitle", systemProperties.getShortTitle());
         data.put("loginExpiredMessage", systemProperties.getLoginExpiredMessage());
 
         data.put("waterMark", systemProperties.isWaterMark());
