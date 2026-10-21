@@ -38,7 +38,7 @@ public class SysJob extends BaseEntity {
     Map<String, Object> jobData;
     // 扩展字段
     String extraInfo;
-    // 执行记录日志聚合方式，为空时按每次执行
+    // 执行记录方式，为空时按每次一份记录
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     JobLogAggregation logAggregation;
@@ -79,7 +79,7 @@ public class SysJob extends BaseEntity {
     }
 
     /**
-     * 存量数据可能为 null，统一按「每次执行」处理
+     * 存量数据可能为 null，统一按「每次一份记录」处理
      */
     public JobLogAggregation getLogAggregation() {
         return logAggregation == null ? JobLogAggregation.PER_RUN : logAggregation;

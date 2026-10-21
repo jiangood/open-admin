@@ -61,7 +61,7 @@ public class FileLogConfig {
                 appender.setContext(context);
                 appender.setName("file-" + key);
                 appender.setFile(buildLogFile(key).getAbsolutePath());
-                // 同一 key 的日志会跨次追加（如定时任务日志聚合按天/小时复用同一 logId），
+                // 同一 key 的日志会跨次追加（如定时任务执行记录按天/小时复用同一 logId），
                 // 必须保持追加模式，不能像一次性任务那样每次截断
                 appender.setAppend(true);
 

@@ -57,6 +57,8 @@ public class DataSyncJob extends BaseJob {
 
 进度只保存在内存（`JobProgressRegistry`），重启后丢失；执行结果仍由 `sys_job_log` 落库。
 
+> cron 使用 Quartz 格式，共 6 或 7 段：**秒 分 时 日 月 周 [年]**，第一位是秒。例如 `0 */5 * * * ?` 表示每 5 分钟，`*/5 * * * * ?` 表示每 5 秒。
+
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
 | `admin/job/progress` | GET | `job:read` | 全部任务运行进度快照，按开始时间倒序 |
@@ -64,15 +66,15 @@ public class DataSyncJob extends BaseJob {
 
 快照字段：`jobId` / `jobName` / `logId` / `state`(`RUNNING`/`SUCCESS`/`FAILED`) / `stateLabel` / `stateColor` / `percent` / `current` / `total` / `message` / `beginTime` / `updateTime` / `endTime` / `runTime` / `result`。
 
-### 日志聚合
+### 执行记录方式
 
-`SysJob.logAggregation`（新建/编辑任务时选择，字典 `jobLogAggregation`）控制执行记录与日志文件粒度：
+`SysJob.logAggregation`（前端字段名「执行记录方式」，新建/编辑任务时选择，字典 `jobLogAggregation`）控制执行记录与日志文件粒度：
 
 | 取值 | 执行记录 | 日志文件 |
 |---|---|---|
-| `PER_RUN` 每次执行（默认） | 每次一行 | 每次一个文件 |
-| `HOURLY` 按小时 | 每任务每小时一行 | 每任务每小时一个文件 |
-| `DAILY` 按天 | 每任务每天一行 | 每任务每天一个文件 |
+| `PER_RUN` 每次一份记录（默认） | 每次一行 | 每次一个文件 |
+| `HOURLY` 每小时一份记录 | 每任务每小时一行 | 每任务每小时一个文件 |
+| `DAILY` 每天一份记录 | 每任务每天一行 | 每任务每天一个文件 |
 
 聚合记录的 `SysJobLog` 额外字段：`logBucket`（聚合桶）、`executeCount`（执行次数）、`failCount`（失败次数）、`totalRunTime`（累计耗时）/`totalRunTimeLabel`；`jobRunTime`/`result` 为最近一次，`success` 表示周期内是否全部成功。执行记录与日志文件按 `sys.job-log-retain-days`（默认 30 天）自动清理。
 
@@ -157,6 +159,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | `View*` | 展示组件，见[展示组件](#展示组件) |
 | `DownloadModal` | 下载弹框，通过 ref 调用 `download()` 方法，支持进度追踪/取消/重试 |
 | `LogViewer` | 文件日志查看器，按字节偏移增量读取；`logKey` + `running` 时自动轮询新内容、任务结束自动补拉最后一段；`url` 可指向业务模块自建接口 |
+| `CronEditor` | cron 表达式输入框 + 常用表达式助手（按间隔/按时间点/自定义），值为 Quartz 格式「秒 分 时 日 月 周 [年]」 |
 
 #### PageFrame
 

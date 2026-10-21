@@ -38,7 +38,7 @@ public class SysJobLog extends BaseEntity {
     String executeDate;
 
     /**
-     * 日志聚合桶：null 表示每次执行；按小时如 2026-10-19-14；按天如 2026-10-19
+     * 记录聚合桶：null 表示每次一份记录；按小时如 2026-10-19-14；按天如 2026-10-19
      */
     @Column(length = 20)
     String logBucket;

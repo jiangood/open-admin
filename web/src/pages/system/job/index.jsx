@@ -1,7 +1,6 @@
 import React from 'react'
 import {
     Alert,
-    AutoComplete,
     Divider,
     Form,
     Input,
@@ -13,29 +12,47 @@ import {
     Tooltip
 } from 'antd'
 import {PlusOutlined, SearchOutlined} from "@ant-design/icons";
-import {FormModal, DictUtils, FieldDictSelect, getMessageApi, HttpClient, LogViewer, Page, PermActions, ProTable, UrlUtils, ValueType} from "../../../framework";
+import {
+    CronEditor,
+    CronUtils,
+    FormModal,
+    DictUtils,
+    FieldDictSelect,
+    getMessageApi,
+    HttpClient,
+    LogViewer,
+    Page,
+    PermActions,
+    ProTable,
+    UrlUtils,
+    ValueType
+} from "../../../framework";
 
 
-const cronOptions = [
+const cronPresets = [
     {
-        label: '*/5 * * * * ? 每隔5秒',
+        label: '每隔 5 秒',
         value: '*/5 * * * * ?'
     },
     {
-        label: '0 */5 * * * ? 每隔5分钟',
+        label: '每隔 5 分钟',
         value: '0 */5 * * * ?'
     },
     {
-        label: '0 0 22 * * ? 每天22点',
+        label: '每天 22:00',
         value: '0 0 22 * * ?'
     },
     {
-        label: '0 0 1 * * ? 每天1点',
+        label: '每天 01:00',
         value: '0 0 1 * * ?'
     },
     {
-        label: '0 0 1 1 * ? 每月1号凌晨1点',
+        label: '每月 1 号 01:00',
         value: '0 0 1 1 * ?'
+    },
+    {
+        label: '工作日 09:00',
+        value: '0 0 9 ? * MON-FRI'
     }
 ]
 
@@ -57,6 +74,8 @@ export default class JobPage extends React.Component {
         logOpen: false,
 
         progressMap: {},
+
+        cronDesc: '',
     }
     tableRef = React.createRef()
     modalRef = React.createRef()
@@ -104,11 +123,12 @@ export default class JobPage extends React.Component {
     }
 
     handleAdd = () => {
-        this.setState({paramList: []})
+        this.setState({paramList: [], cronDesc: ''})
         this.modalRef.current.open({})
     }
 
     handleEdit = (record) => {
+        this.setState({cronDesc: CronUtils.describe(record.cron)})
         this.loadJobParamFields(record.jobClass, record.jobData)
         this.modalRef.current.open(record)
     }
@@ -160,8 +180,25 @@ export default class JobPage extends React.Component {
         },
 
         {
-            title: 'cron',
+            title: 'cron 表达式',
             dataIndex: 'cron',
+            width: 220,
+            render: (v) => {
+                if (!v) {
+                    return '-'
+                }
+                const desc = CronUtils.describe(v)
+                return <div style={{lineHeight: 1.45}}>
+                    <div style={{
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+                        wordBreak: 'break-all'
+                    }}>{v}</div>
+                    {desc && <div style={{
+                        fontSize: 12,
+                        color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))'
+                    }}>{desc}</div>}
+                </div>
+            }
         },
 
 
@@ -184,9 +221,9 @@ export default class JobPage extends React.Component {
         },
 
         {
-            title: '日志聚合',
+            title: '执行记录方式',
             dataIndex: 'logAggregation',
-            render: v => DictUtils.dictTag('jobLogAggregation', v) || '每次执行',
+            render: v => DictUtils.dictTag('jobLogAggregation', v) || '每次一份记录',
         },
 
         {
@@ -332,17 +369,19 @@ export default class JobPage extends React.Component {
                     <Input/>
                 </Form.Item>
 
-                <Form.Item label='cron表达式' name='cron' help='格式：秒分时日月周,留空表示手动执行'
+                <Form.Item label='cron表达式' name='cron'
+                           help='必填，格式：秒 分 时 日 月 周（可选 年）'
+                           extra={this.state.cronDesc ? `解析：${this.state.cronDesc}` : null}
                            rules={[{required: true}]}>
-                    <AutoComplete placeholder='如 0 */5 * * * ?' options={cronOptions}/>
+                    <CronEditor presets={cronPresets} placeholder='如 0 */5 * * * ?'/>
                 </Form.Item>
 
                 <Form.Item label='启用' name='enabled' valuePropName='checked' rules={[{required: true}]}>
                     <Switch/>
                 </Form.Item>
 
-                <Form.Item label='日志聚合' name='logAggregation' initialValue='PER_RUN'
-                           help='高频任务建议按天聚合：一天只保留一条执行记录，日志文件按天合并'>
+                <Form.Item label='执行记录方式' name='logAggregation' initialValue='PER_RUN'
+                           help='控制执行记录与日志文件的粒度。高频任务建议选择「每天一份记录」：一天只保留一条执行记录，日志文件按天合并'>
                     <FieldDictSelect typeCode='jobLogAggregation'/>
                 </Form.Item>
 
@@ -460,6 +499,10 @@ export default class JobPage extends React.Component {
     }
 
     onValuesChange = (changed, values) => {
+        if (changed.cron !== undefined) {
+            this.setState({cronDesc: CronUtils.describe(values.cron)})
+        }
+
         if (changed.jobClass) {
             this.loadJobParamFields(values.jobClass)
             const option = this.state.jobClassOptions.find(o => o.value === changed.jobClass)

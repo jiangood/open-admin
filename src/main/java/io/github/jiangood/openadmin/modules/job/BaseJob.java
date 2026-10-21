@@ -98,7 +98,7 @@ public abstract class BaseJob implements Job {
     /**
      * 获取本次执行要写入的执行记录。
      * <p>
-     * 每次执行模式：新建一条记录，日志文件为 job/{logId}.log；
+     * 每次一份记录模式：新建一条记录，日志文件为 job/{logId}.log；
      * 聚合模式：复用同一周期（按小时/按天）的记录，logId 不变，日志追加到同一文件。
      */
     private SysJobLog acquireLog(SysJob job, LocalDateTime fireTime) {
