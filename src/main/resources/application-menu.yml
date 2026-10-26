@@ -64,6 +64,14 @@ menus:
       - {name: 创建, code: create}
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
+  sys-config:
+    pid: sys
+    name: 系统配置
+    path: /system/config
+    icon: SettingOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 修改, code: update}
   article:
     pid: sys
     name: 文章管理

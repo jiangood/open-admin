@@ -1,13 +1,13 @@
 # 配置参考
 
-> open-admin 全部配置项说明。业务项目在 `application.yml` 中覆盖即可。
+> open-admin 配置项说明。部署期配置写在 `application.yml`；少量展示类配置可在「系统管理 → 系统配置」中运行时修改。
 
-## 系统配置 (`sys.*` in `application.yml`)
+## 启动配置（`application.yml`，需重启）
 
 | 配置 | 说明 | 默认值 |
 |------|------|--------|
-| `sys.title` | 系统标题（必填） | 管理系统 |
-| `sys.short-title` | 系统简称，仅在左侧菜单顶部等空间受限处显示；留空则使用 `sys.title` | 空 |
+| `sys.title` | 系统标题（必填），可在系统配置页覆盖 | 管理系统 |
+| `sys.short-title` | 系统简称，仅在左侧菜单顶部等空间受限处显示；留空则使用 `sys.title`，可在系统配置页覆盖 | 空 |
 | `sys.file.store-type` | 文件存储 (`LOCAL`/`MINIO`) | LOCAL |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
@@ -24,6 +24,69 @@
 | `sys.codegen.frontend-import` | 生成页面引入框架组件的模块名；留空自动识别（框架仓库用相对路径，业务项目用 `@jiangood/open-admin`） | 空 |
 
 > 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-upgrade-docs` skill 从框架 GitHub Release 下载 `framework-files.zip` 同步到业务项目根目录（内容比对，无变更不写入）。无需配置。
+
+## 系统配置（运行时可改）
+
+「系统管理 → 系统配置」页面的数据来自 `sys_config` 表，但**默认值不落库**：
+
+- 取值优先级：**数据库覆盖值 > `application.yml` > 代码声明的默认值**
+- 只有被修改过的项才写入 `sys_config`；删除记录即恢复默认
+- 覆盖值在内存中缓存，保存后本机立即生效；多节点部署时其他节点最长 30 秒后生效
+- 敏感项接口不回显，修改时留空表示保持原值；清除请点「恢复默认」
+
+### 内置配置项
+
+| 分组 | key | 类型 | 默认值 | 说明 |
+|------|-----|------|--------|------|
+| 站点信息 | `sys.title` | STRING（必填） | 管理系统 | 登录页与侧栏标题 |
+| 站点信息 | `sys.short-title` | STRING | 空 | 侧栏简称，空则使用 `sys.title` |
+| 站点信息 | `sys.water-mark` | BOOL | false | 登录后页面右下角显示当前用户水印 |
+| 站点信息 | `sys.login-box-bottom-tip` | STRING | 空 | 登录框底部提示文案 |
+
+其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、代码生成目录、MinIO 等）或安全结构性配置。
+
+### 业务项目扩展
+
+实现 `ConfigProvider` 并注册为 Spring Bean，配置项会自动出现在配置页：
+
+```java
+@Component
+public class CvsConfigProvider implements ConfigProvider {
+
+    @Override
+    public List<ConfigGroup> define() {
+        return List.of(
+                Configs.group("cvs.capture", "抓拍", 10)
+                        .description("抓拍任务的运行参数")
+                        .add(Configs.bool("cvs.capture.enabled", "启用抓拍").defaultValue(true))
+                        .add(Configs.integer("cvs.capture.interval", "抓拍间隔（秒）")
+                                .defaultValue(10).min(5).max(3600))
+                        .add(Configs.time("cvs.capture.start-time", "开始时间").defaultValue("09:00"))
+                        .add(Configs.list("cvs.capture.channels", "通道列表").hint("逗号分隔"))
+        );
+    }
+}
+```
+
+读取：
+
+```java
+boolean enabled = sysConfigService.getBool("cvs.capture.enabled");
+int interval = sysConfigService.getInt("cvs.capture.interval");
+List<String> channels = sysConfigService.getList("cvs.capture.channels");
+```
+
+约束：
+
+- key 与分组 code 均需全局唯一，key 全小写、点分隔、段落内允许连字符，例如 `cvs.capture.start-time`
+- 可选类型：`bool` / `integer` / `decimal` / `string` / `text` / `time` / `list` / `select`，默认值类型需与声明类型一致
+- `.asPublic()`：随 `/admin/public/site-info` 的 `config` 字段下发给未登录页面
+- `.asSecret()`：接口只返回 `hasValue`，不回显值；不能同时 `.asPublic()`
+- `.asRequired()`：保存时不允许为空
+- 配置文件里用相同 key 写默认值也会生效（优先级低于数据库覆盖值）
+- 配置项声明错误（重复 key、非法 key、敏感项同时公开等）会让应用启动失败，便于尽早发现
+
+> 修改配置的接口不要直接加 `@Log`：请求体可能包含敏感值。框架通过 `SysConfigOperationLogger` 只记录变更的 key。
 
 ## 数据库
 

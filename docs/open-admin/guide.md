@@ -61,6 +61,7 @@ web/
 | `OrgTypeProvider` | 自定义机构类型（如新增"门店"类型） | `@Component` |
 | `FileOperator` | 自定义文件存储后端（默认提供 `LOCAL` / `MINIO` 两种实现） | `@Component` |
 | `StartupHook` | 系统启动钩子（JPA 建表前/种子数据前后） | `@Component` |
+| `ConfigProvider` | 声明运行时可改的系统配置项（自动出现在「系统配置」页） | `@Component` |
 
 实现类被 `@ComponentScan` 自动发现，无需手动注册。
 
@@ -107,6 +108,7 @@ web/
 
 | 功能 | 说明 |
 |------|------|
+| 系统配置 | 运行时可改的全局配置：数据库只存覆盖值，`application.yml` 与代码默认值兜底；业务模块实现 `ConfigProvider` 即可在通用配置页维护自己的参数 |
 | 定时任务 | 基于 Quartz，动态创建/暂停/恢复，继承 `BaseJob` + `@JobDescription`；`BaseJob.progress(...)` 上报运行进度，执行记录方式（每次/每小时/每天各一份记录）与保留期清理 |
 | 文件管理 | `sys.file.store-type` 配置（`LOCAL` / `MINIO`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
 | 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
@@ -128,6 +130,7 @@ web/
 | 模块 | 包路径 | 功能 |
 |------|--------|------|
 | system | `modules/system/` | 用户/角色/菜单/组织/字典/文件/日志管理 |
+| config | `modules/config/` | 运行时可改的系统配置（KV 覆盖 + 元数据注册 + 通用配置页） |
 | job | `modules/job/` | Quartz 定时任务 |
 | logviewer | `modules/logviewer/` | 运行日志在线查看（写入 `FileLog` + 增量读取接口 + 按 key 前缀鉴权） |
 | codegen | `modules/codegen/` | 实体扫描与 CRUD 代码生成（系统管理 →「代码生成」） |

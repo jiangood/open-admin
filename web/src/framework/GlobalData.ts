@@ -12,6 +12,8 @@ export interface SiteInfo {
     waterMark?: boolean;
     /** 登录失效（空闲超时/未登录）时全局弹窗的提示文案，对应 sys.login-expired-message */
     loginExpiredMessage?: string;
+    /** 后端声明为 publicVisible 的系统配置，key → value */
+    config?: Record<string, unknown>;
     [key: string]: unknown;
 }
 

@@ -37,6 +37,7 @@ export default class AdminLayout extends React.Component {
 
 
     unsubscribeLayout = null;
+    unsubscribeSiteInfo = null;
 
     componentDidMount() {
         // 判断是否手机端，自动收起菜单
@@ -54,11 +55,19 @@ export default class AdminLayout extends React.Component {
         this.unsubscribeLayout = EventBus.on('layoutChange', () => {
             this.setState({layoutMode: getLayoutMode()});
         })
+
+        // 系统配置保存后刷新标题、水印等站点信息
+        this.unsubscribeSiteInfo = EventBus.on('siteInfoChange', () => {
+            this.setState({siteInfo: GlobalData.getSiteInfo()});
+        })
     }
 
     componentWillUnmount() {
         if (this.unsubscribeLayout) {
             this.unsubscribeLayout();
+        }
+        if (this.unsubscribeSiteInfo) {
+            this.unsubscribeSiteInfo();
         }
     }
 

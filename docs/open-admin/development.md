@@ -31,6 +31,18 @@
 - 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
 - 方法参数校验用 `@Valid` / `@Validated`
 
+## 系统配置
+
+运行时可改的参数优先实现 `ConfigProvider`，不要为每个参数单独写 Controller 和页面：
+
+- key 以模块前缀开头，全小写、点分隔，段落内可用连字符（如 `cvs.capture.interval`），全局唯一
+- 默认值写在代码里（`.defaultValue(...)`）；需要部署期覆盖时，在 `application.yml` 中使用同名 key，优先级低于数据库覆盖值
+- 敏感值加 `.asSecret()`；配置修改接口不要直接挂 `@Log`，操作日志由框架只记录变更的 key
+- 业务代码通过 `SysConfigService` 的 `getBool/getInt/getString/getList` 读取，不要直接查 `SysConfigRepository`
+- 只把「运行期读取、改了立即生效」的参数放进来；启动期装配的配置仍留在 `application.yml`
+
+完整声明方式见 [config.md](config.md) 的「系统配置（运行时可改）」。
+
 ## 定时任务（Quartz）
 
 任务类继承 `BaseJob` 并加 `@JobDescription`，注册菜单后由 Quartz 调度（新增示例见 `modules/job/` 下的框架任务）。

@@ -8,6 +8,8 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginDataVO;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginInfoVO;
+import io.github.jiangood.openadmin.modules.config.CoreConfigKeys;
+import io.github.jiangood.openadmin.modules.config.service.SysConfigService;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
 import io.github.jiangood.openadmin.modules.system.service.ArticleService;
@@ -36,6 +38,7 @@ public class SysCommonController {
 
     private SysRoleService roleService;
     private SystemProperties systemProperties;
+    private SysConfigService sysConfigService;
     private SysUserService sysUserService;
     private SysOrgService sysOrgService;
     private SysDictService sysDictService;
@@ -46,12 +49,14 @@ public class SysCommonController {
     public AjaxResult siteInfo() {
         Dict data = new Dict();
         data.put("copyright", systemProperties.getCopyright());
-        data.put("loginBoxBottomTip", systemProperties.getLoginBoxBottomTip());
-        data.put("title", systemProperties.getTitle());
-        data.put("shortTitle", systemProperties.getShortTitle());
+        data.put("loginBoxBottomTip", sysConfigService.getString(CoreConfigKeys.LOGIN_BOX_BOTTOM_TIP));
+        data.put("title", sysConfigService.getString(CoreConfigKeys.TITLE));
+        data.put("shortTitle", sysConfigService.getString(CoreConfigKeys.SHORT_TITLE));
         data.put("loginExpiredMessage", systemProperties.getLoginExpiredMessage());
 
-        data.put("waterMark", systemProperties.isWaterMark());
+        data.put("waterMark", sysConfigService.getBool(CoreConfigKeys.WATER_MARK));
+        // 公共配置项统一放在 config 中，业务前端可读取自己声明的 publicVisible 配置
+        data.put("config", sysConfigService.publicValues());
 
         return AjaxResult.ok().data(data);
     }

@@ -109,6 +109,32 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 日志如果属于业务数据、需要行级/数据权限校验，不要复用上面的通用接口（它只能校验权限码）：由业务模块自己提供读取接口，并让 `LogViewer` 通过 `url` 指向它，返回同样的 `{content, nextOffset, eof}` 即可复用增量跟随。
 
+### 系统配置
+
+运行时可改的系统配置。元数据由业务模块/框架实现 `ConfigProvider` 声明，`sys_config` 只保存被覆盖的值（见 [config.md](config.md)）。
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/sys-config/items` | GET | `sys-config:read` | 分组 + 元数据 + 当前生效值 |
+| `admin/sys-config/update` | POST | `sys-config:update` | 只提交改动项：`{values:[{key,value}]}` |
+| `admin/sys-config/reset` | POST | `sys-config:update` | `{keys:[...]}`；`keys` 为空表示全部恢复默认 |
+| `admin/sys-config/value` | GET | `sys-config:read` | 单键读取，查询参数 `key` |
+
+`items` 返回 `{groups:[{code,label,description,items:[...]}]}`，配置项字段：
+
+| 字段 | 说明 |
+|------|------|
+| `key` / `label` / `hint` | 配置键、显示名、说明 |
+| `type` | `bool` / `int` / `float` / `string` / `text` / `time` / `list` / `select` |
+| `defaultValue` | 生效默认值（`application.yml` 或代码声明）；敏感项为 `null` |
+| `value` | 当前生效值；敏感项为 `null` |
+| `overridden` | 是否被数据库覆盖 |
+| `source` | `db`（数据库覆盖）/ `env`（application.yml）/ `code`（代码默认） |
+| `secret` / `hasValue` | 是否敏感项、敏感项是否已设置 |
+| `min` / `max` / `options` / `required` | 输入约束 |
+
+> `update` 请求体可能包含敏感值，控制器未使用 `@Log`；操作日志由框架只记录变更的 key。
+
 ### 代码生成
 
 系统管理 →「代码生成」页面：动态扫描已注册实体（继承 `BaseEntity` 且标注 `@Entity`），按选中实体生成常见 CRUD 代码并写入项目源码目录（先预览确认，再在预览抽屉里勾选要写入的文件）。
