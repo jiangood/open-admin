@@ -128,6 +128,9 @@
     height: 46px;
     padding: 0 14px;
     border-radius: var(--login-field-radius);
+    /* antd v6 给内部 input 声明了 `color: inherit`，文字色由容器决定。
+       容器必须显式给浅色，否则会继承 antd 浅色主题的 colorText（黑字压在深色玻璃上不可读） */
+    color: var(--login-text);
     background-color: var(--login-field-bg);
     border: 1px solid var(--login-hairline);
     box-shadow: none;
@@ -154,10 +157,22 @@
     /* 密码可见性切换按钮 */
     .ant-input-suffix {
       color: rgba(255, 255, 255, 0.55);
+
+      /* antd 给密码图标单独着色（colorIcon），不跟随 .ant-input-suffix，需显式覆盖 */
+      .ant-input-password-icon {
+        color: inherit;
+
+        &:hover {
+          color: var(--login-text);
+        }
+      }
     }
   }
 
-  .ant-input {
+  /* antd v6 的 `> input.ant-input { color: inherit }` 特异性为 0,2,1，
+     会压过 .login-form .ant-input（0,2,0）；这里提升特异性后显式上色，
+     避免 antd 调整内部选择器时文字色再次失效 */
+  .login-page & .ant-input {
     color: var(--login-text);
     font-size: 15px;
     background: transparent;
