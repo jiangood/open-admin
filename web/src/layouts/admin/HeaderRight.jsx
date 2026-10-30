@@ -1,7 +1,7 @@
 import {Avatar, Dropdown, Modal} from "antd";
-import {BgColorsOutlined} from "@ant-design/icons";
+import {BgColorsOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
-import {HttpClient, PageUtils, GlobalData, getToken, history, EventBus, ThemeSettings, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {HttpClient, PageUtils, GlobalData, history, EventBus, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -13,8 +13,18 @@ export class HeaderRight extends React.Component {
         themeSettingsVisible: false,
     };
 
+    unsubscribeLoginInfo = null;
+
     componentDidMount() {
         this.loadArticles()
+        // 个人中心修改头像/资料后刷新顶栏显示
+        this.unsubscribeLoginInfo = EventBus.on('loginInfoChange', () => this.setState({}))
+    }
+
+    componentWillUnmount() {
+        if (this.unsubscribeLoginInfo) {
+            this.unsubscribeLoginInfo()
+        }
     }
 
     loadArticles = () => {
@@ -61,6 +71,7 @@ export class HeaderRight extends React.Component {
 
     render() {
         const info = GlobalData.getLoginInfo()
+        const avatarSrc = AvatarUtils.resolve(info.avatar)
         const {dropdownArticles, headerArticles} = this.state
 
         const articleItems = dropdownArticles.map(a => ({
@@ -99,9 +110,7 @@ export class HeaderRight extends React.Component {
                 items: menuItems,
             }}>
                 <div className='item' style={{cursor: 'pointer'}}>
-                    <Avatar size="default" style={{backgroundColor: getToken().colorPrimary}}>
-                        {info.name?.charAt(0)}
-                    </Avatar>
+                    <Avatar size="default" src={avatarSrc} icon={<UserOutlined/>}/>
                     <span style={{marginLeft: 8}}>{info.name}</span>
                 </div>
             </Dropdown>

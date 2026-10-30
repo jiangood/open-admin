@@ -22,6 +22,8 @@ export interface LoginInfo {
     account?: string;
     phone?: string;
     email?: string;
+    /** 头像文件 objectName，页面按 /file/{avatar} 访问 */
+    avatar?: string;
     unit?: string;
     dept?: string;
     roles?: string;

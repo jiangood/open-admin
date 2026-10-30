@@ -61,6 +61,18 @@ public class SysCommonController {
         return AjaxResult.ok().data(data);
     }
 
+    /**
+     * 内置头像列表。PC 端、移动端均可通过该接口获取可选头像及默认头像地址。
+     */
+    @GetMapping("public/avatar-presets")
+    public AjaxResult avatarPresets(HttpServletRequest request) {
+        String contextPath = request.getContextPath();
+        Dict data = Dict.create()
+                .set("defaultAvatarUrl", AvatarPresets.defaultUrl(contextPath))
+                .set("presets", AvatarPresets.list(contextPath));
+        return AjaxResult.ok().data(data);
+    }
+
     @GetMapping("public/login-info")
     public AjaxResult checkLogin(HttpServletRequest request) {
         LoginDataVO r = new LoginDataVO();
@@ -92,6 +104,7 @@ public class SysCommonController {
         userResponse.setOrgName(sysOrgService.getNameById(user.getOrgId()));
         userResponse.setPermissions(permissions);
         userResponse.setAccount(user.getUsername());
+        userResponse.setAvatar(sysUser == null ? null : sysUser.getAvatar());
         userResponse.setRoleNames(roleNames);
         r.setLoginInfo(userResponse);
 

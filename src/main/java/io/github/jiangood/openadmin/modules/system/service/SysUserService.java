@@ -202,6 +202,19 @@ public class SysUserService extends BaseService<SysUser> {
     }
 
 
+    /**
+     * 个人中心修改邮箱、头像
+     */
+    @Transactional
+    public void updateInfo(String userId, String email, String avatar) {
+        SysUser sysUser = sysUserRepository.findById(userId).orElse(null);
+        Assert.notNull(sysUser, MSG_USER_NOT_EXIST);
+        sysUser.setEmail(CharSequenceUtil.trimToNull(email));
+        sysUser.setAvatar(CharSequenceUtil.trimToNull(avatar));
+        sysUserRepository.save(sysUser);
+    }
+
+
     @Cacheable(value = "userName", key = "#userId", sync = true, condition = "#userId != null")
     public String getNameById(String userId) {
         if (userId == null) {

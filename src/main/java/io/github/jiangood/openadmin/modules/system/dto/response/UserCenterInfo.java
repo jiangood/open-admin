@@ -14,6 +14,7 @@ public class UserCenterInfo {
     private String unit;
     private List<String> roles;
     private String email;
+    private String avatar;
     private String account;
     private LocalDateTime createTime;
 }

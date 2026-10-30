@@ -66,6 +66,9 @@ public class SysUser extends BaseEntity {
     @Remark("邮箱")
     @Column(length = 30)
     private String email;
+    @Remark("头像")
+    @Column(length = 255)
+    private String avatar;
     @NotNull
     @Column(nullable = false)
     private Boolean enabled;

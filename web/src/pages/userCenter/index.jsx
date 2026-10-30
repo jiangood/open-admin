@@ -1,16 +1,28 @@
 import React from "react";
-import {Button, Card, Descriptions, Form, Input, Modal} from "antd";
+import {Avatar, Button, Card, Descriptions, Form, Input, Modal, Space} from "antd";
+import {EditOutlined, UserOutlined} from "@ant-design/icons";
 import PermView from "./permView";
-import {HttpClient, history, Page} from "../../framework";
+import AvatarPicker from "./avatarPicker";
+import {
+    AvatarUtils,
+    EventBus,
+    GlobalData,
+    HttpClient,
+    history,
+    Page,
+} from "../../framework";
 
 export default class UserCenterPage extends React.Component {
 
     formRef = React.createRef();
+    editFormRef = React.createRef();
 
     state = {
         info: {},
         changePwdOpen: false,
         changePwdSuccess: false,
+        editOpen: false,
+        editSaving: false,
     }
 
     componentDidMount() {
@@ -30,13 +42,55 @@ export default class UserCenterPage extends React.Component {
             throw new Error(e.message)
         })
 
+    openEdit = () => {
+        const {info} = this.state;
+        this.setState({editOpen: true}, () => {
+            this.editFormRef.current?.setFieldsValue({
+                email: info.email,
+                avatar: info.avatar,
+            });
+        });
+    }
+
+    onEditFinish = (values) => {
+        const data = {
+            email: values.email || '',
+            avatar: values.avatar || '',
+        };
+        this.setState({editSaving: true});
+        HttpClient.post('admin/userCenter/update-info', data, null).then(() => {
+            this.setState(prevState => ({
+                info: {...prevState.info, ...data},
+                editOpen: false,
+            }));
+            // 同步顶栏头像
+            GlobalData.setLoginInfo({...GlobalData.getLoginInfo(), avatar: data.avatar});
+            EventBus.emit('loginInfoChange');
+        }).finally(() => {
+            this.setState({editSaving: false});
+        });
+    }
+
     render() {
-        const {info, changePwdOpen, changePwdSuccess} = this.state;
+        const {info, changePwdOpen, changePwdSuccess, editOpen, editSaving} = this.state;
+        const avatarSrc = AvatarUtils.resolve(info.avatar);
+
         return <Page>
 
             <Card title="个人信息"
                   style={{marginBottom: 16}}
-                  extra={<Button type="primary" danger onClick={() => this.setState({changePwdOpen: true})}>修改密码</Button>}>
+                  extra={<Space>
+                      <Button icon={<EditOutlined/>} onClick={this.openEdit}>编辑资料</Button>
+                      <Button type="primary" danger onClick={() => this.setState({changePwdOpen: true})}>修改密码</Button>
+                  </Space>}>
+                <div style={{display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20}}>
+                    <Avatar size={64} src={avatarSrc} icon={<UserOutlined/>}/>
+                    <div>
+                        <div style={{fontSize: 18, fontWeight: 600}}>{info.name}</div>
+                        <div style={{color: 'var(--oa-color-text-secondary, #666)'}}>{info.account}</div>
+                    </div>
+                </div>
+
                 <Descriptions column={2} size="middle">
                     <Descriptions.Item label="用户名称">{info.name}</Descriptions.Item>
                     <Descriptions.Item label="账号">{info.account}</Descriptions.Item>
@@ -52,6 +106,27 @@ export default class UserCenterPage extends React.Component {
             <Card title="我的权限">
                 <PermView/>
             </Card>
+
+            <Modal open={editOpen} title="编辑资料" okText="保存" cancelText="取消"
+                   confirmLoading={editSaving}
+                   onCancel={() => this.setState({editOpen: false})}
+                   onOk={() => this.editFormRef.current?.submit()}>
+                <Form ref={this.editFormRef} onFinish={this.onEditFinish} layout="vertical"
+                      style={{maxWidth: 400}}>
+                    <Form.Item label="头像" name="avatar">
+                        <AvatarPicker/>
+                    </Form.Item>
+                    <Form.Item name="email"
+                               label="用户邮箱"
+                               rules={[
+                                   {type: 'email', message: '请输入正确的邮箱地址'},
+                                   {max: 30, message: '邮箱长度不能超过30位'},
+                               ]}
+                    >
+                        <Input placeholder="请输入邮箱" maxLength={30}/>
+                    </Form.Item>
+                </Form>
+            </Modal>
 
             <Modal open={changePwdOpen} title="修改密码" okText="确定" cancelText="取消"
                    onCancel={() => this.setState({changePwdOpen: false})}

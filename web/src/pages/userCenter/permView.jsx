@@ -1,6 +1,6 @@
 import React from "react";
-import {Empty, Table, Tag} from "antd";
-import {HttpClient, Gap} from "../../framework";
+import {Empty, Table, Tabs, Tag} from "antd";
+import {HttpClient} from "../../framework";
 
 export default class PermView extends React.Component {
 
@@ -14,12 +14,7 @@ export default class PermView extends React.Component {
         })
     }
 
-    render() {
-        const {data} = this.state;
-        if (!data) {
-            return <Empty description='加载中...'/>;
-        }
-
+    renderOrgPerm = (data) => {
         const orgColumns = [
             {
                 title: '机构名称', dataIndex: 'title', key: 'title',
@@ -38,6 +33,20 @@ export default class PermView extends React.Component {
             },
         ];
 
+        return <div>
+            <div style={{marginBottom: 16}}>
+                <span>数据权限：
+                    <Tag color='processing'>{data.dataPermLabel || '-'}</Tag>
+                </span>
+            </div>
+            {data.orgRows?.length
+                ? <Table size='small' rowKey='key' columns={orgColumns} dataSource={data.orgRows}
+                         pagination={false} expandable={{defaultExpandAllRows: true}}/>
+                : <Empty description='暂无机构数据'/>}
+        </div>;
+    }
+
+    renderFuncPerm = (data) => {
         const menuColumns = [
             {
                 title: '菜单名称', dataIndex: 'title', key: 'title',
@@ -60,21 +69,29 @@ export default class PermView extends React.Component {
             },
         ];
 
-        return <div>
-            <div style={{marginBottom: 16}}>
-                <span>数据权限：
-                    <Tag color='processing'>{data.dataPermLabel || '-'}</Tag>
-                </span>
-            </div>
-            {data.orgRows?.length
-                ? <Table size='small' rowKey='key' columns={orgColumns} dataSource={data.orgRows}
-                         pagination={false} expandable={{defaultExpandAllRows: true}}/>
-                : <Empty description='暂无机构数据'/>}
-            <Gap/>
-            {data.menuRows?.length
-                ? <Table size='small' rowKey='key' columns={menuColumns} dataSource={data.menuRows}
-                         pagination={false} expandable={{defaultExpandAllRows: true}}/>
-                : <Empty description='暂无权限数据'/>}
-        </div>;
+        return data.menuRows?.length
+            ? <Table size='small' rowKey='key' columns={menuColumns} dataSource={data.menuRows}
+                     pagination={false} expandable={{defaultExpandAllRows: true}}/>
+            : <Empty description='暂无权限数据'/>;
+    }
+
+    render() {
+        const {data} = this.state;
+        if (!data) {
+            return <Empty description='加载中...'/>;
+        }
+
+        return <Tabs items={[
+            {
+                key: 'dataPerm',
+                label: '数据权限',
+                children: this.renderOrgPerm(data),
+            },
+            {
+                key: 'funcPerm',
+                label: '功能权限',
+                children: this.renderFuncPerm(data),
+            },
+        ]}/>;
     }
 }

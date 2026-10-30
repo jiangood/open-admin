@@ -16,6 +16,8 @@ export interface FieldUploadImageProps extends FieldProps<string> {
     isPublic?: boolean;
     /** 接受的文件类型 */
     accept?: string;
+    /** 进入裁切工具时的默认裁切比例，默认 4:3；传 null 表示自由裁切 */
+    defaultCropRatio?: Dims | null;
 }
 
 interface Dims {
@@ -167,6 +169,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
     constructor(props: FieldUploadImageProps) {
         super(props);
         ObjectUtils.copyPropertyIfPresent(props, this.state);
+        if (props.defaultCropRatio !== undefined) this.state.cropRatio = props.defaultCropRatio;
         if (props.value) this.state.objectNames = props.value.split(',');
     }
 

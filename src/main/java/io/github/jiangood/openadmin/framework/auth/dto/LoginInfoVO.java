@@ -11,5 +11,6 @@ public class LoginInfoVO {
     private String orgName;
     private List<String> permissions;
     private String account;
+    private String avatar;
     private String roleNames;
 }

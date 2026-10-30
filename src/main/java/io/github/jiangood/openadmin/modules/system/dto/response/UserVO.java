@@ -40,6 +40,8 @@ public class UserVO {
 
     private String email;
 
+    private String avatar;
+
     private Boolean enabled;
 
     private List<String> roleNames;
