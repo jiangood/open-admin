@@ -98,7 +98,7 @@ createRoot(document.getElementById('root')).render(
 - 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
 - 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](docs/open-admin/api.md#页面生命周期)）
 
-**目录约定**（无需配置，自动识别）：`src/pages/` 下按目录区分页面类型——`pages/` 后台页（需登录 + 后台布局）、`pages/public/` 免登录无布局（如登录页）、`pages/standalone/` 需登录无布局（如强制改密页），详见 [development.md](docs/open-admin/development.md#页面目录约定)。
+**目录约定**（无需配置，自动识别）：`src/pages/` 下按目录区分页面类型——`pages/` 后台页（需登录 + 后台布局）、`pages/public/` 免登录无布局（如公开文章页）、`pages/standalone/` 需登录无布局（如强制改密页）。框架内置登录页为 `/login`（`pages/login.jsx`，属于公开页面例外），详见 [development.md](docs/open-admin/development.md#页面目录约定)。
 
 
 ## 文档

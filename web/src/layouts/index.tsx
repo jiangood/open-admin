@@ -3,7 +3,7 @@ import {App, ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus} from "../framework";
 import type {LoginExpiredPayload, ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
@@ -96,6 +96,8 @@ export class Layouts extends React.Component<LayoutsProps> {
 
     getPageType(pathname): 'public' | 'standalone' | 'protected' {
         if (pathname === '/' || pathname === '/index') return 'protected';
+        // 框架内置登录页位于 pages/ 根目录，但需按公开页面处理
+        if (pathname === LOGIN_PATH) return 'public';
         if (pathname.startsWith('/public/')) return 'public';
         if (pathname.startsWith('/standalone/')) return 'standalone';
         return 'protected';

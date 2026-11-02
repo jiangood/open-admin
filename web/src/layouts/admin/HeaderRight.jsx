@@ -1,7 +1,7 @@
 import {Avatar, Dropdown, Modal} from "antd";
 import {BgColorsOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
-import {HttpClient, PageUtils, GlobalData, history, EventBus, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {HttpClient, PageUtils, GlobalData, history, EventBus, LOGIN_PATH, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -120,7 +120,7 @@ export class HeaderRight extends React.Component {
                    onOk={() => {
                        this.setState({alertVisible: false});
                         EventBus.emit('logoutSuccess');
-                        history.replace('/public/login')
+                        history.replace(LOGIN_PATH)
                     }}>
                  退出登录成功
             </Modal>
@@ -130,7 +130,7 @@ export class HeaderRight extends React.Component {
                        this.setState({confirmVisible: false});
                        localStorage.clear();
                        EventBus.emit('logoutSuccess');
-                       history.replace('/public/login')
+                       history.replace(LOGIN_PATH)
                    }}>
                 退出登录失败，是否清空缓存
             </Modal>

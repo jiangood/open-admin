@@ -3,14 +3,17 @@ import {StringUtils} from "./StringUtils";
 import {UrlUtils} from "./UrlUtils";
 import {EventBus} from "./EventBus";
 
+/** 登录页路径：公开页面，支持 ?redirect= 回跳 */
+export const LOGIN_PATH = '/login';
+
 export class PageUtils {
     static redirectToLogin(): void {
-        if (PageUtils.currentPathname() === '/public/login') {
+        if (PageUtils.currentPathname() === LOGIN_PATH) {
             return;
         }
         const url = PageUtils.currentUrl();
         const encodedUrl = encodeURIComponent(url);
-        history.push(`/public/login?redirect=${encodedUrl}`);
+        history.push(`${LOGIN_PATH}?redirect=${encodedUrl}`);
     }
 
     static currentParams(): Record<string, string | undefined> {

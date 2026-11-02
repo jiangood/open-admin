@@ -186,4 +186,6 @@ public void deleteById(String id) {
 | `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
 | `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
 
-`public` 页免登录、无后台布局（如登录页）；`standalone` 页需登录但无后台布局（如强制改密页）。
+`public` 页免登录、无后台布局（如公开文章页）；`standalone` 页需登录但无后台布局（如强制改密页）。
+
+框架内置登录页为 `/login`（页面文件 `pages/login.jsx`），是 `pages/` 下**公开页面的唯一例外**，通过 `LOGIN_PATH` 统一约定；`/public/login` 仅保留为旧地址兼容跳转，新代码请直接使用 `/login`。

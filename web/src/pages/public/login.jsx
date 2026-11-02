@@ -1,151 +1,17 @@
-import React from 'react';
-import {Button, Form, Input} from 'antd';
-import {LockOutlined, SafetyCertificateOutlined, UserOutlined, WarningOutlined} from '@ant-design/icons';
-import {EventBus, HttpClient, GlobalData, getMessageApi, history} from "../../framework";
+import React from "react";
+import {history, LOGIN_PATH} from "../../framework";
 
-import "./login.less"
-
-function getRedirect(query) {
-    let redirect = query?.redirect;
-    if (!redirect) {
-        redirect = '/'
-    }
-    return redirect;
-}
-
-function postLogin(values, query, success, error) {
-    HttpClient.post('/admin/auth/login', values, null, {toastError: false}).then(rs => {
-        EventBus.emit('loginSuccess')
-        history.push(getRedirect(query))
-        success?.(rs)
-    }).catch(e => {
-        console.error('[Login] 登录失败:', e);
-        getMessageApi().error(HttpClient.errToMsg(e))
-        error?.(e)
-    })
-}
-
-function encodePassword(pwd) {
-    const chars = [];
-    for (let i = 0; i < pwd.length; i++)
-        chars.push(pwd.codePointAt(i) + i + 2);
-    return btoa(String.fromCodePoint(...chars));
-}
-
-export default class LoginPage extends React.Component {
-
-    state = {
-        logging: false,
-        siteInfo: {},
-        /* logo.png 缺失或加载失败时，回退到矢量标记，避免首屏出现破损图 */
-        logoError: false
-    }
-
+/**
+ * 旧版登录地址兼容：/public/login?redirect=... → /login?redirect=...
+ * 保留一个版本后删除
+ */
+export default class LegacyLoginRedirect extends React.Component {
     componentDidMount() {
-        const siteInfo = GlobalData.getSiteInfo()
-        if (siteInfo?.title) {
-            this.setState({siteInfo})
-            return
-        }
-        // localStorage 中无站点信息，从服务端重新加载
-        HttpClient.get('/admin/public/site-info', null, {toastError: false}).then(rs => {
-            GlobalData.setSiteInfo(rs.data)
-            this.setState({siteInfo: rs.data})
-        }).catch(() => {
-            console.error('[Login] 加载站点信息失败');
-            getMessageApi().error('加载站点信息失败，请刷新页面重试')
-        })
-    }
-
-    submit = values => {
-        this.setState({logging: true})
-        try {
-            values.password = encodePassword(values.password)
-        } catch (e) {
-            console.error('[Login] 密码编码失败:', e);
-            this.setState({logging: false})
-            getMessageApi().error('密码含不支持字符，请联系管理员重置')
-            return
-        }
-        postLogin(values, this.props.location?.query, () => {
-            this.setState({logging: false})
-        }, () => {
-            this.setState({logging: false})
-        })
+        const search = this.props.location?.search || '';
+        history.replace(LOGIN_PATH + search);
     }
 
     render() {
-        const pageStyle = {
-            backgroundImage: `url("./login_bg.jpg")`
-        }
-
-        return (
-            <section className='login-page' style={pageStyle}>
-                <div className="login-content">
-                    {this.renderBrand()}
-                    {this.getForm()}
-                    {this.renderFormBottom()}
-                </div>
-            </section>
-        );
-    }
-
-    renderBrand() {
-        const {siteInfo = {}, logoError} = this.state
-        return (
-            <div className="login-brand">
-                <span className="login-brand-logo">
-                    {logoError
-                        ? <SafetyCertificateOutlined/>
-                        : <img src="./logo.png" alt="" onError={() => this.setState({logoError: true})}/>}
-                </span>
-                {siteInfo.title && <h1>{siteInfo.title}</h1>}
-            </div>
-        )
-    }
-
-    getForm = () => {
-        const form = (
-            <Form
-                name="normal_login"
-                className="login-form"
-                initialValues={{remember: true}}
-                onFinish={this.submit}
-                requiredMark={false}
-                colon={false}
-            >
-                <Form.Item name="username" rules={[{required: true, message: '请输入用户名!'}]}>
-                    <Input size='large' prefix={<UserOutlined/>} placeholder="用户名" autoComplete="username"/>
-                </Form.Item>
-                <Form.Item name="password" rules={[{required: true, message: '请输入密码!'}]}>
-                    <Input.Password autoComplete="current-password" prefix={<LockOutlined/>} placeholder="密码"
-                           size='large'
-                    />
-                </Form.Item>
-
-                <Form.Item className="login-submit">
-                    <Button loading={this.state.logging} type="primary" htmlType="submit"
-                            block size='large'>
-                        登录
-                    </Button>
-                </Form.Item>
-            </Form>
-        );
-
-        if (this.props.formRender) {
-            return this.props.formRender(form);
-        }
-        return form;
-    };
-
-    renderFormBottom() {
-        const siteInfo = this.state.siteInfo || {};
-        if (siteInfo.loginBoxBottomTip) {
-            return (
-                <div className="login-bottom-tip">
-                    <WarningOutlined/> {siteInfo.loginBoxBottomTip}
-                </div>
-            )
-        }
+        return null;
     }
 }

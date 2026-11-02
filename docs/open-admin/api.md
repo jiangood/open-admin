@@ -530,10 +530,10 @@ location /file/public/ {
 | `ObjectUtils` | 对象操作（`copyPropertyIfPresent` 等） |
 | `StorageUtils` | `set` / `get` / `remove`（localStorage 封装） |
 | `DeviceUtils` | `isMobileDevice` |
-| `PageUtils` | `open(path, label)` 打开新 Tab / `closeCurrent` / `redirectToLogin` / `currentUrl` / `currentParams` |
+| `PageUtils` | `open(path, label)` 打开新 Tab / `closeCurrent` / `redirectToLogin` / `currentUrl` / `currentParams`；常量 `LOGIN_PATH` 为登录页路径（`/login`） |
 | `EventBus` | `on` / `once` / `emit` / `off` — 跨组件通信，优先使用，替代 `document.dispatchEvent` |
 
-`EventBus.on` / `once` 返回取消订阅函数；`on` 支持传 `ctx`（this）。`PageUtils.open(path, label)` 用于跳转到页面（`label` 会作为 Tab 标题，通过 `currentLabel()` 读取）。
+`EventBus.on` / `once` 返回取消订阅函数；`on` 支持传 `ctx`（this）。`PageUtils.open(path, label)` 用于跳转到页面（`label` 会作为 Tab 标题，通过 `currentLabel()` 读取）。登录相关跳转请使用 `LOGIN_PATH`，不要硬编码 `/public/login`。
 
 框架内置事件：登录失效时 `HttpClient` 广播 `loginExpired`（载荷 `{message, reason}`，`reason` 为 `CONCURRENT_LOGIN` 表示同一账号并发登录被顶下线），`Layouts` 已内置监听并弹出提示，业务无需处理；提示文案由 `sys.login-expired-message` / `sys.concurrent-login-message` 配置（见 [config.md](config.md)）。
 
