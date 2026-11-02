@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 系统配置接口。
+ * 参数设置接口。
  *
  * <p>新增/修改配置项请在业务模块实现 {@code ConfigProvider}，不要直接改本控制器。</p>
  */

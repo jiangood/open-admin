@@ -1,7 +1,7 @@
 package io.github.jiangood.openadmin.framework.config.dynamic;
 
 /**
- * 系统配置项的值类型。
+ * 参数项的值类型。
  */
 public enum ConfigType {
 

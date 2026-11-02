@@ -7,8 +7,11 @@ import io.github.jiangood.openadmin.framework.ratelimit.RateLimit;
 import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginReq;
+import io.github.jiangood.openadmin.framework.auth.online.OnlineUserRegistry;
+import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +38,7 @@ public class AuthController {
     private final SecurityHolder securityHolder;
     private final LoginAttemptService loginAttemptService;
     private final SystemProperties systemProperties;
+    private final OnlineUserRegistry onlineUserRegistry;
 
     @PostMapping("login")
     @RateLimit(count = 10, duration = 60)
@@ -77,6 +81,11 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             securityContextRepository.saveContext(SecurityContextHolder.getContext(), request, response);
             loginAttemptService.onSuccess(username);
+
+            if (authentication.getPrincipal() instanceof LoginUser loginUser) {
+                // 必须在会话固定防护替换 sessionId 之后登记，保证拿到最终 sessionId
+                onlineUserRegistry.record(request, loginUser);
+            }
         } catch (SessionAuthenticationException e) {
             throw new IllegalStateException("账号或密码错误");
         } catch (AuthenticationException e) {
@@ -106,8 +115,10 @@ public class AuthController {
     public AjaxResult logout(HttpServletRequest request) {
         SecurityContextHolder.clearContext();
 
-        if (request.getSession(false) != null) {
-            request.getSession(false).invalidate();
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            onlineUserRegistry.remove(session.getId());
+            session.invalidate();
         }
 
         return AjaxResult.ok();

@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * 系统配置读写。
+ * 参数设置读写。
  *
  * <p>取值优先级：数据库覆盖值 &gt; {@code application.yml} &gt; 代码声明的默认值。
  * 数据库只保存被覆盖的项，删除记录即恢复默认。</p>

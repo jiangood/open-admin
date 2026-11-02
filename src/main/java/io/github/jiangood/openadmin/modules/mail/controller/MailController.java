@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * 邮件动作接口。
  *
- * <p>配置读写统一走系统配置接口，这里只提供发送测试邮件。</p>
+ * <p>配置读写统一走参数设置接口，这里只提供发送测试邮件。</p>
  */
 @RestController
 @RequestMapping("admin/mail")

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 系统配置分组，对应配置页上的一个 Tab。
+ * 参数分组，对应参数设置页上的一个 Tab。
  */
 public final class ConfigGroup {
 

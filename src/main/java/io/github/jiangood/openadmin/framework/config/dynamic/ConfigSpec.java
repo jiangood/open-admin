@@ -5,7 +5,7 @@ import io.github.jiangood.openadmin.util.dto.Option;
 import java.util.List;
 
 /**
- * 一个系统配置项的元数据。
+ * 一个参数项的元数据。
  *
  * <p>元数据由代码声明，数据库只保存被用户覆盖的值，因此默认值可以跟随代码升级，
  * 不会被数据库里的旧值卡住。</p>

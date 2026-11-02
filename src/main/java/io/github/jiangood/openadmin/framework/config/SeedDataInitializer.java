@@ -38,6 +38,11 @@ public class SeedDataInitializer {
     /** 管理员默认密码：Open@1234 */
     private static final String ADMIN_PASSWORD = "$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG";
 
+    /** 默认单位（机构树根节点） */
+    private static final String SEED_UNIT_ID = "1";
+    /** 默认部门（挂在默认单位下，用户归属节点） */
+    private static final String SEED_DEPT_ID = "2";
+
     private final SysDictTypeRepository dictTypeRepository;
     private final SysOrgRepository orgRepository;
     private final SysRoleRepository roleRepository;
@@ -66,15 +71,24 @@ public class SeedDataInitializer {
         dictTypeRepository.save(type);
     }
 
+    /**
+     * 单位是机构树根节点，部门挂在单位下；两者不能是同一个节点，否则「单位 / 机构」会显示成重复名称。
+     */
     private void seedOrg() {
-        if (orgRepository.existsById("1")) {
+        seedOrg(SEED_UNIT_ID, null, "默认单位", 1, 0);
+        seedOrg(SEED_DEPT_ID, SEED_UNIT_ID, "默认部门", 2, 0);
+    }
+
+    private void seedOrg(String id, String pid, String name, int type, int seq) {
+        if (orgRepository.existsById(id)) {
             return;
         }
-        SysOrg org = new SysOrg("1");
-        org.setName("默认单位");
-        org.setSeq(0);
+        SysOrg org = new SysOrg(id);
+        org.setPid(pid);
+        org.setName(name);
+        org.setSeq(seq);
         org.setEnabled(true);
-        org.setType(1);
+        org.setType(type);
         orgRepository.save(org);
     }
 
@@ -86,8 +100,9 @@ public class SeedDataInitializer {
         SysUser user = new SysUser("1");
         user.setAccount("admin");
         user.setName("管理员");
-        user.setUnitId("1");
-        user.setOrgId("1");
+        // 用户归属到部门节点，单位取其上级单位（与 SysUserService#resolveUnitId 的推导规则一致）
+        user.setUnitId(SEED_UNIT_ID);
+        user.setOrgId(SEED_DEPT_ID);
         user.setPassword(ADMIN_PASSWORD);
         user.setDataPermType(DataPermType.ALL);
         user.setEnabled(true);

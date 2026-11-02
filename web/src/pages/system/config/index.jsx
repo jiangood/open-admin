@@ -3,7 +3,6 @@ import {
     Button,
     Card,
     Col,
-    Divider,
     Form,
     Input,
     InputNumber,
@@ -21,7 +20,7 @@ import {QuestionCircleOutlined, UndoOutlined} from '@ant-design/icons'
 import {EventBus, GlobalData, HttpClient, Page, Perm} from '../../../framework'
 
 /**
- * 系统配置页。
+ * 参数设置页。
  *
  * 配置项由后端 ConfigProvider 声明（分组 / 类型 / 默认值 / 范围 / 说明），
  * 本页面只负责按元数据渲染、收集修改项并提交差异。
@@ -275,48 +274,41 @@ export default class SysConfigPage extends React.Component {
     render() {
         const {groups, loading, saving, testingMail, dirty} = this.state
         const hasOverridden = groups.some(group => group.items.some(item => item.overridden))
+        // 首次加载显示骨架屏；切回 Tab 等刷新时保留现有内容，避免闪白
+        const initialLoading = loading && groups.length === 0
 
         return <Page>
             <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
-                <Card loading={loading}>
-                    {groups.map((group, index) => (
-                        <div key={group.code}>
-                            <div style={{
-                                marginBottom: 12,
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                justifyContent: 'space-between',
-                                gap: 12
-                            }}>
-                                <div>
-                                    <Typography.Title level={5} style={{margin: 0}}>{group.label}</Typography.Title>
-                                    {group.description && (
-                                        <Typography.Text type="secondary" style={{fontSize: 12}}>
-                                            {group.description}
-                                        </Typography.Text>
-                                    )}
-                                </div>
-                                {group.code === 'mail' && (
-                                    <Perm code='sys-config:update'>
-                                        <Button loading={testingMail}
-                                                disabled={dirty}
-                                                title={dirty ? '请先保存配置修改' : '发送一封测试邮件到发件邮箱'}
-                                                onClick={this.sendTestMail}>
-                                            发送测试邮件
-                                        </Button>
-                                    </Perm>
-                                )}
-                            </div>
+                {initialLoading && <Card loading style={{marginBottom: 16}}/>}
+                <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+                    {groups.map(group => (
+                        <Card key={group.code}
+                              title={group.label}
+                              extra={group.code === 'mail' && (
+                                  <Perm code='sys-config:update'>
+                                      <Button loading={testingMail}
+                                              disabled={dirty}
+                                              title={dirty ? '请先保存配置修改' : '发送一封测试邮件到发件邮箱'}
+                                              onClick={this.sendTestMail}>
+                                          发送测试邮件
+                                      </Button>
+                                  </Perm>
+                              )}>
+                            {group.description && (
+                                <Typography.Text type="secondary"
+                                                 style={{display: 'block', fontSize: 12, marginBottom: 16}}>
+                                    {group.description}
+                                </Typography.Text>
+                            )}
                             <Row gutter={16}>
                                 {group.items.map(this.renderItem)}
                             </Row>
-                            {index < groups.length - 1 && <Divider style={{margin: '8px 0 20px'}}/>}
-                        </div>
+                        </Card>
                     ))}
+                </div>
 
-                    {groups.length > 0 && <Divider style={{margin: '4px 0 16px'}}/>}
-
-                    <Space wrap>
+                {groups.length > 0 && (
+                    <Space wrap style={{marginTop: 16}}>
                         <Perm code='sys-config:update'>
                             <Button type="primary" loading={saving} disabled={!dirty} onClick={this.save}>
                                 保存修改
@@ -336,7 +328,7 @@ export default class SysConfigPage extends React.Component {
                             配置默认值来自 application.yml 或代码声明
                         </Typography.Text>
                     </Space>
-                </Card>
+                )}
             </Form>
         </Page>
     }

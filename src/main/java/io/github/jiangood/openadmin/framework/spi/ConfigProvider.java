@@ -5,10 +5,10 @@ import io.github.jiangood.openadmin.framework.config.dynamic.ConfigGroup;
 import java.util.List;
 
 /**
- * 系统配置项声明扩展点。
+ * 参数项声明扩展点。
  *
  * <p>框架与业务模块都通过实现本接口声明自己负责的配置项；实现类注册为 Spring Bean 后，
- * 配置项会自动出现在「系统管理 → 系统配置」页面。</p>
+ * 配置项会自动出现在「系统管理 → 参数设置」页面。</p>
  *
  * <p>示例：</p>
  * <pre>{@code

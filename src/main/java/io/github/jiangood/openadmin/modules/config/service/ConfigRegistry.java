@@ -46,14 +46,14 @@ public class ConfigRegistry {
             for (ConfigGroup group : defined) {
                 validateGroup(group);
                 if (!groupCodes.add(group.getCode())) {
-                    throw new IllegalStateException("系统配置分组 code 重复: " + group.getCode());
+                    throw new IllegalStateException("参数分组 code 重复: " + group.getCode());
                 }
                 groupList.add(group);
                 for (ConfigSpec spec : group.items()) {
                     validateSpec(spec);
                     ConfigSpec previous = all.putIfAbsent(spec.key(), spec);
                     if (previous != null) {
-                        throw new IllegalStateException("系统配置项 key 重复: " + spec.key()
+                        throw new IllegalStateException("参数项 key 重复: " + spec.key()
                                 + "（" + provider.getClass().getName() + "）");
                     }
                 }
@@ -105,7 +105,7 @@ public class ConfigRegistry {
 
     private void validateSpec(ConfigSpec spec) {
         if (spec.key() == null || !KEY_PATTERN.matcher(spec.key()).matches()) {
-            throw new IllegalStateException("系统配置项 key 格式不正确（小写字母/数字/连字符，点分隔）: " + spec.key());
+            throw new IllegalStateException("参数项 key 格式不正确（小写字母/数字/连字符，点分隔）: " + spec.key());
         }
         if (spec.label() == null || spec.label().isBlank()) {
             throw new IllegalStateException("配置项 " + spec.key() + " 的名称不能为空");

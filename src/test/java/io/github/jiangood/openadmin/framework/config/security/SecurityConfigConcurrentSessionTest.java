@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.session.SessionInformation;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
@@ -30,6 +31,20 @@ class SecurityConfigConcurrentSessionTest {
     @Autowired
     @Qualifier("securityFilterChain")
     private SecurityFilterChain securityFilterChain;
+
+    @Autowired
+    private SessionRegistry sessionRegistry;
+
+    @Test
+    void sessionRegistryShouldBeExposedAsBean() {
+        assertNotNull(sessionRegistry, "SessionRegistry 未注册为 Bean，在线用户列表与强制下线将无法工作");
+
+        sessionRegistry.registerNewSession("test-session", "test-principal");
+        assertNotNull(sessionRegistry.getSessionInformation("test-session"));
+
+        sessionRegistry.removeSessionInformation("test-session");
+        assertNull(sessionRegistry.getSessionInformation("test-session"));
+    }
 
     @Test
     void filterChainShouldUseJson401ExpiredStrategy() throws Exception {

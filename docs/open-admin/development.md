@@ -31,7 +31,7 @@
 - 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
 - 方法参数校验用 `@Valid` / `@Validated`
 
-## 系统配置
+## 参数设置
 
 运行时可改的参数优先实现 `ConfigProvider`，不要为每个参数单独写 Controller 和页面：
 
@@ -42,7 +42,7 @@
 - 业务代码通过 `SysConfigService` 的 `getBool/getInt/getString/getList` 读取，不要直接查 `SysConfigRepository`
 - 只把「运行期读取、改了立即生效」的参数放进来；启动期装配的配置仍留在 `application.yml`
 
-完整声明方式见 [config.md](config.md) 的「系统配置（运行时可改）」。
+完整声明方式见 [config.md](config.md) 的「参数设置（运行时可改）」。
 
 ## 定时任务（Quartz）
 

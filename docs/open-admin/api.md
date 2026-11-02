@@ -109,9 +109,9 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 日志如果属于业务数据、需要行级/数据权限校验，不要复用上面的通用接口（它只能校验权限码）：由业务模块自己提供读取接口，并让 `LogViewer` 通过 `url` 指向它，返回同样的 `{content, nextOffset, eof}` 即可复用增量跟随。
 
-### 系统配置
+### 参数设置
 
-运行时可改的系统配置。元数据由业务模块/框架实现 `ConfigProvider` 声明，`sys_config` 只保存被覆盖的值（见 [config.md](config.md)）。
+运行时可改的全局参数。元数据由业务模块/框架实现 `ConfigProvider` 声明，`sys_config` 只保存被覆盖的值（见 [config.md](config.md)）。
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
@@ -137,11 +137,30 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 ### 邮件
 
-邮件配置统一走上面的系统配置接口，不提供单独的设置读写接口。
+邮件配置统一走上面的参数设置接口，不提供单独的设置读写接口。
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
 | `admin/mail/test` | POST | `sys-config:update` | 发送测试邮件到发件邮箱自己；失败返回具体原因 |
+
+### 在线用户
+
+系统管理 →「在线用户」页面：一个登录会话一行，展示账号、姓名、机构、IP、登录时间与最后活跃时间，支持把指定会话强制下线。
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/sysOnlineUser/page` | GET | `sys-online:read` | 分页查询，查询参数 `keyword`（账号/姓名/IP/机构模糊匹配）、`page`、`size` |
+| `admin/sysOnlineUser/kick` | POST | `sys-online:kick` | 请求体 `{id}`；`id` 为列表返回的随机标识，非 sessionId |
+
+字段：`id` / `username`（账号）/ `name`（姓名）/ `unitId` / `unitName` / `orgId` / `orgName` / `ip` / `userAgent` / `loginTime` / `lastActiveTime` / `current`（是否当前请求所在会话）。真实 `sessionId` 不会下发给前端。
+
+说明：
+
+- 在线记录与 `HttpSession` 一样保存在内存，**仅单实例部署准确**，应用重启后清空；多实例部署需要 Spring Session 等共享会话方案（见 [config.md](config.md)）。
+- `lastActiveTime` 由 Spring Security `SessionRegistry` 的 `lastRequest` 实时计算，无需业务上报。
+- 强制下线调用 `SessionInformation.expireNow()`，对方下一次请求会收到 401，并复用并发登录提示（见下文「框架内置事件」）。
+- 不允许强制下线当前登录会话；会话被踢后记录立即从列表移除，对方会话在下一次请求时失效。
+- 并发登录被顶下线的旧会话、以及空闲超时的会话，会在下次查询列表时自动清理，不会长期残留。
 
 ### 代码生成
 

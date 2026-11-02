@@ -18,6 +18,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
@@ -49,7 +51,9 @@ public class SecurityConfig {
     // 否则会形成循环依赖：SecurityConfig -> PermissionRefreshFilter -> UserDetailsService -> SysUserService -> passwordEncoder(SecurityConfig)
     @Bean
     @Order(1)
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, PermissionRefreshFilter permissionRefreshFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   PermissionRefreshFilter permissionRefreshFilter,
+                                                   SessionRegistry sessionRegistry) throws Exception {
         http.securityMatcher("/admin/**", "/file/**", "/ureport/**")
                 .headers(cfg -> cfg
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表
@@ -82,6 +86,8 @@ public class SecurityConfig {
                     cfg.sessionConcurrency(configurer -> {
                         configurer.maximumSessions(maximumSessions)
                                 .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
+                                // 显式使用同一个 registry，在线用户列表与强制下线才能共享会话信息
+                                .sessionRegistry(sessionRegistry)
                                 // 被顶下线的请求返回 401 + JSON，而非 Spring Security 默认的 200 纯文本
                                 .expiredSessionStrategy(new ConcurrentSessionExpiredStrategy(systemProperties));
                     });
@@ -130,6 +136,11 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
     }
 
     @Bean

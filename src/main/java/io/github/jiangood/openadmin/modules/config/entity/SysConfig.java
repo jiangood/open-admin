@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
 /**
- * 系统配置的运行时覆盖值。
+ * 参数设置的运行时覆盖值。
  *
  * <p>只保存用户改过的项；没有记录的配置项按 {@code application.yml} 和代码默认值解析。
  * 删除记录即恢复默认。</p>

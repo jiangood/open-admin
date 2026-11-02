@@ -66,7 +66,7 @@ menus:
       - {name: 删除, code: delete}
   sys-config:
     pid: sys
-    name: 系统配置
+    name: 参数设置
     path: /system/config
     icon: SettingOutlined
     perms:
@@ -82,11 +82,6 @@ menus:
       - {name: 创建, code: create}
       - {name: 更新, code: update}
       - {name: 删除, code: delete}
-  ## 分隔线：基础功能 | 系统运维
-  sys-sep-ops:
-    pid: sys
-    type: divider
-  ## ----- 系统运维 -----
   sys-file:
     pid: sys
     name: 文件管理
@@ -102,6 +97,14 @@ menus:
     icon: HistoryOutlined
     perms:
       - {name: 读取, code: read}
+  sys-online:
+    pid: sys
+    name: 在线用户
+    path: /system/online
+    icon: TeamOutlined
+    perms:
+      - {name: 读取, code: read}
+      - {name: 强制下线, code: kick}
   ## 分隔线：系统运维 | 开发工具
   sys-sep-dev:
     pid: sys
