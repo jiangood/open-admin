@@ -19,7 +19,9 @@ interface PageProps {
     /** @deprecated 页面底色已默认跟随布局底色，该参数不再产生差异；保留仅为兼容旧写法 */
     backgroundGray?: boolean;
     debug?: boolean;
+    /** @deprecated 页面标题已由菜单 / 标签页提供，页面内无需重复展示；该属性将在后续版本移除 */
     title?: React.ReactNode;
+    /** @deprecated 页面描述请直接在内容区使用 Typography 等排版组件；该属性将在后续版本移除 */
     description?: React.ReactNode;
     /** 右侧操作区：推荐传 PermAction[]（数据驱动），兼容带 perm 属性的节点 */
     actions?: PermAction[] | React.ReactNode;
@@ -27,8 +29,24 @@ interface PageProps {
 }
 
 export class Page extends React.Component<PageProps> {
+    warnedTitle = false;
+    warnedDescription = false;
+
+    /** 已废弃属性仅在首次使用时提示，避免每次渲染刷屏 */
+    warnDeprecatedProps(title: React.ReactNode, description: React.ReactNode) {
+        if (title != null && !this.warnedTitle) {
+            this.warnedTitle = true;
+            console.warn('[Page] title 属性已废弃：页面标题由菜单 / 标签页提供，请移除该属性（后续版本将不再支持）。');
+        }
+        if (description != null && !this.warnedDescription) {
+            this.warnedDescription = true;
+            console.warn('[Page] description 属性已废弃：请在内容区直接使用 Typography 等排版组件（后续版本将不再支持）。');
+        }
+    }
+
     render() {
         const { padding = true, debug = false, title, description, actions, children } = this.props;
+        this.warnDeprecatedProps(title, description);
         const hasHeader = title != null || description != null || actions != null;
         const style: React.CSSProperties = {};
 
