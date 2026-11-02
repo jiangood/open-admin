@@ -44,6 +44,7 @@ class SysConfigServiceTest {
                     .add(Configs.list("test.tags", "标签").defaultValue(List.of("a", "b")))
                     .add(Configs.string("test.password", "密码").asSecret())
                     .add(Configs.string("test.public", "公开").defaultValue("公开值").asPublic())
+                    .add(Configs.proxyUrl("test.proxy", "代理"))
     );
 
     @Mock
@@ -164,6 +165,27 @@ class SysConfigServiceTest {
     @Test
     void publicValuesOnlyContainsPublicItems() {
         assertEquals(Map.of("test.public", "公开值"), service.publicValues());
+    }
+
+    @Test
+    void proxyValueIsMaskedAndMaskKeepsStoredPassword() {
+        service.update(Map.of("test.proxy", "http://user:pass@192.168.1.10:8080"));
+
+        assertEquals("http://user:pass@192.168.1.10:8080", service.getString("test.proxy"));
+        assertEquals("http://user:***@192.168.1.10:8080", service.item("test.proxy").value());
+
+        // 只改端口，密码写成 *** 表示沿用
+        service.update(Map.of("test.proxy", "http://user:***@192.168.1.10:9090"));
+        assertEquals("http://user:pass@192.168.1.10:9090", service.getString("test.proxy"));
+
+        // 清空表示不使用代理
+        service.update(Map.of("test.proxy", ""));
+        assertEquals("", service.getString("test.proxy"));
+        assertEquals("", service.item("test.proxy").value());
+
+        // 非法地址在保存时就拒绝
+        assertThrows(BusinessException.class,
+                () -> service.update(Map.of("test.proxy", "ftp://host:21")));
     }
 
     private SysConfig row(String key, String value) {

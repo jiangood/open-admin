@@ -1,6 +1,8 @@
 package io.github.jiangood.openadmin.modules.config.service;
 
 import io.github.jiangood.openadmin.framework.config.dynamic.ConfigSpec;
+import io.github.jiangood.openadmin.framework.config.dynamic.ConfigType;
+import io.github.jiangood.openadmin.framework.proxy.ProxySettings;
 import io.github.jiangood.openadmin.modules.config.dto.ConfigGroupView;
 import io.github.jiangood.openadmin.modules.config.dto.ConfigItemView;
 import io.github.jiangood.openadmin.modules.config.entity.SysConfig;
@@ -168,12 +170,18 @@ public class SysConfigService {
                 continue;
             }
 
-            String canonical = serialize(spec, value);
             SysConfig row = repository.findByConfigKey(key).orElseGet(() -> {
                 SysConfig created = new SysConfig();
                 created.setConfigKey(key);
                 return created;
             });
+
+            // 代理地址回显时密码是 ***，保存时要用库里的密码还原
+            if (spec.type() == ConfigType.PROXY) {
+                value = resolveProxyValue(row.getConfigValue(), value);
+            }
+
+            String canonical = serialize(spec, value);
             row.setConfigValue(canonical);
             rows.add(row);
             changed.add(key);
@@ -246,8 +254,8 @@ public class SysConfigService {
     private ConfigItemView toView(ConfigSpec spec) {
         boolean overridden = overrides.containsKey(spec.key());
         Object effective = safeValue(spec);
-        Object defaultValue = spec.secret() ? null : envOrDefault(spec);
-        Object value = spec.secret() ? null : effective;
+        Object defaultValue = spec.secret() ? null : displayValue(spec, envOrDefault(spec));
+        Object value = spec.secret() ? null : displayValue(spec, effective);
         boolean hasValue = spec.secret() && effective != null && !String.valueOf(effective).isBlank();
 
         return new ConfigItemView(
@@ -275,6 +283,48 @@ public class SysConfigService {
             log.warn("读取配置项 {} 失败，回退默认值: {}", spec.key(), e.getMessage());
             return spec.defaultValue();
         }
+    }
+
+    /**
+     * 回显值：代理地址只返回掩码后的 URL，明文密码不出服务端。
+     */
+    private Object displayValue(ConfigSpec spec, Object value) {
+        if (spec.type() != ConfigType.PROXY) {
+            return value;
+        }
+        try {
+            return ProxySettings.parse(value == null ? null : String.valueOf(value)).displayUrl();
+        } catch (RuntimeException e) {
+            log.warn("配置项 {} 的代理地址不合法，回显为空: {}", spec.key(), e.getMessage());
+            return "";
+        }
+    }
+
+    /**
+     * 保存代理地址：输入里带 {@code ***} 时沿用库里已保存的密码。
+     */
+    private Object resolveProxyValue(String storedRaw, Object value) {
+        if (isBlank(value)) {
+            return "";
+        }
+        ProxySettings parsed;
+        try {
+            parsed = ProxySettings.parse(String.valueOf(value));
+        } catch (IllegalArgumentException e) {
+            throw new BusinessException("代理地址不正确：" + e.getMessage());
+        }
+        if (!ProxySettings.PASSWORD_MASK.equals(parsed.password())) {
+            return parsed;
+        }
+
+        ProxySettings stored;
+        try {
+            stored = ProxySettings.parse(storedRaw);
+        } catch (RuntimeException e) {
+            stored = ProxySettings.disabled();
+        }
+        return new ProxySettings(parsed.type(), parsed.host(), parsed.port(), parsed.username(),
+                parsed.resolvePassword(stored.password()));
     }
 
     private String source(ConfigSpec spec) {
@@ -352,6 +402,20 @@ public class SysConfigService {
 
     private String serialize(ConfigSpec spec, Object value) {
         return switch (spec.type()) {
+            case PROXY -> {
+                if (value instanceof ProxySettings proxy) {
+                    yield proxy.toUrl();
+                }
+                String text = value == null ? "" : String.valueOf(value).trim();
+                if (text.isEmpty()) {
+                    yield "";
+                }
+                try {
+                    yield ProxySettings.parse(text).toUrl();
+                } catch (IllegalArgumentException e) {
+                    throw new BusinessException("配置项 " + spec.label() + " " + e.getMessage());
+                }
+            }
             case BOOL -> toBoolean(spec, value) ? "true" : "false";
             case INT -> {
                 long number = toLong(spec, value);

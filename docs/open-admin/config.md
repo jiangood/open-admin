@@ -42,8 +42,46 @@
 | 站点信息 | `sys.short-title` | STRING | 空 | 侧栏简称，空则使用 `sys.title` |
 | 站点信息 | `sys.water-mark` | BOOL | false | 登录后页面右下角显示当前用户水印 |
 | 站点信息 | `sys.login-box-bottom-tip` | STRING | 空 | 登录框底部提示文案 |
+| 邮件发送 | `email.provider` | SELECT | 空 | 邮箱类型，决定 SMTP 服务器/端口/加密方式 |
+| 邮件发送 | `email.username` | STRING | 空 | 发件邮箱 |
+| 邮件发送 | `email.password` | STRING（敏感） | 空 | 授权码/应用专用密码，留空表示不修改 |
+| 邮件发送 | `email.from.name` | STRING | 空 | 发件人显示名，可选 |
+| 邮件发送 | `email.proxy` | PROXY | 空 | 代理 URL，留空表示不使用 |
 
 其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、代码生成目录、MinIO 等）或安全结构性配置。
+
+### 邮件发送
+
+邮件配置全部在「系统管理 → 系统配置 → 邮件发送」中维护，不需要填写 SMTP 服务器/端口/加密方式：
+
+| 邮箱类型 | SMTP |
+|------|------|
+| QQ 邮箱 | smtp.qq.com:465 / SSL |
+| 腾讯企业邮 | smtp.exmail.qq.com:465 / SSL |
+| 网易 163 | smtp.163.com:465 / SSL |
+| 网易 126 | smtp.126.com:465 / SSL |
+| Outlook / Microsoft 365 | smtp.office365.com:587 / STARTTLS |
+| Gmail | smtp.gmail.com:587 / STARTTLS |
+| 阿里企业邮 | smtp.qiye.aliyun.com:465 / SSL |
+
+- QQ/163/126 使用邮箱授权码，不是登录密码；Gmail 需要两步验证 + 应用专用密码；
+- Outlook/M365 需要在租户/邮箱开启 SMTP AUTH；个人 Outlook.com 已停用基础认证，当前版本不支持 OAuth2；
+- 代理写一行地址：`http://user:pass@192.168.1.10:8080`、`socks5://192.168.1.10:1080`；不写 scheme 按 http 处理，端口必填，留空表示不使用；
+- 代理密码回显为 `***`，保存时保持 `***` 表示沿用已保存的密码；清空字段即不使用代理；
+- SOCKS5 代理不支持账号密码（JavaMail 的限制），需要认证请用 HTTP 代理。
+
+业务模块注入 `MailService` 发送：
+
+```java
+mailService.sendAsync(MailMessage.builder()
+        .to("ops@example.com")
+        .subject("构建成功")
+        .html(MailTemplate.notification("构建成功", MailTemplate.Status.SUCCESS)
+                .row("项目", "demo")
+                .paragraph("镜像已推送。")
+                .build())
+        .build());
+```
 
 ### 业务项目扩展
 
@@ -79,7 +117,8 @@ List<String> channels = sysConfigService.getList("cvs.capture.channels");
 约束：
 
 - key 与分组 code 均需全局唯一，key 全小写、点分隔、段落内允许连字符，例如 `cvs.capture.start-time`
-- 可选类型：`bool` / `integer` / `decimal` / `string` / `text` / `time` / `list` / `select`，默认值类型需与声明类型一致
+- 可选类型：`bool` / `integer` / `decimal` / `string` / `text` / `time` / `list` / `select` / `proxy`，默认值类型需与声明类型一致
+- `proxy` 类型用于带凭据的代理地址：一个字段同时包含类型、主机、端口与账号密码，回显时密码为 `***`，保存时自动还原已存密码
 - `.asPublic()`：随 `/admin/public/site-info` 的 `config` 字段下发给未登录页面
 - `.asSecret()`：接口只返回 `hasValue`，不回显值；不能同时 `.asPublic()`
 - `.asRequired()`：保存时不允许为空

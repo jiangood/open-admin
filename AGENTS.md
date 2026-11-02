@@ -25,6 +25,21 @@
 - 工作区干净（或只包含白名单文件 `*/pom.xml`、`web/package.json`）
 - 工具：`python`、`git`、`node`、`mvn`、`npm`、`gh`（已登录）
 
+### 发版额度（必读）
+
+Maven Central 自 **2026-10-01** 起按组织统计每月发布额度，超限会影响发布：
+
+- 每个自然月最多 **7 个 release**（组织级，可能包含多个 namespace）
+- 同时限制文件数 **1,167 个/月**、发布体积 **78 MB/月**
+- 超限进入 30 天宽限期；宽限期结束后，会拒绝继续推高该指标的新 release
+- 发版前必须登录 [Usage Center](https://central.sonatype.com/publishing/usage) 确认当月用量
+- 不要只按本地 git tag 数判断：失败的发布也会留下 tag，但仍以 Usage Center 为准
+- 同一自然月内合并改动，避免为小修复连续发版
+- 发布失败不要重复打同一个版本 tag（Central 版本不可变），修好后用下一个版本号
+- 紧急安全修复先联系 `central-support@sonatype.com`，不要直接硬发
+
+官方说明：<https://central.sonatype.org/publish/maven-central-publishing-limits>
+
 ### 使用方式
 
 ```bash

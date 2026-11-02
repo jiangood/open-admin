@@ -38,6 +38,7 @@
 - key 以模块前缀开头，全小写、点分隔，段落内可用连字符（如 `cvs.capture.interval`），全局唯一
 - 默认值写在代码里（`.defaultValue(...)`）；需要部署期覆盖时，在 `application.yml` 中使用同名 key，优先级低于数据库覆盖值
 - 敏感值加 `.asSecret()`；配置修改接口不要直接挂 `@Log`，操作日志由框架只记录变更的 key
+- 代理地址用 `Configs.proxyUrl(...)`（`proxy` 类型）：一个字段包含类型、主机、端口与凭据，接口回显自动把密码替换成 `***`
 - 业务代码通过 `SysConfigService` 的 `getBool/getInt/getString/getList` 读取，不要直接查 `SysConfigRepository`
 - 只把「运行期读取、改了立即生效」的参数放进来；启动期装配的配置仍留在 `application.yml`
 

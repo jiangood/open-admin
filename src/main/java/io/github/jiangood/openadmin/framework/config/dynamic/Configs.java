@@ -50,6 +50,13 @@ public final class Configs {
         return spec(key, label, ConfigType.LIST);
     }
 
+    /**
+     * 代理地址：一个字段同时包含类型、主机、端口与凭据，回显时密码掩码。
+     */
+    public static ConfigSpec proxyUrl(String key, String label) {
+        return spec(key, label, ConfigType.PROXY);
+    }
+
     public static ConfigSpec select(String key, String label, List<Option> options) {
         return spec(key, label, ConfigType.SELECT).options(options);
     }

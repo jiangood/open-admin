@@ -125,7 +125,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | 字段 | 说明 |
 |------|------|
 | `key` / `label` / `hint` | 配置键、显示名、说明 |
-| `type` | `bool` / `int` / `float` / `string` / `text` / `time` / `list` / `select` |
+| `type` | `bool` / `int` / `float` / `string` / `text` / `time` / `list` / `select` / `proxy` |
 | `defaultValue` | 生效默认值（`application.yml` 或代码声明）；敏感项为 `null` |
 | `value` | 当前生效值；敏感项为 `null` |
 | `overridden` | 是否被数据库覆盖 |
@@ -134,6 +134,14 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | `min` / `max` / `options` / `required` | 输入约束 |
 
 > `update` 请求体可能包含敏感值，控制器未使用 `@Log`；操作日志由框架只记录变更的 key。
+
+### 邮件
+
+邮件配置统一走上面的系统配置接口，不提供单独的设置读写接口。
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/mail/test` | POST | `sys-config:update` | 发送测试邮件到发件邮箱自己；失败返回具体原因 |
 
 ### 代码生成
 

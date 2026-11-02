@@ -113,6 +113,7 @@ web/
 | 文件管理 | `sys.file.store-type` 配置（`LOCAL` / `MINIO`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
 | 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
 | 运行日志查看 | 在线查看日志文件 |
+| 邮件发送 | 内置 QQ/腾讯企业邮/163/126/Outlook/Gmail/阿里企业邮模板；配置在「系统配置 → 邮件发送」，业务注入 `MailService` 即可发送通知邮件，支持 HTML、附件与 HTTP/SOCKS5 代理 |
 
 ## 添加业务模块
 
@@ -133,6 +134,7 @@ web/
 | config | `modules/config/` | 运行时可改的系统配置（KV 覆盖 + 元数据注册 + 通用配置页） |
 | job | `modules/job/` | Quartz 定时任务 |
 | logviewer | `modules/logviewer/` | 运行日志在线查看（写入 `FileLog` + 增量读取接口 + 按 key 前缀鉴权） |
+| mail | `modules/mail/` | 邮件发送（服务商模板 + 系统配置项 + `MailService` / `MailTemplate`） |
 | codegen | `modules/codegen/` | 实体扫描与 CRUD 代码生成（系统管理 →「代码生成」） |
 
 ## FAQ

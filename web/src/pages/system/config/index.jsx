@@ -189,6 +189,8 @@ export default class SysConfigPage extends React.Component {
                                }))}/>
             case 'text':
                 return <Input.TextArea rows={3}/>
+            case 'proxy':
+                return <Input placeholder="http://user:pass@192.168.1.10:8080" autoComplete="off"/>
             case 'string':
                 return item.secret
                     ? <Input.Password autoComplete="new-password"

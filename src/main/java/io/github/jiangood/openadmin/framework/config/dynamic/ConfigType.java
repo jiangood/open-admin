@@ -43,5 +43,10 @@ public enum ConfigType {
     /**
      * 下拉选项，可选值由 {@code options} 定义
      */
-    SELECT
+    SELECT,
+
+    /**
+     * 带凭据的代理地址，回显时密码部分替换为 {@code ***}
+     */
+    PROXY
 }
