@@ -260,7 +260,7 @@ TS 页面可 `import type {PageMeta} from '@jiangood/open-admin'` 并标注 `pag
 
 `/login`（`pages/login.jsx`，登录页）默认按 `requiresAuth: false` + `layout: 'blank'` 处理，业务项目覆盖登录页时无需重复声明。`requiresAuth: false` 与 `layout: 'admin'` 是非法组合，会自动修正为 `blank` 并输出 `console.warn`。路由表条目为 `{path, component, meta}`，`matchRoute(pathname)` 的返回值包含 `meta`。
 
-页面标题优先级（同时用于标签页和浏览器标题）：
+页面标题优先级（同时用于页签和浏览器标题）：
 
 ```
 pageMeta.title

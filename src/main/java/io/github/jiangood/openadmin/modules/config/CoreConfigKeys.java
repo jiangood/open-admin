@@ -25,6 +25,16 @@ public final class CoreConfigKeys {
      */
     public static final String LOGIN_BOX_BOTTOM_TIP = "sys.login-box-bottom-tip";
 
+    /**
+     * 默认主题色预设
+     */
+    public static final String UI_THEME_PRESET = "sys.ui.theme-preset";
+
+    /**
+     * 默认页签模式：开启保留已打开页签，关闭为单页模式
+     */
+    public static final String UI_TABS_ENABLED = "sys.ui.tabs-enabled";
+
     private CoreConfigKeys() {
     }
 }

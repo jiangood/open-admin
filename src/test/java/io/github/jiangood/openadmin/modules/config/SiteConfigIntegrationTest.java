@@ -49,4 +49,28 @@ class SiteConfigIntegrationTest {
         assertEquals("管理系统", reset.get("title"));
         assertEquals(false, reset.get("waterMark"));
     }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void uiDefaultsArePublicAndOverridable() {
+        Map<String, Object> before = (Map<String, Object>) sysCommonController.siteInfo().getData();
+        Map<String, Object> configBefore = (Map<String, Object>) before.get("config");
+        assertEquals("antd", configBefore.get("sys.ui.theme-preset"));
+        assertEquals(true, configBefore.get("sys.ui.tabs-enabled"));
+
+        sysConfigService.update(Map.of(
+                "sys.ui.theme-preset", "cyan",
+                "sys.ui.tabs-enabled", false));
+
+        Map<String, Object> after = (Map<String, Object>) sysCommonController.siteInfo().getData();
+        Map<String, Object> configAfter = (Map<String, Object>) after.get("config");
+        assertEquals("cyan", configAfter.get("sys.ui.theme-preset"));
+        assertEquals(false, configAfter.get("sys.ui.tabs-enabled"));
+
+        sysConfigService.reset(java.util.List.of("sys.ui.theme-preset", "sys.ui.tabs-enabled"));
+        Map<String, Object> reset = (Map<String, Object>) sysCommonController.siteInfo().getData();
+        Map<String, Object> configReset = (Map<String, Object>) reset.get("config");
+        assertEquals("antd", configReset.get("sys.ui.theme-preset"));
+        assertEquals(true, configReset.get("sys.ui.tabs-enabled"));
+    }
 }

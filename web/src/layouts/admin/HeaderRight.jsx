@@ -78,7 +78,7 @@ export class HeaderRight extends React.Component {
 
     renderLayoutModeToggle = () => {
         const isTabs = getLayoutMode() === 'tabs';
-        const title = isTabs ? '切换为单页模式' : '切换为多标签页模式';
+        const title = isTabs ? '切换为单页模式' : '切换为页签模式';
         const Icon = isTabs ? FileOutlined : ProfileOutlined;
         return (
             <button type="button" className='item' title={title} aria-label={title}

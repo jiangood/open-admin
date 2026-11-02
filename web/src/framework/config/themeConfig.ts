@@ -199,6 +199,8 @@ const THEME_RADIUS_KEY = 'oa-theme-radius';
 
 /** 业务侧传入的颜色基线（由 setThemeColors 设置） */
 let businessColors: Partial<ThemeColors> | null = null;
+/** 全局默认预设 key（来自参数设置，未自定义用户使用） */
+let defaultPresetKey: string = DEFAULT_PRESET_KEY;
 /** 用户选择的预设 key（持久化到 localStorage） */
 let presetKey: string = readStoredPreset();
 let densityKey: ThemeDensity = readStoredDensity();
@@ -217,15 +219,24 @@ function readStoredMode(): ThemeMode {
     }
 }
 
-function readStoredPreset(): string {
-    if (typeof window === 'undefined') return DEFAULT_PRESET_KEY;
+function readStoredPresetKey(): string | null {
+    if (typeof window === 'undefined') return null;
     try {
         const key = localStorage.getItem(THEME_PRESET_KEY);
         if (key && THEME_PRESETS.some(p => p.key === key)) return key;
     } catch {
         // 隐私模式下 localStorage 不可用，忽略
     }
-    return DEFAULT_PRESET_KEY;
+    return null;
+}
+
+function readStoredPreset(): string {
+    return readStoredPresetKey() ?? DEFAULT_PRESET_KEY;
+}
+
+/** 用户是否在本地自定义过主题色预设 */
+export function hasStoredPreset(): boolean {
+    return readStoredPresetKey() !== null;
 }
 
 function persistPreset(key: string) {
@@ -263,6 +274,15 @@ function writeStored(key: string, value: string) {
     if (typeof window === 'undefined') return;
     try {
         localStorage.setItem(key, value);
+    } catch {
+        // 忽略
+    }
+}
+
+function removeStored(key: string) {
+    if (typeof window === 'undefined') return;
+    try {
+        localStorage.removeItem(key);
     } catch {
         // 忽略
     }
@@ -479,6 +499,26 @@ export function getActivePresetKey(): string {
     return presetKey;
 }
 
+export function getDefaultPresetKey(): string {
+    return defaultPresetKey;
+}
+
+/**
+ * 应用参数设置下发的全局默认主题色。
+ * 仅在用户本地没有自定义预设时生效；已自定义用户保持个人选择，
+ * 但其「恢复默认」会回到这里设置的值。
+ */
+export function setDefaultThemePreset(key: string) {
+    if (!THEME_PRESETS.some(p => p.key === key)) return;
+    defaultPresetKey = key;
+    if (hasStoredPreset() || presetKey === key) return;
+
+    presetKey = key;
+    invalidate();
+    syncCssVars(getToken());
+    EventBus.emit('themeChange', currentMode);
+}
+
 /** 应用界面密度预设，持久化并广播 themeChange */
 export function applyDensityPreset(key: ThemeDensity) {
     if (!DENSITY_PRESETS.some(p => p.key === key)) return;
@@ -507,13 +547,16 @@ export function getActiveRadiusKey(): ThemeRadius {
     return radiusKey;
 }
 
-/** 恢复默认：颜色 / 密度 / 圆角 / 明暗 全部复位（不影响布局，布局由 resetAllSettings 统一处理） */
+/**
+ * 恢复默认：主题色回到参数设置的全局默认，密度 / 圆角 / 明暗复位（不影响布局，布局由 resetAllSettings 统一处理）。
+ * 主题色会同时清除本地覆盖，之后管理员调整全局默认值时重新生效。
+ */
 export function resetUserTheme() {
-    presetKey = DEFAULT_PRESET_KEY;
+    presetKey = defaultPresetKey;
     densityKey = DEFAULT_DENSITY_KEY;
     radiusKey = DEFAULT_RADIUS_KEY;
     currentMode = 'light';
-    persistPreset(presetKey);
+    removeStored(THEME_PRESET_KEY);
     writeStored(THEME_DENSITY_KEY, densityKey);
     writeStored(THEME_RADIUS_KEY, radiusKey);
     writeStored(THEME_MODE_KEY, currentMode);

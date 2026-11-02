@@ -46,6 +46,8 @@
 | 站点信息 | `sys.short-title` | STRING | 空 | 侧栏简称，空则使用 `sys.title` |
 | 站点信息 | `sys.water-mark` | BOOL | false | 登录后页面右下角显示当前用户水印 |
 | 站点信息 | `sys.login-box-bottom-tip` | STRING | 空 | 登录框底部提示文案 |
+| 默认界面 | `sys.ui.theme-preset` | SELECT | `antd` | 未自定义用户的默认主题色预设 |
+| 默认界面 | `sys.ui.tabs-enabled` | BOOL | true | 页签模式，关闭为单页模式 |
 | 邮件发送 | `email.provider` | SELECT | 空 | 邮箱类型，决定 SMTP 服务器/端口/加密方式 |
 | 邮件发送 | `email.username` | STRING | 空 | 发件邮箱 |
 | 邮件发送 | `email.password` | STRING（敏感） | 空 | 授权码/应用专用密码，留空表示不修改 |
@@ -177,7 +179,7 @@ List<String> channels = sysConfigService.getList("cvs.capture.channels");
 
 ## 主题定制
 
-框架默认回归 **antd 原生主题**（主色 `#1677ff`、侧栏 `#001529`、圆角 `6`），零配置即用。顶栏右侧的太阳/月亮图标可一键切换深色/浅色模式；调色板按钮可打开「界面设置」面板，内置多套预设主题，并可按需调整界面密度与圆角，选择后即时生效并持久化到 `localStorage`。界面布局（多标签页 / 单页）由顶栏独立的布局切换按钮控制。
+框架默认回归 **antd 原生主题**（主色 `#1677ff`、侧栏 `#001529`、圆角 `6`），零配置即用。顶栏右侧的太阳/月亮图标可一键切换深色/浅色模式；调色板按钮可打开「界面设置」面板，内置多套预设主题，并可按需调整界面密度与圆角，选择后即时生效并持久化到 `localStorage`。页签模式（开启 / 关闭）由顶栏独立的切换按钮控制，关闭即单页模式。
 
 ### 预设主题
 
@@ -199,14 +201,14 @@ List<String> channels = sysConfigService.getList("cvs.capture.channels");
 import { THEME_PRESETS, applyThemePreset, getActivePresetKey, resetUserTheme } from '@jiangood/open-admin';
 
 THEME_PRESETS;              // 预设列表
-getActivePresetKey();       // 当前预设 key，默认 'antd'
+getActivePresetKey();       // 当前预设 key；未自定义时为参数设置的全局默认
 applyThemePreset('cyan');   // 应用预设
-resetUserTheme();           // 恢复默认（antd）
+resetUserTheme();           // 恢复全局默认（参数设置中的默认主题色）
 ```
 
 ### 业务定制配色
 
-业务侧仍可在入口 `<Layouts>` 传入 `colors` prop，作为**基线**；用户选择的预设会覆盖基线，`resetUserTheme()` 回到基线：
+业务侧仍可在入口 `<Layouts>` 传入 `colors` prop，作为**基线**；用户选择的预设会覆盖基线，`resetUserTheme()` 回到参数设置的全局默认（默认预设为 `antd` 时即回到基线）：
 
 ```jsx
 <Layouts colors={{
@@ -231,7 +233,7 @@ resetUserTheme();           // 恢复默认（antd）
 
 ### 暗色模式
 
-框架内置明/暗两种模式，可通过顶栏的「界面设置」面板（调色板图标）中的「外观模式」切换。切换结果持久化在 `localStorage` 的 `oa-theme-mode`，刷新后保持。
+框架内置明/暗两种模式，可通过顶栏右侧的太阳/月亮图标一键切换（不在「界面设置」面板中重复提供）。切换结果持久化在 `localStorage` 的 `oa-theme-mode`，刷新后保持。
 
 也可在代码中控制：
 
@@ -274,11 +276,11 @@ getActiveRadiusKey();         // 'sharp' | 'default' | 'round'
 applyRadiusPreset('round');
 ```
 
-### 界面布局
+### 页签模式
 
-「界面布局」提供 `多标签页`（默认）与 `单页` 两种模式。单页模式不显示标签栏，仅渲染当前路由页面。持久化在 `localStorage` 的 `oa-layout-tabs`。
+页签模式默认开启（`tabs`），可切换为单页模式（`single`）。单页模式不显示页签栏，仅渲染当前路由页面。持久化在 `localStorage` 的 `oa-layout-tabs`。
 
-顶栏右侧的布局图标可一键切换两种模式（图标显示切换后的目标模式）：多标签页模式下显示单页图标，单页模式下显示标签页图标。
+顶栏右侧的切换图标显示切换后的目标模式：页签模式下显示单页图标，单页模式下显示页签图标。
 
 ```js
 import { getLayoutMode, setLayoutMode, toggleLayoutMode } from '@jiangood/open-admin';
@@ -288,19 +290,32 @@ setLayoutMode('single');
 toggleLayoutMode();
 ```
 
-- 布局切换通过 `EventBus` 的 `layoutChange` 事件广播，管理布局已内置监听并重渲染。
-- 单页模式下业务调用 `PageUtils.closeCurrent()` 不再关闭标签（无标签可关），由业务自行跳转。
+- 页签模式切换通过 `EventBus` 的 `layoutChange` 事件广播，管理布局已内置监听并重渲染。
+- 单页模式下业务调用 `PageUtils.closeCurrent()` 不再关闭页面（无页签可关），由业务自行跳转。
+
+### 全局默认主题色与页签模式
+
+管理员可在「系统管理 → 参数设置 → 默认界面」中维护未自定义用户的默认值，保存后立即生效：
+
+| key | 类型 | 默认 | 说明 |
+|-----|------|------|------|
+| `sys.ui.theme-preset` | select | `antd` | 默认主题色预设，可选值与上方「预设主题」一致 |
+| `sys.ui.tabs-enabled` | bool | `true` | `true` 开启页签模式，`false` 为单页模式 |
+
+- **优先级**：用户在本地自定义的 `oa-theme-preset` / `oa-layout-tabs` 高于参数设置；已自定义用户不受默认值变更影响。
+- 两项均声明为 `publicVisible`，随 `/admin/public/site-info` 的 `config` 字段下发，前端在后台布局渲染前应用，避免闪一下默认样式。
+- 业务侧可通过 `applyServerUiDefaults(siteInfo.config)` 手动应用，或用 `getDefaultPresetKey()` / `getDefaultLayoutMode()` 读取当前全局默认。
 
 ### 恢复默认
 
-「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 布局）。
+「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 页签模式），其中主题色与页签模式回到参数设置的全局默认。
 
 ```js
 import { resetAllSettings, resetUserTheme, resetLayoutMode } from '@jiangood/open-admin';
 
-resetAllSettings();   // 主题 + 布局 全复位
+resetAllSettings();   // 主题 + 页签模式 全复位
 resetUserTheme();     // 仅主题（颜色/明暗/密度/圆角）
-resetLayoutMode();    // 仅布局
+resetLayoutMode();    // 仅页签模式
 ```
 
 尺寸与圆角相关的 CSS 变量：`--oa-border-radius`、`--oa-control-height`、`--oa-font-size`，自定义样式可复用它们以跟随密度/圆角预设。

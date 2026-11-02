@@ -8,6 +8,9 @@ export {
     toggleThemeMode,
     applyThemePreset,
     getActivePresetKey,
+    getDefaultPresetKey,
+    setDefaultThemePreset,
+    hasStoredPreset,
     applyDensityPreset,
     getActiveDensityKey,
     applyRadiusPreset,
@@ -27,12 +30,21 @@ export type { ThemeColors, ThemeMode, ThemePreset, ThemeDensity, ThemeRadius, Th
 
 export {
     getLayoutMode,
+    getDefaultLayoutMode,
     setLayoutMode,
+    setDefaultLayoutMode,
     toggleLayoutMode,
     resetLayoutMode,
+    hasStoredLayoutMode,
     DEFAULT_LAYOUT_MODE,
 } from './layoutConfig'
 export type { LayoutMode } from './layoutConfig'
+
+export {
+    applyServerUiDefaults,
+    UI_THEME_PRESET_KEY,
+    UI_TABS_ENABLED_KEY,
+} from './uiDefaults'
 
 import { resetUserTheme } from './themeConfig'
 import { resetLayoutMode } from './layoutConfig'

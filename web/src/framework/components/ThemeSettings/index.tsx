@@ -7,9 +7,7 @@ import {
     DEFAULT_SIDER_BG,
     applyThemePreset,
     getActivePresetKey,
-    getThemeMode,
     resetAllSettings,
-    setThemeMode,
     DENSITY_PRESETS,
     RADIUS_PRESETS,
     applyDensityPreset,
@@ -17,7 +15,7 @@ import {
     applyRadiusPreset,
     getActiveRadiusKey,
 } from '../../config';
-import type { ThemeMode, ThemeDensity, ThemeRadius } from '../../config';
+import type { ThemeDensity, ThemeRadius } from '../../config';
 import { EventBus } from '../../utils/EventBus';
 
 export interface ThemeSettingsProps {
@@ -30,19 +28,18 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * 界面设置面板：外观模式、主题色、界面密度、圆角。
+ * 界面设置面板：主题色、界面密度、圆角。
+ * 明暗模式由顶栏的太阳/月亮按钮切换，此处不再重复提供。
  * 所有变更即时生效并持久化到 localStorage。
  */
 export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
     const [activeKey, setActiveKey] = React.useState(getActivePresetKey());
-    const [mode, setMode] = React.useState<ThemeMode>(getThemeMode());
     const [density, setDensity] = React.useState<ThemeDensity>(getActiveDensityKey());
     const [radius, setRadius] = React.useState<ThemeRadius>(getActiveRadiusKey());
 
     React.useEffect(() => {
         const offTheme = EventBus.on('themeChange', () => {
             setActiveKey(getActivePresetKey());
-            setMode(getThemeMode());
             setDensity(getActiveDensityKey());
             setRadius(getActiveRadiusKey());
         });
@@ -56,20 +53,8 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
 
     return (
         <Drawer title="界面设置" open={open} onClose={onClose} size={340}>
-            <div style={{ fontWeight: 600 }}>外观模式</div>
-            <Segmented
-                block
-                style={{ marginTop: 12 }}
-                value={mode}
-                onChange={value => setThemeMode(value as ThemeMode)}
-                options={[
-                    { label: '浅色', value: 'light' },
-                    { label: '深色', value: 'dark' },
-                ]}
-            />
-
-            <SectionTitle>主题色</SectionTitle>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+            <div style={{ fontWeight: 600 }}>主题色</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginTop: 12 }}>
                 {THEME_PRESETS.map(preset => {
                     const primary = preset.colors.colorPrimary || DEFAULT_COLORS.colorPrimary || '#1677ff';
                     const sider = preset.colors.siderBg || DEFAULT_SIDER_BG;

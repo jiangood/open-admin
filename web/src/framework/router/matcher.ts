@@ -9,7 +9,7 @@ export type PageLayout = 'admin' | 'blank';
 
 /** 页面元信息：页面文件通过 export const pageMeta 声明，由 vite 插件写入路由表 */
 export interface PageMeta {
-    /** 页面标题：用于标签页标题和浏览器标题；未设置时回退到后端菜单名 */
+    /** 页面标题：用于页签标题和浏览器标题；未设置时回退到后端菜单名 */
     title?: string;
     /** 是否需要登录，默认 true */
     requiresAuth?: boolean;

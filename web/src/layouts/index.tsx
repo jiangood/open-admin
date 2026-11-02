@@ -3,7 +3,7 @@ import {App, ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus, matchRoute, refreshDocumentTitle, setPageTitle, warnDeprecatedPageLabel} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus, matchRoute, refreshDocumentTitle, setPageTitle, warnDeprecatedPageLabel, applyServerUiDefaults} from "../framework";
 import type {LoginExpiredPayload, PageLayout, ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
@@ -138,6 +138,8 @@ export class Layouts extends React.Component<LayoutsProps> {
     loadSiteInfo() {
         HttpClient.get("/admin/public/site-info", null, {toastError: false}).then(data => {
             GlobalData.setSiteInfo(data.data);
+            // 参数设置的默认主题/页签模式需在后台布局首次渲染前生效，避免闪一下默认样式
+            applyServerUiDefaults(data.data?.config);
             this.setState({siteInfoLoaded: true});
         }).catch(() => {
             console.error('[Layout] 加载站点信息失败');
@@ -175,7 +177,11 @@ export class Layouts extends React.Component<LayoutsProps> {
                 themeVersion: prevState.themeVersion + 1,
             }));
         });
-        this.unsubscribeSiteInfo = EventBus.on('siteInfoChange', () => refreshDocumentTitle());
+        this.unsubscribeSiteInfo = EventBus.on('siteInfoChange', () => {
+            // 参数设置保存后，未自定义用户即时跟随新的默认主题/页签模式
+            applyServerUiDefaults(GlobalData.getSiteInfo().config);
+            refreshDocumentTitle();
+        });
         this.syncDocumentTitle();
         this.loadData();
     }

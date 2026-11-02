@@ -2,7 +2,7 @@ import React from "react";
 import {history, PageFrame, matchRoute, setPageTitle} from "../../framework";
 
 /**
- * 单页布局：不使用标签页，仅渲染当前路由对应页面。
+ * 单页布局：不使用页签，仅渲染当前路由对应页面。
  * 路由变化时按 url 重新挂载 PageFrame，页面状态随之重置。
  */
 export class SinglePageLayout extends React.Component {
