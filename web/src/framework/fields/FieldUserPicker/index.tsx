@@ -14,9 +14,9 @@ export interface FieldUserPickerProps extends FieldProps<string[]> {
     placeholder?: string;
     /** 弹窗标题 */
     title?: string;
-    /** 分页数据源地址，默认 admin/sysUser/page */
+    /** 分页数据源地址，默认 admin/sys-user/page */
     requestUrl?: string;
-    /** 按 id 查询用户详情地址（用于回显），默认 admin/sysUser/by-ids */
+    /** 按 id 查询用户详情地址（用于回显），默认 admin/sys-user/by-ids */
     usersUrl?: string;
 }
 
@@ -52,7 +52,7 @@ export class FieldUserPicker extends React.Component<FieldUserPickerProps, Field
         }
     }
 
-    getUsersUrl = () => this.props.usersUrl || 'admin/sysUser/by-ids';
+    getUsersUrl = () => this.props.usersUrl || 'admin/sys-user/by-ids';
 
     // 根据 value(ids) 拉取并补全用户详情，按 ids 顺序展示
     syncUsers = () => {

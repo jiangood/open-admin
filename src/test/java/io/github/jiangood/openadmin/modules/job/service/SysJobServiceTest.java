@@ -3,10 +3,10 @@ package io.github.jiangood.openadmin.modules.job.service;
 import io.github.jiangood.openadmin.framework.data.BaseRepository;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
-import io.github.jiangood.openadmin.modules.job.example.HelloWorldJob;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
+import io.github.jiangood.openadmin.modules.system.job.CleanTempFileJob;
 import io.github.jiangood.openadmin.modules.logviewer.service.FileLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ class SysJobServiceTest {
 
     @Test
     void save_enabledJobInvalidCron_throwsBeforeTouchingQuartz() throws Exception {
-        SysJob job = newJob("not-a-cron", HelloWorldJob.class.getName(), true);
+        SysJob job = newJob("not-a-cron", CleanTempFileJob.class.getName(), true);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         assertThrows(IllegalArgumentException.class, () -> service.save(job, null));
@@ -80,7 +80,7 @@ class SysJobServiceTest {
 
     @Test
     void save_enabledJobValidParams_schedules() throws Exception {
-        SysJob job = newJob("0 */5 * * * ?", HelloWorldJob.class.getName(), true);
+        SysJob job = newJob("0 */5 * * * ?", CleanTempFileJob.class.getName(), true);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.save(job, null);
@@ -91,7 +91,7 @@ class SysJobServiceTest {
 
     @Test
     void save_disabledJobInvalidCron_skipsValidation() throws Exception {
-        SysJob job = newJob("not-a-cron", HelloWorldJob.class.getName(), false);
+        SysJob job = newJob("not-a-cron", CleanTempFileJob.class.getName(), false);
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.save(job, null);

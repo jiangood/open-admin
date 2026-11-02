@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.framework.common;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 内置头像定义。
@@ -12,7 +13,6 @@ import java.util.List;
 public final class AvatarPresets {
 
     public static final String BASE_PATH = "/avatars";
-    public static final String DEFAULT_FILE = "default.svg";
 
     private static final List<Definition> DEFINITIONS = List.of(
             new Definition("preset:avatar-1", "鼠", "avatar-1.svg"),
@@ -33,18 +33,17 @@ public final class AvatarPresets {
     }
 
     /**
-     * 默认头像地址（含 context-path）
+     * 随机取一个内置头像标识，用于新用户或头像为空的用户
      */
-    public static String defaultUrl(String contextPath) {
-        return contextPath + BASE_PATH + "/" + DEFAULT_FILE;
+    public static String randomKey() {
+        return DEFINITIONS.get(ThreadLocalRandom.current().nextInt(DEFINITIONS.size())).key();
     }
 
     /**
-     * 可选头像列表，第一项为默认头像（key 为空）
+     * 可选头像列表
      */
     public static List<Item> list(String contextPath) {
-        List<Item> list = new ArrayList<>(DEFINITIONS.size() + 1);
-        list.add(new Item("", "默认头像", defaultUrl(contextPath)));
+        List<Item> list = new ArrayList<>(DEFINITIONS.size());
         for (Definition definition : DEFINITIONS) {
             list.add(new Item(definition.key(), definition.label(), contextPath + BASE_PATH + "/" + definition.file()));
         }

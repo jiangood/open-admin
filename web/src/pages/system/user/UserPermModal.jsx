@@ -20,7 +20,7 @@ export default class UserPerm extends React.Component {
     show(item) {
         this.setState({visible: true})
 
-        HttpClient.get('admin/sysUser/get-perm-info', {id: item.id}).then(rs => {
+        HttpClient.get('admin/sys-user/get-perm-info', {id: item.id}).then(rs => {
             this.setState({formValues: rs.data})
             this.formRef.current.setFieldsValue(rs.data)
         })
@@ -34,7 +34,7 @@ export default class UserPerm extends React.Component {
         })
 
 
-        HttpClient.post('admin/sysUser/grant-perm', values, null, {toastError: false}).then(() => {
+        HttpClient.post('admin/sys-user/grant-perm', values, null, {toastError: false}).then(() => {
             this.setState({
                 visible: false,
                 confirmLoading: false
@@ -70,7 +70,7 @@ export default class UserPerm extends React.Component {
             >
                 <Form.Item name='id' noStyle></Form.Item>
                 <Form.Item label='角色' name='roleIds' rules={[{required: true}]}>
-                    <FieldRemoteSelect url='admin/sysRole/options' multiple />
+                    <FieldRemoteSelect url='admin/sys-role/options' multiple />
                 </Form.Item>
                 <Form.Item label='数据权限' name='dataPermType' rules={[{required: true}]}>
                     <FieldDictSelect typeCode='dataPermType'/>

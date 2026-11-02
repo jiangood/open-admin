@@ -14,7 +14,7 @@ import {
     ProTable,
     ViewText,
 } from "../../../framework";
-import UserPerm from "./userPerm";
+import UserPerm from "./UserPermModal";
 
 export default class UserPage extends React.Component {
 
@@ -36,13 +36,13 @@ export default class UserPage extends React.Component {
     }
 
     onFinishResetPwd = async values => {
-        await HttpClient.post('admin/sysUser/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
+        await HttpClient.post('admin/sys-user/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
         this.setState({resetPwdUser: null})
         this.tableRef.current?.reload()
     }
 
     handleDelete = r => {
-        HttpClient.post('admin/sysUser/delete', {id: r.id}, null).then(() => {
+        HttpClient.post('admin/sys-user/delete', {id: r.id}, null).then(() => {
             this.tableRef.current.reload();
         })
     }
@@ -135,7 +135,7 @@ export default class UserPage extends React.Component {
 
     onFinish = async values => {
         const isNew = !values.id;
-        const url = isNew ? 'admin/sysUser/create' : 'admin/sysUser/update';
+        const url = isNew ? 'admin/sys-user/create' : 'admin/sys-user/update';
         const result = await HttpClient.post(url, values);
         if (result?.data?.password) {
             this.setState({
@@ -170,7 +170,7 @@ export default class UserPage extends React.Component {
                         )}
                         request={(params) => {
                             params.orgId = this.state.currentOrgId
-                            return HttpClient.get('admin/sysUser/page', params)
+                            return HttpClient.get('admin/sys-user/page', params)
                         }}
                         columns={this.columns}
                         searchFormRender={() => (
@@ -185,7 +185,7 @@ export default class UserPage extends React.Component {
                                     <Input/>
                                 </Form.Item>
                                 <Form.Item label='角色' name='roleId'>
-                                    <FieldRemoteSelect url='admin/sysRole/options' placeholder='请选择角色'/>
+                                    <FieldRemoteSelect url='admin/sys-role/options' placeholder='请选择角色'/>
                                 </Form.Item>
                                 <Form.Item label='状态' name='enabled'>
                                     <Select allowClear placeholder='全部' options={[{value: true, label: '启用'}, {value: false, label: '停用'}]}/>

@@ -15,8 +15,12 @@ export interface AvatarPreset {
     url: string;
 }
 
-/** 默认头像，文件由后端静态目录提供 */
-export const DEFAULT_AVATAR_URL = UrlUtils.contextPath('/avatars/default.svg');
+/**
+ * 默认头像已移除。头像为空时返回空串，由 AntD Avatar 的 icon 兜底显示人形占位。
+ *
+ * @deprecated 不再提供默认头像图片，保留该导出仅为兼容旧引用
+ */
+export const DEFAULT_AVATAR_URL = '';
 
 function presetUrl(key: string): string | null {
     if (!PRESET_PATTERN.test(key)) {
@@ -30,7 +34,6 @@ function presetUrl(key: string): string | null {
  * 正常使用时优先读取 admin/public/avatar-presets 返回的数据。
  */
 export const FALLBACK_AVATAR_PRESETS: AvatarPreset[] = [
-    {key: '', label: '默认头像', url: DEFAULT_AVATAR_URL},
     ...ZODIAC_LABELS.map((label, index) => {
         const key = `${PRESET_PREFIX}avatar-${index + 1}`;
         return {
@@ -48,13 +51,13 @@ export class AvatarUtils {
         return !!avatar && avatar.startsWith(PRESET_PREFIX);
     }
 
-    /** 将数据库中的头像值转换为可访问的图片地址；为空时返回默认头像 */
+    /** 将数据库中的头像值转换为可访问的图片地址；为空或无效时返回空串，由调用方兜底占位 */
     static resolve(avatar?: string | null): string {
         if (!avatar) {
-            return DEFAULT_AVATAR_URL;
+            return '';
         }
         if (AvatarUtils.isPreset(avatar)) {
-            return presetUrl(avatar) || DEFAULT_AVATAR_URL;
+            return presetUrl(avatar) || '';
         }
         return UrlUtils.contextPath(`/file/${avatar}?thumb=1`);
     }

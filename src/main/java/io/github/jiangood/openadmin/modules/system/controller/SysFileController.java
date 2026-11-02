@@ -72,7 +72,7 @@ public class SysFileController {
     /**
      * 上传图片（压缩图 + 缩略图，一次请求两份文件）
      */
-    @PostMapping("uploadImage")
+    @PostMapping("upload-image")
     public AjaxResult uploadImage(@RequestPart("file") MultipartFile file,
                                   @RequestPart("thumb") MultipartFile thumb,
                                   @RequestParam(value = "isPublic", defaultValue = "true") boolean isPublic) throws Exception {
@@ -118,7 +118,7 @@ public class SysFileController {
      * 批量删除文件（按 id）
      */
     @HasPermission("sys-file:delete")
-    @PostMapping("deleteBatch")
+    @PostMapping("delete-batch")
     public AjaxResult deleteBatch(@RequestBody List<String> ids) {
         return AjaxResult.ok().data(service.deleteBatch(ids));
     }

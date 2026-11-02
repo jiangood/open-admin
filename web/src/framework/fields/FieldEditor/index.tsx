@@ -35,7 +35,7 @@ export class FieldEditor extends React.Component<FieldEditorProps, {loading: boo
     render() {
         const {loading} = this.state;
         const isPublic = this.props.isPublic ?? true;
-        const uploadUrl = UrlUtils.contextPath('/admin/sysFile/upload') + '?isPublic=' + isPublic;
+        const uploadUrl = UrlUtils.contextPath('/admin/sys-file/upload') + '?isPublic=' + isPublic;
         const jsUrl = UrlUtils.contextPath('/admin/tinymce/tinymce.min.js');
         const {value, onChange, height} = this.props;
         const editorHeight = height || 300;

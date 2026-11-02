@@ -362,7 +362,7 @@ export default class JobPage extends React.Component {
                        onFinish={this.onFinish}
                        onValuesChange={this.onValuesChange}>
                 <Form.Item label='执行类' name='jobClass' rules={[{required: true}]}
-                           tooltip='继承 BaseJob，参考 HelloWorldJob'>
+                           tooltip='继承 BaseJob'>
                     <Select options={this.state.jobClassOptions}/>
                 </Form.Item>
                 <Form.Item label='名称' name='name' rules={[{required: true}]}>

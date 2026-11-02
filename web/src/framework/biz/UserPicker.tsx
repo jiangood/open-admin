@@ -20,9 +20,9 @@ export interface UserPickerProps {
     width?: number;
     /** 内容区高度，默认 530（刚好容纳默认每页 10 行，不出现表格内部纵向滚动） */
     height?: number;
-    /** 分页数据源地址，默认 admin/sysUser/page */
+    /** 分页数据源地址，默认 admin/sys-user/page */
     requestUrl?: string;
-    /** 按 id 查询用户详情地址（用于回显），默认 admin/sysUser/by-ids */
+    /** 按 id 查询用户详情地址（用于回显），默认 admin/sys-user/by-ids */
     usersUrl?: string;
     /** 确定按钮 loading */
     confirmLoading?: boolean;
@@ -88,9 +88,9 @@ export class UserPicker extends React.Component<UserPickerProps, UserPickerState
         }
     }
 
-    getRequestUrl = () => this.props.requestUrl || 'admin/sysUser/page';
+    getRequestUrl = () => this.props.requestUrl || 'admin/sys-user/page';
 
-    getUsersUrl = () => this.props.usersUrl || 'admin/sysUser/by-ids';
+    getUsersUrl = () => this.props.usersUrl || 'admin/sys-user/by-ids';
 
     init = () => {
         this.formRef.current?.resetFields();

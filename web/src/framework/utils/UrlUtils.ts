@@ -26,16 +26,16 @@ export class UrlUtils {
 
     static paramsToSearch(params: Record<string, string | number | boolean | null | undefined> | null | undefined): string {
         if (!params) return "";
-        const buffer: string[] = [];
+        const search = new URLSearchParams();
         for (const k in params) {
             if (Object.hasOwn(params, k)) {
                 const v = params[k];
                 if (v !== null && v !== undefined) {
-                    buffer.push(`${k}=${v}`);
+                    search.append(k, String(v));
                 }
             }
         }
-        return buffer.join('&');
+        return search.toString();
     }
 
     static setParam(url: string, key: string, value: string | number | boolean | null | undefined): string {

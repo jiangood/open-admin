@@ -1,5 +1,5 @@
 import React from "react";
-import {history, PageFrame} from "../../framework";
+import {history, PageFrame, matchRoute, setPageTitle} from "../../framework";
 
 /**
  * 单页布局：不使用标签页，仅渲染当前路由对应页面。
@@ -14,12 +14,23 @@ export class SinglePageLayout extends React.Component {
         this.unlisten = history.listen(({location}) => {
             this.setState({location});
         });
+        this.syncDocumentTitle();
+    }
+
+    componentDidUpdate() {
+        this.syncDocumentTitle();
     }
 
     componentWillUnmount() {
         if (this.unlisten) {
             this.unlisten();
         }
+    }
+
+    syncDocumentTitle() {
+        const {pathname} = this.state.location;
+        const label = matchRoute(pathname)?.meta?.title || this.props.pathMenuMap?.[pathname]?.name;
+        setPageTitle(label);
     }
 
     render() {

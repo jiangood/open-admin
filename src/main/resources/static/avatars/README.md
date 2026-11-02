@@ -11,7 +11,6 @@
 
 | 文件 | 动物 | 对应生肖/元素 | 背景色 |
 | --- | --- | --- | --- |
-| `default.svg` | 大熊猫 🐼 | 中国国宝，默认头像 | `#d0f4de` |
 | `avatar-1.svg` | 鼠 🐭 | 十二生肖·子鼠 | `#e0e7ff` |
 | `avatar-2.svg` | 牛 🐮 | 十二生肖·丑牛 | `#d9f2e6` |
 | `avatar-3.svg` | 虎 🐯 | 十二生肖·寅虎 | `#fef3c7` |
@@ -30,7 +29,6 @@
 原始 Twemoji 文件位于 `assets/svg/`，例如：
 
 ```
-https://raw.githubusercontent.com/jdecked/twemoji/main/assets/svg/1f43c.svg  # 大熊猫
 https://raw.githubusercontent.com/jdecked/twemoji/main/assets/svg/1f42f.svg  # 老虎
 ```
 

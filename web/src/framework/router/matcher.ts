@@ -4,9 +4,23 @@ function safeDecodeURIComponent(s: string): string {
     try { return decodeURIComponent(s); } catch { return s; }
 }
 
+/** 页面布局：admin = 后台菜单布局；blank = 仅渲染页面内容 */
+export type PageLayout = 'admin' | 'blank';
+
+/** 页面元信息：页面文件通过 export const pageMeta 声明，由 vite 插件写入路由表 */
+export interface PageMeta {
+    /** 页面标题：用于标签页标题和浏览器标题；未设置时回退到后端菜单名 */
+    title?: string;
+    /** 是否需要登录，默认 true */
+    requiresAuth?: boolean;
+    /** 页面布局，默认 admin */
+    layout?: PageLayout;
+}
+
 export interface RouteDef {
     path: string;
     component: ComponentType<unknown>;
+    meta?: PageMeta;
 }
 
 interface InternalRoute extends RouteDef {
@@ -16,6 +30,7 @@ interface InternalRoute extends RouteDef {
 export interface MatchResult {
     component: ComponentType<unknown>;
     params: Record<string, string>;
+    meta?: PageMeta;
 }
 
 const routes: InternalRoute[] = [];
@@ -27,8 +42,8 @@ function compile(path: string): InternalRoute['segments'] {
 }
 
 export function registerRoutes(defs: RouteDef[]): void {
-    for (const {path, component} of defs) {
-        routes.push({path, component, segments: compile(path)});
+    for (const {path, component, meta} of defs) {
+        routes.push({path, component, meta, segments: compile(path)});
     }
 }
 
@@ -51,8 +66,8 @@ export function matchRoute(pathname: string): MatchResult | null {
             }
         }
         if (!ok) continue;
-        if (!dynamic) return {component: route.component, params};
-        if (!best) best = {component: route.component, params};
+        if (!dynamic) return {component: route.component, params, meta: route.meta};
+        if (!best) best = {component: route.component, params, meta: route.meta};
     }
     return best;
 }

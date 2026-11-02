@@ -5,6 +5,12 @@ import {EventBus, HttpClient, GlobalData, getMessageApi, history} from "../frame
 
 import "./login.less"
 
+export const pageMeta = {
+    requiresAuth: false,
+    layout: 'blank',
+    title: '登录',
+};
+
 function getRedirect(query) {
     let redirect = query?.redirect;
     if (!redirect) {

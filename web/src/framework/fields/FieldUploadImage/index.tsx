@@ -18,6 +18,12 @@ export interface FieldUploadImageProps extends FieldProps<string> {
     accept?: string;
     /** 进入裁切工具时的默认裁切比例，默认 4:3；传 null 表示自由裁切 */
     defaultCropRatio?: Dims | null;
+    /** 缩略图与触发按钮形状，圆形用于头像类场景，默认方形 */
+    shape?: 'square' | 'circle';
+    /** 缩略图与触发按钮的尺寸（px），默认 80 */
+    size?: number;
+    /** 触发按钮的提示文案，默认不显示提示 */
+    triggerTitle?: string;
 }
 
 interface Dims {
@@ -366,7 +372,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             fd.append('file', this.state.preview.cFile);
             fd.append('thumb', tFile);
             fd.append('isPublic', String(this.state.isPublic));
-            const rs = await HttpClient.post('admin/sysFile/uploadImage', fd, null, {toastError: false});
+            const rs = await HttpClient.post('admin/sys-file/upload-image', fd, null, {toastError: false});
             this.setState(
                 (prevState) => ({objectNames: [...prevState.objectNames, rs.data.objectName]}),
                 () => this.props.onChange?.(this.state.objectNames.join(','))
@@ -398,6 +404,9 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
 
     render() {
         const {objectNames, accept, compressWidth, compressSize, cropRatio, cropperReady, fullPreviewUrl, maxCount, modalOpen, originalUrl, preview, tool, uploading} = this.state;
+        const {shape = 'square', size = 80, triggerTitle} = this.props;
+        const round = shape === 'circle';
+        const boxRadius = round ? '50%' : 4;
 
         // 画布当前显示的图片
         const canvasImg = preview
@@ -415,8 +424,8 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                 <div>
                     {objectNames.map((name) => (
                         <div key={name} style={{
-                            position: 'relative', display: 'inline-block', marginRight: 8, verticalAlign: 'top',
-                            width: 80, height: 80, borderRadius: 4, overflow: 'hidden', cursor: 'pointer',
+                            position: 'relative', display: 'inline-block', marginRight: round ? 0 : 8, verticalAlign: 'top',
+                            width: size, height: size, borderRadius: boxRadius, overflow: 'hidden', cursor: 'pointer',
                         }}
                             onMouseEnter={(e) => {
                                 const mask = e.currentTarget.querySelector('.oa-field-upload-img-mask') as HTMLElement;
@@ -435,14 +444,14 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                         >
                             <img
                                 src={UrlUtils.contextPath(`/file/${name}?thumb=1`)}
-                                width={80}
-                                height={80}
-                                style={{objectFit: 'cover', borderRadius: 4, display: 'block'}}
+                                width={size}
+                                height={size}
+                                style={{objectFit: 'cover', borderRadius: boxRadius, display: 'block'}}
                                 alt={name}
                             />
                             <div style={{
                                 position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                background: 'rgba(0,0,0,0.45)', opacity: 0, transition: 'opacity .3s', borderRadius: 4,
+                                background: 'rgba(0,0,0,0.45)', opacity: 0, transition: 'opacity .3s', borderRadius: boxRadius,
                                 pointerEvents: 'none',
                             }} className="oa-field-upload-img-mask">
                                 <Space size={12}>
@@ -465,9 +474,29 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
                         </div>
                     ))}
                     {objectNames.length < maxCount && (
-                        <Upload accept={accept} showUploadList={false} beforeUpload={this.handleBeforeUpload} multiple={false}>
-                            <Button icon={<PlusOutlined/>}>选择图片</Button>
-                        </Upload>
+                        round ? (
+                            <Upload accept={accept} showUploadList={false} beforeUpload={this.handleBeforeUpload} multiple={false}>
+                                <button type="button"
+                                        title={triggerTitle}
+                                        aria-label={triggerTitle || '选择图片'}
+                                        style={{
+                                            width: size, height: size, padding: 0, boxSizing: 'border-box',
+                                            border: '2px dashed var(--oa-color-border, #d9d9d9)',
+                                            borderRadius: '50%',
+                                            background: 'var(--oa-color-fill-quaternary, #fafafa)',
+                                            color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65))',
+                                            cursor: 'pointer', lineHeight: 0,
+                                            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                            fontSize: 18,
+                                        }}>
+                                    <PlusOutlined/>
+                                </button>
+                            </Upload>
+                        ) : (
+                            <Upload accept={accept} showUploadList={false} beforeUpload={this.handleBeforeUpload} multiple={false}>
+                                <Button icon={<PlusOutlined/>}>选择图片</Button>
+                            </Upload>
+                        )
                     )}
                 </div>
 

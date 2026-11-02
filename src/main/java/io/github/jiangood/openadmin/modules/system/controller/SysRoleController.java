@@ -35,7 +35,7 @@ import java.util.*;
  * 系统角色
  */
 @RestController
-@RequestMapping("admin/sysRole")
+@RequestMapping("admin/sys-role")
 @RequiredArgsConstructor
 public class SysRoleController {
 

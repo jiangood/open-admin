@@ -41,7 +41,7 @@ import java.util.Map;
 
 
 @RestController
-@RequestMapping("admin/sysUser")
+@RequestMapping("admin/sys-user")
 @RequiredArgsConstructor
 public class SysUserController {
 

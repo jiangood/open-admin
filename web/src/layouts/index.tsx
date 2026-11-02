@@ -3,8 +3,8 @@ import {App, ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus} from "../framework";
-import type {LoginExpiredPayload, ThemeColors} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus, matchRoute, refreshDocumentTitle, setPageTitle, warnDeprecatedPageLabel} from "../framework";
+import type {LoginExpiredPayload, PageLayout, ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
 
@@ -59,6 +59,7 @@ export class Layouts extends React.Component<LayoutsProps> {
     unsubscribeLoginExpired: (() => void) | null = null;
     unsubscribeLogoutSuccess: (() => void) | null = null;
     unsubscribeTheme: (() => void) | null = null;
+    unsubscribeSiteInfo: (() => void) | null = null;
     /** 本次登录失效弹窗的原因。同步字段（非 state）：同一次失效会并发上报多个 401，setState 异步可能读到旧值 */
     private loginExpiredReason: string = '';
 
@@ -94,24 +95,42 @@ export class Layouts extends React.Component<LayoutsProps> {
         this.setState({loginExpiredVisible: false});
     };
 
-    getPageType(pathname): 'public' | 'standalone' | 'protected' {
-        if (pathname === '/' || pathname === '/index') return 'protected';
-        // 框架内置登录页位于 pages/ 根目录，但需按公开页面处理
-        if (pathname === LOGIN_PATH) return 'public';
-        if (pathname.startsWith('/public/')) return 'public';
-        if (pathname.startsWith('/standalone/')) return 'standalone';
-        return 'protected';
+    /**
+     * 解析页面登录与布局要求：
+     * 优先使用页面文件导出的 pageMeta；未匹配的路由按目录约定兜底
+     */
+    getPageMeta(pathname: string): {requiresAuth: boolean; layout: PageLayout} {
+        const meta = matchRoute(pathname)?.meta;
+        const isLogin = pathname === LOGIN_PATH;
+        const inPublicDir = pathname.startsWith('/public/');
+        const inStandaloneDir = pathname.startsWith('/standalone/');
+        const requiresAuth = meta?.requiresAuth ?? (isLogin ? false : !inPublicDir);
+        const layout = requiresAuth
+            ? (meta?.layout ?? (inStandaloneDir || isLogin ? 'blank' : 'admin'))
+            : 'blank';
+        return {requiresAuth, layout};
+    }
+
+    /** 公共/standalone 页用 pageMeta.title；admin 页由 TabLayout / SinglePageLayout 设置 */
+    syncDocumentTitle() {
+        const {pathname, search} = this.state.location;
+        if (search && new URLSearchParams(search).has('_label')) {
+            warnDeprecatedPageLabel();
+        }
+        if (this.getPageMeta(pathname).layout === 'blank') {
+            setPageTitle(matchRoute(pathname)?.meta?.title);
+        }
     }
 
     loadData() {
         const {siteInfoLoaded, loginChecked} = this.state;
-        const pageType = this.getPageType(this.state.location.pathname);
+        const {requiresAuth} = this.getPageMeta(this.state.location.pathname);
 
         if (!siteInfoLoaded) {
             this.loadSiteInfo();
         }
 
-        if ((pageType === 'protected' || pageType === 'standalone') && !loginChecked) {
+        if (requiresAuth && !loginChecked) {
             this.loadLoginInfo();
         }
     }
@@ -133,7 +152,7 @@ export class Layouts extends React.Component<LayoutsProps> {
 
             if (data.data.needUpdatePwd) {
                 this.setState({loginChecked: true});
-                history.push('/standalone/forceUpdatePwd');
+                history.push('/standalone/force-update-pwd');
                 return;
             }
 
@@ -156,12 +175,18 @@ export class Layouts extends React.Component<LayoutsProps> {
                 themeVersion: prevState.themeVersion + 1,
             }));
         });
+        this.unsubscribeSiteInfo = EventBus.on('siteInfoChange', () => refreshDocumentTitle());
+        this.syncDocumentTitle();
         this.loadData();
     }
 
     componentDidUpdate(prevProps: LayoutsProps, prevState: typeof this.state) {
         if (this.state.location !== prevState.location) {
             this.loadData();
+            this.syncDocumentTitle();
+        }
+        if (!prevState.siteInfoLoaded && this.state.siteInfoLoaded) {
+            refreshDocumentTitle();
         }
     }
 
@@ -177,6 +202,9 @@ export class Layouts extends React.Component<LayoutsProps> {
         }
         if (this.unsubscribeTheme) {
             this.unsubscribeTheme();
+        }
+        if (this.unsubscribeSiteInfo) {
+            this.unsubscribeSiteInfo();
         }
     }
 
@@ -196,15 +224,16 @@ export class Layouts extends React.Component<LayoutsProps> {
         const {location, siteInfoLoaded, loginChecked} = this.state;
         const {pathname, search} = location;
         const ready = siteInfoLoaded && loginChecked;
-        const pageType = this.getPageType(pathname);
-        const showPageFrame = pageType === 'public' || (pageType === 'standalone' && ready);
+        const {requiresAuth, layout} = this.getPageMeta(pathname);
+        // 公共页直接渲染；standalone 页需登录后渲染；admin 页交给后台布局
+        const showPageFrame = !requiresAuth || (layout === 'blank' && ready);
 
         return (
             <ErrorBoundary minimal>
                 <ConfigProvider {...baseConfigProps} theme={getThemeConfig()}>
                     <App component={false}>
                         <MessageBridge/>
-                        {this.renderContent(showPageFrame, ready, pathname, search)}
+                        {this.renderContent(showPageFrame, ready, layout, pathname, search)}
                         {this.renderLoginExpiredModal()}
                     </App>
                 </ConfigProvider>
@@ -212,11 +241,11 @@ export class Layouts extends React.Component<LayoutsProps> {
         );
     }
 
-    renderContent(showPageFrame: boolean, ready: boolean, pathname: string, search: string) {
+    renderContent(showPageFrame: boolean, ready: boolean, layout: PageLayout, pathname: string, search: string) {
         if (showPageFrame) {
             return <PageFrame url={pathname + search}/>;
         }
-        if (ready) {
+        if (ready && layout === 'admin') {
             return <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/>;
         }
         return <PageLoading messages={[

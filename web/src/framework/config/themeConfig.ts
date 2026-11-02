@@ -92,7 +92,10 @@ export const RADIUS_PRESETS: ThemeRadiusPreset[] = [
 
 export const DEFAULT_RADIUS_KEY: ThemeRadius = 'default';
 
-/** 可选主题预设；antd 预设不做任何颜色覆盖，保持 100% 原生观感 */
+/**
+ * 可选主题预设；antd 预设不做任何颜色覆盖，保持 100% 原生观感。
+ * 按色相环顺序排列：蓝 → 蓝灰 → 靛蓝 → 紫 → 粉 → 红 → 橙 → 绿 → 青，便于用户按相近色比较选择。
+ */
 export const THEME_PRESETS: ThemePreset[] = [
     {
         key: 'antd',
@@ -100,24 +103,24 @@ export const THEME_PRESETS: ThemePreset[] = [
         colors: {},
     },
     {
-        key: 'cyan',
-        name: '青碧',
+        key: 'graphite',
+        name: '石墨灰',
         colors: {
-            colorPrimary: '#13c2c2',
-            siderBg: '#0C2E2E',
-            siderSubBg: '#0C2E2E',
-            siderTriggerBg: '#082222',
+            colorPrimary: '#2f3542',
+            siderBg: '#1B2026',
+            siderSubBg: '#1B2026',
+            siderTriggerBg: '#141A20',
             siderHoverBg: 'rgba(255,255,255,0.06)',
         },
     },
     {
-        key: 'green',
-        name: '翠竹',
+        key: 'indigo',
+        name: '靛蓝',
         colors: {
-            colorPrimary: '#389e0d',
-            siderBg: '#10291A',
-            siderSubBg: '#10291A',
-            siderTriggerBg: '#0B1E13',
+            colorPrimary: '#4f46e5',
+            siderBg: '#1E1B4B',
+            siderSubBg: '#1E1B4B',
+            siderTriggerBg: '#17143C',
             siderHoverBg: 'rgba(255,255,255,0.06)',
         },
     },
@@ -129,6 +132,17 @@ export const THEME_PRESETS: ThemePreset[] = [
             siderBg: '#1E1440',
             siderSubBg: '#1E1440',
             siderTriggerBg: '#170F31',
+            siderHoverBg: 'rgba(255,255,255,0.06)',
+        },
+    },
+    {
+        key: 'pink',
+        name: '樱花粉',
+        colors: {
+            colorPrimary: '#eb2f96',
+            siderBg: '#2B1024',
+            siderSubBg: '#2B1024',
+            siderTriggerBg: '#200B1A',
             siderHoverBg: 'rgba(255,255,255,0.06)',
         },
     },
@@ -155,13 +169,24 @@ export const THEME_PRESETS: ThemePreset[] = [
         },
     },
     {
-        key: 'graphite',
-        name: '石墨灰',
+        key: 'green',
+        name: '翠竹',
         colors: {
-            colorPrimary: '#2f3542',
-            siderBg: '#1B2026',
-            siderSubBg: '#1B2026',
-            siderTriggerBg: '#141A20',
+            colorPrimary: '#389e0d',
+            siderBg: '#10291A',
+            siderSubBg: '#10291A',
+            siderTriggerBg: '#0B1E13',
+            siderHoverBg: 'rgba(255,255,255,0.06)',
+        },
+    },
+    {
+        key: 'cyan',
+        name: '青碧',
+        colors: {
+            colorPrimary: '#13c2c2',
+            siderBg: '#0C2E2E',
+            siderSubBg: '#0C2E2E',
+            siderTriggerBg: '#082222',
             siderHoverBg: 'rgba(255,255,255,0.06)',
         },
     },

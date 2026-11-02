@@ -65,7 +65,7 @@ class OrgSwitchControllerTest {
     void myOrgs_shouldReturnUnitTree() throws Exception {
         when(sysOrgService.findByLoginUser(1)).thenReturn(List.of(unit("org1", "默认单位")));
 
-        mockMvc.perform(get("/admin/myOrgs"))
+        mockMvc.perform(get("/admin/my-orgs"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.tree[0].key").value("org1"))
                 .andExpect(jsonPath("$.data.tree[0].title").value("默认单位"));
@@ -75,7 +75,7 @@ class OrgSwitchControllerTest {
     void switchOrg_shouldSucceedWhenAccessible() throws Exception {
         when(sysOrgService.findByLoginUser(1)).thenReturn(List.of(unit("org1", "默认单位")));
 
-        mockMvc.perform(post("/admin/switchOrg")
+        mockMvc.perform(post("/admin/switch-org")
                         .contentType("application/json")
                         .content("{\"orgId\":\"org1\"}"))
                 .andExpect(status().isOk())
@@ -86,7 +86,7 @@ class OrgSwitchControllerTest {
     void switchOrg_shouldRejectWhenNotAccessible() throws Exception {
         when(sysOrgService.findByLoginUser(1)).thenReturn(List.of());
 
-        mockMvc.perform(post("/admin/switchOrg")
+        mockMvc.perform(post("/admin/switch-org")
                         .contentType("application/json")
                         .content("{\"orgId\":\"org9\"}"))
                 .andExpect(status().isOk())

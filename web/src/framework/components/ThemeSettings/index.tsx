@@ -16,10 +16,8 @@ import {
     getActiveDensityKey,
     applyRadiusPreset,
     getActiveRadiusKey,
-    getLayoutMode,
-    setLayoutMode,
 } from '../../config';
-import type { ThemeMode, ThemeDensity, ThemeRadius, LayoutMode } from '../../config';
+import type { ThemeMode, ThemeDensity, ThemeRadius } from '../../config';
 import { EventBus } from '../../utils/EventBus';
 
 export interface ThemeSettingsProps {
@@ -32,7 +30,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * 界面设置面板：外观模式、主题色、界面密度、圆角、界面布局。
+ * 界面设置面板：外观模式、主题色、界面密度、圆角。
  * 所有变更即时生效并持久化到 localStorage。
  */
 export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
@@ -40,7 +38,6 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
     const [mode, setMode] = React.useState<ThemeMode>(getThemeMode());
     const [density, setDensity] = React.useState<ThemeDensity>(getActiveDensityKey());
     const [radius, setRadius] = React.useState<ThemeRadius>(getActiveRadiusKey());
-    const [layout, setLayout] = React.useState<LayoutMode>(getLayoutMode());
 
     React.useEffect(() => {
         const offTheme = EventBus.on('themeChange', () => {
@@ -49,12 +46,8 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
             setDensity(getActiveDensityKey());
             setRadius(getActiveRadiusKey());
         });
-        const offLayout = EventBus.on('layoutChange', () => {
-            setLayout(getLayoutMode());
-        });
         return () => {
             offTheme();
-            offLayout();
         };
     }, []);
 
@@ -150,17 +143,6 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
                         </span>
                     ),
                 }))}
-            />
-
-            <SectionTitle>界面布局</SectionTitle>
-            <Segmented
-                block
-                value={layout}
-                onChange={value => setLayoutMode(value as LayoutMode)}
-                options={[
-                    { label: '多标签页', value: 'tabs' },
-                    { label: '单页', value: 'single' },
-                ]}
             />
 
             <Button block style={{ marginTop: 20 }} onClick={() => resetAllSettings()}>

@@ -21,13 +21,13 @@ import {getMessageApi} from "./MessageApi";
  * 用法：
  * ```ts
  * // 提交：成功自动弹后端 message（如"更新成功"），失败自动弹错并 reject（可用 await 感知结果，如 FormModal 提交失败保持弹窗）
- * await HttpClient.post('admin/sysUser/create', values);
+ * await HttpClient.post('admin/sys-user/create', values);
  *
  * // 取返回数据与后端提示文案
- * const {data, message} = await HttpClient.post('admin/sysUser/create', values);
+ * const {data, message} = await HttpClient.post('admin/sys-user/create', values);
  *
  * // 成功自控提示（关闭自动弹后由业务决定）
- * await HttpClient.post('admin/sysUser/delete', {id}, null, {toastSuccess: false});
+ * await HttpClient.post('admin/sys-user/delete', {id}, null, {toastSuccess: false});
  * messageApi.success('删除成功');
  * reload();
  *
@@ -37,10 +37,10 @@ import {getMessageApi} from "./MessageApi";
  *     .catch((e) => myHandle(e));
  *
  * // $.ajax 形态
- * HttpClient.ajax({url: 'admin/sysUser/page', method: 'GET', params}).then((rs) => render(rs.data));
+ * HttpClient.ajax({url: 'admin/sys-user/page', method: 'GET', params}).then((rs) => render(rs.data));
  *
  * // 下载（返回 Promise<Blob>，成功已触发浏览器保存）
- * HttpClient.download({url: 'admin/sysUser/export', method: 'POST', data: {deptId: 1},
+ * HttpClient.download({url: 'admin/sys-user/export', method: 'POST', data: {deptId: 1},
  *     onDownloadProgress: ({loaded, total}) => console.log(loaded, total)})
  *     .catch(() => {});
  * ```

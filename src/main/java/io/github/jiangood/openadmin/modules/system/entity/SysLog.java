@@ -16,7 +16,11 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @FieldNameConstants
-@Table(name = "sys_log", indexes = {@Index(columnList = "operation")})
+@Table(name = "sys_log", indexes = {
+        @Index(columnList = "operation"),
+        // 个人中心"最近操作"按用户 + 时间分页查询
+        @Index(columnList = "userId, operationTime")
+})
 public class SysLog extends BaseEntity {
 
     @Column(nullable = false, length = 100)

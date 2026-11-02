@@ -180,7 +180,7 @@ export default class AdminLayout extends React.Component {
         if (!menu) return;
         const {path} = menu;
         this.setState({currentMenuKey: key});
-        PageUtils.open(path, menu.name);
+        PageUtils.open(path);
     }
 
     getActiveTopMenu() {
@@ -242,7 +242,7 @@ return <Layout className='main-layout'>
                     {this.renderTopMenu()}
                     {this.state.headerLeftArticles.map(a => (
                         <button key={a.code} type="button" className='item'
-                                onClick={() => PageUtils.open('/article/' + a.code, a.title)}>{a.title}</button>
+                                onClick={() => PageUtils.open('/article/' + a.code)}>{a.title}</button>
                     ))}
                     {this.props.showOrgSwitcher?.({
                         activeTopMenu: this.getActiveTopMenu(),
@@ -283,7 +283,7 @@ return <Layout className='main-layout'>
         const {siteInfo, loginInfo, layoutMode} = this.state
         // 即使菜单为空也直接显示页面内容，不要一直显示 Skeleton
         const contentNode = layoutMode === 'single'
-            ? <SinglePageLayout/>
+            ? <SinglePageLayout pathMenuMap={this.state.pathMenuMap}/>
             : <TabLayout pathMenuMap={this.state.pathMenuMap}/>;
         if (siteInfo.waterMark === true) {
             return <Watermark content={[loginInfo.name, loginInfo.account]}>

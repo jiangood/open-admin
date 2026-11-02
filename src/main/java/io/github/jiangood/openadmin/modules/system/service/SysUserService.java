@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.system.service;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.PasswordTool;
+import io.github.jiangood.openadmin.framework.common.AvatarPresets;
 import io.github.jiangood.openadmin.framework.dict.DictSeedSync;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
@@ -203,15 +204,47 @@ public class SysUserService extends BaseService<SysUser> {
 
 
     /**
-     * 个人中心修改邮箱、头像
+     * 确保用户有头像：为空时随机分配一个内置头像并保存，已有头像不做改动
      */
     @Transactional
-    public void updateInfo(String userId, String email, String avatar) {
+    public void ensureAvatar(SysUser sysUser) {
+        if (sysUser == null || CharSequenceUtil.isNotBlank(sysUser.getAvatar())) {
+            return;
+        }
+        sysUser.setAvatar(AvatarPresets.randomKey());
+        sysUserRepository.save(sysUser);
+    }
+
+
+    /**
+     * 个人中心修改手机号、邮箱、头像
+     */
+    @Transactional
+    public void updateInfo(String userId, String phone, String email, String avatar) {
         SysUser sysUser = sysUserRepository.findById(userId).orElse(null);
         Assert.notNull(sysUser, MSG_USER_NOT_EXIST);
+        // phone 为 null 表示调用方未提交该字段（兼容旧版前端），空串表示清空
+        if (phone != null) {
+            sysUser.setPhone(CharSequenceUtil.trimToNull(phone));
+        }
         sysUser.setEmail(CharSequenceUtil.trimToNull(email));
-        sysUser.setAvatar(CharSequenceUtil.trimToNull(avatar));
+        // 允许删除旧头像后重新选择，但不能提交空值
+        String newAvatar = CharSequenceUtil.trimToNull(avatar);
+        Assert.hasText(newAvatar, "头像不能为空");
+        sysUser.setAvatar(newAvatar);
         sysUserRepository.save(sysUser);
+    }
+
+
+    /**
+     * 登录成功后记录本次登录时间（个人中心展示的“上次登录”来自登录时带出的旧值）
+     */
+    @Transactional
+    public void updateLastLoginTime(String userId) {
+        sysUserRepository.findById(userId).ifPresent(sysUser -> {
+            sysUser.setLastLoginTime(LocalDateTime.now());
+            sysUserRepository.save(sysUser);
+        });
     }
 
 

@@ -62,13 +62,12 @@ public class SysCommonController {
     }
 
     /**
-     * 内置头像列表。PC 端、移动端均可通过该接口获取可选头像及默认头像地址。
+     * 内置头像列表。PC 端、移动端均可通过该接口获取可选头像。
      */
     @GetMapping("public/avatar-presets")
     public AjaxResult avatarPresets(HttpServletRequest request) {
         String contextPath = request.getContextPath();
         Dict data = Dict.create()
-                .set("defaultAvatarUrl", AvatarPresets.defaultUrl(contextPath))
                 .set("presets", AvatarPresets.list(contextPath));
         return AjaxResult.ok().data(data);
     }
@@ -89,6 +88,8 @@ public class SysCommonController {
         }
         r.setLogin(true);
         SysUser sysUser = sysUserService.findByAccount(user.getUsername()).orElse(null);
+        // 头像为空时随机分配一个内置头像并保存，避免所有用户共用同一张默认图
+        sysUserService.ensureAvatar(sysUser);
         r.setNeedUpdatePwd(sysUser != null && sysUser.getLastPasswordChangeTime() == null);
         r.setDictInfo(sysDictService.getAllItems());
         r.setSiteArticles(articleService.listGroupedByPosition());

@@ -2,6 +2,10 @@ import React from "react";
 import {HttpClient, Page, UrlUtils} from "../../framework";
 import "./article.less";
 
+export const pageMeta = {
+    title: '文章详情',
+};
+
 export default class ArticlePage extends React.Component {
 
     state = {
@@ -12,7 +16,7 @@ export default class ArticlePage extends React.Component {
     componentDidMount() {
         const code = this.props.params?.code
         if (code) {
-            HttpClient.get('admin/article/getByCode', {code}, {toastError: false}).then(rs => {
+            HttpClient.get('admin/article/get-by-code', {code}, {toastError: false}).then(rs => {
                 this.setState({article: rs.data, loading: false})
             }).catch(() => {
                 this.setState({loading: false})

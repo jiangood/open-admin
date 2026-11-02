@@ -18,7 +18,7 @@ export class OrgSwitcher extends React.Component<Record<string, never>, {tree: O
     state = {tree: [], currentOrgId: null};
 
     componentDidMount() {
-        HttpClient.get("admin/myOrgs", null).then(data => {
+        HttpClient.get("admin/my-orgs", null).then(data => {
             if (data.data) {
                 this.setState({tree: data.data.tree || [], currentOrgId: data.data.currentOrgId || null});
             }
@@ -26,7 +26,7 @@ export class OrgSwitcher extends React.Component<Record<string, never>, {tree: O
     }
 
     handleChange = (orgId: string) => {
-        HttpClient.post("admin/switchOrg", {orgId}, null).then(() => {
+        HttpClient.post("admin/switch-org", {orgId}, null).then(() => {
             setTimeout(() => location.reload(), 1000);
         });
     };

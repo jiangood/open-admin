@@ -53,6 +53,7 @@ public class SysUserDetailsService implements UserDetailsService {
         loginUser.setUnitId(dto.getUnitId());
         loginUser.setUnitName(dto.getUnitLabel());
         loginUser.setName(dto.getName());
+        loginUser.setLastLoginTime(user.getLastLoginTime());
 
         SysUser deptLeader = sysOrgService.getDeptLeader(user.getId());
         if (deptLeader != null) {

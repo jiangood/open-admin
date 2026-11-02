@@ -94,6 +94,9 @@ public class SysUser extends BaseEntity {
     @Remark("上次密码修改时间")
     private LocalDateTime lastPasswordChangeTime;
 
+    @Remark("上次登录时间")
+    private LocalDateTime lastLoginTime;
+
     public SysUser() {
     }
 

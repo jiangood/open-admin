@@ -97,6 +97,7 @@ createRoot(document.getElementById('root')).render(
 - `src/pages/product/index.jsx` → 路由 `/product`；`$code.jsx` → 动态段 `/:code`
 - 业务页面与框架页面路由冲突时业务页面优先（可覆盖框架页面）
 - 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](docs/open-admin/api.md#页面生命周期)）
+- 页面文件可选导出 `pageMeta`（`title` / `requiresAuth` / `layout`），用于覆盖页面标题与页面类型（详见 [pageMeta](docs/open-admin/api.md#页面元信息-pagemeta)）
 
 **目录约定**（无需配置，自动识别）：`src/pages/` 下按目录区分页面类型——`pages/` 后台页（需登录 + 后台布局）、`pages/public/` 免登录无布局（如公开文章页）、`pages/standalone/` 需登录无布局（如强制改密页）。框架内置登录页为 `/login`（`pages/login.jsx`，属于公开页面例外），详见 [development.md](docs/open-admin/development.md#页面目录约定)。
 
@@ -133,6 +134,7 @@ mvn test -Dtest=BeanToolTest                               # 运行单个测试
 mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试，跳过 SpringBootTest 集成测试（更快）
 mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
+mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=local # 允许多端在线，验证个人中心「登录设备」提示
 mvn clean install -DskipTests                              # 安装到本地仓库
 python scripts/bump-version.py <新版本号>                    # 仅升级 pom.xml + web/package.json 版本号
 python scripts/release.py <新版本号>                        # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）

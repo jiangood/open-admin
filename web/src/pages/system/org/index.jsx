@@ -38,7 +38,7 @@ export default class OrgPage extends React.Component {
 
     loadTree = () => {
         this.setState({treeLoading: true})
-        HttpClient.get('admin/sysOrg/tree', this.state.params, {toastError: false}).then(rs => {
+        HttpClient.get('admin/sys-org/tree', this.state.params, {toastError: false}).then(rs => {
             this.setState({treeData: rs.data})
             this.setState({treeLoading: false});
         }).catch(() => {
@@ -53,7 +53,7 @@ export default class OrgPage extends React.Component {
     handleDelete = () => {
         const {selectedOrg} = this.state
         if (!selectedOrg) return
-        HttpClient.post('admin/sysOrg/delete', {id: selectedOrg.id}, null).then(() => {
+        HttpClient.post('admin/sys-org/delete', {id: selectedOrg.id}, null).then(() => {
             this.setState({selectedOrg: null, deleteModalOpen: false})
             this.loadTree()
         })
@@ -64,7 +64,7 @@ export default class OrgPage extends React.Component {
             this.setState({selectedOrg: null})
             return
         }
-        HttpClient.get("admin/sysOrg/detail", {id: selectedKeys[0]}).then(rs => {
+        HttpClient.get("admin/sys-org/detail", {id: selectedKeys[0]}).then(rs => {
             this.setState({selectedOrg: rs.data})
         })
     }
@@ -80,7 +80,7 @@ export default class OrgPage extends React.Component {
 
     handleModalFinish = async values => {
         const isNew = !values.id
-        const url = isNew ? 'admin/sysOrg/create' : 'admin/sysOrg/update'
+        const url = isNew ? 'admin/sys-org/create' : 'admin/sys-org/update'
         await HttpClient.post(url, values)
         this.loadTree()
     }
@@ -189,13 +189,13 @@ export default class OrgPage extends React.Component {
                        onFinish={this.handleModalFinish}
                        labelCol={{flex: '120px'}}>
                 <Form.Item label='父节点' name='pid'>
-                    <FieldRemoteTreeSelect url='admin/sysOrg/tree'/>
+                    <FieldRemoteTreeSelect url='admin/sys-org/tree'/>
                 </Form.Item>
                 <Form.Item label='名称' name='name' rules={[{required: true}]}>
                     <Input/>
                 </Form.Item>
                 <Form.Item label='类型' name='type' rules={[{required: true}]}>
-                    <FieldRemoteSelect url='admin/sysOrg/type-options' placeholder='请选择类型'/>
+                    <FieldRemoteSelect url='admin/sys-org/type-options' placeholder='请选择类型'/>
                 </Form.Item>
                 <Form.Item label='部门领导' name={['leader', 'id']}>
                     <FieldUserSelect/>
@@ -233,7 +233,7 @@ export default class OrgPage extends React.Component {
         const dragKey = dragNode.key;
         const dropPos = e.node.pos.split('-');
         const dropPosition = e.dropPosition - Number(dropPos[dropPos.length - 1]);
-        HttpClient.post('admin/sysOrg/sort', {dropPosition, dropToGap, dropKey, dragKey}, null).then(() => this.loadTree())
+        HttpClient.post('admin/sys-org/sort', {dropPosition, dropToGap, dropKey, dragKey}, null).then(() => this.loadTree())
     };
 }
 

@@ -55,7 +55,7 @@ export default class LogPage extends React.Component {
     render() {
         return <Page>
             <ProTable
-                request={(params) => HttpClient.get('admin/sysLog/page', params)}
+                request={(params) => HttpClient.get('admin/sys-log/page', params)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <>

@@ -1,0 +1,6 @@
+# 本地调试专用配置，按需激活：mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=local
+# （或设置环境变量 SPRING_PROFILES_ACTIVE=local）
+# 允许同一账号最多 3 个会话同时在线，便于验证个人中心「登录设备」的多处登录提示。
+# 仅在激活 local profile 时生效，默认启动不受影响。
+sys:
+  maximum-sessions: 3

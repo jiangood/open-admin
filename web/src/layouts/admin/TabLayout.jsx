@@ -1,24 +1,39 @@
 import React from "react";
-import {history, PageFrame, UrlUtils, EventBus} from "../../framework";
+import {history, PageFrame, EventBus, matchRoute, setPageTitle} from "../../framework";
 import {AdminTabs} from "./AdminTabs";
 
-function getLabel(pathname, search, pathMenuMap) {
-    if (pathname === '/') return '首页';
-    const params = UrlUtils.getParams(search);
-    if (params._label) return params._label;
+function getPathname(url) {
+    const qIndex = url.indexOf('?');
+    return qIndex === -1 ? url : url.substring(0, qIndex);
+}
+
+/** 移除已弃用的 _label 参数，避免旧 URL 产生重复 Tab；其余 query 原样保留 */
+function normalizeUrl(url) {
+    const qIndex = url.indexOf('?');
+    if (qIndex === -1) return url;
+    const params = new URLSearchParams(url.substring(qIndex));
+    if (!params.has('_label')) return url;
+    params.delete('_label');
+    const search = params.toString();
+    return search ? `${url.substring(0, qIndex)}?${search}` : url.substring(0, qIndex);
+}
+
+function getLabel(pathname, pathMenuMap) {
+    if (pathname === '/' || pathname === '/index') return '首页';
+    const route = matchRoute(pathname);
+    // 页面显式声明的标题优先；未声明时回退到后端菜单名
+    if (route?.meta?.title) return route.meta.title;
     const menu = pathMenuMap[pathname];
     if (menu) return menu.name;
+    if (!route) return '页面不存在';
     return '未命名';
 }
 
 export class TabLayout extends React.Component {
     constructor(props) {
         super(props);
-        const initUrl = history.location.pathname + history.location.search;
-        const qIndex = initUrl.indexOf('?');
-        const initPathname = qIndex === -1 ? initUrl : initUrl.substring(0, qIndex);
-        const initSearch = qIndex === -1 ? '' : initUrl.substring(qIndex);
-        const initLabel = getLabel(initPathname, initSearch, props.pathMenuMap);
+        const initUrl = normalizeUrl(history.location.pathname + history.location.search);
+        const initLabel = getLabel(getPathname(initUrl), props.pathMenuMap);
         this.state = {
             tabs: [{key: initUrl, label: initLabel, refreshKey: 0}],
             activeKey: initUrl,
@@ -29,13 +44,11 @@ export class TabLayout extends React.Component {
     unlisten = null;
     unsubscribeClosePage = null;
 
-    openTab = (url) => {
-        const qIndex = url.indexOf('?');
-        const pathname = qIndex === -1 ? url : url.substring(0, qIndex);
-        const search = qIndex === -1 ? '' : url.substring(qIndex);
+    openTab = (rawUrl) => {
+        const url = normalizeUrl(rawUrl);
         this.setState(prev => ({
             tabs: prev.tabs.some(t => t.key === url) ? prev.tabs
-                : [...prev.tabs, {key: url, label: getLabel(pathname, search, this.props.pathMenuMap), refreshKey: 0}],
+                : [...prev.tabs, {key: url, label: getLabel(getPathname(url), this.props.pathMenuMap), refreshKey: 0}],
             activeKey: url,
         }));
     };
@@ -64,6 +77,13 @@ export class TabLayout extends React.Component {
         this.closeTab(url);
     };
 
+    /** 浏览器标题跟随当前激活标签 */
+    syncDocumentTitle() {
+        const {tabs, activeKey} = this.state;
+        const active = tabs.find(t => t.key === activeKey);
+        setPageTitle(active && active.label !== '未命名' ? active.label : undefined);
+    }
+
     handleCloseOthers = (key) => {
         this.setState(prev => ({tabs: prev.tabs.filter(t => t.key === key)}));
         if (key !== this.activeKey) {
@@ -81,6 +101,7 @@ export class TabLayout extends React.Component {
             this.openTab(location.pathname + location.search);
         });
         this.unsubscribeClosePage = EventBus.on('closePage', this.handleClosePageEvent);
+        this.syncDocumentTitle();
     }
 
     componentDidUpdate(prevProps) {
@@ -89,16 +110,14 @@ export class TabLayout extends React.Component {
         if (this.props.pathMenuMap !== prevProps.pathMenuMap) {
             this.refreshTabLabels();
         }
+        this.syncDocumentTitle();
     }
 
     refreshTabLabels() {
         this.setState(prev => {
             let changed = false;
             const tabs = prev.tabs.map(t => {
-                const qIndex = t.key.indexOf('?');
-                const pathname = qIndex === -1 ? t.key : t.key.substring(0, qIndex);
-                const search = qIndex === -1 ? '' : t.key.substring(qIndex);
-                const label = getLabel(pathname, search, this.props.pathMenuMap);
+                const label = getLabel(getPathname(t.key), this.props.pathMenuMap);
                 if (label === t.label) return t;
                 changed = true;
                 return {...t, label};

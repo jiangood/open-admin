@@ -4,7 +4,7 @@ public final class SysFileConstants {
     private SysFileConstants() {
     }
 
-    public static final String BASE_PATH = "admin/sysFile";
+    public static final String BASE_PATH = "admin/sys-file";
     public static final String FILE_URL_PATTERN = "/file/{objectName}";
 
     /** 公共文件目录前缀 */

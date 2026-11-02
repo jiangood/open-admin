@@ -41,10 +41,9 @@ public class OnlineUserService {
 
         List<OnlineUser> active = new ArrayList<>();
         for (OnlineUser item : onlineUserRegistry.list()) {
-            SessionInformation information = sessionRegistry.getSessionInformation(item.getSessionId());
             // 会话已被销毁或已被标记过期（如并发登录被顶下线），惰性清理，避免列表残留在线的“僵尸会话”
-            if (information == null || information.isExpired()) {
-                onlineUserRegistry.remove(item.getSessionId());
+            SessionInformation information = activeInformation(item);
+            if (information == null) {
                 continue;
             }
             if (matches(item, kw)) {
@@ -62,6 +61,29 @@ public class OnlineUserService {
     }
 
     /**
+     * 当前账号的全部活动会话（个人中心「登录设备」）。仅返回指定用户的记录。
+     */
+    public List<OnlineUser> listByUser(String userId) {
+        if (userId == null) {
+            return List.of();
+        }
+
+        String currentSessionId = currentSessionId();
+        List<OnlineUser> active = new ArrayList<>();
+        for (OnlineUser item : onlineUserRegistry.list()) {
+            if (!Objects.equals(userId, item.getUserId())) {
+                continue;
+            }
+            SessionInformation information = activeInformation(item);
+            if (information == null) {
+                continue;
+            }
+            active.add(toView(item, information, currentSessionId));
+        }
+        return active;
+    }
+
+    /**
      * 强制下线：标记会话过期，用户下一次请求会收到 401 并提示重新登录。
      */
     public void kick(String id) {
@@ -71,11 +93,41 @@ public class OnlineUserService {
         String currentSessionId = currentSessionId();
         Assert.state(!Objects.equals(target.getSessionId(), currentSessionId), "不能强制下线当前登录会话");
 
+        expire(target);
+    }
+
+    /**
+     * 个人中心下线自己的其他设备：只能操作当前账号的会话，且不能下线当前会话。
+     */
+    public void kickOwn(String id, String userId) {
+        OnlineUser target = onlineUserRegistry.findById(id);
+        Assert.notNull(target, "该登录设备已下线");
+        Assert.state(Objects.equals(target.getUserId(), userId), "无权操作该登录设备");
+
+        String currentSessionId = currentSessionId();
+        Assert.state(!Objects.equals(target.getSessionId(), currentSessionId), "不能下线当前登录设备");
+
+        expire(target);
+    }
+
+    private void expire(OnlineUser target) {
         SessionInformation information = sessionRegistry.getSessionInformation(target.getSessionId());
         if (information != null) {
             information.expireNow();
         }
         onlineUserRegistry.remove(target.getSessionId());
+    }
+
+    /**
+     * 校验会话仍然有效；已销毁或已过期的会话顺带从内存登记表移除。
+     */
+    private SessionInformation activeInformation(OnlineUser item) {
+        SessionInformation information = sessionRegistry.getSessionInformation(item.getSessionId());
+        if (information == null || information.isExpired()) {
+            onlineUserRegistry.remove(item.getSessionId());
+            return null;
+        }
+        return information;
     }
 
     private boolean matches(OnlineUser item, String keyword) {

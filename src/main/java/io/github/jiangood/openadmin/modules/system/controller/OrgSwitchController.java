@@ -21,7 +21,7 @@ public class OrgSwitchController {
 
     private final SysOrgService sysOrgService;
 
-    @GetMapping("admin/myOrgs")
+    @GetMapping("admin/my-orgs")
     public AjaxResult myOrgs() {
         List<SysOrg> units = sysOrgService.findByLoginUser(UnitOrgTypeProvider.TYPE_UNIT);
         List<TreeOption> tree = units.stream()
@@ -30,7 +30,7 @@ public class OrgSwitchController {
         return AjaxResult.ok().data(new OrgSwitcherVO(TreeTool.buildTree(tree), LoginTool.getCurrentOrgId()));
     }
 
-    @PostMapping("admin/switchOrg")
+    @PostMapping("admin/switch-org")
     public AjaxResult switchOrg(@RequestBody SwitchOrgReq req) {
         boolean accessible = sysOrgService.findByLoginUser(UnitOrgTypeProvider.TYPE_UNIT)
                 .stream().anyMatch(u -> u.getId().equals(req.orgId()));

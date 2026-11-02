@@ -11,22 +11,22 @@ export * from './pickerUser'
 
 class InnerFieldUserSelect extends React.Component<ComponentProps<typeof FieldRemoteSelect>> {
     render() {
-        return <FieldRemoteSelect url="admin/sysUser/options" {...this.props} />;
+        return <FieldRemoteSelect url="admin/sys-user/options" {...this.props} />;
     }
 }
 class InnerFieldUserSelectMultiple extends React.Component<ComponentProps<typeof FieldRemoteSelect>> {
     render() {
-        return <FieldRemoteSelect url="admin/sysUser/options" multiple {...this.props} />;
+        return <FieldRemoteSelect url="admin/sys-user/options" multiple {...this.props} />;
     }
 }
 class InnerFieldUnitTreeSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
     render() {
-        return <FieldRemoteTreeSelect url="admin/sysOrg/unit-tree" {...this.props} />;
+        return <FieldRemoteTreeSelect url="admin/sys-org/unit-tree" {...this.props} />;
     }
 }
 class InnerFieldDeptTreeSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {
     render() {
-        return <FieldRemoteTreeSelect url="admin/sysOrg/dept-tree" {...this.props} />;
+        return <FieldRemoteTreeSelect url="admin/sys-org/dept-tree" {...this.props} />;
     }
 }
 class InnerFieldOrgTreeMultipleSelect extends React.Component<ComponentProps<typeof FieldRemoteTreeSelect>> {

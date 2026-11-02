@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("admin/sysOrg")
+@RequestMapping("admin/sys-org")
 @Slf4j
 @RequiredArgsConstructor
 public class SysOrgController {

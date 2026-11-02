@@ -22,7 +22,7 @@ export class OrgTree extends React.Component<OrgTreeProps, OrgTreeState> {
     }
 
     componentDidMount() {
-        HttpClient.get('admin/sysOrg/tree', null).then(tree => {
+        HttpClient.get('admin/sys-org/tree', null).then(tree => {
             this.setState({treeData: tree.data, treeDataLoading: false})
         }).catch(() => {
             // 失败时结束 loading 并置空（组件会显示空状态提示），避免一直停留在骨架屏；

@@ -57,7 +57,7 @@ class UserCenterPermControllerTest {
 
         when(sysUserService.getPermView("u1")).thenReturn(vo);
 
-        mockMvc.perform(get("/admin/userCenter/perms"))
+        mockMvc.perform(get("/admin/user-center/perms"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.dataPermLabel").value("所有"));
     }

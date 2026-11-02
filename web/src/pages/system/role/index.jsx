@@ -26,20 +26,20 @@ export default class RolePage extends React.Component {
     }
 
     handleEditUser = record => {
-        HttpClient.get('admin/sysRole/user-list', {id: record.id}).then(rs => {
+        HttpClient.get('admin/sys-role/user-list', {id: record.id}).then(rs => {
             this.setState({pickerOpen: true, selectedRecord: record, targetKeys: rs.data?.selectedKeys || []})
         })
     }
 
     onFinish = async values => {
         const isNew = !values.id;
-        const url = isNew ? 'admin/sysRole/create' : 'admin/sysRole/update';
+        const url = isNew ? 'admin/sys-role/create' : 'admin/sys-role/update';
         await HttpClient.post(url, values)
         this.tableRef.current.reload()
     }
 
     handleDelete = record => {
-        HttpClient.post('admin/sysRole/delete', {id: record.id}, null).then(() => {
+        HttpClient.post('admin/sys-role/delete', {id: record.id}, null).then(() => {
             this.tableRef.current.reload()
         })
     }
@@ -109,7 +109,7 @@ export default class RolePage extends React.Component {
                     size="small"
                     actions={[
                         {label: '用户设置', perm: 'sys-role:grant-permission', onClick: () => this.handleEditUser(record)},
-                        {label: '权限设置', perm: 'sys-role:grant-permission', onClick: () => PageUtils.open('/system/role/rolePerm?id=' + record.id, '角色权限设置')},
+                        {label: '权限设置', perm: 'sys-role:grant-permission', onClick: () => PageUtils.open('/system/role/role-perm?id=' + record.id)},
                         {label: '编辑', perm: 'sys-role:update', onClick: () => this.handleEdit(record)},
                         {label: '删除', perm: 'sys-role:delete', confirm: '是否确定删除系统角色', onClick: () => this.handleDelete(record)},
                     ]}
@@ -124,7 +124,7 @@ export default class RolePage extends React.Component {
             id: this.state.selectedRecord.id,
             userIdList
         }
-        HttpClient.post('admin/sysRole/grant-users', params, null, {toastError: false}).then(() => {
+        HttpClient.post('admin/sys-role/grant-users', params, null, {toastError: false}).then(() => {
             this.setState({pickerOpen: false, usersModalLoading: false})
         }).catch(() => {
             this.setState({usersModalLoading: false})
@@ -141,7 +141,7 @@ export default class RolePage extends React.Component {
                         {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: 'sys-role:create', onClick: this.handleAdd},
                     ]}/>
                 )}
-                request={(params) => HttpClient.get('admin/sysRole/page', params)}
+                request={(params) => HttpClient.get('admin/sys-role/page', params)}
                 columns={this.columns}
                 searchInline
                 searchFormRender={() => (
@@ -186,8 +186,8 @@ export default class RolePage extends React.Component {
                 title={'为「' + (this.state.selectedRecord?.name || '') + '」角色分配用户'}
                 value={this.state.targetKeys}
                 confirmLoading={this.state.usersModalLoading}
-                requestUrl='admin/sysRole/user-page'
-                usersUrl='admin/sysRole/user-by-ids'
+                requestUrl='admin/sys-role/user-page'
+                usersUrl='admin/sys-role/user-by-ids'
                 onOk={this.handleSaveUsers}
                 onCancel={() => this.setState({pickerOpen: false})}
             />

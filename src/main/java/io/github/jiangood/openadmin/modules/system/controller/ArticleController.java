@@ -64,7 +64,7 @@ public class ArticleController {
         return AjaxResult.ok().msg("删除成功");
     }
 
-    @GetMapping("getByCode")
+    @GetMapping("get-by-code")
     public AjaxResult getByCode(String code) {
         Article article = articleService.getByCode(code);
         if (article == null || !article.getEnabled()) {
@@ -73,7 +73,7 @@ public class ArticleController {
         return AjaxResult.ok().data(article);
     }
 
-    @GetMapping("listByPosition")
+    @GetMapping("list-by-position")
     public AjaxResult listByPosition(ArticlePosition position) {
         List<Article> list = articleService.listByPosition(position);
         return AjaxResult.ok().data(list);

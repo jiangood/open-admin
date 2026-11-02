@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 在线用户列表（系统管理 →「在线用户」）。
  */
 @RestController
-@RequestMapping("admin/sysOnlineUser")
+@RequestMapping("admin/sys-online-user")
 @RequiredArgsConstructor
 public class SysOnlineUserController {
 

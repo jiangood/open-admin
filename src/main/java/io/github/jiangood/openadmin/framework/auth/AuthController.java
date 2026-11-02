@@ -9,6 +9,7 @@ import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.framework.auth.dto.LoginReq;
 import io.github.jiangood.openadmin.framework.auth.online.OnlineUserRegistry;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
+import io.github.jiangood.openadmin.modules.system.service.SysUserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -39,6 +40,7 @@ public class AuthController {
     private final LoginAttemptService loginAttemptService;
     private final SystemProperties systemProperties;
     private final OnlineUserRegistry onlineUserRegistry;
+    private final SysUserService sysUserService;
 
     @PostMapping("login")
     @RateLimit(count = 10, duration = 60)
@@ -85,6 +87,8 @@ public class AuthController {
             if (authentication.getPrincipal() instanceof LoginUser loginUser) {
                 // 必须在会话固定防护替换 sessionId 之后登记，保证拿到最终 sessionId
                 onlineUserRegistry.record(request, loginUser);
+                // 登录成功后刷新库里的“上次登录时间”，会话中的 LoginUser 仍保留本次登录前的旧值
+                sysUserService.updateLastLoginTime(loginUser.getId());
             }
         } catch (SessionAuthenticationException e) {
             throw new IllegalStateException("账号或密码错误");

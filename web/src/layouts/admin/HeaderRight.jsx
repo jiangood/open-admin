@@ -1,7 +1,7 @@
 import {Avatar, Dropdown, Modal} from "antd";
-import {BgColorsOutlined, UserOutlined} from "@ant-design/icons";
+import {BgColorsOutlined, FileOutlined, MoonOutlined, ProfileOutlined, SunOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
-import {HttpClient, PageUtils, GlobalData, history, EventBus, LOGIN_PATH, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT} from "../../framework";
+import {HttpClient, PageUtils, GlobalData, history, EventBus, LOGIN_PATH, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT, getThemeMode, toggleThemeMode, getLayoutMode, toggleLayoutMode} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -14,16 +14,28 @@ export class HeaderRight extends React.Component {
     };
 
     unsubscribeLoginInfo = null;
+    unsubscribeTheme = null;
+    unsubscribeLayout = null;
 
     componentDidMount() {
         this.loadArticles()
         // 个人中心修改头像/资料后刷新顶栏显示
         this.unsubscribeLoginInfo = EventBus.on('loginInfoChange', () => this.setState({}))
+        // 明暗切换后刷新太阳/月亮图标（其它入口切换时也能同步）
+        this.unsubscribeTheme = EventBus.on('themeChange', () => this.setState({}))
+        // 布局切换后刷新图标（其它入口切换时也能同步）
+        this.unsubscribeLayout = EventBus.on('layoutChange', () => this.setState({}))
     }
 
     componentWillUnmount() {
         if (this.unsubscribeLoginInfo) {
             this.unsubscribeLoginInfo()
+        }
+        if (this.unsubscribeTheme) {
+            this.unsubscribeTheme()
+        }
+        if (this.unsubscribeLayout) {
+            this.unsubscribeLayout()
         }
     }
 
@@ -46,11 +58,34 @@ export class HeaderRight extends React.Component {
     }
 
     account = () => {
-        PageUtils.open('/userCenter', '个人中心')
+        PageUtils.open('/user-center')
     }
 
-    openArticle = (code, title) => {
-        PageUtils.open('/article/' + code, title)
+    openArticle = (code) => {
+        PageUtils.open('/article/' + code)
+    }
+
+    renderThemeModeToggle = () => {
+        const isDark = getThemeMode() === 'dark';
+        const title = isDark ? '切换到浅色模式' : '切换到深色模式';
+        return (
+            <button type="button" className='item' title={title} aria-label={title}
+                    onClick={() => toggleThemeMode()}>
+                {isDark ? <SunOutlined/> : <MoonOutlined/>}
+            </button>
+        )
+    }
+
+    renderLayoutModeToggle = () => {
+        const isTabs = getLayoutMode() === 'tabs';
+        const title = isTabs ? '切换为单页模式' : '切换为多标签页模式';
+        const Icon = isTabs ? FileOutlined : ProfileOutlined;
+        return (
+            <button type="button" className='item' title={title} aria-label={title}
+                    onClick={() => toggleLayoutMode()}>
+                <Icon/>
+            </button>
+        )
     }
 
     renderThemeSettings = () => {
@@ -80,7 +115,7 @@ export class HeaderRight extends React.Component {
         }))
 
         const menuItems = [
-            {key: 'userCenter', label: '个人中心'},
+            {key: 'user-center', label: '个人中心'},
             ...articleItems,
             {key: 'logout', label: '退出登录'},
         ]
@@ -88,29 +123,31 @@ export class HeaderRight extends React.Component {
         return <div className='header-right'>
             {headerArticles.map(a => (
                 <button key={a.code} type="button" className='item'
-                        onClick={() => this.openArticle(a.code, a.title)}>
+                        onClick={() => this.openArticle(a.code)}>
                     {a.title}
                 </button>
             ))}
+
+            {this.renderLayoutModeToggle()}
+
+            {this.renderThemeModeToggle()}
 
             {this.renderThemeSettings()}
 
             <Dropdown menu={{
                 onClick: ({key}) => {
-                    if (key === 'userCenter') {
+                    if (key === 'user-center') {
                         this.account()
                     } else if (key === 'logout') {
                         this.logout();
                     } else if (key.startsWith('article:')) {
-                        const code = key.substring(8)
-                        const article = dropdownArticles.find(a => a.code === code)
-                        this.openArticle(code, article ? article.title : code)
+                        this.openArticle(key.substring(8))
                     }
                 },
                 items: menuItems,
             }}>
                 <div className='item' style={{cursor: 'pointer'}}>
-                    <Avatar size="default" src={avatarSrc} icon={<UserOutlined/>}/>
+                    <Avatar size="default" src={avatarSrc || undefined} icon={<UserOutlined/>}/>
                     <span style={{marginLeft: 8}}>{info.name}</span>
                 </div>
             </Dropdown>

@@ -45,6 +45,47 @@ function fileToRoutePath(file) {
     return routePath || '/';
 }
 
+/** 按页面目录推断 pageMeta 默认值 */
+function defaultPageMeta(relPath) {
+    const top = relPath.split('/')[0];
+    // /login 是框架约定的登录页路径：业务项目覆盖该页面时无需再声明 pageMeta
+    if (relPath === 'login' || relPath === 'login/index') return {requiresAuth: false, layout: 'blank'};
+    if (top === 'public') return {requiresAuth: false, layout: 'blank'};
+    if (top === 'standalone') return {requiresAuth: true, layout: 'blank'};
+    return {requiresAuth: true, layout: 'admin'};
+}
+
+/** 页面 pageMeta 源码缓存：dev 下只有元信息变化时才重建路由表 */
+const pageMetaCache = new Map();
+
+/** 提取 pageMeta 导出源码，用于判断页面元信息是否变化 */
+function readPageMetaSource(file) {
+    try {
+        const source = fs.readFileSync(file, 'utf8');
+        const matched = source.match(/export\s+const\s+pageMeta(?:\s*:\s*[^=]+)?\s*=\s*\{[\s\S]*?\};?/);
+        return matched ? matched[0].replace(/\s+/g, '') : '';
+    } catch {
+        return '';
+    }
+}
+
+/** 生成浏览器端 pageMeta 归一化函数：补默认值、修正非法组合 */
+const PAGE_META_HELPER = `function __resolvePageMeta(mod, defaults) {
+    let meta = mod?.pageMeta;
+    if (meta != null && typeof meta !== 'object') {
+        console.warn('[open-admin] 页面 pageMeta 必须是对象，已忽略');
+        meta = null;
+    }
+    const requiresAuth = typeof meta?.requiresAuth === 'boolean' ? meta.requiresAuth : defaults.requiresAuth;
+    let layout = meta?.layout === 'admin' || meta?.layout === 'blank' ? meta.layout : defaults.layout;
+    if (!requiresAuth && layout === 'admin') {
+        console.warn('[open-admin] pageMeta：requiresAuth=false 时必须使用 blank 布局，已自动修正');
+        layout = 'blank';
+    }
+    const title = typeof meta?.title === 'string' && meta.title.trim() ? meta.title.trim() : undefined;
+    return {requiresAuth, layout, title};
+}`;
+
 /** 生成可被 Vite dev/build 解析的 import 路径 */
 function toImportPath(root, file) {
     const nm = file.indexOf('/node_modules/');
@@ -61,17 +102,20 @@ function generateRoutesModule(root) {
     const imports = [];
     const entries = [];
     collectPageFiles(root).forEach((file, i) => {
+        const pageMatch = file.match(PAGE_PATH_RE);
         const routePath = fileToRoutePath(file);
-        if (!routePath) return;
+        if (!routePath || !pageMatch) return;
+        pageMetaCache.set(file, readPageMetaSource(file));
         if (seen.has(routePath)) {
             console.warn(`[open-admin] 路由 ${routePath} 被覆盖（来自 ${file}）`);
             return;
         }
         seen.add(routePath);
-        imports.push(`import P${i} from ${JSON.stringify(toImportPath(root, file))};`);
-        entries.push(`    {path: ${JSON.stringify(routePath)}, component: P${i}},`);
+        const defaults = defaultPageMeta(pageMatch[1]);
+        imports.push(`import P${i}, * as M${i} from ${JSON.stringify(toImportPath(root, file))};`);
+        entries.push(`    {path: ${JSON.stringify(routePath)}, component: P${i}, meta: __resolvePageMeta(M${i}, ${JSON.stringify(defaults)})},`);
     });
-    return `${imports.join('\n')}\n\nexport default [\n${entries.join('\n')}\n];\n`;
+    return `${imports.join('\n')}\n\n${PAGE_META_HELPER}\n\nexport default [\n${entries.join('\n')}\n];\n`;
 }
 
 export default function openAdmin() {
@@ -92,16 +136,30 @@ export default function openAdmin() {
         },
 
         configureServer(server) {
-            const onPagesFileChange = (file) => {
-                if (!PAGE_PATH_RE.test(file.split(path.sep).join('/'))) return;
+            const reloadRoutes = () => {
                 const mod = server.moduleGraph.getModuleById(RESOLVED_ID);
                 if (mod) {
                     server.moduleGraph.invalidateModule(mod);
                     server.ws.send({type: 'full-reload'});
                 }
             };
+            const onPagesFileChange = (file) => {
+                const normalized = file.split(path.sep).join('/');
+                if (!PAGE_PATH_RE.test(normalized)) return;
+                reloadRoutes();
+            };
+            // 只有 pageMeta 变化才重建路由表；普通页面代码交由 React Fast Refresh 处理
+            const onPageFileChange = (file) => {
+                const normalized = file.split(path.sep).join('/');
+                if (!PAGE_PATH_RE.test(normalized)) return;
+                const next = readPageMetaSource(normalized);
+                if (pageMetaCache.get(normalized) === next) return;
+                pageMetaCache.set(normalized, next);
+                reloadRoutes();
+            };
             server.watcher.on('add', onPagesFileChange);
             server.watcher.on('unlink', onPagesFileChange);
+            server.watcher.on('change', onPageFileChange);
         },
     };
 }

@@ -71,6 +71,8 @@ export interface ProTableProps<T = unknown> {
     bordered?: boolean;
     /** 树形数据模式，关闭分页且不传 page/size 参数 */
     treeMode?: boolean;
+    /** 无数据时的提示文案，默认“暂无数据” */
+    emptyText?: React.ReactNode;
 }
 
 interface ProTableState<T = unknown> {
@@ -256,7 +258,7 @@ this.setState({loading: true})
                     bordered={this.props.bordered ?? false}
                     locale={{
                         emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                           description={hasFilter ? '没有符合条件的数据' : '暂无数据'}/>,
+                                           description={hasFilter ? '没有符合条件的数据' : (this.props.emptyText ?? '暂无数据')}/>,
                     }}
                 />
             </div>

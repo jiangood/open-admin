@@ -11,7 +11,7 @@ export default class OnlineUserPage extends React.Component {
     tableRef = React.createRef();
 
     handleKick = row => {
-        HttpClient.post('admin/sysOnlineUser/kick', {id: row.id}).then(() => {
+        HttpClient.post('admin/sys-online-user/kick', {id: row.id}).then(() => {
             this.tableRef.current.reload();
         });
     };
@@ -81,7 +81,7 @@ export default class OnlineUserPage extends React.Component {
         return <Page>
             <ProTable
                 actionRef={this.tableRef}
-                request={params => HttpClient.get('admin/sysOnlineUser/page', params)}
+                request={params => HttpClient.get('admin/sys-online-user/page', params)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <Form.Item label='账号/姓名/IP' name='keyword'>

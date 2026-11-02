@@ -62,7 +62,7 @@ class SysRoleControllerTest {
         when(sysRoleService.findById("1")).thenReturn(Optional.of(admin));
         when(sysRoleService.ownMenu("1")).thenReturn(List.of(menu));
 
-        mockMvc.perform(get("/admin/sysRole/own-perms").param("id", "1"))
+        mockMvc.perform(get("/admin/sys-role/own-perms").param("id", "1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data['sys-user']").isArray())
                 .andExpect(jsonPath("$.data['sys-user'][0]").value("sys-user:read"))
@@ -95,7 +95,7 @@ class SysRoleControllerTest {
         when(sysRoleService.findById("2")).thenReturn(Optional.of(role));
         when(sysRoleService.ownMenu("2")).thenReturn(List.of(menu));
 
-        mockMvc.perform(get("/admin/sysRole/own-perms").param("id", "2"))
+        mockMvc.perform(get("/admin/sys-role/own-perms").param("id", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data['sys-user']").isArray())
                 .andExpect(jsonPath("$.data['sys-user'][0]").value("sys-user:read"))

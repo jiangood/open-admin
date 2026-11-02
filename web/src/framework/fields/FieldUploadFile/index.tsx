@@ -149,7 +149,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         const {accept, fileList, maxCount} = this.state;
 
         return <Upload
-            action={UrlUtils.contextPath('/admin/sysFile/upload')}
+            action={UrlUtils.contextPath('/admin/sys-file/upload')}
             data={{isPublic: this.state.isPublic}}
             listType={this.props.listType || 'picture-card'}
             fileList={fileList}

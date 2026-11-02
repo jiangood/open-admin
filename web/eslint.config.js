@@ -22,7 +22,11 @@ export default tseslint.config(
         rules: {
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'warn',
-            'react-refresh/only-export-components': ['warn', {allowConstantExport: true}],
+            'react-refresh/only-export-components': ['warn', {
+                allowConstantExport: true,
+                // 页面元信息是构建期约定，不参与 React 组件导出
+                allowExportNames: ['pageMeta'],
+            }],
             'react-compiler/react-compiler': 'error',
             '@typescript-eslint/no-unused-expressions': ['error', {allowShortCircuit: true}],
             '@typescript-eslint/no-unused-vars': ['error', {argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true}],

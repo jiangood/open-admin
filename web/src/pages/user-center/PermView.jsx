@@ -1,6 +1,7 @@
 import React from "react";
 import {Empty, Table, Tabs, Tag} from "antd";
 import {HttpClient} from "../../framework";
+import RecentOps from "./RecentOps";
 
 export default class PermView extends React.Component {
 
@@ -9,7 +10,7 @@ export default class PermView extends React.Component {
     }
 
     componentDidMount() {
-        HttpClient.get('admin/userCenter/perms', null).then(rs => {
+        HttpClient.get('admin/user-center/perms', null).then(rs => {
             this.setState({data: rs.data})
         })
     }
@@ -91,6 +92,11 @@ export default class PermView extends React.Component {
                 key: 'funcPerm',
                 label: '功能权限',
                 children: this.renderFuncPerm(data),
+            },
+            {
+                key: 'recentOps',
+                label: '最近操作',
+                children: <RecentOps/>,
             },
         ]}/>;
     }

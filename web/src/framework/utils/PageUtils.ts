@@ -2,9 +2,24 @@ import {history} from '../router';
 import {StringUtils} from "./StringUtils";
 import {UrlUtils} from "./UrlUtils";
 import {EventBus} from "./EventBus";
+import {getPageTitle} from "./TitleUtils";
 
 /** 登录页路径：公开页面，支持 ?redirect= 回跳 */
 export const LOGIN_PATH = '/login';
+
+let labelDeprecatedWarned = false;
+
+/**
+ * @internal
+ * `_label` 参数已弃用：首次被使用时提示一次，方便业务项目迁移
+ */
+export function warnDeprecatedPageLabel(): void {
+    if (labelDeprecatedWarned) return;
+    labelDeprecatedWarned = true;
+    console.warn(
+        '[open-admin] 检测到已弃用的 _label 参数：该参数已不再生效，请改用页面文件中的 pageMeta.title。'
+    );
+}
 
 export class PageUtils {
     static redirectToLogin(): void {
@@ -34,16 +49,29 @@ export class PageUtils {
         return StringUtils.subAfterLast(path, '/') || undefined;
     }
 
-    static open(path: string, label = '未命名'): void {
-        let targetPath = path;
+    /**
+     * 打开页面并切换到对应 Tab
+     * @param path 页面路径
+     * @param label @deprecated 已不再生效，仅用于提示迁移；页面标题请使用 pageMeta.title
+     */
+    static open(path: string, label?: string): void {
         if (label) {
-            targetPath = UrlUtils.setParam(targetPath, '_label', label);
+            warnDeprecatedPageLabel();
         }
-        history.push(targetPath);
+        history.push(path);
     }
 
+    /**
+     * @deprecated `_label` 已不再生效，页面标题请使用 pageMeta.title 或 {@link PageUtils.currentTitle}
+     */
     static currentLabel(): string | undefined {
-        return this.currentParams()['_label'];
+        warnDeprecatedPageLabel();
+        return undefined;
+    }
+
+    /** 获取当前页面标题（不含系统标题）；没有页面标题时返回 undefined */
+    static currentTitle(): string | undefined {
+        return getPageTitle();
     }
 
     static closeCurrent(): void {

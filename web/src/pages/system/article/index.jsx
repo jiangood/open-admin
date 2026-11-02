@@ -36,7 +36,7 @@ export default class ArticleListPage extends React.Component {
     }
 
     handlePreview = record => {
-        PageUtils.open('/article/' + record.code, record.title)
+        PageUtils.open('/article/' + record.code)
     }
 
     onFinish = async values => {

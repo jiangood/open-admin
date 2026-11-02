@@ -1,17 +1,23 @@
 import React from "react";
 import {Button, Form, Input} from "antd";
-import {getMessageApi, getToken, HttpClient, history} from "../../framework";
+import {getMessageApi, getToken, HttpClient, history, LOGIN_PATH} from "../../framework";
+
+export const pageMeta = {
+    requiresAuth: true,
+    layout: 'blank',
+    title: '修改密码',
+};
 
 export default class ForceUpdatePwdPage extends React.Component {
 
     onFinish = (values) => {
-        HttpClient.post('admin/userCenter/update-pwd', values, null).then(() => {
+        HttpClient.post('admin/user-center/update-pwd', values, null).then(() => {
             getMessageApi().success('修改密码成功，请重新登录');
-            history.push('/public/login');
+            history.push(LOGIN_PATH);
         })
     }
 
-    validator = (rule, value) => HttpClient.get("admin/sysUser/pwd-strength", {password: value}, {toastError: false})
+    validator = (rule, value) => HttpClient.get("admin/sys-user/pwd-strength", {password: value}, {toastError: false})
         .catch(e => {
             throw new Error(e.message)
         })

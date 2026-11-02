@@ -2,6 +2,11 @@ import React from "react";
 import {Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
 import {HttpClient, Page} from "../../../framework";
+
+export const pageMeta = {
+    title: '角色权限设置',
+};
+
 export default class RolePermPage extends React.Component {
 
 
@@ -62,15 +67,15 @@ export default class RolePermPage extends React.Component {
                 this.setState({loading: false})
             }
         };
-        HttpClient.get('admin/sysRole/get', {id: this.roleId}).then(rs => {
+        HttpClient.get('admin/sys-role/get', {id: this.roleId}).then(rs => {
             this.setState({roleInfo: rs.data})
             onFinish()
         });
-        HttpClient.get('admin/sysRole/perm-tree-table', {id: this.roleId}).then(rs => {
+        HttpClient.get('admin/sys-role/perm-tree-table', {id: this.roleId}).then(rs => {
             this.setState({dataSource: rs.data})
             onFinish()
         });
-        HttpClient.get('admin/sysRole/own-perms', {id: this.roleId}).then(rs => {
+        HttpClient.get('admin/sys-role/own-perms', {id: this.roleId}).then(rs => {
             this.setState({rowSelectedKeys: rs.data})
             onFinish()
         });
@@ -88,7 +93,7 @@ export default class RolePermPage extends React.Component {
             menus.push(menuId)
             perms.push(...ks)
         }
-        HttpClient.post('admin/sysRole/save-perms', {id: this.roleId, perms, menus})
+        HttpClient.post('admin/sys-role/save-perms', {id: this.roleId, perms, menus})
     };
 
 

@@ -167,18 +167,19 @@ public void deleteById(String id) {
 ## 前端要点
 
 - **UI 定位**：面向正常业务人员的**桌面端**后台，**不要求无障碍（a11y）与移动端适配**（不强制 tablist/键盘导航、触摸目标、移动布局等）；样式优先使用 `--oa-*` CSS 变量 / antd token，**禁止硬编码颜色**（须同时兼容明暗主题）
-- 组件大驼峰，页面文件小写开头（约定式路由：小写开头才注册为页面）
+- 页面文件用 kebab-case（小写开头，如 `force-update-pwd.jsx`，会自动注册为路由），组件文件用 PascalCase（大驼峰，不会被注册为页面）
 - 使用 ES6+，强制 `const`/`let`，解构赋值
 - 优先使用框架组件：`ProTable`、`Page`、`FieldDictSelect` 等
 - 权限控制：`<PermActions actions={[{label, perm, onClick}]} />`（数据驱动，推荐）、`<Perm code="...">`；旧式 `<Button perm="...">` 已不推荐
 - **列表页工具栏**：操作按钮（新增/导出/清理/刷新）统一放右侧 `toolBarRightRender`，左槽 `toolBarRender` 只放状态/说明类内容（如「已选 N 项」）；与筛选卡的「查询/重置」、分页器同处右侧，避免同一屏出现两个方向的按钮列
 - 跨组件通信使用 `EventBus`（`emit` / `on` / `once` / `off`），不要使用 `document.dispatchEvent`
 - 表单弹框优先用 `FormModal`（ref 调用 `open(values)`），避免静态 `Modal.confirm()` 表单场景；对话框用 `<Modal open={...}>` 控制，避免 `Modal.info()` / `Modal.confirm()` 等静态方法
+- **Modal 内表单回填**：受控 `<Modal open={...}>` 首次打开时内容可能尚未挂载，在打开回调里用 `setFieldsValue` 会因 `ref.current` 为空而静默失败（表现为必填项为空、编辑不生效）。应给 `Modal` 加 `destroyOnHidden`，并用 `Form` 的 `initialValues` 传入当前数据，每次打开重建表单即可正确回填；不要用 `forceRender` 提前挂载来绕开
 - 页面生命周期：页面组件实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用，详见[页面生命周期](api.md#页面生命周期)
 
 ### 页面目录约定
 
-页面文件放在 `web/src/pages/` 下（小写开头自动注册路由），按目录自动识别页面类型，无需额外配置：
+页面文件放在 `web/src/pages/` 下（小写开头的 kebab-case 文件名自动注册路由），按目录自动识别页面类型，无需额外配置：
 
 | 目录 | 路由前缀 | 是否需要登录 | 是否需要 AdminLayout |
 |------|---------|-------------|---------------------|
@@ -186,6 +187,17 @@ public void deleteById(String id) {
 | `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
 | `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
 
-`public` 页免登录、无后台布局（如公开文章页）；`standalone` 页需登录但无后台布局（如强制改密页）。
+`public` 页免登录、无后台布局（如公开文章页）；`standalone` 页需登录但无后台布局（如强制改密页）。目录只提供默认值，页面可通过 `pageMeta` 显式覆盖：
 
-框架内置登录页为 `/login`（页面文件 `pages/login.jsx`），是 `pages/` 下**公开页面的唯一例外**，通过 `LOGIN_PATH` 统一约定；`/public/login` 仅保留为旧地址兼容跳转，新代码请直接使用 `/login`。
+```jsx
+// 页面文件（可选导出）
+export const pageMeta = {
+    title: '角色权限设置', // 页面标题
+    requiresAuth: true,   // 是否需要登录
+    layout: 'admin',      // 'admin' | 'blank'
+};
+```
+
+非菜单的详情页、公共页推荐声明 `pageMeta.title`；页面标题为静态元信息，不支持运行时动态回填。`PageUtils.open(path, label)` 的 `label` 参数与 URL 中的 `_label` 已弃用且不再生效，传入时控制台会提示。
+
+框架内置登录页为 `/login`（页面文件 `pages/login.jsx`），通过 `pageMeta` 声明为公开页；业务项目覆盖 `pages/login.jsx` 时即使不写 `pageMeta`，插件也会按 `/login` 默认公开页处理。`/public/login` 仅保留为旧地址兼容跳转，新代码请直接使用 `/login`。

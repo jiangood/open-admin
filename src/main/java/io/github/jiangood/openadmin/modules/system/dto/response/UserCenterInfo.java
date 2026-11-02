@@ -17,4 +17,5 @@ public class UserCenterInfo {
     private String avatar;
     private String account;
     private LocalDateTime createTime;
+    private LocalDateTime lastLoginTime;
 }

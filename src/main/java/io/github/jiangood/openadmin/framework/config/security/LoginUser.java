@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,6 +22,11 @@ public class LoginUser extends User {
     private String orgName;
 
     private String deptLeaderId;
+
+    /**
+     * 上次登录时间（本次登录时从库里带出，登录成功后库里会被刷新为本次时间）
+     */
+    private LocalDateTime lastLoginTime;
 
     private final Set<String> permissions;
 
