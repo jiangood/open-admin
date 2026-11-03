@@ -170,13 +170,19 @@ export default class JobPage extends React.Component {
 
     columns = [
         {
-            title: '名称',
+            title: '名称 / 执行类',
             dataIndex: 'name',
-
-        },
-        {
-            title: '执行类',
-            dataIndex: 'jobClassName',
+            width: 240,
+            render: (v, record) => {
+                return <div style={{lineHeight: 1.45}}>
+                    <div>{v}</div>
+                    {record.jobClassName && <div style={{
+                        fontSize: 12,
+                        color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                        wordBreak: 'break-all'
+                    }}>{record.jobClassName}</div>}
+                </div>
+            }
         },
 
         {
@@ -213,41 +219,35 @@ export default class JobPage extends React.Component {
 
 
         {
-            title: '启用状态',
-            dataIndex: 'enabled',
-            render: (v, record) => {
-                return record.enabled ? <Tag color='green'>启用</Tag> : <Tag color='red'>停用</Tag>
-            },
-        },
-
-        {
-            title: '执行记录方式',
-            dataIndex: 'logAggregation',
-            render: v => DictUtils.dictTag('jobLogAggregation', v) || '每次一份记录',
-        },
-
-        {
-            title: '运行状态',
+            title: '状态 / 记录方式',
             dataIndex: 'progress',
             width: 220,
             render: (_, record) => {
                 const p = this.state.progressMap[record.id]
-                if (!p) {
-                    return <Tag>未运行</Tag>
-                }
+                const logAggregation = DictUtils.dictLabel('jobLogAggregation', record.logAggregation) || '每次一份记录'
                 return <div>
-                    <Tag color={p.stateColor || 'default'}>{p.stateLabel}</Tag>
-                    {p.percent != null && <Progress percent={p.percent} size='small'/>}
-                    {p.message && <Tooltip title={p.message}>
-                        <div style={{
-                            fontSize: 12,
-                            color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65))',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            maxWidth: 200
-                        }}>{p.message}</div>
-                    </Tooltip>}
+                    {record.enabled ? <Tag color='green'>启用</Tag> : <Tag color='red'>停用</Tag>}
+                    {p
+                        ? <>
+                            <Tag color={p.stateColor || 'default'}>{p.stateLabel}</Tag>
+                            {p.percent != null && <Progress percent={p.percent} size='small'/>}
+                            {p.message && <Tooltip title={p.message}>
+                                <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65))',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    whiteSpace: 'nowrap',
+                                    maxWidth: 200
+                                }}>{p.message}</div>
+                            </Tooltip>}
+                        </>
+                        : <Tag>未运行</Tag>
+                    }
+                    <div style={{
+                        fontSize: 12,
+                        color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))'
+                    }}>记录方式：{logAggregation}</div>
                 </div>
             },
         },
@@ -259,8 +259,7 @@ export default class JobPage extends React.Component {
             render: (_, record) => {
 
                 return <PermActions
-                    more
-                    size="small"
+                    size="large"
                     actions={[
                         {label: '执行情况', perm: 'job:read', onClick: () => this.showExecuteRecord(record)},
                         {label: '执行一次', perm: 'job:trigger', onClick: () => this.handleTriggerJob(record)},
