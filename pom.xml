@@ -95,7 +95,7 @@
         <dependency>
             <groupId>io.minio</groupId>
             <artifactId>minio</artifactId>
-            <version>9.0.3</version>
+            <version>9.0.4</version>
             <optional>true</optional>
         </dependency>
         <!-- minio 9.x 的 Maven 元数据依赖的 okhttp 为空壳（KMP root），实际类在 okhttp-jvm -->
