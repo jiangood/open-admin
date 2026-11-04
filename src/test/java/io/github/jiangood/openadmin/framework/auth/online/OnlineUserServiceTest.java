@@ -56,6 +56,7 @@ class OnlineUserServiceTest {
         OnlineUser row = page.getContent().get(0);
         assertNotNull(row.getLastActiveTime());
         assertFalse(row.isCurrent());
+        assertTrue(row.isInnerIp());
 
         service.kick(row.getId());
 
@@ -63,6 +64,35 @@ class OnlineUserServiceTest {
         SessionInformation information = sessionRegistry.getSessionInformation(session.getId());
         assertNotNull(information);
         assertTrue(information.isExpired());
+    }
+
+    @Test
+    void shouldMarkInnerIp() {
+        OnlineUserRegistry registry = new OnlineUserRegistry();
+        SessionRegistryImpl sessionRegistry = new SessionRegistryImpl();
+        LoginUser user = loginUser();
+
+        MockHttpSession innerSession = new MockHttpSession();
+        MockHttpServletRequest innerRequest = new MockHttpServletRequest();
+        innerRequest.setSession(innerSession);
+        innerRequest.setRemoteAddr("172.18.0.1");
+        registry.record(innerRequest, user);
+        sessionRegistry.registerNewSession(innerSession.getId(), user);
+
+        MockHttpSession publicSession = new MockHttpSession();
+        MockHttpServletRequest publicRequest = new MockHttpServletRequest();
+        publicRequest.setSession(publicSession);
+        publicRequest.setRemoteAddr("8.8.8.8");
+        registry.record(publicRequest, user);
+        sessionRegistry.registerNewSession(publicSession.getId(), user);
+
+        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        List<OnlineUser> rows = service.page(null, PageRequest.of(0, 10)).getContent();
+
+        OnlineUser inner = rows.stream().filter(r -> "172.18.0.1".equals(r.getIp())).findFirst().orElseThrow();
+        OnlineUser pub = rows.stream().filter(r -> "8.8.8.8".equals(r.getIp())).findFirst().orElseThrow();
+        assertTrue(inner.isInnerIp());
+        assertFalse(pub.isInnerIp());
     }
 
     @Test

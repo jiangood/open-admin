@@ -186,8 +186,13 @@ export default class UserCenterPage extends React.Component {
         {
             title: 'IP',
             dataIndex: 'ip',
-            width: 140,
-            render: v => v || '-',
+            width: 170,
+            render: (v, record) => (
+                <span>
+                    {v || '-'}
+                    {record.innerIp && <Tag style={{marginInlineStart: 6, marginInlineEnd: 0}}>内网</Tag>}
+                </span>
+            ),
         },
         {
             title: '登录时间',
@@ -211,7 +216,7 @@ export default class UserCenterPage extends React.Component {
                               okText="下线"
                               cancelText="取消"
                               onConfirm={() => this.kickSession(record.id)}>
-                    <Button size="small" danger type="link" style={{padding: 0}}>下线</Button>
+                    <Button size="small" danger>下线</Button>
                 </Popconfirm>,
         },
     ];
@@ -291,7 +296,7 @@ export default class UserCenterPage extends React.Component {
                 <PermView/>
             </Card>
 
-            <Modal open={sessionModalOpen} title="登录设备" width={720}
+            <Modal open={sessionModalOpen} title="登录设备" width={900}
                    footer={<Button onClick={this.closeSessions}>关闭</Button>}
                    onCancel={this.closeSessions}>
                 <div style={{

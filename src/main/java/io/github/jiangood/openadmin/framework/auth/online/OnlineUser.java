@@ -44,6 +44,12 @@ public class OnlineUser {
     private String orgName;
 
     private String ip;
+
+    /**
+     * IP 是否属于内网地址，由查询时实时计算，用于前端展示「内网」标记
+     */
+    private boolean innerIp;
+
     private String userAgent;
 
     private LocalDateTime loginTime;

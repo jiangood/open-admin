@@ -40,7 +40,13 @@ export default class OnlineUserPage extends React.Component {
         {
             title: 'IP',
             dataIndex: 'ip',
-            width: 140,
+            width: 170,
+            render: (v, record) => (
+                <span>
+                    {v || '-'}
+                    {record.innerIp && <Tag style={{marginInlineStart: 6, marginInlineEnd: 0}}>内网</Tag>}
+                </span>
+            ),
         },
         {
             title: '登录时间',

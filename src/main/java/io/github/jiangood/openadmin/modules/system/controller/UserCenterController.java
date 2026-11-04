@@ -107,6 +107,7 @@ public class UserCenterController {
         UserCenterSessionVO vo = new UserCenterSessionVO();
         vo.setId(session.getId());
         vo.setIp(session.getIp());
+        vo.setInnerIp(session.isInnerIp());
         vo.setUserAgent(session.getUserAgent());
         vo.setLoginTime(session.getLoginTime());
         vo.setLastActiveTime(session.getLastActiveTime());

@@ -19,6 +19,11 @@ public class UserCenterSessionVO {
 
     private String ip;
 
+    /**
+     * IP 是否属于内网地址，用于前端展示「内网」标记
+     */
+    private boolean innerIp;
+
     private String userAgent;
 
     private LocalDateTime loginTime;

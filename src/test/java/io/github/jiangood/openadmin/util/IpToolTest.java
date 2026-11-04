@@ -73,6 +73,20 @@ class IpToolTest {
     }
 
     @Test
+    void testIsInnerIp() {
+        assertTrue(IpTool.isInnerIp("127.0.0.1"));
+        assertTrue(IpTool.isInnerIp("10.0.0.1"));
+        assertTrue(IpTool.isInnerIp("172.18.0.1"));
+        assertTrue(IpTool.isInnerIp("192.168.1.1"));
+
+        assertFalse(IpTool.isInnerIp("8.8.8.8"));
+        assertFalse(IpTool.isInnerIp(null));
+        assertFalse(IpTool.isInnerIp(""));
+        // IPv6 无法按 IPv4 规则判断，应安全返回 false 而不是抛异常
+        assertFalse(IpTool.isInnerIp("2408:8207:1234::1"));
+    }
+
+    @Test
     void testGetLocationWithPublicIp() {
         // 这里我们不实际调用外部API，而是测试缓存机制
         String ip = "8.8.8.8";

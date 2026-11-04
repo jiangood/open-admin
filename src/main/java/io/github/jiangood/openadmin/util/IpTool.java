@@ -51,9 +51,25 @@ public class IpTool {
         return getLocation(ip);
     }
 
+    /**
+     * 是否为内网 IP（10/8、172.16/12、192.168/16、127/8 等）。
+     * <p>
+     * IPv6 等无法解析的地址按非内网处理，避免列表展示时抛异常。
+     */
+    public static boolean isInnerIp(String ip) {
+        if (CharSequenceUtil.isBlank(ip)) {
+            return false;
+        }
+        try {
+            return NetUtil.isInnerIP(ip);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static String getLocation(String ip) {
         //如果是本地ip或局域网ip，则直接不查询
-        if (ObjectUtil.isEmpty(ip) || NetUtil.isInnerIP(ip)) {
+        if (ObjectUtil.isEmpty(ip) || isInnerIp(ip)) {
             return "内网";
         }
 

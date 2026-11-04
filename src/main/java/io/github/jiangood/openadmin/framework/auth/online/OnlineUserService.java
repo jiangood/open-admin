@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.framework.auth.online;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import io.github.jiangood.openadmin.util.IpTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -157,6 +158,7 @@ public class OnlineUserService {
             view.setLastActiveTime(source.getLoginTime());
         }
         view.setCurrent(Objects.equals(source.getSessionId(), currentSessionId));
+        view.setInnerIp(IpTool.isInnerIp(source.getIp()));
         return view;
     }
 

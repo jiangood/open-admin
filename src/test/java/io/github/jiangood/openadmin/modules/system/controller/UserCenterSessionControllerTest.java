@@ -67,6 +67,7 @@ class UserCenterSessionControllerTest {
         OnlineUser row = new OnlineUser();
         row.setId("s1");
         row.setIp("10.0.0.8");
+        row.setInnerIp(true);
         row.setUserAgent("JUnit Browser");
         row.setLoginTime(LocalDateTime.of(2026, 11, 2, 9, 12));
         row.setLastActiveTime(LocalDateTime.of(2026, 11, 2, 10, 3));
@@ -79,6 +80,7 @@ class UserCenterSessionControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].id").value("s1"))
                 .andExpect(jsonPath("$.data[0].ip").value("10.0.0.8"))
+                .andExpect(jsonPath("$.data[0].innerIp").value(true))
                 .andExpect(jsonPath("$.data[0].current").value(true))
                 .andExpect(jsonPath("$.data[0].userId").doesNotExist());
 
