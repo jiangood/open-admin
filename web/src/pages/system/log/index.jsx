@@ -1,6 +1,6 @@
 import React from 'react';
 import {Form, Input, Tag} from "antd";
-import {ViewText, FieldDateRange, HttpClient, Page, ProTable} from "../../../framework";
+import {ViewText, FieldDateRange, HttpClient, Page, PageUtils, ProTable} from "../../../framework";
 
 export default class LogPage extends React.Component {
 
@@ -52,14 +52,31 @@ export default class LogPage extends React.Component {
     ];
 
 
+    getDefaultParams = () => {
+        const {userId, username, ip} = PageUtils.currentParams();
+        const params = {};
+        if (userId) params.userId = userId;
+        if (username) params.username = username;
+        if (ip) params.ip = ip;
+        return Object.keys(params).length ? params : undefined;
+    };
+
+
     render() {
         return <Page>
             <ProTable
+                defaultParams={this.getDefaultParams()}
                 request={(params) => HttpClient.get('admin/sys-log/page', params)}
                 columns={this.columns}
                 searchFormRender={() => (
                     <>
                         <Form.Item label='操作' name='operation'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='操作者' name='username'>
+                            <Input/>
+                        </Form.Item>
+                        <Form.Item label='IP' name='ip'>
                             <Input/>
                         </Form.Item>
                         <Form.Item label='时间' name='dateRange'>

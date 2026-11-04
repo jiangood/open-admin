@@ -2,6 +2,7 @@ import React from "react";
 import {Empty, Table, Tabs, Tag} from "antd";
 import {HttpClient} from "../../framework";
 import RecentOps from "./RecentOps";
+import ShortcutSettings from "./ShortcutSettings";
 
 export default class PermView extends React.Component {
 
@@ -16,6 +17,9 @@ export default class PermView extends React.Component {
     }
 
     renderOrgPerm = (data) => {
+        if (!data) {
+            return <Empty description='加载中...'/>;
+        }
         const orgColumns = [
             {
                 title: '机构名称', dataIndex: 'title', key: 'title',
@@ -48,6 +52,9 @@ export default class PermView extends React.Component {
     }
 
     renderFuncPerm = (data) => {
+        if (!data) {
+            return <Empty description='加载中...'/>;
+        }
         const menuColumns = [
             {
                 title: '菜单名称', dataIndex: 'title', key: 'title',
@@ -78,11 +85,13 @@ export default class PermView extends React.Component {
 
     render() {
         const {data} = this.state;
-        if (!data) {
-            return <Empty description='加载中...'/>;
-        }
 
         return <Tabs items={[
+            {
+                key: 'shortcuts',
+                label: '快捷菜单',
+                children: <ShortcutSettings/>,
+            },
             {
                 key: 'dataPerm',
                 label: '数据权限',

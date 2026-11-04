@@ -1,6 +1,6 @@
 import React from 'react';
 import {Form, Input, Tag} from 'antd';
-import {HttpClient, Page, PermActions, ProTable} from "../../../framework";
+import {HttpClient, Link, Page, PermActions, PermUtils, ProTable, UrlUtils} from "../../../framework";
 
 /**
  * 在线用户：一个登录会话一行，支持强制下线。
@@ -59,6 +59,39 @@ export default class OnlineUserPage extends React.Component {
             dataIndex: 'lastActiveTime',
             width: 170,
             render: v => v || '-',
+        },
+        {
+            title: '最近操作',
+            dataIndex: 'lastOperation',
+            width: 200,
+            render: (v, record) => {
+                if (!v) {
+                    return '-';
+                }
+                const timeText = record.lastOperationTimeText && (
+                    <span style={{
+                        marginInlineStart: 6,
+                        color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                    }}>
+                        {record.lastOperationTimeText}
+                    </span>
+                );
+                if (!PermUtils.hasPermission('sys-log:read')) {
+                    return <span title={record.lastOperationTime || undefined}>{v}{timeText}</span>;
+                }
+                // 按「用户 + IP」跳转，与最近操作的匹配条件保持一致
+                const query = UrlUtils.paramsToSearch({
+                    userId: record.userId,
+                    username: record.name,
+                    ip: record.ip,
+                });
+                return (
+                    <Link to={`/system/log?${query}`} title={record.lastOperationTime || undefined}>
+                        {v}
+                        {timeText}
+                    </Link>
+                );
+            },
         },
         {
             title: '操作',

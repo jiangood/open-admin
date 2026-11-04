@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.system.controller;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterPermVO;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
+import io.github.jiangood.openadmin.modules.system.service.UserShortcutService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,9 @@ class UserCenterPermControllerTest {
 
     @Mock
     private SysUserService sysUserService;
+
+    @Mock
+    private UserShortcutService userShortcutService;
 
     @InjectMocks
     private UserCenterController controller;

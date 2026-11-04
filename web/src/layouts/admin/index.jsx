@@ -21,6 +21,8 @@ export default class AdminLayout extends React.Component {
         pathMenuMap: {},
         menuLoading:true,
 
+        shortcuts: [],
+
 
         currentMenuKey: null,
 
@@ -38,6 +40,7 @@ export default class AdminLayout extends React.Component {
 
     unsubscribeLayout = null;
     unsubscribeSiteInfo = null;
+    unsubscribeShortcuts = null;
 
     componentDidMount() {
         // 判断是否手机端，自动收起菜单
@@ -48,6 +51,9 @@ export default class AdminLayout extends React.Component {
         this.setState({siteInfo, loginInfo})
 
         this.initMenu()
+        this.loadShortcuts()
+
+        this.unsubscribeShortcuts = EventBus.on('shortcutsChange', this.loadShortcuts)
 
         const siteArticles = GlobalData.getSiteArticles();
         this.setState({headerLeftArticles: siteArticles[ARTICLE_HEADER_LEFT] || []})
@@ -69,6 +75,16 @@ export default class AdminLayout extends React.Component {
         if (this.unsubscribeSiteInfo) {
             this.unsubscribeSiteInfo();
         }
+        if (this.unsubscribeShortcuts) {
+            this.unsubscribeShortcuts();
+        }
+    }
+
+
+    loadShortcuts = () => {
+        HttpClient.get('admin/user-center/shortcuts', null, {toastError: false})
+            .then(rs => this.setState({shortcuts: rs.data || []}))
+            .catch(() => this.setState({shortcuts: []}))
     }
 
 
@@ -242,6 +258,7 @@ return <Layout className='main-layout'>
                                   style={{color: 'var(--oa-sider-text, rgba(255,255,255,0.85))'}}>{siderTitle}</Link>
                         </h3>
                     </div>
+                    {this.renderShortcutMenu()}
                     {this.renderLeftMenu()}
 
                 </Sider>
@@ -270,6 +287,57 @@ return <Layout className='main-layout'>
         </Layout>
     }
 
+
+    /** 点击快捷菜单时同步顶部/左侧菜单的当前项，避免跨一级菜单跳转后侧栏状态不跟随 */
+    activateMenuForShortcut(shortcut) {
+        const {topMenus, menuMap} = this.state;
+        const menuDef = menuMap[shortcut.id];
+        let matched = (topMenus || []).find(topMenu =>
+            (topMenu.children || []).some(child => child.key === shortcut.id));
+        if (!matched && menuDef) {
+            matched = this.findActiveTopMenu(topMenus, menuDef, menuMap);
+        }
+        if (matched) {
+            this.setState({
+                activeTopMenuKey: matched.key,
+                sideMenus: matched.children || [],
+                currentMenuKey: shortcut.id,
+            });
+        } else {
+            this.setState({currentMenuKey: shortcut.id});
+        }
+    }
+
+    renderShortcutMenu() {
+        const {shortcuts} = this.state;
+        if (!shortcuts || shortcuts.length === 0) {
+            return null;
+        }
+
+        const items = shortcuts.map(item => ({
+            key: item.id,
+            icon: <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 16}}/>,
+            label: item.name,
+        }));
+
+        return <div className='shortcut-menu'>
+            <div className='shortcut-menu-title'>快捷菜单</div>
+            <Menu items={items}
+                  theme='dark'
+                  mode="inline"
+                  className='shortcut-menu-list'
+                  selectable={false}
+                  inlineIndent={16}
+                  onClick={({key}) => {
+                      const shortcut = shortcuts.find(item => item.id === key);
+                      if (shortcut?.path) {
+                          this.activateMenuForShortcut(shortcut);
+                          PageUtils.open(shortcut.path);
+                      }
+                  }}
+            />
+        </div>;
+    }
 
     renderLeftMenu() {
         if(this.state.menuLoading){

@@ -145,19 +145,21 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 ### 在线用户
 
-系统管理 →「在线用户」页面：一个登录会话一行，展示账号、姓名、机构、IP、登录时间与最后活跃时间，支持把指定会话强制下线。
+系统管理 →「在线用户」页面：一个登录会话一行，展示账号、姓名、机构、IP、登录时间、最后活跃时间与最近操作（取自操作日志，可点击跳转到按该用户 + IP 过滤的操作日志），支持把指定会话强制下线。
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
 | `admin/sys-online-user/page` | GET | `sys-online:read` | 分页查询，查询参数 `keyword`（账号/姓名/IP/机构模糊匹配）、`page`、`size` |
 | `admin/sys-online-user/kick` | POST | `sys-online:kick` | 请求体 `{id}`；`id` 为列表返回的随机标识，非 sessionId |
 
-字段：`id` / `username`（账号）/ `name`（姓名）/ `unitId` / `unitName` / `orgId` / `orgName` / `ip` / `userAgent` / `loginTime` / `lastActiveTime` / `current`（是否当前请求所在会话）。真实 `sessionId` 不会下发给前端。
+字段：`id` / `username`（账号）/ `name`（姓名）/ `unitId` / `unitName` / `orgId` / `orgName` / `ip` / `userAgent` / `loginTime` / `lastActiveTime` / `lastOperation`（最近操作名称）/ `lastOperationTime`（最近操作时间）/ `lastOperationTimeText`（友好时间，如「5分钟前」）/ `current`（是否当前请求所在会话）。真实 `sessionId` 不会下发给前端。
 
 说明：
 
 - 在线记录与 `HttpSession` 一样保存在内存，**仅单实例部署准确**，应用重启后清空；多实例部署需要 Spring Session 等共享会话方案（见 [config.md](config.md)）。
 - `lastActiveTime` 由 Spring Security `SessionRegistry` 的 `lastRequest` 实时计算，无需业务上报。
+- `lastOperation` / `lastOperationTime` 按「用户 + IP」从操作日志表 `sys_log` 批量取最新一条；`lastOperationTimeText` 由 `FriendlyTool.getPastTime` 计算。同一账号从不同 IP 登录时，各会话只显示与自己 IP 一致的最近操作。
+- 「最近操作」跳转格式：`/system/log?userId=...&username=...&ip=...`，操作日志页支持 `username`（模糊）、`userId`（精确）、`ip`（精确）筛选。
 - 强制下线调用 `SessionInformation.expireNow()`，对方下一次请求会收到 401，并复用并发登录提示（见下文「框架内置事件」）。
 - 不允许强制下线当前登录会话；会话被踢后记录立即从列表移除，对方会话在下一次请求时失效。
 - 并发登录被顶下线的旧会话、以及空闲超时的会话，会在下次查询列表时自动清理，不会长期残留。
@@ -170,8 +172,15 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 |------|------|------|------|
 | `admin/user-center/sessions` | GET | 登录即可 | 当前账号的活动会话列表，按登录时间倒序 |
 | `admin/user-center/sessions/kick` | POST | 登录即可 | 请求体 `{id}`；下线自己的其他设备，不能下线当前会话 |
+| `admin/user-center/shortcuts` | GET | 登录即可 | 当前用户有效快捷菜单，按个人中心配置顺序返回 |
+| `admin/user-center/shortcut-options` | GET | 登录即可 | 快捷菜单配置项：当前用户有权限的页面菜单树，目录节点仅用于分组 |
+| `admin/user-center/shortcuts` | POST | 登录即可 | 请求体 `{menuIds: string[]}`，保存顺序；空数组表示清空，最多 10 个 |
 
 字段：`id`（随机标识，非 sessionId）/ `ip` / `userAgent` / `loginTime` / `lastActiveTime` / `current`。
+
+快捷菜单字段：`id`（菜单 id）/ `name` / `path` / `icon`。服务端只保存菜单 id，读取时按当前角色权限解析；权限被回收或菜单被删除的条目会自动从快捷菜单中消失，保存时也会校验菜单必须属于当前用户可访问的页面菜单。
+
+快捷菜单保存在 `sys_user.shortcut_menus`（TEXT，JSON 数组）。使用 JPA 自动建表时会自动新增；如项目自行管理表结构，需要同步添加该列。
 
 说明：
 
@@ -366,6 +375,7 @@ import { PermActions } from '@jiangood/open-admin';
     <Form.Item label="名称" name="name"><Input/></Form.Item>
   )}
   searchInline                           // 搜索表单内联到工具栏左侧（单条件页面），默认 false
+  defaultParams={{status: 'ENABLED'}}    // 初始筛选条件，首次加载即生效并回填表单
   toolBarRightRender={(params, {selectedRowKeys}) => (        // 操作按钮统一放右侧
     <Button type="primary" onClick={this.handleAdd}>新增</Button>
   )}
@@ -390,6 +400,7 @@ import { PermActions } from '@jiangood/open-admin';
 | `searchFormRender` | 搜索表单渲染函数，返回 `Form.Item` 列表 |
 | `searchFormCols` | 搜索栏每行列数，默认 4（`searchInline` 时忽略） |
 | `searchInline` | 搜索表单内联到工具栏左侧，与操作按钮同一行（单条件页面省一行空间）；默认 `false` = 独立筛选卡 |
+| `defaultParams` | 初始筛选条件，首次加载即按此条件查询并回填搜索表单（适合从其他页面带参数跳转） |
 | `defaultPageSize` | 默认每页条数 |
 | `scrollY` | 表格纵向滚动高度 |
 | `bordered` | 是否显示边框 |

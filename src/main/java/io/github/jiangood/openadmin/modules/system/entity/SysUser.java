@@ -10,6 +10,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
@@ -69,6 +71,16 @@ public class SysUser extends BaseEntity {
     @Remark("头像")
     @Column(length = 255)
     private String avatar;
+    /**
+     * 个人中心配置的快捷菜单（有序菜单 id 列表）。
+     * <p>
+     * 不通过用户管理接口下发；个人中心通过 {@code admin/user-center/shortcuts} 单独读取。
+     */
+    @Remark("快捷菜单")
+    @JsonIgnore
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "TEXT")
+    private List<String> shortcutMenus;
     @NotNull
     @Column(nullable = false)
     private Boolean enabled;

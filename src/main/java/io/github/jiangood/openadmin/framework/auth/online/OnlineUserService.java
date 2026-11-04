@@ -2,6 +2,9 @@ package io.github.jiangood.openadmin.framework.auth.online;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.CharSequenceUtil;
+import io.github.jiangood.openadmin.modules.system.service.SysLogService;
+import io.github.jiangood.openadmin.modules.system.service.SysLogService.LatestOperation;
+import io.github.jiangood.openadmin.util.FriendlyTool;
 import io.github.jiangood.openadmin.util.IpTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +22,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 在线用户查询与强制下线。
@@ -30,6 +36,7 @@ public class OnlineUserService {
 
     private final OnlineUserRegistry onlineUserRegistry;
     private final SessionRegistry sessionRegistry;
+    private final SysLogService sysLogService;
 
     /**
      * 内存分页。在线会话数量很小，直接在内存中过滤与分页即可。
@@ -53,12 +60,16 @@ public class OnlineUserService {
         }
 
         int total = active.size();
+        Page<OnlineUser> result;
         if (pageable.isUnpaged()) {
-            return new PageImpl<>(active);
+            result = new PageImpl<>(active);
+        } else {
+            int start = (int) Math.min(pageable.getOffset(), total);
+            int end = Math.min(start + pageable.getPageSize(), total);
+            result = new PageImpl<>(active.subList(start, end), pageable, total);
         }
-        int start = (int) Math.min(pageable.getOffset(), total);
-        int end = Math.min(start + pageable.getPageSize(), total);
-        return new PageImpl<>(active.subList(start, end), pageable, total);
+        fillLastOperation(result.getContent());
+        return result;
     }
 
     /**
@@ -145,6 +156,41 @@ public class OnlineUserService {
 
     private boolean contains(String value, String keyword) {
         return value != null && value.toLowerCase().contains(keyword);
+    }
+
+    /**
+     * 为当前页的在线用户补充「最近操作」：按用户 + IP 批量取操作日志的最新一条，避免逐行查库。
+     * <p>
+     * 必须同时匹配 userId 与 ip：同一账号可能从多个 IP 登录，只显示当前会话 IP 下的操作。
+     */
+    private void fillLastOperation(List<OnlineUser> rows) {
+        if (rows.isEmpty()) {
+            return;
+        }
+        Set<String> userIds = rows.stream()
+                .map(OnlineUser::getUserId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (userIds.isEmpty()) {
+            return;
+        }
+
+        Map<String, Map<String, LatestOperation>> latestMap = sysLogService.findLatestByUserIds(userIds);
+        for (OnlineUser row : rows) {
+            Map<String, LatestOperation> byIp = latestMap.get(row.getUserId());
+            if (byIp == null) {
+                continue;
+            }
+            LatestOperation latest = byIp.get(row.getIp());
+            if (latest == null) {
+                continue;
+            }
+            row.setLastOperation(latest.operation());
+            row.setLastOperationTime(latest.operationTime());
+            row.setLastOperationTimeText(latest.operationTime() == null
+                    ? null
+                    : FriendlyTool.getPastTime(latest.operationTime()));
+        }
     }
 
     private OnlineUser toView(OnlineUser source, SessionInformation information, String currentSessionId) {

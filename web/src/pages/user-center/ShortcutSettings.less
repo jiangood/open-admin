@@ -1,0 +1,93 @@
+.shortcut-tab {
+  .shortcut-tab-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .shortcut-tab-tip {
+    font-size: 13px;
+    color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
+  }
+
+  .shortcut-tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .ant-tag {
+      margin-inline-end: 0;
+      padding: 4px 10px;
+    }
+  }
+}
+
+.shortcut-config {
+  display: flex;
+  gap: 16px;
+  min-height: 380px;
+
+  .shortcut-config-pane {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .shortcut-config-title {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
+  }
+
+  .shortcut-tree-box,
+  .shortcut-selected-box {
+    flex: 1;
+    min-height: 300px;
+    max-height: 420px;
+    padding: 8px;
+    overflow: auto;
+    border: 1px solid var(--oa-color-border, #e8e8e8);
+    border-radius: var(--oa-border-radius, 6px);
+  }
+
+  .shortcut-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+
+  .shortcut-selected-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    cursor: move;
+    border-radius: var(--oa-border-radius, 6px);
+
+    &:hover {
+      background: var(--oa-color-fill, rgba(0, 0, 0, 0.06));
+    }
+
+    &.dragging {
+      opacity: 0.5;
+    }
+  }
+
+  .shortcut-drag-handle,
+  .shortcut-item-icon {
+    flex-shrink: 0;
+    color: var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45));
+  }
+
+  .shortcut-item-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

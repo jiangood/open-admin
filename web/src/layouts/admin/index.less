@@ -161,6 +161,30 @@
       display: none;
     }
 
+    /* 个人中心配置的快捷菜单，固定在常规菜单上方 */
+    .shortcut-menu {
+      flex: 0 1 auto;
+      max-height: 40vh;
+      overflow-y: auto;
+      padding-bottom: 4px;
+      scrollbar-width: thin;
+      border-bottom: 1px solid color-mix(in srgb, var(--oa-sider-text, rgba(255, 255, 255, 0.85)) 14%, transparent);
+
+      .shortcut-menu-title {
+        padding: 8px 16px 4px;
+        font-size: 12px;
+        color: color-mix(in srgb, var(--oa-sider-text, rgba(255, 255, 255, 0.85)) 60%, transparent);
+      }
+
+      .shortcut-menu-list {
+        border-inline-end: none;
+      }
+    }
+
+    &.ant-layout-sider-collapsed .shortcut-menu-title {
+      display: none;
+    }
+
     .left-menu {
       flex: 1;
       overflow: auto;

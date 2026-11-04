@@ -1,9 +1,11 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import io.github.jiangood.openadmin.framework.auth.online.OnlineUserService;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.service.SysLogService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
+import io.github.jiangood.openadmin.modules.system.service.UserShortcutService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +42,12 @@ class UserCenterLogControllerTest {
 
     @Mock
     private SysLogService sysLogService;
+
+    @Mock
+    private OnlineUserService onlineUserService;
+
+    @Mock
+    private UserShortcutService userShortcutService;
 
     @InjectMocks
     private UserCenterController controller;

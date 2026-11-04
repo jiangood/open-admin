@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.framework.auth.online.OnlineUser;
 import io.github.jiangood.openadmin.framework.auth.online.OnlineUserService;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.modules.system.dto.request.SaveUserShortcutsReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.UpdatePwdReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.UpdateUserCenterReq;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterInfo;
@@ -16,6 +17,7 @@ import io.github.jiangood.openadmin.modules.system.dto.response.UserVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.service.SysLogService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
+import io.github.jiangood.openadmin.modules.system.service.UserShortcutService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,7 @@ public class UserCenterController {
     private final SysUserService sysUserService;
     private final SysLogService sysLogService;
     private final OnlineUserService onlineUserService;
+    private final UserShortcutService userShortcutService;
 
 
     @GetMapping("info")
@@ -67,6 +70,35 @@ public class UserCenterController {
     @GetMapping("perms")
     public AjaxResult perms() {
         return AjaxResult.ok().data(sysUserService.getPermView(LoginTool.getUserId()));
+    }
+
+
+    /**
+     * 当前用户的快捷菜单，按个人中心配置顺序返回。
+     */
+    @GetMapping("shortcuts")
+    public AjaxResult shortcuts() {
+        return AjaxResult.ok().data(userShortcutService.list(LoginTool.getUserId()));
+    }
+
+
+    /**
+     * 快捷菜单配置项：仅当前用户有权限、且可跳转的页面菜单。
+     */
+    @GetMapping("shortcut-options")
+    public AjaxResult shortcutOptions() {
+        return AjaxResult.ok().data(userShortcutService.options(LoginTool.getUserId()));
+    }
+
+
+    /**
+     * 保存快捷菜单，最多 10 个，顺序即左侧展示顺序。
+     */
+    @Log("个人中心-配置快捷菜单")
+    @PostMapping("shortcuts")
+    public AjaxResult saveShortcuts(@RequestBody SaveUserShortcutsReq request) {
+        return AjaxResult.ok("保存成功")
+                .data(userShortcutService.save(LoginTool.getUserId(), request.getMenuIds()));
     }
 
 

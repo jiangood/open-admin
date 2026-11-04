@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.modules.system.repository;
 
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,9 @@ class SysUserRepositoryTest {
 
     @Autowired
     private SysUserRepository sysUserRepository;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private SysUser testUser1;
     private SysUser testUser2;
@@ -124,5 +128,17 @@ class SysUserRepositoryTest {
 
         List<SysUser> enabledUsers = sysUserRepository.findAll(Spec.<SysUser>of().eq("enabled", true));
         assertTrue(enabledUsers.size() >= 2);
+    }
+
+    @Test
+    void testShortcutMenusJsonRoundTrip() {
+        testUser1.setShortcutMenus(List.of("sys-user", "sys-role"));
+        sysUserRepository.save(testUser1);
+        entityManager.flush();
+        entityManager.clear();
+
+        SysUser db = sysUserRepository.findById(testUser1.getId()).orElse(null);
+        assertNotNull(db);
+        assertEquals(List.of("sys-user", "sys-role"), db.getShortcutMenus());
     }
 }

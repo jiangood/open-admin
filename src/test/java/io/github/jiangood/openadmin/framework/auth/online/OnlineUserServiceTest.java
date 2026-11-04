@@ -1,6 +1,8 @@
 package io.github.jiangood.openadmin.framework.auth.online;
 
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
+import io.github.jiangood.openadmin.modules.system.service.SysLogService;
+import io.github.jiangood.openadmin.modules.system.service.SysLogService.LatestOperation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -12,7 +14,9 @@ import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,12 +24,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class OnlineUserServiceTest {
 
     @AfterEach
     void tearDown() {
         RequestContextHolder.resetRequestAttributes();
+    }
+
+    private OnlineUserService newService(OnlineUserRegistry registry, SessionRegistryImpl sessionRegistry) {
+        return new OnlineUserService(registry, sessionRegistry, mock(SysLogService.class));
     }
 
     private LoginUser loginUser() {
@@ -49,7 +60,7 @@ class OnlineUserServiceTest {
         registry.record(request, loginUser);
         sessionRegistry.registerNewSession(session.getId(), loginUser);
 
-        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        OnlineUserService service = newService(registry, sessionRegistry);
 
         Page<OnlineUser> page = service.page(null, PageRequest.of(0, 10));
         assertEquals(1, page.getTotalElements());
@@ -64,6 +75,32 @@ class OnlineUserServiceTest {
         SessionInformation information = sessionRegistry.getSessionInformation(session.getId());
         assertNotNull(information);
         assertTrue(information.isExpired());
+    }
+
+    @Test
+    void shouldFillLastOperation() {
+        OnlineUserRegistry registry = new OnlineUserRegistry();
+        SessionRegistryImpl sessionRegistry = new SessionRegistryImpl();
+
+        MockHttpSession session = new MockHttpSession();
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.setSession(session);
+        registry.record(request, loginUser());
+        sessionRegistry.registerNewSession(session.getId(), loginUser());
+
+        LocalDateTime operationTime = LocalDateTime.now().minusMinutes(5);
+        LatestOperation latest = new LatestOperation("user-1", "127.0.0.1", "用户-创建", operationTime);
+
+        SysLogService logService = mock(SysLogService.class);
+        when(logService.findLatestByUserIds(anyCollection()))
+                .thenReturn(Map.of("user-1", Map.of("127.0.0.1", latest)));
+
+        OnlineUserService service = new OnlineUserService(registry, sessionRegistry, logService);
+        OnlineUser row = service.page(null, PageRequest.of(0, 10)).getContent().get(0);
+
+        assertEquals("用户-创建", row.getLastOperation());
+        assertEquals(operationTime, row.getLastOperationTime());
+        assertEquals("5分钟前", row.getLastOperationTimeText());
     }
 
     @Test
@@ -86,7 +123,7 @@ class OnlineUserServiceTest {
         registry.record(publicRequest, user);
         sessionRegistry.registerNewSession(publicSession.getId(), user);
 
-        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        OnlineUserService service = newService(registry, sessionRegistry);
         List<OnlineUser> rows = service.page(null, PageRequest.of(0, 10)).getContent();
 
         OnlineUser inner = rows.stream().filter(r -> "172.18.0.1".equals(r.getIp())).findFirst().orElseThrow();
@@ -107,7 +144,7 @@ class OnlineUserServiceTest {
         registry.record(request, loginUser);
         sessionRegistry.registerNewSession(session.getId(), loginUser);
 
-        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        OnlineUserService service = newService(registry, sessionRegistry);
 
         assertEquals(1, service.page("管理", PageRequest.of(0, 10)).getTotalElements());
         assertEquals(1, service.page("admin", PageRequest.of(0, 10)).getTotalElements());
@@ -127,7 +164,7 @@ class OnlineUserServiceTest {
         sessionRegistry.registerNewSession(session.getId(), loginUser);
         sessionRegistry.getSessionInformation(session.getId()).expireNow();
 
-        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        OnlineUserService service = newService(registry, sessionRegistry);
 
         assertEquals(0, service.page(null, PageRequest.of(0, 10)).getTotalElements());
         assertTrue(registry.list().isEmpty());
@@ -137,7 +174,7 @@ class OnlineUserServiceTest {
     void shouldListOnlyCurrentUsersSessions() {
         OnlineUserRegistry registry = new OnlineUserRegistry();
         SessionRegistryImpl sessionRegistry = new SessionRegistryImpl();
-        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        OnlineUserService service = newService(registry, sessionRegistry);
 
         MockHttpServletRequest mine = recordSession(registry, sessionRegistry, "user-1", "admin");
         recordSession(registry, sessionRegistry, "user-2", "other");
@@ -158,7 +195,7 @@ class OnlineUserServiceTest {
     void shouldKickOwnSessionsOnly() {
         OnlineUserRegistry registry = new OnlineUserRegistry();
         SessionRegistryImpl sessionRegistry = new SessionRegistryImpl();
-        OnlineUserService service = new OnlineUserService(registry, sessionRegistry);
+        OnlineUserService service = newService(registry, sessionRegistry);
 
         MockHttpServletRequest current = recordSession(registry, sessionRegistry, "user-1", "admin");
         MockHttpServletRequest other = recordSession(registry, sessionRegistry, "user-1", "admin");

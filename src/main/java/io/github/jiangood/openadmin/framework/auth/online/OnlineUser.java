@@ -60,6 +60,21 @@ public class OnlineUser {
     private LocalDateTime lastActiveTime;
 
     /**
+     * 最近一次操作名称，来自操作日志表 sys_log
+     */
+    private String lastOperation;
+
+    /**
+     * 最近一次操作时间，来自操作日志表 sys_log
+     */
+    private LocalDateTime lastOperationTime;
+
+    /**
+     * 最近一次操作的友好时间描述（如「5分钟前」），由 {@code FriendlyTool.getPastTime} 计算
+     */
+    private String lastOperationTimeText;
+
+    /**
      * 是否当前请求所在的会话（前端据此隐藏「强制下线」）
      */
     private boolean current;

@@ -142,7 +142,9 @@ public class SysUserService extends BaseService<SysUser> {
         fieldsToUpdate.removeAll(List.of(
             SysUser.Fields.password,
             SysUser.Fields.dataPermType,
-            SysUser.Fields.lastPasswordChangeTime
+            SysUser.Fields.lastPasswordChangeTime,
+            // 快捷菜单属于个人偏好，只能由用户在个人中心维护
+            SysUser.Fields.shortcutMenus
         ));
         if (fieldsToUpdate.contains(SysUser.Fields.orgId) || fieldsToUpdate.contains(SysUser.Fields.unitId)) {
             fieldsToUpdate.add(SysUser.Fields.unitId);

@@ -57,6 +57,11 @@ export interface ProTableProps<T = unknown> {
         onChange?: (selectedRowKeys: React.Key[], selectedRows: T[]) => void;
     };
     defaultPageSize?: number;
+    /**
+     * 初始筛选条件：首次加载即按此条件查询，同时回填搜索表单。
+     * 适合从其他页面带参数跳转（如操作日志按用户/IP 过滤）。
+     */
+    defaultParams?: Record<string, unknown>;
     /** 搜索栏每行列数，默认 4（searchInline 时忽略） */
     searchFormCols?: number;
     /**
@@ -136,6 +141,9 @@ export class ProTable<T = unknown> extends React.Component<ProTableProps<T>, Pro
         super(props);
         if (props.defaultPageSize) {
             this.state.pageSize = props.defaultPageSize
+        }
+        if (props.defaultParams) {
+            this.state.params = {...props.defaultParams}
         }
         this.id = StringUtils.random(32)
     }
@@ -277,6 +285,7 @@ this.setState({loading: true})
             <Form
                 className="filter-bar"
                 style={{'--oa-filter-cols': this.props.searchFormCols ?? 4} as React.CSSProperties}
+                initialValues={this.props.defaultParams}
                 onFinish={(values) => this.onSearch(values)}
                 ref={this.bindFormRef}
             >
@@ -301,6 +310,7 @@ this.setState({loading: true})
         return (
             <Form
                 className="pro-table-search-inline"
+                initialValues={this.props.defaultParams}
                 onFinish={(values) => this.onSearch(values)}
                 onValuesChange={(changedValues) => {
                     // 条件被清空（allowClear 等）后自动回到无筛选状态，否则用户还要再按一次回车
