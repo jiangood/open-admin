@@ -10,6 +10,11 @@ const columns = [
         title: '操作', dataIndex: 'operation',
     },
     {
+        title: '操作详情', dataIndex: 'detail',
+        ellipsis: true,
+        render: (detail) => detail || '-',
+    },
+    {
         title: '结果', dataIndex: 'success', width: 90,
         render: (success) => <Tag color={success ? 'green' : 'red'}>{success ? '成功' : '失败'}</Tag>
     },

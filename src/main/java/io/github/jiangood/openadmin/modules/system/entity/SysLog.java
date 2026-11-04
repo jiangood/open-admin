@@ -26,6 +26,14 @@ public class SysLog extends BaseEntity {
     @Column(nullable = false, length = 100)
     private String operation;
 
+    /**
+     * 操作详情，人类可读，例如「删除用户：张三」。
+     * <p>
+     * 由 {@code @Log.detail} 模板或 {@code OperationLogContext} 生成；旧数据可能为空。
+     */
+    @Column(length = 500)
+    private String detail;
+
 
     @Lob
     private String params;

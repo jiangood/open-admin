@@ -28,6 +28,7 @@
 
 - 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入；Quartz 任务例外见下方「定时任务（Quartz）」
 - 业务异常抛 `ServiceException`，Controller 不做 try-catch
+- 操作日志用 `@Log("模块-动作")`；需要人话详情时加 `detail = "新增XX「${#input.name}」"`，删除/重置等只有 id 的场景用 `OperationLogContext.setDetail(...)`；详情里不要拼密码、令牌等敏感字段
 - 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
 - 方法参数校验用 `@Valid` / `@Validated`
 

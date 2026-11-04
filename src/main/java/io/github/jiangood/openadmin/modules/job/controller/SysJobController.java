@@ -12,6 +12,7 @@ import io.github.jiangood.openadmin.util.field.Field;
 import io.github.jiangood.openadmin.util.field.FieldDescription;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import io.github.jiangood.openadmin.modules.job.JobParamFieldProvider;
@@ -50,7 +51,7 @@ public class SysJobController {
         return AjaxResult.ok().data(service.page(name, jobClass, pageable));
     }
 
-    @Log("定时任务-创建")
+    @Log(value = "定时任务-创建", detail = "创建任务「${#req.name}」")
     @HasPermission("job:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody JobReq req) throws Exception {
@@ -60,7 +61,7 @@ public class SysJobController {
         return AjaxResult.ok().msg("创建成功");
     }
 
-    @Log("定时任务-更新")
+    @Log(value = "定时任务-更新", detail = "修改任务「${#req.name ?: #req.id}」")
     @HasPermission("job:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody JobReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
@@ -84,6 +85,7 @@ public class SysJobController {
     public AjaxResult triggerJob(@Valid @RequestBody IdReq req) throws SchedulerException, ClassNotFoundException {
         SysJob job = service.findById(req.getId()).orElse(null);
         Assert.notNull(job, "任务不存在，可能已被删除");
+        OperationLogContext.setDetail("手动执行任务「" + job.getName() + "」");
         quartzService.triggerJob(job);
 
         return AjaxResult.ok().msg("执行一次命令已发送");

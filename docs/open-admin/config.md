@@ -131,7 +131,7 @@ List<String> channels = sysConfigService.getList("cvs.capture.channels");
 - 配置文件里用相同 key 写默认值也会生效（优先级低于数据库覆盖值）
 - 配置项声明错误（重复 key、非法 key、敏感项同时公开等）会让应用启动失败，便于尽早发现
 
-> 修改配置的接口不要直接加 `@Log`：请求体可能包含敏感值。框架通过 `SysConfigOperationLogger` 只记录变更的 key。
+> 修改配置的接口不要直接加 `@Log`：请求体可能包含敏感值。框架通过 `SysConfigOperationLogger` 只记录变更的 key（操作详情里列出 key，不记录值）。
 
 ## 数据库
 

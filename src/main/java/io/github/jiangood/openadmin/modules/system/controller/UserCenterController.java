@@ -7,6 +7,7 @@ import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.framework.auth.online.OnlineUser;
 import io.github.jiangood.openadmin.framework.auth.online.OnlineUserService;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.modules.system.dto.request.SaveUserShortcutsReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.UpdatePwdReq;
 import io.github.jiangood.openadmin.modules.system.dto.request.UpdateUserCenterReq;
@@ -97,8 +98,9 @@ public class UserCenterController {
     @Log("个人中心-配置快捷菜单")
     @PostMapping("shortcuts")
     public AjaxResult saveShortcuts(@RequestBody SaveUserShortcutsReq request) {
-        return AjaxResult.ok("保存成功")
-                .data(userShortcutService.save(LoginTool.getUserId(), request.getMenuIds()));
+        var saved = userShortcutService.save(LoginTool.getUserId(), request.getMenuIds());
+        OperationLogContext.setDetail("配置快捷菜单（" + saved.size() + " 项）");
+        return AjaxResult.ok("保存成功").data(saved);
     }
 
 
@@ -121,6 +123,10 @@ public class UserCenterController {
     @Log("个人中心-下线登录设备")
     @PostMapping("sessions/kick")
     public AjaxResult kickSession(@Valid @RequestBody IdReq req) {
+        OnlineUser target = onlineUserService.findById(req.getId());
+        if (target != null) {
+            OperationLogContext.setDetail("下线登录设备「IP " + target.getIp() + "」");
+        }
         onlineUserService.kickOwn(req.getId(), LoginTool.getUserId());
         return AjaxResult.ok("已下线");
     }
@@ -152,6 +158,7 @@ public class UserCenterController {
         UserCenterLogVO vo = new UserCenterLogVO();
         vo.setId(sysLog.getId());
         vo.setOperation(sysLog.getOperation());
+        vo.setDetail(sysLog.getDetail());
         vo.setSuccess(sysLog.getSuccess());
         vo.setDuration(sysLog.getDuration());
         vo.setIp(sysLog.getIp());
@@ -163,7 +170,7 @@ public class UserCenterController {
     /**
      * 修改个人资料（手机号、邮箱、头像）
      */
-    @Log("个人中心-修改资料")
+    @Log(value = "个人中心-修改资料", detail = "修改个人资料（手机号：${#request.phone}，邮箱：${#request.email}）")
     @PostMapping("update-info")
     public AjaxResult updateInfo(@Valid @RequestBody UpdateUserCenterReq request) {
         sysUserService.updateInfo(LoginTool.getUserId(), request.getPhone(), request.getEmail(), request.getAvatar());

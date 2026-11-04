@@ -69,7 +69,7 @@ public class SysRoleController {
     /**
      * 创建角色
      */
-    @Log("角色-创建")
+    @Log(value = "角色-创建", detail = "创建角色「${#req.name}」")
     @HasPermission("sys-role:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody RoleReq req) {
@@ -86,7 +86,7 @@ public class SysRoleController {
     /**
      * 更新角色
      */
-    @Log("角色-更新")
+    @Log(value = "角色-更新", detail = "修改角色「${#req.name ?: #req.id}」")
     @HasPermission("sys-role:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody RoleReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) {

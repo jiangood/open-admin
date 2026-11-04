@@ -57,7 +57,7 @@ public class CodegenController {
     /**
      * 预览将生成的文件，不写盘。
      */
-    @Log("代码生成-预览")
+    @Log(value = "代码生成-预览", detail = "预览生成「${#req.className}」")
     @HasPermission("sys-codegen:generate")
     @PostMapping("preview")
     public AjaxResult preview(@Valid @RequestBody CodegenReq req) {
@@ -67,7 +67,7 @@ public class CodegenController {
     /**
      * 生成并写入项目源码目录。
      */
-    @Log("代码生成-生成")
+    @Log(value = "代码生成-生成", detail = "生成代码「${#req.className}」")
     @HasPermission("sys-codegen:generate")
     @PostMapping("generate")
     public AjaxResult generate(@Valid @RequestBody CodegenReq req) throws IOException {

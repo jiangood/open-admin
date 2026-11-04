@@ -39,7 +39,7 @@ public class ArticleController {
         return AjaxResult.ok().data(page);
     }
 
-    @Log("文章-创建")
+    @Log(value = "文章-创建", detail = "创建文章「${#req.title}」")
     @HasPermission("article:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody ArticleReq req) {
@@ -48,7 +48,7 @@ public class ArticleController {
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
 
-    @Log("文章-更新")
+    @Log(value = "文章-更新", detail = "修改文章「${#req.title ?: #req.code ?: #req.id}」")
     @HasPermission("article:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody ArticleReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) {

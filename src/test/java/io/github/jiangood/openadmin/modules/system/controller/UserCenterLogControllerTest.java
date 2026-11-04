@@ -77,6 +77,7 @@ class UserCenterLogControllerTest {
         SysLog sysLog = new SysLog();
         sysLog.setId("log1");
         sysLog.setOperation("个人中心-修改资料");
+        sysLog.setDetail("修改个人资料（手机号：13800000000）");
         sysLog.setSuccess(true);
         sysLog.setDuration(12);
         sysLog.setIp("127.0.0.1");
@@ -89,6 +90,7 @@ class UserCenterLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.content.length()").value(1))
                 .andExpect(jsonPath("$.data.content[0].operation").value("个人中心-修改资料"))
+                .andExpect(jsonPath("$.data.content[0].detail").value("修改个人资料（手机号：13800000000）"))
                 .andExpect(jsonPath("$.data.content[0].success").value(true))
                 .andExpect(jsonPath("$.data.totalElements").value(1));
 

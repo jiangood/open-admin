@@ -91,7 +91,7 @@ public class SysDictController {
         return AjaxResult.ok().data(new PageImpl<>(list));
     }
 
-    @Log("字典-创建")
+    @Log(value = "字典-创建", detail = "创建字典项「${#req.label}」")
     @HasPermission("sys-dict:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody DictItemReq req) {
@@ -100,7 +100,7 @@ public class SysDictController {
         return AjaxResult.ok().data(result.getId()).msg("创建成功");
     }
 
-    @Log("字典-更新")
+    @Log(value = "字典-更新", detail = "修改字典项「${#req.label ?: #req.code ?: #req.id}」")
     @HasPermission("sys-dict:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody DictItemReq req, @RequestHeader("X-Body-Fields") List<String> updateFields) {

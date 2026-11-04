@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.config.controller;
 
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +20,17 @@ public class SysConfigOperationLogger {
 
     @Log("参数设置-修改")
     public AjaxResult updated(@RequestBody List<String> keys) {
+        OperationLogContext.setDetail("修改参数：" + joinKeys(keys));
         return AjaxResult.ok().data(keys);
     }
 
     @Log("参数设置-恢复默认")
     public AjaxResult reset(@RequestBody List<String> keys) {
+        OperationLogContext.setDetail("恢复默认参数：" + joinKeys(keys));
         return AjaxResult.ok().data(keys);
+    }
+
+    private static String joinKeys(List<String> keys) {
+        return keys == null || keys.isEmpty() ? "（无）" : String.join("、", keys);
     }
 }

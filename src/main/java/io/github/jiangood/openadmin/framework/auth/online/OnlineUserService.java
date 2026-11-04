@@ -96,6 +96,13 @@ public class OnlineUserService {
     }
 
     /**
+     * 按对外会话 id 查找在线用户，找不到返回 null。
+     */
+    public OnlineUser findById(String id) {
+        return onlineUserRegistry.findById(id);
+    }
+
+    /**
      * 强制下线：标记会话过期，用户下一次请求会收到 401 并提示重新登录。
      */
     public void kick(String id) {

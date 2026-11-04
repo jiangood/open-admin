@@ -1,7 +1,9 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import io.github.jiangood.openadmin.framework.auth.online.OnlineUser;
 import io.github.jiangood.openadmin.framework.auth.online.OnlineUserService;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
@@ -35,6 +37,11 @@ public class SysOnlineUserController {
     @HasPermission("sys-online:kick")
     @PostMapping("kick")
     public AjaxResult kick(@Valid @RequestBody IdReq req) {
+        OnlineUser target = onlineUserService.findById(req.getId());
+        if (target != null) {
+            String name = target.getName() != null ? target.getName() : target.getUsername();
+            OperationLogContext.setDetail("强制下线「" + name + "（" + target.getUsername() + "，IP " + target.getIp() + "）」");
+        }
         onlineUserService.kick(req.getId());
         return AjaxResult.ok("已强制下线");
     }

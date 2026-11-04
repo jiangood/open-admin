@@ -12,6 +12,7 @@ import io.github.jiangood.openadmin.util.tree.drop.DropResult;
 import io.github.jiangood.openadmin.util.tree.drop.TreeDropTool;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
 import io.github.jiangood.openadmin.modules.system.dto.SysOrgVO;
 import io.github.jiangood.openadmin.modules.system.dto.request.OrgReq;
@@ -64,7 +65,7 @@ public class SysOrgController {
         return AjaxResult.ok().data(list2Tree(list));
     }
 
-    @Log("机构-创建")
+    @Log(value = "机构-创建", detail = "创建机构「${#input.name}」")
     @HasPermission("sys-org:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody OrgReq input) {
@@ -81,7 +82,7 @@ public class SysOrgController {
         return AjaxResult.ok().msg("创建机构成功");
     }
 
-    @Log("机构-更新")
+    @Log(value = "机构-更新", detail = "修改机构「${#input.name ?: #input.id}」")
     @HasPermission("sys-org:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody OrgReq input, @RequestHeader("X-Body-Fields") List<String> requestBodyKeys) {
@@ -102,6 +103,8 @@ public class SysOrgController {
     @HasPermission("sys-org:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
+        sysOrgService.findById(idRequest.getId())
+                .ifPresent(org -> OperationLogContext.setDetail("删除机构「" + org.getName() + "」"));
         sysOrgService.deleteById(idRequest.getId());
         var loginUser = LoginTool.getUser();
         sysUserService.markPermsStale(loginUser.getId(), loginUser.getUsername());

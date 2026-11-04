@@ -27,11 +27,12 @@ public class SysLogController {
 
     @HasPermission("sys-log:read")
     @GetMapping("page")
-    public AjaxResult page(String dateRange, String operation, String username, String userId, String ip,
+    public AjaxResult page(String dateRange, String operation, String detail, String username, String userId, String ip,
                            @PageableDefault(sort = "operationTime", direction = Sort.Direction.DESC) Pageable pageable) {
         Spec<SysLog> q = Spec.of();
         q.betweenDateRange(SysLog.Fields.operationTime, dateRange, true);
         q.like(SysLog.Fields.operation, operation);
+        q.like(SysLog.Fields.detail, detail);
         q.like(SysLog.Fields.username, username);
         q.eq(SysLog.Fields.userId, userId);
         q.eq(SysLog.Fields.ip, ip);

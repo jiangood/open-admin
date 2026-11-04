@@ -17,6 +17,9 @@ public class UserCenterLogVO {
     /** 操作名称，如"用户-创建" */
     private String operation;
 
+    /** 操作详情，如"删除用户「张三」"；旧数据可能为空 */
+    private String detail;
+
     /** 是否成功 */
     private Boolean success;
 

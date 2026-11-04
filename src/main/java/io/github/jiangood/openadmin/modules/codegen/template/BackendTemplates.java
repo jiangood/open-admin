@@ -165,6 +165,22 @@ public final class BackendTemplates {
         pageBody.append("        var page = service.findAll(spec, pageable);\n");
         pageBody.append("        return AjaxResult.ok().data(page);");
 
+        // 有常用显示字段时，顺带生成「人话」操作详情；没有则保持原来的 @Log("模块-动作")
+        FieldMetaVO detailField = findDetailField(meta);
+        String createLog = "@Log(\"" + label + "-创建\")";
+        String updateLog = "@Log(\"" + label + "-更新\")";
+        String deleteBody = "        service.deleteById(req.getId());";
+        if (detailField != null) {
+            String field = detailField.getName();
+            createLog = "@Log(value = \"" + label + "-创建\", detail = \"创建" + label + "「${#input." + field + "}」\")";
+            updateLog = "@Log(value = \"" + label + "-更新\", detail = \"修改" + label + "「${#input." + field + " ?: #input.id}」\")";
+            deleteBody = "        service.findById(req.getId())\n"
+                    + "                .ifPresent(entity -> OperationLogContext.setDetail(\"删除" + label
+                    + "「\" + entity.get" + capitalize(field) + "() + \"」\"));\n"
+                    + "        service.deleteById(req.getId());";
+            imports.append("import io.github.jiangood.openadmin.framework.log.OperationLogContext;\n");
+        }
+
         return """
                 package %s.controller;
 
@@ -202,7 +218,7 @@ public final class BackendTemplates {
                                 .orElse(AjaxResult.err().msg("记录不存在"));
                     }
 
-                    @Log("%s-创建")
+                    %s
                     @HasPermission("%s:create")
                     @PostMapping("create")
                     public AjaxResult create(@RequestBody %s input) throws Exception {
@@ -210,7 +226,7 @@ public final class BackendTemplates {
                         return AjaxResult.ok().msg("创建成功");
                     }
 
-                    @Log("%s-更新")
+                    %s
                     @HasPermission("%s:update")
                     @PostMapping("update")
                     public AjaxResult update(@RequestBody %s input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
@@ -222,7 +238,7 @@ public final class BackendTemplates {
                     @HasPermission("%s:delete")
                     @PostMapping("delete")
                     public AjaxResult delete(@Valid @RequestBody IdReq req) {
-                        service.deleteById(req.getId());
+                %s
                         return AjaxResult.ok().msg("删除成功");
                     }
                 }
@@ -230,9 +246,35 @@ public final class BackendTemplates {
                 module, params,
                 pageBody,
                 module,
-                label, module, entity,
-                label, module, entity,
-                label, module);
+                createLog, module, entity,
+                updateLog, module, entity,
+                label, module, deleteBody);
+    }
+
+    /**
+     * 取一个适合写进操作详情的显示字段（name / title / label / account / code）。
+     */
+    private static FieldMetaVO findDetailField(EntityMetaVO meta) {
+        List<FieldMetaVO> fields = meta.getFields();
+        if (fields == null || fields.isEmpty()) {
+            return null;
+        }
+        for (String name : List.of("name", "title", "label", "account", "code")) {
+            FieldMetaVO matched = fields.stream()
+                    .filter(f -> name.equals(f.getName()))
+                    .filter(f -> "STRING".equals(f.getCategory()))
+                    .findFirst()
+                    .orElse(null);
+            if (matched != null) {
+                return matched;
+            }
+        }
+        return null;
+    }
+
+    private static String capitalize(String name) {
+        return name == null || name.isEmpty() ? name
+                : Character.toUpperCase(name.charAt(0)) + name.substring(1);
     }
 
     private static List<FieldMetaVO> searchable(EntityMetaVO meta) {

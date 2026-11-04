@@ -86,6 +86,11 @@ class CodegenTemplateTest {
         assertTrue(controller.contains("spec.orLike(searchText, \"code\", \"title\")"), "title 应作为模糊查询字段");
         assertTrue(controller.contains("spec.eq(\"position\", position)"));
         assertTrue(controller.contains("import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;"));
+        assertTrue(controller.contains("detail = \"创建文章「${#input.title}」\""), "应生成创建详情模板");
+        assertTrue(controller.contains("detail = \"修改文章「${#input.title ?: #input.id}」\""), "应生成更新详情模板");
+        assertTrue(controller.contains("OperationLogContext.setDetail(\"删除文章「\" + entity.getTitle() + \"」\")"),
+                "删除应通过 OperationLogContext 记录详情");
+        assertTrue(controller.contains("import io.github.jiangood.openadmin.framework.log.OperationLogContext;"));
     }
 
     @Test

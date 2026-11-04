@@ -220,9 +220,9 @@ public class CustomerService extends BaseService<Customer> {
 |------|------|-----|------|------|
 | 分页查询 | `@RequestMapping("page")` | `admin/{module}/page` | `{module}:read` | 支持 searchText 模糊搜索 + Pageable |
 | 详情 | `@GetMapping("info/{id}")` | `admin/{module}/info/{id}` | `{module}:read` | 返回单条记录 |
-| 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid + @Log |
-| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + @RequestHeader("X-Body-Fields") + @Log |
-| 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq + @Log |
+| 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid + @Log（建议带 detail） |
+| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + @RequestHeader("X-Body-Fields") + @Log（建议带 detail） |
+| 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq + @Log + `OperationLogContext.setDetail(...)` |
 | 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:read` | 下拉框数据源（非必选） |
 
 > **搜索参数契约（易踩坑）**：`ProTable` 会把搜索表单各 `Form.Item` 的 `name` 值**原样**作为 query 参数发送给 `page`/`options`，不会自动映射。因此后端方法参数名必须与前端搜索字段名**完全一致**。本模板后端 `page`/`options` 参数名统一为 `searchText`，前端搜索框也必须用 `name='searchText'`（见「第三步」模板）；若改成其他名字（如 `name`），必须同步修改后端参数名，否则搜索输入不生效。
@@ -233,6 +233,7 @@ package com.mycompany.myproject.modules.customer.controller;
 import com.mycompany.myproject.modules.customer.entity.Customer;
 import com.mycompany.myproject.modules.customer.service.CustomerService;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
@@ -272,7 +273,7 @@ public class CustomerController {
                 .orElse(AjaxResult.fail().msg("记录不存在"));
     }
 
-    @Log("客户-创建")
+    @Log(value = "客户-创建", detail = "创建客户「${#input.name}」")
     @HasPermission("customer:create")
     @PostMapping("create")
     public AjaxResult create(@Valid @RequestBody Customer input) throws Exception {
@@ -280,7 +281,7 @@ public class CustomerController {
         return AjaxResult.ok().msg("创建成功");
     }
 
-    @Log("客户-更新")
+    @Log(value = "客户-更新", detail = "修改客户「${#input.name ?: #input.id}」")
     @HasPermission("customer:update")
     @PostMapping("update")
     public AjaxResult update(@Valid @RequestBody Customer input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
@@ -292,6 +293,8 @@ public class CustomerController {
     @HasPermission("customer:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq req) {
+        service.findById(req.getId())
+                .ifPresent(entity -> OperationLogContext.setDetail("删除客户「" + entity.getName() + "」"));
         service.deleteById(req.getId());
         return AjaxResult.ok().msg("删除成功");
     }
@@ -549,7 +552,7 @@ menus:
 ## 代码规范约束
 
 - 后端/前端开发规范（命名、构造器注入、`AjaxResult`、REST 端点等）遵循 [development.md](../../../docs/open-admin/development.md)
-- 需要操作日志的端点加 `@Log("业务-操作描述")`
+- 需要操作日志的端点加 `@Log("业务-操作描述")`；建议补 `detail` 详情（`${#input.name}` 之类），删除等只有 id 的用 `OperationLogContext.setDetail(...)`，详情不要拼敏感字段
 - 敏感端点加 `@RateLimit` 限流（如登录、短信验证码）
 - Java import 使用框架的全限定名（参见上文模板）；前端 import 使用 `@jiangood/open-admin` 包名
 - 直接输出代码，避免冗余说明；确保代码完整可运行

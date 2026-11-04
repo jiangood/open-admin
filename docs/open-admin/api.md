@@ -20,10 +20,23 @@ repository.findAll(spec, pageable);
 | 注解 | 用途 |
 |------|------|
 | `@HasPermission("resource:action")` | 权限控制 |
-| `@Log` | 操作日志 |
+| `@Log("业务-操作")` | 操作日志（可加 `detail` 详情模板） |
 | `@RateLimit(count=10, duration=60)` | IP 限流 |
 | `@JobDescription` | 定时任务定义 |
 | `@ValidateMobile` / `@ValidateIdNum` / ... | 字段格式校验 |
+
+### 操作日志
+
+| 写法 | 用途 |
+|---|---|
+| `@Log("用户-创建")` | 只记录操作名 |
+| `@Log(value = "用户-创建", detail = "新增用户「${#input.name}」")` | 声明式详情；`${}` 内是 SpEL，变量为方法参数（`#参数名`，或 `#p0` / `#a0`） |
+| `OperationLogContext.setDetail("删除用户「" + user.getName() + "」")` | 代码补充详情，适合只有 id、或需要旧值的场景（优先级高于注解模板） |
+
+- 求值失败或结果为 null 时按空串处理，不影响业务方法；详情最长 500 字符
+- 部分更新场景可用 SpEL 的 `?:` 兜底，如 `${#input.name ?: #input.id}`，避免出现空的「」
+- **不要拼接密码、令牌等敏感字段**：`params` 会按字段名自动脱敏，`detail` 不会
+- 日志页的「操作详情」列来自 `detail`，请求参数在行详情抽屉里查看
 
 ### 工具类
 

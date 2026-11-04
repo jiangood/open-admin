@@ -7,6 +7,7 @@ import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.log.Log;
+import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.util.PasswordTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.DropdownReq;
@@ -69,7 +70,7 @@ public class SysUserController {
     }
 
 
-    @Log("用户-创建")
+    @Log(value = "用户-创建", detail = "新增用户「${#input.name}（${#input.account}）」")
     @HasPermission("sys-user:create")
     @PostMapping("create")
     public AjaxResult create(@RequestBody UserReq input) throws Exception {
@@ -80,7 +81,7 @@ public class SysUserController {
         return AjaxResult.ok("添加新用户成功").data("password", plain);
     }
 
-    @Log("用户-更新")
+    @Log(value = "用户-更新", detail = "修改用户「${#input.name ?: #input.account ?: #input.id}」")
     @HasPermission("sys-user:update")
     @PostMapping("update")
     public AjaxResult update(@RequestBody UserReq input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
@@ -96,6 +97,7 @@ public class SysUserController {
     public AjaxResult delete(@Valid @RequestBody IdReq idRequest) {
         SysUser user = sysUserService.findById(idRequest.getId()).orElse(null);
         Assert.notNull(user, "用户不存在");
+        OperationLogContext.setDetail("删除用户「" + user.getName() + "（" + user.getAccount() + "）」");
         sysUserService.deleteById(idRequest.getId());
         sysUserService.markPermsStale(user.getId(), user.getAccount());
 
@@ -132,6 +134,10 @@ public class SysUserController {
     @PostMapping("reset-pwd")
     public AjaxResult resetPwd(@RequestBody UserReq input) {
         Assert.hasText(input.getPassword(), "请输入新密码");
+        SysUser user = sysUserService.findById(input.getId()).orElse(null);
+        if (user != null) {
+            OperationLogContext.setDetail("重置用户「" + user.getName() + "（" + user.getAccount() + "）」的密码");
+        }
         sysUserService.resetPwd(input.getId(), input.getPassword());
         return AjaxResult.ok().msg("重置成功");
     }
@@ -197,6 +203,7 @@ public class SysUserController {
     public AjaxResult grantPerm(@Valid @RequestBody GrantUserPermReq param) {
         SysUser sysUser = sysUserService.grantPerm(param.getId(), param.getRoleIds(), param.getDataPermType(), param.getOrgIds());
         sysUserService.markPermsStale(sysUser.getId(), sysUser.getAccount());
+        OperationLogContext.setDetail("授权用户「" + sysUser.getName() + "（" + sysUser.getAccount() + "）」的数据权限");
 
         return AjaxResult.ok().msg("授权成功");
     }

@@ -74,7 +74,7 @@ web/
 - **权限控制** — `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
 - **ID 生成** — 默认 UUIDv7（时间排序，MySQL 友好）
 - **文件存储** — 支持 `local` / `minio`，通过 `FileOperator` 接口抽象
-- **操作日志** — `@Log` 注解 + AOP 切面，异步记录
+- **操作日志** — `@Log` 注解 + AOP 切面，异步记录；`@Log.detail` 或 `OperationLogContext` 记录人类可读详情（如「删除用户：张三」），不要把密码/令牌写进详情
 - **页面生命周期** — 多 Tab 下页面保持 mounted，通过 `PageFrame` 的 `show` prop + ref 机制自动调用组件 `onShow()` 方法（首次打开 / Tab 切回时触发）
 
 ## 技术栈
@@ -112,7 +112,7 @@ web/
 | 参数设置 | 运行时可改的全局配置：数据库只存覆盖值，`application.yml` 与代码默认值兜底；业务模块实现 `ConfigProvider` 即可在通用配置页维护自己的参数 |
 | 定时任务 | 基于 Quartz，动态创建/暂停/恢复，继承 `BaseJob` + `@JobDescription`；`BaseJob.progress(...)` 上报运行进度，执行记录方式（每次/每小时/每天各一份记录）与保留期清理 |
 | 文件管理 | `sys.file.store-type` 配置（`LOCAL` / `MINIO`），统一上传下载预览；临时文件自动清理（TTL 可配置） |
-| 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`） |
+| 操作日志 | `@Log` 注解 + AOP 切面，异步记录（独立线程池 `operationLogExecutor`）；`@Log.detail` 或 `OperationLogContext` 记录人类可读详情，日志页支持详情列与行详情抽屉 |
 | 在线用户 | 一个登录会话一行，展示账号/姓名/机构/IP/登录时间、最后活跃与最近操作（取自操作日志，按用户 + IP 匹配，可跳转日志），支持强制下线；会话记录在内存，仅单实例部署准确 |
 | 运行日志查看 | 在线查看日志文件 |
 | 邮件发送 | 内置 QQ/腾讯企业邮/163/126/Outlook/Gmail/阿里企业邮模板；配置在「参数设置 → 邮件发送」，业务注入 `MailService` 即可发送通知邮件，支持 HTML、附件与 HTTP/SOCKS5 代理 |
