@@ -37,6 +37,11 @@ function MessageBridge() {
 
 interface LayoutsProps {
     headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
+    /**
+     * headerExtra 是否撑满顶栏剩余空间（紧跟一级菜单右侧）。
+     * 默认 false = 现有行为：headerExtra 固定在 HeaderRight 左侧。
+     */
+    headerExtraStretch?: boolean;
     showOrgSwitcher?: (context: HeaderExtraContext) => boolean;
     /** 主题颜色覆盖，不传使用框架默认主题 */
     colors?: Partial<ThemeColors>;
@@ -252,7 +257,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             return <PageFrame url={pathname + search}/>;
         }
         if (ready && layout === 'admin') {
-            return <AdminLayout headerExtra={this.props.headerExtra} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/>;
+            return <AdminLayout headerExtra={this.props.headerExtra} headerExtraStretch={this.props.headerExtraStretch} showOrgSwitcher={this.props.showOrgSwitcher} loginInfo={GlobalData.getLoginInfo()}/>;
         }
         return <PageLoading messages={[
             !this.state.siteInfoLoaded && '加载站点信息...',

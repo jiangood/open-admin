@@ -214,6 +214,16 @@ export default class AdminLayout extends React.Component {
         // 侧栏空间有限，优先显示系统简称；未配置时回退完整标题
         const siderTitle = (siteInfo.shortTitle || '').trim() || siteInfo.title || '首页';
 
+        const headerExtraNode = this.props.headerExtra?.({
+            activeTopMenu: this.getActiveTopMenu(),
+            loginInfo: this.props.loginInfo,
+        });
+        // 只有真正有内容时才占位，避免无权限角色留下空容器影响顶栏布局
+        // （null/undefined/布尔值在 React 中都不渲染，视为没有额外内容）
+        const hasHeaderExtra = headerExtraNode !== null && headerExtraNode !== undefined
+            && typeof headerExtraNode !== 'boolean';
+        const headerClassName = 'header' + (this.props.headerExtraStretch && hasHeaderExtra ? ' has-stretch-extra' : '');
+
 return <Layout className='main-layout'>
              {/* 侧栏单独套暗色算法，使分割线/边框在深色底上可见，并按预设覆盖侧栏底色 */}
              <ConfigProvider theme={getSiderThemeConfig()}>
@@ -238,7 +248,7 @@ return <Layout className='main-layout'>
              </ConfigProvider>
 
             <Layout style={{flex: 1, overflow: 'hidden'}}>
-                <Header className='header'>
+                <Header className={headerClassName}>
                     {this.renderTopMenu()}
                     {this.state.headerLeftArticles.map(a => (
                         <button key={a.code} type="button" className='item'
@@ -248,10 +258,7 @@ return <Layout className='main-layout'>
                         activeTopMenu: this.getActiveTopMenu(),
                         loginInfo: this.props.loginInfo,
                     }) && <OrgSwitcher/>}
-                    {this.props.headerExtra?.({
-                        activeTopMenu: this.getActiveTopMenu(),
-                        loginInfo: this.props.loginInfo,
-                    })}
+                    {hasHeaderExtra && <div className='header-extra'>{headerExtraNode}</div>}
                     <HeaderRight/>
                 </Header>
 

@@ -77,6 +77,25 @@
       flex-shrink: 0;
     }
 
+    /* headerExtra 容器：给业务稳定的样式钩子，内部溢出省略才能生效 */
+    .header-extra {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    /* 让 headerExtra 紧跟一级菜单并吃掉剩余空间（opt-in，默认不生效） */
+    &.has-stretch-extra {
+      .top-nav {
+        /* 菜单按内容宽排布，过多时仍可收缩横向滚动 */
+        flex: 0 1 auto;
+      }
+
+      .header-extra {
+        flex: 1 1 auto;
+      }
+    }
+
     .header-right {
       line-height: 36px;
       display: flex;

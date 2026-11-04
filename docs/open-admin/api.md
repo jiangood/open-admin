@@ -231,6 +231,17 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | `LogViewer` | 文件日志查看器，按字节偏移增量读取；`logKey` + `running` 时自动轮询新内容、任务结束自动补拉最后一段；`url` 可指向业务模块自建接口 |
 | `CronEditor` | cron 表达式输入框 + 常用表达式助手（按间隔/按时间点/自定义），值为 Quartz 格式「秒 分 时 日 月 周 [年]」 |
 
+#### Layouts
+
+应用根布局（由 `web/src/main.jsx` 渲染），负责站点信息/登录校验、主题与后台布局（侧栏 + 顶栏 + 页签）。
+
+| 属性 | 类型 | 说明 |
+|---|---|---|
+| `headerExtra` | `(context: HeaderExtraContext) => React.ReactNode` | 顶栏额外内容，默认渲染在 `HeaderRight` 左侧；`context` 含 `activeTopMenu`、`loginInfo` |
+| `headerExtraStretch` | `boolean` | 为 `true` 时 `headerExtra` 紧跟一级菜单并撑满顶栏剩余空间；默认 `false`（保持原位置）。需要常驻条（如预警滚动条）时使用，不要覆盖 `.top-nav` |
+| `showOrgSwitcher` | `(context: HeaderExtraContext) => boolean` | 是否显示组织机构切换器 |
+| `colors` | `Partial<ThemeColors>` | 主题颜色基线，见 [config.md](config.md) |
+
 #### PageFrame
 
 多 Tab 布局的内核：根据当前 hash 匹配路由渲染页面组件。页面通过 `onShow()` 生命周期响应激活（详见[页面生命周期](#页面生命周期)），整个 `PageFrame` 由 `ErrorBoundary` 包裹，页面渲染异常不会影响整体布局。
