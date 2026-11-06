@@ -9,6 +9,18 @@
 # 业务项目自己的配置优先级更高，可以按需覆盖。
 # ===================================================================
 
+server:
+  servlet:
+    session:
+      # 会话空闲超时（分钟）：引用 sys.session-idle-time，保持与文档一致。
+      # 此前未接线，实际使用 Spring Boot 默认的 30m。
+      timeout: "${sys.session-idle-time:180}m"
+      # 优雅停机时把 session 写入 store-dir，启动时恢复，实现重启免登录。
+      # 仅对单实例、正常停机有效；kill -9 / 崩溃 / 多实例请改用 Spring Session。
+      # 未挂载 /data 的业务项目请覆盖 store-dir，或设置 persistent: false 关闭。
+      persistent: true
+      store-dir: /data/session
+
 spring:
   autoconfigure:
     exclude:

@@ -57,7 +57,7 @@ npm run dev                    # 默认 http://localhost:3000
 
 ### Docker 一键部署
 
-镜像内置 H2 数据库，无需外部 MySQL，数据、日志、上传文件持久化在 `/data`：
+镜像内置 H2 数据库，无需外部 MySQL，数据、日志、上传文件、登录会话持久化在 `/data`（正常重启后用户无需重新登录）：
 
 ```bash
 # docker compose（首次自动构建镜像）

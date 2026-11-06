@@ -14,6 +14,12 @@ import java.util.stream.Collectors;
 @Setter
 public class LoginUser extends User {
 
+    /**
+     * 会话落盘（server.servlet.session.persistent）依赖 JDK 序列化；
+     * 固定 UID，避免框架升级增删字段后 SESSIONS.ser 无法反序列化。
+     */
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private String name;
     private String unitId;

@@ -171,7 +171,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 说明：
 
-- 在线记录与 `HttpSession` 一样保存在内存，**仅单实例部署准确**，应用重启后清空；多实例部署需要 Spring Session 等共享会话方案（见 [config.md](config.md)）。
+- 在线记录保存在内存，**仅单实例部署准确**；应用重启后 `HttpSession` 会从落盘文件恢复，在线记录则在用户下一次请求时自动补登记（重启后尚未访问的用户不会立即出现），多实例部署需要 Spring Session 等共享会话方案（见 [config.md](config.md)）。
 - `lastActiveTime` 由 Spring Security `SessionRegistry` 的 `lastRequest` 实时计算，无需业务上报。
 - `lastOperation` / `lastOperationTime` 按「用户 + IP」从操作日志表 `sys_log` 批量取最新一条；`lastOperationTimeText` 由 `FriendlyTool.getPastTime` 计算。同一账号从不同 IP 登录时，各会话只显示与自己 IP 一致的最近操作。
 - 「最近操作」跳转格式：`/system/log?userId=...&username=...&ip=...`，操作日志页支持 `username`（模糊）、`userId`（精确）、`ip`（精确）筛选。
@@ -201,7 +201,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 - 是否会出现多处登录取决于 `sys.maximum-sessions`：默认 `1` 会在新登录时踢掉旧会话；调大后多个会话并存，个人中心在会话数大于 1 时显示提示。
 - 服务端会校验会话归属，只能下线自己的会话，也允许用户自助下线自己的其他设备。
-- 在线记录保存在内存，**仅单实例部署准确**（同「在线用户」）。
+- 在线记录保存在内存，**仅单实例部署准确**（同「在线用户」）；应用重启后随用户请求自动恢复登记。
 
 ### 代码生成
 

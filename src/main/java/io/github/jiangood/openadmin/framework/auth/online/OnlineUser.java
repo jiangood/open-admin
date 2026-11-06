@@ -4,16 +4,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 在线用户（一个登录会话一行）。
  * <p>
  * 数据直接来自登录时的 {@code LoginUser} 与 {@code HttpSession}，不查库，避免每次刷新页面产生额外查询。
+ * <p>
+ * 登录成功后会作为 session 属性一起落盘，应用重启恢复会话时用于还原登录时间/IP/UA。
  */
 @Getter
 @Setter
-public class OnlineUser {
+public class OnlineUser implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * 对外暴露的随机标识，避免把真实 sessionId 泄露给前端

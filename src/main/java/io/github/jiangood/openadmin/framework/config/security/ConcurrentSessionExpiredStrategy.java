@@ -4,6 +4,7 @@ import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.util.ResponseTool;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.web.session.SessionInformationExpiredEvent;
@@ -37,6 +38,12 @@ public class ConcurrentSessionExpiredStrategy implements SessionInformationExpir
     @Override
     public void onExpiredSessionDetected(SessionInformationExpiredEvent event) throws IOException {
         HttpServletResponse response = event.getResponse();
+
+        // 被顶下线的会话立即销毁：避免应用重启时 Tomcat 把已失效会话落盘、随后又被恢复
+        HttpSession session = event.getRequest().getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
 
         // ResponseTool 只写 body 与 Content-Type，状态码必须在此显式设置
         response.setStatus(HttpStatus.UNAUTHORIZED.value());

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -28,6 +29,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 public class OnlineUserRegistry {
+
+    /**
+     * 登录时把在线记录写入 session 的 key。
+     * <p>
+     * 应用重启后 Tomcat 从 /data/session 恢复 HttpSession，这里保存的元数据也随之恢复，
+     * 避免在线用户列表把「登录时间」重置为重启后的首次访问时间。
+     */
+    public static final String SESSION_ATTR = OnlineUserRegistry.class.getName() + ".ONLINE_USER";
 
     /**
      * sessionId -> 在线记录
@@ -61,6 +70,47 @@ public class OnlineUserRegistry {
         onlineUser.setLoginTime(LocalDateTime.now());
 
         sessions.put(session.getId(), onlineUser);
+        // 随 session 一起落盘，供应用重启后恢复
+        session.setAttribute(SESSION_ATTR, onlineUser);
+    }
+
+    /**
+     * 应用重启后按需恢复在线记录：优先复用登录时写入 session 的原始记录（保留登录时间/IP/UA），
+     * 没有则按当前请求重新登记；同时同步用户可能已变化的姓名、机构等字段。
+     */
+    public void restore(HttpServletRequest request, LoginUser loginUser) {
+        if (request == null || loginUser == null) {
+            return;
+        }
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return;
+        }
+
+        String sessionId = session.getId();
+        Object saved = session.getAttribute(SESSION_ATTR);
+        OnlineUser onlineUser;
+        if (saved instanceof OnlineUser value && Objects.equals(value.getUserId(), loginUser.getId())) {
+            onlineUser = value;
+        } else {
+            onlineUser = new OnlineUser();
+            onlineUser.setId(IdTool.uuidV7());
+            onlineUser.setLoginTime(LocalDateTime.now());
+            onlineUser.setIp(IpTool.getIp(request));
+            onlineUser.setUserAgent(request.getHeader("User-Agent"));
+        }
+
+        onlineUser.setSessionId(sessionId);
+        onlineUser.setUserId(loginUser.getId());
+        onlineUser.setUsername(loginUser.getUsername());
+        onlineUser.setName(loginUser.getName());
+        onlineUser.setUnitId(loginUser.getUnitId());
+        onlineUser.setUnitName(loginUser.getUnitName());
+        onlineUser.setOrgId(loginUser.getOrgId());
+        onlineUser.setOrgName(loginUser.getOrgName());
+
+        sessions.put(sessionId, onlineUser);
+        session.setAttribute(SESSION_ATTR, onlineUser);
     }
 
     public void remove(String sessionId) {

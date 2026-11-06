@@ -47,6 +47,13 @@ class SecurityConfigConcurrentSessionTest {
     }
 
     @Test
+    void filterChainShouldContainSessionRestoreFilter() {
+        boolean present = ((DefaultSecurityFilterChain) securityFilterChain).getFilters().stream()
+                .anyMatch(SessionRestoreFilter.class::isInstance);
+        assertTrue(present, "过滤链中未注册 SessionRestoreFilter，应用重启后在线用户与并发会话控制无法恢复");
+    }
+
+    @Test
     void filterChainShouldUseJson401ExpiredStrategy() throws Exception {
         ConcurrentSessionFilter filter = ((DefaultSecurityFilterChain) securityFilterChain).getFilters().stream()
                 .filter(ConcurrentSessionFilter.class::isInstance)

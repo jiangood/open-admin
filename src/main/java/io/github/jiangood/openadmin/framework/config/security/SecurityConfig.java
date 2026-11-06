@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
 import cn.hutool.core.collection.CollUtil;
+import io.github.jiangood.openadmin.framework.auth.online.OnlineUserRegistry;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.util.ArrayTool;
 import io.github.jiangood.openadmin.util.ResponseTool;
@@ -25,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -53,7 +55,8 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    PermissionRefreshFilter permissionRefreshFilter,
-                                                   SessionRegistry sessionRegistry) throws Exception {
+                                                   SessionRegistry sessionRegistry,
+                                                   OnlineUserRegistry onlineUserRegistry) throws Exception {
         http.securityMatcher("/admin/**", "/file/**", "/ureport/**")
                 .headers(cfg -> cfg
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)   // iframe 允许同域名下访问，如嵌入ureport报表
@@ -97,6 +100,10 @@ public class SecurityConfig {
 
         // 认证通过后判断是否需要刷新权限（如修改用户）
         http.addFilterAfter(permissionRefreshFilter, UsernamePasswordAuthenticationFilter.class);
+
+        // 应用重启后 Tomcat 会恢复 HttpSession，但内存态的会话注册表为空，这里按需补登记
+        // 放在 ConcurrentSessionFilter 之前，保证同一请求内恢复的会话也能参与并发控制
+        http.addFilterBefore(new SessionRestoreFilter(sessionRegistry, onlineUserRegistry), ConcurrentSessionFilter.class);
 
 
         http.exceptionHandling(cfg -> {

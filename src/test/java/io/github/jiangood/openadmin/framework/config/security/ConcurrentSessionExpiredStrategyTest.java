@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.web.session.SessionInformationExpiredEvent;
 
@@ -58,6 +59,20 @@ class ConcurrentSessionExpiredStrategyTest {
         Map<String, Object> body = JsonTool.jsonToMapQuietly(response.getContentAsString());
         assertEquals(401, response.getStatus());
         assertEquals("账号已在其它设备登录，请重新登录", body.get("message"));
+    }
+
+    @Test
+    void shouldInvalidateKickedSession() throws Exception {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        MockHttpSession session = new MockHttpSession();
+        request.setSession(session);
+        SessionInformation sessionInformation = new SessionInformation("admin", session.getId(), new Date());
+
+        new ConcurrentSessionExpiredStrategy(new SystemProperties())
+                .onExpiredSessionDetected(new SessionInformationExpiredEvent(
+                        sessionInformation, request, new MockHttpServletResponse()));
+
+        assertTrue(session.isInvalid(), "被顶下线的会话应立即销毁，避免重启时被 Tomcat 落盘后恢复");
     }
 
     @Test

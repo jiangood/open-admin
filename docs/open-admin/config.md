@@ -12,8 +12,11 @@
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
 | `sys.file.minio.*` | MinIO 对象存储配置 | — |
-| `sys.session-idle-time` | Session 超时（分钟） | 180 |
+| `sys.session-idle-time` | Session 超时（分钟），通过 `server.servlet.session.timeout` 生效 | 180 |
 | `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时踢出旧会话 | 1 |
+| `server.servlet.session.persistent` | 优雅停机时把登录会话落盘，重启后恢复（重启免登录） | true |
+| `server.servlet.session.store-dir` | 会话落盘目录，需可写并位于持久卷 | /data/session |
+| `server.servlet.session.timeout` | 会话空闲超时，默认引用 `sys.session-idle-time` | 180m |
 | `sys.concurrent-login-message` | 被并发登录顶下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
 | `sys.login-expired-message` | 会话空闲超时/未登录时的提示文案（经 `/admin/public/site-info` 下发给前端） | 登录已过期，请重新登录 |
 | `sys.job-enable` | 定时任务开关 | true |
@@ -26,7 +29,9 @@
 
 > 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-upgrade-docs` skill 从框架 GitHub Release 下载 `framework-files.zip` 同步到业务项目根目录（内容比对，无变更不写入）。无需配置。
 
-> 「在线用户」列表复用同一套会话注册表，记录保存在内存，**仅单实例部署准确**；多实例部署请先引入 Spring Session 等共享会话方案，否则各节点只能看到本节点登录的用户。
+> **会话落盘（重启免登录）**：框架默认开启 `server.servlet.session.persistent`，正常停机时把 `HttpSession` 写入 `server.servlet.session.store-dir`，启动后恢复。仅对**单实例、优雅停机**有效：`kill -9`、JVM 崩溃、断电不会保留会话；多实例请改用 Spring Session 等共享会话方案。首次升级启动时旧的内存会话已丢失，所有用户需重新登录一次，之后正常重启不再需要。session 中的自定义属性必须可序列化；未挂载 `/data` 的项目请覆盖 `store-dir`，或设置 `persistent: false` 关闭。
+
+> 「在线用户」列表复用同一套会话注册表，记录保存在内存，**仅单实例部署准确**；应用重启后会话本身会恢复，在线记录则随用户下一次请求自动补登记（重启后尚未访问的用户不会立即出现在列表里）。多实例部署请先引入 Spring Session 等共享会话方案，否则各节点只能看到本节点登录的用户。
 
 > 本地想验证个人中心「登录设备」的多处登录提示，可用 `local` profile 启动（`-Dspring-boot.run.profiles=local` 或环境变量 `SPRING_PROFILES_ACTIVE=local`），该 profile 将 `sys.maximum-sessions` 设为 `3`。
 
