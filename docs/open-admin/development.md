@@ -50,6 +50,17 @@
 
 任务类继承 `BaseJob` 并加 `@JobDescription`，注册菜单后由 Quartz 调度（新增示例见 `modules/job/` 下的框架任务）。
 
+**自动注册**：启动时会扫描 `BaseJob` 子类以及带 `@JobDescription` 的任务类，把缺失的记录补建到 `sys_job`（默认禁用），不需要再为每个业务任务手写 seed。已有记录不会被覆盖，删除记录后重启会重新补建；不想运行请禁用而不是删除。可通过 `sys.job-auto-register: false` 关闭。注解属性：
+
+| 属性 | 默认值 | 说明 |
+|------|--------|------|
+| `label` | 必填 | 任务名称；重名时自动追加类名 |
+| `defaultCron` | 空 | 自动注册时的默认 cron；为空则只补建不启用调度 |
+| `defaultEnabled` | false | 自动注册时是否启用（需同时配置 `defaultCron`） |
+| `logAggregation` | `PER_RUN` | 执行记录方式 |
+| `autoRegister` | true | 是否参与启动自动注册；依赖库中的任务可设为 false |
+| `params` / `paramsProvider` | 空 | 任务参数定义 |
+
 **实例化与注入**：Quartz 任务由调度器的 JobFactory 在**每次触发时创建新实例**（原型，非 Spring 单例，不走 AOP 代理）。Spring Boot 默认 `SpringBeanJobFactory` 通过 `beanFactory.createBean()` 实例化，因此**构造器注入与字段注入均可使用**。框架自身约定任务用 `@Resource` 字段注入（见 `BaseJob`）。
 
 - 若任务类只有**单个构造器**（如 `@RequiredArgsConstructor` 生成的），Spring 会隐式用该构造器注入依赖，构造器注入也可正常工作；

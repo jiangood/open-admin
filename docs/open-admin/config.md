@@ -17,6 +17,7 @@
 | `sys.concurrent-login-message` | 被并发登录顶下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
 | `sys.login-expired-message` | 会话空闲超时/未登录时的提示文案（经 `/admin/public/site-info` 下发给前端） | 登录已过期，请重新登录 |
 | `sys.job-enable` | 定时任务开关 | true |
+| `sys.job-auto-register` | 启动时扫描 `BaseJob` 子类 / `@JobDescription` 并补建缺失的定时任务记录（只补建，不覆盖已有配置） | true |
 | `sys.job-log-retain-days` | 定时任务执行记录保留天数，`<=0` 表示不清理 | 30 |
 | `sys.codegen.backend-dir` | 代码生成后端源码根目录（相对项目根） | src/main/java |
 | `sys.codegen.resource-dir` | 代码生成资源目录（菜单 YAML 输出位置） | src/main/resources |
@@ -52,6 +53,7 @@
 | 邮件发送 | `email.username` | STRING | 空 | 发件邮箱 |
 | 邮件发送 | `email.password` | STRING（敏感） | 空 | 授权码/应用专用密码，留空表示不修改 |
 | 邮件发送 | `email.from.name` | STRING | 空 | 发件人显示名，可选 |
+| 邮件发送 | `email.default-to` | LIST | 空 | 默认收件人，多个用逗号分隔；发送时未填收件人则使用 |
 | 邮件发送 | `email.proxy` | PROXY | 空 | 代理 URL，留空表示不使用 |
 
 其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、代码生成目录、MinIO 等）或安全结构性配置。
@@ -76,6 +78,8 @@
 - 代理密码回显为 `***`，保存时保持 `***` 表示沿用已保存的密码；清空字段即不使用代理；
 - SOCKS5 代理不支持账号密码（JavaMail 的限制），需要认证请用 HTTP 代理。
 
+未填写 `email.default-to` 时，`MailMessage.to` 为空仍会报「收件邮箱不能为空」；配置后会自动使用默认收件人。测试邮件优先发到默认收件人，未配置再发到 `email.username` 自己。
+
 业务模块注入 `MailService` 发送：
 
 ```java
@@ -87,6 +91,19 @@ mailService.sendAsync(MailMessage.builder()
                 .paragraph("镜像已推送。")
                 .build())
         .build());
+```
+
+需要记录失败、提示用户补配置或自行重试时，使用返回结果的 API：
+
+```java
+MailSendResult result = mailService.trySend(message);
+if (!result.success()) {
+    // result.errorType()：NOT_CONFIGURED / AUTH / PROXY / NETWORK / RECIPIENT_MISSING / INVALID_MESSAGE / UNKNOWN
+    // result.error()：可直接展示的失败原因
+}
+
+// 异步版本，future 完成时得到同样的结果
+mailService.sendAsyncResult(message).thenAccept(r -> { ... });
 ```
 
 ### 业务项目扩展

@@ -24,7 +24,10 @@ public class ClassTool {
 
         PathMatchingResourcePatternResolver pathMatchingResourcePatternResolver = new PathMatchingResourcePatternResolver();
         Resource[] resources = pathMatchingResourcePatternResolver.getResources("classpath*:" + pkgPath + "/**/*.class");
-        ClassLoader loader = ClassLoader.getSystemClassLoader();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (loader == null) {
+            loader = ClassTool.class.getClassLoader();
+        }
 
         for (Resource resource : resources) {
             MetadataReader reader = cachingMetadataReaderFactory.getMetadataReader(resource);

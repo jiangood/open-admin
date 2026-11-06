@@ -16,6 +16,7 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
 
 sys:
+  job-auto-register: false
   file:
     store-type: LOCAL
     upload-path: /tmp/test-uploads

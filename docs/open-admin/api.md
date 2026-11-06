@@ -60,6 +60,8 @@ public class DataSyncJob extends BaseJob {
 }
 ```
 
+启动时框架会按 `BaseJob` 子类 / `@JobDescription` 自动补建缺失的 `sys_job` 记录（默认禁用，不覆盖已有配置）；`defaultCron` / `defaultEnabled` / `logAggregation` / `autoRegister` 见 [development.md](development.md) 的「自动注册」。
+
 进度上报（`BaseJob` 受保护方法，供前端「定时任务」页面轮询展示）：
 
 | 方法 | 说明 |
@@ -154,7 +156,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
-| `admin/mail/test` | POST | `sys-config:update` | 发送测试邮件到发件邮箱自己；失败返回具体原因 |
+| `admin/mail/test` | POST | `sys-config:update` | 发送测试邮件到默认收件人或发件邮箱自己；失败返回具体原因 |
 
 ### 在线用户
 

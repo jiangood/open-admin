@@ -84,6 +84,10 @@ public class SystemProperties {
      */
     private boolean jobEnable = true;
     /**
+     * 启动时扫描 {@code BaseJob} 子类 / {@code @JobDescription} 并补建缺失的 {@code SysJob} 记录；只补建，不覆盖已有配置
+     */
+    private boolean jobAutoRegister = true;
+    /**
      * 定时任务执行记录保留天数，&lt;=0 表示不清理
      */
     private int jobLogRetainDays = 30;

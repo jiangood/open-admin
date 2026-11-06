@@ -17,6 +17,9 @@ public final class MailConfigKeys {
     /** 发件人显示名称 */
     public static final String FROM_NAME = "email.from.name";
 
+    /** 默认收件人，多个用逗号分隔；发送时未填收件人则使用 */
+    public static final String DEFAULT_TO = "email.default-to";
+
     /** 代理地址，一个字段包含类型、主机、端口与凭据 */
     public static final String PROXY = "email.proxy";
 

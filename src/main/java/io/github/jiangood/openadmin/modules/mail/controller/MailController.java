@@ -23,9 +23,9 @@ public class MailController {
 
     @PostMapping("test")
     @HasPermission("sys-config:update")
-    @Log(value = "邮件-发送测试", detail = "向发件邮箱发送测试邮件")
+    @Log(value = "邮件-发送测试", detail = "向默认收件人或发件邮箱发送测试邮件")
     public AjaxResult test() {
         mailService.sendTest();
-        return AjaxResult.ok().msg("测试邮件已发送到发件邮箱，请查收");
+        return AjaxResult.ok().msg("测试邮件已发送，请查收");
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Configuration
 @ComponentScan(basePackages = OpenAdminConfiguration.PKG)
@@ -30,6 +31,21 @@ public class OpenAdminConfiguration {
         executor.setQueueCapacity(1000);
         executor.setThreadNamePrefix("oplog-");
         executor.setDaemon(true);
+        return executor;
+    }
+
+    /**
+     * 邮件发送线程池：IO 阻塞型任务，使用有界队列，队列满时由调用线程执行，避免丢任务或无限堆积。
+     */
+    @Bean("mailExecutor")
+    public Executor mailExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(2);
+        executor.setMaxPoolSize(4);
+        executor.setQueueCapacity(200);
+        executor.setThreadNamePrefix("mail-");
+        executor.setDaemon(true);
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         return executor;
     }
 
