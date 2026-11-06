@@ -13,6 +13,8 @@ public interface SysJobRepository extends BaseRepository<SysJob, String> {
 
     SysJob findByName(String name);
 
+    SysJob findByJobKey(String jobKey);
+
     List<SysJob> findByJobClass(String jobClass);
 
 }

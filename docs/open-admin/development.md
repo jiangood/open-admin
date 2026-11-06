@@ -54,12 +54,35 @@
 
 | 属性 | 默认值 | 说明 |
 |------|--------|------|
+| `key` | 全限定类名 | 稳定标识；类改名/换包时保持不变即可复用原记录 |
 | `label` | 必填 | 任务名称；重名时自动追加类名 |
 | `defaultCron` | 空 | 自动注册时的默认 cron；为空则只补建不启用调度 |
 | `defaultEnabled` | false | 自动注册时是否启用（需同时配置 `defaultCron`） |
 | `logAggregation` | `PER_RUN` | 执行记录方式 |
 | `autoRegister` | true | 是否参与启动自动注册；依赖库中的任务可设为 false |
 | `params` / `paramsProvider` | 空 | 任务参数定义 |
+
+**稳定 key 与升级**：`sys_job.job_key` 可空且唯一，新记录写入 `key`；旧数据启动时按 `jobClass` 回填。匹配顺序为 `job_key` → `jobClass`，因此类改名/换包后不会重复补建。若 key 已存在但执行类不同，框架只输出 warn，不会覆盖数据库中的执行类；按提示在「系统管理 → 定时任务」里修改即可。key 重复时保留类名排序靠前的一个。
+
+换包且未显式声明 `key` 时，会再做一次保守推断：若数据库中恰好有一条「执行类已不存在、简单类名相同、仍使用默认 key」的记录，则提示「疑似换包」并跳过补建，避免重复；显式改过 key 的记录不参与推断。该逻辑只提示，不自动修改执行类。
+
+**JobRegistrar SPI**：业务可实现 `JobRegistrar` 并注册为 Spring Bean，显式注册任务或覆盖注解默认值（`name` / `cron` / `enabled` / `logAggregation` / `jobData`）。SPI 优先级高于注解，只影响新建记录，不修改已有配置：
+
+```java
+@Bean
+public JobRegistrar reminderJobs() {
+    return () -> List.of(JobDefinition.builder()
+            .key("reminder.send")                    // 可省略，默认全限定类名
+            .jobClass(ReminderJob.class)
+            .name("提醒-发送")
+            .cron("0 0/5 * * * ?")
+            .enabled(true)
+            .logAggregation(JobLogAggregation.DAILY)
+            .build());
+}
+```
+
+**管理页导入**：定时任务页面的「导入任务」会列出代码中存在、数据库未注册的任务，支持单条或全部导入。已存在但执行类不存在的记录仍只提示，不会自动删除。
 
 **实例化与注入**：Quartz 任务由调度器的 JobFactory 在**每次触发时创建新实例**（原型，非 Spring 单例，不走 AOP 代理）。Spring Boot 默认 `SpringBeanJobFactory` 通过 `beanFactory.createBean()` 实例化，因此**构造器注入与字段注入均可使用**。框架自身约定任务用 `@Resource` 字段注入（见 `BaseJob`）。
 

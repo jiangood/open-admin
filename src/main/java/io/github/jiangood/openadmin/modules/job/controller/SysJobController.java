@@ -16,9 +16,11 @@ import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import io.github.jiangood.openadmin.modules.job.JobParamFieldProvider;
+import io.github.jiangood.openadmin.modules.job.dto.request.JobImportReq;
 import io.github.jiangood.openadmin.modules.job.dto.request.JobReq;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
+import io.github.jiangood.openadmin.modules.job.quartz.JobRegistrationManager;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.service.SysJobService;
 import lombok.RequiredArgsConstructor;
@@ -43,12 +45,33 @@ public class SysJobController {
     private final SysJobService service;
     private final Scheduler scheduler;
     private final QuartzManager quartzService;
+    private final JobRegistrationManager registrationManager;
 
 
     @HasPermission("job:read")
     @GetMapping("page")
     public AjaxResult page(String name, String jobClass, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws SchedulerException {
         return AjaxResult.ok().data(service.page(name, jobClass, pageable));
+    }
+
+    /**
+     * 代码中存在、但数据库尚未注册的任务
+     */
+    @HasPermission("job:read")
+    @GetMapping("unregistered")
+    public AjaxResult unregistered() {
+        return AjaxResult.ok().data(registrationManager.findUnregistered());
+    }
+
+    /**
+     * 一键导入代码中的任务；keys 为空时导入全部未注册任务
+     */
+    @Log("定时任务-导入")
+    @HasPermission("job:create")
+    @PostMapping("import")
+    public AjaxResult importJobs(@RequestBody(required = false) JobImportReq req) {
+        int count = registrationManager.importJobs(req == null ? null : req.getKeys());
+        return AjaxResult.ok().msg("成功导入 " + count + " 个任务").data(Map.of("count", count));
     }
 
     @Log(value = "定时任务-创建", detail = "创建任务「${#req.name}」")

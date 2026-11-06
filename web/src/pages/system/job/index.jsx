@@ -1,6 +1,7 @@
 import React from 'react'
 import {
     Alert,
+    Button,
     Divider,
     Form,
     Input,
@@ -8,6 +9,7 @@ import {
     Progress,
     Select,
     Switch,
+    Table,
     Tag,
     Tooltip
 } from 'antd'
@@ -76,6 +78,10 @@ export default class JobPage extends React.Component {
         progressMap: {},
 
         cronDesc: '',
+
+        importOpen: false,
+        unregistered: [],
+        importLoading: false,
     }
     tableRef = React.createRef()
     modalRef = React.createRef()
@@ -165,6 +171,32 @@ export default class JobPage extends React.Component {
             this.loadProgress()
         }).catch(e => {
             console.error('[Job] 触发任务失败:', e);
+        })
+    }
+
+    showImport = () => {
+        this.setState({importOpen: true})
+        this.loadUnregistered()
+    }
+
+    loadUnregistered = () => {
+        HttpClient.get('admin/job/unregistered', null, {toastError: false}).then(rs => {
+            this.setState({unregistered: rs.data || []})
+        }).catch(e => {
+            console.error('[Job] 加载未注册任务失败:', e);
+        })
+    }
+
+    handleImport = keys => {
+        this.setState({importLoading: true})
+        HttpClient.post('admin/job/import', {keys: keys && keys.length ? keys : null}, null, {toastError: false}).then(rs => {
+            this.setState({importLoading: false})
+            getMessageApi().success(rs.msg || '导入完成')
+            this.loadUnregistered()
+            this.tableRef.current.reload()
+        }).catch(e => {
+            console.error('[Job] 导入任务失败:', e);
+            this.setState({importLoading: false})
         })
     }
 
@@ -339,6 +371,7 @@ export default class JobPage extends React.Component {
                 toolBarRightRender={() => (
                     <PermActions actions={[
                         {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: 'job:create', onClick: () => this.handleAdd()},
+                        {label: '导入任务', perm: 'job:create', onClick: this.showImport},
                         {label: '查看状态', perm: 'job:read', onClick: this.showStatus},
                     ]}/>
                 )}
@@ -493,6 +526,68 @@ export default class JobPage extends React.Component {
                                running={this.isLogRunning()}
                                height={480}/>
                 )}
+            </Modal>
+
+            <Modal title='导入代码中的任务'
+                   open={this.state.importOpen}
+                   onCancel={() => this.setState({importOpen: false})}
+                   width={860}
+                   footer={[
+                       <Button key='close' onClick={() => this.setState({importOpen: false})}>关闭</Button>,
+                       <Button key='importAll'
+                               type='primary'
+                               loading={this.state.importLoading}
+                               disabled={!this.state.unregistered.length}
+                               onClick={() => this.handleImport(this.state.unregistered.map(item => item.key))}>
+                           全部导入
+                       </Button>
+                   ]}
+            >
+                <Alert type='info' showIcon style={{marginBottom: 12}}
+                       title='以下任务在代码中存在，但数据库中还没有对应记录。导入后按注解或 SPI 声明的默认配置创建；已存在的任务不会被修改。'/>
+                <Table
+                    rowKey='key'
+                    size='small'
+                    pagination={false}
+                    dataSource={this.state.unregistered}
+                    locale={{emptyText: '没有未注册的任务'}}
+                    columns={[
+                        {
+                            title: '任务 / 执行类',
+                            dataIndex: 'name',
+                            render: (v, record) => <div style={{lineHeight: 1.45}}>
+                                <div>{v || record.jobClassName}</div>
+                                <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                                    wordBreak: 'break-all'
+                                }}>{record.jobClassName}</div>
+                                {record.key !== record.jobClassName && <div style={{
+                                    fontSize: 12,
+                                    color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))'
+                                }}>key：{record.key}</div>}
+                            </div>
+                        },
+                        {
+                            title: 'cron 表达式',
+                            dataIndex: 'cron',
+                            width: 180,
+                            render: v => v || '-'
+                        },
+                        {
+                            title: '默认状态',
+                            dataIndex: 'enabled',
+                            width: 100,
+                            render: v => v ? <Tag color='green'>启用</Tag> : <Tag>停用</Tag>
+                        },
+                        {
+                            title: '操作',
+                            dataIndex: 'option',
+                            width: 80,
+                            render: (_, record) => <a onClick={() => this.handleImport([record.key])}>导入</a>
+                        }
+                    ]}
+                />
             </Modal>
         </Page>
     }

@@ -32,6 +32,12 @@ public class SysJob extends BaseEntity {
     Boolean enabled;
     @NotNull
     String jobClass;
+    /**
+     * 稳定标识，对应 {@code @JobDescription.key()}，为空时回退按 {@link #jobClass} 匹配。
+     * 可空唯一：旧数据升级后由自动注册回填，多个 NULL 不冲突。
+     */
+    @Column(unique = true, length = 255)
+    String jobKey;
     // 参数
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "TEXT")

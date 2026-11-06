@@ -22,7 +22,7 @@ repository.findAll(spec, pageable);
 | `@HasPermission("resource:action")` | 权限控制 |
 | `@Log("业务-操作")` | 操作日志（可加 `detail` 详情模板） |
 | `@RateLimit(count=10, duration=60)` | IP 限流 |
-| `@JobDescription` | 定时任务定义 |
+| `@JobDescription` | 定时任务定义（`key` / `label` / `defaultCron` / `defaultEnabled` / `logAggregation` / `autoRegister`） |
 | `@ValidateMobile` / `@ValidateIdNum` / ... | 字段格式校验 |
 
 ### 操作日志
@@ -60,7 +60,7 @@ public class DataSyncJob extends BaseJob {
 }
 ```
 
-启动时框架会按 `BaseJob` 子类 / `@JobDescription` 自动补建缺失的 `sys_job` 记录（默认禁用，不覆盖已有配置）；`defaultCron` / `defaultEnabled` / `logAggregation` / `autoRegister` 见 [development.md](development.md) 的「自动注册」。
+启动时框架会按 `BaseJob` 子类 / `@JobDescription` 自动补建缺失的 `sys_job` 记录（默认禁用，不覆盖已有配置），也支持 `JobRegistrar` SPI 显式注册；`key` / `defaultCron` / `defaultEnabled` / `logAggregation` / `autoRegister` 见 [development.md](development.md) 的「自动注册」。
 
 进度上报（`BaseJob` 受保护方法，供前端「定时任务」页面轮询展示）：
 

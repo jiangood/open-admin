@@ -11,6 +11,13 @@ import java.lang.annotation.*;
 @Target({ElementType.TYPE})
 public @interface JobDescription {
 
+    /**
+     * 稳定标识，默认使用全限定类名。
+     * <p>类改名或换包时保持 key 不变，即可继续复用已存在的 {@code sys_job} 记录，
+     * 避免按类名匹配产生重复任务。</p>
+     */
+    String key() default "";
+
     String label();
 
 
