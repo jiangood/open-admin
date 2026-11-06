@@ -613,7 +613,7 @@ location /file/public/ {
 | `UrlUtils` | `contextPath(path)` 拼接 context-path / `getParams` / `setParam` / `getPathname` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `walk` / `findByKey` / `flattenTree` / `getKeyList` / `getChildRecursive` |
-| `DateUtils` | `formatDate` / `formatTime` / `formatDateTime` / `formatDateCn` / `friendlyTime` |
+| `DateUtils` | `toDate` / `formatDate` / `formatTime` / `formatDateTime` / `formatDateCn` / `friendlyTime` |
 | `StringUtils` | `ellipsis` / `random` / `contains` / `subBefore` / `subAfter` / `split` / `join` |
 | `ArrayUtils` | 数组操作 |
 | `ObjectUtils` | 对象操作（`copyPropertyIfPresent` 等） |
@@ -621,6 +621,8 @@ location /file/public/ {
 | `DeviceUtils` | `isMobileDevice` |
 | `PageUtils` | `open(path)` 打开新 Tab / `currentTitle()` 获取当前页面标题 / `closeCurrent` / `redirectToLogin` / `currentUrl` / `currentParams`；常量 `LOGIN_PATH` 为登录页路径（`/login`）。`open` 的 `label` 参数已弃用且不再生效，`currentLabel()` 已弃用 |
 | `EventBus` | `on` / `once` / `emit` / `off` — 跨组件通信，优先使用，替代 `document.dispatchEvent` |
+
+`DateUtils.toDate` 统一解析后端时间字段：`Date`、epoch 秒、epoch 毫秒、ISO 串、`YYYY-MM-DD HH:mm:ss`、纯日期（按本地零点），无效或空值返回 `null`；`formatDate*` 同样接受这些入参，解析失败返回空串。后端时间字段可能是 epoch 秒、epoch 毫秒或 ISO 串，业务侧请直接用 `toDate`，不要手写 `v * 1000` 或 `new Date(v)`。`friendlyTime(value, options?)` 的选项：`showSeconds`（默认 `true`，`false` 时不足 1 分钟显示「刚刚」）、`daysOnly`（默认 `false`，`true` 时不换算成「周」）、`future`（默认 `'after'`，`'clamp'` 时未来时间显示「刚刚」）、`empty`（无效值占位，默认 `undefined`）。
 
 `EventBus.on` / `once` 返回取消订阅函数；`on` 支持传 `ctx`（this）。`PageUtils.open(path)` 用于跳转到页面，`PageUtils.currentTitle()` 返回当前页面标题（不含系统标题，未设置时返回 `undefined`）；页面标题请由目标页面通过 `pageMeta.title` 提供。`PageUtils.open(path, label)` 的 `label` 参数与 URL 中的 `_label` 已弃用且不再生效，传入时控制台会输出一次弃用提示。登录相关跳转请使用 `LOGIN_PATH`，不要硬编码 `/public/login`。
 
