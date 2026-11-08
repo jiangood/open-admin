@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.system.service;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterShortcutVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import io.github.jiangood.openadmin.util.tree.TreeTool;
@@ -25,7 +24,8 @@ import java.util.stream.Collectors;
  * 个人中心快捷菜单。
  * <p>
  * 快捷菜单只保存菜单 id，读取时再按当前角色权限解析名称/路径/图标。
- * 角色权限被回收或菜单被删除后，快捷项会自动失效，不会把无权限入口展示给用户。
+ * 角色权限被回收、菜单被删除或被业务定制隐藏后，快捷项会自动失效，
+ * 不会把无权限入口展示给用户。
  */
 @Service
 @RequiredArgsConstructor
@@ -34,8 +34,7 @@ public class UserShortcutService {
     public static final int MAX_SHORTCUTS = 10;
 
     private final SysUserRepository sysUserRepository;
-    private final SysRoleService sysRoleService;
-    private final SysMenuRepository sysMenuRepository;
+    private final UserMenuService userMenuService;
 
     /**
      * 当前用户有效的快捷菜单，按保存顺序返回。
@@ -59,13 +58,13 @@ public class UserShortcutService {
     @Transactional(readOnly = true)
     public List<TreeOption> options(String userId) {
         SysUser user = requireUser(userId);
-        List<MenuDefinition> all = sysMenuRepository.findAll();
-        Map<String, MenuDefinition> allMap = all.stream()
+        List<MenuDefinition> menus = userMenuService.resolve(user);
+        Map<String, MenuDefinition> menuMap = menus.stream()
                 .filter(menu -> !menu.isDivider())
                 .collect(Collectors.toMap(MenuDefinition::getId, menu -> menu,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
-        Set<String> pageIds = ownPageMenus(user).stream()
+        Set<String> pageIds = pageMenus(menus).stream()
                 .map(MenuDefinition::getId)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         if (pageIds.isEmpty()) {
@@ -77,12 +76,12 @@ public class UserShortcutService {
         for (String pageId : pageIds) {
             String current = pageId;
             while (current != null && includeIds.add(current)) {
-                MenuDefinition menu = allMap.get(current);
+                MenuDefinition menu = menuMap.get(current);
                 current = menu == null ? null : menu.getPid();
             }
         }
 
-        List<TreeOption> nodes = all.stream()
+        List<TreeOption> nodes = menus.stream()
                 .filter(menu -> !menu.isDivider())
                 .filter(menu -> includeIds.contains(menu.getId()))
                 .map(menu -> {
@@ -123,15 +122,14 @@ public class UserShortcutService {
     }
 
     private Map<String, MenuDefinition> pageMenuMap(SysUser user) {
-        return ownPageMenus(user).stream()
+        return pageMenus(userMenuService.resolve(user)).stream()
                 .collect(Collectors.toMap(MenuDefinition::getId, menu -> menu,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 
-    private List<MenuDefinition> ownPageMenus(SysUser user) {
-        return sysRoleService.ownMenu(user.getRoles()).stream()
+    private List<MenuDefinition> pageMenus(List<MenuDefinition> menus) {
+        return menus.stream()
                 .filter(menu -> !menu.isDivider())
-                .filter(menu -> menu.getDisabled() == null || !menu.getDisabled())
                 .filter(menu -> menu.getPath() != null && !menu.getPath().isBlank())
                 .filter(menu -> menu.getName() != null && !menu.getName().isBlank())
                 .toList();

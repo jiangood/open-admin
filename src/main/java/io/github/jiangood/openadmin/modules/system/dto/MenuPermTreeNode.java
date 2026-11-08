@@ -30,8 +30,5 @@ public class MenuPermTreeNode {
     /** 权限显示名称列表，与 permCodes 一一对应 */
     private List<String> permNames;
 
-    /** 是否禁用 */
-    private Boolean disabled;
-
     private List<MenuPermTreeNode> children;
 }

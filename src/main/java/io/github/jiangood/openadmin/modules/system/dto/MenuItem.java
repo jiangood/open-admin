@@ -10,7 +10,6 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MenuItem {
     private Boolean danger;
-    private Boolean disabled;
     private String extra;
     /** Ant Design 图标组件名，取值见 https://ant-design.antgroup.com/components/icon-cn */
     private String icon;
@@ -31,7 +30,6 @@ public class MenuItem {
 
     public MenuItem(MenuItem src) {
         this.danger = src.danger;
-        this.disabled = src.disabled;
         this.extra = src.extra;
         this.icon = src.icon;
         this.key = src.key;

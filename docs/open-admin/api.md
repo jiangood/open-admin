@@ -220,7 +220,7 @@ mailService.sendAsync(MailMessage.builder()
 
 字段：`id`（随机标识，非 sessionId）/ `ip` / `userAgent` / `loginTime` / `lastActiveTime` / `current`。
 
-快捷菜单字段：`id`（菜单 id）/ `name` / `path` / `icon`。服务端只保存菜单 id，读取时按当前角色权限解析；权限被回收或菜单被删除的条目会自动从快捷菜单中消失，保存时也会校验菜单必须属于当前用户可访问的页面菜单。
+快捷菜单字段：`id`（菜单 id）/ `name` / `path` / `icon`。服务端只保存菜单 id，读取时按当前角色权限解析；权限被回收或菜单被删除的条目会自动从快捷菜单中消失，保存时也会校验菜单必须属于当前用户可访问的页面菜单。快捷菜单与导航菜单（`admin/menu-info`）都会应用 `MenuCustomizer` 的定制结果（改名、移动、排序、隐藏），见 [guide.md](guide.md)「框架扩展点」。
 
 快捷菜单保存在 `sys_user.shortcut_menus`（TEXT，JSON 数组）。使用 JPA 自动建表时会自动新增；如项目自行管理表结构，需要同步添加该列。
 

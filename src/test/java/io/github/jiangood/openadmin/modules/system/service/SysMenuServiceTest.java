@@ -95,18 +95,6 @@ class SysMenuServiceTest {
         assertTrue(tree.isEmpty());
     }
 
-    @Test
-    void testMenuPermTree_shouldPropagateDisabledFlag() {
-        MenuDefinition sys = menu("sys", null, "系统管理");
-        sys.setDisabled(true);
-
-        when(sysMenuRepository.findAll()).thenReturn(List.of(sys));
-
-        List<MenuPermTreeNode> tree = sysMenuService.menuPermTree();
-
-        assertEquals(Boolean.TRUE, tree.get(0).getDisabled());
-    }
-
     private MenuDefinition divider(String id, String pid) {
         MenuDefinition def = new MenuDefinition();
         def.setId(id);

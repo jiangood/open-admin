@@ -43,9 +43,6 @@ public class MenuDefinition {
     /** 未读消息数拉取 URL */
     private String messageCountUrl;
 
-    /** 是否禁用（禁用时菜单不显示） */
-    private Boolean disabled;
-
     /**
      * 节点类型。当前仅用于左侧菜单分隔线：YAML 中配置 {@code type: divider} 时，
      * 该节点渲染为 antd Menu 的分隔线，无需 {@code name}/{@code path}。

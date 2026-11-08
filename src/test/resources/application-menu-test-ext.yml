@@ -1,8 +1,5 @@
-# 测试专用菜单扩展——验证多文件合并
+# 测试专用菜单扩展——验证多文件加载
 menus:
-  sys-user:
-    perms:
-      - {name: 导出, code: export}
   test-dev:
     name: 开发者工具
     icon: ToolOutlined

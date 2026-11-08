@@ -19,7 +19,8 @@ public class MenuProperties {
 
     /**
      * 菜单定义，按 id 索引。
-     * 多个 {@code application-menu-*.yml} 文件中相同 id 的条目会自动合并。
+     * <p>菜单 id 必须全局唯一，多个 {@code application-menu-*.yml} 文件中重复定义
+     * 相同 id 会在启动时直接失败，不做合并覆盖。
      */
     private Map<String, MenuDefinition> menus = new LinkedHashMap<>();
 

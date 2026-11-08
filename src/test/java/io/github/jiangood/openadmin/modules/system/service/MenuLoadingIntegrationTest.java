@@ -186,16 +186,16 @@ class MenuLoadingIntegrationTest {
     }
 
     @Test
-    void testMultiFileMerge() {
+    void testMultiFileMenus() {
         // 验证 src/test/resources/ 下的 application-menu-test-ext.yml 和
-        // application-menu-test-extra.yml 已正确合并到菜单列表中
+        // application-menu-test-extra.yml 已正确加载到菜单列表中
         List<MenuDefinition> all = sysMenuRepository.findAll();
 
         // test-dev 来自 test-ext 文件
         MenuDefinition dev = all.stream()
                 .filter(m -> "test-dev".equals(m.getId()))
                 .findFirst().orElse(null);
-        assertNotNull(dev, "test-dev 应该来自 application-menu-test-ext.yml 的合并");
+        assertNotNull(dev, "test-dev 应该来自 application-menu-test-ext.yml");
         assertEquals("开发者工具", dev.getName());
         assertEquals("ToolOutlined", dev.getIcon());
 
@@ -203,11 +203,8 @@ class MenuLoadingIntegrationTest {
         MenuDefinition extra = all.stream()
                 .filter(m -> "test-extra".equals(m.getId()))
                 .findFirst().orElse(null);
-        assertNotNull(extra, "test-extra 应该来自 application-menu-test-extra.yml 的合并");
+        assertNotNull(extra, "test-extra 应该来自 application-menu-test-extra.yml");
         assertEquals("test-dev", extra.getPid());
-
-        // sys-user 被两个文件定义，最后加载的文件覆盖——具体值取决于 classpath 顺序不做断言
-        assertNotNull(all.stream().filter(m -> "sys-user".equals(m.getId())).findFirst().orElse(null));
     }
 
     @Test

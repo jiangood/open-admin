@@ -4,7 +4,6 @@ import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.dto.response.UserCenterShortcutVO;
 import io.github.jiangood.openadmin.modules.system.entity.SysRole;
 import io.github.jiangood.openadmin.modules.system.entity.SysUser;
-import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
 import io.github.jiangood.openadmin.util.dto.TreeOption;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,10 +31,7 @@ class UserShortcutServiceTest {
     private SysUserRepository sysUserRepository;
 
     @Mock
-    private SysRoleService sysRoleService;
-
-    @Mock
-    private SysMenuRepository sysMenuRepository;
+    private UserMenuService userMenuService;
 
     private UserShortcutService userShortcutService;
 
@@ -43,7 +39,7 @@ class UserShortcutServiceTest {
 
     @BeforeEach
     void setUp() {
-        userShortcutService = new UserShortcutService(sysUserRepository, sysRoleService, sysMenuRepository);
+        userShortcutService = new UserShortcutService(sysUserRepository, userMenuService);
 
         user = new SysUser();
         user.setId("u1");
@@ -70,20 +66,18 @@ class UserShortcutServiceTest {
         MenuDefinition root = menu("sys", null, "系统管理", null);
         MenuDefinition userMenu = menu("sys-user", "sys", "用户管理", "/system/user");
         MenuDefinition roleMenu = menu("sys-role", "sys", "角色管理", "/system/role");
-        MenuDefinition disabled = menu("sys-disabled", "sys", "禁用菜单", "/system/disabled");
-        disabled.setDisabled(true);
         MenuDefinition divider = new MenuDefinition();
         divider.setId("sys-sep");
         divider.setPid("sys");
         divider.setType(MenuDefinition.TYPE_DIVIDER);
         MenuDefinition pathless = menu("sys-dir", "sys", "空目录", null);
-        return List.of(root, userMenu, roleMenu, disabled, divider, pathless);
+        return List.of(root, userMenu, roleMenu, divider, pathless);
     }
 
     @Test
     void list_shouldKeepSavedOrderAndSkipInvalidMenus() {
         user.setShortcutMenus(List.of("sys-role", "missing", "sys-user", "sys-role"));
-        when(sysRoleService.ownMenu(user.getRoles())).thenReturn(menus());
+        when(userMenuService.resolve(user)).thenReturn(menus());
 
         List<UserCenterShortcutVO> list = userShortcutService.list("u1");
 
@@ -93,8 +87,7 @@ class UserShortcutServiceTest {
 
     @Test
     void options_shouldContainOnlyAuthorizedPageMenusWithAncestors() {
-        when(sysRoleService.ownMenu(user.getRoles())).thenReturn(menus());
-        when(sysMenuRepository.findAll()).thenReturn(menus());
+        when(userMenuService.resolve(user)).thenReturn(menus());
 
         List<TreeOption> tree = userShortcutService.options("u1");
 
@@ -107,6 +100,17 @@ class UserShortcutServiceTest {
                 root.getChildren().stream().map(TreeOption::getKey).toList());
         assertTrue(root.getChildren().stream().allMatch(node -> Boolean.TRUE.equals(node.getLeaf())));
         assertTrue(root.getChildren().stream().noneMatch(node -> Boolean.TRUE.equals(node.getDisableCheckbox())));
+    }
+
+    @Test
+    void options_shouldUseResolvedMenuName() {
+        List<MenuDefinition> resolved = menus();
+        resolved.get(1).setName("自定义用户管理");
+        when(userMenuService.resolve(user)).thenReturn(resolved);
+
+        List<TreeOption> tree = userShortcutService.options("u1");
+
+        assertEquals("自定义用户管理", tree.get(0).getChildren().get(0).getTitle());
     }
 
     @Test
@@ -123,7 +127,7 @@ class UserShortcutServiceTest {
 
     @Test
     void save_shouldRejectUnauthorizedMenu() {
-        when(sysRoleService.ownMenu(user.getRoles())).thenReturn(menus());
+        when(userMenuService.resolve(user)).thenReturn(menus());
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> userShortcutService.save("u1", List.of("sys-user", "not-exist")));
@@ -133,7 +137,7 @@ class UserShortcutServiceTest {
 
     @Test
     void save_shouldPersistNormalizedOrder() {
-        when(sysRoleService.ownMenu(user.getRoles())).thenReturn(menus());
+        when(userMenuService.resolve(user)).thenReturn(menus());
 
         List<UserCenterShortcutVO> saved = userShortcutService.save("u1",
                 List.of("sys-role", " ", "sys-user", "sys-role"));
@@ -146,7 +150,7 @@ class UserShortcutServiceTest {
     @Test
     void save_shouldAllowClearing() {
         user.setShortcutMenus(List.of("sys-user"));
-        when(sysRoleService.ownMenu(user.getRoles())).thenReturn(menus());
+        when(userMenuService.resolve(user)).thenReturn(menus());
 
         List<UserCenterShortcutVO> saved = userShortcutService.save("u1", List.of());
 

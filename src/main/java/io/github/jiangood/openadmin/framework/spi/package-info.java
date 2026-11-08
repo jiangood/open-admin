@@ -7,7 +7,10 @@
  *
  * <ul>
  *   <li>{@link io.github.jiangood.openadmin.framework.spi.OrgTypeProvider} — 自定义机构类型</li>
+ *   <li>{@link io.github.jiangood.openadmin.framework.spi.FileOperator} — 自定义文件存储后端</li>
  *   <li>{@link io.github.jiangood.openadmin.framework.spi.StartupHook} — 系统启动钩子</li>
+ *   <li>{@link io.github.jiangood.openadmin.framework.spi.ConfigProvider} — 声明运行时可改的参数项</li>
+ *   <li>{@link io.github.jiangood.openadmin.framework.spi.MenuCustomizer} — 调整登录用户看到的菜单</li>
  * </ul>
  */
 package io.github.jiangood.openadmin.framework.spi;

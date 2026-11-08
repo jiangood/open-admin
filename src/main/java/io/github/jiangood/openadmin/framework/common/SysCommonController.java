@@ -18,6 +18,7 @@ import io.github.jiangood.openadmin.modules.system.service.SysMenuService;
 import io.github.jiangood.openadmin.modules.system.service.SysOrgService;
 import io.github.jiangood.openadmin.modules.system.service.SysRoleService;
 import io.github.jiangood.openadmin.modules.system.service.SysUserService;
+import io.github.jiangood.openadmin.modules.system.service.UserMenuService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.AllArgsConstructor;
@@ -43,6 +44,7 @@ public class SysCommonController {
     private SysOrgService sysOrgService;
     private SysDictService sysDictService;
     private SysMenuService sysMenuService;
+    private UserMenuService userMenuService;
     private ArticleService articleService;
 
     @GetMapping("public/site-info")
@@ -126,7 +128,7 @@ public class SysCommonController {
             return AjaxResult.err("用户不存在");
         }
 
-        List<MenuDefinition> userMenus = roleService.ownMenu(user.getRoles());
+        List<MenuDefinition> userMenus = userMenuService.resolve(user);
         return AjaxResult.ok().data(sysMenuService.buildMenuInfo(userMenus));
     }
 }

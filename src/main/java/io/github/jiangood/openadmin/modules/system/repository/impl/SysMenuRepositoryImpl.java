@@ -1,7 +1,5 @@
 package io.github.jiangood.openadmin.modules.system.repository.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.bean.copier.CopyOptions;
 import io.github.jiangood.openadmin.framework.config.MenuDefinition;
 import io.github.jiangood.openadmin.modules.system.repository.SysMenuRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,17 +10,27 @@ import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Repository;
+import org.yaml.snakeyaml.LoaderOptions;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
-import java.util.*;
+import java.io.InputStream;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * 菜单仓库实现。
  * <p>
  * 扫描 {@code classpath*:application-menu*.yml}，逐文件绑定为
- * {@code Map<String, MenuDefinition>}，然后按 key 手动合并（相同 key 的属性合并、
- * 后加载覆盖先加载）。最后按 seq 排序返回扁平列表。
+ * {@code Map<String, MenuDefinition>}。菜单 id 必须全局唯一：同一文件内
+ * 重复定义或不同文件之间重复定义都会在启动时直接失败，不做合并覆盖。
+ * 最后按 seq 排序返回扁平列表。
  */
 @Slf4j
 @Repository
@@ -31,45 +39,73 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
     private final List<MenuDefinition> menus;
 
     public SysMenuRepositoryImpl() {
-        this.menus = loadMenus();
+        this.menus = loadMenus(scanResources());
     }
 
-    private static List<MenuDefinition> loadMenus() {
+    private static Resource[] scanResources() {
         try {
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Resource[] resources = resolver.getResources("classpath*:application-menu*.yml");
+            return new PathMatchingResourcePatternResolver().getResources("classpath*:application-menu*.yml");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to scan application-menu*.yml", e);
+        }
+    }
 
-            YamlPropertySourceLoader loader = new YamlPropertySourceLoader();
-            Map<String, MenuDefinition> merged = new LinkedHashMap<>();
+    static List<MenuDefinition> loadMenus(Resource[] resources) {
+        Map<String, MenuDefinition> merged = new LinkedHashMap<>();
+        Map<String, String> origins = new HashMap<>();
 
-            for (Resource resource : resources) {
-                List<org.springframework.core.env.PropertySource<?>> sources =
-                        loader.load(resource.getFilename(), resource);
-                if (sources.isEmpty()) continue;
+        for (Resource resource : resources) {
+            checkDuplicateKeys(resource);
 
-                Binder binder = new Binder(ConfigurationPropertySource.from(sources.get(0)));
-                Map<String, MenuDefinition> map = binder
-                        .bind("menus", Bindable.mapOf(String.class, MenuDefinition.class))
-                        .orElse(Map.of());
-
-                for (Map.Entry<String, MenuDefinition> entry : map.entrySet()) {
-                    MenuDefinition def = entry.getValue();
-                    if (def == null) continue;
-                    def.setId(entry.getKey());
-                    merged.merge(entry.getKey(), def, (oldVal, newVal) -> {
-                        // 用 newVal 的非 null 字段覆盖 oldVal
-                        BeanUtil.copyProperties(newVal, oldVal,
-                                CopyOptions.create().ignoreNullValue());
-                        return oldVal;
-                    });
-                }
+            List<org.springframework.core.env.PropertySource<?>> sources;
+            try {
+                sources = new YamlPropertySourceLoader().load(resource.getFilename(), resource);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to load " + resource.getDescription(), e);
+            }
+            if (sources.isEmpty()) {
+                continue;
             }
 
-            return merged.values().stream()
-                    .sorted(Comparator.comparingInt(MenuDefinition::getSeq))
-                    .collect(Collectors.toList());
+            Binder binder = new Binder(ConfigurationPropertySource.from(sources.get(0)));
+            Map<String, MenuDefinition> map = binder
+                    .bind("menus", Bindable.mapOf(String.class, MenuDefinition.class))
+                    .orElse(Map.of());
+
+            for (Map.Entry<String, MenuDefinition> entry : map.entrySet()) {
+                String id = entry.getKey();
+                MenuDefinition def = entry.getValue();
+                if (def == null) {
+                    continue;
+                }
+                if (id == null || id.isBlank()) {
+                    throw new IllegalStateException("菜单 id 不能为空：" + resource.getDescription());
+                }
+                String existing = origins.putIfAbsent(id, resource.getDescription());
+                if (existing != null) {
+                    throw new IllegalStateException("菜单 id 重复：" + id
+                            + "，已存在于 " + existing + "，又在 " + resource.getDescription() + " 中定义");
+                }
+                def.setId(id);
+                merged.put(id, def);
+            }
+        }
+
+        return merged.values().stream()
+                .sorted(Comparator.comparingInt(MenuDefinition::getSeq))
+                .collect(Collectors.toList());
+    }
+
+    private static void checkDuplicateKeys(Resource resource) {
+        LoaderOptions options = new LoaderOptions();
+        options.setAllowDuplicateKeys(false);
+        try (InputStream in = resource.getInputStream()) {
+            new Yaml(options).load(in);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to load application-menu*.yml", e);
+            throw new RuntimeException("Failed to read " + resource.getDescription(), e);
+        } catch (RuntimeException e) {
+            throw new IllegalStateException("菜单配置无效或存在重复 key：" + resource.getDescription()
+                    + "，原因：" + e.getMessage(), e);
         }
     }
 

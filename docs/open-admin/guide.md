@@ -31,7 +31,7 @@
 ```
 src/main/java/io/github/jiangood/openadmin/
 ├── framework/          # 框架基础层
-│   ├── spi/            # 扩展点接口（OrgTypeProvider, FileOperator, StartupHook）
+│   ├── spi/            # 扩展点接口（OrgTypeProvider, FileOperator, StartupHook, ConfigProvider, MenuCustomizer）
 │   ├── config/         # Spring 配置（Security, JPA, Jackson）
 │   ├── data/           # BaseEntity, BaseRepository, Spec
 │   ├── perm/           # @HasPermission 注解 + 切面
@@ -62,15 +62,40 @@ web/
 | `FileOperator` | 自定义文件存储后端（默认提供 `LOCAL` / `S3` 两种实现） | `@Component` |
 | `StartupHook` | 系统启动钩子（JPA 建表前/种子数据前后） | `@Component` |
 | `ConfigProvider` | 声明运行时可改的参数项（自动出现在「参数设置」页） | `@Component` |
+| `MenuCustomizer` | 调整登录用户看到的菜单：改名、移动、排序、隐藏（不支持增删） | `@Component` |
 
 实现类被 `@ComponentScan` 自动发现，无需手动注册。
+
+#### 菜单定制示例
+
+```java
+@Component
+public class CvsMenuCustomizer implements MenuCustomizer {
+
+    @Override
+    public void customize(MenuCustomization customization) {
+        // 查看当前菜单（调试用）
+        log.debug("定制前菜单:\n{}", customization.dump());
+
+        customization.rename("cvs-capture", "抓拍管理")
+                     .moveTo("cvs-playback", "cvs-monitor")
+                     .moveBefore("cvs-alarm", "cvs-playback")
+                     .hide("cvs-debug");
+    }
+}
+```
+
+- 整个项目只允许一个 `MenuCustomizer`，多个实现会导致启动失败
+- 隐藏目录时会连同所有后代一起隐藏
+- 定制只影响导航菜单和个人中心快捷菜单，不影响角色授权页、用户权限页，也不改变权限码
+- 菜单隐藏后页面仍可通过 URL 访问，后端 `@HasPermission` 校验照常生效
 
 ### 核心架构模式
 
 - **BaseEntity** — 所有实体继承 BaseEntity（UUIDv7 id 由 `@PrePersist` 自动生成，含 createTime/createUser、updateTime/updateUser）
 - **Spec 动态查询** — `Spec<T>` 链式构建 JPA Specification（eq/like/in/between/or 等），通过 `SpecImpl` + `ExpressionTool` 执行
 - **PageExt** — 扩展 PageImpl，支持返回额外数据（如汇总行）
-- **菜单加载** — `classpath*:application-menu*.yml` YAML 定义菜单（Map 格式，key 为菜单 id），也支持数据库存储
+- **菜单加载** — `classpath*:application-menu*.yml` YAML 定义菜单（Map 格式，key 为菜单 id）；id 必须全局唯一，重复定义启动失败
 - **权限控制** — `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
 - **ID 生成** — 默认 UUIDv7（时间排序，MySQL 友好）
 - **文件存储** — 支持 `local` / `s3`（AWS SDK v2，兼容 RustFS / OSS / COS），通过 `FileOperator` 接口抽象

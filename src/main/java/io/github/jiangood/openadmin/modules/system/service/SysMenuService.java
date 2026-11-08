@@ -30,11 +30,8 @@ public class SysMenuService {
         List<MenuDefinition> all = sysMenuRepository.findAll();
         List<TreeOption> items = all.stream()
                 .filter(def -> !def.isDivider())
-                .map(def -> {
-                    TreeOption node = new TreeOption(def.getName(), def.getId(), def.getPid());
-                    node.setDisabled(def.getDisabled());
-                    return node;
-                }).toList();
+                .map(def -> new TreeOption(def.getName(), def.getId(), def.getPid()))
+                .toList();
         return TreeTool.buildTree(items);
     }
 
@@ -49,7 +46,6 @@ public class SysMenuService {
                     node.setName(def.getName());
                     node.setPermCodes(def.getPermCodes());
                     node.setPermNames(def.getPermNames());
-                    node.setDisabled(def.getDisabled());
                     return node;
                 }).toList();
         return TreeTool.buildTree(nodes, MenuPermTreeNode::getId, MenuPermTreeNode::getPid,
@@ -60,7 +56,6 @@ public class SysMenuService {
         Map<String, MenuDefinition> pathMenuMap = new HashMap<>();
         Map<String, MenuDefinition> menuMap = new HashMap<>();
         List<MenuItem> list = menuDefs.stream()
-                .filter(def -> def.getDisabled() == null || !def.getDisabled())
                 .map(def -> {
                     MenuItem item = new MenuItem();
                     item.setKey(def.getId());
