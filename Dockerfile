@@ -3,7 +3,7 @@
 # ===================================================================
 # 镜像内置 H2 数据库（文件模式），无需外部 MySQL，构建后即可一键运行：
 #   docker build -t open-admin .
-#   docker run -d -p 8080:8080 -v ./data:/data open-admin
+#   docker run -d -p 8888:8888 -v ./data:/data open-admin
 # 数据（H2 数据库 / 上传文件 / 日志）均持久化在容器内 /data，请挂载数据卷。
 # ===================================================================
 
@@ -48,6 +48,6 @@ VOLUME ["/data"]
 # 时区
 ENV TZ=Asia/Shanghai
 
-EXPOSE 8080
+EXPOSE 8888
 
 ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Duser.timezone=Asia/Shanghai","-jar","/app/app.jar","--spring.profiles.active=prod"]

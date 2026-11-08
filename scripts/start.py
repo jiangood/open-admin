@@ -224,7 +224,7 @@ def main(argv) -> int:
 
     if target == "all" and action in ("start", "restart"):
         print()
-        print("前端: http://localhost:3000  后端: http://localhost:8080")
+        print("前端: http://localhost:7777  后端: http://localhost:8888")
         print(f"日志: {LOG_DIR}{os.sep}")
     return rc
 

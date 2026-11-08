@@ -150,6 +150,6 @@ web/
 
 **前端依赖安装失败？** `npm install --registry=https://registry.npmmirror.com`
 
-**端口被占用？** 后端默认 8080，前端默认 3000，可通过环境变量 `SERVER_PORT` 修改后端端口。
+**端口被占用？** 后端默认 8888，前端默认 7777，可通过环境变量 `SERVER_PORT` 修改后端端口。
 
 **页签显示「未命名」怎么办？** 菜单页未声明 `pageMeta.title` 时会自动回退到后端菜单名；非菜单的详情页/公共页需要在页面文件导出 `pageMeta.title`。不要再通过 `PageUtils.open(path, label)` 写 `_label` 参数（已弃用且不再生效，首次使用会在控制台提示）。

@@ -46,7 +46,7 @@ mvn -Pdev spring-boot:run   # 开发模式启动（内置 H2，首次启动自�
 ```bash
 cd web
 npm install
-npm run dev                    # 默认 http://localhost:3000
+npm run dev                    # 默认 http://localhost:7777
 ```
 
 ### 默认登录
@@ -65,7 +65,7 @@ docker compose -f docker-compose/docker-compose.yml up -d --build
 
 # 或手动构建 / 运行
 docker build -t open-admin .
-docker run -d --name open-admin -p 8080:8080 -v ./data:/data open-admin
+docker run -d --name open-admin -p 8888:8888 -v ./data:/data open-admin
 ```
 
 ### 集成到已有项目
@@ -152,7 +152,7 @@ cd web && npm run build                                       # 前端构建
 ```bash
 python scripts/start.py                                 # 后台启动前后端（target=all, action=start）
 python scripts/start.py backend start|stop|restart|status     # 后端: mvn -Pdev spring-boot:run（devtools 热重载）
-python scripts/start.py frontend start|stop|restart|status    # 前端: npm run dev（端口 3000，缺 node_modules 自动安装）
+python scripts/start.py frontend start|stop|restart|status    # 前端: npm run dev（端口 7777，缺 node_modules 自动安装）
 ```
 
 - `target` 可为 `all|backend|frontend`（缺省 `all`），`action` 可为 `start|stop|restart|status`（缺省 `start`）

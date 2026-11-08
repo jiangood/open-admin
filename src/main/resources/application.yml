@@ -5,7 +5,7 @@
 db_path: /data/db/open-admin
 
 server:
-  port: 8080
+  port: 8888
   servlet:
     context-path: /example  # 独立应用默认上下文；容器部署由 prod profile 覆盖为 /
 
