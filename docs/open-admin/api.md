@@ -15,6 +15,31 @@ Spec<User> spec = Spec.of()
 repository.findAll(spec, pageable);
 ```
 
+### CrudOps CRUD 辅助
+
+`io.github.jiangood.openadmin.framework.web.CrudOps` 收敛 Controller 固定逻辑（代码生成器默认使用）：
+
+| 方法 | 说明 |
+|------|------|
+| `info(Optional<T>, notFoundMsg)` | 存在返回 `data`，否则 `AjaxResult.err(msg)` |
+| `page(service, pageable, specCustomizer)` | 构造 Spec 并分页；`specCustomizer` 可为 `null` |
+| `created()` / `created(saved)` / `updated()` / `deleted()` | 标准成功响应 |
+| `requireUpdate(id, fields, existingSupplier, notFoundMsg)` | 校验 id 非空、确有字段提交、记录存在，返回已有记录 |
+| `requireDelete(existing, notFoundMsg)` | 校验记录存在，返回已有记录（便于写日志详情） |
+
+校验失败抛 `BusinessException`，由全局异常处理器转成 `AjaxResult.err` 业务文案。`requireUpdate` 先校验 id/字段，再按需查询，id 为空时不会执行无效查询。
+
+```java
+@PostMapping("update")
+public AjaxResult update(@RequestBody Customer input,
+        @RequestHeader(value = "X-Body-Fields", required = false) List<String> updateFields) {
+    CrudOps.requireUpdate(input.getId(), updateFields,
+            () -> service.findById(input.getId()), "记录不存在");
+    service.save(input, updateFields);
+    return CrudOps.updated();
+}
+```
+
 ### 注解
 
 | 注解 | 用途 |
@@ -249,7 +274,7 @@ mailService.sendAsync(MailMessage.builder()
 |------|------|------|
 | Repository | `{实体包去掉 .entity}/repository/{Entity}Repository.java` | 继承 `BaseRepository<Entity, String>` |
 | Service | `{模块包}/service/{Entity}Service.java` | 继承 `BaseService`，含 `@FileField` 时自动生成 confirmTempFiles/discardTempFiles 事务方法 |
-| Controller | `{模块包}/controller/{Entity}Controller.java` | `admin/{module}` 下 `page/info/create/update/delete`，`@HasPermission` + `@Log` |
+| Controller | `{模块包}/controller/{Entity}Controller.java` | `admin/{module}` 下 `page/info/create/update/delete`，`@HasPermission` + `@Log`，默认使用 `CrudOps` 统一响应与校验 |
 | 前端页面 | `web/src/pages/{module}/index.jsx` | `ProTable` + `FormModal`，按字段类型选用 `Field*`/`View*` 组件 |
 | 菜单 | `src/main/resources/application-menu-{module}.yml` | 挂在指定父菜单（默认 `sys`），含读/建/改/删权限 |
 

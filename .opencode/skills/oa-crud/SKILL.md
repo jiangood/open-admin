@@ -221,7 +221,7 @@ public class CustomerService extends BaseService<Customer> {
 | 分页查询 | `@RequestMapping("page")` | `admin/{module}/page` | `{module}:read` | 支持 searchText 模糊搜索 + Pageable |
 | 详情 | `@GetMapping("info/{id}")` | `admin/{module}/info/{id}` | `{module}:read` | 返回单条记录 |
 | 创建 | `@PostMapping("create")` | `admin/{module}/create` | `{module}:create` | @RequestBody @Valid + @Log（建议带 detail） |
-| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + @RequestHeader("X-Body-Fields") + @Log（建议带 detail） |
+| 更新 | `@PostMapping("update")` | `admin/{module}/update` | `{module}:update` | @RequestBody @Valid + `@RequestHeader(value = "X-Body-Fields", required = false)` + `CrudOps.requireUpdate(...)` + @Log（建议带 detail） |
 | 删除 | `@PostMapping("delete")` | `admin/{module}/delete` | `{module}:delete` | @RequestBody IdReq + @Log + `OperationLogContext.setDetail(...)` |
 | 选项列表 | `@GetMapping("options")` | `admin/{module}/options` | `{module}:read` | 下拉框数据源（非必选） |
 
@@ -236,6 +236,7 @@ import io.github.jiangood.openadmin.framework.log.Log;
 import io.github.jiangood.openadmin.framework.log.OperationLogContext;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.framework.perm.HasPermission;
+import io.github.jiangood.openadmin.framework.web.CrudOps;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
 import io.github.jiangood.openadmin.util.dto.Option;
@@ -260,17 +261,16 @@ public class CustomerController {
     @RequestMapping("page")
     public AjaxResult page(String searchText,
             @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
-        Spec<Customer> q = Spec.of().orLike(searchText, "name", "contact");
-        Page<Customer> page = service.findAll(q, pageable);
-        return AjaxResult.ok().data(page);
+        return CrudOps.page(service, pageable, spec -> {
+            spec.orLike(searchText, "name", "contact");
+            return spec;
+        });
     }
 
     @HasPermission("customer:read")
     @GetMapping("info/{id}")
     public AjaxResult info(@PathVariable String id) {
-        return service.findById(id)
-                .map(c -> AjaxResult.ok().data(c))
-                .orElse(AjaxResult.fail().msg("记录不存在"));
+        return CrudOps.info(service.findById(id), "记录不存在");
     }
 
     @Log(value = "客户-创建", detail = "创建客户「${#input.name}」")
@@ -278,25 +278,28 @@ public class CustomerController {
     @PostMapping("create")
     public AjaxResult create(@Valid @RequestBody Customer input) throws Exception {
         service.save(input, null);
-        return AjaxResult.ok().msg("创建成功");
+        return CrudOps.created();
     }
 
     @Log(value = "客户-更新", detail = "修改客户「${#input.name ?: #input.id}」")
     @HasPermission("customer:update")
     @PostMapping("update")
-    public AjaxResult update(@Valid @RequestBody Customer input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
+    public AjaxResult update(@Valid @RequestBody Customer input,
+            @RequestHeader(value = "X-Body-Fields", required = false) List<String> updateFields) throws Exception {
+        CrudOps.requireUpdate(input.getId(), updateFields,
+                () -> service.findById(input.getId()), "记录不存在");
         service.save(input, updateFields);
-        return AjaxResult.ok().msg("更新成功");
+        return CrudOps.updated();
     }
 
     @Log("客户-删除")
     @HasPermission("customer:delete")
     @PostMapping("delete")
     public AjaxResult delete(@Valid @RequestBody IdReq req) {
-        service.findById(req.getId())
-                .ifPresent(entity -> OperationLogContext.setDetail("删除客户「" + entity.getName() + "」"));
+        Customer entity = CrudOps.requireDelete(service.findById(req.getId()), "记录不存在");
+        OperationLogContext.setDetail("删除客户「" + entity.getName() + "」");
         service.deleteById(req.getId());
-        return AjaxResult.ok().msg("删除成功");
+        return CrudOps.deleted();
     }
 
     @HasPermission("customer:read")
@@ -309,6 +312,8 @@ public class CustomerController {
     }
 }
 ```
+
+> **CrudOps 统一校验**：`page` / `info` / `created` / `updated` / `deleted` 收敛固定响应；`requireUpdate` 依次校验 id 非空、确有字段提交、记录存在，`requireDelete` 校验记录存在，失败抛 `BusinessException` 并返回业务文案。因此 `X-Body-Fields` 改为可选请求头，缺失时返回「没有提交任何字段」，不再由框架报 400 缺少请求头。旧代码可继续直接调用 `service.save(input, updateFields)`，新生成代码默认使用该骨架。
 
 ### 临时文件确认（必须）
 

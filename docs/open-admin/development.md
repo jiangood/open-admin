@@ -19,15 +19,42 @@
 | 分页查询 | GET | `admin/xxx/page` | `page(Pageable)` |
 | 详情 | GET | `admin/xxx/info/{id}` | `info(@PathVariable id)` |
 | 创建 | POST | `admin/xxx/create` | `create(@RequestBody dto)` |
-| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, @RequestHeader("X-Body-Fields") List<String> fields)` |
+| 更新 | POST | `admin/xxx/update` | `update(@RequestBody dto, @RequestHeader(value = "X-Body-Fields", required = false) List<String> fields)` |
 | 删除 | POST | `admin/xxx/delete` | `delete(@Valid @RequestBody IdReq req)` |
 
 > **部分更新语义**：`update` 采用 PATCH 式语义 —— 请求头 `X-Body-Fields` 携带本次 body 的顶层字段名（逗号分隔），后端只更新其中列出的字段，未列出的保持原值；显式传 `null` 的字段会被清空。前端 `HttpClient` 对 POST 的普通对象 body 会自动附加该请求头（值为 `undefined` 的键会被序列化丢弃，故不在其中），业务页面无需手动处理。
 
+### CRUD 辅助（CrudOps）
+
+代码生成器生成的 Controller 默认使用 `io.github.jiangood.openadmin.framework.web.CrudOps`，统一详情、分页、成功响应以及更新/删除校验，避免每个模块重复写同样的判断：
+
+| 方法 | 作用 |
+|------|------|
+| `info(Optional<T>, notFoundMsg)` | 存在返回 `data`，否则返回业务错误 |
+| `page(service, pageable, specCustomizer)` | 构造 Spec 并分页，`customizer` 可为 `null` |
+| `created()` / `created(saved)` / `updated()` / `deleted()` | 标准成功响应文案 |
+| `requireUpdate(id, fields, existingSupplier, notFoundMsg)` | 依次校验 id 非空、确有字段提交、记录存在 |
+| `requireDelete(existing, notFoundMsg)` | 校验记录存在，返回已有记录便于写日志 |
+
+`requireUpdate` 在 id 为空或字段为空时直接抛 `BusinessException`，不会先执行查询；校验失败由全局异常处理器转成 `AjaxResult.err` 业务文案，不会被兜底成「服务器忙」。
+
+```java
+@PostMapping("update")
+public AjaxResult update(@RequestBody Customer input,
+        @RequestHeader(value = "X-Body-Fields", required = false) List<String> updateFields) {
+    CrudOps.requireUpdate(input.getId(), updateFields,
+            () -> service.findById(input.getId()), "记录不存在");
+    service.save(input, updateFields);
+    return CrudOps.updated();
+}
+```
+
+> `X-Body-Fields` 为可选请求头，缺失时由 `CrudOps` 返回「没有提交任何字段」，而不是框架层的 400「缺少请求头」。
+
 ## 后端要点
 
 - 推荐构造器注入（`@RequiredArgsConstructor` + `private final`）；框架基类（如 `BaseService`）允许 `@Autowired` 字段注入；Quartz 任务例外见下方「定时任务（Quartz）」
-- 业务异常抛 `ServiceException`，Controller 不做 try-catch
+- 业务异常抛 `BusinessException`，Controller 不做 try-catch
 - 操作日志用 `@Log("模块-动作")`；需要人话详情时加 `detail = "新增XX「${#input.name}」"`，删除/重置等只有 id 的场景用 `OperationLogContext.setDetail(...)`；详情里不要拼密码、令牌等敏感字段
 - 使用 Java 21 Record / Pattern Matching / Switch 表达式 / Text Block
 - 方法参数校验用 `@Valid` / `@Validated`

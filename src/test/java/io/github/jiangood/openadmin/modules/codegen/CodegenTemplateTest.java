@@ -83,9 +83,20 @@ class CodegenTemplateTest {
         assertTrue(controller.contains("@HasPermission(\"article:read\")"));
         assertTrue(controller.contains("@HasPermission(\"article:create\")"));
         assertTrue(controller.contains("public class ArticleController"));
+        assertTrue(controller.contains("import io.github.jiangood.openadmin.framework.web.CrudOps;"));
+        assertTrue(controller.contains("return CrudOps.page(service, pageable, spec -> {"));
         assertTrue(controller.contains("spec.orLike(searchText, \"code\", \"title\")"), "title 应作为模糊查询字段");
         assertTrue(controller.contains("spec.eq(\"position\", position)"));
         assertTrue(controller.contains("import io.github.jiangood.openadmin.modules.system.enums.ArticlePosition;"));
+        assertTrue(controller.contains("@RequestHeader(value = \"X-Body-Fields\", required = false)"),
+                "更新请求头应改为可选，由 CrudOps 统一校验");
+        assertTrue(controller.contains("CrudOps.requireUpdate(input.getId(), updateFields,"),
+                "更新应校验 id、字段与记录存在性");
+        assertTrue(controller.contains("return CrudOps.created();"));
+        assertTrue(controller.contains("return CrudOps.updated();"));
+        assertTrue(controller.contains("return CrudOps.deleted();"));
+        assertTrue(controller.contains("CrudOps.requireDelete(service.findById(req.getId()), \"记录不存在\")"),
+                "删除应校验记录存在");
         assertTrue(controller.contains("detail = \"创建文章「${#input.title}」\""), "应生成创建详情模板");
         assertTrue(controller.contains("detail = \"修改文章「${#input.title ?: #input.id}」\""), "应生成更新详情模板");
         assertTrue(controller.contains("OperationLogContext.setDetail(\"删除文章「\" + entity.getTitle() + \"」\")"),

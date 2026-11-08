@@ -151,34 +151,37 @@ public final class BackendTemplates {
         }
 
         StringBuilder pageBody = new StringBuilder();
-        pageBody.append("        var spec = service.spec();\n");
+        pageBody.append("        return CrudOps.page(service, pageable, spec -> {\n");
         if (!stringFields.isEmpty()) {
-            pageBody.append("        spec.orLike(searchText, ")
+            pageBody.append("            spec.orLike(searchText, ")
                     .append(stringFields.stream().map(f -> "\"" + f.getName() + "\"")
                             .collect(Collectors.joining(", ")))
                     .append(");\n");
         }
         for (FieldMetaVO field : filterFields) {
-            pageBody.append("        spec.eq(\"").append(field.getName()).append("\", ")
+            pageBody.append("            spec.eq(\"").append(field.getName()).append("\", ")
                     .append(field.getName()).append(");\n");
         }
-        pageBody.append("        var page = service.findAll(spec, pageable);\n");
-        pageBody.append("        return AjaxResult.ok().data(page);");
+        pageBody.append("            return spec;\n");
+        pageBody.append("        });");
 
         // 有常用显示字段时，顺带生成「人话」操作详情；没有则保持原来的 @Log("模块-动作")
         FieldMetaVO detailField = findDetailField(meta);
         String createLog = "@Log(\"" + label + "-创建\")";
         String updateLog = "@Log(\"" + label + "-更新\")";
-        String deleteBody = "        service.deleteById(req.getId());";
+        String deleteBody;
         if (detailField != null) {
             String field = detailField.getName();
             createLog = "@Log(value = \"" + label + "-创建\", detail = \"创建" + label + "「${#input." + field + "}」\")";
             updateLog = "@Log(value = \"" + label + "-更新\", detail = \"修改" + label + "「${#input." + field + " ?: #input.id}」\")";
-            deleteBody = "        service.findById(req.getId())\n"
-                    + "                .ifPresent(entity -> OperationLogContext.setDetail(\"删除" + label
-                    + "「\" + entity.get" + capitalize(field) + "() + \"」\"));\n"
+            deleteBody = "        var entity = CrudOps.requireDelete(service.findById(req.getId()), \"记录不存在\");\n"
+                    + "        OperationLogContext.setDetail(\"删除" + label
+                    + "「\" + entity.get" + capitalize(field) + "() + \"」\");\n"
                     + "        service.deleteById(req.getId());";
             imports.append("import io.github.jiangood.openadmin.framework.log.OperationLogContext;\n");
+        } else {
+            deleteBody = "        CrudOps.requireDelete(service.findById(req.getId()), \"记录不存在\");\n"
+                    + "        service.deleteById(req.getId());";
         }
 
         return """
@@ -186,6 +189,7 @@ public final class BackendTemplates {
 
                 %simport io.github.jiangood.openadmin.framework.log.Log;
                 import io.github.jiangood.openadmin.framework.perm.HasPermission;
+                import io.github.jiangood.openadmin.framework.web.CrudOps;
                 import io.github.jiangood.openadmin.util.dto.AjaxResult;
                 import io.github.jiangood.openadmin.util.dto.IdReq;
                 import jakarta.validation.Valid;
@@ -213,9 +217,7 @@ public final class BackendTemplates {
                     @HasPermission("%s:read")
                     @GetMapping("info/{id}")
                     public AjaxResult info(@PathVariable String id) {
-                        return service.findById(id)
-                                .map(data -> AjaxResult.ok().data(data))
-                                .orElse(AjaxResult.err().msg("记录不存在"));
+                        return CrudOps.info(service.findById(id), "记录不存在");
                     }
 
                     %s
@@ -223,15 +225,18 @@ public final class BackendTemplates {
                     @PostMapping("create")
                     public AjaxResult create(@RequestBody %s input) throws Exception {
                         service.save(input, null);
-                        return AjaxResult.ok().msg("创建成功");
+                        return CrudOps.created();
                     }
 
                     %s
                     @HasPermission("%s:update")
                     @PostMapping("update")
-                    public AjaxResult update(@RequestBody %s input, @RequestHeader("X-Body-Fields") List<String> updateFields) throws Exception {
+                    public AjaxResult update(@RequestBody %s input,
+                                             @RequestHeader(value = "X-Body-Fields", required = false) List<String> updateFields) throws Exception {
+                        CrudOps.requireUpdate(input.getId(), updateFields,
+                                () -> service.findById(input.getId()), "记录不存在");
                         service.save(input, updateFields);
-                        return AjaxResult.ok().msg("更新成功");
+                        return CrudOps.updated();
                     }
 
                     @Log("%s-删除")
@@ -239,7 +244,7 @@ public final class BackendTemplates {
                     @PostMapping("delete")
                     public AjaxResult delete(@Valid @RequestBody IdReq req) {
                 %s
-                        return AjaxResult.ok().msg("删除成功");
+                        return CrudOps.deleted();
                     }
                 }
                 """.formatted(meta.getModulePackage(), imports, module, entity, serviceType,
