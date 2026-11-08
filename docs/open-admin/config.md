@@ -244,6 +244,16 @@ sys:
       bucket-name: open-admin
 ```
 
+本地开发可用 Docker 快速起一个 S3 兼容服务（RustFS，端口 9000 为 S3 API、9001 为控制台）：
+
+```bash
+docker run -d --name rustfs -p 9000:9000 -p 9001:9001 \
+  -e RUSTFS_ACCESS_KEY=openadmin -e RUSTFS_SECRET_KEY=openadmin \
+  -v rustfs-data:/data ghcr.io/rustfs/rustfs:latest
+```
+
+启动后把上面的 `access-key` / `secret-key` 改为 `openadmin` 即可；`bucket-name` 指定的桶需先在控制台创建。
+
 文件 `objectName` 带可见性前缀（如 `public/202607/xxx.jpg` / `private/202607/xxx.pdf`），本地磁盘路径 = `sys.file.upload-path` + `objectName`，与 URL `/file/{objectName}` 完全一致。
 
 ## 临时文件自动清理
