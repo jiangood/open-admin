@@ -84,7 +84,7 @@
 - 代理密码回显为 `***`，保存时保持 `***` 表示沿用已保存的密码；清空字段即不使用代理；
 - SOCKS5 代理不支持账号密码（JavaMail 的限制），需要认证请用 HTTP 代理。
 
-未填写 `email.default-to` 时，`MailMessage.to` 为空仍会报「收件邮箱不能为空」；配置后会自动使用默认收件人。
+未填写 `email.default-to` 时，`MailMessage` 的 `to` / `cc` / `bcc` 全为空才会报「收件邮箱不能为空」；只填 `cc` 或 `bcc` 时，框架会把发件邮箱放入 `To`，避免部分服务器判定为无收件人而拒收。
 
 业务模块注入 `MailService` 发送：
 
@@ -98,6 +98,21 @@ mailService.sendAsync(MailMessage.builder()
                 .build())
         .build());
 ```
+
+HTML 正文需要内嵌图片时使用 `inline`（CID），客户端直接显示图片，不会变成附件：
+
+```java
+mailService.sendAsync(MailMessage.builder()
+        .to("ops@example.com")
+        .subject("巡检报告")
+        .html("<p>趋势见下图：</p><img src=\"cid:trend\">")
+        .inline(MailInline.of("trend", new File("/data/trend.png")))   // 文件
+        .inline(MailInline.of("logo", logoBytes, "image/png"))         // 字节数组
+        .build());
+```
+
+- `cid` 可以写 `trend`、`cid:trend` 或 `<trend>`，正文统一用 `cid:trend` 引用；框架发送时按 RFC 用尖括号包裹 `Content-ID`；
+- 只填 `bcc` / `cc` 时框架会用发件邮箱补一个 `To`，避免部分服务器把「没有收件人」的邮件拒收；`bcc` 收件人之间互不可见。
 
 需要记录失败、提示用户补配置或自行重试时，使用返回结果的 API：
 

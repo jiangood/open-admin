@@ -9,6 +9,7 @@ import io.github.jiangood.openadmin.modules.config.service.SysConfigService;
 import io.github.jiangood.openadmin.modules.mail.MailAttachment;
 import io.github.jiangood.openadmin.modules.mail.MailConfigKeys;
 import io.github.jiangood.openadmin.modules.mail.MailErrorType;
+import io.github.jiangood.openadmin.modules.mail.MailInline;
 import io.github.jiangood.openadmin.modules.mail.MailMessage;
 import io.github.jiangood.openadmin.modules.mail.MailProvider;
 import io.github.jiangood.openadmin.modules.mail.MailProxyProperties;
@@ -23,6 +24,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -101,7 +108,9 @@ public class MailService {
             throw new SendFailure(MailErrorType.INVALID_MESSAGE, "邮件内容不能为空");
         }
         List<String> to = resolveRecipients(message);
-        if (to.isEmpty()) {
+        List<String> cc = clean(message.getCc());
+        List<String> bcc = clean(message.getBcc());
+        if (to.isEmpty() && cc.isEmpty() && bcc.isEmpty()) {
             throw new SendFailure(MailErrorType.RECIPIENT_MISSING, "收件邮箱不能为空");
         }
         if (StrUtil.isBlank(message.getSubject())) {
@@ -110,19 +119,42 @@ public class MailService {
         if (StrUtil.isBlank(message.getHtml())) {
             throw new SendFailure(MailErrorType.INVALID_MESSAGE, "邮件内容不能为空");
         }
+        validateInlines(message.getInlines());
 
         Settings settings = settingsForSend();
         MailAccount account = createAccount(settings);
+        if (to.isEmpty()) {
+            // 只有抄送/密送时显式把发件人放进 To：部分服务器会把「没有 To」的邮件判定为无收件人而拒收
+            to = List.of(settings.username());
+        }
+
+        JakartaMail mail = buildMail(account, message, to, cc, bcc);
+
+        try {
+            mail.send();
+        } catch (MailException e) {
+            throw failure(e, settings);
+        }
+
+        log.info("邮件发送成功，收件人：{}，主题：{}，附件：{}，内联图片：{}，代理：{}",
+                to, message.getSubject(), attachments(message.getAttachments()).size(),
+                message.getInlines() == null ? 0 : message.getInlines().size(),
+                settings.proxy().enabled() ? settings.proxy().address() : "无");
+    }
+
+    /**
+     * 组装邮件（不含实际发送），便于单测直接检查 MIME 结构。
+     */
+    static JakartaMail buildMail(MailAccount account, MailMessage message,
+                                 List<String> to, List<String> cc, List<String> bcc) {
         JakartaMail mail = JakartaMail.create(account)
                 .setTos(to.toArray(String[]::new))
                 .setTitle(message.getSubject())
                 .setContent(message.getHtml(), true);
 
-        List<String> cc = clean(message.getCc());
         if (!cc.isEmpty()) {
             mail.setCcs(cc.toArray(String[]::new));
         }
-        List<String> bcc = clean(message.getBcc());
         if (!bcc.isEmpty()) {
             mail.setBccs(bcc.toArray(String[]::new));
         }
@@ -132,15 +164,8 @@ public class MailService {
             mail.setAttachments(attachments.toArray(DataSource[]::new));
         }
 
-        try {
-            mail.send();
-        } catch (MailException e) {
-            throw failure(e, settings);
-        }
-
-        log.info("邮件发送成功，收件人：{}，主题：{}，附件：{}，代理：{}",
-                to, message.getSubject(), attachments.size(),
-                settings.proxy().enabled() ? settings.proxy().address() : "无");
+        addInlines(mail, message.getInlines());
+        return mail;
     }
 
     private Settings settingsForSend() {
@@ -241,7 +266,7 @@ public class MailService {
         return account;
     }
 
-    private List<DataSource> attachments(List<MailAttachment> attachments) {
+    private static List<DataSource> attachments(List<MailAttachment> attachments) {
         List<DataSource> result = new ArrayList<>();
         if (attachments == null) {
             return result;
@@ -261,6 +286,62 @@ public class MailService {
             }
         }
         return result;
+    }
+
+    private static void validateInlines(List<MailInline> inlines) {
+        if (inlines == null || inlines.isEmpty()) {
+            return;
+        }
+        for (MailInline inline : inlines) {
+            if (inline == null) {
+                throw new SendFailure(MailErrorType.INVALID_MESSAGE, "内联图片内容不能为空");
+            }
+            if (StrUtil.isBlank(inline.cid())) {
+                throw new SendFailure(MailErrorType.INVALID_MESSAGE, "内联图片 cid 不能为空");
+            }
+            if (inline.file() == null && inline.bytes() == null) {
+                throw new SendFailure(MailErrorType.INVALID_MESSAGE, "内联图片文件和内容不能同时为空：" + inline.cid());
+            }
+        }
+    }
+
+    private static void addInlines(JakartaMail mail, List<MailInline> inlines) {
+        if (inlines == null || inlines.isEmpty()) {
+            return;
+        }
+        for (MailInline inline : inlines) {
+            if (inline == null) {
+                continue;
+            }
+            String cid = inline.cid();
+            try (InputStream input = openInline(inline)) {
+                // Content-ID 按 RFC 用尖括号包裹，正文仍用 cid:xxx 引用
+                mail.addImage("<" + cid + ">", input, inlineContentType(inline));
+            } catch (IOException e) {
+                throw new SendFailure(MailErrorType.INVALID_MESSAGE, "内联图片读取失败：" + cid);
+            }
+        }
+    }
+
+    private static InputStream openInline(MailInline inline) throws IOException {
+        if (inline.file() != null) {
+            return new BufferedInputStream(new FileInputStream(inline.file()));
+        }
+        return new ByteArrayInputStream(inline.bytes());
+    }
+
+    private static String inlineContentType(MailInline inline) {
+        String contentType = StrUtil.trimToNull(inline.contentType());
+        if (contentType != null) {
+            return contentType;
+        }
+        if (inline.file() != null) {
+            String byName = URLConnection.guessContentTypeFromName(inline.file().getName());
+            if (byName != null && byName.startsWith("image/")) {
+                return byName;
+            }
+        }
+        return "image/png";
     }
 
     private static List<String> clean(List<String> values) {

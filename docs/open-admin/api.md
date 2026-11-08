@@ -168,6 +168,23 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 邮件配置统一走上面的参数设置接口，不提供单独的设置读写接口。
 
+业务侧通过 `MailService` 发送，支持 HTML 正文、附件和内联图片：
+
+```java
+mailService.sendAsync(MailMessage.builder()
+        .to("ops@example.com")
+        .bcc("audit@example.com")                       // 可选
+        .subject("巡检报告")
+        .html("<p>趋势见下图：</p><img src=\"cid:trend\">")
+        .inline(MailInline.of("trend", trendFile))       // 文件
+        .inline(MailInline.of("logo", logoBytes, "image/png"))  // 字节数组
+        .build());
+```
+
+- `MailInline` 的 `cid` 支持 `trend` / `cid:trend` / `<trend>` 三种写法，HTML 统一用 `cid:trend` 引用；发送时 `Content-ID` 会用尖括号包裹；
+- 未填 `to` 时优先使用参数设置里的 `email.default-to`；`to` / `cc` / `bcc` 全为空才报「收件邮箱不能为空」，只有 `cc` / `bcc` 时会用发件邮箱补 `To`；
+- 发送结果统一走 `MailSendResult` / `MailErrorType`，与附件、代理、认证失败的处理一致。
+
 ### 在线用户
 
 系统管理 →「在线用户」页面：一个登录会话一行，展示账号、姓名、机构、IP、登录时间、最后活跃时间与最近操作（取自操作日志，可点击跳转到按该用户 + IP 过滤的操作日志），支持把指定会话强制下线。

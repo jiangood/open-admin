@@ -37,4 +37,8 @@ public class MailMessage {
 
     @Singular("attachment")
     private List<MailAttachment> attachments;
+
+    /** 内联图片：HTML 正文用 {@code <img src="cid:...">} 引用，不作为附件展示 */
+    @Singular("inline")
+    private List<MailInline> inlines;
 }
