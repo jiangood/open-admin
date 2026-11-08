@@ -22,8 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,28 +93,6 @@ class MailServiceTest {
                 () -> mailService.send(messageWithoutTo()));
 
         assertEquals("收件邮箱不能为空", exception.getMessage());
-    }
-
-    @Test
-    void sendTest_usesDefaultRecipientsBeforeSenderAccount() {
-        when(configService.getList(MailConfigKeys.DEFAULT_TO)).thenReturn(List.of("ops@example.com"));
-        when(configService.getString(MailConfigKeys.PROVIDER)).thenReturn(null);
-
-        BusinessException exception = assertThrows(BusinessException.class, mailService::sendTest);
-
-        // 已使用默认收件人，接下来才是 SMTP 未配置
-        assertTrue(exception.getMessage().contains("未配置邮箱类型"));
-    }
-
-    @Test
-    void sendTest_withExplicitRecipientDoesNotUseDefault() {
-        when(configService.getString(MailConfigKeys.PROVIDER)).thenReturn(null);
-
-        BusinessException exception = assertThrows(BusinessException.class,
-                () -> mailService.sendTest("ops@example.com"));
-
-        assertTrue(exception.getMessage().contains("未配置邮箱类型"));
-        verify(configService, never()).getList(MailConfigKeys.DEFAULT_TO);
     }
 
     @Test

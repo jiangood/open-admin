@@ -31,7 +31,7 @@ public class MailConfigProvider implements ConfigProvider {
                         .add(Configs.string(MailConfigKeys.FROM_NAME, "发件人名称")
                                 .hint("可选，显示在收件人看到的发件人位置；留空则使用发件邮箱"))
                         .add(Configs.list(MailConfigKeys.DEFAULT_TO, "默认收件人")
-                                .hint("可选，多个用逗号分隔；发送时未填收件人则使用这里，测试邮件也优先发到这里"))
+                                .hint("可选，多个用逗号分隔；发送时未填收件人则使用这里"))
                         .add(Configs.proxyUrl(MailConfigKeys.PROXY, "代理")
                                 .hint("可选：http://user:pass@192.168.1.10:8080 或 socks5://192.168.1.10:1080；留空表示不使用代理"))
         );

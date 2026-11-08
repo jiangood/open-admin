@@ -13,7 +13,6 @@ import io.github.jiangood.openadmin.modules.mail.MailMessage;
 import io.github.jiangood.openadmin.modules.mail.MailProvider;
 import io.github.jiangood.openadmin.modules.mail.MailProxyProperties;
 import io.github.jiangood.openadmin.modules.mail.MailSendResult;
-import io.github.jiangood.openadmin.modules.mail.MailTemplate;
 import io.github.jiangood.openadmin.util.BusinessException;
 import jakarta.activation.DataSource;
 import jakarta.activation.FileDataSource;
@@ -50,7 +49,7 @@ public class MailService {
     private Executor mailExecutor;
 
     /**
-     * 同步发送，失败抛 {@link BusinessException}，适合交互式场景（测试发送等）。
+     * 同步发送，失败抛 {@link BusinessException}，适合需要立即感知发送结果的交互式场景。
      */
     public void send(MailMessage message) {
         try {
@@ -95,36 +94,6 @@ public class MailService {
      */
     public CompletableFuture<MailSendResult> sendAsyncResult(MailMessage message) {
         return CompletableFuture.supplyAsync(() -> trySend(message), mailExecutor);
-    }
-
-    /** 发到默认收件人或发件邮箱自己，用于验证配置。 */
-    public void sendTest() {
-        sendTest(null);
-    }
-
-    /**
-     * 发送测试邮件。
-     *
-     * @param to 指定收件人；为空时优先使用 {@code email.default-to}，未配置则发到发件邮箱自己
-     */
-    public void sendTest(String to) {
-        List<String> recipients;
-        String explicit = StrUtil.trimToNull(to);
-        if (explicit != null) {
-            recipients = List.of(explicit);
-        } else {
-            recipients = clean(configService.getList(MailConfigKeys.DEFAULT_TO));
-            if (recipients.isEmpty()) {
-                recipients = List.of(settings().username());
-            }
-        }
-
-        MailMessage message = MailMessage.builder()
-                .to(recipients)
-                .subject("邮件通知测试")
-                .html(MailTemplate.test())
-                .build();
-        send(message);
     }
 
     private void sendInternal(MailMessage message) {

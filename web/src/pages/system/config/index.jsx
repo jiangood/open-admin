@@ -31,7 +31,6 @@ export default class SysConfigPage extends React.Component {
         groups: [],
         loading: true,
         saving: false,
-        testingMail: false,
         dirty: false,
     }
 
@@ -138,19 +137,6 @@ export default class SysConfigPage extends React.Component {
             // 错误提示由 HttpClient 统一处理
         } finally {
             this.setState({saving: false})
-        }
-    }
-
-    /** 用已保存的配置发一封测试邮件到发件邮箱自身 */
-    sendTestMail = async () => {
-        this.setState({testingMail: true})
-        try {
-            // 成功提示由后端 message 自动弹出
-            await HttpClient.post('admin/mail/test')
-        } catch {
-            // 错误提示由 HttpClient 统一处理
-        } finally {
-            this.setState({testingMail: false})
         }
     }
 
@@ -272,7 +258,7 @@ export default class SysConfigPage extends React.Component {
     }
 
     render() {
-        const {groups, loading, saving, testingMail, dirty} = this.state
+        const {groups, loading, saving, dirty} = this.state
         const hasOverridden = groups.some(group => group.items.some(item => item.overridden))
         // 首次加载显示骨架屏；切回 Tab 等刷新时保留现有内容，避免闪白
         const initialLoading = loading && groups.length === 0
@@ -283,17 +269,7 @@ export default class SysConfigPage extends React.Component {
                 <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
                     {groups.map(group => (
                         <Card key={group.code}
-                              title={group.label}
-                              extra={group.code === 'mail' && (
-                                  <Perm code='sys-config:update'>
-                                      <Button loading={testingMail}
-                                              disabled={dirty}
-                                              title={dirty ? '请先保存配置修改' : '发送一封测试邮件到发件邮箱'}
-                                              onClick={this.sendTestMail}>
-                                          发送测试邮件
-                                      </Button>
-                                  </Perm>
-                              )}>
+                              title={group.label}>
                             {group.description && (
                                 <Typography.Text type="secondary"
                                                  style={{display: 'block', fontSize: 12, marginBottom: 16}}>

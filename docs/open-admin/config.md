@@ -84,7 +84,7 @@
 - 代理密码回显为 `***`，保存时保持 `***` 表示沿用已保存的密码；清空字段即不使用代理；
 - SOCKS5 代理不支持账号密码（JavaMail 的限制），需要认证请用 HTTP 代理。
 
-未填写 `email.default-to` 时，`MailMessage.to` 为空仍会报「收件邮箱不能为空」；配置后会自动使用默认收件人。测试邮件优先发到默认收件人，未配置再发到 `email.username` 自己。
+未填写 `email.default-to` 时，`MailMessage.to` 为空仍会报「收件邮箱不能为空」；配置后会自动使用默认收件人。
 
 业务模块注入 `MailService` 发送：
 

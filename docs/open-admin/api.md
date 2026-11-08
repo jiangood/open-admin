@@ -168,10 +168,6 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 邮件配置统一走上面的参数设置接口，不提供单独的设置读写接口。
 
-| 端点 | HTTP | 权限 | 说明 |
-|------|------|------|------|
-| `admin/mail/test` | POST | `sys-config:update` | 发送测试邮件到默认收件人或发件邮箱自己；失败返回具体原因 |
-
 ### 在线用户
 
 系统管理 →「在线用户」页面：一个登录会话一行，展示账号、姓名、机构、IP、登录时间、最后活跃时间与最近操作（取自操作日志，可点击跳转到按该用户 + IP 过滤的操作日志），支持把指定会话强制下线。

@@ -43,14 +43,6 @@ public final class MailTemplate {
         return notification(title, Status.INFO);
     }
 
-    /** 测试邮件内容，用于验证 SMTP 配置。 */
-    public static String test() {
-        return "<div style=\"font-family:" + FONT + ";color:#1f2937;font-size:14px;line-height:1.7\">"
-                + "<h2 style=\"font-size:18px;margin:0 0 12px;color:" + Status.SUCCESS.color() + "\">邮件发送服务可用</h2>"
-                + "<p>如果你收到这封邮件，说明邮件发送配置正确。业务模块可以通过 MailService 发送通知。</p>"
-                + "</div>";
-    }
-
     public static final class Builder {
 
         private final String title;

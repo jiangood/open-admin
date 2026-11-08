@@ -30,12 +30,4 @@ class MailTemplateTest {
 
         assertTrue(html.contains("<td style=\"border:1px solid #e5e7eb;word-break:break-all\">-</td>"));
     }
-
-    @Test
-    void testMailHasContent() {
-        String html = MailTemplate.test();
-
-        assertTrue(html.contains("邮件发送服务可用"));
-        assertTrue(html.contains("MailService"));
-    }
 }
