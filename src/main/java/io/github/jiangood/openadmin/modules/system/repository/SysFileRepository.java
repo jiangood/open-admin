@@ -36,6 +36,12 @@ public interface SysFileRepository extends BaseRepository<SysFile, String> {
     @Query("SELECT f FROM SysFile f WHERE f.objectName = :objectName")
     SysFile findByObjectName(@Param("objectName") String objectName);
 
+    /**
+     * 查询所有文件存储路径，用于生成文件管理左侧文件夹树
+     */
+    @Query("SELECT f.objectName FROM SysFile f WHERE f.objectName IS NOT NULL")
+    List<String> findAllObjectNames();
+
     @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE SysFile f SET f.status = :to WHERE f.status = :from AND f.createTime < :deadline")

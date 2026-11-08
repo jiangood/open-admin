@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.modules.system.controller;
 
+import cn.hutool.core.text.CharSequenceUtil;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.StringReq;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
@@ -37,6 +38,7 @@ public class SysFileController {
     public AjaxResult page(String dateRange,
                            String originName,
                            String objectName,
+                           String folder,
                            FileStatus status,
                            String type,
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
@@ -46,9 +48,22 @@ public class SysFileController {
         q.like(SysFile.Fields.objectName, objectName);
         q.eq(SysFile.Fields.status, status);
         q.eq(SysFile.Fields.type, type);
+        if (CharSequenceUtil.isNotBlank(folder)) {
+            // 按左侧文件夹过滤，包含其所有子目录（leftLike 生成 value%）
+            q.leftLike(SysFile.Fields.objectName, folder + "/");
+        }
 
         Page<SysFile> page = service.findAll(q, pageable);
         return AjaxResult.ok().data(page);
+    }
+
+    /**
+     * 左侧文件夹树（按 objectName 的存储目录生成）
+     */
+    @HasPermission("sys-file:read")
+    @GetMapping("folder-tree")
+    public AjaxResult folderTree() {
+        return AjaxResult.ok().data(service.getFolderTree());
     }
 
 

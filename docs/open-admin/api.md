@@ -579,6 +579,7 @@ class ReportPage extends React.Component {
 - `POST /admin/sys-file/upload` — 通用文件上传，表单参数 `file`、`isPublic`（`true` 公开免登录 / `false` 私有需登录，默认 `true`）
 - `POST /admin/sys-file/upload-image` — 图片上传，表单参数 `file`、`thumb`（缩略图）、`isPublic`
 - `GET /admin/sys-file/download/{*objectName}` — 下载
+- `GET /admin/sys-file/folder-tree` — 文件管理左侧文件夹树，按 objectName 的存储目录聚合，节点为 `key`/`title`/`count`/`children`；`GET /admin/sys-file/page` 可传 `folder`（目录前缀，含子目录）过滤
 
 上传文件默认标记为临时，保存业务数据后后端自动确认（详见[临时文件自动清理](config.md#临时文件自动清理)）。
 

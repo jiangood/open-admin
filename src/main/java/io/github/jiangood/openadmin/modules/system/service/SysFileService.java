@@ -16,6 +16,7 @@ import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
+import io.github.jiangood.openadmin.modules.system.dto.SysFileFolderNode;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
@@ -591,6 +592,99 @@ public class SysFileService {
             return table.name();
         }
         return CharSequenceUtil.toUnderlineCase(entityClass.getSimpleName());
+    }
+
+    /**
+     * 文件管理左侧文件夹树：按 objectName 的存储目录聚合，
+     * count 为该目录（含子目录）下的文件数量
+     */
+    public List<SysFileFolderNode> getFolderTree() {
+        return buildFolderTree(sysFileRepository.findAllObjectNames());
+    }
+
+    static List<SysFileFolderNode> buildFolderTree(List<String> objectNames) {
+        Map<String, SysFileFolderNode> nodeMap = new LinkedHashMap<>();
+        Map<String, SysFileFolderNode> parentMap = new HashMap<>();
+        if (objectNames != null) {
+            for (String objectName : objectNames) {
+                if (CharSequenceUtil.isBlank(objectName)) {
+                    continue;
+                }
+                String normalized = objectName.replace('\\', '/');
+                int slash = normalized.lastIndexOf('/');
+                if (slash <= 0) {
+                    continue;
+                }
+                SysFileFolderNode parent = null;
+                StringBuilder path = new StringBuilder();
+                for (String segment : normalized.substring(0, slash).split("/")) {
+                    if (CharSequenceUtil.isBlank(segment)) {
+                        continue;
+                    }
+                    if (path.length() > 0) {
+                        path.append('/');
+                    }
+                    path.append(segment);
+                    String key = path.toString();
+                    SysFileFolderNode node = nodeMap.get(key);
+                    if (node == null) {
+                        node = new SysFileFolderNode(key, folderTitle(segment));
+                        nodeMap.put(key, node);
+                        parentMap.put(key, parent);
+                        if (parent != null) {
+                            parent.getChildren().add(node);
+                        }
+                    }
+                    node.setCount(node.getCount() + 1);
+                    parent = node;
+                }
+            }
+        }
+
+        List<SysFileFolderNode> roots = new ArrayList<>();
+        for (Map.Entry<String, SysFileFolderNode> entry : nodeMap.entrySet()) {
+            if (parentMap.get(entry.getKey()) == null) {
+                roots.add(entry.getValue());
+            }
+        }
+        sortFolderTree(roots);
+        return roots;
+    }
+
+    private static void sortFolderTree(List<SysFileFolderNode> nodes) {
+        nodes.sort(Comparator
+                .comparingInt((SysFileFolderNode node) -> folderOrder(node.getKey()))
+                .thenComparing(SysFileFolderNode::getKey));
+        for (SysFileFolderNode node : nodes) {
+            sortFolderTree(node.getChildren());
+        }
+    }
+
+    private static int folderOrder(String key) {
+        return switch (key) {
+            case SysFileConstants.PUBLIC_PREFIX -> 0;
+            case SysFileConstants.PRIVATE_PREFIX -> 1;
+            default -> 2;
+        };
+    }
+
+    private static String folderTitle(String segment) {
+        return switch (segment) {
+            case SysFileConstants.PUBLIC_PREFIX -> "公共文件";
+            case SysFileConstants.PRIVATE_PREFIX -> "私有文件";
+            case SysFileConstants.IMAGE_DIR -> "图片";
+            default -> formatMonthSegment(segment);
+        };
+    }
+
+    /**
+     * 年/月目录（如 202601）展示为 2026年01月，其他目录保持原样
+     */
+    private static String formatMonthSegment(String segment) {
+        if (segment.length() == 6 && segment.chars().allMatch(Character::isDigit)) {
+            return segment.substring(0, 4) + "年" + segment.substring(4) + "月";
+        }
+        return segment;
     }
 
     public Page<SysFile> findAll(Specification<SysFile> q, Pageable pageable) {
