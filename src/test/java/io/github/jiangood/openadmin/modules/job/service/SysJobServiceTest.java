@@ -39,11 +39,14 @@ class SysJobServiceTest {
     @Mock
     private FileLogService fileLogService;
 
+    @Mock
+    private JobLogSizeService jobLogSizeService;
+
     private SysJobService service;
 
     @BeforeEach
     void setUp() {
-        service = new SysJobService(quartzService, sysJobLogRepository, jobProgressRegistry, fileLogService);
+        service = new SysJobService(quartzService, sysJobLogRepository, jobProgressRegistry, fileLogService, jobLogSizeService);
         ReflectionTestUtils.setField(service, "repository", repository);
     }
 
@@ -115,6 +118,7 @@ class SysJobServiceTest {
         verify(quartzService).deleteJob(job);
         verify(sysJobLogRepository).deleteAll(java.util.List.of(log));
         verify(fileLogService).deleteLog("job/log-1");
+        verify(jobLogSizeService).invalidate();
         verify(repository).deleteById("job-1");
         verify(jobProgressRegistry).remove("job-1");
     }

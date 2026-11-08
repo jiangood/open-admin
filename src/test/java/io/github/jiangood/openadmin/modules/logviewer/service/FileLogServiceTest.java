@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -136,5 +137,31 @@ class FileLogServiceTest {
     @Test
     void readChunk_shouldRejectPathTraversal() {
         assertThrows(IllegalArgumentException.class, () -> service.readChunk("/../secret", 0, 0));
+    }
+
+    @Test
+    void statLogFiles_shouldSumLogFilesWithoutCreatingDirectory() throws Exception {
+        Files.createDirectories(logDir.resolve("job"));
+        Files.writeString(logDir.resolve("job/a.log"), "hello");
+        Files.writeString(logDir.resolve("job/b.log"), "world!");
+        Files.writeString(logDir.resolve("job/ignore.txt"), "0123456789");
+
+        Map<String, Long> sizes = service.statLogFiles("job");
+
+        assertEquals(Map.of("a", 5L, "b", 6L), sizes);
+    }
+
+    @Test
+    void statLogFiles_shouldReturnEmptyWhenDirectoryMissing() throws Exception {
+        assertTrue(service.statLogFiles("job").isEmpty());
+        assertFalse(Files.exists(logDir.resolve("job")), "统计不应创建目录");
+    }
+
+    @Test
+    void statLogFiles_shouldRejectInvalidDirectoryKey() {
+        assertThrows(IllegalArgumentException.class, () -> service.statLogFiles("../job"));
+        assertThrows(IllegalArgumentException.class, () -> service.statLogFiles("a/b"));
+        assertThrows(IllegalArgumentException.class, () -> service.statLogFiles(""));
+        assertThrows(IllegalArgumentException.class, () -> service.statLogFiles(null));
     }
 }

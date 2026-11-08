@@ -92,6 +92,10 @@ public class SystemProperties {
      */
     private int jobLogRetainDays = 30;
     /**
+     * 定时任务日志文件总占用告警阈值（MB），&lt;=0 表示不告警；仅用于管理页展示提醒，不自动清理
+     */
+    private int jobLogSizeWarnMb = 1024;
+    /**
      *  是否打印全局捕获的异常， 通常指web请求异常
      */
     private boolean printGlobalException = true;

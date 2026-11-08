@@ -72,6 +72,12 @@ export interface ProTableProps<T = unknown> {
     searchInline?: boolean;
     /** 搜索表单渲染函数，返回 Form.Item 列表 */
     searchFormRender?: () => React.ReactNode;
+    /**
+     * 表格横向宽度。默认 `'max-content'`：列宽按内容撑开，超宽时横向滚动（单元格不换行）。
+     * 传 `true` 时表格宽度自适应容器，单元格内容按列宽自动换行（列宽不足时才横向滚动）。
+     * 传数字时作为表格最小宽度：容器更宽时铺满，更窄时横向滚动。
+     */
+    scrollX?: number | true | string;
     scrollY?: number | string;
     bordered?: boolean;
     /** 树形数据模式，关闭分页且不传 page/size 参数 */
@@ -213,6 +219,7 @@ this.setState({loading: true})
             columns,
             rowSelection,
             rowKey = "id",
+            scrollX = 'max-content',
         } = this.props
         // 有筛选条件时区分「无匹配结果」与「暂无数据」，避免业务人员误以为数据丢失
         const hasFilter = Object.keys(this.state.params || {}).length > 0
@@ -240,7 +247,7 @@ this.setState({loading: true})
                     rowKey={rowKey}
                     size={this.state.tableSize}
                     rowSelection={this.getRowSelectionProps(rowSelection)}
-                    scroll={{x: 'max-content', y: this.state.scrollY}}
+                    scroll={{x: scrollX, y: this.state.scrollY}}
                     pagination={this.props.treeMode ? false : {
                         showSizeChanger: true,
                         total: this.state.total,

@@ -11,6 +11,8 @@ public interface SysJobRepository extends BaseRepository<SysJob, String> {
 
     List<SysJob> findAllByEnabledTrue();
 
+    long countByEnabled(boolean enabled);
+
     SysJob findByName(String name);
 
     SysJob findByJobKey(String jobKey);

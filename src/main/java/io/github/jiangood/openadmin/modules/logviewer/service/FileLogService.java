@@ -13,6 +13,11 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 @Service
 public class FileLogService {
@@ -106,6 +111,45 @@ public class FileLogService {
     public void deleteLog(String key) throws IOException {
         String normalizedKey = normalizeKey(key);
         Files.deleteIfExists(fileLogConfig.buildLogFile(normalizedKey).toPath());
+    }
+
+    /**
+     * 只读统计某个日志目录下所有 {@code .log} 文件的大小。
+     * <p>
+     * 与 {@link #readLogContent(String)} 等按 key 定位单个文件的方法不同，这里刻意
+     * <b>不</b>经过 {@link FileLogConfig#buildLogFile(String)}（它会 {@code mkdirs}），
+     * 避免统计动作产生副作用；目录不存在时直接返回空 Map。单个文件在统计过程中被删除时跳过该文件。
+     *
+     * @param dirKey 日志目录 key，如 {@code job}；只允许单级目录名
+     * @return 文件名去掉 {@code .log} 后的名称 → 字节数
+     */
+    public Map<String, Long> statLogFiles(String dirKey) throws IOException {
+        if (dirKey == null || dirKey.isBlank()
+                || ".".equals(dirKey) || "..".equals(dirKey)
+                || dirKey.contains("/") || dirKey.contains("\\")) {
+            throw new IllegalArgumentException("非法的日志目录 key: " + dirKey);
+        }
+
+        Map<String, Long> result = new HashMap<>();
+        Path dir = Paths.get(fileLogConfig.getLogPath(), dirKey);
+        if (!Files.isDirectory(dir)) {
+            return result;
+        }
+
+        try (Stream<Path> files = Files.list(dir)) {
+            files.filter(Files::isRegularFile).forEach(file -> {
+                String name = file.getFileName().toString();
+                if (!name.endsWith(".log")) {
+                    return;
+                }
+                try {
+                    result.put(name.substring(0, name.length() - ".log".length()), Files.size(file));
+                } catch (IOException e) {
+                    // 文件可能刚被清理任务删除，忽略
+                }
+            });
+        }
+        return result;
     }
 
     private static byte[] read(File file, long from, int size) throws IOException {

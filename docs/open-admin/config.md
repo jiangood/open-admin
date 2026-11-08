@@ -22,6 +22,7 @@
 | `sys.job-enable` | 定时任务开关 | true |
 | `sys.job-auto-register` | 启动时扫描 `BaseJob` 子类 / `@JobDescription` 并补建缺失的定时任务记录（只补建，不覆盖已有配置） | true |
 | `sys.job-log-retain-days` | 定时任务执行记录保留天数，`<=0` 表示不清理 | 30 |
+| `sys.job-log-size-warn-mb` | 定时任务日志文件总占用告警阈值（MB），仅用于管理页红色提示，不自动清理；`<=0` 关闭告警 | 1024 |
 | `sys.codegen.backend-dir` | 代码生成后端源码根目录（相对项目根） | src/main/java |
 | `sys.codegen.resource-dir` | 代码生成资源目录（菜单 YAML 输出位置） | src/main/resources |
 | `sys.codegen.frontend-dir` | 代码生成前端页面根目录 | web/src/pages |

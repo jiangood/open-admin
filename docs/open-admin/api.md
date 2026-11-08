@@ -81,6 +81,18 @@ public class DataSyncJob extends BaseJob {
 
 快照字段：`jobId` / `jobName` / `logId` / `state`(`RUNNING`/`SUCCESS`/`FAILED`) / `stateLabel` / `stateColor` / `percent` / `current` / `total` / `message` / `beginTime` / `updateTime` / `endTime` / `runTime` / `result`。
 
+页面顶部统计卡片（运行中 / 今日执行 / 日志占用 / 调度器）：
+
+| 端点 | HTTP | 权限 | 说明 |
+|------|------|------|------|
+| `admin/job/stat` | GET | `job:read` | `jobCount` / `enabledCount` / `runningCount` / `todayExecuteCount` / `todayFailCount` / `scheduler` |
+| `admin/job/log-size` | GET | `job:read` | 全部任务日志占用：`bytes` / `files` / `warnMb` / `warn` |
+| `admin/job/{jobId}/log-size` | GET | `job:read` | 指定任务的日志占用：`bytes` / `files` |
+
+`admin/job/stat` 的 `scheduler` 字段：`version` / `schedulerName` / `instanceId` / `started` / `standby` / `runningSince` / `jobsExecuted` / `threadPoolSize` / `jobStoreClass` / `persistent` / `clustered`，读取失败时带 `error`。
+
+日志占用只读统计 `${logging.file.path}/job/*.log`，不会创建目录；结果在服务端缓存 30 秒，删除任务或执行记录清理后会主动失效。超过 `sys.job-log-size-warn-mb`（默认 1024 MB，`<=0` 关闭）时 `warn` 为 `true`，管理页以红色提示，不自动清理；清理仍由 `sys.job-log-retain-days` 控制。
+
 ### 执行记录方式
 
 `SysJob.logAggregation`（前端字段名「执行记录方式」，新建/编辑任务时选择，字典 `jobLogAggregation`）控制执行记录与日志文件粒度：
@@ -417,6 +429,7 @@ import { PermActions } from '@jiangood/open-admin';
 | `searchInline` | 搜索表单内联到工具栏左侧，与操作按钮同一行（单条件页面省一行空间）；默认 `false` = 独立筛选卡 |
 | `defaultParams` | 初始筛选条件，首次加载即按此条件查询并回填搜索表单（适合从其他页面带参数跳转） |
 | `defaultPageSize` | 默认每页条数 |
+| `scrollX` | 表格横向宽度：默认 `'max-content'`（按内容撑开，超宽时横向滚动）；传 `true` 让表格自适应容器宽度、单元格内容按列宽换行；传数字为表格最小宽度（容器更宽时铺满，更窄时横向滚动） |
 | `scrollY` | 表格纵向滚动高度 |
 | `bordered` | 是否显示边框 |
 

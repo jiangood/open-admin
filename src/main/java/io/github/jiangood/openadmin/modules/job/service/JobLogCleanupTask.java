@@ -29,6 +29,7 @@ public class JobLogCleanupTask {
     private final SystemProperties systemProperties;
     private final SysJobLogRepository sysJobLogRepository;
     private final FileLogService fileLogService;
+    private final JobLogSizeService jobLogSizeService;
 
     @Scheduled(cron = "0 0 3 * * ?")
     public void cleanExpiredLogs() {
@@ -54,6 +55,7 @@ public class JobLogCleanupTask {
         }
 
         if (total > 0) {
+            jobLogSizeService.invalidate();
             log.info("任务执行记录清理完成，共删除 {} 条（保留 {} 天）", total, retainDays);
         }
     }

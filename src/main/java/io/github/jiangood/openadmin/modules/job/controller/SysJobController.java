@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.job.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ClassUtil;
 import tools.jackson.core.JacksonException;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
@@ -22,6 +21,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.quartz.JobRegistrationManager;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
+import io.github.jiangood.openadmin.modules.job.service.JobStatService;
 import io.github.jiangood.openadmin.modules.job.service.SysJobService;
 import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
@@ -43,15 +43,15 @@ import java.util.*;
 public class SysJobController {
 
     private final SysJobService service;
-    private final Scheduler scheduler;
+    private final JobStatService statService;
     private final QuartzManager quartzService;
     private final JobRegistrationManager registrationManager;
 
 
     @HasPermission("job:read")
     @GetMapping("page")
-    public AjaxResult page(String name, String jobClass, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws SchedulerException {
-        return AjaxResult.ok().data(service.page(name, jobClass, pageable));
+    public AjaxResult page(String searchText, @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) throws SchedulerException {
+        return AjaxResult.ok().data(service.page(searchText, pageable));
     }
 
     /**
@@ -216,74 +216,31 @@ public class SysJobController {
         return AjaxResult.ok().data(service.getProgress(jobId));
     }
 
-
+    /**
+     * 页面顶部卡片：运行中 / 今日执行 / 调度器信息
+     */
     @HasPermission("job:read")
-    @GetMapping("status")
-    public AjaxResult info() throws SchedulerException {
-        SchedulerMetaData meta = scheduler.getMetaData();
+    @GetMapping("stat")
+    public AjaxResult stat() {
+        return AjaxResult.ok().data(statService.stat());
+    }
 
-        StringBuilder str = new StringBuilder("Quartz 调度器 (v");
-        str.append(meta.getVersion());
-        str.append(") '");
-        str.append(meta.getSchedulerName());
-        str.append("' 实例ID '");
-        str.append(meta.getSchedulerInstanceId());
-        str.append("'\n");
-        str.append("  调度器类: '");
-        str.append(meta.getSchedulerClass().getName());
-        str.append("'");
-        if (meta.isSchedulerRemote()) {
-            str.append(" - 通过 RMI 访问.");
-        } else {
-            str.append(" - 本地运行.");
-        }
+    /**
+     * 全部任务日志文件占用（字节数、文件数、告警阈值）
+     */
+    @HasPermission("job:read")
+    @GetMapping("log-size")
+    public AjaxResult totalLogSize() {
+        return AjaxResult.ok().data(statService.totalLogSize());
+    }
 
-        str.append("\n");
-        if (!meta.isShutdown()) {
-            if (meta.getRunningSince() != null) {
-                str.append("  运行开始时间: ");
-                str.append(DateUtil.formatDateTime(meta.getRunningSince()));
-            } else {
-                str.append("  尚未启动.");
-            }
-
-            str.append("\n");
-            if (meta.isInStandbyMode()) {
-                str.append("  当前处于待机模式.");
-            } else {
-                str.append("  当前不处于待机模式.");
-            }
-        } else {
-            str.append("  调度器已被关闭.");
-        }
-
-        str.append("\n");
-        str.append("  已执行任务数: ");
-        str.append(meta.getNumberOfJobsExecuted());
-        str.append("\n");
-        str.append("  使用线程池 '");
-        str.append(meta.getThreadPoolClass().getName());
-        str.append("' - 线程数 ");
-        str.append(meta.getThreadPoolSize());
-        str.append(" 个.");
-        str.append("\n");
-        str.append("  使用作业存储 '");
-        str.append(meta.getJobStoreClass().getName());
-        str.append("' - ");
-        if (meta.isJobStoreSupportsPersistence()) {
-            str.append("支持持久化.");
-        } else {
-            str.append("不支持持久化.");
-        }
-
-        if (meta.isJobStoreClustered()) {
-            str.append(" 并且是集群化的.");
-        } else {
-            str.append(" 并且不是集群化的.");
-        }
-
-        str.append("\n");
-        return AjaxResult.ok().data(str.toString());
+    /**
+     * 指定任务的日志文件占用，用于「执行情况」弹窗
+     */
+    @HasPermission("job:read")
+    @GetMapping("{jobId}/log-size")
+    public AjaxResult jobLogSize(@PathVariable String jobId) {
+        return AjaxResult.ok().data(statService.logSizeOfJob(jobId));
     }
 
 

@@ -32,12 +32,14 @@ class JobLogCleanupTaskTest {
     private SysJobLogRepository sysJobLogRepository;
     @Mock
     private FileLogService fileLogService;
+    @Mock
+    private JobLogSizeService jobLogSizeService;
 
     private JobLogCleanupTask task;
 
     @BeforeEach
     void setUp() {
-        task = new JobLogCleanupTask(systemProperties, sysJobLogRepository, fileLogService);
+        task = new JobLogCleanupTask(systemProperties, sysJobLogRepository, fileLogService, jobLogSizeService);
     }
 
     private SysJobLog log(String id) {
@@ -77,6 +79,7 @@ class JobLogCleanupTaskTest {
         verify(sysJobLogRepository).deleteAll(List.of(a, b));
         verify(fileLogService).deleteLog("job/log-a");
         verify(fileLogService).deleteLog("job/log-b");
+        verify(jobLogSizeService).invalidate();
     }
 
     @Test

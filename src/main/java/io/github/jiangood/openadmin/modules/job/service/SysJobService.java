@@ -33,6 +33,7 @@ public class SysJobService extends BaseService<SysJob> {
     private final SysJobLogRepository sysJobLogRepository;
     private final JobProgressRegistry jobProgressRegistry;
     private final FileLogService fileLogService;
+    private final JobLogSizeService jobLogSizeService;
 
     @Transactional(rollbackFor = Exception.class)
     public SysJob save(SysJob input, List<String> requestKeys) throws Exception {
@@ -98,6 +99,7 @@ public class SysJobService extends BaseService<SysJob> {
             }
         }
 
+        jobLogSizeService.invalidate();
         deleteById(id);
         jobProgressRegistry.remove(id);
     }
@@ -107,8 +109,13 @@ public class SysJobService extends BaseService<SysJob> {
         return sysJobLogRepository.findAll(q, pageable);
     }
 
-    public Page<SysJob> page(String name, String jobClass, Pageable pageable) throws SchedulerException {
-        return repository.findAll(Spec.<SysJob>of().like(SysJob.Fields.name, name).like(SysJob.Fields.jobClass, jobClass), pageable);
+    /**
+     * 按关键字模糊匹配任务名称 / 执行类 / 任务 key
+     */
+    public Page<SysJob> page(String searchText, Pageable pageable) throws SchedulerException {
+        Spec<SysJob> spec = Spec.of();
+        spec.orLike(searchText, SysJob.Fields.name, SysJob.Fields.jobClass, SysJob.Fields.jobKey);
+        return repository.findAll(spec, pageable);
     }
 
     /**

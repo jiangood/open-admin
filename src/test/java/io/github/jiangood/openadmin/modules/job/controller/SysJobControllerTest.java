@@ -1,11 +1,15 @@
 package io.github.jiangood.openadmin.modules.job.controller;
 
+import io.github.jiangood.openadmin.modules.job.dto.JobStat;
+import io.github.jiangood.openadmin.modules.job.dto.LogSizeStat;
 import io.github.jiangood.openadmin.modules.job.dto.request.JobReq;
 import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
 import io.github.jiangood.openadmin.modules.job.progress.JobRunState;
+import io.github.jiangood.openadmin.modules.job.quartz.JobRegistrationManager;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
+import io.github.jiangood.openadmin.modules.job.service.JobStatService;
 import io.github.jiangood.openadmin.modules.job.service.SysJobService;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.dto.IdReq;
@@ -19,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
+import org.quartz.Scheduler;
 
 import java.util.List;
 import java.util.Map;
@@ -38,7 +43,16 @@ class SysJobControllerTest {
     private SysJobService service;
 
     @Mock
+    private JobStatService statService;
+
+    @Mock
+    private Scheduler scheduler;
+
+    @Mock
     private QuartzManager quartzService;
+
+    @Mock
+    private JobRegistrationManager registrationManager;
 
     @InjectMocks
     private SysJobController controller;
@@ -123,5 +137,39 @@ class SysJobControllerTest {
         org.mockito.ArgumentCaptor<SysJob> captor = org.mockito.ArgumentCaptor.forClass(SysJob.class);
         verify(service).save(captor.capture(), org.mockito.ArgumentMatchers.isNull());
         assertEquals(JobLogAggregation.DAILY, captor.getValue().getLogAggregation());
+    }
+
+    @Test
+    void stat_shouldReturnServiceSnapshot() {
+        JobStat stat = new JobStat();
+        stat.setJobCount(3);
+        when(statService.stat()).thenReturn(stat);
+
+        AjaxResult rs = controller.stat();
+
+        assertEquals(stat, rs.getData());
+    }
+
+    @Test
+    void totalLogSize_shouldReturnServiceSnapshot() {
+        LogSizeStat size = new LogSizeStat();
+        size.setBytes(1024);
+        size.setFiles(2);
+        when(statService.totalLogSize()).thenReturn(size);
+
+        AjaxResult rs = controller.totalLogSize();
+
+        assertEquals(size, rs.getData());
+    }
+
+    @Test
+    void jobLogSize_shouldDelegateWithJobId() {
+        LogSizeStat size = new LogSizeStat();
+        size.setBytes(512);
+        when(statService.logSizeOfJob("job-1")).thenReturn(size);
+
+        AjaxResult rs = controller.jobLogSize("job-1");
+
+        assertEquals(size, rs.getData());
     }
 }
