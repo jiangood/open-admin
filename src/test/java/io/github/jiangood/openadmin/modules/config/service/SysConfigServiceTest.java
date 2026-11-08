@@ -1,7 +1,9 @@
 package io.github.jiangood.openadmin.modules.config.service;
 
+import io.github.jiangood.openadmin.framework.config.dynamic.ConfigGroup;
 import io.github.jiangood.openadmin.framework.config.dynamic.Configs;
 import io.github.jiangood.openadmin.framework.spi.ConfigProvider;
+import io.github.jiangood.openadmin.modules.config.dto.ConfigGroupView;
 import io.github.jiangood.openadmin.modules.config.dto.ConfigItemView;
 import io.github.jiangood.openadmin.modules.config.entity.SysConfig;
 import io.github.jiangood.openadmin.modules.config.repository.SysConfigRepository;
@@ -36,16 +38,29 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SysConfigServiceTest {
 
-    private static final ConfigProvider PROVIDER = () -> List.of(
-            Configs.group("test", "测试", 10)
-                    .add(Configs.string("test.name", "名称").defaultValue("默认").asRequired())
-                    .add(Configs.integer("test.count", "数量").defaultValue(5).min(1).max(10))
-                    .add(Configs.bool("test.enabled", "启用").defaultValue(false))
-                    .add(Configs.list("test.tags", "标签").defaultValue(List.of("a", "b")))
-                    .add(Configs.string("test.password", "密码").asSecret())
-                    .add(Configs.string("test.public", "公开").defaultValue("公开值").asPublic())
-                    .add(Configs.proxyUrl("test.proxy", "代理"))
-    );
+    private static final ConfigProvider PROVIDER = new ConfigProvider() {
+        @Override
+        public List<ConfigGroup> define() {
+            return List.of(
+                    Configs.group("test", "测试", 10)
+                            .add(Configs.string("test.name", "名称").defaultValue("默认").asRequired())
+                            .add(Configs.integer("test.count", "数量").defaultValue(5).min(1).max(10))
+                            .add(Configs.bool("test.enabled", "启用").defaultValue(false))
+                            .add(Configs.list("test.tags", "标签").defaultValue(List.of("a", "b")))
+                            .add(Configs.string("test.password", "密码").asSecret())
+                            .add(Configs.string("test.public", "公开").defaultValue("公开值").asPublic())
+                            .add(Configs.proxyUrl("test.proxy", "代理"))
+                            .add(Configs.string("test.internal", "内部").defaultValue("internal-default").asHidden()),
+                    Configs.group("internal", "仅内部", 20)
+                            .add(Configs.string("internal.marker", "标记").asHidden())
+            );
+        }
+
+        @Override
+        public List<String> deprecatedKeys() {
+            return List.of("test.old", "test.removed");
+        }
+    };
 
     @Mock
     private SysConfigRepository repository;
@@ -71,6 +86,26 @@ class SysConfigServiceTest {
             }
             return saved;
         });
+        when(repository.save(any(SysConfig.class))).thenAnswer(invocation -> {
+            SysConfig row = invocation.getArgument(0);
+            store.put(row.getConfigKey(), row);
+            return row;
+        });
+        when(repository.findByConfigKeyIn(any())).thenAnswer(invocation -> {
+            Collection<String> keys = invocation.getArgument(0);
+            List<SysConfig> rows = new ArrayList<>();
+            for (String key : keys) {
+                SysConfig row = store.get(key);
+                if (row != null) {
+                    rows.add(row);
+                }
+            }
+            return rows;
+        });
+        doAnswer(invocation -> {
+            store.remove((String) invocation.getArgument(0));
+            return null;
+        }).when(repository).deleteByConfigKey(anyString());
         doAnswer(invocation -> {
             Collection<String> keys = invocation.getArgument(0);
             keys.forEach(store::remove);
@@ -186,6 +221,68 @@ class SysConfigServiceTest {
         // 非法地址在保存时就拒绝
         assertThrows(BusinessException.class,
                 () -> service.update(Map.of("test.proxy", "ftp://host:21")));
+    }
+
+    @Test
+    void groupsExcludeHiddenItemsAndHiddenOnlyGroups() {
+        List<ConfigGroupView> groups = service.groups();
+
+        assertEquals(1, groups.size());
+        assertEquals("test", groups.get(0).code());
+        assertTrue(groups.get(0).items().stream().noneMatch(item -> "test.internal".equals(item.key())));
+        assertTrue(groups.stream().noneMatch(group -> "internal".equals(group.code())));
+    }
+
+    @Test
+    void hiddenItemIsReadableButNotWritableThroughPageUpdate() {
+        assertEquals("internal-default", service.getString("test.internal"));
+
+        BusinessException error = assertThrows(BusinessException.class,
+                () -> service.update(Map.of("test.internal", "changed")));
+        assertTrue(error.getMessage().contains("内部配置"));
+        assertEquals("internal-default", service.getString("test.internal"));
+    }
+
+    @Test
+    void putInternalWritesAndRemoveInternalClears() {
+        service.putInternal("test.internal", "fp-1");
+
+        assertEquals("fp-1", service.getString("test.internal"));
+        assertTrue(service.isOverridden("test.internal"));
+
+        service.removeInternal("test.internal");
+        assertEquals("internal-default", service.getString("test.internal"));
+        assertFalse(service.isOverridden("test.internal"));
+    }
+
+    @Test
+    void putInternalRejectsVisibleKeys() {
+        assertThrows(BusinessException.class, () -> service.putInternal("test.count", 6));
+        assertThrows(BusinessException.class, () -> service.removeInternal("test.count"));
+    }
+
+    @Test
+    void resetAllKeepsHiddenOverridesButRejectsExplicitHiddenKey() {
+        service.putInternal("test.internal", "fp-1");
+        service.update(Map.of("test.count", 9));
+
+        service.reset(null);
+
+        assertEquals(5, service.getInt("test.count"));
+        assertEquals("fp-1", service.getString("test.internal"));
+        assertThrows(BusinessException.class, () -> service.reset(List.of("test.internal")));
+        assertEquals("fp-1", service.getString("test.internal"));
+    }
+
+    @Test
+    void purgeDeprecatedKeysRemovesResidueIdempotently() {
+        store.put("test.old", row("test.old", "v"));
+        store.put("test.count", row("test.count", "9"));
+
+        assertEquals(List.of("test.old"), service.purgeDeprecatedKeys());
+        assertFalse(store.containsKey("test.old"));
+        assertTrue(store.containsKey("test.count"));
+        assertTrue(service.purgeDeprecatedKeys().isEmpty());
     }
 
     private SysConfig row(String key, String value) {

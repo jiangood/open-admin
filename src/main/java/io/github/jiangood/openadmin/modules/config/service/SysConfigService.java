@@ -116,13 +116,19 @@ public class SysConfigService {
     }
 
     /**
-     * 配置页数据：分组 + 元数据 + 当前生效值
+     * 配置页数据：分组 + 元数据 + 当前生效值。
+     *
+     * <p>隐藏项不会出现在页面数据中；只包含隐藏项的分组也会一并省略。</p>
      */
     public List<ConfigGroupView> groups() {
         ensureFresh();
         return registry.groups().stream()
                 .map(group -> new ConfigGroupView(group.getCode(), group.getLabel(), group.getDescription(),
-                        group.items().stream().map(this::toView).toList()))
+                        group.items().stream()
+                                .filter(spec -> !spec.hidden())
+                                .map(this::toView)
+                                .toList()))
+                .filter(group -> !group.items().isEmpty())
                 .toList();
     }
 
@@ -163,6 +169,9 @@ public class SysConfigService {
                 throw new BusinessException("配置键不能为空");
             }
             ConfigSpec spec = registry.require(key);
+            if (spec.hidden()) {
+                throw new BusinessException("配置项 " + spec.label() + " 为内部配置，不支持在参数设置中修改");
+            }
             Object value = entry.getValue();
 
             // 敏感值留空表示不修改，避免前端每次保存把已设置的密码覆盖掉
@@ -195,15 +204,101 @@ public class SysConfigService {
     }
 
     /**
+     * 写入内部配置项。
+     *
+     * <p>供指纹、初始化标记等隐藏键使用，绕过「页面不允许修改隐藏项」的限制；
+     * 普通配置项仍应走 {@link #update(Map)} 以便记录操作日志。</p>
+     */
+    @Transactional
+    public void putInternal(String key, Object value) {
+        ConfigSpec spec = registry.require(key);
+        requireHidden(spec);
+        SysConfig row = repository.findByConfigKey(key).orElseGet(() -> {
+            SysConfig created = new SysConfig();
+            created.setConfigKey(key);
+            return created;
+        });
+
+        Object normalized = value;
+        if (spec.type() == ConfigType.PROXY) {
+            normalized = resolveProxyValue(row.getConfigValue(), value);
+        }
+        row.setConfigValue(serialize(spec, normalized));
+        repository.save(row);
+        reload();
+    }
+
+    /**
+     * 删除内部配置项，使其恢复默认值
+     */
+    @Transactional
+    public void removeInternal(String key) {
+        ConfigSpec spec = registry.require(key);
+        requireHidden(spec);
+        repository.deleteByConfigKey(key);
+        reload();
+    }
+
+    private void requireHidden(ConfigSpec spec) {
+        if (!spec.hidden()) {
+            throw new BusinessException("配置项 " + spec.label() + " 不是内部配置，请使用参数设置接口保存");
+        }
+    }
+
+    /**
+     * 清理已下线配置项的残留行，返回实际删除的 key。
+     *
+     * <p>幂等：没有残留行时不做任何写入。日志只应记录 key，不记录值。</p>
+     */
+    @Transactional
+    public List<String> purgeDeprecatedKeys() {
+        List<String> keys = registry.deprecatedKeys();
+        if (keys.isEmpty()) {
+            return List.of();
+        }
+        List<String> existing = repository.findByConfigKeyIn(keys).stream()
+                .map(SysConfig::getConfigKey)
+                .distinct()
+                .toList();
+        if (existing.isEmpty()) {
+            return List.of();
+        }
+        repository.deleteByConfigKeyIn(existing);
+        reload();
+        return existing;
+    }
+
+    /**
      * 恢复默认。{@code keys} 为空表示恢复全部配置。
+     *
+     * <p>隐藏项不会通过页面被重置：显式传入隐藏键会被拒绝，全部恢复时也会保留隐藏项的值。</p>
      */
     @Transactional
     public void reset(List<String> keys) {
         if (keys == null || keys.isEmpty()) {
-            repository.deleteAllInBatch();
+            // 全部恢复：保留隐藏项的值，其余（包括未注册的残留行）一并清理
+            List<String> hiddenKeys = registry.specs().stream()
+                    .filter(ConfigSpec::hidden)
+                    .map(ConfigSpec::key)
+                    .toList();
+            if (hiddenKeys.isEmpty()) {
+                repository.deleteAllInBatch();
+            } else {
+                List<String> keysToDelete = repository.findAll().stream()
+                        .map(SysConfig::getConfigKey)
+                        .filter(key -> key != null && !hiddenKeys.contains(key))
+                        .distinct()
+                        .toList();
+                if (!keysToDelete.isEmpty()) {
+                    repository.deleteByConfigKeyIn(keysToDelete);
+                }
+            }
         } else {
             for (String key : keys) {
-                registry.require(key);
+                ConfigSpec spec = registry.require(key);
+                if (spec.hidden()) {
+                    throw new BusinessException("配置项 " + spec.label() + " 为内部配置，不支持在参数设置中重置");
+                }
             }
             repository.deleteByConfigKeyIn(keys);
         }

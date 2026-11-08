@@ -142,9 +142,9 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
-| `admin/sys-config/items` | GET | `sys-config:read` | 分组 + 元数据 + 当前生效值 |
-| `admin/sys-config/update` | POST | `sys-config:update` | 只提交改动项：`{values:[{key,value}]}` |
-| `admin/sys-config/reset` | POST | `sys-config:update` | `{keys:[...]}`；`keys` 为空表示全部恢复默认 |
+| `admin/sys-config/items` | GET | `sys-config:read` | 分组 + 元数据 + 当前生效值；隐藏项与只含隐藏项的分组不会返回 |
+| `admin/sys-config/update` | POST | `sys-config:update` | 只提交改动项：`{values:[{key,value}]}`；隐藏项会被拒绝 |
+| `admin/sys-config/reset` | POST | `sys-config:update` | `{keys:[...]}`；`keys` 为空表示全部恢复默认（保留隐藏项）；显式传隐藏项会被拒绝 |
 | `admin/sys-config/value` | GET | `sys-config:read` | 单键读取，查询参数 `key` |
 
 `items` 返回 `{groups:[{code,label,description,items:[...]}]}`，配置项字段：
@@ -159,6 +159,8 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | `source` | `db`（数据库覆盖）/ `env`（application.yml）/ `code`（代码默认） |
 | `secret` / `hasValue` | 是否敏感项、敏感项是否已设置 |
 | `min` / `max` / `options` / `required` | 输入约束 |
+
+> 隐藏项（`.asHidden()`）不会出现在 `items` 中，也不能通过 `update` / `reset` 修改；业务侧使用 `SysConfigService.putInternal` / `removeInternal`。`reset` 全部恢复时会保留隐藏项的值。
 
 > `update` 请求体可能包含敏感值，控制器未使用 `@Log`；操作日志由框架只记录变更的 key。
 

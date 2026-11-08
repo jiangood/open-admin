@@ -1,6 +1,8 @@
 package io.github.jiangood.openadmin.modules.config.service;
 
 import io.github.jiangood.openadmin.framework.config.dynamic.ConfigGroup;
+import io.github.jiangood.openadmin.framework.config.dynamic.ConfigSpec;
+import io.github.jiangood.openadmin.framework.config.dynamic.ConfigType;
 import io.github.jiangood.openadmin.framework.config.dynamic.Configs;
 import io.github.jiangood.openadmin.framework.spi.ConfigProvider;
 import org.junit.jupiter.api.Test;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +18,20 @@ class ConfigRegistryTest {
 
     private static ConfigProvider provider(ConfigGroup... groups) {
         return () -> List.of(groups);
+    }
+
+    private static ConfigProvider provider(List<String> deprecatedKeys, ConfigGroup... groups) {
+        return new ConfigProvider() {
+            @Override
+            public List<ConfigGroup> define() {
+                return List.of(groups);
+            }
+
+            @Override
+            public List<String> deprecatedKeys() {
+                return deprecatedKeys;
+            }
+        };
     }
 
     @Test
@@ -73,6 +90,88 @@ class ConfigRegistryTest {
     void selectRequiresOptions() {
         assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
                 provider(Configs.group("a", "A", 10).add(Configs.select("a.select", "选择", List.of())))
+        )));
+    }
+
+    @Test
+    void hiddenSpecIsRegisteredButNotPublic() {
+        ConfigRegistry registry = new ConfigRegistry(List.of(
+                provider(Configs.group("a", "A", 10)
+                        .add(Configs.string("a.visible", "可见"))
+                        .add(Configs.string("a.internal", "内部").defaultValue("x").asHidden()))
+        ));
+
+        assertTrue(registry.require("a.internal").hidden());
+        assertFalse(registry.require("a.visible").hidden());
+        assertEquals("x", registry.require("a.internal").defaultValue());
+        assertTrue(registry.publicSpecs().isEmpty());
+    }
+
+    @Test
+    void hiddenCannotBePublic() {
+        assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(Configs.group("a", "A", 10).add(Configs.string("a.internal", "内部").asHidden().asPublic()))
+        )));
+    }
+
+    @Test
+    void legacyConstructorKeepsHiddenFalse() {
+        ConfigSpec spec = new ConfigSpec("a.item", "旧构造", ConfigType.STRING, "x", "",
+                null, null, List.of(), false, false, false);
+
+        assertFalse(spec.hidden());
+        assertEquals("x", spec.defaultValue());
+    }
+
+    @Test
+    void collectsDeprecatedKeysFromProviders() {
+        ConfigRegistry registry = new ConfigRegistry(List.of(
+                provider(List.of("a.old"), Configs.group("a", "A", 10).add(Configs.string("a.item", "项"))),
+                provider(List.of("b.old"), Configs.group("b", "B", 20).add(Configs.string("b.item", "项")))
+        ));
+
+        assertEquals(List.of("a.old", "b.old"), registry.deprecatedKeys());
+    }
+
+    @Test
+    void deprecatedKeyCannotBeDeclaredAsActive() {
+        assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(List.of("a.item"), Configs.group("a", "A", 10).add(Configs.string("a.item", "项")))
+        )));
+    }
+
+    @Test
+    void duplicateDeprecatedKeyFailsFast() {
+        IllegalStateException error = assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(List.of("a.old"), Configs.group("a", "A", 10).add(Configs.string("a.item", "项"))),
+                provider(List.of("a.old"), Configs.group("b", "B", 20).add(Configs.string("b.item", "项")))
+        )));
+
+        assertTrue(error.getMessage().contains("重复"));
+    }
+
+    @Test
+    void deprecatedKeysAllowLegacyFormats() {
+        ConfigRegistry registry = new ConfigRegistry(List.of(
+                provider(List.of("cvs.encode_fp", "Legacy-Key"), Configs.group("a", "A", 10)
+                        .add(Configs.string("a.item", "项")))
+        ));
+
+        assertEquals(List.of("cvs.encode_fp", "Legacy-Key"), registry.deprecatedKeys());
+    }
+
+    @Test
+    void blankDeprecatedKeyFailsFast() {
+        assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(List.of(" "), Configs.group("a", "A", 10).add(Configs.string("a.item", "项")))
+        )));
+    }
+
+    @Test
+    void tooLongDeprecatedKeyFailsFast() {
+        String longKey = "a".repeat(129);
+        assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(List.of(longKey), Configs.group("a", "A", 10).add(Configs.string("a.item", "项")))
         )));
     }
 }

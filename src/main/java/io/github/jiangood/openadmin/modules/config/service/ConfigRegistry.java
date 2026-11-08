@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,37 +33,60 @@ public class ConfigRegistry {
 
     private final List<ConfigGroup> groups;
     private final Map<String, ConfigSpec> specs;
+    private final List<String> deprecatedKeys;
 
     public ConfigRegistry(List<ConfigProvider> providers) {
         Map<String, ConfigSpec> all = new LinkedHashMap<>();
         List<ConfigGroup> groupList = new ArrayList<>();
         Set<String> groupCodes = new HashSet<>();
+        List<String> deprecated = new ArrayList<>();
 
         for (ConfigProvider provider : providers) {
             List<ConfigGroup> defined = provider.define();
-            if (defined == null || defined.isEmpty()) {
-                continue;
-            }
-            for (ConfigGroup group : defined) {
-                validateGroup(group);
-                if (!groupCodes.add(group.getCode())) {
-                    throw new IllegalStateException("参数分组 code 重复: " + group.getCode());
-                }
-                groupList.add(group);
-                for (ConfigSpec spec : group.items()) {
-                    validateSpec(spec);
-                    ConfigSpec previous = all.putIfAbsent(spec.key(), spec);
-                    if (previous != null) {
-                        throw new IllegalStateException("参数项 key 重复: " + spec.key()
-                                + "（" + provider.getClass().getName() + "）");
+            if (defined != null && !defined.isEmpty()) {
+                for (ConfigGroup group : defined) {
+                    validateGroup(group);
+                    if (!groupCodes.add(group.getCode())) {
+                        throw new IllegalStateException("参数分组 code 重复: " + group.getCode());
+                    }
+                    groupList.add(group);
+                    for (ConfigSpec spec : group.items()) {
+                        validateSpec(spec);
+                        ConfigSpec previous = all.putIfAbsent(spec.key(), spec);
+                        if (previous != null) {
+                            throw new IllegalStateException("参数项 key 重复: " + spec.key()
+                                    + "（" + provider.getClass().getName() + "）");
+                        }
                     }
                 }
+            }
+
+            List<String> providerDeprecated = provider.deprecatedKeys();
+            if (providerDeprecated != null) {
+                deprecated.addAll(providerDeprecated);
+            }
+        }
+
+        Set<String> deprecatedSet = new LinkedHashSet<>();
+        for (String key : deprecated) {
+            if (key == null || key.isBlank()) {
+                throw new IllegalStateException("废弃参数项 key 不能为空");
+            }
+            if (key.length() > 128) {
+                throw new IllegalStateException("废弃参数项 key 超过 128 个字符: " + key);
+            }
+            if (all.containsKey(key)) {
+                throw new IllegalStateException("废弃参数项不能同时声明为有效配置项: " + key);
+            }
+            if (!deprecatedSet.add(key)) {
+                throw new IllegalStateException("废弃参数项 key 重复: " + key);
             }
         }
 
         groupList.sort(Comparator.comparingInt(ConfigGroup::getSeq).thenComparing(ConfigGroup::getCode));
         this.groups = List.copyOf(groupList);
         this.specs = Collections.unmodifiableMap(all);
+        this.deprecatedKeys = List.copyOf(deprecatedSet);
     }
 
     public List<ConfigGroup> groups() {
@@ -85,7 +109,16 @@ public class ConfigRegistry {
     }
 
     public List<ConfigSpec> publicSpecs() {
-        return specs.values().stream().filter(ConfigSpec::publicVisible).toList();
+        return specs.values().stream()
+                .filter(spec -> spec.publicVisible() && !spec.hidden())
+                .toList();
+    }
+
+    /**
+     * 已下线的配置键，启动时用于清理 {@code sys_config} 残留行
+     */
+    public List<String> deprecatedKeys() {
+        return deprecatedKeys;
     }
 
     private void validateGroup(ConfigGroup group) {
@@ -112,6 +145,9 @@ public class ConfigRegistry {
         }
         if (spec.secret() && spec.publicVisible()) {
             throw new IllegalStateException("配置项 " + spec.key() + " 不能同时为敏感项和公开项");
+        }
+        if (spec.hidden() && spec.publicVisible()) {
+            throw new IllegalStateException("配置项 " + spec.key() + " 不能同时为隐藏项和公开项");
         }
         if (spec.min() != null && spec.max() != null && spec.min() > spec.max()) {
             throw new IllegalStateException("配置项 " + spec.key() + " 的最小值不能大于最大值");

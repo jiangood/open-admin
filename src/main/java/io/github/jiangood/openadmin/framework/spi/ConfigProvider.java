@@ -31,4 +31,14 @@ import java.util.List;
 public interface ConfigProvider {
 
     List<ConfigGroup> define();
+
+    /**
+     * 已下线的配置键。
+     *
+     * <p>应用启动时会幂等清理 {@code sys_config} 中这些键的残留行，日志只记录 key，不记录值。
+     * 已下线的键不能同时出现在 {@link #define()} 中。</p>
+     */
+    default List<String> deprecatedKeys() {
+        return List.of();
+    }
 }

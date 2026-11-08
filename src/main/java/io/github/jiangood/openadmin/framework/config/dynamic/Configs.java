@@ -66,6 +66,6 @@ public final class Configs {
     }
 
     private static ConfigSpec spec(String key, String label, ConfigType type) {
-        return new ConfigSpec(key, label, type, null, "", null, null, List.of(), false, false, false);
+        return new ConfigSpec(key, label, type, null, "", null, null, List.of(), false, false, false, false);
     }
 }

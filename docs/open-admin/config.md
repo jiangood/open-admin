@@ -151,10 +151,41 @@ List<String> channels = sysConfigService.getList("cvs.capture.channels");
 - `.asPublic()`：随 `/admin/public/site-info` 的 `config` 字段下发给未登录页面
 - `.asSecret()`：接口只返回 `hasValue`，不回显值；不能同时 `.asPublic()`
 - `.asRequired()`：保存时不允许为空
+- `.asHidden()`：内部配置项，业务可正常读写，但不出现在配置页，也不能通过页面接口修改或重置；不能同时 `.asPublic()`
 - 配置文件里用相同 key 写默认值也会生效（优先级低于数据库覆盖值）
-- 配置项声明错误（重复 key、非法 key、敏感项同时公开等）会让应用启动失败，便于尽早发现
+- 配置项声明错误（重复 key、非法 key、敏感项同时公开、隐藏项同时公开等）会让应用启动失败，便于尽早发现
 
 > 修改配置的接口不要直接加 `@Log`：请求体可能包含敏感值。框架通过 `SysConfigOperationLogger` 只记录变更的 key（操作详情里列出 key，不记录值）。
+
+### 内部配置项与废弃键
+
+指纹、初始化标记、内部开关等不需要出现在「参数设置」页的键，用 `.asHidden()` 声明：
+
+```java
+.add(Configs.string("cvs.encode-fp", "编码指纹").asHidden())
+```
+
+- 配置页接口（`items` / `update` / `reset`）不会返回、也不允许修改隐藏项；只包含隐藏项的分组不会显示
+- 业务代码仍可正常读取，写操作使用 `putInternal` / `removeInternal`（仅限隐藏项）：
+
+```java
+sysConfigService.putInternal("cvs.encode-fp", "fp-20261108");
+String fp = sysConfigService.getString("cvs.encode-fp");
+sysConfigService.removeInternal("cvs.encode-fp");   // 恢复默认
+```
+
+- 页面「全部恢复默认」会保留隐藏项的值，避免误删内部状态；需要清理时显式调用 `removeInternal`
+
+已下线的键直接在 `ConfigProvider` 中声明，应用启动时会幂等清理数据库残留行（日志只记录 key，不记录值）：
+
+```java
+@Override
+public List<String> deprecatedKeys() {
+    return List.of("cvs.old-interval", "cvs.old-mode");
+}
+```
+
+从业务自建参数表迁移历史覆盖值时，建议在一次性启动钩子里读取旧表，逐项调用 `update`（可见项）或 `putInternal`（隐藏项）；写入前会按框架声明的类型校验，迁移完成后即可删除旧表与旧页面。
 
 ## 数据库
 

@@ -41,6 +41,8 @@
 - 敏感值加 `.asSecret()`；配置修改接口不要直接挂 `@Log`，操作日志由框架只记录变更的 key
 - 需要随 `/admin/public/site-info` 下发给未登录页面的展示类参数加 `.asPublic()`，值会放在 `siteInfo.config` 中
 - 代理地址用 `Configs.proxyUrl(...)`（`proxy` 类型）：一个字段包含类型、主机、端口与凭据，接口回显自动把密码替换成 `***`
+- 指纹、初始化标记等内部键加 `.asHidden()`：不出现在配置页，也不能被页面接口修改；业务侧用 `putInternal` / `removeInternal` 读写
+- 已下线的 key 通过 `ConfigProvider.deprecatedKeys()` 声明，启动时自动清理数据库残留行（只记录 key，不记录值）
 - 业务代码通过 `SysConfigService` 的 `getBool/getInt/getString/getList` 读取，不要直接查 `SysConfigRepository`
 - 只把「运行期读取、改了立即生效」的参数放进来；启动期装配的配置仍留在 `application.yml`
 
