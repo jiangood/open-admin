@@ -143,11 +143,11 @@ public class SystemProperties {
     public static class FileStorage {
 
         public enum StoreType {
-            LOCAL, MINIO
+            LOCAL, S3
         }
 
         /**
-         * 存储类型: LOCAL / MINIO
+         * 存储类型: LOCAL / S3
          */
         private StoreType storeType = StoreType.LOCAL;
 
@@ -167,16 +167,32 @@ public class SystemProperties {
         private int cleanTempMinutes = 120;
 
         /**
-         * MinIO 对象存储配置
+         * S3 协议对象存储配置（AWS S3 / RustFS / 阿里云 OSS / 腾讯云 COS / Ceph 等）
          */
-        private Minio minio = new Minio();
+        private S3 s3 = new S3();
 
         @Data
-        public static class Minio {
+        public static class S3 {
+            /**
+             * 服务地址，如 http://localhost:9000；对接 AWS S3 时可留空使用默认地域地址
+             */
             private String endpoint;
+
+            /**
+             * 地域，RustFS 可保持默认
+             */
+            private String region = "us-east-1";
+
             private String accessKey;
+
             private String secretKey;
+
             private String bucketName;
+
+            /**
+             * 是否使用 path-style 访问：RustFS / 腾讯云 COS 需 true，AWS S3 / 阿里云 OSS 建议 false
+             */
+            private boolean pathStyleAccess = true;
         }
     }
 

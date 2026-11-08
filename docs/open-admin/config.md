@@ -8,10 +8,10 @@
 |------|------|--------|
 | `sys.title` | 系统标题（必填），可在参数设置页覆盖 | 管理系统 |
 | `sys.short-title` | 系统简称，仅在左侧菜单顶部等空间受限处显示；留空则使用 `sys.title`，可在参数设置页覆盖 | 空 |
-| `sys.file.store-type` | 文件存储 (`LOCAL`/`MINIO`) | LOCAL |
+| `sys.file.store-type` | 文件存储 (`LOCAL`/`S3`) | LOCAL |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
-| `sys.file.minio.*` | MinIO 对象存储配置 | — |
+| `sys.file.s3.*` | S3 对象存储配置 | — |
 | `sys.session-idle-time` | Session 超时（分钟），通过 `server.servlet.session.timeout` 生效 | 180 |
 | `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时踢出旧会话 | 1 |
 | `server.servlet.session.persistent` | 优雅停机时把登录会话落盘，重启后恢复（重启免登录） | true |
@@ -62,7 +62,7 @@
 | 邮件发送 | `email.default-to` | LIST | 空 | 默认收件人，多个用逗号分隔；发送时未填收件人则使用 |
 | 邮件发送 | `email.proxy` | PROXY | 空 | 代理 URL，留空表示不使用 |
 
-其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、代码生成目录、MinIO 等）或安全结构性配置。
+其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、代码生成目录、对象存储等）或安全结构性配置。
 
 ### 邮件发送
 
@@ -219,10 +219,30 @@ public List<String> deprecatedKeys() {
 
 ## 文件存储
 
-通过 `sys.file.store-type` 选择后端（`LOCAL` / `MINIO`）：
+通过 `sys.file.store-type` 选择后端（`LOCAL` / `S3`）：
 
 - `LOCAL` — 本地文件系统，保存到 `sys.file.upload-path`，按 `public/`、`private/` 子目录区分可见性
-- `MINIO` — MinIO 对象存储（官方 `io.minio:minio` 客户端），配置 `sys.file.minio.{endpoint,accessKey,secretKey,bucketName}`；`endpoint` 需带协议前缀（如 `http://localhost:9000`），bucket 需提前创建。业务项目需自行添加 `io.minio:minio` 与 `com.squareup.okhttp3:okhttp-jvm` 依赖（minio 9.x 的 Maven 元数据引用的 okhttp 为空壳，实际类在 okhttp-jvm）
+- `S3` — S3 协议对象存储（AWS SDK v2 客户端），可对接 AWS S3、RustFS、阿里云 OSS、腾讯云 COS、Ceph 等。依赖已随框架引入（`software.amazon.awssdk:s3` + `url-connection-client`），业务项目无需额外配置
+
+| 配置 | 说明 | 默认值 |
+|------|------|--------|
+| `sys.file.s3.endpoint` | 服务地址，如 `http://localhost:9000`；对接 AWS S3 时可留空 | 空 |
+| `sys.file.s3.region` | 地域，RustFS 可保持默认；AWS 中国区需改为 `cn-north-1` 等 | us-east-1 |
+| `sys.file.s3.access-key` | Access Key；留空则使用默认凭证链（环境变量 / IAM Role / 实例角色） | 空 |
+| `sys.file.s3.secret-key` | Secret Key | 空 |
+| `sys.file.s3.bucket-name` | 存储桶，需提前创建 | — |
+| `sys.file.s3.path-style-access` | 是否使用 path-style 访问；RustFS 默认 `true`，AWS S3 / 阿里云 OSS 建议 `false`（virtual-hosted） | true |
+
+```yaml
+sys:
+  file:
+    store-type: S3
+    s3:
+      endpoint: http://localhost:9000
+      access-key: your-access-key
+      secret-key: your-secret-key
+      bucket-name: open-admin
+```
 
 文件 `objectName` 带可见性前缀（如 `public/202607/xxx.jpg` / `private/202607/xxx.pdf`），本地磁盘路径 = `sys.file.upload-path` + `objectName`，与 URL `/file/{objectName}` 完全一致。
 

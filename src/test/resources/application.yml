@@ -20,7 +20,7 @@ sys:
   file:
     store-type: LOCAL
     upload-path: /tmp/test-uploads
-    minio:
+    s3:
       endpoint: http://localhost:9000
       access-key: test-access-key
       secret-key: test-secret-key

@@ -45,6 +45,7 @@
         <poi.version>5.5.1</poi.version>
         <guava.version>33.7.2-jre</guava.version>
         <commons-io.version>2.22.0</commons-io.version>
+        <awssdk.version>2.57.11</awssdk.version>
 
     </properties>
     <dependencies>
@@ -93,17 +94,26 @@
         </dependency>
 
         <dependency>
-            <groupId>io.minio</groupId>
-            <artifactId>minio</artifactId>
-            <version>9.0.3</version>
-            <optional>true</optional>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${awssdk.version}</version>
+            <exclusions>
+                <!-- 默认的同步/异步 HTTP 客户端体积大且不会用到，统一走 url-connection-client -->
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache5-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>netty-nio-client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
-        <!-- minio 9.x 的 Maven 元数据依赖的 okhttp 为空壳（KMP root），实际类在 okhttp-jvm -->
+        <!-- 轻量同步 HTTP 客户端，避免引入 netty / apache-client -->
         <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp-jvm</artifactId>
-            <version>5.5.0</version>
-            <optional>true</optional>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+            <version>${awssdk.version}</version>
         </dependency>
 
 

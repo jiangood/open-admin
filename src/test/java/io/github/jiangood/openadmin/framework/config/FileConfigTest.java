@@ -2,7 +2,7 @@ package io.github.jiangood.openadmin.framework.config;
 
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import io.github.jiangood.openadmin.modules.system.file.LocalFileOperator;
-import io.github.jiangood.openadmin.modules.system.file.MinioFileOperator;
+import io.github.jiangood.openadmin.modules.system.file.S3FileOperator;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -22,16 +22,16 @@ class FileConfigTest {
     }
 
     @Test
-    void shouldCreateMinioOperatorWhenStoreTypeIsMinio() {
+    void shouldCreateS3OperatorWhenStoreTypeIsS3() {
         SystemProperties sp = new SystemProperties();
-        sp.getFile().setStoreType(SystemProperties.FileStorage.StoreType.MINIO);
-        sp.getFile().getMinio().setEndpoint("http://localhost:9000");
-        sp.getFile().getMinio().setAccessKey("access");
-        sp.getFile().getMinio().setSecretKey("secret");
-        sp.getFile().getMinio().setBucketName("bucket");
+        sp.getFile().setStoreType(SystemProperties.FileStorage.StoreType.S3);
+        sp.getFile().getS3().setEndpoint("http://localhost:9000");
+        sp.getFile().getS3().setAccessKey("access");
+        sp.getFile().getS3().setSecretKey("secret");
+        sp.getFile().getS3().setBucketName("bucket");
 
         FileOperator operator = new FileConfig().fileOperator(sp);
 
-        assertInstanceOf(MinioFileOperator.class, operator);
+        assertInstanceOf(S3FileOperator.class, operator);
     }
 }
