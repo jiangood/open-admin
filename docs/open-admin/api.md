@@ -121,7 +121,7 @@ public class DataSyncJob extends BaseJob {
 
 `admin/job/stat` 的 `scheduler` 字段：`version` / `schedulerName` / `instanceId` / `started` / `standby` / `runningSince` / `jobsExecuted` / `threadPoolSize` / `jobStoreClass` / `persistent` / `clustered`，读取失败时带 `error`。
 
-日志占用只读统计 `${logging.file.path}/job/*.log`，不会创建目录；结果在服务端缓存 30 秒，删除任务或执行记录清理后会主动失效。超过 `sys.job-log-size-warn-mb`（默认 1024 MB，`<=0` 关闭）时 `warn` 为 `true`，管理页以红色提示，不自动清理；清理仍由 `sys.job-log-retain-days` 控制。
+日志占用只读统计 `${logging.file.path}/job/*.log`，不会创建目录；结果在服务端缓存 30 秒，删除任务或执行记录清理后会主动失效。超过 `sys.job-log-size-warn-mb`（默认 1024 MB，`<=0` 关闭）时 `warn` 为 `true`，管理页以红色提示，不自动清理；清理仍由 `sys.job-log-retain-days` 控制（任务执行后惰性触发，见下文）。
 
 ### 执行记录方式
 
@@ -133,7 +133,7 @@ public class DataSyncJob extends BaseJob {
 | `HOURLY` 每小时一份记录 | 每任务每小时一行 | 每任务每小时一个文件 |
 | `DAILY` 每天一份记录 | 每任务每天一行 | 每任务每天一个文件 |
 
-聚合记录的 `SysJobLog` 额外字段：`logBucket`（聚合桶）、`executeCount`（执行次数）、`failCount`（失败次数）、`totalRunTime`（累计耗时）/`totalRunTimeLabel`；`jobRunTime`/`result` 为最近一次，`success` 表示周期内是否全部成功。执行记录与日志文件按 `sys.job-log-retain-days`（默认 30 天）自动清理。
+聚合记录的 `SysJobLog` 额外字段：`logBucket`（聚合桶）、`executeCount`（执行次数）、`failCount`（失败次数）、`totalRunTime`（累计耗时）/`totalRunTimeLabel`；`jobRunTime`/`result` 为最近一次，`success` 表示周期内是否全部成功。执行记录与日志文件按 `sys.job-log-retain-days`（默认 30 天）惰性清理：任意定时任务执行结束后触发一次检查（同一自然日最多清理一次，清理在独立线程异步执行），没有任务执行就不会触发；删除任务时也会一并删除其执行记录与日志文件。
 
 ### 运行日志
 
