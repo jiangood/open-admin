@@ -66,12 +66,6 @@ const statWarnStyle = {
     color: 'var(--oa-color-error, #ff4d4f)',
 }
 
-/**
- * 任务列表各列宽度之和，作为表格最小宽度：
- * 容器更宽时铺满，更窄时横向滚动，避免列被压缩到内容溢出。
- */
-const JOB_TABLE_MIN_WIDTH = 1280
-
 const cronPresets = [
     {
         label: '每隔 5 秒',
@@ -299,14 +293,12 @@ export default class JobPage extends React.Component {
         {
             title: '名称',
             dataIndex: 'name',
-            width: 180,
             render: v => v ? <span style={{overflowWrap: 'break-word'}}>{v}</span> : '-'
         },
 
         {
             title: '执行类',
             dataIndex: 'jobClassName',
-            width: 160,
             render: v => v
                 ? <span style={{
                     fontSize: 12,
@@ -319,7 +311,6 @@ export default class JobPage extends React.Component {
         {
             title: 'cron 表达式',
             dataIndex: 'cron',
-            width: 140,
             render: (v) => {
                 if (!v) {
                     return '-'
@@ -337,7 +328,6 @@ export default class JobPage extends React.Component {
         {
             title: '参数',
             dataIndex: 'jobData',
-            width: 180,
             render(list) {
                 if (!list) {
                     return '-'
@@ -350,14 +340,12 @@ export default class JobPage extends React.Component {
         {
             title: '启用',
             dataIndex: 'enabled',
-            width: 76,
             render: v => v ? <Tag color='green'>启用</Tag> : <Tag color='red'>停用</Tag>
         },
 
         {
             title: '记录方式',
             dataIndex: 'logAggregation',
-            width: 100,
             render: v => <span style={{overflowWrap: 'break-word'}}>
                 {DictUtils.dictLabel('jobLogAggregation', v) || '每次一份记录'}
             </span>
@@ -366,33 +354,23 @@ export default class JobPage extends React.Component {
         {
             title: '运行状态',
             dataIndex: 'progress',
-            width: 170,
             render: (_, record) => {
                 const p = this.state.progressMap[record.id]
                 if (!p) {
                     return <Tag>未运行</Tag>
                 }
-                return <div>
-                    <Tag color={p.stateColor || 'default'}>{p.stateLabel}</Tag>
-                    {p.percent != null && <Progress percent={p.percent} size='small'/>}
-                    {p.message && <Tooltip title={p.message}>
-                        <div style={{
-                            fontSize: 12,
-                            color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65))',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            maxWidth: 160
-                        }}>{p.message}</div>
-                    </Tooltip>}
-                </div>
+                // 单行标签：运行中带百分比，明细信息放进 tooltip，避免撑高表格行
+                const label = p.state === 'RUNNING' && p.percent != null
+                    ? `${p.stateLabel} ${p.percent}%`
+                    : p.stateLabel
+                const tag = <Tag color={p.stateColor || 'default'}>{label}</Tag>
+                return p.message ? <Tooltip title={p.message}>{tag}</Tooltip> : tag
             },
         },
 
         {
             title: '操作',
             dataIndex: 'option',
-            width: 272,
             fixed: 'right',
             render: (_, record) => {
 
@@ -530,7 +508,6 @@ export default class JobPage extends React.Component {
             <ProTable
                 actionRef={this.tableRef}
                 searchInline
-                scrollX={JOB_TABLE_MIN_WIDTH}
                 toolBarRightRender={() => (
                     <PermActions actions={[
                         {label: '新增', type: 'primary', icon: <PlusOutlined/>, perm: 'job:create', onClick: () => this.handleAdd()},
