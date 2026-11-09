@@ -83,15 +83,19 @@ export default class FormDrawer extends React.Component<FormDrawerProps> {
   )
 
   render() {
+    const placement = this.props.placement ?? 'right'
+    // antd v6 起 width/height 已废弃，统一用 size（top/bottom 时 size 表示高度）
+    const size = placement === 'top' || placement === 'bottom'
+      ? (this.props.height ?? 600)
+      : (this.props.width ?? 600)
     return (
       <Drawer
         title={this.props.title}
         open={this.state.visible}
         onClose={() => this.setState({visible: false})}
         destroyOnHidden
-        width={this.props.placement === 'top' || this.props.placement === 'bottom' ? undefined : (this.props.width ?? 600)}
-        height={this.props.placement === 'top' || this.props.placement === 'bottom' ? (this.props.height ?? 600) : undefined}
-        placement={this.props.placement ?? 'right'}
+        size={size}
+        placement={placement}
         footer={this.footer()}
       >
         <Form ref={this.formRef}

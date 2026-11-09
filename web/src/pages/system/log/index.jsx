@@ -79,7 +79,7 @@ export default class LogPage extends React.Component {
         const record = this.state.detailRecord;
         return (
             <Drawer title='操作日志详情'
-                    width={720}
+                    size={720}
                     open={!!record}
                     onClose={() => this.setState({detailRecord: null})}>
                 {record && <>

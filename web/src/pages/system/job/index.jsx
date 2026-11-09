@@ -453,7 +453,7 @@ export default class JobPage extends React.Component {
             </Card>
             <Card size='small'>
                 <Statistic title='日志占用' value={formatBytes(logSize.bytes)}
-                           valueStyle={logWarn ? warnColor : undefined}/>
+                           styles={{content: logWarn ? warnColor : undefined}}/>
                 <Tooltip title={logWarn ? warnTip : null}>
                     <div style={logWarn ? statWarnStyle : statHintStyle}>
                         {logSize.files} 个日志文件{logSize.warnMb ? ` · 阈值 ${logSize.warnMb} MB` : ''}
@@ -463,7 +463,7 @@ export default class JobPage extends React.Component {
             <Card size='small'>
                 <Statistic title='调度器'
                            value={scheduler.error ? '异常' : `Quartz ${scheduler.version || '-'}`}
-                           valueStyle={{fontSize: 20, ...(scheduler.error ? warnColor : {})}}/>
+                           styles={{content: {fontSize: 20, ...(scheduler.error ? warnColor : {})}}}/>
                 <Tooltip title={schedulerTip}>
                     <div style={scheduler.error ? statWarnStyle : statHintStyle}>
                         {scheduler.error || `${scheduler.standby ? '待机' : (scheduler.started ? '运行中' : '未启动')}`

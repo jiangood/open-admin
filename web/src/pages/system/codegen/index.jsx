@@ -156,7 +156,7 @@ export default class CodegenPage extends React.Component {
                 </Perm>
             </Card>
 
-            <Drawer title='生成预览' width={960}
+            <Drawer title='生成预览' size={960}
                     open={this.state.previewOpen}
                     onClose={() => this.setState({previewOpen: false})}
                     extra={
