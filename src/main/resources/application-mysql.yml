@@ -1,6 +1,6 @@
 # 可选：切换到 MySQL 数据库（框架独立运行 / 示例应用）。
 # 用法：mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=mysql
-# 或容器部署：--spring.profiles.active=prod,mysql（后面的 profile 优先生效）
+# 或容器部署：SPRING_PROFILES_ACTIVE=prod,mysql（后面的 profile 优先生效）
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

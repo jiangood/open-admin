@@ -1,5 +1,5 @@
 # 生产 / 容器部署：使用根路径访问，去掉 /example 前缀。
-# Dockerfile 通过 --spring.profiles.active=prod 激活本配置。
+# Dockerfile 通过环境变量 SPRING_PROFILES_ACTIVE=prod（默认值，可覆盖）激活本配置。
 server:
   servlet:
     context-path: /

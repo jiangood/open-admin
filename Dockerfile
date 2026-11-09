@@ -45,9 +45,11 @@ COPY --from=build-frontend /build/dist/ ./static/
 RUN mkdir -p /data/db
 VOLUME ["/data"]
 
-# 时区
-ENV TZ=Asia/Shanghai
+# 时区与默认运行 profile（profile 作为可覆盖的默认值，避免写死在命令行参数里）
+# 切换示例：docker run -e SPRING_PROFILES_ACTIVE=dev ...
+ENV TZ=Asia/Shanghai \
+    SPRING_PROFILES_ACTIVE=prod
 
 EXPOSE 8888
 
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Duser.timezone=Asia/Shanghai","-jar","/app/app.jar","--spring.profiles.active=prod"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom","-Duser.timezone=Asia/Shanghai","-jar","/app/app.jar"]

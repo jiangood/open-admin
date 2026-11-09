@@ -68,6 +68,8 @@ docker build -t open-admin .
 docker run -d --name open-admin -p 8888:8888 -v ./data:/data open-admin
 ```
 
+容器默认以 `prod` profile 启动；需要切换时用环境变量覆盖即可，例如 `docker run -e SPRING_PROFILES_ACTIVE=prod,mysql ...`。
+
 ### 集成到已有项目
 
 **后端**：业务项目 `pom.xml` 添加依赖，`application.yml` 配置数据源，通过 `spring.config.import: classpath:application-lib.yml` 引入框架默认配置。
