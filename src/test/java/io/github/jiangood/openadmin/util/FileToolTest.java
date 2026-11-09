@@ -1,14 +1,20 @@
 package io.github.jiangood.openadmin.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * FileTool工具类的单元测试
  */
 class FileToolTest {
+
+    @TempDir
+    Path tempDir;
 
     @Test
     void testFindParentByName() throws IOException {
@@ -156,5 +162,42 @@ class FileToolTest {
         file1.delete();
         file2.delete();
         directory.delete();
+    }
+
+    @Test
+    void testResolveUnder() throws IOException {
+        Path root = tempDir.resolve("root");
+        Files.createDirectories(root);
+
+        Path resolved = FileTool.resolveUnder(root, "public/2026/a.jpg");
+        assertNotNull(resolved);
+        assertEquals(root.resolve("public/2026/a.jpg").toAbsolutePath().normalize(), resolved);
+
+        // 允许解析尚未存在的文件
+        assertNotNull(FileTool.resolveUnder(root, "missing.txt"));
+
+        // 目录穿越与绝对路径一律拒绝
+        assertNull(FileTool.resolveUnder(root, "../escape.txt"));
+        assertNull(FileTool.resolveUnder(root, "public/../../escape.txt"));
+        assertNull(FileTool.resolveUnder(root, root.resolve("a.txt").toString()));
+        assertNull(FileTool.resolveUnder(root, ""));
+        assertNull(FileTool.resolveUnder(root, "  "));
+        assertNull(FileTool.resolveUnder(root, null));
+        assertNull(FileTool.resolveUnder(null, "a.txt"));
+    }
+
+    @Test
+    void testExistingFile() throws IOException {
+        Path root = tempDir.resolve("root2");
+        Files.createDirectories(root);
+        Files.writeString(root.resolve("a.txt"), "x");
+
+        assertEquals(root.resolve("a.txt").toAbsolutePath().normalize(),
+                FileTool.existingFile(root, "a.txt"));
+        assertNull(FileTool.existingFile(root, "missing.txt"));
+        assertNull(FileTool.existingFile(root, ".."));
+
+        Files.createDirectories(root.resolve("dir"));
+        assertNull(FileTool.existingFile(root, "dir"));
     }
 }

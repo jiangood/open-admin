@@ -69,10 +69,15 @@ public AjaxResult update(@RequestBody Customer input,
 |----|---------|
 | `ExcelTool` | `importExcel` / `exportExcel` |
 | `JdbcRunner` (framework.data) | `findById` / `findAll` / `save` / `deleteById` / `count` |
+| `JdbcValues` | `asLong` / `roundedLong` / `asInt` / `asDouble` / `bool` / `triBool` / `str` / `strTrim` / `strOrNull` / `localDateTime` / `epochSec` / `longOrNull` / `intOrNull` |
+| `FileTool` | `resolveUnder(root, name)` / `existingFile(root, name)` 目录穿越安全解析（`LocalFileOperator` 已复用）；`findByMainName` / `findParentByName` |
+| `ThreadTool` | `execute` / `daemon` / `daemonFixed` / `singleScheduler` / `singleWorker` / `boundedPool` / `close` / `closeNow` / `sleepQuietly` |
 | `LoginTool` | `getUserId` / `getUser` / `getPermissions` / `isAdmin` |
 | `TreeTool` | `buildTree` / `walk` / `treeToList` / `getLeafs` |
 | `BeanTool` / `JsonTool` / `StringTool` | 常用对象/JSON/字符串操作 |
 | `PasswordTool` | 密码加密 |
+
+`JdbcValues` 用于 `JdbcRunner` 返回的 `Map<String, Object>` 取值：`asLong` 截断、`roundedLong` 四舍五入、`triBool` 区分「未知」与 `false`，不要直接强转。`ThreadTool` 的线程工厂一律 daemon；`boundedPool` 队列满时抛 `RejectedExecutionException`；`close` 最多等在途任务 5 秒。取本地文件时优先用 `FileTool.resolveUnder` / `existingFile`，不要自行拼接目录。
 
 ### 定时任务
 
@@ -606,7 +611,7 @@ class ReportPage extends React.Component {
 - `GET /admin/sys-file/download/{*objectName}` — 下载
 - `GET /admin/sys-file/folder-tree` — 文件管理左侧文件夹树，按 objectName 的存储目录聚合，节点为 `key`/`title`/`count`/`children`；`GET /admin/sys-file/page` 可传 `folder`（目录前缀，含子目录）过滤
 
-上传文件默认标记为临时，保存业务数据后后端自动确认（详见[临时文件自动清理](config.md#临时文件自动清理)）。
+上传文件默认标记为临时，保存业务数据后后端自动确认（详见[临时文件自动清理](config.md#临时文件自动清理)）。本地存储会对 `objectName` 做目录穿越校验（绝对路径与 `../` 越界直接拒绝），业务不要把未经校验的外部路径拼到 `sys.file.upload-path` 下。
 
 前端字段直接存储文件 `objectName`（如 `public/202607/xxx.jpg`），`ViewImage` / `ViewFile` / `FieldUploadFile` 自动拼接 `/file/{objectName}` 展示；上传组件通过 `isPublic` prop 指定是否公开，默认 `true`（私有文件显式传 `isPublic={false}`）：
 
