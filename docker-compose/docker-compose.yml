@@ -16,3 +16,5 @@ services:
       # 数据目录：内置 H2 数据库、上传文件、日志均持久化在此
       - "../data/:/data"
     restart: unless-stopped
+    # 会话在停机最后一步才落盘；默认宽限可能被 SIGKILL，导致重启后需重新登录（见 docs/open-admin/config.md）
+    stop_grace_period: 60s

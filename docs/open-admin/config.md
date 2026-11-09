@@ -32,6 +32,8 @@
 
 > **会话落盘（重启免登录）**：框架默认开启 `server.servlet.session.persistent`，正常停机时把 `HttpSession` 写入 `server.servlet.session.store-dir`，启动后恢复。仅对**单实例、优雅停机**有效：`kill -9`、JVM 崩溃、断电不会保留会话；多实例请改用 Spring Session 等共享会话方案。首次升级启动时旧的内存会话已丢失，所有用户需重新登录一次，之后正常重启不再需要。session 中的自定义属性必须可序列化；未挂载 `/data` 的项目请覆盖 `store-dir`，或设置 `persistent: false` 关闭。
 
+> **容器部署需调大停机宽限**：会话是在停机**最后一步**（Web 容器停止时）才写入 `store-dir`，而 `docker stop` / `docker compose up -d` 默认只等 10 秒（部分环境更短），超时即 SIGKILL，会话一个字节都写不出去。应用停机还要等 Lifecycle bean（线程池 `awaitTermination` 等）和 graceful 停机（默认最多 30 秒），所以请在 compose 里显式设置 `stop_grace_period: 60s`（或 `docker stop -t 60`）。判断方法：`docker inspect <容器> --format '{{.State.ExitCode}}'`，**137 表示被 SIGKILL**，143 才是正常退出。
+
 > 「在线用户」列表复用同一套会话注册表，记录保存在内存，**仅单实例部署准确**；应用重启后会话本身会恢复，在线记录则随用户下一次请求自动补登记（重启后尚未访问的用户不会立即出现在列表里）。多实例部署请先引入 Spring Session 等共享会话方案，否则各节点只能看到本节点登录的用户。
 
 > 本地想验证个人中心「登录设备」的多处登录提示，可用 `local` profile 启动（`-Dspring-boot.run.profiles=local` 或环境变量 `SPRING_PROFILES_ACTIVE=local`），该 profile 将 `sys.maximum-sessions` 设为 `3`。
