@@ -8,6 +8,7 @@ import io.github.jiangood.openadmin.modules.config.dto.ConfigItemView;
 import io.github.jiangood.openadmin.modules.config.entity.SysConfig;
 import io.github.jiangood.openadmin.modules.config.repository.SysConfigRepository;
 import io.github.jiangood.openadmin.util.BusinessException;
+import io.github.jiangood.openadmin.util.dto.Option;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,6 +43,18 @@ import static org.mockito.Mockito.when;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class SysConfigServiceTest {
 
+    private static final AtomicReference<List<Option>> DYNAMIC_OPTIONS = new AtomicReference<>();
+    private static final AtomicBoolean DYNAMIC_FAILS = new AtomicBoolean();
+    private static final AtomicInteger DYNAMIC_LOADS = new AtomicInteger();
+
+    private static final Supplier<List<Option>> DYNAMIC_SUPPLIER = () -> {
+        DYNAMIC_LOADS.incrementAndGet();
+        if (DYNAMIC_FAILS.get()) {
+            throw new IllegalStateException("db down");
+        }
+        return DYNAMIC_OPTIONS.get();
+    };
+
     private static final ConfigProvider PROVIDER = new ConfigProvider() {
         @Override
         public List<ConfigGroup> define() {
@@ -50,6 +67,8 @@ class SysConfigServiceTest {
                             .add(Configs.string("test.password", "密码").asSecret())
                             .add(Configs.string("test.public", "公开").defaultValue("公开值").asPublic())
                             .add(Configs.proxyUrl("test.proxy", "代理"))
+                            .add(Configs.select("test.dynamic", "动态", DYNAMIC_SUPPLIER))
+                            .add(Configs.select("test.dynamic-empty", "可空动态", DYNAMIC_SUPPLIER).allowEmpty())
                             .add(Configs.string("test.internal", "内部").defaultValue("internal-default").asHidden()),
                     Configs.group("internal", "仅内部", 20)
                             .add(Configs.string("internal.marker", "标记").asHidden())
@@ -72,6 +91,9 @@ class SysConfigServiceTest {
     @BeforeEach
     void setUp() {
         store.clear();
+        DYNAMIC_OPTIONS.set(List.of(new Option("a", "A"), new Option("b", "B")));
+        DYNAMIC_FAILS.set(false);
+        DYNAMIC_LOADS.set(0);
         environment = new MockEnvironment();
 
         when(repository.findAll()).thenAnswer(invocation -> new ArrayList<>(store.values()));
@@ -224,6 +246,82 @@ class SysConfigServiceTest {
     }
 
     @Test
+    void dynamicOptionsRefreshBetweenRequestsWithoutRestart() {
+        assertEquals(List.of("a", "b"), optionValues("test.dynamic"));
+
+        DYNAMIC_OPTIONS.set(List.of(new Option("c", "C")));
+
+        assertEquals(List.of("c"), optionValues("test.dynamic"));
+    }
+
+    @Test
+    void dynamicOptionsEvaluatedOncePerGroupsRequest() {
+        service.groups();
+        assertEquals(1, DYNAMIC_LOADS.get());
+
+        service.groups();
+        assertEquals(2, DYNAMIC_LOADS.get());
+    }
+
+    @Test
+    void dynamicOptionsFailureOnlyDegradesThatItem() {
+        DYNAMIC_FAILS.set(true);
+
+        List<ConfigGroupView> groups = service.groups();
+
+        assertTrue(viewOf(groups, "test.dynamic").options().isEmpty());
+        assertEquals("名称", viewOf(groups, "test.name").label());
+    }
+
+    @Test
+    void dynamicOptionsFailureFailsSave() {
+        DYNAMIC_FAILS.set(true);
+
+        BusinessException error = assertThrows(BusinessException.class,
+                () -> service.update(Map.of("test.dynamic", "a")));
+
+        assertTrue(error.getMessage().contains("选项加载失败"));
+    }
+
+    @Test
+    void dynamicOptionsSaveUsesLatestOptions() {
+        service.update(Map.of("test.dynamic", "a"));
+        assertEquals("a", store.get("test.dynamic").getConfigValue());
+        assertEquals("a", service.getString("test.dynamic"));
+
+        DYNAMIC_OPTIONS.set(List.of(new Option("c", "C")));
+
+        BusinessException error = assertThrows(BusinessException.class,
+                () -> service.update(Map.of("test.dynamic", "a")));
+        assertTrue(error.getMessage().contains("可选范围"));
+    }
+
+    @Test
+    void readDoesNotEvaluateDynamicOptions() {
+        environment.setProperty("test.dynamic", "c");
+
+        assertEquals("c", service.getString("test.dynamic"));
+        assertEquals(0, DYNAMIC_LOADS.get());
+    }
+
+    @Test
+    void allowEmptySelectSavesBlank() {
+        service.update(Map.of("test.dynamic-empty", ""));
+
+        assertEquals("", store.get("test.dynamic-empty").getConfigValue());
+        assertEquals("", service.getString("test.dynamic-empty"));
+
+        ConfigItemView item = service.item("test.dynamic-empty");
+        assertEquals("", item.value());
+        assertTrue(item.allowEmpty());
+    }
+
+    @Test
+    void staticSelectStillRejectsBlank() {
+        assertThrows(BusinessException.class, () -> service.update(Map.of("test.dynamic", "")));
+    }
+
+    @Test
     void groupsExcludeHiddenItemsAndHiddenOnlyGroups() {
         List<ConfigGroupView> groups = service.groups();
 
@@ -283,6 +381,20 @@ class SysConfigServiceTest {
         assertFalse(store.containsKey("test.old"));
         assertTrue(store.containsKey("test.count"));
         assertTrue(service.purgeDeprecatedKeys().isEmpty());
+    }
+
+    private List<String> optionValues(String key) {
+        return viewOf(service.groups(), key).options().stream()
+                .map(option -> String.valueOf(option.getValue()))
+                .toList();
+    }
+
+    private ConfigItemView viewOf(List<ConfigGroupView> groups, String key) {
+        return groups.stream()
+                .flatMap(group -> group.items().stream())
+                .filter(item -> key.equals(item.key()))
+                .findFirst()
+                .orElseThrow();
     }
 
     private SysConfig row(String key, String value) {

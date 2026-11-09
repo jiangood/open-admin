@@ -189,6 +189,9 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | `source` | `db`（数据库覆盖）/ `env`（application.yml）/ `code`（代码默认） |
 | `secret` / `hasValue` | 是否敏感项、敏感项是否已设置 |
 | `min` / `max` / `options` / `required` | 输入约束 |
+| `allowEmpty` | 仅 `select`：是否允许保存空值（表示「不设置」） |
+
+> `select` 的 `value` 与 `options[].value` 统一为字符串。`options` 可以在每次请求时动态求值（`Configs.select(key, label, Supplier)`），新增 / 删除业务表记录后重新进入参数页即可看到，无需重启；求值失败时该项按空选项返回，不影响其他配置项。
 
 > 隐藏项（`.asHidden()`）不会出现在 `items` 中，也不能通过 `update` / `reset` 修改；业务侧使用 `SysConfigService.putInternal` / `removeInternal`。`reset` 全部恢复时会保留隐藏项的值。
 

@@ -5,12 +5,16 @@ import io.github.jiangood.openadmin.framework.config.dynamic.ConfigSpec;
 import io.github.jiangood.openadmin.framework.config.dynamic.ConfigType;
 import io.github.jiangood.openadmin.framework.config.dynamic.Configs;
 import io.github.jiangood.openadmin.framework.spi.ConfigProvider;
+import io.github.jiangood.openadmin.util.dto.Option;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -91,6 +95,53 @@ class ConfigRegistryTest {
         assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
                 provider(Configs.group("a", "A", 10).add(Configs.select("a.select", "选择", List.of())))
         )));
+    }
+
+    @Test
+    void dynamicSelectDoesNotEvaluateAtStartup() {
+        AtomicInteger calls = new AtomicInteger();
+        Supplier<List<Option>> supplier = () -> {
+            calls.incrementAndGet();
+            throw new IllegalStateException("启动期不应求值动态选项");
+        };
+
+        ConfigRegistry registry = new ConfigRegistry(List.of(
+                provider(Configs.group("a", "A", 10).add(Configs.select("a.select", "动态", supplier)))
+        ));
+
+        assertEquals(0, calls.get());
+        assertTrue(registry.require("a.select").dynamicOptions());
+        assertNotNull(registry.require("a.select").optionsSupplier());
+    }
+
+    @Test
+    void dynamicSelectCannotAlsoDeclareStaticOptions() {
+        ConfigSpec spec = new ConfigSpec("a.select", "动态", ConfigType.SELECT, null, "",
+                null, null, List.of(new Option("x", "X")), false, false, false, false,
+                () -> List.of(new Option("x", "X")), false);
+
+        IllegalStateException error = assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(Configs.group("a", "A", 10).add(spec))
+        )));
+
+        assertTrue(error.getMessage().contains("不能同时声明"));
+    }
+
+    @Test
+    void allowEmptyOnlyAppliesToSelect() {
+        assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(Configs.group("a", "A", 10).add(Configs.string("a.name", "名称").allowEmpty()))
+        )));
+    }
+
+    @Test
+    void allowEmptyCannotBeRequired() {
+        IllegalStateException error = assertThrows(IllegalStateException.class, () -> new ConfigRegistry(List.of(
+                provider(Configs.group("a", "A", 10).add(
+                        Configs.select("a.select", "选择", new Option("x", "X")).allowEmpty().asRequired()))
+        )));
+
+        assertTrue(error.getMessage().contains("allowEmpty"));
     }
 
     @Test

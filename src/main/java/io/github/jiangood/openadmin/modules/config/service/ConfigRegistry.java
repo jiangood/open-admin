@@ -153,11 +153,24 @@ public class ConfigRegistry {
             throw new IllegalStateException("配置项 " + spec.key() + " 的最小值不能大于最大值");
         }
         if (spec.type() == ConfigType.SELECT) {
-            if (spec.options().isEmpty()) {
+            boolean dynamic = spec.dynamicOptions();
+            if (dynamic && !spec.options().isEmpty()) {
+                throw new IllegalStateException("下拉配置项 " + spec.key() + " 不能同时声明静态 options 和动态 optionsSupplier");
+            }
+            if (!dynamic && spec.options().isEmpty()) {
                 throw new IllegalStateException("下拉配置项 " + spec.key() + " 必须声明 options");
             }
-            if (spec.defaultValue() != null && !containsOption(spec, String.valueOf(spec.defaultValue()))) {
+            // 动态选项启动期不求值，无法也不应校验默认值是否在选项中
+            if (!dynamic && spec.defaultValue() != null && !containsOption(spec, String.valueOf(spec.defaultValue()))) {
                 throw new IllegalStateException("配置项 " + spec.key() + " 的默认值不在 options 中");
+            }
+        }
+        if (spec.allowEmptyValue()) {
+            if (spec.type() != ConfigType.SELECT) {
+                throw new IllegalStateException("配置项 " + spec.key() + " 的 allowEmpty 仅适用于下拉配置项");
+            }
+            if (spec.required()) {
+                throw new IllegalStateException("配置项 " + spec.key() + " 不能同时声明 allowEmpty 和必填");
             }
         }
         if (spec.type() == ConfigType.TIME && spec.defaultValue() != null

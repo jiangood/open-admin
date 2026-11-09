@@ -168,11 +168,47 @@ List<String> channels = sysConfigService.getList("cvs.capture.channels");
 - `.asPublic()`：随 `/admin/public/site-info` 的 `config` 字段下发给未登录页面
 - `.asSecret()`：接口只返回 `hasValue`，不回显值；不能同时 `.asPublic()`
 - `.asRequired()`：保存时不允许为空
+- `.allowEmpty()`：仅用于 `select`，允许保存空值表示「不设置」；不能与 `.asRequired()` 同时使用
 - `.asHidden()`：内部配置项，业务可正常读写，但不出现在配置页，也不能通过页面接口修改或重置；不能同时 `.asPublic()`
 - 配置文件里用相同 key 写默认值也会生效（优先级低于数据库覆盖值）
 - 配置项声明错误（重复 key、非法 key、敏感项同时公开、隐藏项同时公开等）会让应用启动失败，便于尽早发现
 
 > 修改配置的接口不要直接加 `@Log`：请求体可能包含敏感值。框架通过 `SysConfigOperationLogger` 只记录变更的 key（操作详情里列出 key，不记录值）。
+
+#### 动态下拉选项
+
+选项来自数据库表（且会随时增删改）时，用 `Supplier` 声明，不要在启动时写死：
+
+```java
+@Component
+public class DockerConfigProvider implements ConfigProvider {
+
+    private final RegistryRepository registryRepository;
+
+    @Override
+    public List<ConfigGroup> define() {
+        return List.of(
+                Configs.group("docker", "Docker", 30)
+                        .add(Configs.select("docker.default-registry", "默认注册中心",
+                                        // 每次渲染参数页 / 保存时求值，新增的注册中心无需重启
+                                        () -> Option.convertList(registryRepository.findAll(),
+                                                Registry::getId, Registry::getName))
+                                .allowEmpty()
+                                .hint("留空表示不设置默认注册中心"))
+        );
+    }
+}
+```
+
+求值时机与语义：
+
+- **启动阶段不求值**，所以不会因为业务表未初始化而启动失败；
+- 每次 `GET admin/sys-config/items` / `value` 请求对同一个 supplier 只求值一次，一个分组多个动态项不会重复查库；
+- 保存时用最新选项校验，选项已删除的旧值会被拒绝；
+- 动态项加载失败时，该项按空选项渲染并记录 `warn`，不影响参数页其他配置；保存时返回「选项加载失败」；
+- 业务侧 `getString` / `getInt` 等读取配置值**不会**触发 supplier，`application.yml` 中的值也不做成员校验；
+- 框架只做请求级缓存，**不做全局缓存**：需要实时就不要再在 supplier 内部加缓存；
+- 选项值统一按字符串处理，`Option.value` 可以传 `Long` 等类型。
 
 ### 内部配置项与废弃键
 

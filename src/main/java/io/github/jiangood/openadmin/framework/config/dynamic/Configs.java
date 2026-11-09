@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.framework.config.dynamic;
 import io.github.jiangood.openadmin.util.dto.Option;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * 配置项声明的快捷入口。
@@ -59,6 +60,18 @@ public final class Configs {
 
     public static ConfigSpec select(String key, String label, List<Option> options) {
         return spec(key, label, ConfigType.SELECT).options(options);
+    }
+
+    /**
+     * 动态选项：每次渲染参数设置页 / 保存配置时调用 supplier，选项来自数据库表时无需重启。
+     *
+     * <pre>{@code
+     * Configs.select("docker.default-registry", "默认注册中心",
+     *         () -> Option.convertList(registryRepository.findAll(), Registry::getId, Registry::getName))
+     * }</pre>
+     */
+    public static ConfigSpec select(String key, String label, Supplier<List<Option>> optionsSupplier) {
+        return spec(key, label, ConfigType.SELECT).options(optionsSupplier);
     }
 
     public static ConfigSpec select(String key, String label, Option... options) {

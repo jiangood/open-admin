@@ -19,6 +19,9 @@ import {
 import {QuestionCircleOutlined, UndoOutlined} from '@ant-design/icons'
 import {EventBus, GlobalData, HttpClient, Page, Perm} from '../../../framework'
 
+/** 下拉值统一转字符串；清空时 antd 给 undefined，按空串处理 */
+const selectText = (value) => (value === null || value === undefined ? '' : String(value))
+
 /**
  * 参数设置页。
  *
@@ -91,19 +94,24 @@ export default class SysConfigPage extends React.Component {
         const patch = {}
         Object.entries(values || {}).forEach(([key, value]) => {
             const item = items.get(key)
-            if (!item || value === undefined) {
+            if (!item) {
+                return
+            }
+            // 下拉值统一按字符串比较：清空后 antd 给 undefined，存库值可能是 null
+            const next = item.type === 'select' ? selectText(value) : value
+            if (next === undefined) {
                 return
             }
             // 敏感值留空表示不修改
-            if (item.secret && (value === null || value === '')) {
+            if (item.secret && (next === null || next === '')) {
                 return
             }
-            const before = item.value
-            const same = Array.isArray(value) || Array.isArray(before)
-                ? JSON.stringify(value ?? []) === JSON.stringify(before ?? [])
-                : value === before
+            const before = item.type === 'select' ? selectText(item.value) : item.value
+            const same = Array.isArray(next) || Array.isArray(before)
+                ? JSON.stringify(next ?? []) === JSON.stringify(before ?? [])
+                : next === before
             if (!same) {
-                patch[key] = value
+                patch[key] = next
             }
         })
         return patch
@@ -182,8 +190,12 @@ export default class SysConfigPage extends React.Component {
                                placeholder="输入后回车，或粘贴逗号分隔的内容"/>
             case 'select':
                 return <Select style={{width: '100%'}}
+                               showSearch
+                               optionFilterProp="label"
+                               allowClear={item.allowEmpty}
+                               placeholder={item.allowEmpty ? '不设置' : undefined}
                                options={(item.options || []).map(option => ({
-                                   value: option.value,
+                                   value: selectText(option.value),
                                    label: option.label,
                                }))}/>
             case 'text':

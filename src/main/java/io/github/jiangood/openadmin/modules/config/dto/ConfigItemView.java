@@ -23,6 +23,7 @@ public record ConfigItemView(
         Double max,
         List<Option> options,
         String source,
-        boolean required
+        boolean required,
+        boolean allowEmpty
 ) {
 }

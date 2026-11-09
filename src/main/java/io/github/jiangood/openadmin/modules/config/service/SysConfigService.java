@@ -8,6 +8,7 @@ import io.github.jiangood.openadmin.modules.config.dto.ConfigItemView;
 import io.github.jiangood.openadmin.modules.config.entity.SysConfig;
 import io.github.jiangood.openadmin.modules.config.repository.SysConfigRepository;
 import io.github.jiangood.openadmin.util.BusinessException;
+import io.github.jiangood.openadmin.util.dto.Option;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
@@ -18,11 +19,13 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 /**
@@ -112,7 +115,7 @@ public class SysConfigService {
 
     public ConfigItemView item(String key) {
         ensureFresh();
-        return toView(registry.require(key));
+        return toView(registry.require(key), new OptionResolver());
     }
 
     /**
@@ -122,11 +125,13 @@ public class SysConfigService {
      */
     public List<ConfigGroupView> groups() {
         ensureFresh();
+        // 一次请求内对同一个 supplier 只求值一次，避免一个分组多个项重复查库
+        OptionResolver resolver = new OptionResolver();
         return registry.groups().stream()
                 .map(group -> new ConfigGroupView(group.getCode(), group.getLabel(), group.getDescription(),
                         group.items().stream()
                                 .filter(spec -> !spec.hidden())
-                                .map(this::toView)
+                                .map(spec -> toView(spec, resolver))
                                 .toList()))
                 .filter(group -> !group.items().isEmpty())
                 .toList();
@@ -162,6 +167,7 @@ public class SysConfigService {
 
         List<SysConfig> rows = new ArrayList<>();
         List<String> changed = new ArrayList<>();
+        OptionResolver resolver = new OptionResolver();
 
         for (Map.Entry<String, Object> entry : values.entrySet()) {
             String key = entry.getKey();
@@ -190,7 +196,7 @@ public class SysConfigService {
                 value = resolveProxyValue(row.getConfigValue(), value);
             }
 
-            String canonical = serialize(spec, value);
+            String canonical = serialize(spec, value, resolver);
             row.setConfigValue(canonical);
             rows.add(row);
             changed.add(key);
@@ -223,7 +229,7 @@ public class SysConfigService {
         if (spec.type() == ConfigType.PROXY) {
             normalized = resolveProxyValue(row.getConfigValue(), value);
         }
-        row.setConfigValue(serialize(spec, normalized));
+        row.setConfigValue(serialize(spec, normalized, new OptionResolver()));
         repository.save(row);
         reload();
     }
@@ -346,12 +352,17 @@ public class SysConfigService {
         }
     }
 
-    private ConfigItemView toView(ConfigSpec spec) {
+    private ConfigItemView toView(ConfigSpec spec, OptionResolver resolver) {
         boolean overridden = overrides.containsKey(spec.key());
         Object effective = safeValue(spec);
         Object defaultValue = spec.secret() ? null : displayValue(spec, envOrDefault(spec));
         Object value = spec.secret() ? null : displayValue(spec, effective);
         boolean hasValue = spec.secret() && effective != null && !String.valueOf(effective).isBlank();
+        if (spec.type() == ConfigType.SELECT) {
+            // 统一输出字符串，避免前端 option.value 为数字时与存库的字符串值匹配不上
+            defaultValue = defaultValue == null ? null : String.valueOf(defaultValue);
+            value = value == null ? null : String.valueOf(value);
+        }
 
         return new ConfigItemView(
                 spec.key(),
@@ -365,10 +376,23 @@ public class SysConfigService {
                 hasValue,
                 spec.min(),
                 spec.max(),
-                spec.options(),
+                viewOptions(spec, resolver),
                 source(spec),
-                spec.required()
+                spec.required(),
+                spec.allowEmptyValue()
         );
+    }
+
+    /**
+     * 渲染用选项：动态选项加载失败时只让当前项降级为空选项，不影响其他配置项。
+     */
+    private List<Option> viewOptions(ConfigSpec spec, OptionResolver resolver) {
+        try {
+            return resolver.resolve(spec);
+        } catch (RuntimeException e) {
+            log.warn("配置项 {} 的选项加载失败，按空选项展示: {}", spec.key(), e.toString());
+            return List.of();
+        }
     }
 
     private Object safeValue(ConfigSpec spec) {
@@ -450,7 +474,14 @@ public class SysConfigService {
                 }
                 case SELECT -> {
                     String value = environment.getProperty(spec.key());
-                    yield value != null && containsOption(spec, value) ? value : spec.defaultValue();
+                    if (value == null) {
+                        yield spec.defaultValue();
+                    }
+                    // 动态选项不在这里求值：业务每次 get()/getString() 读取时不应查库
+                    if (spec.dynamicOptions()) {
+                        yield value;
+                    }
+                    yield containsOption(spec.options(), value) ? value : spec.defaultValue();
                 }
                 default -> {
                     String value = environment.getProperty(spec.key());
@@ -495,7 +526,7 @@ public class SysConfigService {
         };
     }
 
-    private String serialize(ConfigSpec spec, Object value) {
+    private String serialize(ConfigSpec spec, Object value, OptionResolver resolver) {
         return switch (spec.type()) {
             case PROXY -> {
                 if (value instanceof ProxySettings proxy) {
@@ -540,8 +571,21 @@ public class SysConfigService {
                 yield String.join(",", values);
             }
             case SELECT -> {
-                String text = requireText(spec, value);
-                if (!containsOption(spec, text)) {
+                String text = value == null ? "" : String.valueOf(value).trim();
+                if (text.isEmpty()) {
+                    if (spec.allowEmptyValue()) {
+                        yield "";
+                    }
+                    throw new BusinessException("配置项 " + spec.label() + " 不能为空");
+                }
+                List<Option> options;
+                try {
+                    options = resolver.resolve(spec);
+                } catch (RuntimeException e) {
+                    log.warn("配置项 {} 的选项加载失败，无法校验保存值: {}", spec.key(), e.toString());
+                    throw new BusinessException("配置项 " + spec.label() + " 的选项加载失败，请稍后重试");
+                }
+                if (!containsOption(options, text)) {
                     throw new BusinessException("配置项 " + spec.label() + " 的取值不在可选范围内");
                 }
                 yield text;
@@ -609,8 +653,8 @@ public class SysConfigService {
         }
     }
 
-    private boolean containsOption(ConfigSpec spec, String value) {
-        return spec.options().stream().anyMatch(option -> String.valueOf(option.getValue()).equals(value));
+    private boolean containsOption(List<Option> options, String value) {
+        return options.stream().anyMatch(option -> String.valueOf(option.getValue()).equals(value));
     }
 
     private Boolean boolDefault(ConfigSpec spec) {
@@ -692,5 +736,47 @@ public class SysConfigService {
             return String.valueOf((long) value);
         }
         return String.valueOf(value);
+    }
+
+    /**
+     * 单次请求内的选项求值器：同一个 supplier 只调用一次。
+     *
+     * <p>只做请求级缓存，不做全局缓存，否则又会回到「改表必须重启」的问题。</p>
+     */
+    private static final class OptionResolver {
+
+        private final Map<Supplier<List<Option>>, List<Option>> cache = new IdentityHashMap<>();
+
+        List<Option> resolve(ConfigSpec spec) {
+            if (!spec.dynamicOptions()) {
+                return normalize(spec.options());
+            }
+            Supplier<List<Option>> supplier = spec.optionsSupplier();
+            List<Option> loaded = cache.get(supplier);
+            if (loaded == null) {
+                loaded = normalize(supplier.get());
+                cache.put(supplier, loaded);
+            }
+            return loaded;
+        }
+
+        /**
+         * 统一把选项值转成字符串，并过滤空选项。
+         */
+        private List<Option> normalize(List<Option> options) {
+            if (options == null || options.isEmpty()) {
+                return List.of();
+            }
+            List<Option> normalized = new ArrayList<>(options.size());
+            for (Option option : options) {
+                if (option == null || option.getValue() == null) {
+                    continue;
+                }
+                Option copy = new Option(String.valueOf(option.getValue()), option.getLabel());
+                copy.setData(option.getData());
+                normalized.add(copy);
+            }
+            return List.copyOf(normalized);
+        }
     }
 }
