@@ -174,7 +174,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
 | `admin/sys-config/items` | GET | `sys-config:read` | 分组 + 元数据 + 当前生效值；隐藏项与只含隐藏项的分组不会返回 |
-| `admin/sys-config/system` | GET | `sys-config:read` | 只读系统参数（来自 `application.yml` / 代码默认值），返回 `{items:[{key,label,value}]}` |
+| `admin/sys-config/system` | GET | `sys-config:read` | 只读系统参数（来自 `application.yml` / 代码默认值），返回 `{items:[{key,label,value,group}]}`；`group` 为 `runtime`（运行时状态，页面定时刷新）或 `startup`（启动期配置） |
 | `admin/sys-config/update` | POST | `sys-config:update` | 只提交改动项：`{values:[{key,value}]}`；隐藏项会被拒绝 |
 | `admin/sys-config/reset` | POST | `sys-config:update` | `{keys:[...]}`；`keys` 为空表示全部恢复默认（保留隐藏项）；显式传隐藏项会被拒绝 |
 | `admin/sys-config/value` | GET | `sys-config:read` | 单键读取，查询参数 `key` |

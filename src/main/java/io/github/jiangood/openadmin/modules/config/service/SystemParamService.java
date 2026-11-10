@@ -54,29 +54,32 @@ public class SystemParamService {
         SystemProperties.FileStorage file = systemProperties.getFile();
         DataSource dataSource = dataSourceProvider.getIfUnique();
         List<SystemParamView> items = new ArrayList<>();
-        add(items, "sys.start-time", "系统启动时间", startTime());
-        add(items, "spring.datasource.url", "数据库连接", jdbcUrl(dataSource));
+        // 运行时状态排在前面：这两项会随服务运行变化，页面定时刷新
+        add(items, SystemParamView.GROUP_RUNTIME, "sys.start-time", "系统启动时间", startTime());
         String pool = poolUsage(dataSource);
         if (pool != null) {
-            add(items, "spring.datasource.hikari", "连接池", pool);
+            add(items, SystemParamView.GROUP_RUNTIME, "spring.datasource.hikari", "连接池", pool);
         }
-        add(items, "sys.maximum-sessions", "最大并发会话数",
+        add(items, SystemParamView.GROUP_STARTUP, "spring.datasource.url", "数据库连接", jdbcUrl(dataSource));
+        add(items, SystemParamView.GROUP_STARTUP, "sys.maximum-sessions", "最大并发会话数",
                 String.valueOf(systemProperties.getMaximumSessions()));
-        add(items, "sys.max-sessions-prevents-login", "并发超限策略",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.max-sessions-prevents-login", "并发超限策略",
                 systemProperties.isMaxSessionsPreventsLogin() ? "阻止新登录（旧会话继续有效）" : "踢出旧会话");
-        add(items, "sys.session-idle-time", "会话空闲超时",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.session-idle-time", "会话空闲超时",
                 systemProperties.getSessionIdleTime() + " 分钟");
-        add(items, "sys.login-lock-max-attempts", "登录失败上限",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.login-lock-max-attempts", "登录失败上限",
                 systemProperties.getLoginLockMaxAttempts() + " 次");
-        add(items, "sys.login-lock-minutes", "登录锁定时长",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.login-lock-minutes", "登录锁定时长",
                 systemProperties.getLoginLockMinutes() + " 分钟");
-        add(items, "sys.file.store-type", "文件存储方式",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.file.store-type", "文件存储方式",
                 file.getStoreType() == SystemProperties.FileStorage.StoreType.S3 ? "S3 对象存储" : "本地存储");
-        add(items, "sys.file.upload-path", "上传目录", blankToDash(file.getUploadPath()));
-        add(items, "sys.file.clean-temp-minutes", "临时文件清理",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.file.upload-path", "上传目录",
+                blankToDash(file.getUploadPath()));
+        add(items, SystemParamView.GROUP_STARTUP, "sys.file.clean-temp-minutes", "临时文件清理",
                 file.getCleanTempMinutes() + " 分钟");
-        add(items, "sys.data-file-dir", "数据目录", blankToDash(systemProperties.getDataFileDir()));
-        add(items, "logging.file.path", "日志目录",
+        add(items, SystemParamView.GROUP_STARTUP, "sys.data-file-dir", "数据目录",
+                blankToDash(systemProperties.getDataFileDir()));
+        add(items, SystemParamView.GROUP_STARTUP, "logging.file.path", "日志目录",
                 blankToDash(environment.getProperty("logging.file.path")));
         return items;
     }
@@ -126,8 +129,8 @@ public class SystemParamService {
         return URL_PASSWORD.matcher(PARAM_PASSWORD.matcher(url).replaceAll("$1***")).replaceAll("$1:***@");
     }
 
-    private static void add(List<SystemParamView> items, String key, String label, String value) {
-        items.add(new SystemParamView(key, label, value));
+    private static void add(List<SystemParamView> items, String group, String key, String label, String value) {
+        items.add(new SystemParamView(key, label, value, group));
     }
 
     private static String blankToDash(String value) {

@@ -3,7 +3,6 @@ import {
     Button,
     Card,
     Col,
-    Descriptions,
     Form,
     Input,
     InputNumber,
@@ -23,11 +22,17 @@ import {EventBus, GlobalData, HttpClient, Page, Perm} from '../../../framework'
 /** 下拉值统一转字符串；清空时 antd 给 undefined，按空串处理 */
 const selectText = (value) => (value === null || value === undefined ? '' : String(value))
 
+/** 只读参数轮询间隔：启动时间里的「已运行」与连接池用量会随运行变化 */
+const SYSTEM_POLL_INTERVAL = 15000
+
+/** 旧后端或意外值一律归入启动期配置 */
+const groupOf = (item) => (item.group === 'runtime' ? 'runtime' : 'startup')
+
 /**
  * 系统参数页。
  *
  * 配置项由后端 ConfigProvider 声明（分组 / 类型 / 默认值 / 范围 / 说明），
- * 本页面只负责按元数据渲染、收集修改项并提交差异；右侧窄列只读卡片展示
+ * 本页面只负责按元数据渲染、收集修改项并提交差异；右侧只读卡片展示
  * 来自 application.yml / 代码默认值的启动期参数与运行时状态。
  */
 export default class SysConfigPage extends React.Component {
@@ -42,8 +47,15 @@ export default class SysConfigPage extends React.Component {
 
     formRef = React.createRef()
 
+    systemTimer = null
+
     componentDidMount() {
         this.load()
+        this.startSystemPolling()
+    }
+
+    componentWillUnmount() {
+        this.stopSystemPolling()
     }
 
     /** 多 Tab 下页面保持 mounted，切回时重新拉取；有未保存修改时不覆盖用户输入 */
@@ -56,17 +68,40 @@ export default class SysConfigPage extends React.Component {
 
     load = async () => {
         this.setState({loading: true})
-        const [itemsResult, systemResult] = await Promise.allSettled([
+        const [itemsResult] = await Promise.allSettled([
             HttpClient.get('admin/sys-config/items'),
-            HttpClient.get('admin/sys-config/system', null, {toastError: false}),
+            this.loadSystem(),
         ])
-        if (systemResult.status === 'fulfilled') {
-            this.setState({systemParams: systemResult.value.data?.items || []})
-        }
         if (itemsResult.status === 'fulfilled') {
             this.applyGroups(itemsResult.value.data?.groups || [])
         } else {
             this.setState({loading: false})
+        }
+    }
+
+    /** 只刷新只读参数（启动时间 / 连接池），不触碰可编辑表单；轮询失败保持现状 */
+    loadSystem = async () => {
+        try {
+            const rs = await HttpClient.get('admin/sys-config/system', null, {toastError: false})
+            this.setState({systemParams: rs.data?.items || []})
+        } catch {
+            // 轮询失败静默，下次再试
+        }
+    }
+
+    startSystemPolling = () => {
+        this.stopSystemPolling()
+        this.systemTimer = setInterval(() => {
+            if (!document.hidden) {
+                this.loadSystem()
+            }
+        }, SYSTEM_POLL_INTERVAL)
+    }
+
+    stopSystemPolling = () => {
+        if (this.systemTimer) {
+            clearInterval(this.systemTimer)
+            this.systemTimer = null
         }
     }
 
@@ -278,38 +313,81 @@ export default class SysConfigPage extends React.Component {
         </Col>
     }
 
-    /** 只读卡片固定在页面右侧、只占窄列，避免挤占可编辑表单；窄屏时自然堆叠到表单下方 */
-    renderSystemCard = () => {
+    /**
+     * 只读参数固定在页面右侧，占约三分之一宽度，长路径 / JDBC URL 不至于挤成一列；窄屏时自然堆叠到表单下方。
+     *
+     * 运行时状态与启动期配置分成两张卡片，避免两种性质不同的值混在一张卡里；
+     * 每项按「标签 / 配置键（右对齐、可省略）/ 值」排布，而不是 antd Descriptions：
+     * 垂直 Descriptions 的标签与值同为正文级字号，技术配置键夹在中间会让人分不清哪行是值。
+     * 运行时状态（启动时间 / 连接池）不是 yml 配置项，只显示标签和值。
+     */
+    renderSystemCards = () => {
         const {systemParams} = this.state
         if (systemParams.length === 0) {
             return null
         }
-        return <Col xs={24} xl={6}>
-            <Card
-                title="只读系统参数"
-                extra={<Tag style={{marginInlineEnd: 0}}>需重启</Tag>}
-            >
-                <Typography.Text type="secondary" style={{display: 'block', fontSize: 12, marginBottom: 12}}>
-                    启动期配置与运行时状态，仅展示，不参与保存。
-                </Typography.Text>
-                <Descriptions size="small" column={1} layout="vertical" colon={false}>
-                    {systemParams.map(item => (
-                        <Descriptions.Item key={item.key} label={<div>
-                            <div>{item.label}</div>
-                            <Typography.Text type="secondary"
-                                             style={{
-                                                 fontSize: 11,
-                                                 fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
-                                             }}>
-                                {item.key}
-                            </Typography.Text>
-                        </div>}>
-                            <Typography.Text style={{wordBreak: 'break-all'}}>{item.value || '-'}</Typography.Text>
-                        </Descriptions.Item>
-                    ))}
-                </Descriptions>
-            </Card>
+        const runtime = systemParams.filter(item => groupOf(item) === 'runtime')
+        const startup = systemParams.filter(item => groupOf(item) !== 'runtime')
+
+        return <Col xs={24} xl={8}>
+            <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+                {runtime.length > 0 && (
+                    <Card
+                        title="运行时状态"
+                        extra={<Typography.Text type="secondary" style={{fontSize: 12}}>
+                            每 {SYSTEM_POLL_INTERVAL / 1000} 秒刷新
+                        </Typography.Text>}
+                    >
+                        {runtime.map((item, index) => this.renderSystemRow(item, index))}
+                    </Card>
+                )}
+                {startup.length > 0 && (
+                    <Card title="启动期配置" extra={<Tag style={{marginInlineEnd: 0}}>需重启</Tag>}>
+                        {startup.map((item, index) => this.renderSystemRow(item, index))}
+                    </Card>
+                )}
+            </div>
+            <Typography.Text type="secondary" style={{display: 'block', fontSize: 12, marginTop: 8}}>
+                以上参数仅展示，不参与保存。
+            </Typography.Text>
         </Col>
+    }
+
+    renderSystemRow = (item, index) => {
+        // 运行时状态不是 yml 里能查到的配置项（启动时间 / 连接池用量），右侧不再挂配置键
+        const showKey = groupOf(item) !== 'runtime'
+        return <div key={item.key} style={{
+            padding: '8px 0',
+            borderTop: index === 0 ? undefined : '1px solid var(--oa-color-border)',
+        }}>
+            <div style={{display: 'flex', alignItems: 'baseline', gap: 8}}>
+                <Typography.Text style={{fontSize: 12, color: 'var(--oa-color-text-secondary)'}}>
+                    {item.label}
+                </Typography.Text>
+                {showKey && (
+                    <Typography.Text title={item.key} style={{
+                        minWidth: 0,
+                        marginInlineStart: 'auto',
+                        fontSize: 11,
+                        color: 'var(--oa-color-text-tertiary)',
+                        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                    }}>
+                        {item.key}
+                    </Typography.Text>
+                )}
+            </div>
+            <Typography.Text style={{
+                display: 'block',
+                marginTop: 2,
+                fontSize: 13,
+                overflowWrap: 'anywhere',
+            }}>
+                {item.value || '-'}
+            </Typography.Text>
+        </div>
     }
 
     render() {
@@ -320,7 +398,7 @@ export default class SysConfigPage extends React.Component {
 
         return <Page>
             <Row gutter={[16, 16]}>
-                <Col xs={24} xl={18}>
+                <Col xs={24} xl={16}>
                     <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
                         {initialLoading && <Card loading style={{marginBottom: 16}}/>}
                         <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
@@ -364,7 +442,7 @@ export default class SysConfigPage extends React.Component {
                         )}
                     </Form>
                 </Col>
-                {this.renderSystemCard()}
+                {this.renderSystemCards()}
             </Row>
         </Page>
     }

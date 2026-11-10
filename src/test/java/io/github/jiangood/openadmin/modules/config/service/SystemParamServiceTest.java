@@ -71,6 +71,22 @@ class SystemParamServiceTest {
     }
 
     @Test
+    void groupsRuntimeStatusAheadOfStartupConfig() {
+        HikariDataSource dataSource = mock(HikariDataSource.class);
+        HikariPoolMXBean pool = mock(HikariPoolMXBean.class);
+        when(dataSource.getHikariPoolMXBean()).thenReturn(pool);
+
+        List<SystemParamView> items = new SystemParamService(new SystemProperties(), new MockEnvironment(), provider(dataSource)).items();
+
+        // 运行时状态排在最前，页面据此分组并定时刷新
+        assertEquals("sys.start-time", items.get(0).key());
+        assertEquals(SystemParamView.GROUP_RUNTIME, items.get(0).group());
+        assertEquals(SystemParamView.GROUP_RUNTIME, groupOf(items, "spring.datasource.hikari"));
+        assertEquals(SystemParamView.GROUP_STARTUP, groupOf(items, "spring.datasource.url"));
+        assertEquals(SystemParamView.GROUP_STARTUP, groupOf(items, "sys.maximum-sessions"));
+    }
+
+    @Test
     void exposesJdbcUrlWithoutPassword() {
         MockEnvironment environment = new MockEnvironment().withProperty("spring.datasource.url",
                 "jdbc:mysql://root:123456@127.0.0.1:3306/open-admin?password=abc&useSSL=false");
@@ -104,6 +120,14 @@ class SystemParamServiceTest {
         ObjectProvider<DataSource> provider = mock(ObjectProvider.class);
         when(provider.getIfUnique()).thenReturn(dataSource);
         return provider;
+    }
+
+    private String groupOf(List<SystemParamView> items, String key) {
+        return items.stream()
+                .filter(item -> key.equals(item.key()))
+                .map(SystemParamView::group)
+                .findFirst()
+                .orElseThrow();
     }
 
     private String valueOf(List<SystemParamView> items, String key) {

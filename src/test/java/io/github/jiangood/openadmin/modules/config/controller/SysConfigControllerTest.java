@@ -37,7 +37,8 @@ class SysConfigControllerTest {
     @Test
     void systemReturnsReadonlyItems() {
         when(systemParamService.items()).thenReturn(List.of(
-                new SystemParamView("sys.maximum-sessions", "最大并发会话数", "1")
+                new SystemParamView("sys.maximum-sessions", "最大并发会话数", "1",
+                        SystemParamView.GROUP_STARTUP)
         ));
 
         AjaxResult result = controller.system();
