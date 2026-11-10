@@ -347,9 +347,6 @@ export default class SysConfigPage extends React.Component {
                     </Card>
                 )}
             </div>
-            <Typography.Text type="secondary" style={{display: 'block', fontSize: 12, marginTop: 8}}>
-                以上参数仅展示，不参与保存。
-            </Typography.Text>
         </Col>
     }
 
