@@ -7,8 +7,9 @@ function normalize(title?: string): string | undefined {
 }
 
 function systemTitle(): string {
-    const title = GlobalData.getSiteInfo()?.title;
-    return typeof title === 'string' && title.trim() ? title.trim() : 'open-admin';
+    const siteInfo = GlobalData.getSiteInfo();
+    // 浏览器标签宽度有限，优先用系统简称，避免挤占页面标题
+    return normalize(siteInfo?.shortTitle) || normalize(siteInfo?.title) || 'open-admin';
 }
 
 function renderDocumentTitle(): void {
@@ -20,7 +21,7 @@ function renderDocumentTitle(): void {
 
 /**
  * 设置当前页面标题（不含系统标题）；传空只显示系统标题。
- * 浏览器标题格式：`系统标题 | 页面标题`
+ * 浏览器标题格式：`系统标题（优先系统简称） | 页面标题`
  */
 export function setPageTitle(title?: string): void {
     currentPageTitle = normalize(title);

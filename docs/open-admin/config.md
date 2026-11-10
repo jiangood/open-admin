@@ -7,7 +7,7 @@
 | 配置 | 说明 | 默认值 |
 |------|------|--------|
 | `sys.title` | 系统标题（必填），可在参数设置页覆盖 | 管理系统 |
-| `sys.short-title` | 系统简称，仅在左侧菜单顶部等空间受限处显示；留空则使用 `sys.title`，可在参数设置页覆盖 | 空 |
+| `sys.short-title` | 系统简称，用于左侧菜单顶部与浏览器标题等空间受限处；留空则使用 `sys.title`，可在参数设置页覆盖 | 空 |
 | `sys.file.store-type` | 文件存储 (`LOCAL`/`S3`) | LOCAL |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
@@ -52,7 +52,7 @@
 | 分组 | key | 类型 | 默认值 | 说明 |
 |------|-----|------|--------|------|
 | 站点信息 | `sys.title` | STRING（必填） | 管理系统 | 登录页与侧栏标题 |
-| 站点信息 | `sys.short-title` | STRING | 空 | 侧栏简称，空则使用 `sys.title` |
+| 站点信息 | `sys.short-title` | STRING | 空 | 侧栏与浏览器标题的简称，空则使用 `sys.title` |
 | 站点信息 | `sys.water-mark` | BOOL | false | 登录后页面右下角显示当前用户水印 |
 | 站点信息 | `sys.login-box-bottom-tip` | STRING | 空 | 登录框底部提示文案 |
 | 默认界面 | `sys.ui.theme-preset` | SELECT | `antd` | 未自定义用户的默认主题色预设 |

@@ -45,7 +45,7 @@ public class CoreConfigProvider implements ConfigProvider {
                                 .hint("登录页与侧栏显示的系统名称"))
                         .add(Configs.string(CoreConfigKeys.SHORT_TITLE, "系统简称")
                                 .asPublic()
-                                .hint("侧栏空间受限时显示；留空则使用系统标题"))
+                                .hint("侧栏、浏览器标题等空间受限处显示；留空则使用系统标题"))
                         .add(Configs.bool(CoreConfigKeys.WATER_MARK, "显示水印")
                                 .defaultValue(false)
                                 .asPublic()

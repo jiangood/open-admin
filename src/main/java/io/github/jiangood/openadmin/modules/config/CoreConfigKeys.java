@@ -11,7 +11,7 @@ public final class CoreConfigKeys {
     public static final String TITLE = "sys.title";
 
     /**
-     * 系统简称，侧栏等空间受限处使用
+     * 系统简称，侧栏、浏览器标题等空间受限处使用
      */
     public static final String SHORT_TITLE = "sys.short-title";
 
