@@ -27,8 +27,8 @@ const selectText = (value) => (value === null || value === undefined ? '' : Stri
  * 系统参数页。
  *
  * 配置项由后端 ConfigProvider 声明（分组 / 类型 / 默认值 / 范围 / 说明），
- * 本页面只负责按元数据渲染、收集修改项并提交差异；顶部只读卡片展示
- * 来自 application.yml / 代码默认值的启动期参数。
+ * 本页面只负责按元数据渲染、收集修改项并提交差异；右侧窄列只读卡片展示
+ * 来自 application.yml / 代码默认值的启动期参数与运行时状态。
  */
 export default class SysConfigPage extends React.Component {
 
@@ -278,32 +278,38 @@ export default class SysConfigPage extends React.Component {
         </Col>
     }
 
+    /** 只读卡片固定在页面右侧、只占窄列，避免挤占可编辑表单；窄屏时自然堆叠到表单下方 */
     renderSystemCard = () => {
         const {systemParams} = this.state
         if (systemParams.length === 0) {
             return null
         }
-        return <Card
-            title="系统参数（只读）"
-            extra={<Tag>需重启</Tag>}
-            style={{marginBottom: 16}}
-        >
-            <Typography.Text type="secondary" style={{display: 'block', fontSize: 12, marginBottom: 16}}>
-                以下参数来自 application.yml 或代码默认值，修改后需重启；此处仅展示，不参与保存。
-            </Typography.Text>
-            <Descriptions size="small" column={{xs: 1, sm: 2, xl: 3}}>
-                {systemParams.map(item => (
-                    <Descriptions.Item key={item.key} label={item.label}>
-                        <Space size={8} wrap>
-                            <Typography.Text>{item.value || '-'}</Typography.Text>
-                            <Typography.Text type="secondary" style={{fontSize: 12}}>
+        return <Col xs={24} xl={6}>
+            <Card
+                title="只读系统参数"
+                extra={<Tag style={{marginInlineEnd: 0}}>需重启</Tag>}
+            >
+                <Typography.Text type="secondary" style={{display: 'block', fontSize: 12, marginBottom: 12}}>
+                    启动期配置与运行时状态，仅展示，不参与保存。
+                </Typography.Text>
+                <Descriptions size="small" column={1} layout="vertical" colon={false}>
+                    {systemParams.map(item => (
+                        <Descriptions.Item key={item.key} label={<div>
+                            <div>{item.label}</div>
+                            <Typography.Text type="secondary"
+                                             style={{
+                                                 fontSize: 11,
+                                                 fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
+                                             }}>
                                 {item.key}
                             </Typography.Text>
-                        </Space>
-                    </Descriptions.Item>
-                ))}
-            </Descriptions>
-        </Card>
+                        </div>}>
+                            <Typography.Text style={{wordBreak: 'break-all'}}>{item.value || '-'}</Typography.Text>
+                        </Descriptions.Item>
+                    ))}
+                </Descriptions>
+            </Card>
+        </Col>
     }
 
     render() {
@@ -313,49 +319,53 @@ export default class SysConfigPage extends React.Component {
         const initialLoading = loading && groups.length === 0
 
         return <Page>
-            {this.renderSystemCard()}
-            <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
-                {initialLoading && <Card loading style={{marginBottom: 16}}/>}
-                <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
-                    {groups.map(group => (
-                        <Card key={group.code}
-                              title={group.label}>
-                            {group.description && (
-                                <Typography.Text type="secondary"
-                                                 style={{display: 'block', fontSize: 12, marginBottom: 16}}>
-                                    {group.description}
-                                </Typography.Text>
-                            )}
-                            <Row gutter={16}>
-                                {group.items.map(this.renderItem)}
-                            </Row>
-                        </Card>
-                    ))}
-                </div>
+            <Row gutter={[16, 16]}>
+                <Col xs={24} xl={18}>
+                    <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
+                        {initialLoading && <Card loading style={{marginBottom: 16}}/>}
+                        <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+                            {groups.map(group => (
+                                <Card key={group.code}
+                                      title={group.label}>
+                                    {group.description && (
+                                        <Typography.Text type="secondary"
+                                                         style={{display: 'block', fontSize: 12, marginBottom: 16}}>
+                                            {group.description}
+                                        </Typography.Text>
+                                    )}
+                                    <Row gutter={16}>
+                                        {group.items.map(this.renderItem)}
+                                    </Row>
+                                </Card>
+                            ))}
+                        </div>
 
-                {groups.length > 0 && (
-                    <Space wrap style={{marginTop: 16}}>
-                        <Perm code='sys-config:update'>
-                            <Button type="primary" loading={saving} disabled={!dirty} onClick={this.save}>
-                                保存修改
-                            </Button>
-                        </Perm>
-                        <Perm code='sys-config:update'>
-                            <Popconfirm
-                                title="恢复全部默认值？"
-                                description="所有已修改的配置项都会回到默认值。"
-                                disabled={!hasOverridden}
-                                onConfirm={() => this.resetKeys([])}
-                            >
-                                <Button danger disabled={!hasOverridden}>全部恢复默认</Button>
-                            </Popconfirm>
-                        </Perm>
-                        <Typography.Text type="secondary" style={{fontSize: 12}}>
-                            配置默认值来自 application.yml 或代码声明
-                        </Typography.Text>
-                    </Space>
-                )}
-            </Form>
+                        {groups.length > 0 && (
+                            <Space wrap style={{marginTop: 16}}>
+                                <Perm code='sys-config:update'>
+                                    <Button type="primary" loading={saving} disabled={!dirty} onClick={this.save}>
+                                        保存修改
+                                    </Button>
+                                </Perm>
+                                <Perm code='sys-config:update'>
+                                    <Popconfirm
+                                        title="恢复全部默认值？"
+                                        description="所有已修改的配置项都会回到默认值。"
+                                        disabled={!hasOverridden}
+                                        onConfirm={() => this.resetKeys([])}
+                                    >
+                                        <Button danger disabled={!hasOverridden}>全部恢复默认</Button>
+                                    </Popconfirm>
+                                </Perm>
+                                <Typography.Text type="secondary" style={{fontSize: 12}}>
+                                    配置默认值来自 application.yml 或代码声明
+                                </Typography.Text>
+                            </Space>
+                        )}
+                    </Form>
+                </Col>
+                {this.renderSystemCard()}
+            </Row>
         </Page>
     }
 }
