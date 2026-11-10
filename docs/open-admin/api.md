@@ -435,6 +435,8 @@ import { PermActions } from '@jiangood/open-admin';
 
 `PermAction` 字段：`label`、`perm`、`onClick`、`confirm`（确认提示）、`danger`、`disabled`、`icon`、`type`（`primary`/`dashed`/`link`/`text`，仅按钮生效）。`more` 为布尔值，开启后多余操作折叠进 `...` 下拉。
 
+> `confirm` 在普通按钮上使用 Popconfirm，在 `more` 下拉中使用全局弹窗（`getModalApi().confirm`）。下拉菜单项点击后会关闭菜单，Popconfirm 会失去锚点，因此折叠项不再使用 Popconfirm。`danger` 为 `true` 时确认弹窗的「确定」按钮同步为危险色。
+
 > 传统 children 写法（包裹 `<Button perm="...">`）已不推荐，控制台会输出迁移提示，建议改用 `actions`。
 
 #### ProTable

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button, Dropdown, Popconfirm, Space } from 'antd';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { PermUtils } from '../utils';
+import { getModalApi } from '../utils/ModalApi';
 
 export interface PermAction {
     /** 按钮文本 */
@@ -108,30 +109,28 @@ export class PermActions extends React.Component<PermActionsProps> {
 
         const [first, ...rest] = visible;
 
-        const items = rest.map((action, index) => {
-            const label = action.confirm ? (
-                <Popconfirm title={action.confirm} onConfirm={action.onClick}>
-                    <span>{action.label}</span>
-                </Popconfirm>
-            ) : (
-                action.label
-            );
-            return {
-                key: `more-${index}`,
-                label,
-                icon: action.icon,
-                danger: action.danger,
-                disabled: action.disabled,
-                onClick: (info) => {
-                    if (action.confirm) {
-                        info.domEvent.preventDefault();
-                        info.domEvent.stopPropagation();
-                    } else {
-                        action.onClick?.();
-                    }
-                },
-            };
-        });
+        const items = rest.map((action, index) => ({
+            key: `more-${index}`,
+            label: action.label,
+            icon: action.icon,
+            danger: action.danger,
+            disabled: action.disabled,
+            /**
+             * 下拉菜单项点击后会关闭下拉，Popconfirm 会因此失去锚点导致确认按钮点不到，
+             * 所以 more 模式下 confirm 改用跟随主题的全局弹窗。
+             */
+            onClick: () => {
+                if (action.confirm) {
+                    getModalApi().confirm({
+                        content: action.confirm,
+                        okButtonProps: { danger: action.danger },
+                        onOk: () => action.onClick?.(),
+                    });
+                    return;
+                }
+                action.onClick?.();
+            },
+        }));
 
         return (
             <Space.Compact>

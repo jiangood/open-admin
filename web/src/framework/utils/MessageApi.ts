@@ -4,7 +4,7 @@ import type {MessageInstance} from 'antd/es/message/interface';
 /**
  * message 实例持有者。
  * 静态 message 无法消费 ConfigProvider 主题（暗色模式下仍是浅色），
- * 由布局内的 MessageBridge 通过 App.useApp() 注入跟随主题的实例。
+ * 由布局内的 AppBridge 通过 App.useApp() 注入跟随主题的实例。
  */
 let messageInstance: MessageInstance = staticMessage;
 

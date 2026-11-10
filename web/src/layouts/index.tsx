@@ -3,7 +3,7 @@ import {App, ConfigProvider, Modal} from "antd";
 import zhCN from 'antd/locale/zh_CN';
 import dayjs from 'dayjs';
 import 'dayjs/locale/zh-cn';
-import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, EventBus, matchRoute, refreshDocumentTitle, setPageTitle, warnDeprecatedPageLabel, applyServerUiDefaults} from "../framework";
+import {ErrorBoundary, GlobalData, HttpClient, LOGIN_EXPIRED_REASON_CONCURRENT_LOGIN, LOGIN_PATH, PageFrame, PageLoading, PageUtils, history, getThemeConfig, getThemeMode, setThemeColors, setMessageApi, setModalApi, EventBus, matchRoute, refreshDocumentTitle, setPageTitle, warnDeprecatedPageLabel, applyServerUiDefaults} from "../framework";
 import type {LoginExpiredPayload, PageLayout, ThemeColors} from "../framework";
 
 import AdminLayout from "./admin"
@@ -25,13 +25,17 @@ export interface HeaderExtraContext {
     loginInfo: { id: string; name: string; account: string };
 }
 
-/** 将 App 上下文的 message 实例注入框架，使提示跟随 ConfigProvider 主题（含暗色） */
-function MessageBridge() {
-    const {message} = App.useApp();
+/** 将 App 上下文的 message / modal 实例注入框架，使提示与弹窗跟随 ConfigProvider 主题（含暗色） */
+function AppBridge() {
+    const {message, modal} = App.useApp();
     React.useEffect(() => {
         setMessageApi(message);
-        return () => setMessageApi();
-    }, [message]);
+        setModalApi(modal);
+        return () => {
+            setMessageApi();
+            setModalApi();
+        };
+    }, [message, modal]);
     return null;
 }
 
@@ -243,7 +247,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             <ErrorBoundary minimal>
                 <ConfigProvider {...baseConfigProps} theme={getThemeConfig()}>
                     <App component={false}>
-                        <MessageBridge/>
+                        <AppBridge/>
                         {this.renderContent(showPageFrame, ready, layout, pathname, search)}
                         {this.renderLoginExpiredModal()}
                     </App>
