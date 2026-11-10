@@ -5,6 +5,7 @@ import io.github.jiangood.openadmin.framework.perm.HasPermission;
 import io.github.jiangood.openadmin.modules.config.dto.ConfigResetReq;
 import io.github.jiangood.openadmin.modules.config.dto.ConfigUpdateReq;
 import io.github.jiangood.openadmin.modules.config.service.SysConfigService;
+import io.github.jiangood.openadmin.modules.config.service.SystemParamService;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 参数设置接口。
+ * 系统参数接口。
  *
  * <p>新增/修改配置项请在业务模块实现 {@code ConfigProvider}，不要直接改本控制器。</p>
  */
@@ -29,12 +30,22 @@ import java.util.Map;
 public class SysConfigController {
 
     private final SysConfigService configService;
+    private final SystemParamService systemParamService;
     private final SysConfigOperationLogger operationLogger;
 
     @HasPermission("sys-config:read")
     @GetMapping("items")
     public AjaxResult items() {
         return AjaxResult.ok().data(Map.of("groups", configService.groups()));
+    }
+
+    /**
+     * 只读系统参数：来自 application.yml / 代码默认值，仅用于页面展示。
+     */
+    @HasPermission("sys-config:read")
+    @GetMapping("system")
+    public AjaxResult system() {
+        return AjaxResult.ok().data(Map.of("items", systemParamService.items()));
     }
 
     /**

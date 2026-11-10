@@ -3,6 +3,7 @@ import {
     Button,
     Card,
     Col,
+    Descriptions,
     Form,
     Input,
     InputNumber,
@@ -23,15 +24,17 @@ import {EventBus, GlobalData, HttpClient, Page, Perm} from '../../../framework'
 const selectText = (value) => (value === null || value === undefined ? '' : String(value))
 
 /**
- * 参数设置页。
+ * 系统参数页。
  *
  * 配置项由后端 ConfigProvider 声明（分组 / 类型 / 默认值 / 范围 / 说明），
- * 本页面只负责按元数据渲染、收集修改项并提交差异。
+ * 本页面只负责按元数据渲染、收集修改项并提交差异；顶部只读卡片展示
+ * 来自 application.yml / 代码默认值的启动期参数。
  */
 export default class SysConfigPage extends React.Component {
 
     state = {
         groups: [],
+        systemParams: [],
         loading: true,
         saving: false,
         dirty: false,
@@ -53,10 +56,16 @@ export default class SysConfigPage extends React.Component {
 
     load = async () => {
         this.setState({loading: true})
-        try {
-            const rs = await HttpClient.get('admin/sys-config/items')
-            this.applyGroups(rs.data?.groups || [])
-        } catch {
+        const [itemsResult, systemResult] = await Promise.allSettled([
+            HttpClient.get('admin/sys-config/items'),
+            HttpClient.get('admin/sys-config/system', null, {toastError: false}),
+        ])
+        if (systemResult.status === 'fulfilled') {
+            this.setState({systemParams: systemResult.value.data?.items || []})
+        }
+        if (itemsResult.status === 'fulfilled') {
+            this.applyGroups(itemsResult.value.data?.groups || [])
+        } else {
             this.setState({loading: false})
         }
     }
@@ -269,6 +278,34 @@ export default class SysConfigPage extends React.Component {
         </Col>
     }
 
+    renderSystemCard = () => {
+        const {systemParams} = this.state
+        if (systemParams.length === 0) {
+            return null
+        }
+        return <Card
+            title="系统参数（只读）"
+            extra={<Tag>需重启</Tag>}
+            style={{marginBottom: 16}}
+        >
+            <Typography.Text type="secondary" style={{display: 'block', fontSize: 12, marginBottom: 16}}>
+                以下参数来自 application.yml 或代码默认值，修改后需重启；此处仅展示，不参与保存。
+            </Typography.Text>
+            <Descriptions size="small" column={{xs: 1, sm: 2, xl: 3}}>
+                {systemParams.map(item => (
+                    <Descriptions.Item key={item.key} label={item.label}>
+                        <Space size={8} wrap>
+                            <Typography.Text>{item.value || '-'}</Typography.Text>
+                            <Typography.Text type="secondary" style={{fontSize: 12}}>
+                                {item.key}
+                            </Typography.Text>
+                        </Space>
+                    </Descriptions.Item>
+                ))}
+            </Descriptions>
+        </Card>
+    }
+
     render() {
         const {groups, loading, saving, dirty} = this.state
         const hasOverridden = groups.some(group => group.items.some(item => item.overridden))
@@ -276,6 +313,7 @@ export default class SysConfigPage extends React.Component {
         const initialLoading = loading && groups.length === 0
 
         return <Page>
+            {this.renderSystemCard()}
             <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
                 {initialLoading && <Card loading style={{marginBottom: 16}}/>}
                 <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>

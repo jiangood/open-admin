@@ -91,6 +91,11 @@ public class AuthController {
                 sysUserService.updateLastLoginTime(loginUser.getId());
             }
         } catch (SessionAuthenticationException e) {
+            // 账号密码正确，但会话数已达上限且开启了「阻止新登录」，不能误导成密码错误
+            if (systemProperties.isMaxSessionsPreventsLogin()) {
+                log.warn("登录被阻止，账号在线会话数已达上限: {}", username);
+                throw new IllegalStateException(systemProperties.getConcurrentLoginBlockedMessage());
+            }
             throw new IllegalStateException("账号或密码错误");
         } catch (AuthenticationException e) {
             loginAttemptService.onFailed(username);

@@ -66,7 +66,7 @@ menus:
       - {name: 删除, code: delete}
   sys-config:
     pid: sys
-    name: 参数设置
+    name: 系统参数
     path: /system/config
     icon: SettingOutlined
     perms:

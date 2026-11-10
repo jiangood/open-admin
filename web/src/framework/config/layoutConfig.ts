@@ -34,7 +34,7 @@ function removeStoredLayoutMode() {
     }
 }
 
-/** 全局默认布局（来自参数设置，未自定义用户使用） */
+/** 全局默认布局（来自系统参数，未自定义用户使用） */
 let defaultLayoutMode: LayoutMode = DEFAULT_LAYOUT_MODE;
 
 let currentLayoutMode: LayoutMode = readStoredLayoutMode() ?? DEFAULT_LAYOUT_MODE;
@@ -49,7 +49,7 @@ export function getDefaultLayoutMode(): LayoutMode {
 }
 
 /**
- * 应用参数设置下发的全局默认页签模式。
+ * 应用系统参数下发的全局默认页签模式。
  * 仅在用户本地没有自定义时生效；已自定义用户保持个人选择。
  */
 export function setDefaultLayoutMode(mode: LayoutMode) {
@@ -81,7 +81,7 @@ export function toggleLayoutMode(): LayoutMode {
     return next;
 }
 
-/** 恢复默认页签模式：清除本地覆盖，回到参数设置的全局默认 */
+/** 恢复默认页签模式：清除本地覆盖，回到系统参数的全局默认 */
 export function resetLayoutMode() {
     removeStoredLayoutMode();
     if (currentLayoutMode === defaultLayoutMode) return;

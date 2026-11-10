@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 框架邮件发送服务。
  *
- * <p>配置来自「系统管理 → 参数设置 → 邮件发送」，支持运行时修改，无需重启。
+ * <p>配置来自「系统管理 → 系统参数 → 邮件发送」，支持运行时修改，无需重启。
  * 业务模块注入本类并调用 {@link #send(MailMessage)} / {@link #sendAsync(MailMessage)}；
  * 需要感知发送结果时使用 {@link #trySend(MailMessage)} / {@link #sendAsyncResult(MailMessage)}。</p>
  */
@@ -216,16 +216,16 @@ public class MailService {
     private Settings settings() {
         MailProvider provider = MailProvider.parse(configService.getString(MailConfigKeys.PROVIDER));
         if (provider == null) {
-            throw new BusinessException("未配置邮箱类型，请到「系统管理 → 参数设置 → 邮件发送」选择");
+            throw new BusinessException("未配置邮箱类型，请到「系统管理 → 系统参数 → 邮件发送」选择");
         }
 
         String username = StrUtil.trimToNull(configService.getString(MailConfigKeys.USERNAME));
         if (username == null) {
-            throw new BusinessException("未配置发件邮箱，请到「系统管理 → 参数设置 → 邮件发送」填写");
+            throw new BusinessException("未配置发件邮箱，请到「系统管理 → 系统参数 → 邮件发送」填写");
         }
         String password = StrUtil.trimToNull(configService.getString(MailConfigKeys.PASSWORD));
         if (password == null) {
-            throw new BusinessException("未配置邮箱授权码，请到「系统管理 → 参数设置 → 邮件发送」填写");
+            throw new BusinessException("未配置邮箱授权码，请到「系统管理 → 系统参数 → 邮件发送」填写");
         }
 
         ProxySettings proxy;

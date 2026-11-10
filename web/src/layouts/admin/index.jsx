@@ -62,7 +62,7 @@ export default class AdminLayout extends React.Component {
             this.setState({layoutMode: getLayoutMode()});
         })
 
-        // 参数设置保存后刷新标题、水印等站点信息
+        // 系统参数保存后刷新标题、水印等站点信息
         this.unsubscribeSiteInfo = EventBus.on('siteInfoChange', () => {
             this.setState({siteInfo: GlobalData.getSiteInfo()});
         })

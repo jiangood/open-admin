@@ -36,9 +36,18 @@ public class SystemProperties {
      */
     private int maximumSessions = 1;
     /**
+     * 并发会话数超出上限时是否阻止新登录
+     * true: 阻止新登录，旧会话继续有效；false: 踢出旧会话（被顶下线）
+     */
+    private boolean maxSessionsPreventsLogin = true;
+    /**
      * 并发登录被顶下线时的提示文案
      */
     private String concurrentLoginMessage = "您的账号已在别处登录，请重新登录";
+    /**
+     * 并发会话数超出上限、新登录被阻止时的提示文案
+     */
+    private String concurrentLoginBlockedMessage = "该账号已在别处登录，请先退出后再登录";
     /**
      * 会话空闲超时/未登录时的提示文案
      */

@@ -6,10 +6,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.session.SessionInformation;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.session.SessionAuthenticationException;
+import org.springframework.security.web.authentication.session.SessionAuthenticationStrategy;
 import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.session.SessionInformationExpiredEvent;
 import org.springframework.security.web.session.SessionInformationExpiredStrategy;
@@ -34,6 +38,30 @@ class SecurityConfigConcurrentSessionTest {
 
     @Autowired
     private SessionRegistry sessionRegistry;
+
+    @Autowired
+    private SecurityHolder securityHolder;
+
+    @Test
+    void sessionAuthenticationStrategyShouldRejectSecondLoginByDefault() {
+        SessionAuthenticationStrategy strategy = securityHolder.getSharedObject(SessionAuthenticationStrategy.class);
+        assertNotNull(strategy, "共享对象中未注册 SessionAuthenticationStrategy");
+
+        String principal = "concurrent-login-test-user";
+        sessionRegistry.registerNewSession("existing-session", principal);
+        try {
+            MockHttpServletRequest request = new MockHttpServletRequest();
+            request.getSession(true); // ChangeSessionIdAuthenticationStrategy 需要已有会话
+            MockHttpServletResponse response = new MockHttpServletResponse();
+            Authentication authentication = new UsernamePasswordAuthenticationToken(principal, "n/a");
+
+            assertThrows(SessionAuthenticationException.class,
+                    () -> strategy.onAuthentication(authentication, request, response),
+                    "默认应阻止第二个会话登录（sys.max-sessions-prevents-login=true）");
+        } finally {
+            sessionRegistry.removeSessionInformation("existing-session");
+        }
+    }
 
     @Test
     void sessionRegistryShouldBeExposedAsBean() {

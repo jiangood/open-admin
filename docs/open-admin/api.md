@@ -166,16 +166,19 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 日志如果属于业务数据、需要行级/数据权限校验，不要复用上面的通用接口（它只能校验权限码）：由业务模块自己提供读取接口，并让 `LogViewer` 通过 `url` 指向它，返回同样的 `{content, nextOffset, eof}` 即可复用增量跟随。
 
-### 参数设置
+### 系统参数
 
-运行时可改的全局参数。元数据由业务模块/框架实现 `ConfigProvider` 声明，`sys_config` 只保存被覆盖的值（见 [config.md](config.md)）。
+运行时可改的全局参数，以及页面顶部只读展示的启动期参数。元数据由业务模块/框架实现 `ConfigProvider` 声明，`sys_config` 只保存被覆盖的值（见 [config.md](config.md)）。
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
 | `admin/sys-config/items` | GET | `sys-config:read` | 分组 + 元数据 + 当前生效值；隐藏项与只含隐藏项的分组不会返回 |
+| `admin/sys-config/system` | GET | `sys-config:read` | 只读系统参数（来自 `application.yml` / 代码默认值），返回 `{items:[{key,label,value}]}` |
 | `admin/sys-config/update` | POST | `sys-config:update` | 只提交改动项：`{values:[{key,value}]}`；隐藏项会被拒绝 |
 | `admin/sys-config/reset` | POST | `sys-config:update` | `{keys:[...]}`；`keys` 为空表示全部恢复默认（保留隐藏项）；显式传隐藏项会被拒绝 |
 | `admin/sys-config/value` | GET | `sys-config:read` | 单键读取，查询参数 `key` |
+
+> `system` 只返回非敏感的启动期参数，值已按业务含义格式化；修改仍需改 `application.yml` 并重启。
 
 `items` 返回 `{groups:[{code,label,description,items:[...]}]}`，配置项字段：
 
@@ -199,7 +202,7 @@ public class OrderLogPermissionProvider implements LogKeyPermissionProvider {
 
 ### 邮件
 
-邮件配置统一走上面的参数设置接口，不提供单独的设置读写接口。
+邮件配置统一走上面的系统参数接口，不提供单独的设置读写接口。
 
 业务侧通过 `MailService` 发送，支持 HTML 正文、附件和内联图片：
 
@@ -215,7 +218,7 @@ mailService.sendAsync(MailMessage.builder()
 ```
 
 - `MailInline` 的 `cid` 支持 `trend` / `cid:trend` / `<trend>` 三种写法，HTML 统一用 `cid:trend` 引用；发送时 `Content-ID` 会用尖括号包裹；
-- 未填 `to` 时优先使用参数设置里的 `email.default-to`；`to` / `cc` / `bcc` 全为空才报「收件邮箱不能为空」，只有 `cc` / `bcc` 时会用发件邮箱补 `To`；
+- 未填 `to` 时优先使用系统参数里的 `email.default-to`；`to` / `cc` / `bcc` 全为空才报「收件邮箱不能为空」，只有 `cc` / `bcc` 时会用发件邮箱补 `To`；
 - 发送结果统一走 `MailSendResult` / `MailErrorType`，与附件、代理、认证失败的处理一致。
 
 ### 在线用户
@@ -259,7 +262,7 @@ mailService.sendAsync(MailMessage.builder()
 
 说明：
 
-- 是否会出现多处登录取决于 `sys.maximum-sessions`：默认 `1` 会在新登录时踢掉旧会话；调大后多个会话并存，个人中心在会话数大于 1 时显示提示。
+- 是否会出现多处登录取决于 `sys.maximum-sessions`：默认 `1`，配合 `sys.max-sessions-prevents-login`（默认 `true`）时新登录会被拒绝、旧会话继续有效；将该开关设为 `false` 则改为踢掉旧会话。调大后多个会话并存，个人中心在会话数大于 1 时显示提示。
 - 服务端会校验会话归属，只能下线自己的会话，也允许用户自助下线自己的其他设备。
 - 在线记录保存在内存，**仅单实例部署准确**（同「在线用户」）；应用重启后随用户请求自动恢复登记。
 

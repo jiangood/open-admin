@@ -3,7 +3,7 @@ package io.github.jiangood.openadmin.modules.mail;
 /**
  * 邮件发送失败分类。
  *
- * <p>业务侧可据此决定是否重试、是否提示用户去「参数设置」补配置，
+ * <p>业务侧可据此决定是否重试、是否提示用户去「系统参数」补配置，
  * 不需要解析错误文案。</p>
  */
 public enum MailErrorType {

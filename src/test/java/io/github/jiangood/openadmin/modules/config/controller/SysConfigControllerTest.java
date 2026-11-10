@@ -1,7 +1,9 @@
 package io.github.jiangood.openadmin.modules.config.controller;
 
 import io.github.jiangood.openadmin.modules.config.dto.ConfigUpdateReq;
+import io.github.jiangood.openadmin.modules.config.dto.SystemParamView;
 import io.github.jiangood.openadmin.modules.config.service.SysConfigService;
+import io.github.jiangood.openadmin.modules.config.service.SystemParamService;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,10 +26,27 @@ class SysConfigControllerTest {
     private SysConfigService service;
 
     @Mock
+    private SystemParamService systemParamService;
+
+    @Mock
     private SysConfigOperationLogger operationLogger;
 
     @InjectMocks
     private SysConfigController controller;
+
+    @Test
+    void systemReturnsReadonlyItems() {
+        when(systemParamService.items()).thenReturn(List.of(
+                new SystemParamView("sys.maximum-sessions", "最大并发会话数", "1")
+        ));
+
+        AjaxResult result = controller.system();
+
+        verify(systemParamService).items();
+        assertTrue(result.isSuccess());
+        Map<?, ?> data = (Map<?, ?>) result.getData();
+        assertTrue(((List<?>) data.get("items")).size() == 1);
+    }
 
     @Test
     void updateMapsItemsAndLogsChangedKeys() {

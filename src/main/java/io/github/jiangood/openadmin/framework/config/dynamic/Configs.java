@@ -63,7 +63,7 @@ public final class Configs {
     }
 
     /**
-     * 动态选项：每次渲染参数设置页 / 保存配置时调用 supplier，选项来自数据库表时无需重启。
+     * 动态选项：每次渲染系统参数页 / 保存配置时调用 supplier，选项来自数据库表时无需重启。
      *
      * <pre>{@code
      * Configs.select("docker.default-registry", "默认注册中心",

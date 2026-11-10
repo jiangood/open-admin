@@ -1,7 +1,7 @@
 import { setDefaultThemePreset } from './themeConfig';
 import { setDefaultLayoutMode } from './layoutConfig';
 
-/** 参数设置中「默认界面」分组的配置键 */
+/** 系统参数中「默认界面」分组的配置键 */
 export const UI_THEME_PRESET_KEY = 'sys.ui.theme-preset';
 export const UI_TABS_ENABLED_KEY = 'sys.ui.tabs-enabled';
 

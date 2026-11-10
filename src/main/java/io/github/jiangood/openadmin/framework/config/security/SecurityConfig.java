@@ -83,12 +83,13 @@ public class SecurityConfig {
                 })
                 .sessionManagement(cfg -> {
                     int maximumSessions = systemProperties.getMaximumSessions();
-                    log.info("设置最大并发会话数为 {}", maximumSessions);
+                    boolean preventsLogin = systemProperties.isMaxSessionsPreventsLogin();
+                    log.info("设置最大并发会话数为 {}，超出时{}", maximumSessions, preventsLogin ? "阻止新登录" : "踢出旧会话");
 
                     cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                     cfg.sessionConcurrency(configurer -> {
                         configurer.maximumSessions(maximumSessions)
-                                .maxSessionsPreventsLogin(false) // true:阻止新登录，false:踢出旧会话
+                                .maxSessionsPreventsLogin(preventsLogin) // true:阻止新登录，false:踢出旧会话
                                 // 显式使用同一个 registry，在线用户列表与强制下线才能共享会话信息
                                 .sessionRegistry(sessionRegistry)
                                 // 被顶下线的请求返回 401 + JSON，而非 Spring Security 默认的 200 纯文本

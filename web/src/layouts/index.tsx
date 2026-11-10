@@ -143,7 +143,7 @@ export class Layouts extends React.Component<LayoutsProps> {
     loadSiteInfo() {
         HttpClient.get("/admin/public/site-info", null, {toastError: false}).then(data => {
             GlobalData.setSiteInfo(data.data);
-            // 参数设置的默认主题/页签模式需在后台布局首次渲染前生效，避免闪一下默认样式
+            // 系统参数的默认主题/页签模式需在后台布局首次渲染前生效，避免闪一下默认样式
             applyServerUiDefaults(data.data?.config);
             this.setState({siteInfoLoaded: true});
         }).catch(() => {
@@ -183,7 +183,7 @@ export class Layouts extends React.Component<LayoutsProps> {
             }));
         });
         this.unsubscribeSiteInfo = EventBus.on('siteInfoChange', () => {
-            // 参数设置保存后，未自定义用户即时跟随新的默认主题/页签模式
+            // 系统参数保存后，未自定义用户即时跟随新的默认主题/页签模式
             applyServerUiDefaults(GlobalData.getSiteInfo().config);
             refreshDocumentTitle();
         });

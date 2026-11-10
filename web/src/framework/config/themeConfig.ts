@@ -199,7 +199,7 @@ const THEME_RADIUS_KEY = 'oa-theme-radius';
 
 /** 业务侧传入的颜色基线（由 setThemeColors 设置） */
 let businessColors: Partial<ThemeColors> | null = null;
-/** 全局默认预设 key（来自参数设置，未自定义用户使用） */
+/** 全局默认预设 key（来自系统参数，未自定义用户使用） */
 let defaultPresetKey: string = DEFAULT_PRESET_KEY;
 /** 用户选择的预设 key（持久化到 localStorage） */
 let presetKey: string = readStoredPreset();
@@ -504,7 +504,7 @@ export function getDefaultPresetKey(): string {
 }
 
 /**
- * 应用参数设置下发的全局默认主题色。
+ * 应用系统参数下发的全局默认主题色。
  * 仅在用户本地没有自定义预设时生效；已自定义用户保持个人选择，
  * 但其「恢复默认」会回到这里设置的值。
  */
@@ -548,7 +548,7 @@ export function getActiveRadiusKey(): ThemeRadius {
 }
 
 /**
- * 恢复默认：主题色回到参数设置的全局默认，密度 / 圆角 / 明暗复位（不影响布局，布局由 resetAllSettings 统一处理）。
+ * 恢复默认：主题色回到系统参数的全局默认，密度 / 圆角 / 明暗复位（不影响布局，布局由 resetAllSettings 统一处理）。
  * 主题色会同时清除本地覆盖，之后管理员调整全局默认值时重新生效。
  */
 export function resetUserTheme() {

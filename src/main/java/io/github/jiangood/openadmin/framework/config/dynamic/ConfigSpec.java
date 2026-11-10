@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * <p>通过 {@link Configs} 的静态方法创建，再链式补充说明、范围、是否敏感等属性。</p>
  *
  * <p>下拉配置项的选项有两种来源：静态 {@code options} 与动态 {@code optionsSupplier}。
- * 动态选项只在渲染参数设置页、保存配置时求值，启动阶段不会访问数据库。</p>
+ * 动态选项只在渲染系统参数页、保存配置时求值，启动阶段不会访问数据库。</p>
  */
 public record ConfigSpec(
         String key,
@@ -88,7 +88,7 @@ public record ConfigSpec(
     }
 
     /**
-     * 动态选项：每次渲染参数设置页 / 保存配置时求值，适合选项来自其他业务表的场景
+     * 动态选项：每次渲染系统参数页 / 保存配置时求值，适合选项来自其他业务表的场景
      */
     public ConfigSpec options(Supplier<List<Option>> value) {
         return new ConfigSpec(key, label, type, defaultValue, hint, min, max, List.of(), secret, publicVisible,
@@ -125,7 +125,7 @@ public record ConfigSpec(
     }
 
     /**
-     * 内部配置项：业务仍可正常读写，但不出现在「参数设置」页，也不能通过页面接口修改。
+     * 内部配置项：业务仍可正常读写，但不出现在「系统参数」页，也不能通过页面接口修改。
      *
      * <p>用于指纹、初始化标记、内部开关等不面向业务人员的键。</p>
      */

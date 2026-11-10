@@ -1,23 +1,28 @@
 # 配置参考
 
-> open-admin 配置项说明。部署期配置写在 `application.yml`；少量展示类配置可在「系统管理 → 参数设置」中运行时修改。
+> open-admin 配置项说明。部署期配置写在 `application.yml`；少量展示类配置可在「系统管理 → 系统参数」中运行时修改。
 
 ## 启动配置（`application.yml`，需重启）
 
 | 配置 | 说明 | 默认值 |
 |------|------|--------|
-| `sys.title` | 系统标题（必填），可在参数设置页覆盖 | 管理系统 |
-| `sys.short-title` | 系统简称，用于左侧菜单顶部与浏览器标题等空间受限处；留空则使用 `sys.title`，可在参数设置页覆盖 | 空 |
+| `sys.title` | 系统标题（必填），可在系统参数页覆盖 | 管理系统 |
+| `sys.short-title` | 系统简称，用于左侧菜单顶部与浏览器标题等空间受限处；留空则使用 `sys.title`，可在系统参数页覆盖 | 空 |
 | `sys.file.store-type` | 文件存储 (`LOCAL`/`S3`) | LOCAL |
 | `sys.file.upload-path` | 本地上传路径 | /home/files |
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
 | `sys.file.s3.*` | S3 对象存储配置 | — |
+| `sys.data-file-dir` | 缓存 / 数据目录 | /data/ |
 | `sys.session-idle-time` | Session 超时（分钟），通过 `server.servlet.session.timeout` 生效 | 180 |
-| `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时踢出旧会话 | 1 |
+| `sys.login-lock-minutes` | 登录锁定时长（分钟） | 5 |
+| `sys.login-lock-max-attempts` | 登录异常最大次数，超过则锁定 | 10 |
+| `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时按 `sys.max-sessions-prevents-login` 处理 | 1 |
+| `sys.max-sessions-prevents-login` | 并发会话数超限时是否阻止新登录：`true` 阻止新登录（旧会话继续有效），`false` 踢出旧会话 | true |
 | `server.servlet.session.persistent` | 优雅停机时把登录会话落盘，重启后恢复（重启免登录） | true |
 | `server.servlet.session.store-dir` | 会话落盘目录，需可写并位于持久卷 | /data/session |
 | `server.servlet.session.timeout` | 会话空闲超时，默认引用 `sys.session-idle-time` | 180m |
-| `sys.concurrent-login-message` | 被并发登录顶下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
+| `sys.concurrent-login-message` | 被并发登录顶下线或管理员强制下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
+| `sys.concurrent-login-blocked-message` | 并发会话超限、新登录被阻止时的提示文案 | 该账号已在别处登录，请先退出后再登录 |
 | `sys.login-expired-message` | 会话空闲超时/未登录时的提示文案（经 `/admin/public/site-info` 下发给前端） | 登录已过期，请重新登录 |
 | `sys.job-enable` | 定时任务开关 | true |
 | `sys.job-auto-register` | 启动时扫描 `BaseJob` 子类 / `@JobDescription` 并补建缺失的定时任务记录（只补建，不覆盖已有配置） | true |
@@ -36,16 +41,37 @@
 
 > 「在线用户」列表复用同一套会话注册表，记录保存在内存，**仅单实例部署准确**；应用重启后会话本身会恢复，在线记录则随用户下一次请求自动补登记（重启后尚未访问的用户不会立即出现在列表里）。多实例部署请先引入 Spring Session 等共享会话方案，否则各节点只能看到本节点登录的用户。
 
+> **并发登录策略**：默认 `sys.maximum-sessions=1` 且 `sys.max-sessions-prevents-login=true`，同一账号同时只允许一个在线会话，再次登录会被拒绝并提示 `sys.concurrent-login-blocked-message`。被阻止的用户需要先在原设备退出、让管理员在「在线用户」强制下线，或等待会话空闲超时（`sys.session-idle-time`）后再登录。若希望新登录直接顶掉旧会话，把 `sys.max-sessions-prevents-login` 设为 `false`。
+
 > 本地想验证个人中心「登录设备」的多处登录提示，可用 `local` profile 启动（`-Dspring-boot.run.profiles=local` 或环境变量 `SPRING_PROFILES_ACTIVE=local`），该 profile 将 `sys.maximum-sessions` 设为 `3`。
 
-## 参数设置（运行时可改）
+## 系统参数（运行时可改）
 
-「系统管理 → 参数设置」页面的数据来自 `sys_config` 表，但**默认值不落库**：
+「系统管理 → 系统参数」页面的数据来自 `sys_config` 表，但**默认值不落库**：
 
 - 取值优先级：**数据库覆盖值 > `application.yml` > 代码声明的默认值**
 - 只有被修改过的项才写入 `sys_config`；删除记录即恢复默认
 - 覆盖值在内存中缓存，保存后本机立即生效；多节点部署时其他节点最长 30 秒后生效
 - 敏感项接口不回显，修改时留空表示保持原值；清除请点「恢复默认」
+
+### 只读系统参数
+
+页面顶部只读卡片展示一组启动期配置的当前生效值（来自 `application.yml` 或代码默认值），便于确认部署状态；这些值不能在页面修改，改完 `application.yml` 后需重启。
+
+| 展示名 | 配置键 | 说明 |
+|--------|--------|------|
+| 最大并发会话数 | `sys.maximum-sessions` | 同一账号同时在线会话上限 |
+| 并发超限策略 | `sys.max-sessions-prevents-login` | `true` 阻止新登录，`false` 踢出旧会话 |
+| 会话空闲超时 | `sys.session-idle-time` | 单位分钟 |
+| 登录失败上限 | `sys.login-lock-max-attempts` | 单位次 |
+| 登录锁定时长 | `sys.login-lock-minutes` | 单位分钟 |
+| 文件存储方式 | `sys.file.store-type` | 本地存储 / S3 对象存储 |
+| 上传目录 | `sys.file.upload-path` | 本地上传路径 |
+| 临时文件清理 | `sys.file.clean-temp-minutes` | 单位分钟 |
+| 数据目录 | `sys.data-file-dir` | 缓存 / 数据目录 |
+| 日志目录 | `logging.file.path` | 文件日志目录 |
+
+> 只读卡片不返回 S3 密钥、邮箱授权码、代理密码等敏感值。
 
 ### 内置配置项
 
@@ -68,7 +94,7 @@
 
 ### 邮件发送
 
-邮件配置全部在「系统管理 → 参数设置 → 邮件发送」中维护，不需要填写 SMTP 服务器/端口/加密方式：
+邮件配置全部在「系统管理 → 系统参数 → 邮件发送」中维护，不需要填写 SMTP 服务器/端口/加密方式：
 
 | 邮箱类型 | SMTP |
 |------|------|
@@ -212,7 +238,7 @@ public class DockerConfigProvider implements ConfigProvider {
 
 ### 内部配置项与废弃键
 
-指纹、初始化标记、内部开关等不需要出现在「参数设置」页的键，用 `.asHidden()` 声明：
+指纹、初始化标记、内部开关等不需要出现在「系统参数」页的键，用 `.asHidden()` 声明：
 
 ```java
 .add(Configs.string("cvs.encode-fp", "编码指纹").asHidden())
@@ -338,14 +364,14 @@ docker run -d --name rustfs -p 9000:9000 -p 9001:9001 \
 import { THEME_PRESETS, applyThemePreset, getActivePresetKey, resetUserTheme } from '@jiangood/open-admin';
 
 THEME_PRESETS;              // 预设列表
-getActivePresetKey();       // 当前预设 key；未自定义时为参数设置的全局默认
+getActivePresetKey();       // 当前预设 key；未自定义时为系统参数的全局默认
 applyThemePreset('cyan');   // 应用预设
-resetUserTheme();           // 恢复全局默认（参数设置中的默认主题色）
+resetUserTheme();           // 恢复全局默认（系统参数中的默认主题色）
 ```
 
 ### 业务定制配色
 
-业务侧仍可在入口 `<Layouts>` 传入 `colors` prop，作为**基线**；用户选择的预设会覆盖基线，`resetUserTheme()` 回到参数设置的全局默认（默认预设为 `antd` 时即回到基线）：
+业务侧仍可在入口 `<Layouts>` 传入 `colors` prop，作为**基线**；用户选择的预设会覆盖基线，`resetUserTheme()` 回到系统参数的全局默认（默认预设为 `antd` 时即回到基线）：
 
 ```jsx
 <Layouts colors={{
@@ -432,20 +458,20 @@ toggleLayoutMode();
 
 ### 全局默认主题色与页签模式
 
-管理员可在「系统管理 → 参数设置 → 默认界面」中维护未自定义用户的默认值，保存后立即生效：
+管理员可在「系统管理 → 系统参数 → 默认界面」中维护未自定义用户的默认值，保存后立即生效：
 
 | key | 类型 | 默认 | 说明 |
 |-----|------|------|------|
 | `sys.ui.theme-preset` | select | `antd` | 默认主题色预设，可选值与上方「预设主题」一致 |
 | `sys.ui.tabs-enabled` | bool | `true` | `true` 开启页签模式，`false` 为单页模式 |
 
-- **优先级**：用户在本地自定义的 `oa-theme-preset` / `oa-layout-tabs` 高于参数设置；已自定义用户不受默认值变更影响。
+- **优先级**：用户在本地自定义的 `oa-theme-preset` / `oa-layout-tabs` 高于系统参数；已自定义用户不受默认值变更影响。
 - 两项均声明为 `publicVisible`，随 `/admin/public/site-info` 的 `config` 字段下发，前端在后台布局渲染前应用，避免闪一下默认样式。
 - 业务侧可通过 `applyServerUiDefaults(siteInfo.config)` 手动应用，或用 `getDefaultPresetKey()` / `getDefaultLayoutMode()` 读取当前全局默认。
 
 ### 恢复默认
 
-「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 页签模式），其中主题色与页签模式回到参数设置的全局默认。
+「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 页签模式），其中主题色与页签模式回到系统参数的全局默认。
 
 ```js
 import { resetAllSettings, resetUserTheme, resetLayoutMode } from '@jiangood/open-admin';
