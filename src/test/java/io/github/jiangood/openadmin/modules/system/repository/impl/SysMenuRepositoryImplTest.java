@@ -27,8 +27,8 @@ class SysMenuRepositoryImplTest {
     @Test
     void shouldLoadDifferentIdsFromMultipleFilesAndSortBySeq() {
         List<MenuDefinition> menus = SysMenuRepositoryImpl.loadMenus(new Resource[]{
-                yaml("application-menu-a.yml", "menus:\n  b:\n    name: B\n    seq: 20\n"),
-                yaml("application-menu-b.yml", "menus:\n  a:\n    name: A\n    seq: 10\n")
+                yaml("menu-a.yml", "menus:\n  b:\n    name: B\n    seq: 20\n"),
+                yaml("menu-b.yml", "menus:\n  a:\n    name: A\n    seq: 10\n")
         });
 
         assertEquals(List.of("a", "b"), menus.stream().map(MenuDefinition::getId).toList());
@@ -38,8 +38,8 @@ class SysMenuRepositoryImplTest {
     @Test
     void shouldRejectDuplicateIdAcrossFiles() {
         Resource[] resources = {
-                yaml("application-menu-a.yml", "menus:\n  sys-user:\n    name: 用户管理\n"),
-                yaml("application-menu-b.yml", "menus:\n  sys-user:\n    name: 重复定义\n")
+                yaml("menu-a.yml", "menus:\n  sys-user:\n    name: 用户管理\n"),
+                yaml("menu-b.yml", "menus:\n  sys-user:\n    name: 重复定义\n")
         };
 
         IllegalStateException ex = assertThrows(IllegalStateException.class,
@@ -52,7 +52,7 @@ class SysMenuRepositoryImplTest {
     @Test
     void shouldRejectDuplicateIdInSameFile() {
         Resource[] resources = {
-                yaml("application-menu-a.yml",
+                yaml("menu-a.yml",
                         "menus:\n  sys-user:\n    name: 第一次\n  sys-user:\n    name: 第二次\n")
         };
 

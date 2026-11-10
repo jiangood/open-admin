@@ -95,7 +95,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 - **BaseEntity** — 所有实体继承 BaseEntity（UUIDv7 id 由 `@PrePersist` 自动生成，含 createTime/createUser、updateTime/updateUser）
 - **Spec 动态查询** — `Spec<T>` 链式构建 JPA Specification（eq/like/in/between/or 等），通过 `SpecImpl` + `ExpressionTool` 执行
 - **PageExt** — 扩展 PageImpl，支持返回额外数据（如汇总行）
-- **菜单加载** — `classpath*:application-menu*.yml` YAML 定义菜单（Map 格式，key 为菜单 id）；id 必须全局唯一，重复定义启动失败
+- **菜单加载** — `classpath*:menu.yml` + `classpath*:menu-*.yml` YAML 定义菜单（Map 格式，key 为菜单 id）；id 必须全局唯一，重复定义启动失败。旧名 `application-menu*.yml` 已不再识别，需改名为 `menu.yml` / `menu-*.yml`
 - **权限控制** — `@HasPermission` 注解 + AOP 切面，支持 SpEL 表达式
 - **ID 生成** — 默认 UUIDv7（时间排序，MySQL 友好）
 - **文件存储** — 支持 `local` / `s3`（AWS SDK v2，兼容 RustFS / OSS / COS），通过 `FileOperator` 接口抽象
@@ -119,7 +119,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 - **角色管理**：列表/创建/编辑/分配权限（菜单 + 按钮）
 - **权限控制**：后端 `@HasPermission("resource:action")` 注解 + AOP 切面，支持 SpEL；前端推荐 `<PermActions actions={[{label, perm, onClick}]} />` 数据驱动模式（旧式 `<Button perm="xxx:yyy" />` 子元素写法已不推荐）和 `<Perm code="xxx">` 组件
 - **权限码格式**：全小写两段式 `{资源}:{操作}`，资源 kebab-case（如 `sys-user:read`、`sys-role:grant-permission`）
-- **YAML 定义**：`application-menu*.yml` 中用 `perms` 对象列表定义
+- **YAML 定义**：`menu*.yml` 中用 `perms` 对象列表定义
 - **菜单分隔线**：左侧菜单支持在 YAML 中配置分隔线（`type: divider`，无需 `name`/`path`，用 `pid` + `seq` 控制位置）对菜单项分组；顶部菜单不支持分隔线
 - **快捷菜单**：用户在个人中心「快捷菜单」Tab 从有权限的页面菜单中勾选（最多 10 个，可拖拽排序），配置结果固定显示在左侧菜单顶部
 
@@ -148,7 +148,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 2. **Repository** — 继承 `BaseRepository<T, String>`，通用 CRUD + 动态查询
 3. **Service** — 继承 `BaseService<T>`，通用业务逻辑
 4. **Controller** — RESTful，返回 `AjaxResult`，`@HasPermission` 控制权限；含文件上传字段的实体打 `@FileField` 注解，save 后调用 `sysFileService.confirmTempFiles(entity)` 确认临时文件
-5. **菜单** — `src/main/resources/application-menu*.yml` 定义菜单树
+5. **菜单** — `src/main/resources/menu.yml`（或 `menu-*.yml`）定义菜单树
 6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
 
 > 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 从框架 Release 同步到 `.opencode/skills/`）。也可在「系统管理 → 代码生成」中选中已建好的实体，一键生成 Repository / Service / Controller / 前端页面 / 菜单 代码并写入项目源码目录（先预览确认）。

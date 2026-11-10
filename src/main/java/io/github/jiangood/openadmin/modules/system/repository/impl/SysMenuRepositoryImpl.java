@@ -15,6 +15,8 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 /**
  * 菜单仓库实现。
  * <p>
- * 扫描 {@code classpath*:application-menu*.yml}，逐文件绑定为
+ * 扫描 {@code classpath*:menu.yml} 与 {@code classpath*:menu-*.yml}，逐文件绑定为
  * {@code Map<String, MenuDefinition>}。菜单 id 必须全局唯一：同一文件内
  * 重复定义或不同文件之间重复定义都会在启动时直接失败，不做合并覆盖。
  * 最后按 seq 排序返回扁平列表。
@@ -36,6 +38,14 @@ import java.util.stream.Collectors;
 @Repository
 public class SysMenuRepositoryImpl implements SysMenuRepository {
 
+    /**
+     * 菜单文件扫描位置。框架默认菜单在 {@code menu.yml}，业务模块新增 {@code menu-*.yml}。
+     */
+    private static final String[] MENU_LOCATIONS = {
+            "classpath*:menu.yml",
+            "classpath*:menu-*.yml"
+    };
+
     private final List<MenuDefinition> menus;
 
     public SysMenuRepositoryImpl() {
@@ -43,11 +53,16 @@ public class SysMenuRepositoryImpl implements SysMenuRepository {
     }
 
     private static Resource[] scanResources() {
-        try {
-            return new PathMatchingResourcePatternResolver().getResources("classpath*:application-menu*.yml");
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to scan application-menu*.yml", e);
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        List<Resource> resources = new ArrayList<>();
+        for (String location : MENU_LOCATIONS) {
+            try {
+                resources.addAll(Arrays.asList(resolver.getResources(location)));
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to scan " + location, e);
+            }
         }
+        return resources.toArray(Resource[]::new);
     }
 
     static List<MenuDefinition> loadMenus(Resource[] resources) {

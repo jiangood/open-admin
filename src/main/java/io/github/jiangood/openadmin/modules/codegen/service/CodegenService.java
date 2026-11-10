@@ -92,7 +92,7 @@ public class CodegenService {
                 BackendTemplates.controller(meta, module, label), "backend"));
         files.add(writer.file(frontendRoot, module + "/index.jsx",
                 FrontendTemplates.page(meta, module, label, frontendImport), "frontend"));
-        files.add(writer.file(resourceRoot, "application-menu-" + module + ".yml",
+        files.add(writer.file(resourceRoot, "menu-" + module + ".yml",
                 MenuTemplate.menu(module, label, parentMenu), "menu"));
         return files;
     }

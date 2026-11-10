@@ -187,15 +187,15 @@ class MenuLoadingIntegrationTest {
 
     @Test
     void testMultiFileMenus() {
-        // 验证 src/test/resources/ 下的 application-menu-test-ext.yml 和
-        // application-menu-test-extra.yml 已正确加载到菜单列表中
+        // 验证 src/test/resources/ 下的 menu-test-ext.yml 和
+        // menu-test-extra.yml 已正确加载到菜单列表中
         List<MenuDefinition> all = sysMenuRepository.findAll();
 
         // test-dev 来自 test-ext 文件
         MenuDefinition dev = all.stream()
                 .filter(m -> "test-dev".equals(m.getId()))
                 .findFirst().orElse(null);
-        assertNotNull(dev, "test-dev 应该来自 application-menu-test-ext.yml");
+        assertNotNull(dev, "test-dev 应该来自 menu-test-ext.yml");
         assertEquals("开发者工具", dev.getName());
         assertEquals("ToolOutlined", dev.getIcon());
 
@@ -203,7 +203,7 @@ class MenuLoadingIntegrationTest {
         MenuDefinition extra = all.stream()
                 .filter(m -> "test-extra".equals(m.getId()))
                 .findFirst().orElse(null);
-        assertNotNull(extra, "test-extra 应该来自 application-menu-test-extra.yml");
+        assertNotNull(extra, "test-extra 应该来自 menu-test-extra.yml");
         assertEquals("test-dev", extra.getPid());
     }
 
@@ -214,7 +214,7 @@ class MenuLoadingIntegrationTest {
                 .filter(m -> "test-sep".equals(m.getId()))
                 .findFirst().orElse(null);
 
-        assertNotNull(divider, "test-sep 分隔线应从 application-menu-test-extra.yml 绑定");
+        assertNotNull(divider, "test-sep 分隔线应从 menu-test-extra.yml 绑定");
         assertTrue(divider.isDivider());
         assertNull(divider.getName());
         assertEquals("test-dev", divider.getPid());

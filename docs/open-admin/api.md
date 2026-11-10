@@ -284,7 +284,7 @@ mailService.sendAsync(MailMessage.builder()
 | Service | `{模块包}/service/{Entity}Service.java` | 继承 `BaseService`，含 `@FileField` 时自动生成 confirmTempFiles/discardTempFiles 事务方法 |
 | Controller | `{模块包}/controller/{Entity}Controller.java` | `admin/{module}` 下 `page/info/create/update/delete`，`@HasPermission` + `@Log`，默认使用 `CrudOps` 统一响应与校验 |
 | 前端页面 | `web/src/pages/{module}/index.jsx` | `ProTable` + `FormModal`，按字段类型选用 `Field*`/`View*` 组件 |
-| 菜单 | `src/main/resources/application-menu-{module}.yml` | 挂在指定父菜单（默认 `sys`），含读/建/改/删权限 |
+| 菜单 | `src/main/resources/menu-{module}.yml` | 挂在指定父菜单（默认 `sys`），含读/建/改/删权限 |
 
 字段映射：String→`Input`、`@Lob`/TEXT→`Input.TextArea`、数字→`InputNumber`、布尔→`FieldBoolean`、日期→`FieldDate`、枚举（`@DictType`）→`FieldDictSelect`、`@FileField(html=true)`→`FieldEditor`、图片类文件→`FieldUploadImage`、其他文件→`FieldUploadFile`；查询条件为可搜索 String 字段的 `searchText` 模糊匹配 + 枚举/布尔等值过滤。
 

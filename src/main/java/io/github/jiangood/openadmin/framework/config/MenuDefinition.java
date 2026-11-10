@@ -8,10 +8,8 @@ import java.util.List;
 /**
  * 菜单定义。
  * <p>
- * 从 YAML {@code application-menu*.yml} 绑定而来，id 使用 Map key 自动回填。
+ * 从 YAML {@code menu*.yml} 绑定而来，id 使用 Map key 自动回填。
  * 不包含树形 {@code children} 字段，父子关系由 {@code pid} 表达。
- *
- * @see MenuProperties
  */
 @Data
 public class MenuDefinition {

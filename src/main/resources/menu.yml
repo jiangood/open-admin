@@ -1,4 +1,4 @@
-## 框架预设菜单结构。业务项目可在 resources/ 下加 application-menu-*.yml 扩展或覆盖。
+## 框架预设菜单结构。业务项目可在 resources/ 下加 menu-*.yml 扩展或覆盖。
 ## 同级菜单按声明顺序排列（seq 相同时保持 YAML 顺序）；type: divider 的条目渲染为左侧菜单分隔线（无需 name/path），用于对菜单分组。
 menus:
   sys:
