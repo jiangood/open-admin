@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.framework.auth;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.service.SysLogService;
+import io.github.jiangood.openadmin.util.BrowserFingerprintTool;
 import io.github.jiangood.openadmin.util.IpTool;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -75,6 +76,7 @@ public class AuthOperationLogger {
         sysLog.setDetail(truncate(detail, DETAIL_MAX_LENGTH));
         sysLog.setUsername(truncate(username, USERNAME_MAX_LENGTH));
         sysLog.setIp(IpTool.getIp(request));
+        sysLog.setFingerprint(BrowserFingerprintTool.get(request));
         sysLog.setOperationTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysLog.setDuration((int) duration);
         return sysLog;

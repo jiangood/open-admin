@@ -10,6 +10,7 @@ import tools.jackson.databind.ser.std.SimpleFilterProvider;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.util.dto.AjaxResult;
 import io.github.jiangood.openadmin.util.ArrayTool;
+import io.github.jiangood.openadmin.util.BrowserFingerprintTool;
 import io.github.jiangood.openadmin.util.IpTool;
 import io.github.jiangood.openadmin.util.RequestTool;
 import io.github.jiangood.openadmin.framework.auth.LoginTool;
@@ -143,6 +144,7 @@ public class LogAspect {
         sysLog.setOperation(methodAnn == null ? method.getName() : methodAnn.value());
         sysLog.setDetail(resolveDetail(method, methodAnn, joinPoint.getArgs()));
         sysLog.setIp(ip);
+        sysLog.setFingerprint(BrowserFingerprintTool.get(request));
         sysLog.setOperationTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysLog.setDuration((int) duration);
         sysLog.setParams(params);

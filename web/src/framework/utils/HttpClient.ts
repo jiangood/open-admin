@@ -3,6 +3,7 @@ import type {AxiosProgressEvent, AxiosRequestConfig} from "axios";
 import qs from 'qs';
 import {EventBus} from "./EventBus";
 import {getMessageApi} from "./MessageApi";
+import {BROWSER_FINGERPRINT_HEADER, getBrowserFingerprint} from "./BrowserFingerprint";
 
 /**
  * 单一 Promise 风格 HTTP 工具类（所有请求方法均返回 Promise，无 success/error 回调）
@@ -111,6 +112,15 @@ const axiosInstance = axios.create({
     withCredentials: true,
     headers: {'Content-Type': 'application/json'},
     paramsSerializer: (params: Record<string, unknown>) => qs.stringify(params, {indices: false})
+});
+
+// 所有请求统一附加浏览器指纹，后端写入操作日志，便于判断是否为同一浏览器
+axiosInstance.interceptors.request.use((config) => {
+    const fingerprint = getBrowserFingerprint();
+    if (fingerprint) {
+        config.headers.set(BROWSER_FINGERPRINT_HEADER, fingerprint);
+    }
+    return config;
 });
 
 export class HttpClient {

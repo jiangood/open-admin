@@ -19,7 +19,9 @@ import java.time.LocalDateTime;
 @Table(name = "sys_log", indexes = {
         @Index(columnList = "operation"),
         // 个人中心"最近操作"按用户 + 时间分页查询
-        @Index(columnList = "userId, operationTime")
+        @Index(columnList = "userId, operationTime"),
+        // 操作日志页按浏览器指纹筛选
+        @Index(columnList = "fingerprint")
 })
 public class SysLog extends BaseEntity {
 
@@ -68,6 +70,32 @@ public class SysLog extends BaseEntity {
 
     @Column(length = 64)
     private String ip;
+
+    /**
+     * 浏览器指纹，由前端生成并随请求头上报，用于判断是否为同一浏览器。
+     * <p>
+     * 客户端可伪造；旧数据或非浏览器请求（如接口直连）可能为空。
+     */
+    @Column(length = 64)
+    private String fingerprint;
+
+    /**
+     * 指纹备注记录 id，仅用于页面展示与取消标记，不落库。
+     */
+    @Transient
+    private String fingerprintRemarkId;
+
+    /**
+     * 指纹备注名，来自 sys_browser_fingerprint，仅用于页面展示，不落库。
+     */
+    @Transient
+    private String fingerprintName;
+
+    /**
+     * 指纹备注说明，来自 sys_browser_fingerprint，仅用于页面展示，不落库。
+     */
+    @Transient
+    private String fingerprintRemark;
 
     private LocalDateTime operationTime;
 

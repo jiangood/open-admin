@@ -97,6 +97,7 @@ menus:
     icon: HistoryOutlined
     perms:
       - {name: 读取, code: read}
+      - {name: 维护指纹备注, code: write}
   sys-online:
     pid: sys
     name: 在线用户

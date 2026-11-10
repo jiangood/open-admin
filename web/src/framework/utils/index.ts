@@ -5,7 +5,8 @@ export * from "./UrlUtils"
 export * from "./StringUtils"
 export * from "./EventBus";
 export * from "./TreeUtils";
-export * from './StorageUtils'
+export * from "./StorageUtils"
+export * from './BrowserFingerprint'
 export * from './DeviceUtils'
 export * from './ObjectUtils'
 export * from './DictUtils'

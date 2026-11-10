@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.framework.auth;
 import io.github.jiangood.openadmin.framework.config.security.LoginUser;
 import io.github.jiangood.openadmin.modules.system.entity.SysLog;
 import io.github.jiangood.openadmin.modules.system.service.SysLogService;
+import io.github.jiangood.openadmin.util.BrowserFingerprintTool;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -42,6 +43,16 @@ class AuthOperationLoggerTest {
         assertEquals("127.0.0.1", sysLog.getIp());
         assertEquals(12, sysLog.getDuration().intValue());
         assertTrue(sysLog.getSuccess());
+    }
+
+    @Test
+    void loginShouldRecordBrowserFingerprint() {
+        MockHttpServletRequest request = request();
+        request.addHeader(BrowserFingerprintTool.HEADER, "fp-123");
+
+        logger.loginSuccess(request, "admin", loginUser(), 12);
+
+        assertEquals("fp-123", capture().getFingerprint());
     }
 
     @Test
