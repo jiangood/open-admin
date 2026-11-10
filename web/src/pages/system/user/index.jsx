@@ -155,7 +155,7 @@ export default class UserPage extends React.Component {
 
         return <Page >
             <Splitter>
-                <Splitter.Panel defaultSize={340} style={{paddingRight: 8}}>
+                <Splitter.Panel defaultSize={240} style={{paddingRight: 8}}>
                     <Card size='small'>
                         <OrgTree onChange={this.onSelectOrg}/>
                     </Card>
