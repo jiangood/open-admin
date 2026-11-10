@@ -26,8 +26,10 @@ export interface PermAction {
 export type ButtonSize = 'small' | 'middle' | 'large';
 
 export interface PermActionsProps {
-    /** 是否折叠为「第一个操作 + 更多下拉」，多余操作进入 `...` 菜单 */
+    /** 是否折叠为「前 N 个操作 + 更多下拉」，多余操作进入 `...` 菜单 */
     more?: boolean;
+    /** `more` 模式下直接展示的操作数量，默认 1；超出的折叠进 `...` 下拉 */
+    visibleCount?: number;
     /** 按钮尺寸 */
     size?: ButtonSize;
     /** 传统写法：包裹带 `perm` 属性的子元素，按 `perm` 过滤。不推荐，建议改用 `actions` 数据驱动 */
@@ -39,14 +41,15 @@ export interface PermActionsProps {
 export class PermActions extends React.Component<PermActionsProps> {
     static readonly defaultProps: Partial<PermActionsProps> = {
         more: false,
+        visibleCount: 1,
         size: 'middle',
     };
 
     render() {
-        const { children, more, size, actions } = this.props;
+        const { children, more, visibleCount = 1, size, actions } = this.props;
 
         if (actions) {
-            return this.renderActions(actions, more, size);
+            return this.renderActions(actions, more, size, visibleCount);
         }
 
         const checkPerm = (element) => {
@@ -95,7 +98,8 @@ export class PermActions extends React.Component<PermActionsProps> {
     private renderActions(
         actions: PermAction[],
         more?: boolean,
-        size: 'small' | 'middle' | 'large' = 'small'
+        size: 'small' | 'middle' | 'large' = 'small',
+        visibleCount: number = 1
     ) {
         const visible = actions.filter((a) => !a.perm || PermUtils.hasPermission(a.perm));
         if (visible.length === 0) return null;
@@ -107,7 +111,17 @@ export class PermActions extends React.Component<PermActionsProps> {
             return <Space>{buttons}</Space>;
         }
 
-        const [first, ...rest] = visible;
+        const inlineCount = Math.max(1, Math.min(visibleCount, visible.length));
+        const inline = visible.slice(0, inlineCount);
+        const rest = visible.slice(inlineCount);
+
+        const buttons = inline.map((action, index) => (
+            <React.Fragment key={index}>{this.renderButton(action, size)}</React.Fragment>
+        ));
+
+        if (rest.length === 0) {
+            return <Space>{buttons}</Space>;
+        }
 
         const items = rest.map((action, index) => ({
             key: `more-${index}`,
@@ -134,7 +148,7 @@ export class PermActions extends React.Component<PermActionsProps> {
 
         return (
             <Space.Compact>
-                {this.renderButton(first, size)}
+                {buttons}
                 <Dropdown menu={{ items }} placement="bottomRight">
                     <Button size={size} icon={<EllipsisOutlined/>}/>
                 </Dropdown>

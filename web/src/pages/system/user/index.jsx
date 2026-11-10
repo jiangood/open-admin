@@ -121,6 +121,7 @@ export default class UserPage extends React.Component {
             render: (_, record) => {
                 return <PermActions
                     more
+                    visibleCount={2}
                     size="small"
                     actions={[
                         {label: '编辑', perm: 'sys-user:update', onClick: () => this.handleEdit(record)},
