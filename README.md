@@ -160,7 +160,7 @@ python scripts/start.py frontend start|stop|restart|status    # 前端: npm run 
 - `target` 可为 `all|backend|frontend`（缺省 `all`），`action` 可为 `start|stop|restart|status`（缺省 `start`）
 - 日志 `logs/backend.log`、`logs/frontend.log`，PID 记录在 `logs/*.pid`
 - Windows 下以 `cmd.exe /c` + `CREATE_NO_WINDOW` 后台启动、`taskkill /T /F` 结束整棵进程树；POSIX 下用独立会话 + 进程组 `SIGTERM/SIGKILL`
-- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数见 `application-mysql.yml` 中的 `db_*` 变量）
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数直接写在 `application-mysql.yml`，需要覆盖时用 `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD`）
 
 ### 发版
 
