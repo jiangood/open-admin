@@ -21,6 +21,7 @@
 | `server.servlet.session.persistent` | 优雅停机时把登录会话落盘，重启后恢复（重启免登录） | true |
 | `server.servlet.session.store-dir` | 会话落盘目录，需可写并位于持久卷 | /data/session |
 | `server.servlet.session.timeout` | 会话空闲超时，默认引用 `sys.session-idle-time` | 180m |
+| `server.servlet.session.cookie.name` | 会话 cookie 名；同一域名/IP 下部署多套应用时必须各不相同 | JSESSIONID |
 | `sys.concurrent-login-message` | 被并发登录顶下线或管理员强制下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
 | `sys.concurrent-login-blocked-message` | 并发会话超限、新登录被阻止时的提示文案 | 该账号已在别处登录，请先退出后再登录 |
 | `sys.login-expired-message` | 会话空闲超时/未登录时的提示文案（经 `/admin/public/site-info` 下发给前端） | 登录已过期，请重新登录 |
@@ -41,7 +42,23 @@
 
 > 「在线用户」列表复用同一套会话注册表，记录保存在内存，**仅单实例部署准确**；应用重启后会话本身会恢复，在线记录则随用户下一次请求自动补登记（重启后尚未访问的用户不会立即出现在列表里）。多实例部署请先引入 Spring Session 等共享会话方案，否则各节点只能看到本节点登录的用户。
 
-> **并发登录策略**：默认 `sys.maximum-sessions=1` 且 `sys.max-sessions-prevents-login=true`，同一账号同时只允许一个在线会话，再次登录会被拒绝并提示 `sys.concurrent-login-blocked-message`。被阻止的用户需要先在原设备退出、让管理员在「在线用户」强制下线，或等待会话空闲超时（`sys.session-idle-time`）后再登录。若希望新登录直接顶掉旧会话，把 `sys.max-sessions-prevents-login` 设为 `false`。
+> **同域多套应用必须区分 session cookie 名**：浏览器识别 cookie 只看 `name + domain + path`，**不看端口**。同一台主机（或同一域名）上部署多套 open-admin 应用、且都使用根路径（`server.servlet.context-path: /`）时，它们会共用同一个 `JSESSIONID`，互相覆盖对方 cookie 里的会话 id，表现为「用着用着就要求重新登录」；被覆盖的会话在服务端仍然存活，还会继续占用 `sys.maximum-sessions` 名额（见下方「并发登录策略」）。
+>
+> 给每套应用配置不同的 cookie 名即可隔离：
+>
+> ```yaml
+> server:
+>   servlet:
+>     session:
+>       cookie:
+>         name: DOCKER_ADMIN_SESSION   # 每套应用取不同值，建议「大写应用名 + _SESSION」
+> ```
+>
+> 更彻底的做法是给每套应用独立域名（cookie 天然按域名隔离）。各应用使用**互不嵌套**的非根 `context-path`（如 `/a`、`/b`）时，cookie 的 path 不同，也不会互相覆盖；但嵌套路径（如 `/a` 与 `/a/b`）仍会互相干扰。
+>
+> 启动日志会打印实际生效的 `name / path / timeout / persistent`，出现「莫名掉线」时先对比两个应用的值。
+
+> **并发登录策略**：默认 `sys.maximum-sessions=1` 且 `sys.max-sessions-prevents-login=true`，同一账号同时只允许一个在线会话，再次登录会被拒绝并提示 `sys.concurrent-login-blocked-message`。被阻止的用户需要先在原设备退出、让管理员在「在线用户」强制下线，或等待会话空闲超时（`sys.session-idle-time`）后再登录。若希望新登录直接顶掉旧会话，把 `sys.max-sessions-prevents-login` 设为 `false`。若用户频繁「莫名掉线」且会话在服务端仍然存活，先排查上一条「同域多套应用必须区分 session cookie 名」。
 
 > 本地想验证个人中心「登录设备」的多处登录提示，可用 `local` profile 启动（`-Dspring-boot.run.profiles=local` 或环境变量 `SPRING_PROFILES_ACTIVE=local`），该 profile 将 `sys.maximum-sessions` 设为 `3`。
 
