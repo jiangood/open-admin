@@ -85,6 +85,13 @@ public class SecurityConfig {
                     int maximumSessions = systemProperties.getMaximumSessions();
                     boolean preventsLogin = systemProperties.isMaxSessionsPreventsLogin();
                     log.info("设置最大并发会话数为 {}，超出时{}", maximumSessions, preventsLogin ? "阻止新登录" : "踢出旧会话");
+                    // 同域多套应用共用 JSESSIONID 会互相顶掉登录态，把实际生效的 cookie 配置打进启动日志便于对照
+                    log.info("会话 cookie: name={} path={} timeout={} persistent={}",
+                            environment.getProperty("server.servlet.session.cookie.name", "JSESSIONID"),
+                            environment.getProperty("server.servlet.session.cookie.path",
+                                    environment.getProperty("server.servlet.context-path", "/")),
+                            environment.getProperty("server.servlet.session.timeout", "180m"),
+                            environment.getProperty("server.servlet.session.persistent", "false"));
 
                     cfg.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED);
                     cfg.sessionConcurrency(configurer -> {
