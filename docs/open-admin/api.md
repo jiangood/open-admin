@@ -62,6 +62,7 @@ public AjaxResult update(@RequestBody Customer input,
 - 部分更新场景可用 SpEL 的 `?:` 兜底，如 `${#input.name ?: #input.id}`，避免出现空的「」
 - **不要拼接密码、令牌等敏感字段**：`params` 会按字段名自动脱敏，`detail` 不会
 - 日志页的「操作详情」列来自 `detail`，请求参数在行详情抽屉里查看
+- 登录/登出由框架手动写入（登录时尚未认证、登出时上下文已清空，切面拿不到操作者）：操作名为「认证-登录」「认证-登录失败」「认证-登出」，失败登录会记录原因（如「账号或密码错误」「账户已被锁定」），不记录请求参数，避免密码进入日志
 
 ### 工具类
 
@@ -236,7 +237,7 @@ mailService.sendAsync(MailMessage.builder()
 
 - 在线记录保存在内存，**仅单实例部署准确**；应用重启后 `HttpSession` 会从落盘文件恢复，在线记录则在用户下一次请求时自动补登记（重启后尚未访问的用户不会立即出现），多实例部署需要 Spring Session 等共享会话方案（见 [config.md](config.md)）。
 - `lastActiveTime` 由 Spring Security `SessionRegistry` 的 `lastRequest` 实时计算，无需业务上报。
-- `lastOperation` / `lastOperationTime` 按「用户 + IP」从操作日志表 `sys_log` 批量取最新一条；`lastOperationTimeText` 由 `FriendlyTool.getPastTime` 计算。同一账号从不同 IP 登录时，各会话只显示与自己 IP 一致的最近操作。
+- `lastOperation` / `lastOperationTime` 按「用户 + IP」从操作日志表 `sys_log` 批量取最新一条；`lastOperationTimeText` 由 `FriendlyTool.getPastTime` 计算。同一账号从不同 IP 登录时，各会话只显示与自己 IP 一致的最近操作。登录成功本身也会写入一条「认证-登录」，所以刚登录的会话最近操作通常显示为登录。
 - 「最近操作」跳转格式：`/system/log?userId=...&username=...&ip=...`，操作日志页支持 `username`（模糊）、`userId`（精确）、`ip`（精确）筛选。
 - 强制下线调用 `SessionInformation.expireNow()`，对方下一次请求会收到 401，并复用并发登录提示（见下文「框架内置事件」）。
 - 不允许强制下线当前登录会话；会话被踢后记录立即从列表移除，对方会话在下一次请求时失效。

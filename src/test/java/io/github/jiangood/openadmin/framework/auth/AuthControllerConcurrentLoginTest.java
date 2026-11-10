@@ -75,7 +75,7 @@ class AuthControllerConcurrentLoginTest {
         securityHolder.setSharedObjects(sharedObjects);
 
         return new AuthController(securityHolder, mock(LoginAttemptService.class), properties,
-                mock(OnlineUserRegistry.class), mock(SysUserService.class));
+                mock(OnlineUserRegistry.class), mock(SysUserService.class), mock(AuthOperationLogger.class));
     }
 
     private LoginReq loginReq() {

@@ -41,18 +41,26 @@ public class AuthController {
     private final SystemProperties systemProperties;
     private final OnlineUserRegistry onlineUserRegistry;
     private final SysUserService sysUserService;
+    private final AuthOperationLogger authOperationLogger;
 
     @PostMapping("login")
     @RateLimit(count = 10, duration = 60)
     public AjaxResult login(@RequestBody @Valid LoginReq loginRequest, HttpServletRequest request, HttpServletResponse response) {
+        long startTime = System.currentTimeMillis();
         String username = loginRequest.getUsername();
-        String password = loginRequest.getPassword();
-        password = this.decodeWebPassword(password);
+        LoginUser loginUser;
+        try {
+            String password = this.decodeWebPassword(loginRequest.getPassword());
 
-        checkAttempts(username);
+            checkAttempts(username);
 
-        authenticate(username, password, request, response);
+            loginUser = authenticate(username, password, request, response);
+        } catch (RuntimeException e) {
+            authOperationLogger.loginFailed(request, username, e.getMessage(), System.currentTimeMillis() - startTime);
+            throw e;
+        }
 
+        authOperationLogger.loginSuccess(request, username, loginUser, System.currentTimeMillis() - startTime);
         return AjaxResult.ok("登录成功");
     }
 
@@ -69,7 +77,7 @@ public class AuthController {
         Assert.state(!locked, "账户已被锁定，请" + systemProperties.getLoginLockMinutes() + "分钟后再试");
     }
 
-    private void authenticate(String username, String password, HttpServletRequest request, HttpServletResponse response) {
+    private LoginUser authenticate(String username, String password, HttpServletRequest request, HttpServletResponse response) {
         AuthenticationManager authenticationManager = securityHolder.getSharedObject(AuthenticationManager.class);
         SessionAuthenticationStrategy sessionStrategy = securityHolder.getSharedObject(SessionAuthenticationStrategy.class);
         SecurityContextRepository securityContextRepository = securityHolder.getSharedObject(SecurityContextRepository.class);
@@ -89,7 +97,9 @@ public class AuthController {
                 onlineUserRegistry.record(request, loginUser);
                 // 登录成功后刷新库里的“上次登录时间”，会话中的 LoginUser 仍保留本次登录前的旧值
                 sysUserService.updateLastLoginTime(loginUser.getId());
+                return loginUser;
             }
+            return null;
         } catch (SessionAuthenticationException e) {
             // 账号密码正确，但会话数已达上限且开启了「阻止新登录」，不能误导成密码错误
             if (systemProperties.isMaxSessionsPreventsLogin()) {
@@ -122,6 +132,10 @@ public class AuthController {
 
     @PostMapping("logout")
     public AjaxResult logout(HttpServletRequest request) {
+        long startTime = System.currentTimeMillis();
+        // 清理 SecurityContext 之前取出操作者，否则日志里没有用户
+        LoginUser loginUser = LoginTool.getUser();
+
         SecurityContextHolder.clearContext();
 
         HttpSession session = request.getSession(false);
@@ -130,6 +144,7 @@ public class AuthController {
             session.invalidate();
         }
 
+        authOperationLogger.logout(request, loginUser, System.currentTimeMillis() - startTime);
         return AjaxResult.ok();
     }
 
