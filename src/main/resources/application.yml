@@ -1,7 +1,6 @@
 # H2 数据库文件根路径（不含扩展名）。
 # 默认写入容器内 /data 目录（镜像部署时把 ./data 挂载到 /data，数据、日志、上传文件均持久化）。
 # 本地开发可通过 -Ddb_path=./data/db/open-admin 覆盖。
-# 切换到 MySQL：见 application-mysql.yml（--spring.profiles.active=mysql）。
 db_path: /data/db/open-admin
 
 server:
@@ -13,7 +12,7 @@ spring:
   config:
     import: classpath:application-lib.yml
   datasource:
-    # 内置 H2（MySQL 兼容模式），首次启动自动建表并写入种子数据，无需外部 MySQL
+    # 内置 H2（MySQL 兼容模式），首次启动自动建表并写入种子数据，无需外部数据库
     driver-class-name: org.h2.Driver
     url: "jdbc:h2:file:${db_path};MODE=MySQL;DB_CLOSE_DELAY=-1"
     username: sa

@@ -27,7 +27,7 @@ open-admin 是一个后台管理系统框架（脚手架），**业务项目无�
 
 ### 环境要求
 
-- **JDK 21+** / **Node.js 18+**（数据库内置 H2，无需安装；可选 MySQL 8.0+）
+- **JDK 21+** / **Node.js 18+**（数据库内置 H2，无需安装）
 
 ### 后端启动
 
@@ -38,8 +38,7 @@ mvn clean compile
 mvn -Pdev spring-boot:run   # 开发模式启动（内置 H2，首次启动自动建表 + 初始化数据）
 ```
 
-数据库文件默认在 `/data/db/open-admin`（本地开发可用 `-Ddb_path=./data/db/open-admin` 覆盖）；
-切换 MySQL 见 `application-mysql.yml`：`mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=mysql`。
+数据库文件默认在 `/data/db/open-admin`（本地开发可用 `-Ddb_path=./data/db/open-admin` 覆盖）。
 
 ### 前端启动
 
@@ -57,7 +56,7 @@ npm run dev                    # 默认 http://localhost:7777
 
 ### Docker 一键部署
 
-镜像内置 H2 数据库，无需外部 MySQL，数据、日志、上传文件、登录会话持久化在 `/data`（正常重启后用户无需重新登录）：
+镜像内置 H2 数据库，无需外部数据库，数据、日志、上传文件、登录会话持久化在 `/data`（正常重启后用户无需重新登录）：
 
 ```bash
 # docker compose（首次自动构建镜像）
@@ -68,7 +67,7 @@ docker build -t open-admin .
 docker run -d --name open-admin -p 8888:8888 -v ./data:/data open-admin
 ```
 
-容器默认以 `prod` profile 启动；需要切换时用环境变量覆盖即可，例如 `docker run -e SPRING_PROFILES_ACTIVE=prod,mysql ...`。
+容器默认以 `prod` profile 启动；可通过环境变量 `SPRING_PROFILES_ACTIVE` 覆盖。
 
 ### 集成到已有项目
 
@@ -145,7 +144,7 @@ cd web && npm run dev                                         # 前端开发模�
 cd web && npm run build                                       # 前端构建
 ```
 
-测试使用 H2 内存数据库，无需 MySQL。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
+测试使用 H2 内存数据库。RepositoryTest 和 ServiceTest 等集成测试同样使用 H2，可通过 `mvn test -Dtest='!*RepositoryTest,!*ServiceTest'` 跳过以加速。
 
 ### 启动脚本
 
@@ -160,7 +159,7 @@ python scripts/start.py frontend start|stop|restart|status    # 前端: npm run 
 - `target` 可为 `all|backend|frontend`（缺省 `all`），`action` 可为 `start|stop|restart|status`（缺省 `start`）
 - 日志 `logs/backend.log`、`logs/frontend.log`，PID 记录在 `logs/*.pid`
 - Windows 下以 `cmd.exe /c` + `CREATE_NO_WINDOW` 后台启动、`taskkill /T /F` 结束整棵进程树；POSIX 下用独立会话 + 进程组 `SIGTERM/SIGKILL`
-- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2，无需 MySQL；切 MySQL 用 `profiles=mysql`，连接参数直接写在 `application-mysql.yml`，需要覆盖时用 `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD`）
+- 后端脚本即 `mvn -Pdev spring-boot:run`（用 `application.yml`，默认内置 H2；需要覆盖连接参数时用 `SPRING_DATASOURCE_URL` / `SPRING_DATASOURCE_USERNAME` / `SPRING_DATASOURCE_PASSWORD`）
 
 ### 发版
 

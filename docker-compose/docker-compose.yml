@@ -10,8 +10,8 @@ services:
     environment:
       # 应用监听端口（对外映射到宿主机 8888）
       - SERVER_PORT=8888
-      # 运行 profile（默认 prod）；如需附加 MySQL：prod,mysql
-      # - SPRING_PROFILES_ACTIVE=prod,mysql
+      # 运行 profile（默认 prod）
+      # - SPRING_PROFILES_ACTIVE=prod
     volumes:
       # 数据目录：内置 H2 数据库、上传文件、日志均持久化在此
       - "../data/:/data"
