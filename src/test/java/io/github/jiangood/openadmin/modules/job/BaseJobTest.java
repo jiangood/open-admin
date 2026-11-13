@@ -135,7 +135,7 @@ class BaseJobTest {
 
         job.execute(context);
 
-        verify(jobProgressRegistry).update("job-1", 3L, 10L, "已处理 3/10");
+        verify(jobProgressRegistry).update("job-1", "已处理 3/10");
     }
 
     @Test
@@ -264,7 +264,7 @@ class BaseJobTest {
 
         @Override
         public String execute(JobDataMap data, Logger logger) throws Exception {
-            progress(3, 10, "已处理 3/10");
+            progress("已处理 3/10");
             if (error) {
                 throw new OutOfMemoryError("boom");
             }

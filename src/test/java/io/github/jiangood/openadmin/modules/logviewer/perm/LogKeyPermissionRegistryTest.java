@@ -23,7 +23,12 @@ class LogKeyPermissionRegistryTest {
     }
 
     private static LogKeyPermissionProvider provider(Map<String, String> entries) {
-        return () -> entries;
+        return new LogKeyPermissionProvider() {
+            @Override
+            public Map<String, String> logKeyPermissions() {
+                return entries;
+            }
+        };
     }
 
     private static void login(String... permissions) {

@@ -6,7 +6,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 /**
- * 任务运行进度快照（内存态，不落库）
+ * 任务运行状态快照（内存态，不落库）。
  * <p>
  * 每次更新都是整体替换一个新实例，保证 Web 线程读到的是一致快照。
  */
@@ -25,13 +25,7 @@ public class JobProgress {
     private String logId;
     private JobRunState state;
     /**
-     * 百分比 0-100，未知时为 null
-     */
-    private Integer percent;
-    private Long current;
-    private Long total;
-    /**
-     * 进度描述，如「已同步 3/10」
+     * 运行状态描述，如「正在采集主机用量」
      */
     private String message;
     private LocalDateTime beginTime;

@@ -22,8 +22,8 @@ import org.springframework.context.annotation.Configuration;
 import java.io.File;
 
 /**
- * 根据 mdc设置的key记录日志到单独文件
- * （使用封装的 {@link io.github.jiangood.openadmin.modules.logviewer.util.FileLog}）
+ * 根据 MDC 设置的 key 记录日志到单独文件。
+ * （使用封装的 {@link io.github.jiangood.openadmin.modules.logviewer.util.TaskLog}）
  */
 @Slf4j
 @Getter

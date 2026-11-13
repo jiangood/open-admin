@@ -6,11 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class JobProgressRegistryTest {
 
@@ -37,6 +33,7 @@ class JobProgressRegistryTest {
         assertEquals("log-1", p.getLogId());
         assertEquals("同步", p.getJobName());
         assertEquals("运行中", p.getStateLabel());
+        assertTrue(p.isRunning());
     }
 
     @Test
@@ -48,48 +45,18 @@ class JobProgressRegistryTest {
     }
 
     @Test
-    void update_shouldKeepExplicitPercent() {
+    void update_shouldSetMessage() {
         registry.start(job("job-1", "同步"), "log-1");
-        registry.update("job-1", 40, "已处理 4 批");
+        registry.update("job-1", "正在采集");
 
         JobProgress p = registry.get("job-1");
-        assertEquals(40, p.getPercent());
-        assertEquals("已处理 4 批", p.getMessage());
-    }
-
-    @Test
-    void update_shouldComputePercentFromCounters() {
-        registry.start(job("job-1", "同步"), "log-1");
-        registry.update("job-1", 3L, 10L, "已同步 3/10");
-
-        JobProgress p = registry.get("job-1");
-        assertEquals(30, p.getPercent());
-        assertEquals(3L, p.getCurrent());
-        assertEquals(10L, p.getTotal());
-    }
-
-    @Test
-    void update_shouldCapPercentAt100() {
-        registry.start(job("job-1", "同步"), "log-1");
-        registry.update("job-1", 12L, 10L, null);
-        registry.update("job-1", 150, null);
-
-        assertEquals(100, registry.get("job-1").getPercent());
-    }
-
-    @Test
-    void update_shouldIgnoreZeroTotal() {
-        registry.start(job("job-1", "同步"), "log-1");
-        registry.update("job-1", 0L, 0L, "空数据");
-
-        JobProgress p = registry.get("job-1");
-        assertNull(p.getPercent());
-        assertEquals("空数据", p.getMessage());
+        assertEquals("正在采集", p.getMessage());
+        assertTrue(p.isRunning());
     }
 
     @Test
     void update_shouldIgnoreUnknownJob() {
-        registry.update("no-such-job", 10, "x");
+        registry.update("no-such-job", "x");
         assertTrue(registry.listAll().isEmpty());
     }
 
@@ -97,12 +64,11 @@ class JobProgressRegistryTest {
     void update_shouldIgnoreFinishedRun() {
         registry.start(job("job-1", "同步"), "log-1");
         registry.success("job-1", "OK");
-        registry.update("job-1", 10, "迟到的进度");
+        registry.update("job-1", "迟到的更新");
 
         JobProgress p = registry.get("job-1");
         assertEquals(JobRunState.SUCCESS, p.getState());
         assertNull(p.getMessage());
-        assertEquals(100, p.getPercent());
     }
 
     @Test
@@ -113,7 +79,6 @@ class JobProgressRegistryTest {
         JobProgress p = registry.get("job-1");
         assertEquals(JobRunState.SUCCESS, p.getState());
         assertEquals("OK", p.getResult());
-        assertEquals(100, p.getPercent());
         assertNotNull(p.getEndTime());
         assertNotNull(p.getRunTime());
         assertFalse(p.isRunning());

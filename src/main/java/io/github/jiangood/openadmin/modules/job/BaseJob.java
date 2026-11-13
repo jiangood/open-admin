@@ -6,7 +6,7 @@ import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
-import io.github.jiangood.openadmin.modules.logviewer.util.FileLog;
+import io.github.jiangood.openadmin.modules.logviewer.util.TaskLog;
 import jakarta.annotation.Resource;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -60,8 +60,8 @@ public abstract class BaseJob implements Job {
 
         jobProgressRegistry.start(job, jobLog.getId());
 
-        String previousLogKey = FileLog.bind(JobLogPermissionProvider.KEY_PREFIX + "/" + jobLog.getId());
-        Logger logger = FileLog.logger();
+        String previousLogKey = TaskLog.bind(JobLogPermissionProvider.KEY_PREFIX + "/" + jobLog.getId());
+        Logger logger = TaskLog.logger();
         if (jobLog.getLogBucket() != null) {
             int nextRun = (jobLog.getExecuteCount() == null ? 0 : jobLog.getExecuteCount()) + 1;
             logger.info("===== 第 {} 次执行 =====", nextRun);
@@ -90,7 +90,7 @@ public abstract class BaseJob implements Job {
                 finishLog(jobLog, success, result, System.currentTimeMillis() - startMillis);
                 logger.info("执行结束 返回值{}", result);
             } finally {
-                FileLog.unbind(previousLogKey);
+                TaskLog.unbind(previousLogKey);
             }
         }
     }
@@ -98,7 +98,7 @@ public abstract class BaseJob implements Job {
     /**
      * 获取本次执行要写入的执行记录。
      * <p>
-     * 每次一份记录模式：新建一条记录，日志文件为 job/{logId}.log；
+     * 每次一份记录模式：新建一条记录，日志文件为 job/{logId}.log。
      * 聚合模式：复用同一周期（按小时/按天）的记录，logId 不变，日志追加到同一文件。
      */
     private SysJobLog acquireLog(SysJob job, LocalDateTime fireTime) {
@@ -147,34 +147,12 @@ public abstract class BaseJob implements Job {
     }
 
     public abstract String execute(JobDataMap data, Logger logger) throws Exception;
-
     /**
-     * 上报进度百分比
+     * 更新运行状态描述（可选，用于在任务列表/日志中展示当前阶段）。
      *
-     * @param percent 0-100
-     * @param message 进度描述，可为 null
-     */
-    protected void progress(int percent, String message) {
-        jobProgressRegistry.update(currentJobId, percent, message);
-    }
-
-    /**
-     * 上报「已处理/总数」进度，百分比自动计算
-     *
-     * @param current 已处理数量
-     * @param total   总数量
-     * @param message 进度描述，可为 null
-     */
-    protected void progress(long current, long total, String message) {
-        jobProgressRegistry.update(currentJobId, current, total, message);
-    }
-
-    /**
-     * 只更新进度描述（进度未知时使用）
-     *
-     * @param message 进度描述
+     * @param message 状态描述
      */
     protected void progress(String message) {
-        jobProgressRegistry.update(currentJobId, null, message);
+        jobProgressRegistry.update(currentJobId, message);
     }
 }

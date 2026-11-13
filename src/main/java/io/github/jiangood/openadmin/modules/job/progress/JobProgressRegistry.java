@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 任务运行进度注册表（内存态）
+ * 任务运行状态注册表（内存态）。
  * <p>
  * 只在内存中保存「当前/最近一次」运行状态，供前端轮询展示；执行结果本身仍由 sys_job_log 落库。
- * 重启后运行中进度丢失，页面显示为「未运行」，但执行记录完整。
+ * 重启后运行中状态丢失，页面显示为「未运行」，但执行记录完整。
  */
 @Slf4j
 @Component
@@ -48,39 +48,17 @@ public class JobProgressRegistry {
     }
 
     /**
-     * 上报百分比进度
+     * 更新运行状态描述。
      */
-    public void update(String jobId, Integer percent, String message) {
-        update(jobId, percent, null, null, message);
-    }
-
-    /**
-     * 上报「已处理/总数」进度，百分比自动计算
-     */
-    public void update(String jobId, long current, long total, String message) {
-        Integer percent = total > 0 ? (int) Math.min(100, current * 100 / total) : null;
-        update(jobId, percent, current, total, message);
-    }
-
-    private void update(String jobId, Integer percent, Long current, Long total, String message) {
+    public void update(String jobId, String message) {
         if (jobId == null) {
             return;
         }
         byJobId.computeIfPresent(jobId, (key, old) -> {
             if (!old.isRunning()) {
-                // 已结束的运行不再接受进度更新（例如任务异常退出后又误调）
                 return old;
             }
             JobProgress p = copy(old);
-            if (percent != null) {
-                p.setPercent(Math.max(0, Math.min(100, percent)));
-            }
-            if (current != null) {
-                p.setCurrent(current);
-            }
-            if (total != null) {
-                p.setTotal(total);
-            }
             if (message != null) {
                 p.setMessage(message);
             }
@@ -94,14 +72,14 @@ public class JobProgressRegistry {
      * 任务执行成功
      */
     public void success(String jobId, String result) {
-        finish(jobId, JobRunState.SUCCESS, result, 100);
+        finish(jobId, JobRunState.SUCCESS, result);
     }
 
     /**
      * 任务执行失败
      */
     public void fail(String jobId, String message) {
-        finish(jobId, JobRunState.FAILED, message, null);
+        finish(jobId, JobRunState.FAILED, message);
     }
 
     /**
@@ -115,24 +93,21 @@ public class JobProgressRegistry {
             if (!old.isRunning()) {
                 return old;
             }
-            return finished(old, JobRunState.FAILED, message, null);
+            return finished(old, JobRunState.FAILED, message);
         });
     }
 
-    private void finish(String jobId, JobRunState state, String result, Integer percent) {
+    private void finish(String jobId, JobRunState state, String result) {
         if (jobId == null) {
             return;
         }
-        byJobId.computeIfPresent(jobId, (key, old) -> finished(old, state, result, percent));
+        byJobId.computeIfPresent(jobId, (key, old) -> finished(old, state, result));
     }
 
-    private JobProgress finished(JobProgress old, JobRunState state, String result, Integer percent) {
+    private JobProgress finished(JobProgress old, JobRunState state, String result) {
         JobProgress p = copy(old);
         p.setState(state);
         p.setResult(result);
-        if (percent != null) {
-            p.setPercent(percent);
-        }
         LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
         p.setEndTime(now);
         p.setUpdateTime(now);
@@ -153,8 +128,6 @@ public class JobProgressRegistry {
 
     /**
      * 按日志 id 查询运行进度，用于判断某份日志对应的任务是否仍在运行；不存在返回 null。
-     * <p>
-     * 内存态数据量很小（只保留当前/最近一次），直接遍历即可，无需额外索引。
      */
     public JobProgress getByLogId(String logId) {
         if (logId == null) {
@@ -206,9 +179,6 @@ public class JobProgressRegistry {
         p.setJobName(old.getJobName());
         p.setLogId(old.getLogId());
         p.setState(old.getState());
-        p.setPercent(old.getPercent());
-        p.setCurrent(old.getCurrent());
-        p.setTotal(old.getTotal());
         p.setMessage(old.getMessage());
         p.setBeginTime(old.getBeginTime());
         p.setUpdateTime(old.getUpdateTime());

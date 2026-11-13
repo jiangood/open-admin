@@ -7,7 +7,6 @@ import {
     Form,
     Input,
     Modal,
-    Progress,
     Select,
     Statistic,
     Switch,
@@ -360,9 +359,7 @@ export default class JobPage extends React.Component {
                     return <Tag>未运行</Tag>
                 }
                 // 单行标签：运行中带百分比，明细信息放进 tooltip，避免撑高表格行
-                const label = p.state === 'RUNNING' && p.percent != null
-                    ? `${p.stateLabel} ${p.percent}%`
-                    : p.stateLabel
+                const label = p.stateLabel
                 const tag = <Tag color={p.stateColor || 'default'}>{label}</Tag>
                 return p.message ? <Tooltip title={p.message}>{tag}</Tooltip> : tag
             },
@@ -480,7 +477,6 @@ export default class JobPage extends React.Component {
             style={{marginBottom: 12}}
             title={<div>
                 <div style={{marginBottom: 6}}>{p.message || '任务运行中'}</div>
-                {p.percent != null && <Progress percent={p.percent} size='small'/>}
             </div>}
         />
     }
