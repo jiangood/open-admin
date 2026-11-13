@@ -22,14 +22,16 @@ export interface TaskLogDrawerProps {
 export default class TaskLogDrawer extends React.Component<TaskLogDrawerProps> {
     render() {
         const { open, logId, title, onClose, width, running } = this.props
+        const bodyHeight = typeof window !== 'undefined' ? window.innerHeight - 55 : 600
         return <Drawer title={title || '任务日志'} size={width || 860} open={open}
                        mask={{ closable: false }}
-                       onClose={onClose}>
+                       onClose={onClose}
+                       styles={{ body: { padding: 12, height: bodyHeight, overflow: 'hidden' } }}>
             {open && logId
                 ? <LogViewer key={logId}
                              logKey={'task/' + logId}
                              running={!!running}
-                             height={window.innerHeight - 160}/>
+                             height={bodyHeight - 24}/>
                 : null}
         </Drawer>
     }
