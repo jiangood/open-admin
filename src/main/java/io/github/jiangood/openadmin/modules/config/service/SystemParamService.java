@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariPoolMXBean;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.config.dto.SystemParamView;
 import io.github.jiangood.openadmin.util.DurationTool;
+import io.github.jiangood.openadmin.util.VersionTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.core.env.Environment;
@@ -24,8 +25,9 @@ import java.util.regex.Pattern;
 /**
  * 只读系统参数。
  *
- * <p>展示启动期配置（application.yml / 代码默认值）的当前生效值和运行时状态（启动时间、数据库连接与连接池用量），
- * 便于管理员在「系统管理 → 系统参数」页面确认部署状态、定位连接不足等问题；这些值不能在页面修改。</p>
+ * <p>展示启动期配置（application.yml / 代码默认值）的当前生效值、运行时状态（启动时间、数据库连接与连接池用量）
+ * 以及框架与应用的版本信息，便于管理员在「系统管理 → 系统参数」页面确认部署状态、定位连接不足等问题；
+ * 这些值不能在页面修改。</p>
  */
 @Service
 @RequiredArgsConstructor
@@ -81,6 +83,11 @@ public class SystemParamService {
                 blankToDash(systemProperties.getDataFileDir()));
         add(items, SystemParamView.GROUP_STARTUP, "logging.file.path", "日志目录",
                 blankToDash(environment.getProperty("logging.file.path")));
+        // 版本信息：打包运行附带构建时间，开发模式只有版本号
+        add(items, SystemParamView.GROUP_VERSION, "sys.framework-version", "框架版本",
+                withBuildTime(VersionTool.getFrameworkVersion(), VersionTool.getFrameworkBuildTime()));
+        add(items, SystemParamView.GROUP_VERSION, "sys.app-version", "应用版本",
+                withBuildTime(VersionTool.getApplicationVersion(), VersionTool.getApplicationBuildTime()));
         return items;
     }
 
@@ -135,5 +142,13 @@ public class SystemParamService {
 
     private static String blankToDash(String value) {
         return value == null || value.isBlank() ? "-" : value;
+    }
+
+    /** 版本号附构建时间（精确到秒）：拿不到构建时间（开发模式）时只显示版本号 */
+    private static String withBuildTime(String version, String buildTime) {
+        if (version == null || version.isBlank()) {
+            return null;
+        }
+        return buildTime == null || buildTime.isBlank() ? version : version + "（" + buildTime + "）";
     }
 }

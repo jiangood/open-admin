@@ -25,8 +25,8 @@ const selectText = (value) => (value === null || value === undefined ? '' : Stri
 /** 只读参数轮询间隔：启动时间里的「已运行」与连接池用量会随运行变化 */
 const SYSTEM_POLL_INTERVAL = 15000
 
-/** 旧后端或意外值一律归入启动期配置 */
-const groupOf = (item) => (item.group === 'runtime' ? 'runtime' : 'startup')
+/** 旧后端或意外值一律归入启动期配置；version 为版本信息卡片 */
+const groupOf = (item) => (item.group === 'runtime' ? 'runtime' : item.group === 'version' ? 'version' : 'startup')
 
 /**
  * 系统参数页。
@@ -316,10 +316,10 @@ export default class SysConfigPage extends React.Component {
     /**
      * 只读参数固定在页面右侧，占约三分之一宽度，长路径 / JDBC URL 不至于挤成一列；窄屏时自然堆叠到表单下方。
      *
-     * 运行时状态与启动期配置分成两张卡片，避免两种性质不同的值混在一张卡里；
+     * 运行时状态、启动期配置与版本信息分成三张卡片，避免性质不同的值混在一张卡里；
      * 每项按「标签 / 配置键（右对齐、可省略）/ 值」排布，而不是 antd Descriptions：
      * 垂直 Descriptions 的标签与值同为正文级字号，技术配置键夹在中间会让人分不清哪行是值。
-     * 运行时状态（启动时间 / 连接池）不是 yml 配置项，只显示标签和值。
+     * 运行时状态（启动时间 / 连接池）与版本信息不是 yml 配置项，只显示标签和值。
      */
     renderSystemCards = () => {
         const {systemParams} = this.state
@@ -327,7 +327,8 @@ export default class SysConfigPage extends React.Component {
             return null
         }
         const runtime = systemParams.filter(item => groupOf(item) === 'runtime')
-        const startup = systemParams.filter(item => groupOf(item) !== 'runtime')
+        const version = systemParams.filter(item => groupOf(item) === 'version')
+        const startup = systemParams.filter(item => groupOf(item) !== 'runtime' && groupOf(item) !== 'version')
 
         return <Col xs={24} xl={8}>
             <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
@@ -346,13 +347,18 @@ export default class SysConfigPage extends React.Component {
                         {startup.map((item, index) => this.renderSystemRow(item, index))}
                     </Card>
                 )}
+                {version.length > 0 && (
+                    <Card title="版本信息">
+                        {version.map((item, index) => this.renderSystemRow(item, index))}
+                    </Card>
+                )}
             </div>
         </Col>
     }
 
     renderSystemRow = (item, index) => {
-        // 运行时状态不是 yml 里能查到的配置项（启动时间 / 连接池用量），右侧不再挂配置键
-        const showKey = groupOf(item) !== 'runtime'
+        // 只有启动期配置是 yml 里能查到的配置项，其余（启动时间 / 连接池 / 版本信息）不显示配置键
+        const showKey = groupOf(item) === 'startup'
         return <div key={item.key} style={{
             padding: '8px 0',
             borderTop: index === 0 ? undefined : '1px solid var(--oa-color-border)',

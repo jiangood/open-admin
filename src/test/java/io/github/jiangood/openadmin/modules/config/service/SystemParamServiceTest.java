@@ -71,6 +71,16 @@ class SystemParamServiceTest {
     }
 
     @Test
+    void exposesVersionInfoInDedicatedGroup() {
+        List<SystemParamView> items = new SystemParamService(new SystemProperties(), new MockEnvironment(), provider(null)).items();
+
+        assertEquals(SystemParamView.GROUP_VERSION, groupOf(items, "sys.framework-version"));
+        assertEquals(SystemParamView.GROUP_VERSION, groupOf(items, "sys.app-version"));
+        // 测试 JVM（classes 目录）中框架版本可解析（pom.xml 兜底），构建时间拿不到则只显示版本号
+        assertTrue(valueOf(items, "sys.framework-version").matches("\\d+\\.\\d+.*"));
+    }
+
+    @Test
     void groupsRuntimeStatusAheadOfStartupConfig() {
         HikariDataSource dataSource = mock(HikariDataSource.class);
         HikariPoolMXBean pool = mock(HikariPoolMXBean.class);

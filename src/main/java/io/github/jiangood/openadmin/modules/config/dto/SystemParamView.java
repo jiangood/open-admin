@@ -19,4 +19,7 @@ public record SystemParamView(
 
     /** 启动期配置：来自 application.yml / 代码默认值，改后需重启 */
     public static final String GROUP_STARTUP = "startup";
+
+    /** 版本信息：框架与应用版本及其构建时间 */
+    public static final String GROUP_VERSION = "version";
 }
