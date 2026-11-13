@@ -87,7 +87,11 @@ public class LogKeyPermissionRegistry {
         for (LogKeyPermissionProvider provider : providers) {
             String dynamic = provider.requiredPermission(normalized);
             if (dynamic != null) {
-                assertHasPermission(dynamic);
+                if (LogKeyPermissionProvider.LOGIN_REQUIRED.equals(dynamic)) {
+                    assertAuthenticated();
+                } else {
+                    assertHasPermission(dynamic);
+                }
                 return;
             }
         }
@@ -99,6 +103,13 @@ public class LogKeyPermissionRegistry {
             throw new AccessDeniedException(MSG_FORBIDDEN + "：未配置该日志的查看权限");
         }
         assertHasPermission(permission);
+    }
+
+    private void assertAuthenticated() {
+        // getPermissions() 在已登录时返回权限集合（可为空），未登录/无上下文时按实现可能为 null
+        if (LoginTool.getPermissions() == null) {
+            throw new AccessDeniedException(MSG_FORBIDDEN);
+        }
     }
 
     private void assertHasPermission(String permission) {

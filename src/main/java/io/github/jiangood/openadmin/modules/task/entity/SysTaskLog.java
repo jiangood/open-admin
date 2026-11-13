@@ -81,7 +81,7 @@ public class SysTaskLog extends BaseEntity {
 
     /**
      * 查看该任务日志所需的权限码（如 host:list），日志接口与任务中心据此鉴权。
-     * 为空表示不允许通过通用端点查看。
+     * 为空表示仅需登录用户即可查看。
      */
     @Column(length = 64)
     String permission;

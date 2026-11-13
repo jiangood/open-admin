@@ -48,8 +48,9 @@ public class TaskLogKeyPermissionProvider implements LogKeyPermissionProvider {
             throw new AccessDeniedException(MSG_FORBIDDEN + "：任务记录不存在");
         }
         String permission = task.getPermission();
+        // 为空表示仅需登录用户即可查看
         if (permission == null || permission.isBlank()) {
-            throw new AccessDeniedException(MSG_FORBIDDEN + "：该任务日志不可查看");
+            return LOGIN_REQUIRED;
         }
         return permission;
     }
