@@ -1,37 +1,45 @@
 import React from 'react'
 import { Drawer } from 'antd'
-import { LogViewer } from '../LogViewer'
+import { TaskLogViewer, TaskLogTransport } from '../TaskLogViewer'
 
 export interface TaskLogDrawerProps {
     open: boolean
     logId?: string | null
     title?: string
-    /** 任务是否运行中；运行中时日志持续轮询，结束后补拉一次 */
+    /** 任务是否运行中 */
     running?: boolean
     width?: number | string
+    /** 传输方式：默认 http */
+    transport?: TaskLogTransport
+    /** WebSocket 地址（transport 为 ws/auto 时使用） */
+    wsUrl?: string
     onClose?: () => void
-    /** 任务结束回调（由外部在检测到 running 变为 false 后触发） */
+    /** 任务结束回调（ws 结束或外部触发） */
     onEnd?: () => void
 }
 
 /**
- * 通用任务日志抽屉：按 logId 通过 logviewer HTTP 接口实时查看任务日志。
+ * 通用任务日志抽屉：按 logId 查看任务日志。
  * <p>
- * 日志 key 为 {@code task/{logId}}，权限按任务记录的 permission 字段鉴权。
+ * HTTP 模式走 logviewer（logKey 默认 task/{logId}）；WS 模式连接 wsUrl 实时 tail。
+ * 权限按任务记录的 permission 字段鉴权。
  */
 export default class TaskLogDrawer extends React.Component<TaskLogDrawerProps> {
     render() {
-        const { open, logId, title, onClose, width, running } = this.props
+        const { open, logId, title, onClose, onEnd, width, running, transport, wsUrl } = this.props
         const bodyHeight = typeof window !== 'undefined' ? window.innerHeight - 55 : 600
         return <Drawer title={title || '任务日志'} size={width || 860} open={open}
                        mask={{ closable: false }}
                        onClose={onClose}
                        styles={{ body: { padding: 12, height: bodyHeight, overflow: 'hidden' } }}>
             {open && logId
-                ? <LogViewer key={logId}
-                             logKey={'task/' + logId}
-                             running={!!running}
-                             height={bodyHeight - 24}/>
+                ? <TaskLogViewer key={logId + '-' + (transport || 'http')}
+                                 logId={logId}
+                                 running={!!running}
+                                 transport={transport || 'http'}
+                                 wsUrl={wsUrl}
+                                 onEnd={onEnd}
+                                 height={bodyHeight - 24}/>
                 : null}
         </Drawer>
     }

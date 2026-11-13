@@ -1,33 +1,34 @@
 ﻿import React from 'react'
-import {Button, Drawer, Form, Input, Modal, Select, Tag, Tooltip, message} from 'antd'
+import {Button, Form, Input, Modal, Select, Tag, Tooltip, message} from 'antd'
 import {
     DateUtils,
     HttpClient,
-    LogViewer,
     Page,
     PermActions,
     PermUtils,
     ProTable,
+    TaskLogDrawer,
 } from "../../../framework";
 
 /**
- * 浠诲姟绫诲瀷鐨勫睍绀哄悕涓庨厤鑹层€備笌鍚庣 SysTaskLog.type 瀵瑰簲锛涙湭鐧昏鐨勭被鍨嬪洖閫€涓哄師鏍峰睍绀恒€? */
+ * 任务类型的展示名与配色。与后端 SysTaskLog.type 对应；未登记的类型回退为原样展示。
+ */
 const TYPE_LABELS = {
-    'agent-deploy': {label: 'Agent 閮ㄧ讲', color: 'purple'},
-    deploy: {label: '搴旂敤閮ㄧ讲', color: 'blue'},
-    build: {label: '椤圭洰鏋勫缓', color: 'geekblue'},
-    'build-test': {label: '鏋勫缓娴嬭瘯', color: 'cyan'},
-    'image-sync': {label: '闀滃儚鍚屾', color: 'green'},
-    'image-export': {label: '闀滃儚瀵煎嚭', color: 'orange'},
-    'image-import': {label: '闀滃儚瀵煎叆', color: 'gold'},
-    'image-download': {label: '闀滃儚涓嬭浇', color: 'volcano'},
-    'host-image-export': {label: '涓绘満闀滃儚瀵煎嚭', color: 'magenta'},
+    'agent-deploy': {label: 'Agent 部署', color: 'purple'},
+    deploy: {label: '应用部署', color: 'blue'},
+    build: {label: '项目构建', color: 'geekblue'},
+    'build-test': {label: '构建测试', color: 'cyan'},
+    'image-sync': {label: '镜像同步', color: 'green'},
+    'image-export': {label: '镜像导出', color: 'orange'},
+    'image-import': {label: '镜像导入', color: 'gold'},
+    'image-download': {label: '镜像下载', color: 'volcano'},
+    'host-image-export': {label: '主机镜像导出', color: 'magenta'},
 }
 
 const STATUS_LABELS = {
-    RUNNING: {label: '杩愯涓?, color: 'processing'},
-    SUCCESS: {label: '鎴愬姛', color: 'success'},
-    FAILED: {label: '澶辫触', color: 'error'},
+    RUNNING: {label: '运行中', color: 'processing'},
+    SUCCESS: {label: '成功', color: 'success'},
+    FAILED: {label: '失败', color: 'error'},
 }
 
 const typeTagOf = type => {
@@ -41,11 +42,15 @@ const statusTagOf = status => {
 }
 
 /**
- * 浠诲姟涓績锛氱粺涓€鏌ョ湅鍚庡彴闀夸换鍔＄殑鏃ュ織涓庡巻鍙茬粨鏋溿€? * <p>
- * 鏃ュ織姝ｆ枃鎸?logId 璧?logviewer锛坘ey = task/{logId}锛夛紝閴存潈鎸変换鍔¤褰曠殑 permission 瀛楁锛? * 杩愯涓殑浠诲姟鍙姹傚彇娑堬紙鍏抽棴浠诲姟鐧昏鐨勫彲涓柇璧勬簮锛夈€? * <p>
- * 杩愯涓殑浠诲姟鍦ㄩ〉闈㈠彲瑙佹椂姣?10 绉掑埛鏂颁竴娆″垪琛紝浠诲姟缁撴潫鐘舵€佷細鑷姩鍑虹幇銆? */
+ * 任务中心：统一查看后台长任务的日志与历史结果。
+ * <p>
+ * 日志正文按 logId 走 logviewer（key = task/{logId}），鉴权按任务记录的 permission 字段。
+ * 运行中的任务可请求取消（关闭任务登记的可中断资源）。
+ * <p>
+ * 运行中的任务在页面可见时每 10 秒刷新一次列表，任务结束状态会自动出现。
+ */
 export const pageMeta = {
-    title: '浠诲姟涓績',
+    title: '任务中心',
 }
 
 export default class extends React.Component {
@@ -69,7 +74,8 @@ export default class extends React.Component {
     poll = () => {
         if (!document.hidden) {
             this.tableRef.current?.reload()
-            // 鎶藉眽鎵撳紑涓斾换鍔¤繍琛屼腑鏃讹紝鍚屾浠诲姟鐘舵€佷互渚挎棩蹇楄疆璇㈠湪缁撴潫鍚庡仠涓?            if (this.state.logVisible && this.state.logId && this.state.logRunning) {
+            // 抽屉打开且任务运行中时，同步任务状态以便日志轮询在结束后停下
+            if (this.state.logVisible && this.state.logId && this.state.logRunning) {
                 this.syncLogRunning()
             }
         }
@@ -87,31 +93,31 @@ export default class extends React.Component {
     }
 
     columns = [
-        {title: '寮€濮嬫椂闂?, dataIndex: 'createTime', width: 170},
-        {title: '绫诲瀷', dataIndex: 'type', width: 120, render: typeTagOf},
+        {title: '开始时间', dataIndex: 'createTime', width: 170},
+        {title: '类型', dataIndex: 'type', width: 120, render: typeTagOf},
         {
-            title: '浠诲姟', dataIndex: 'title', ellipsis: true,
+            title: '任务', dataIndex: 'title', ellipsis: true,
             render: (v, row) => v || row.logId,
         },
-        {title: '瑙﹀彂浜?, dataIndex: 'triggerUser', width: 110, render: v => v || '-'},
+        {title: '触发人', dataIndex: 'triggerUser', width: 110, render: v => v || '-'},
         {
-            title: '鐘舵€?, dataIndex: 'status', width: 90,
+            title: '状态', dataIndex: 'status', width: 90,
             render: (_, row) => row.error
                 ? <Tooltip title={row.error}>{statusTagOf(row.status)}</Tooltip>
                 : statusTagOf(row.status),
         },
-        {title: '缁撴潫鏃堕棿', dataIndex: 'endTime', width: 170, render: v => v || '-'},
+        {title: '结束时间', dataIndex: 'endTime', width: 170, render: v => v || '-'},
         {
-            title: '鑰楁椂', dataIndex: 'timeSpend', width: 100,
+            title: '耗时', dataIndex: 'timeSpend', width: 100,
             render: (v, row) => row.status === 'RUNNING'
                 ? '-'
                 : v != null ? DateUtils.friendlyTotalTime(v) : '-',
         },
         {
-            title: '鎿嶄綔', dataIndex: 'option', valueType: 'option', width: 150,
+            title: '操作', dataIndex: 'option', valueType: 'option', width: 150, fixed: 'right',
             render: (_, row) => <>
                 <PermActions size='small' actions={[
-                    {label: '鏌ョ湅鏃ュ織', perm: 'task:view', onClick: () => this.openLog(row)},
+                    {label: '日志', perm: 'task:view', onClick: () => this.openLog(row)},
                 ]}/>
                 {row.status === 'RUNNING' && PermUtils.hasPermission('task:cancel') &&
                     <Button type='link' size='small' danger onClick={() => this.confirmCancel(row)}>取消</Button>}
@@ -158,30 +164,23 @@ export default class extends React.Component {
                       searchInline
                       searchFormRender={() => <>
                           <Form.Item name='searchText' noStyle>
-                              <Input placeholder='鎼滅储浠诲姟' allowClear/>
+                              <Input placeholder='搜索任务' allowClear/>
                           </Form.Item>
                           <Form.Item name='status' noStyle>
-                              <Select placeholder='鐘舵€? allowClear style={{width: 120}} options={[
-                                  {value: 'RUNNING', label: '杩愯涓?},
-                                  {value: 'SUCCESS', label: '鎴愬姛'},
-                                  {value: 'FAILED', label: '澶辫触'},
+                              <Select placeholder='状态' allowClear style={{width: 120}} options={[
+                                  {value: 'RUNNING', label: '运行中'},
+                                  {value: 'SUCCESS', label: '成功'},
+                                  {value: 'FAILED', label: '失败'},
                               ]}/>
                           </Form.Item>
                       </>}
                       request={params => HttpClient.get('admin/sys/task/page', params)}
                       columns={this.columns}/>
 
-            <Drawer title='任务日志' size={860} open={logVisible}
-                    mask={{closable: false}}
-                    onClose={this.closeLog}
-                    styles={{body: {padding: 12, height: typeof window !== 'undefined' ? window.innerHeight - 55 : 600, overflow: 'hidden'}}}>
-                {logVisible && logId
-                    ? <LogViewer key={logId}
-                                 logKey={'task/' + logId}
-                                 running={logRunning}
-                                 height={typeof window !== 'undefined' ? window.innerHeight - 79 : 500}/>
-                    : null}
-            </Drawer>
+            <TaskLogDrawer open={logVisible} logId={logId}
+                           title='任务日志'
+                           running={logRunning}
+                           onClose={this.closeLog}/>
         </Page>
     }
 }
