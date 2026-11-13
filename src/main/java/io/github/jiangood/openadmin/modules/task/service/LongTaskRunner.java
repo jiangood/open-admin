@@ -51,7 +51,7 @@ public class LongTaskRunner {
     @Deprecated
     public void execute(String logId, TaskWork work) {
         taskLogRegistry.start(logId);
-        TaskLog.bind(logId);
+        TaskLog.bind("task/" + logId);
         boolean success = false;
         String error = null;
         try {

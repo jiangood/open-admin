@@ -37,7 +37,7 @@ public class FileLogService {
 
     public String readLogContent(String key) throws IOException {
         String normalizedKey = normalizeKey(key);
-        File file = fileLogConfig.buildLogFile(normalizedKey);
+        File file = resolveFile(normalizedKey);
 
         if (!file.exists()) {
             return "文件不存在:" + file.getAbsolutePath();
@@ -63,7 +63,7 @@ public class FileLogService {
      */
     public LogChunk readChunk(String key, long offset, int maxLength) throws IOException {
         String normalizedKey = normalizeKey(key);
-        File file = fileLogConfig.buildLogFile(normalizedKey);
+        File file = resolveFile(normalizedKey);
 
         int size = maxLength <= 0 ? DEFAULT_MAX_LENGTH : Math.min(maxLength, MAX_LENGTH_LIMIT);
 
@@ -110,7 +110,25 @@ public class FileLogService {
      */
     public void deleteLog(String key) throws IOException {
         String normalizedKey = normalizeKey(key);
-        Files.deleteIfExists(fileLogConfig.buildLogFile(normalizedKey).toPath());
+        Files.deleteIfExists(resolveFile(normalizedKey).toPath());
+    }
+
+    /**
+     * 解析实际日志文件：优先使用 key 对应路径；当 key 为 {@code task/{logId}} 且新路径不存在、
+     * 旧路径 {@code {logId}.log} 存在时回退读取，兼容历史日志。
+     */
+    protected File resolveFile(String normalizedKey) {
+        File file = fileLogConfig.buildLogFile(normalizedKey);
+        if (!file.exists() && normalizedKey.startsWith("task/")) {
+            String plainKey = normalizedKey.substring("task/".length());
+            if (!plainKey.isBlank() && !plainKey.contains("/") && !plainKey.contains("\\")) {
+                File plain = fileLogConfig.buildLogFile(plainKey);
+                if (plain.exists()) {
+                    return plain;
+                }
+            }
+        }
+        return file;
     }
 
     /**

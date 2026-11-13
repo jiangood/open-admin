@@ -134,7 +134,7 @@ public class SysTaskExecutor {
      */
     void execute(String logId, TaskWork work) {
         taskLogRegistry.start(logId);
-        TaskLog.bind(logId);
+        TaskLog.bind(taskLogKey(logId));
         boolean success = false;
         String error = null;
         try {
@@ -159,6 +159,13 @@ public class SysTaskExecutor {
             TaskLog.unbind();
             taskLogRegistry.finish(logId);
         }
+    }
+
+    /**
+     * 任务日志文件 key：与 logviewer 权限前缀保持一致（task/{logId} -> task/{logId}.log）
+     */
+    public static String taskLogKey(String logId) {
+        return "task/" + logId;
     }
 
     @PreDestroy
