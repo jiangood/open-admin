@@ -23,12 +23,11 @@ import {
     FieldDictSelect,
     getMessageApi,
     HttpClient,
-    LogViewer,
     Page,
+    PageUtils,
     PermActions,
     PermUtils,
     ProTable,
-    UrlUtils,
     ValueType
 } from "../../../framework";
 
@@ -46,14 +45,15 @@ function formatBytes(bytes) {
 
 const statCardsStyle = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: 12,
-    marginBottom: 12,
+    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+    gap: 8,
+    marginBottom: 8,
 }
 
 const statHintStyle = {
-    marginTop: 4,
+    marginTop: 2,
     fontSize: 12,
+    lineHeight: '18px',
     color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
@@ -102,10 +102,6 @@ export default class JobPage extends React.Component {
 
         paramList: [],
 
-        executeRecordOpen: false,
-
-        logOpen: false,
-
         progressMap: {},
 
         cronDesc: '',
@@ -117,8 +113,6 @@ export default class JobPage extends React.Component {
         // 顶部卡片：统计 / 日志占用
         stat: null,
         logSize: null,
-        // 「执行情况」弹窗内当前任务的日志占用
-        jobLogSize: null,
     }
     tableRef = React.createRef()
     modalRef = React.createRef()
@@ -196,19 +190,8 @@ export default class JobPage extends React.Component {
             HttpClient.get('admin/job/log-size', null, {toastError: false}),
         ]).then(([statResult, logSizeResult]) => {
             this.setState({stat: statResult.data, logSize: logSizeResult.data})
-            if (this.state.executeRecordOpen && this.state.selectedRecord) {
-                this.loadJobLogSize(this.state.selectedRecord.id)
-            }
         }).catch(e => {
             console.error('[Job] 加载任务统计失败:', e);
-        })
-    }
-
-    loadJobLogSize = jobId => {
-        HttpClient.get(`admin/job/${jobId}/log-size`, null, {toastError: false}).then(rs => {
-            this.setState({jobLogSize: rs.data})
-        }).catch(e => {
-            console.error('[Job] 加载任务日志占用失败:', e);
         })
     }
 
@@ -251,16 +234,6 @@ export default class JobPage extends React.Component {
         })
     }
 
-    handleTriggerJob = row => {
-        HttpClient.post('admin/job/trigger-job', {id: row.id}, null, {toastError: false}).then(() => {
-            this.tableRef.current.reload();
-            this.loadProgress()
-            this.loadStat()
-        }).catch(e => {
-            console.error('[Job] 触发任务失败:', e);
-        })
-    }
-
     showImport = () => {
         this.setState({importOpen: true})
         this.loadUnregistered()
@@ -292,7 +265,9 @@ export default class JobPage extends React.Component {
         {
             title: '名称',
             dataIndex: 'name',
-            render: v => v ? <span style={{overflowWrap: 'break-word'}}>{v}</span> : '-'
+            render: (v, record) => v
+                ? <a style={{overflowWrap: 'break-word'}} onClick={() => PageUtils.open(`/system/job/${record.id}`)}>{v}</a>
+                : '-'
         },
 
         {
@@ -374,8 +349,7 @@ export default class JobPage extends React.Component {
                 return <PermActions
                     size="small"
                     actions={[
-                        {label: '执行情况', perm: 'job:read', onClick: () => this.showExecuteRecord(record)},
-                        {label: '执行一次', perm: 'job:trigger', onClick: () => this.handleTriggerJob(record)},
+                        {label: '详情', type: 'primary', perm: 'job:read', onClick: () => PageUtils.open(`/system/job/${record.id}`)},
                         {label: '编辑', perm: 'job:update', onClick: () => this.handleEdit(record)},
                         {label: '删除', perm: 'job:delete', confirm: '是否确定删除?', onClick: () => this.handleDelete(record)},
                     ]}
@@ -384,12 +358,6 @@ export default class JobPage extends React.Component {
         },
 
     ]
-
-    showExecuteRecord(record) {
-        this.setState({executeRecordOpen: true, selectedRecord: record, jobLogSize: null})
-        this.loadProgress()
-        this.loadJobLogSize(record.id)
-    }
 
     /**
      * 顶部卡片：运行中 / 今日执行 / 日志占用 / 调度器
@@ -415,30 +383,33 @@ export default class JobPage extends React.Component {
                 <div>threadPoolSize: {scheduler.threadPoolSize ?? '-'} · jobsExecuted: {scheduler.jobsExecuted ?? 0}</div>
             </div>
 
+        const cardBodyStyle = {padding: '8px 12px'}
+        const valueStyle = {fontSize: 20, lineHeight: '28px'}
+
         return <div style={statCardsStyle}>
-            <Card size='small'>
-                <Statistic title='运行中' value={stat.runningCount} suffix='个'/>
+            <Card size='small' styles={{body: cardBodyStyle}}>
+                <Statistic title='运行中' value={stat.runningCount} suffix='个' styles={{content: valueStyle}}/>
                 <div style={statHintStyle}>调度器已执行 {scheduler.jobsExecuted ?? 0} 次</div>
             </Card>
-            <Card size='small'>
-                <Statistic title='今日执行' value={stat.todayExecuteCount} suffix='次'/>
+            <Card size='small' styles={{body: cardBodyStyle}}>
+                <Statistic title='今日执行' value={stat.todayExecuteCount} suffix='次' styles={{content: valueStyle}}/>
                 <div style={stat.todayFailCount > 0 ? statWarnStyle : statHintStyle}>
                     今日失败 {stat.todayFailCount} 次
                 </div>
             </Card>
-            <Card size='small'>
+            <Card size='small' styles={{body: cardBodyStyle}}>
                 <Statistic title='日志占用' value={formatBytes(logSize.bytes)}
-                           styles={{content: logWarn ? warnColor : undefined}}/>
+                           styles={{content: {...valueStyle, ...(logWarn ? warnColor : {})}}}/>
                 <Tooltip title={logWarn ? warnTip : null}>
                     <div style={logWarn ? statWarnStyle : statHintStyle}>
                         {logSize.files} 个日志文件{logSize.warnMb ? ` · 阈值 ${logSize.warnMb} MB` : ''}
                     </div>
                 </Tooltip>
             </Card>
-            <Card size='small'>
+            <Card size='small' styles={{body: cardBodyStyle}}>
                 <Statistic title='调度器'
                            value={scheduler.error ? '异常' : `Quartz ${scheduler.version || '-'}`}
-                           styles={{content: {fontSize: 20, ...(scheduler.error ? warnColor : {})}}}/>
+                           styles={{content: {...valueStyle, fontSize: 16, ...(scheduler.error ? warnColor : {})}}}/>
                 <Tooltip title={schedulerTip}>
                     <div style={scheduler.error ? statWarnStyle : statHintStyle}>
                         {scheduler.error || `${scheduler.standby ? '待机' : (scheduler.started ? '运行中' : '未启动')}`
@@ -447,54 +418,6 @@ export default class JobPage extends React.Component {
                 </Tooltip>
             </Card>
         </div>
-    }
-
-    /**
-     * 「执行情况」弹窗顶部：当前任务的日志占用
-     */
-    renderJobLogSize() {
-        const {jobLogSize} = this.state
-        if (!jobLogSize) {
-            return null
-        }
-        return <div style={{marginBottom: 12, color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65))'}}>
-            该任务日志占用 <b>{formatBytes(jobLogSize.bytes)}</b>（{jobLogSize.files} 个文件）
-        </div>
-    }
-
-    /**
-     * 执行记录弹窗顶部：当前任务的运行中进度（内存态）
-     */
-    renderRunningProgress() {
-        const {selectedRecord, progressMap} = this.state
-        const p = selectedRecord ? progressMap[selectedRecord.id] : null
-        if (!p || p.state !== 'RUNNING') {
-            return null
-        }
-        return <Alert
-            type='info'
-            showIcon
-            style={{marginBottom: 12}}
-            title={<div>
-                <div style={{marginBottom: 6}}>{p.message || '任务运行中'}</div>
-            </div>}
-        />
-    }
-
-    showLog = (record) => {
-        this.setState({logOpen: true, selectedLogRecord: record})
-    }
-
-    /**
-     * 该执行记录对应的日志是否仍在写入：用进度快照里的 logId 精确匹配
-     */
-    isLogRunning = () => {
-        const {selectedLogRecord, progressMap} = this.state
-        if (!selectedLogRecord) {
-            return false
-        }
-        return Object.values(progressMap).some(p =>
-            p.logId === selectedLogRecord.id && p.state === 'RUNNING')
     }
 
     render() {
@@ -564,87 +487,6 @@ export default class JobPage extends React.Component {
                     </div>
                 ))}
             </FormModal>
-
-            <Modal title='定时任务记录'
-                   open={this.state.executeRecordOpen}
-                   onCancel={() => this.setState({executeRecordOpen: false, jobLogSize: null})}
-                   footer={null}
-                   width={1024}
-                   destroyOnHidden
-            >
-                {this.renderJobLogSize()}
-                {this.renderRunningProgress()}
-                <ProTable scrollX={800} columns={[
-                    {
-                        title: '开始时间',
-                        dataIndex: 'beginTime',
-                        width: 170,
-                        render: v => v || '-'
-                    },
-                    {
-                        title: '结束时间',
-                        dataIndex: 'endTime',
-                        width: 170,
-                        render: (v, record) => v || (record.beginTime ? '运行中…' : '-')
-                    },
-                    {
-                        title: '成功/失败',
-                        dataIndex: 'executeCount',
-                        width: 150,
-                        render: (v, record) => {
-                            const count = v == null ? 1 : v
-                            // 旧版本升级上来的记录没有 failCount，用 success 兜底
-                            const failCount = record.failCount == null
-                                ? (record.success === false ? 1 : 0)
-                                : record.failCount
-                            const successCount = Math.max(count - failCount, 0)
-                            if (successCount === 0 && failCount === 0) {
-                                return '-'
-                            }
-                            return <span>
-                                {successCount > 0 &&
-                                    <Tag color='success' style={{marginRight: 4}}>成功 {successCount}</Tag>}
-                                {failCount > 0 &&
-                                    <Tag color='error' style={{marginRight: 0}}>失败 {failCount}</Tag>}
-                            </span>
-                        },
-                    },
-                    {
-                        title: '返回结果',
-                        dataIndex: 'result',
-                        render: v => (v == null || v === '') ? '-' : <span style={{wordBreak: 'break-all'}}>{v}</span>,
-                    },
-                    {
-                        title: '操作',
-                        dataIndex: 'option',
-                        width: 64,
-                        fixed: 'right',
-                        render: (_, record) => <a onClick={() => this.showLog(record)}>日志</a>,
-                    }
-                ]} request={(params) => {
-                    params.jobId = this.state.selectedRecord.id
-                    return HttpClient.get('admin/job/execute-record', params);
-                }}></ProTable>
-
-            </Modal>
-
-            <Modal title='任务日志'
-                   open={this.state.logOpen}
-                   onCancel={() => this.setState({logOpen: false})}
-                   width={1024}
-                   destroyOnHidden
-                   footer={this.state.selectedLogRecord ? (
-                       <a href={UrlUtils.contextPath('/admin/sys/log/raw/job/' + this.state.selectedLogRecord.id)}
-                          target='_blank' rel='noreferrer'>在新窗口打开</a>
-                   ) : null}
-            >
-                {this.state.selectedLogRecord && (
-                    <LogViewer key={this.state.selectedLogRecord.id}
-                               logKey={'job/' + this.state.selectedLogRecord.id}
-                               running={this.isLogRunning()}
-                               height={480}/>
-                )}
-            </Modal>
 
             <Modal title='导入代码中的任务'
                    open={this.state.importOpen}

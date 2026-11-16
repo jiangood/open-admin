@@ -5,7 +5,10 @@ import lombok.Setter;
 
 /**
  * 日志文件增量读取结果。
+ *
+ * @deprecated 框架前端已改为 raw 全文读取，本分块增量协议仅为兼容保留，后续版本可能移除。
  */
+@Deprecated(since = "3.3.1", forRemoval = false)
 @Getter
 @Setter
 public class LogChunk {

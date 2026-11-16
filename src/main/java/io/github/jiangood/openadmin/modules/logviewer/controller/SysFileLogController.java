@@ -40,7 +40,10 @@ public class SysFileLogController {
      * @param key    日志 key，如 {@code job/{logId}}
      * @param offset 起始字节偏移，默认 0
      * @param length 本次最多读取的字节数，默认 256KB
+     * @deprecated 框架前端已改为使用 {@link #raw(String, HttpServletResponse)}（{@code /admin/sys/log/raw/{key}}）读取日志；
+     *             本 offset 分块增量接口仅为兼容保留，后续版本可能移除。
      */
+    @Deprecated(since = "3.3.1", forRemoval = false)
     @GetMapping("{*key}")
     public AjaxResult log(@PathVariable String key,
                           @RequestParam(defaultValue = "0") long offset,

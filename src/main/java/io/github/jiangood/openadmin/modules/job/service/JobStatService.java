@@ -1,8 +1,10 @@
 package io.github.jiangood.openadmin.modules.job.service;
 
 import cn.hutool.core.date.DateUtil;
+import io.github.jiangood.openadmin.modules.job.dto.JobExecStat;
 import io.github.jiangood.openadmin.modules.job.dto.JobStat;
 import io.github.jiangood.openadmin.modules.job.dto.LogSizeStat;
+import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
@@ -64,6 +66,24 @@ public class JobStatService {
         return jobLogSizeService.forJob(jobId);
     }
 
+    /**
+     * 单个任务的执行统计
+     */
+    public JobExecStat jobExecStat(String jobId) {
+        JobExecStat stat = new JobExecStat();
+        stat.setRecordCount(sysJobLogRepository.countBySysJob_Id(jobId));
+        stat.setTotalExecuteCount(nullToZero(sysJobLogRepository.sumExecuteCountByJobId(jobId)));
+        stat.setTotalFailCount(nullToZero(sysJobLogRepository.sumFailCountByJobId(jobId)));
+        sysJobLogRepository.findFirstBySysJob_IdOrderByBeginTimeDesc(jobId).ifPresent(log -> {
+            stat.setLastBeginTime(formatTime(log.getBeginTime()));
+            stat.setLastEndTime(formatTime(log.getEndTime()));
+            stat.setLastSuccess(log.getSuccess());
+            stat.setLastResult(log.getResult());
+            stat.setLastRunTime(log.getJobRunTime() != null ? log.getJobRunTime() : log.getTotalRunTime());
+        });
+        return stat;
+    }
+
     private JobStat.Scheduler schedulerInfo() {
         JobStat.Scheduler info = new JobStat.Scheduler();
         try {
@@ -90,5 +110,12 @@ public class JobStatService {
 
     private static long nullToZero(Long value) {
         return value == null ? 0L : value;
+    }
+
+    private static String formatTime(java.time.LocalDateTime time) {
+        if (time == null) {
+            return null;
+        }
+        return time.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

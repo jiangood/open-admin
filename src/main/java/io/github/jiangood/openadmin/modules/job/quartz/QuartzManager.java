@@ -77,4 +77,23 @@ public class QuartzManager {
             scheduler.scheduleJob(jobDetail, trigger);
         }
     }
+
+    /**
+     * 中断正在执行的任务。
+     * <p>
+     * 仅对实现了 {@link InterruptableJob} 的任务有效（框架任务基类 {@code BaseJob} 已实现），
+     * 且任务需自行响应线程中断。
+     *
+     * @return 是否有正在执行的任务被中断；任务未在运行或未实现可中断能力时返回 false
+     */
+    public boolean interruptJob(SysJob job) throws SchedulerException {
+        if (job == null || job.getName() == null) {
+            return false;
+        }
+        JobKey jobKey = JobKey.jobKey(job.getName());
+        if (!scheduler.checkExists(jobKey)) {
+            return false;
+        }
+        return scheduler.interrupt(jobKey);
+    }
 }

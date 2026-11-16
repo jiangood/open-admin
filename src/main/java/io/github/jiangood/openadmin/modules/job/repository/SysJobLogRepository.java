@@ -43,4 +43,14 @@ public interface SysJobLogRepository extends BaseRepository<SysJobLog, String> {
      */
     @Query("select coalesce(sum(l.failCount), 0) from SysJobLog l where l.beginTime >= :start")
     Long sumFailCountSince(@Param("start") LocalDateTime start);
+
+    long countBySysJob_Id(String jobId);
+
+    @Query("select coalesce(sum(l.executeCount), 0) from SysJobLog l where l.sysJob.id = :jobId")
+    Long sumExecuteCountByJobId(@Param("jobId") String jobId);
+
+    @Query("select coalesce(sum(l.failCount), 0) from SysJobLog l where l.sysJob.id = :jobId")
+    Long sumFailCountByJobId(@Param("jobId") String jobId);
+
+    Optional<SysJobLog> findFirstBySysJob_IdOrderByBeginTimeDesc(String jobId);
 }

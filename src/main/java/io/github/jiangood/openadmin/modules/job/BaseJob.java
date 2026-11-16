@@ -18,7 +18,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
 @DisallowConcurrentExecution
-public abstract class BaseJob implements Job {
+public abstract class BaseJob implements Job, InterruptableJob {
 
     private static final DateTimeFormatter HOURLY_BUCKET = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH");
     private static final DateTimeFormatter DAILY_BUCKET = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -36,6 +36,13 @@ public abstract class BaseJob implements Job {
      * 本次执行的进度 key（SysJob.id），每次触发新建实例，无需考虑并发
      */
     private String currentJobId;
+
+    /**
+     * 当前正在执行任务的线程：取消时通过中断该线程触发协作式取消。
+     * <p>
+     * 任务类为 {@link DisallowConcurrentExecution}，同一任务同一时刻只会有一个执行实例。
+     */
+    private volatile Thread executingThread;
 
 
     @Override
@@ -71,15 +78,24 @@ public abstract class BaseJob implements Job {
         long startMillis = System.currentTimeMillis();
         String result = null;
         boolean success = true;
+        executingThread = Thread.currentThread();
         try {
             result = this.execute(data, logger);
             jobProgressRegistry.success(currentJobId, result);
+        } catch (InterruptedException e) {
+            // 管理端取消：Quartz 中断执行线程后，任务以 InterruptedException 结束
+            Thread.currentThread().interrupt();
+            logger.warn("任务已被取消执行");
+            result = "已取消";
+            success = false;
+            jobProgressRegistry.fail(currentJobId, result);
         } catch (Exception e) {
             logger.error("任务执行异常", e);
             result = "异常" + e.getMessage();
             success = false;
             jobProgressRegistry.fail(currentJobId, result);
         } finally {
+            executingThread = null;
             // 兜底：任务抛出 Error 或提前中断时，避免进度永远停留在「运行中」，并保证执行记录落库
             jobProgressRegistry.failIfRunning(currentJobId, "任务异常终止");
             try {
@@ -144,6 +160,20 @@ public abstract class BaseJob implements Job {
             case HOURLY -> fireTime.format(HOURLY_BUCKET);
             case DAILY -> fireTime.format(DAILY_BUCKET);
         };
+    }
+
+    /**
+     * Quartz 取消执行：中断当前执行线程。
+     * <p>
+     * 任务实现若在长循环/阻塞调用中需要及时响应取消，应主动检查
+     * {@link Thread#isInterrupted()} 或让阻塞调用抛出 {@link InterruptedException}。
+     */
+    @Override
+    public void interrupt() {
+        Thread thread = this.executingThread;
+        if (thread != null) {
+            thread.interrupt();
+        }
     }
 
     public abstract String execute(JobDataMap data, Logger logger) throws Exception;

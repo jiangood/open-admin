@@ -114,6 +114,23 @@ public class SysJobController {
         return AjaxResult.ok().msg("执行一次命令已发送");
     }
 
+    /**
+     * 取消正在执行的任务（Quartz interrupt）。
+     */
+    @Log("定时任务-取消执行")
+    @HasPermission("job:trigger")
+    @PostMapping("interrupt")
+    public AjaxResult interruptJob(@Valid @RequestBody IdReq req) throws SchedulerException {
+        SysJob job = service.findById(req.getId()).orElse(null);
+        Assert.notNull(job, "任务不存在，可能已被删除");
+        OperationLogContext.setDetail("取消任务「" + job.getName() + "」");
+        boolean interrupted = quartzService.interruptJob(job);
+        if (!interrupted) {
+            return AjaxResult.err().msg("当前没有正在执行的任务，或任务不支持中断");
+        }
+        return AjaxResult.ok().msg("已发送取消请求");
+    }
+
 
     @GetMapping("job-class-options")
     public AjaxResult jobClassList() {
@@ -235,12 +252,29 @@ public class SysJobController {
     }
 
     /**
-     * 指定任务的日志文件占用，用于「执行情况」弹窗
+     * 指定任务的日志文件占用
      */
     @HasPermission("job:read")
     @GetMapping("{jobId}/log-size")
     public AjaxResult jobLogSize(@PathVariable String jobId) {
         return AjaxResult.ok().data(statService.logSizeOfJob(jobId));
+    }
+
+    /**
+     * 指定任务的执行统计
+     */
+    @HasPermission("job:read")
+    @GetMapping("{jobId}/stat")
+    public AjaxResult jobExecStat(@PathVariable String jobId) {
+        return AjaxResult.ok().data(statService.jobExecStat(jobId));
+    }
+
+    @HasPermission("job:read")
+    @GetMapping("{id}")
+    public AjaxResult detail(@PathVariable String id) {
+        SysJob job = service.findById(id).orElse(null);
+        Assert.notNull(job, "任务不存在，可能已被删除");
+        return AjaxResult.ok().data(job);
     }
 
 

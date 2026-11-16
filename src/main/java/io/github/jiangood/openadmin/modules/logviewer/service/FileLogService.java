@@ -61,6 +61,10 @@ public class FileLogService {
      * @param offset    起始字节偏移，&lt;=0 表示从头读
      * @param maxLength 本次最多读取的字节数，&lt;=0 取 {@link #DEFAULT_MAX_LENGTH}
      */
+    /**
+     * @deprecated 框架前端已改为 raw 全文读取（{@code /admin/sys/log/raw/{key}}），本分块增量读取能力仅为兼容保留，后续版本可能移除。
+     */
+    @Deprecated(since = "3.3.1", forRemoval = false)
     public LogChunk readChunk(String key, long offset, int maxLength) throws IOException {
         String normalizedKey = normalizeKey(key);
         File file = resolveFile(normalizedKey);
