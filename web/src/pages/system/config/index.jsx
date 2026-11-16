@@ -22,10 +22,10 @@ import {EventBus, GlobalData, HttpClient, Page, Perm} from '../../../framework'
 /** 下拉值统一转字符串；清空时 antd 给 undefined，按空串处理 */
 const selectText = (value) => (value === null || value === undefined ? '' : String(value))
 
-/** 只读参数轮询间隔：启动时间里的「已运行」与连接池用量会随运行变化 */
+/** 只读参数轮询间隔：运行时长与连接池用量会随运行变化 */
 const SYSTEM_POLL_INTERVAL = 15000
 
-/** 旧后端或意外值一律归入启动期配置；version 为版本信息卡片 */
+/** 旧后端或意外值一律归入启动期配置；version 并入运行时状态卡片 */
 const groupOf = (item) => (item.group === 'runtime' ? 'runtime' : item.group === 'version' ? 'version' : 'startup')
 
 /**
@@ -79,7 +79,7 @@ export default class SysConfigPage extends React.Component {
         }
     }
 
-    /** 只刷新只读参数（启动时间 / 连接池），不触碰可编辑表单；轮询失败保持现状 */
+    /** 只刷新只读参数（运行时长 / 连接池），不触碰可编辑表单；轮询失败保持现状 */
     loadSystem = async () => {
         try {
             const rs = await HttpClient.get('admin/sys-config/system', null, {toastError: false})
@@ -316,10 +316,11 @@ export default class SysConfigPage extends React.Component {
     /**
      * 只读参数固定在页面右侧，占约三分之一宽度，长路径 / JDBC URL 不至于挤成一列；窄屏时自然堆叠到表单下方。
      *
-     * 运行时状态、启动期配置与版本信息分成三张卡片，避免性质不同的值混在一张卡里；
-     * 每项按「标签 / 配置键（右对齐、可省略）/ 值」排布，而不是 antd Descriptions：
-     * 垂直 Descriptions 的标签与值同为正文级字号，技术配置键夹在中间会让人分不清哪行是值。
-     * 运行时状态（启动时间 / 连接池）与版本信息不是 yml 配置项，只显示标签和值。
+     * 运行时状态、启动期配置分成两张卡片，避免性质不同的值混在一张卡里；
+     * 版本信息只有两项且不含配置键，压成一行小字放在运行时状态卡片底部，不单独占一张卡。
+     * 两张卡片的每一项都按「配置项（含配置键）在左、值右对齐」单行排布，长值只在值区域换行，
+     * 而不是 antd Descriptions：垂直 Descriptions 的标签与值同为正文级字号，技术配置键夹在中间会让人分不清哪行是值。
+     * 运行时状态（运行时长 / 连接池）与版本信息不是 yml 配置项，只显示标签和值。
      */
     renderSystemCards = () => {
         const {systemParams} = this.state
@@ -329,48 +330,63 @@ export default class SysConfigPage extends React.Component {
         const runtime = systemParams.filter(item => groupOf(item) === 'runtime')
         const version = systemParams.filter(item => groupOf(item) === 'version')
         const startup = systemParams.filter(item => groupOf(item) !== 'runtime' && groupOf(item) !== 'version')
+        const versionText = version.map(item => `${item.label} ${item.value || '-'}`).join(' · ')
 
         return <Col xs={24} xl={8}>
             <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
-                {runtime.length > 0 && (
+                {(runtime.length > 0 || versionText) && (
                     <Card
                         title="运行时状态"
                         extra={<Typography.Text type="secondary" style={{fontSize: 12}}>
                             每 {SYSTEM_POLL_INTERVAL / 1000} 秒刷新
                         </Typography.Text>}
                     >
-                        {runtime.map((item, index) => this.renderSystemRow(item, index))}
+                        {runtime.map(item => this.renderSystemRow(item))}
+                        {versionText && (
+                            <div style={{paddingTop: 2}}>
+                                <Typography.Text type="secondary" style={{fontSize: 12, overflowWrap: 'anywhere'}}>
+                                    {versionText}
+                                </Typography.Text>
+                            </div>
+                        )}
                     </Card>
                 )}
                 {startup.length > 0 && (
                     <Card title="启动期配置" extra={<Tag style={{marginInlineEnd: 0}}>需重启</Tag>}>
-                        {startup.map((item, index) => this.renderSystemRow(item, index))}
-                    </Card>
-                )}
-                {version.length > 0 && (
-                    <Card title="版本信息">
-                        {version.map((item, index) => this.renderSystemRow(item, index))}
+                        {startup.map(item => this.renderSystemRow(item))}
                     </Card>
                 )}
             </div>
         </Col>
     }
 
-    renderSystemRow = (item, index) => {
-        // 只有启动期配置是 yml 里能查到的配置项，其余（启动时间 / 连接池 / 版本信息）不显示配置键
+    /**
+     * 每项一行：配置项在左、值右对齐；启动期配置的配置键放在标签下方第二行，
+     * 左侧只占一个配置键的宽度，把更多横向空间留给值。长值只在右侧值区域内换行。
+     */
+    renderSystemRow = (item) => {
+        // 只有启动期配置是 yml 里能查到的配置项，其余（运行时长 / 连接池 / 版本信息）不显示配置键
         const showKey = groupOf(item) === 'startup'
         return <div key={item.key} style={{
-            padding: '8px 0',
-            borderTop: index === 0 ? undefined : '1px solid var(--oa-color-border)',
+            display: 'flex',
+            alignItems: showKey ? 'flex-start' : 'baseline',
+            gap: 12,
+            padding: '4px 0',
         }}>
-            <div style={{display: 'flex', alignItems: 'baseline', gap: 8}}>
-                <Typography.Text style={{fontSize: 12, color: 'var(--oa-color-text-secondary)'}}>
+            <div style={{flex: 'none', maxWidth: '55%', minWidth: 0}}>
+                <Typography.Text style={{
+                    display: 'block',
+                    fontSize: 12,
+                    color: 'var(--oa-color-text-secondary)',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                }}>
                     {item.label}
                 </Typography.Text>
                 {showKey && (
                     <Typography.Text title={item.key} style={{
-                        minWidth: 0,
-                        marginInlineStart: 'auto',
+                        display: 'block',
                         fontSize: 11,
                         color: 'var(--oa-color-text-tertiary)',
                         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
@@ -382,15 +398,23 @@ export default class SysConfigPage extends React.Component {
                     </Typography.Text>
                 )}
             </div>
-            <Typography.Text style={{
-                display: 'block',
-                marginTop: 2,
-                fontSize: 13,
-                overflowWrap: 'anywhere',
-            }}>
-                {item.value || '-'}
-            </Typography.Text>
+            <div style={{flex: '1 1 auto', minWidth: 0, textAlign: 'right'}}>
+                {this.renderSystemValue(item)}
+            </div>
         </div>
+    }
+
+    /** 运行时长单独用 Tag 呈现，和普通配置值区分开 */
+    renderSystemValue = (item) => {
+        if (item.key === 'sys.start-time') {
+            return <Tag color="processing" style={{marginInlineEnd: 0}}>{item.value || '-'}</Tag>
+        }
+        return <Typography.Text style={{
+            fontSize: 13,
+            overflowWrap: 'anywhere',
+        }}>
+            {item.value || '-'}
+        </Typography.Text>
     }
 
     render() {

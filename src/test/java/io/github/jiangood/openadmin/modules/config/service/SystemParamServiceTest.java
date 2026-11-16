@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -40,8 +41,11 @@ class SystemParamServiceTest {
         List<SystemParamView> items = new SystemParamService(properties, environment, provider(null)).items();
 
         assertEquals("sys.start-time", items.get(0).key());
-        assertTrue(valueOf(items, "sys.start-time")
-                .matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}（已运行 .+）"));
+        assertEquals("运行时长", items.get(0).label());
+        // 只显示运行时长，不再拼接启动时刻
+        String uptime = valueOf(items, "sys.start-time");
+        assertFalse(uptime.isBlank());
+        assertFalse(uptime.contains("-"));
         assertEquals("3", valueOf(items, "sys.maximum-sessions"));
         assertEquals("踢出旧会话", valueOf(items, "sys.max-sessions-prevents-login"));
         assertEquals("120 分钟", valueOf(items, "sys.session-idle-time"));

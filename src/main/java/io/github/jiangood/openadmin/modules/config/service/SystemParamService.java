@@ -14,10 +14,6 @@ import org.springframework.stereotype.Service;
 import javax.sql.DataSource;
 import java.lang.management.ManagementFactory;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -25,17 +21,15 @@ import java.util.regex.Pattern;
 /**
  * 只读系统参数。
  *
- * <p>展示启动期配置（application.yml / 代码默认值）的当前生效值、运行时状态（启动时间、数据库连接与连接池用量）
- * 以及框架与应用的版本信息，便于管理员在「系统管理 → 系统参数」页面确认部署状态、定位连接不足等问题；
+ * <p>展示启动期配置（application.yml / 代码默认值）的当前生效值、运行时状态（运行时长、数据库连接与连接池用量）
+ * 以及框架与系统（业务项目）的版本信息，便于管理员在「系统管理 → 系统参数」页面确认部署状态、定位连接不足等问题；
  * 这些值不能在页面修改。</p>
  */
 @Service
 @RequiredArgsConstructor
 public class SystemParamService {
 
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-    /** 进程启动时间：取 JVM 启动时刻，重启前后对比即可确认是否已重新部署 */
+    /** 进程启动时间：取 JVM 启动时刻，用于计算运行时长；重启后归零即可确认已重新部署 */
     private static final long START_TIME = ManagementFactory.getRuntimeMXBean().getStartTime();
 
     /** JDBC URL 里的密码：mysql/postgres 等 `//user:pass@host` 形式 */
@@ -57,7 +51,7 @@ public class SystemParamService {
         DataSource dataSource = dataSourceProvider.getIfUnique();
         List<SystemParamView> items = new ArrayList<>();
         // 运行时状态排在前面：这两项会随服务运行变化，页面定时刷新
-        add(items, SystemParamView.GROUP_RUNTIME, "sys.start-time", "系统启动时间", startTime());
+        add(items, SystemParamView.GROUP_RUNTIME, "sys.start-time", "运行时长", uptime());
         String pool = poolUsage(dataSource);
         if (pool != null) {
             add(items, SystemParamView.GROUP_RUNTIME, "spring.datasource.hikari", "连接池", pool);
@@ -83,23 +77,19 @@ public class SystemParamService {
                 blankToDash(systemProperties.getDataFileDir()));
         add(items, SystemParamView.GROUP_STARTUP, "logging.file.path", "日志目录",
                 blankToDash(environment.getProperty("logging.file.path")));
-        // 版本信息：打包运行附带构建时间，开发模式只有版本号
+        // 版本信息：系统版本在前（部署方最关心自己的项目），打包运行附带构建时间，开发模式只有版本号
+        add(items, SystemParamView.GROUP_VERSION, "sys.app-version", "系统版本",
+                withBuildTime(VersionTool.getApplicationVersion(), VersionTool.getApplicationBuildTime()));
         add(items, SystemParamView.GROUP_VERSION, "sys.framework-version", "框架版本",
                 withBuildTime(VersionTool.getFrameworkVersion(), VersionTool.getFrameworkBuildTime()));
-        add(items, SystemParamView.GROUP_VERSION, "sys.app-version", "应用版本",
-                withBuildTime(VersionTool.getApplicationVersion(), VersionTool.getApplicationBuildTime()));
         return items;
     }
 
-    /** 启动时间附上已运行时长，方便判断服务是否需要重启 */
-    private static String startTime() {
-        LocalDateTime start = LocalDateTime.ofInstant(Instant.ofEpochMilli(START_TIME), ZoneId.systemDefault());
+    /** JVM 启动至今的运行时长，重启后归零，便于确认服务是否已重新部署 */
+    private static String uptime() {
         Duration uptime = Duration.ofMillis(Math.max(0, System.currentTimeMillis() - START_TIME));
         String text = DurationTool.format(uptime);
-        if (text == null || text.isBlank()) {
-            text = "不到 1 秒";
-        }
-        return DATE_TIME.format(start) + "（已运行 " + text + "）";
+        return text == null || text.isBlank() ? "不到 1 秒" : text;
     }
 
     /** 优先取连接池里的实际 URL（已展开占位符），拿不到再回退到配置项；密码类参数一律脱敏 */
