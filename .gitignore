@@ -40,3 +40,6 @@ target/
 # Python
 __pycache__/
 *.pyc
+
+# 本地账号密码等敏感信息
+/DEV_CREDENTIALS.md
