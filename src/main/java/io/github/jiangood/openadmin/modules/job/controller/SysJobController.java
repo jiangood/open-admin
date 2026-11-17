@@ -19,6 +19,8 @@ import io.github.jiangood.openadmin.modules.job.dto.request.JobImportReq;
 import io.github.jiangood.openadmin.modules.job.dto.request.JobReq;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
+import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
+import io.github.jiangood.openadmin.modules.job.progress.JobRunState;
 import io.github.jiangood.openadmin.modules.job.quartz.JobRegistrationManager;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.service.JobStatService;
@@ -108,6 +110,12 @@ public class SysJobController {
     public AjaxResult triggerJob(@Valid @RequestBody IdReq req) throws SchedulerException, ClassNotFoundException {
         SysJob job = service.findById(req.getId()).orElse(null);
         Assert.notNull(job, "任务不存在，可能已被删除");
+        // 任务禁止并发执行（@DisallowConcurrentExecution），运行中重复触发只会被 Quartz 静默排队，
+        // 这里显式拒绝，避免「点了没反应」的困惑
+        JobProgress progress = service.getProgress(req.getId());
+        if (progress != null && progress.getState() == JobRunState.RUNNING) {
+            return AjaxResult.err().msg("任务正在运行中，请等待本次执行完成或先取消当前执行");
+        }
         OperationLogContext.setDetail("手动执行任务「" + job.getName() + "」");
         quartzService.triggerJob(job);
 

@@ -271,7 +271,7 @@ export default class JobPage extends React.Component {
 
         {
             title: '执行类',
-            dataIndex: 'jobClassName',
+            dataIndex: 'jobClass',
             render: v => v
                 ? <span style={{
                     fontSize: 12,

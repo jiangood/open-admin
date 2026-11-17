@@ -377,7 +377,7 @@ export default class JobDetailPage extends React.Component {
                     <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
                         {canTrigger && (
                             <Button type="primary" icon={<CaretRightOutlined/>}
-                                    loading={triggering} onClick={this.handleTrigger}>
+                                    loading={triggering} disabled={running} onClick={this.handleTrigger}>
                                 执行一次
                             </Button>
                         )}
@@ -386,7 +386,7 @@ export default class JobDetailPage extends React.Component {
                 </div>
                 <Descriptions size="small" column={2}>
                     <Descriptions.Item label="执行类" span={2}>
-                        <span style={{wordBreak: 'break-all'}}>{job.jobClassName || job.jobClass || '-'}</span>
+                        <span style={{wordBreak: 'break-all'}}>{job.jobClass || job.jobClassName || '-'}</span>
                     </Descriptions.Item>
                     <Descriptions.Item label="cron 表达式">
                         <span style={{fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>{job.cron || '-'}</span>
