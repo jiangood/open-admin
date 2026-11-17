@@ -3,7 +3,6 @@ import {
     Alert,
     Button,
     Card,
-    Divider,
     Form,
     Input,
     Modal,
@@ -470,7 +469,6 @@ export default class JobPage extends React.Component {
                     <FieldDictSelect typeCode='jobLogAggregation'/>
                 </Form.Item>
 
-                {this.state.paramList?.length > 0 && <Divider>任务参数</Divider>}
                 {this.state.paramList?.map(p => (
                     <Form.Item label={p.label}
                                name={['jobData', p.name]}
