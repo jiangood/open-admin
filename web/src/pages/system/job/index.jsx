@@ -460,13 +460,13 @@ export default class JobPage extends React.Component {
                     <CronEditor presets={cronPresets} placeholder='如 0 */5 * * * ?'/>
                 </Form.Item>
 
-                <Form.Item label='启用' name='enabled' valuePropName='checked' rules={[{required: true}]}>
-                    <Switch/>
-                </Form.Item>
-
                 <Form.Item label='执行记录方式' name='logAggregation' initialValue='PER_RUN'
                            help='控制执行记录与日志文件的粒度。高频任务建议选择「每天一份记录」：一天只保留一条执行记录，日志文件按天合并'>
                     <FieldDictSelect typeCode='jobLogAggregation'/>
+                </Form.Item>
+
+                <Form.Item label='启用' name='enabled' valuePropName='checked' rules={[{required: true}]}>
+                    <Switch/>
                 </Form.Item>
 
                 {this.state.paramList?.map(p => (
