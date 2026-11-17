@@ -14,11 +14,11 @@ import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeReposit
 import io.github.jiangood.openadmin.modules.system.repository.SysOrgRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysRoleRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysUserRepository;
+import io.github.jiangood.openadmin.util.PasswordTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,8 +35,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SeedDataInitializer {
 
-    /** 管理员默认密码：Open@1234 */
-    private static final String ADMIN_PASSWORD = "$2a$10$U9cSuuy4T5INCIf9VYspYun4wZsZDUGbfkLCt8/Gd70zjaVQUB0vG";
+    /** 旧版内置管理员默认密码（已废弃）。框架开源后为公开信息，仅用于检测存量部署，不再作为种子密码写入。 */
+    private static final String LEGACY_DEFAULT_ADMIN_PASSWORD = "Open@1234";
 
     /** 默认单位（机构树根节点） */
     private static final String SEED_UNIT_ID = "1";
@@ -95,6 +95,7 @@ public class SeedDataInitializer {
     private void seedAdmin() {
         SysRole role = roleRepository.findById("1").orElseGet(this::createAdminRole);
         if (userRepository.existsById("1")) {
+            forceLegacyDefaultAdminPasswordChange();
             return;
         }
         SysUser user = new SysUser("1");
@@ -103,12 +104,30 @@ public class SeedDataInitializer {
         // 用户归属到部门节点，单位取其上级单位（与 SysUserService#resolveUnitId 的推导规则一致）
         user.setUnitId(SEED_UNIT_ID);
         user.setOrgId(SEED_DEPT_ID);
-        user.setPassword(ADMIN_PASSWORD);
+        // 初始密码随机生成并打印到启动日志，避免开源框架的固定默认密码被业务项目沿用；
+        // lastPasswordChangeTime 置空使前端在首次登录后强制修改密码（SysCommonController#checkLogin 的 needUpdatePwd）
+        String initPassword = PasswordTool.random();
+        user.setPassword(PasswordTool.encode(initPassword));
         user.setDataPermType(DataPermType.ALL);
         user.setEnabled(true);
-        user.setLastPasswordChangeTime(LocalDateTime.now());
+        user.setLastPasswordChangeTime(null);
         user.setRoles(new HashSet<>(Set.of(role)));
         userRepository.save(user);
+        log.warn("首次启动初始化管理员账号：admin，初始密码为 {}（随机生成，请妥善保存，首次登录后必须修改密码）", initPassword);
+    }
+
+    /**
+     * 存量升级自愈：admin 仍在使用已废弃的旧版内置默认密码时，将其标记为「须强制改密」，
+     * 下次登录由前端引导修改。密码已改过的项目校验不通过，不受影响。
+     */
+    private void forceLegacyDefaultAdminPasswordChange() {
+        userRepository.findById("1")
+                .filter(user -> PasswordTool.getEncoder().matches(LEGACY_DEFAULT_ADMIN_PASSWORD, user.getPassword()))
+                .ifPresent(user -> {
+                    user.setLastPasswordChangeTime(null);
+                    userRepository.save(user);
+                    log.warn("检测到管理员仍使用旧版内置默认密码，已要求下次登录时修改密码");
+                });
     }
 
     private SysRole createAdminRole() {

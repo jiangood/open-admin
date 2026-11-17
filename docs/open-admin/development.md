@@ -250,10 +250,8 @@ public void deleteById(String id) {
 | 目录 | 路由前缀 | 是否需要登录 | 是否需要 AdminLayout |
 |------|---------|-------------|---------------------|
 | `pages/` | `/` | ✅ 是 | ✅ 是 |
-| `pages/public/` | `/public/` | ❌ 否 | ❌ 否 |
-| `pages/standalone/` | `/standalone/` | ✅ 是 | ❌ 否 |
 
-`public` 页免登录、无后台布局（如公开文章页）；`standalone` 页需登录但无后台布局（如强制改密页）。目录只提供默认值，页面可通过 `pageMeta` 显式覆盖：
+目录只提供默认值，页面可通过 `pageMeta` 显式覆盖。免登录无后台布局的页面（如公开文章页）应声明 `requiresAuth: false` 且 `layout: 'blank'`；需登录但不使用后台布局的页面（如强制改密页）应声明 `requiresAuth: true` 且 `layout: 'blank'`：
 
 ```jsx
 // 页面文件（可选导出）
@@ -266,4 +264,4 @@ export const pageMeta = {
 
 非菜单的详情页、公共页推荐声明 `pageMeta.title`；页面标题为静态元信息，不支持运行时动态回填。`PageUtils.open(path, label)` 的 `label` 参数与 URL 中的 `_label` 已弃用且不再生效，传入时控制台会提示。
 
-框架内置登录页为 `/login`（页面文件 `pages/login.jsx`），通过 `pageMeta` 声明为公开页；业务项目覆盖 `pages/login.jsx` 时即使不写 `pageMeta`，插件也会按 `/login` 默认公开页处理。`/public/login` 仅保留为旧地址兼容跳转，新代码请直接使用 `/login`。
+框架内置登录页为 `/login`（页面文件 `pages/login.jsx`），通过 `pageMeta` 声明为公开页；业务项目覆盖 `pages/login.jsx` 时即使不写 `pageMeta`，插件也会按 `/login` 默认公开页处理。登录相关跳转请直接使用 `/login`（或 `LOGIN_PATH`）。

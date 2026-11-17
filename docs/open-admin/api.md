@@ -356,11 +356,9 @@ TS 页面可 `import type {PageMeta} from '@jiangood/open-admin'` 并标注 `pag
 
 | 页面位置 | `requiresAuth` | `layout` |
 |---|---|---|
-| `pages/public/**` | `false` | `blank` |
-| `pages/standalone/**` | `true` | `blank` |
 | 其他 `pages/**` | `true` | `admin` |
 
-`/login`（`pages/login.jsx`，登录页）默认按 `requiresAuth: false` + `layout: 'blank'` 处理，业务项目覆盖登录页时无需重复声明。`requiresAuth: false` 与 `layout: 'admin'` 是非法组合，会自动修正为 `blank` 并输出 `console.warn`。路由表条目为 `{path, component, meta}`，`matchRoute(pathname)` 的返回值包含 `meta`。
+`/login`（`pages/login.jsx`，登录页）默认按 `requiresAuth: false` + `layout: 'blank'` 处理，业务项目覆盖登录页时无需重复声明。免登录页面应显式声明 `requiresAuth: false` 且 `layout: 'blank'`；需登录但不使用后台布局的页面应显式声明 `layout: 'blank'`（如 `pages/force-update-pwd.jsx`）。`requiresAuth: false` 与 `layout: 'admin'` 是非法组合，会自动修正为 `blank` 并输出 `console.warn`。路由表条目为 `{path, component, meta}`，`matchRoute(pathname)` 的返回值包含 `meta`。
 
 页面标题优先级（同时用于页签和浏览器标题）：
 
@@ -699,7 +697,7 @@ location /file/public/ {
 
 `DateUtils.toDate` 统一解析后端时间字段：`Date`、epoch 秒、epoch 毫秒、ISO 串、`YYYY-MM-DD HH:mm:ss`、纯日期（按本地零点），无效或空值返回 `null`；`formatDate*` 同样接受这些入参，解析失败返回空串。后端时间字段可能是 epoch 秒、epoch 毫秒或 ISO 串，业务侧请直接用 `toDate`，不要手写 `v * 1000` 或 `new Date(v)`。`friendlyTime(value, options?)` 的选项：`showSeconds`（默认 `true`，`false` 时不足 1 分钟显示「刚刚」）、`daysOnly`（默认 `false`，`true` 时不换算成「周」）、`future`（默认 `'after'`，`'clamp'` 时未来时间显示「刚刚」）、`empty`（无效值占位，默认 `undefined`）。
 
-`EventBus.on` / `once` 返回取消订阅函数；`on` 支持传 `ctx`（this）。`PageUtils.open(path)` 用于跳转到页面，`PageUtils.currentTitle()` 返回当前页面标题（不含系统标题，未设置时返回 `undefined`）；页面标题请由目标页面通过 `pageMeta.title` 提供。`PageUtils.open(path, label)` 的 `label` 参数与 URL 中的 `_label` 已弃用且不再生效，传入时控制台会输出一次弃用提示。登录相关跳转请使用 `LOGIN_PATH`，不要硬编码 `/public/login`。
+`EventBus.on` / `once` 返回取消订阅函数；`on` 支持传 `ctx`（this）。`PageUtils.open(path)` 用于跳转到页面，`PageUtils.currentTitle()` 返回当前页面标题（不含系统标题，未设置时返回 `undefined`）；页面标题请由目标页面通过 `pageMeta.title` 提供。`PageUtils.open(path, label)` 的 `label` 参数与 URL 中的 `_label` 已弃用且不再生效，传入时控制台会输出一次弃用提示。登录相关跳转请使用 `LOGIN_PATH`（`/login`）。
 
 框架内置事件：登录失效时 `HttpClient` 广播 `loginExpired`（载荷 `{message, reason}`，`reason` 为 `CONCURRENT_LOGIN` 表示同一账号并发登录被顶下线），`Layouts` 已内置监听并弹出提示，业务无需处理；提示文案由 `sys.login-expired-message` / `sys.concurrent-login-message` 配置（见 [config.md](config.md)）。
 

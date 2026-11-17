@@ -47,11 +47,8 @@ function fileToRoutePath(file) {
 
 /** 按页面目录推断 pageMeta 默认值 */
 function defaultPageMeta(relPath) {
-    const top = relPath.split('/')[0];
     // /login 是框架约定的登录页路径：业务项目覆盖该页面时无需再声明 pageMeta
     if (relPath === 'login' || relPath === 'login/index') return {requiresAuth: false, layout: 'blank'};
-    if (top === 'public') return {requiresAuth: false, layout: 'blank'};
-    if (top === 'standalone') return {requiresAuth: true, layout: 'blank'};
     return {requiresAuth: true, layout: 'admin'};
 }
 

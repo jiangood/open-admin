@@ -111,16 +111,14 @@ export class Layouts extends React.Component<LayoutsProps> {
     getPageMeta(pathname: string): {requiresAuth: boolean; layout: PageLayout} {
         const meta = matchRoute(pathname)?.meta;
         const isLogin = pathname === LOGIN_PATH;
-        const inPublicDir = pathname.startsWith('/public/');
-        const inStandaloneDir = pathname.startsWith('/standalone/');
-        const requiresAuth = meta?.requiresAuth ?? (isLogin ? false : !inPublicDir);
+        const requiresAuth = meta?.requiresAuth ?? !isLogin;
         const layout = requiresAuth
-            ? (meta?.layout ?? (inStandaloneDir || isLogin ? 'blank' : 'admin'))
+            ? (meta?.layout ?? (isLogin ? 'blank' : 'admin'))
             : 'blank';
         return {requiresAuth, layout};
     }
 
-    /** 公共/standalone 页用 pageMeta.title；admin 页由 TabLayout / SinglePageLayout 设置 */
+    /** blank 布局页用 pageMeta.title；admin 页由 TabLayout / SinglePageLayout 设置 */
     syncDocumentTitle() {
         const {pathname, search} = this.state.location;
         if (search && new URLSearchParams(search).has('_label')) {
@@ -163,7 +161,7 @@ export class Layouts extends React.Component<LayoutsProps> {
 
             if (data.data.needUpdatePwd) {
                 this.setState({loginChecked: true});
-                history.push('/standalone/force-update-pwd');
+                history.push('/force-update-pwd');
                 return;
             }
 
@@ -240,7 +238,7 @@ export class Layouts extends React.Component<LayoutsProps> {
         const {pathname, search} = location;
         const ready = siteInfoLoaded && loginChecked;
         const {requiresAuth, layout} = this.getPageMeta(pathname);
-        // 公共页直接渲染；standalone 页需登录后渲染；admin 页交给后台布局
+        // 免登录页直接渲染；需登录的 blank 布局页登录校验后渲染；admin 页交给后台布局
         const showPageFrame = !requiresAuth || (layout === 'blank' && ready);
 
         return (

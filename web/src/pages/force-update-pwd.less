@@ -1,0 +1,242 @@
+.force-pwd-page {
+  background-color: #16233f;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: bottom;
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
+
+  .force-pwd-content {
+    --login-text: rgba(255, 255, 255, 0.94);
+    --login-text-dim: rgba(255, 255, 255, 0.6);
+    --login-hairline: rgba(255, 255, 255, 0.16);
+    --login-field-bg: rgba(255, 255, 255, 0.08);
+    --login-radius: calc(var(--oa-border-radius, 6px) + 10px);
+    --login-field-radius: calc(var(--oa-border-radius, 6px) + 2px);
+
+    box-sizing: border-box;
+    width: 420px;
+    max-width: 100%;
+    padding: 40px 36px 32px;
+
+    background-color: color-mix(in srgb, var(--oa-sider-bg, #0b1220) 55%, transparent);
+    background-image: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--primary-color, #1677ff) 16%, transparent) 0%,
+      transparent 140px
+    );
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid color-mix(in srgb, var(--primary-color, #1677ff) 26%, var(--login-hairline));
+    border-radius: var(--login-radius);
+    box-shadow: 0 24px 64px -20px rgba(0, 0, 0, 0.6),
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    animation: force-pwd-panel-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    .ant-form-item-label > label {
+      color: var(--login-text);
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    }
+
+    .ant-form-item-extra {
+      color: var(--login-text-dim);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+  }
+}
+
+@keyframes force-pwd-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .force-pwd-page .force-pwd-content {
+    background-color: color-mix(in srgb, var(--oa-sider-bg, #0b1220) 92%, transparent);
+  }
+}
+
+.force-pwd-brand {
+  margin-bottom: 22px;
+  text-align: center;
+
+  .force-pwd-brand-logo {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: var(--login-radius);
+    background: color-mix(in srgb, var(--primary-color, #1677ff) 16%, rgba(255, 255, 255, 0.06));
+    border: 1px solid var(--login-hairline);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+    img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .anticon {
+      color: var(--login-text);
+      font-size: 26px;
+    }
+  }
+
+  .force-pwd-site-title {
+    margin: 0 0 6px;
+    color: var(--login-text-dim);
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--login-text);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    line-height: 1.4;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+  }
+
+  .force-pwd-desc {
+    margin: 12px 0 0;
+    color: var(--login-text-dim);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+.force-pwd-form {
+  width: 100%;
+  margin-top: 8px;
+
+  .ant-form-item {
+    margin-bottom: 18px;
+  }
+
+  .ant-input-affix-wrapper {
+    height: 46px;
+    padding: 0 14px;
+    border-radius: var(--login-field-radius);
+    color: var(--login-text);
+    background-color: var(--login-field-bg);
+    border: 1px solid var(--login-hairline);
+    box-shadow: none;
+    transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.28);
+    }
+
+    &:focus-within,
+    &.ant-input-affix-wrapper-focused {
+      background-color: rgba(255, 255, 255, 0.14);
+      border-color: var(--primary-color, #1677ff);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color, #1677ff) 28%, transparent);
+    }
+
+    .ant-input-prefix {
+      margin-inline-end: 10px;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 16px;
+    }
+
+    .ant-input-suffix {
+      color: rgba(255, 255, 255, 0.55);
+
+      .ant-input-password-icon {
+        color: inherit;
+
+        &:hover {
+          color: var(--login-text);
+        }
+      }
+    }
+  }
+
+  .force-pwd-page & .ant-input {
+    color: var(--login-text);
+    font-size: 15px;
+    background: transparent;
+
+    &::placeholder {
+      color: var(--login-text-dim);
+    }
+  }
+
+  .ant-form-item-explain-error {
+    margin-top: 4px;
+    color: color-mix(in srgb, var(--oa-color-error, #ff4d4f) 55%, #fff);
+    font-size: 13px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  }
+
+  .force-pwd-submit {
+    margin-top: 28px;
+    margin-bottom: 0;
+
+    .ant-btn-primary {
+      height: 46px;
+      border: none;
+      border-radius: var(--login-field-radius);
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      text-indent: 0.3em;
+      background: linear-gradient(
+        135deg,
+        var(--primary-color, #1677ff),
+        var(--primary-color-hover, #4096ff)
+      );
+      box-shadow: 0 12px 26px -12px color-mix(in srgb, var(--primary-color, #1677ff) 85%, transparent);
+      transition: filter 0.2s, box-shadow 0.2s, transform 0.16s;
+
+      &:hover:not(:disabled) {
+        filter: brightness(1.07);
+        box-shadow: 0 16px 32px -12px color-mix(in srgb, var(--primary-color, #1677ff) 95%, transparent);
+      }
+
+      &:active:not(:disabled) {
+        transform: translateY(1px);
+        filter: brightness(0.98);
+      }
+    }
+  }
+}
+
+.force-pwd-page .force-pwd-form .ant-form-item-has-error {
+  .ant-input-affix-wrapper,
+  .ant-input-affix-wrapper:hover,
+  .ant-input-affix-wrapper:focus,
+  .ant-input-affix-wrapper:focus-within {
+    background-color: color-mix(in srgb, var(--oa-color-error, #ff4d4f) 12%, transparent);
+    border-color: color-mix(in srgb, var(--oa-color-error, #ff4d4f) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--oa-color-error, #ff4d4f) 24%, transparent);
+  }
+
+  .ant-input {
+    background-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .force-pwd-page .force-pwd-content {
+    animation: none;
+  }
+}

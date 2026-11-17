@@ -168,6 +168,8 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 
 **种子数据如何管理？** 框架内置的种子数据（默认字典类型、机构、管理员用户/角色、默认文章、清理任务）在首次启动、JPA 建表完成后由 `SeedDataInitializer`（`framework/config/SeedDataInitializer.java`）写入：每条记录先按 id 判断是否已存在，存在则跳过，不覆盖后续修改，因此可重复启动、幂等执行，且不依赖数据库方言（H2 / MySQL 均可）。
 
+**管理员初始密码是什么？** 首次启动创建 `admin` 时，初始密码随机生成并打印在启动日志中（`WARN` 级别，含「初始密码为」字样，Docker 部署用 `docker logs` 查看），且 `lastPasswordChangeTime` 置空——首次登录成功即被引导强制修改密码（与「管理员重置密码」同一机制）。框架不提供固定默认密码，也不提供配置项固定初始密码。若存量项目升级后启动日志出现「检测到管理员仍使用旧版内置默认密码」，说明 admin 密码从未改过，下次登录须修改。
+
 **业务项目如何添加自己的种子数据？** 实现 `StartupHook` 并注册为 Spring Bean，在 `afterSeedDataInitialize()` 中写入业务数据（框架会先写内置种子数据，再调用该方法）。建议同样采用「按业务键判断是否已存在，存在则跳过」的幂等写法。业务数据通过 JPA Repository 保存即可，无需 Flyway 等版本化迁移工具。
 
 > 框架不再使用 Flyway：早期内置的 `db/migration/*.sql` 已移除，历史库表的兼容迁移由业务项目按需自行处理。

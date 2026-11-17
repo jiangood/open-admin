@@ -50,9 +50,7 @@ npm run dev                    # 默认 http://localhost:7777
 
 ### 默认登录
 
-| 账号 | 密码 |
-|------|------|
-| admin | Open@1234 |
+首次启动会自动创建管理员账号 `admin`，初始密码**随机生成**并打印在启动日志中（`WARN` 级别，Docker 部署可用 `docker logs` 查看），登录后须修改密码。
 
 ### Docker 一键部署
 
@@ -100,7 +98,7 @@ createRoot(document.getElementById('root')).render(
 - 页面组件可实现 `onShow()` 方法，在首次加载或 Tab 切换激活时自动调用（详见[页面生命周期](docs/open-admin/api.md#页面生命周期)）
 - 页面文件可选导出 `pageMeta`（`title` / `requiresAuth` / `layout`），用于覆盖页面标题与页面类型（详见 [pageMeta](docs/open-admin/api.md#页面元信息-pagemeta)）
 
-**目录约定**（无需配置，自动识别）：`src/pages/` 下按目录区分页面类型——`pages/` 后台页（需登录 + 后台布局）、`pages/public/` 免登录无布局（如公开文章页）、`pages/standalone/` 需登录无布局（如强制改密页）。框架内置登录页为 `/login`（`pages/login.jsx`，属于公开页面例外），详见 [development.md](docs/open-admin/development.md#页面目录约定)。
+**目录约定**（无需配置，自动识别）：`src/pages/` 下的页面默认需登录且使用后台布局。框架内置登录页为 `/login`（`pages/login.jsx`，公开页面例外）。免登录页面需显式声明 `pageMeta: { requiresAuth: false, layout: 'blank' }`，需登录但不使用后台布局的页面需声明 `pageMeta: { requiresAuth: true, layout: 'blank' }`，详见 [development.md](docs/open-admin/development.md#页面目录约定)。
 
 
 ## 文档

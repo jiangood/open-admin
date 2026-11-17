@@ -47,7 +47,7 @@ INSERT INTO sys_org (id, pid, name, seq, enabled, type, create_time, update_time
 ('dmo20', '1', '贵州省现代物流产业集团有限公司', 20, TRUE, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- 10000 个用户：姓名取姓氏池(10) x 名字池(10) = 100 种组合，每种重复约 100 次
--- 密码统一为管理员默认密码 Open@1234
+-- 演示用户密码统一为 Open@1234（仅本地演示/压测数据使用，不参与框架种子逻辑）
 INSERT INTO sys_user (id, account, name, password, unit_id, org_id, enabled, data_perm_type, create_time, update_time)
 SELECT 'dmu' || LPAD(CAST(x AS VARCHAR), 6, '0'),
        'demo' || LPAD(CAST(x AS VARCHAR), 6, '0'),
