@@ -470,21 +470,19 @@ export default class JobPage extends React.Component {
                     <FieldDictSelect typeCode='jobLogAggregation'/>
                 </Form.Item>
 
+                {this.state.paramList?.length > 0 && <Divider>任务参数</Divider>}
                 {this.state.paramList?.map(p => (
-                    <div key={p.name}>
-                        <Divider>任务参数</Divider>
-                        <Form.Item label={p.label}
-                                   name={['jobData', p.name]}
-                                   key={p.name}
-                                   initialValue={p.defaultValue}
-                                   valuePropName={p.valueType === 'boolean' ? 'checked' : 'value'}
-                                   rules={[{required: p.required}]}>
-                            {ValueType.renderField(p.valueType, {
-                                ...p.componentProps,
-                                placeholder: p.placeholder || '请输入'
-                            })}
-                        </Form.Item>
-                    </div>
+                    <Form.Item label={p.label}
+                               name={['jobData', p.name]}
+                               key={p.name}
+                               initialValue={p.defaultValue}
+                               valuePropName={p.valueType === 'boolean' ? 'checked' : 'value'}
+                               rules={[{required: p.required}]}>
+                        {ValueType.renderField(p.valueType, {
+                            ...p.componentProps,
+                            placeholder: p.placeholder || '请输入'
+                        })}
+                    </Form.Item>
                 ))}
             </FormModal>
 

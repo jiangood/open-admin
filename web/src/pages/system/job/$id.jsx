@@ -1,5 +1,5 @@
 import React from 'react'
-import {Alert, Button, Card, Descriptions, Empty, Spin, Tabs, Tag} from 'antd'
+import {Alert, Button, Card, Descriptions, Empty, Space, Spin, Tabs, Tag} from 'antd'
 import {CaretRightOutlined} from '@ant-design/icons'
 import {CronUtils, DictUtils, getMessageApi, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
 
@@ -31,10 +31,11 @@ export default class JobDetailPage extends React.Component {
         logDrawerRunning: false,
         logDrawerTitle: '',
         triggering: false,
-        interrupting: false,
+        interruptingId: null,
     }
 
     progressTimer = null
+    recordsTableRef = React.createRef()
 
     componentDidMount() {
         this.loadAll()
@@ -120,19 +121,24 @@ export default class JobDetailPage extends React.Component {
         }
     }
 
-    handleInterrupt = () => {
+    /** 取消当前运行中的执行（记录 Tab 行内按钮）；错误提示由 HttpClient 自动弹出 */
+    handleInterrupt = (logId) => {
         const {jobId} = this
         if (!jobId) return
-        this.setState({interrupting: true})
-        HttpClient.post('admin/job/interrupt', {id: jobId}, null, {toastError: false}).then(rs => {
-            getMessageApi().success(rs.msg || '已发送取消请求')
+        this.setState({interruptingId: logId})
+        HttpClient.post('admin/job/interrupt', {id: jobId}).then(() => {
             this.loadProgress()
-            setTimeout(() => this.loadProgress(), 800)
+            this.reloadRecords()
         }).catch(e => {
             console.error('[JobDetail] 取消任务失败:', e)
         }).finally(() => {
-            this.setState({interrupting: false})
+            this.setState({interruptingId: null})
         })
+    }
+
+    /** 刷新记录 Tab 表格（未挂载时跳过，如用户停留在统计/配置 Tab） */
+    reloadRecords = () => {
+        this.recordsTableRef?.current?.reload()
     }
 
     openLatestLog = () => {
@@ -191,11 +197,17 @@ export default class JobDetailPage extends React.Component {
         const {jobId} = this
         if (!jobId) return
         this.setState({triggering: true})
-        HttpClient.post('admin/job/trigger-job', {id: jobId}, null, {toastError: false}).then(() => {
-            getMessageApi().success('执行命令已发送')
+        HttpClient.post('admin/job/trigger-job', {id: jobId}).then(() => {
             this.loadProgress()
-            setTimeout(() => this.loadProgress(), 800)
-            setTimeout(() => this.loadProgress(), 2000)
+            // Quartz 触发是异步的，执行记录不会立刻落库：延时重查进度并刷新记录表
+            setTimeout(() => {
+                this.loadProgress()
+                this.reloadRecords()
+            }, 800)
+            setTimeout(() => {
+                this.loadProgress()
+                this.reloadRecords()
+            }, 2000)
         }).catch(e => {
             console.error('[JobDetail] 触发任务失败:', e)
         }).finally(() => {
@@ -226,11 +238,19 @@ export default class JobDetailPage extends React.Component {
             },
             {title: '返回结果', dataIndex: 'result', render: v => (v == null || v === '') ? '-' : <span style={{wordBreak: 'break-all'}}>{v}</span>},
             {
-                title: '操作', dataIndex: 'option', width: 80, fixed: 'right',
-                render: (_, record) => <Button size="small" onClick={() => this.openLogDrawer(record)}>日志</Button>,
+                title: '操作', dataIndex: 'option', width: 120, fixed: 'right',
+                render: (_, record) => <Space size={4}>
+                    {this.isLogRunning(record.id) && PermUtils.hasPermission('job:trigger') && (
+                        <Button size="small" danger
+                                loading={this.state.interruptingId === record.id}
+                                onClick={() => this.handleInterrupt(record.id)}>取消</Button>
+                    )}
+                    <Button size="small" onClick={() => this.openLogDrawer(record)}>日志</Button>
+                </Space>,
             },
         ]
         return <ProTable
+            actionRef={this.recordsTableRef}
             rowKey="id"
             scrollX={800}
             columns={columns}
@@ -325,7 +345,7 @@ export default class JobDetailPage extends React.Component {
     }
 
     render() {
-        const {job, loading, progress, jobLogSize, activeTab, triggering, interrupting} = this.state
+        const {job, loading, progress, jobLogSize, activeTab, triggering} = this.state
         if (loading) {
             return <Page><div style={{textAlign: 'center', padding: '48px 0'}}><Spin/></div></Page>
         }
@@ -368,11 +388,6 @@ export default class JobDetailPage extends React.Component {
                             <Button type="primary" icon={<CaretRightOutlined/>}
                                     loading={triggering} onClick={this.handleTrigger}>
                                 执行一次
-                            </Button>
-                        )}
-                        {canTrigger && running && (
-                            <Button danger loading={interrupting} onClick={this.handleInterrupt}>
-                                取消执行
                             </Button>
                         )}
                         <Button onClick={this.openLatestLog}>最新日志</Button>
