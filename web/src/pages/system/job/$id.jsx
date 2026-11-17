@@ -372,33 +372,9 @@ export default class JobDetailPage extends React.Component {
 
         return <Page>
             <Card style={{marginBottom: 12}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap'}}>
-                    <div style={{flex: 1, minWidth: 320}}>
-                        <div style={{fontSize: 18, fontWeight: 600, marginBottom: 12}}>{job.name || '-'}</div>
-                        <Descriptions size="small" column={2}>
-                            <Descriptions.Item label="执行类" span={2}>
-                                <span style={{wordBreak: 'break-all'}}>{job.jobClassName || job.jobClass || '-'}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="cron 表达式">
-                                <span style={{fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>{job.cron || '-'}</span>
-                            </Descriptions.Item>
-                            <Descriptions.Item label="启用">
-                                {job.enabled ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="记录方式">
-                                {DictUtils.dictLabel('jobLogAggregation', job.logAggregation) || '每次一份记录'}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="日志占用">
-                                {jobLogSize ? <span>{formatBytes(jobLogSize.bytes)}（{jobLogSize.files} 个文件）</span> : '-'}
-                            </Descriptions.Item>
-                        </Descriptions>
-                    </div>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 12}}>
+                    <div style={{fontSize: 18, fontWeight: 600}}>{job.name || '-'}</div>
                     <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
-                        {running && (
-                            <Tag color="processing" icon={<LoadingOutlined spin/>} style={{marginInlineEnd: 0}}>
-                                {progress.message || '运行中'}
-                            </Tag>
-                        )}
                         {canTrigger && (
                             <Button type="primary" icon={<CaretRightOutlined/>}
                                     loading={triggering} onClick={this.handleTrigger}>
@@ -408,6 +384,28 @@ export default class JobDetailPage extends React.Component {
                         <Button onClick={this.openLatestLog}>最新日志</Button>
                     </div>
                 </div>
+                <Descriptions size="small" column={2}>
+                    <Descriptions.Item label="执行类" span={2}>
+                        <span style={{wordBreak: 'break-all'}}>{job.jobClassName || job.jobClass || '-'}</span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="cron 表达式">
+                        <span style={{fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>{job.cron || '-'}</span>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="启用">
+                        {job.enabled ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="记录方式">
+                        {DictUtils.dictLabel('jobLogAggregation', job.logAggregation) || '每次一份记录'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="日志占用">
+                        {jobLogSize ? <span>{formatBytes(jobLogSize.bytes)}（{jobLogSize.files} 个文件）</span> : '-'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="运行状态">
+                        {running
+                            ? <Tag color="processing" icon={<LoadingOutlined spin/>}>{progress.message || '运行中'}</Tag>
+                            : <Tag>未运行</Tag>}
+                    </Descriptions.Item>
+                </Descriptions>
             </Card>
 
             <Card>
