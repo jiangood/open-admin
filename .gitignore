@@ -33,6 +33,7 @@ target/
 /logs/
 /data/
 /.opencode/plans/
+/.opencode/skills/ui-ux-pro-max/
 .playwright-mcp/
 *.log
 *.tgz
