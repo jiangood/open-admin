@@ -413,8 +413,8 @@ export default class JobDetailPage extends React.Component {
                     activeKey={activeTab}
                     onChange={key => this.setState({activeTab: key})}
                     items={[
-                        {key: 'records', label: '记录', children: this.renderRecordsTab()},
-                        {key: 'stat', label: '统计', children: this.renderStatTab()},
+                        {key: 'records', label: '执行记录', children: this.renderRecordsTab()},
+                        {key: 'stat', label: '执行统计', children: this.renderStatTab()},
                         {key: 'config', label: '配置', children: this.renderConfigTab()},
                     ]}
                 />
