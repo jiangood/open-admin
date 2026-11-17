@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Form, Input} from "antd";
 import {LockOutlined, SafetyCertificateOutlined} from '@ant-design/icons';
-import {getMessageApi, GlobalData, HttpClient, history, LOGIN_PATH} from "../../framework";
+import {getMessageApi, GlobalData, HttpClient, history, LOGIN_PATH} from "../framework";
 
 import "./force-update-pwd.less";
 
