@@ -1,7 +1,7 @@
 import React from 'react'
 import {Button, Card, Descriptions, Empty, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
 import {CaretRightOutlined, LoadingOutlined} from '@ant-design/icons'
-import {CronUtils, DictUtils, getMessageApi, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
+import {CronUtils, DictUtils, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
 
 function formatBytes(bytes) {
     if (!bytes || bytes <= 0) {
@@ -139,38 +139,6 @@ export default class JobDetailPage extends React.Component {
     /** 刷新记录 Tab 表格（未挂载时跳过，如用户停留在统计/配置 Tab） */
     reloadRecords = () => {
         this.recordsTableRef?.current?.reload()
-    }
-
-    openLatestLog = () => {
-        const {jobId} = this
-        const {progress} = this.state
-        if (progress && progress.state === 'RUNNING' && progress.logId) {
-            this.setState({
-                logDrawerOpen: true,
-                logDrawerId: progress.logId,
-                logDrawerRunning: true,
-                logDrawerTitle: '最新日志',
-            })
-            return
-        }
-        HttpClient.get('admin/job/execute-record', {jobId, current: 1, pageSize: 1}, {toastError: false}).then(rs => {
-            const data = rs.data || {}
-            const records = data.records || data.list || data.content || (Array.isArray(data) ? data : [])
-            const latest = records[0]
-            if (latest) {
-                this.setState({
-                    logDrawerOpen: true,
-                    logDrawerId: latest.id,
-                    logDrawerRunning: this.isLogRunning(latest.id),
-                    logDrawerTitle: latest.beginTime ? `最新日志 - ${latest.beginTime}` : '最新日志',
-                })
-            } else {
-                getMessageApi().info('暂无执行日志')
-            }
-        }).catch(e => {
-            console.error('[JobDetail] 加载最新执行记录失败:', e)
-            getMessageApi().error('加载最新日志失败')
-        })
     }
 
     isLogRunning = (logId) => {
@@ -381,7 +349,6 @@ export default class JobDetailPage extends React.Component {
                                 执行一次
                             </Button>
                         )}
-                        <Button onClick={this.openLatestLog}>最新日志</Button>
                     </div>
                 </div>
                 <Descriptions size="small" column={2}>
