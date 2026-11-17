@@ -1,6 +1,6 @@
 import React from 'react'
-import {Alert, Button, Card, Descriptions, Empty, Space, Spin, Tabs, Tag} from 'antd'
-import {CaretRightOutlined} from '@ant-design/icons'
+import {Button, Card, Descriptions, Empty, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
+import {CaretRightOutlined, LoadingOutlined} from '@ant-design/icons'
 import {CronUtils, DictUtils, getMessageApi, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
 
 function formatBytes(bytes) {
@@ -220,7 +220,17 @@ export default class JobDetailPage extends React.Component {
         if (!jobId) return null
         const columns = [
             {title: '开始时间', dataIndex: 'beginTime', width: 170, render: v => v || '-'},
-            {title: '结束时间', dataIndex: 'endTime', width: 170, render: (v, record) => v || (record.beginTime ? '运行中…' : '-')},
+            {title: '结束时间', dataIndex: 'endTime', width: 170, render: (v, record) => {
+                if (v) {
+                    return v
+                }
+                if (!record.beginTime) {
+                    return '-'
+                }
+                // 明细放 tooltip，避免撑高表格行（与列表页「运行状态」列的做法一致）
+                const msg = this.isLogRunning(record.id) ? (this.state.progress?.message || '任务运行中') : null
+                return msg ? <Tooltip title={msg}><span>运行中…</span></Tooltip> : '运行中…'
+            }},
             {
                 title: '成功/失败',
                 dataIndex: 'executeCount',
@@ -383,7 +393,12 @@ export default class JobDetailPage extends React.Component {
                             </Descriptions.Item>
                         </Descriptions>
                     </div>
-                    <div style={{display: 'flex', gap: 8}}>
+                    <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+                        {running && (
+                            <Tag color="processing" icon={<LoadingOutlined spin/>} style={{marginInlineEnd: 0}}>
+                                {progress.message || '运行中'}
+                            </Tag>
+                        )}
                         {canTrigger && (
                             <Button type="primary" icon={<CaretRightOutlined/>}
                                     loading={triggering} onClick={this.handleTrigger}>
@@ -394,11 +409,6 @@ export default class JobDetailPage extends React.Component {
                     </div>
                 </div>
             </Card>
-
-            {running && (
-                <Alert type="info" showIcon style={{marginBottom: 12}}
-                       title={progress.message || '任务运行中'}/>
-            )}
 
             <Card>
                 <Tabs
