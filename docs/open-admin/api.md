@@ -100,11 +100,9 @@ public class DataSyncJob extends BaseJob {
 
 | 方法 | 说明 |
 |------|------|
-| `progress(int percent, String message)` | 直接上报百分比（0-100） |
-| `progress(long current, long total, String message)` | 上报「已处理/总数」，百分比自动计算 |
-| `progress(String message)` | 仅更新描述，进度未知时使用 |
+| `progress(String message)` | 更新运行状态描述，在任务列表/日志中展示当前阶段 |
 
-进度只保存在内存（`JobProgressRegistry`），重启后丢失；执行结果仍由 `sys_job_log` 落库。
+框架只上报状态描述（`message`），不提供百分比字段；需要展示进度可在描述文本中自行拼接。进度只保存在内存（`JobProgressRegistry`），重启后丢失；执行结果仍由 `sys_job_log` 落库。
 
 > cron 使用 Quartz 格式，共 6 或 7 段：**秒 分 时 日 月 周 [年]**，第一位是秒。例如 `0 */5 * * * ?` 表示每 5 分钟，`*/5 * * * * ?` 表示每 5 秒。
 
@@ -113,7 +111,7 @@ public class DataSyncJob extends BaseJob {
 | `admin/job/progress` | GET | `job:read` | 全部任务运行进度快照，按开始时间倒序 |
 | `admin/job/progress/{jobId}` | GET | `job:read` | 单个任务进度，从未运行时 `data` 为 `null` |
 
-快照字段：`jobId` / `jobName` / `logId` / `state`(`RUNNING`/`SUCCESS`/`FAILED`) / `stateLabel` / `stateColor` / `percent` / `current` / `total` / `message` / `beginTime` / `updateTime` / `endTime` / `runTime` / `result`。
+快照字段：`jobId` / `jobName` / `logId` / `state`(`RUNNING`/`SUCCESS`/`FAILED`) / `stateLabel` / `stateColor` / `message` / `beginTime` / `updateTime` / `endTime` / `runTime` / `result`。
 
 页面顶部统计卡片（运行中 / 今日执行 / 日志占用 / 调度器）：
 

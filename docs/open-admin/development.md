@@ -122,18 +122,18 @@ public JobRegistrar reminderJobs() {
 
 ### 进度上报
 
-长任务可调用 `BaseJob` 提供的 `progress(...)` 把运行进度暴露给前端「定时任务」页面（页面每 3 秒轮询 `admin/job/progress`）：
+长任务可调用 `BaseJob` 提供的 `progress(...)` 把运行状态描述暴露给前端「定时任务」页面（页面每 3 秒轮询 `admin/job/progress`）：
 
 ```java
 List<Row> rows = load();
 for (int i = 0; i < rows.size(); i++) {
+    progress("已同步 " + (i + 1) + "/" + rows.size());
     sync(rows.get(i));
-    progress(i + 1, rows.size(), "已同步 " + (i + 1) + "/" + rows.size());
 }
 return "同步完成 " + rows.size() + " 条";
 ```
 
-- 三种重载：`progress(percent, msg)` / `progress(current, total, msg)`（百分比自动算）/ `progress(msg)`
+- 只有一个重载：`progress(String msg)`，更新运行中展示的状态描述；框架不提供百分比字段，需要展示进度可在描述文本中自行拼接
 - 进度是**内存态**（`JobProgressRegistry`），不落库；重启后运行中进度丢失，但 `sys_job_log` 执行记录完整
 - 只对继承 `BaseJob` 的任务生效；直接实现 `org.quartz.Job` 的类没有进度
 - 进度按 `SysJob.id` 记录，同一任务受 `@DisallowConcurrentExecution` 保护不会并发覆盖
