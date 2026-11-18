@@ -105,11 +105,10 @@ export default class RolePage extends React.Component {
             render: (_, record) => {
 
                 return <PermActions
-                    more
                     size="small"
                     actions={[
-                        {label: '用户设置', perm: 'sys-role:grant-permission', onClick: () => this.handleEditUser(record)},
-                        {label: '权限设置', perm: 'sys-role:grant-permission', onClick: () => PageUtils.open('/system/role/role-perm?id=' + record.id)},
+                        {label: '用户', perm: 'sys-role:grant-permission', onClick: () => this.handleEditUser(record)},
+                        {label: '权限', perm: 'sys-role:grant-permission', onClick: () => PageUtils.open('/system/role/role-perm?id=' + record.id)},
                         {label: '编辑', perm: 'sys-role:update', onClick: () => this.handleEdit(record)},
                         {label: '删除', perm: 'sys-role:delete', confirm: '是否确定删除系统角色', onClick: () => this.handleDelete(record)},
                     ]}
@@ -145,14 +144,9 @@ export default class RolePage extends React.Component {
                 columns={this.columns}
                 searchInline
                 searchFormRender={() => (
-                    <>
-                        <Form.Item name='name' noStyle>
-                            <Input prefix={<SearchOutlined/>} placeholder='角色名称' allowClear/>
-                        </Form.Item>
-                        <Form.Item name='code' noStyle>
-                            <Input placeholder='角色编码' allowClear/>
-                        </Form.Item>
-                    </>
+                    <Form.Item name='keyword' noStyle>
+                        <Input prefix={<SearchOutlined/>} placeholder='角色名称/编码' allowClear/>
+                    </Form.Item>
                 )}
             />
 

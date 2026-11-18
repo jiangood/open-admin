@@ -14,8 +14,10 @@ import {
     getActiveDensityKey,
     applyRadiusPreset,
     getActiveRadiusKey,
+    getLayoutMode,
+    setLayoutMode,
 } from '../../config';
-import type { ThemeDensity, ThemeRadius } from '../../config';
+import type { ThemeDensity, ThemeRadius, LayoutMode } from '../../config';
 import { EventBus } from '../../utils/EventBus';
 
 export interface ThemeSettingsProps {
@@ -28,7 +30,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * 界面设置面板：主题色、界面密度、圆角。
+ * 界面设置面板：布局模式、主题色、界面密度、圆角。
  * 明暗模式由顶栏的太阳/月亮按钮切换，此处不再重复提供。
  * 所有变更即时生效并持久化到 localStorage。
  */
@@ -36,6 +38,7 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
     const [activeKey, setActiveKey] = React.useState(getActivePresetKey());
     const [density, setDensity] = React.useState<ThemeDensity>(getActiveDensityKey());
     const [radius, setRadius] = React.useState<ThemeRadius>(getActiveRadiusKey());
+    const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>(getLayoutMode());
 
     React.useEffect(() => {
         const offTheme = EventBus.on('themeChange', () => {
@@ -43,8 +46,12 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
             setDensity(getActiveDensityKey());
             setRadius(getActiveRadiusKey());
         });
+        const offLayout = EventBus.on('layoutChange', () => {
+            setLayoutModeState(getLayoutMode());
+        });
         return () => {
             offTheme();
+            offLayout();
         };
     }, []);
 
@@ -53,7 +60,22 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
 
     return (
         <Drawer title="界面设置" open={open} onClose={onClose} size={340}>
-            <div style={{ fontWeight: 600 }}>主题色</div>
+            <div style={{ fontWeight: 600 }}>布局模式</div>
+            <Segmented
+                block
+                style={{ marginTop: 12 }}
+                value={layoutMode}
+                onChange={value => setLayoutMode(value as LayoutMode)}
+                options={[
+                    { label: '页签模式', value: 'tabs' },
+                    { label: '单页模式', value: 'single' },
+                ]}
+            />
+            <div style={{ marginTop: 8, fontSize: 12, color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.45))' }}>
+                页签模式可同时打开多个页面；单页模式仅显示当前页面。
+            </div>
+
+            <SectionTitle>主题色</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginTop: 12 }}>
                 {THEME_PRESETS.map(preset => {
                     const primary = preset.colors.colorPrimary || DEFAULT_COLORS.colorPrimary || '#1677ff';

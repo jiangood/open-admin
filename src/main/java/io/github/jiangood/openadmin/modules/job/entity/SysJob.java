@@ -44,7 +44,7 @@ public class SysJob extends BaseEntity {
     Map<String, Object> jobData;
     // 扩展字段
     String extraInfo;
-    // 执行记录方式，为空时按每次一份记录
+    // 执行记录方式：已统一为每次一份记录，保留字段以兼容存量数据
     @Enumerated(EnumType.STRING)
     @Column(length = 20)
     JobLogAggregation logAggregation;
@@ -79,15 +79,13 @@ public class SysJob extends BaseEntity {
     @PreUpdate
     public void prePersistOrUpdate() {
         Assert.state(jobClass.endsWith(JOB_SUFFIX), "必须以" + JOB_SUFFIX + "结尾");
-        if (logAggregation == null) {
-            logAggregation = JobLogAggregation.PER_RUN;
-        }
+        logAggregation = JobLogAggregation.PER_RUN;
     }
 
     /**
-     * 存量数据可能为 null，统一按「每次一份记录」处理
+     * 统一按「每次一份记录」处理
      */
     public JobLogAggregation getLogAggregation() {
-        return logAggregation == null ? JobLogAggregation.PER_RUN : logAggregation;
+        return JobLogAggregation.PER_RUN;
     }
 }

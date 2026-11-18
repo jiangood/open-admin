@@ -1,7 +1,7 @@
 import React from 'react'
-import {Button, Card, Descriptions, Empty, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
+import {Button, Card, Col, Descriptions, Empty, Row, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
 import {CaretRightOutlined, LoadingOutlined} from '@ant-design/icons'
-import {CronUtils, DictUtils, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
+import {CronUtils, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
 
 function formatBytes(bytes) {
     if (!bytes || bytes <= 0) {
@@ -218,12 +218,12 @@ export default class JobDetailPage extends React.Component {
             {
                 title: '操作', dataIndex: 'option', width: 120, fixed: 'right',
                 render: (_, record) => <Space size={4}>
+                    <Button size="small" onClick={() => this.openLogDrawer(record)}>日志</Button>
                     {this.isLogRunning(record.id) && PermUtils.hasPermission('job:trigger') && (
                         <Button size="small" danger
                                 loading={this.state.interruptingId === record.id}
                                 onClick={() => this.handleInterrupt(record.id)}>取消</Button>
                     )}
-                    <Button size="small" onClick={() => this.openLogDrawer(record)}>日志</Button>
                 </Space>,
             },
         ]
@@ -282,9 +282,6 @@ export default class JobDetailPage extends React.Component {
             <Descriptions.Item label="启用">
                 {job.enabled ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>}
             </Descriptions.Item>
-            <Descriptions.Item label="记录方式">
-                {DictUtils.dictLabel('jobLogAggregation', job.logAggregation) || '每次一份记录'}
-            </Descriptions.Item>
             <Descriptions.Item label="任务参数（jobData）">{jobDataNode}</Descriptions.Item>
         </Descriptions>
     }
@@ -323,7 +320,7 @@ export default class JobDetailPage extends React.Component {
     }
 
     render() {
-        const {job, loading, progress, jobLogSize, activeTab, triggering} = this.state
+        const {job, loading, progress, jobLogSize, execStat, activeTab, triggering} = this.state
         if (loading) {
             return <Page><div style={{textAlign: 'center', padding: '48px 0'}}><Spin/></div></Page>
         }
@@ -340,9 +337,17 @@ export default class JobDetailPage extends React.Component {
 
         return <Page>
             <Card style={{marginBottom: 12}}>
-                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 12}}>
-                    <div style={{fontSize: 18, fontWeight: 600}}>{job.name || '-'}</div>
-                    <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', marginBottom: 16}}>
+                    <div>
+                        <div style={{fontSize: 18, fontWeight: 600, marginBottom: 8}}>{job.name || '-'}</div>
+                        <Space size={8} wrap>
+                            {job.enabled ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>}
+                            {running
+                                ? <Tag color="processing" icon={<LoadingOutlined spin/>}>{progress.message || '运行中'}</Tag>
+                                : <Tag>未运行</Tag>}
+                        </Space>
+                    </div>
+                    <div>
                         {canTrigger && (
                             <Button type="primary" icon={<CaretRightOutlined/>}
                                     loading={triggering} disabled={running} onClick={this.handleTrigger}>
@@ -351,28 +356,46 @@ export default class JobDetailPage extends React.Component {
                         )}
                     </div>
                 </div>
-                <Descriptions size="small" column={2}>
-                    <Descriptions.Item label="执行类" span={2}>
-                        <span style={{wordBreak: 'break-all'}}>{job.jobClass || job.jobClassName || '-'}</span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="cron 表达式">
-                        <span style={{fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>{job.cron || '-'}</span>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="启用">
-                        {job.enabled ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="记录方式">
-                        {DictUtils.dictLabel('jobLogAggregation', job.logAggregation) || '每次一份记录'}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="日志占用">
-                        {jobLogSize ? <span>{formatBytes(jobLogSize.bytes)}（{jobLogSize.files} 个文件）</span> : '-'}
-                    </Descriptions.Item>
-                    <Descriptions.Item label="运行状态">
-                        {running
-                            ? <Tag color="processing" icon={<LoadingOutlined spin/>}>{progress.message || '运行中'}</Tag>
-                            : <Tag>未运行</Tag>}
-                    </Descriptions.Item>
-                </Descriptions>
+                <Row gutter={[24, 12]}>
+                    <Col xs={24} md={14}>
+                        <Descriptions size="small" column={1} colon>
+                            <Descriptions.Item label="执行类">
+                                {(() => {
+                                    const fullName = job.jobClass || job.jobClassName || '';
+                                    if (!fullName) {
+                                        return '-';
+                                    }
+                                    const simpleName = job.jobClass ? job.jobClass.substring(job.jobClass.lastIndexOf('.') + 1) : (job.jobClassName || fullName);
+                                    return <Tooltip title={fullName}>
+                                        <span style={{fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>
+                                            {simpleName}
+                                        </span>
+                                    </Tooltip>;
+                                })()}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="cron 表达式">
+                                <span style={{fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>{job.cron || '-'}</span>
+                            </Descriptions.Item>
+                        </Descriptions>
+                    </Col>
+                    <Col xs={24} md={10}>
+                        <Descriptions size="small" column={2} colon>
+                            <Descriptions.Item label="累计执行">
+                                {execStat ? `${execStat.totalExecuteCount ?? 0} 次` : '-'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="累计失败">
+                                {execStat
+                                    ? (execStat.totalFailCount ?? 0) > 0
+                                        ? <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{execStat.totalFailCount} 次</span>
+                                        : '0 次'
+                                    : '-'}
+                            </Descriptions.Item>
+                            <Descriptions.Item label="日志占用" span={2}>
+                                {jobLogSize ? <span>{formatBytes(jobLogSize.bytes)}（{jobLogSize.files} 个文件）</span> : '-'}
+                            </Descriptions.Item>
+                        </Descriptions>
+                    </Col>
+                </Row>
             </Card>
 
             <Card>
@@ -382,7 +405,7 @@ export default class JobDetailPage extends React.Component {
                     items={[
                         {key: 'records', label: '执行记录', children: this.renderRecordsTab()},
                         {key: 'stat', label: '执行统计', children: this.renderStatTab()},
-                        {key: 'config', label: '配置', children: this.renderConfigTab()},
+                        {key: 'config', label: '任务详情', children: this.renderConfigTab()},
                     ]}
                 />
             </Card>

@@ -1,7 +1,7 @@
 import {Avatar, Dropdown, Modal} from "antd";
-import {BgColorsOutlined, FileOutlined, MoonOutlined, ProfileOutlined, SunOutlined, UserOutlined} from "@ant-design/icons";
+import {BgColorsOutlined, MoonOutlined, SunOutlined, UserOutlined} from "@ant-design/icons";
 import React from "react";
-import {HttpClient, PageUtils, GlobalData, history, EventBus, LOGIN_PATH, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT, getThemeMode, toggleThemeMode, getLayoutMode, toggleLayoutMode} from "../../framework";
+import {HttpClient, PageUtils, GlobalData, history, EventBus, LOGIN_PATH, ThemeSettings, AvatarUtils, ARTICLE_HEADER_AVATAR_DROPDOWN, ARTICLE_HEADER_RIGHT, getThemeMode, toggleThemeMode} from "../../framework";
 
 export class HeaderRight extends React.Component {
 
@@ -15,7 +15,6 @@ export class HeaderRight extends React.Component {
 
     unsubscribeLoginInfo = null;
     unsubscribeTheme = null;
-    unsubscribeLayout = null;
 
     componentDidMount() {
         this.loadArticles()
@@ -23,8 +22,6 @@ export class HeaderRight extends React.Component {
         this.unsubscribeLoginInfo = EventBus.on('loginInfoChange', () => this.setState({}))
         // 明暗切换后刷新太阳/月亮图标（其它入口切换时也能同步）
         this.unsubscribeTheme = EventBus.on('themeChange', () => this.setState({}))
-        // 布局切换后刷新图标（其它入口切换时也能同步）
-        this.unsubscribeLayout = EventBus.on('layoutChange', () => this.setState({}))
     }
 
     componentWillUnmount() {
@@ -33,9 +30,6 @@ export class HeaderRight extends React.Component {
         }
         if (this.unsubscribeTheme) {
             this.unsubscribeTheme()
-        }
-        if (this.unsubscribeLayout) {
-            this.unsubscribeLayout()
         }
     }
 
@@ -72,18 +66,6 @@ export class HeaderRight extends React.Component {
             <button type="button" className='item' title={title} aria-label={title}
                     onClick={() => toggleThemeMode()}>
                 {isDark ? <SunOutlined/> : <MoonOutlined/>}
-            </button>
-        )
-    }
-
-    renderLayoutModeToggle = () => {
-        const isTabs = getLayoutMode() === 'tabs';
-        const title = isTabs ? '切换为单页模式' : '切换为页签模式';
-        const Icon = isTabs ? FileOutlined : ProfileOutlined;
-        return (
-            <button type="button" className='item pc-only' title={title} aria-label={title}
-                    onClick={() => toggleLayoutMode()}>
-                <Icon/>
             </button>
         )
     }
@@ -127,8 +109,6 @@ export class HeaderRight extends React.Component {
                     {a.title}
                 </button>
             ))}
-
-            {this.renderLayoutModeToggle()}
 
             {this.renderThemeModeToggle()}
 

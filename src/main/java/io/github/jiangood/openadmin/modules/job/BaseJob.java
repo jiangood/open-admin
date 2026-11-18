@@ -1,6 +1,5 @@
 package io.github.jiangood.openadmin.modules.job;
 
-import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
 import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
@@ -15,13 +14,9 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 @DisallowConcurrentExecution
 public abstract class BaseJob implements Job, InterruptableJob {
-
-    private static final DateTimeFormatter HOURLY_BUCKET = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH");
-    private static final DateTimeFormatter DAILY_BUCKET = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Resource
     private SysJobLogRepository sysJobLogRepository;
@@ -112,28 +107,17 @@ public abstract class BaseJob implements Job, InterruptableJob {
     }
 
     /**
-     * 获取本次执行要写入的执行记录。
-     * <p>
-     * 每次一份记录模式：新建一条记录，日志文件为 job/{logId}.log。
-     * 聚合模式：复用同一周期（按小时/按天）的记录，logId 不变，日志追加到同一文件。
+     * 获取本次执行要写入的执行记录：每次执行新建一条记录，日志文件为 job/{logId}.log。
      */
     private SysJobLog acquireLog(SysJob job, LocalDateTime fireTime) {
-        String bucket = calcBucket(job.getLogAggregation(), fireTime);
-        SysJobLog jobLog = null;
-        if (bucket != null) {
-            jobLog = sysJobLogRepository.findFirstBySysJob_IdAndLogBucket(job.getId(), bucket).orElse(null);
-        }
-        if (jobLog == null) {
-            jobLog = new SysJobLog();
-            jobLog.setSysJob(job);
-            jobLog.setLogBucket(bucket);
-            jobLog.setBeginTime(fireTime);
-            jobLog.setExecuteCount(0);
-            jobLog.setFailCount(0);
-            jobLog.setTotalRunTime(0L);
-            jobLog = sysJobLogRepository.save(jobLog);
-        }
-        return jobLog;
+        SysJobLog jobLog = new SysJobLog();
+        jobLog.setSysJob(job);
+        jobLog.setLogBucket(null);
+        jobLog.setBeginTime(fireTime);
+        jobLog.setExecuteCount(0);
+        jobLog.setFailCount(0);
+        jobLog.setTotalRunTime(0L);
+        return sysJobLogRepository.save(jobLog);
     }
 
     private void finishLog(SysJobLog jobLog, boolean success, String result, long duration) {
@@ -149,17 +133,6 @@ public abstract class BaseJob implements Job, InterruptableJob {
         jobLog.setResult(result);
         jobLog.setEndTime(LocalDateTime.now(ZoneId.systemDefault()));
         sysJobLogRepository.save(jobLog);
-    }
-
-    private static String calcBucket(JobLogAggregation aggregation, LocalDateTime fireTime) {
-        if (aggregation == null) {
-            return null;
-        }
-        return switch (aggregation) {
-            case PER_RUN -> null;
-            case HOURLY -> fireTime.format(HOURLY_BUCKET);
-            case DAILY -> fireTime.format(DAILY_BUCKET);
-        };
     }
 
     /**

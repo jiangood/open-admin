@@ -48,11 +48,10 @@ public class SysRoleController {
 
     @HasPermission("sys-role:read")
     @GetMapping("page")
-    public AjaxResult page(String name, String code,
+    public AjaxResult page(String keyword,
                            @PageableDefault(direction = Sort.Direction.DESC, sort = "updateTime") Pageable pageable) {
         Spec<SysRole> q = Spec.of();
-        q.like(SysRole.Fields.name, name);
-        q.like(SysRole.Fields.code, code);
+        q.orLike(keyword, SysRole.Fields.name, SysRole.Fields.code);
         Page<SysRole> page = sysRoleService.findAll(q, pageable);
         return AjaxResult.ok().data(page);
     }

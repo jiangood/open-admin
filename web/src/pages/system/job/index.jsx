@@ -2,12 +2,10 @@ import React from 'react'
 import {
     Alert,
     Button,
-    Card,
     Form,
     Input,
     Modal,
     Select,
-    Statistic,
     Switch,
     Table,
     Tag,
@@ -18,8 +16,6 @@ import {
     CronEditor,
     CronUtils,
     FormModal,
-    DictUtils,
-    FieldDictSelect,
     getMessageApi,
     HttpClient,
     Page,
@@ -42,26 +38,16 @@ function formatBytes(bytes) {
     return `${(bytes / Math.pow(k, index)).toFixed(index > 0 ? 1 : 0)} ${units[index]}`
 }
 
-const statCardsStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-    gap: 8,
+const statBarStyle = {
     marginBottom: 8,
-}
-
-const statHintStyle = {
-    marginTop: 2,
-    fontSize: 12,
-    lineHeight: '18px',
-    color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-}
-
-const statWarnStyle = {
-    ...statHintStyle,
-    color: 'var(--oa-color-error, #ff4d4f)',
+    height: 56,
+    padding: '0 16px',
+    display: 'flex',
+    alignItems: 'center',
+    boxSizing: 'border-box',
+    border: '1px solid var(--oa-color-border, #f0f0f0)',
+    borderRadius: 8,
+    background: 'var(--oa-color-bg-container, #fff)',
 }
 
 const cronPresets = [
@@ -272,13 +258,19 @@ export default class JobPage extends React.Component {
         {
             title: '执行类',
             dataIndex: 'jobClass',
-            render: v => v
-                ? <span style={{
-                    fontSize: 12,
-                    color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
-                    wordBreak: 'break-all'
-                }}>{v}</span>
-                : '-'
+            render: v => {
+                if (!v) {
+                    return '-';
+                }
+                const simpleName = v.substring(v.lastIndexOf('.') + 1);
+                return <Tooltip title={v}>
+                    <span style={{
+                        fontSize: 12,
+                        color: 'var(--oa-color-text-tertiary, rgba(0, 0, 0, 0.45))',
+                        wordBreak: 'break-all'
+                    }}>{simpleName}</span>
+                </Tooltip>;
+            }
         },
 
         {
@@ -317,15 +309,7 @@ export default class JobPage extends React.Component {
         },
 
         {
-            title: '记录方式',
-            dataIndex: 'logAggregation',
-            render: v => <span style={{overflowWrap: 'break-word'}}>
-                {DictUtils.dictLabel('jobLogAggregation', v) || '每次一份记录'}
-            </span>
-        },
-
-        {
-            title: '运行状态',
+            title: '最近状态',
             dataIndex: 'progress',
             render: (_, record) => {
                 const p = this.state.progressMap[record.id]
@@ -359,7 +343,7 @@ export default class JobPage extends React.Component {
     ]
 
     /**
-     * 顶部卡片：运行中 / 今日执行 / 日志占用 / 调度器
+     * 顶部统计卡片：简要文字描述，重要信息用 Tag 标识
      */
     renderStatCards() {
         const {stat, logSize} = this.state
@@ -369,9 +353,8 @@ export default class JobPage extends React.Component {
         const scheduler = stat.scheduler || {}
         const logWarn = !!logSize.warn
         const warnTip = logSize.warnMb
-            ? `已超过告警阈值 ${logSize.warnMb} MB。可缩短 sys.job-log-retain-days，或让任务按天/小时聚合日志。`
+            ? `已超过告警阈值 ${logSize.warnMb} MB，可缩短 sys.job-log-retain-days 以减少日志占用。`
             : null
-        const warnColor = {color: 'var(--oa-color-error, #ff4d4f)'}
         const schedulerTip = scheduler.error ? null
             : <div style={{lineHeight: 1.7, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'}}>
                 <div>schedulerName: {scheduler.schedulerName || '-'}</div>
@@ -382,40 +365,22 @@ export default class JobPage extends React.Component {
                 <div>threadPoolSize: {scheduler.threadPoolSize ?? '-'} · jobsExecuted: {scheduler.jobsExecuted ?? 0}</div>
             </div>
 
-        const cardBodyStyle = {padding: '8px 12px'}
-        const valueStyle = {fontSize: 20, lineHeight: '28px'}
+        const schedulerStatus = scheduler.error ? '异常' : (scheduler.standby ? '待机' : (scheduler.started ? '运行中' : '未启动'))
 
-        return <div style={statCardsStyle}>
-            <Card size='small' styles={{body: cardBodyStyle}}>
-                <Statistic title='运行中' value={stat.runningCount} suffix='个' styles={{content: valueStyle}}/>
-                <div style={statHintStyle}>调度器已执行 {scheduler.jobsExecuted ?? 0} 次</div>
-            </Card>
-            <Card size='small' styles={{body: cardBodyStyle}}>
-                <Statistic title='今日执行' value={stat.todayExecuteCount} suffix='次' styles={{content: valueStyle}}/>
-                <div style={stat.todayFailCount > 0 ? statWarnStyle : statHintStyle}>
-                    今日失败 {stat.todayFailCount} 次
-                </div>
-            </Card>
-            <Card size='small' styles={{body: cardBodyStyle}}>
-                <Statistic title='日志占用' value={formatBytes(logSize.bytes)}
-                           styles={{content: {...valueStyle, ...(logWarn ? warnColor : {})}}}/>
-                <Tooltip title={logWarn ? warnTip : null}>
-                    <div style={logWarn ? statWarnStyle : statHintStyle}>
-                        {logSize.files} 个日志文件{logSize.warnMb ? ` · 阈值 ${logSize.warnMb} MB` : ''}
-                    </div>
-                </Tooltip>
-            </Card>
-            <Card size='small' styles={{body: cardBodyStyle}}>
-                <Statistic title='调度器'
-                           value={scheduler.error ? '异常' : `Quartz ${scheduler.version || '-'}`}
-                           styles={{content: {...valueStyle, fontSize: 16, ...(scheduler.error ? warnColor : {})}}}/>
-                <Tooltip title={schedulerTip}>
-                    <div style={scheduler.error ? statWarnStyle : statHintStyle}>
-                        {scheduler.error || `${scheduler.standby ? '待机' : (scheduler.started ? '运行中' : '未启动')}`
-                            + ` · ${scheduler.jobStoreClass || '-'} · 线程 ${scheduler.threadPoolSize ?? '-'}`}
-                    </div>
-                </Tooltip>
-            </Card>
+        return <div style={statBarStyle}>
+            <div style={{fontSize: 14, lineHeight: '22px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%'}}>
+                今日 {stat.todayExecuteCount} 次
+                {stat.todayFailCount > 0 && <Tag color="error" style={{marginLeft: 4}}>失败 {stat.todayFailCount}</Tag>}
+                <span style={{margin: '0 8px', color: 'var(--oa-color-text-quaternary, rgba(0,0,0,0.25))'}}>|</span>
+                日志 {formatBytes(logSize.bytes)} · {logSize.files} 文件
+                {logWarn && <Tooltip title={warnTip}><Tag color="error" style={{marginLeft: 4}}>超限</Tag></Tooltip>}
+                <span style={{margin: '0 8px', color: 'var(--oa-color-text-quaternary, rgba(0,0,0,0.25))'}}>|</span>
+                运行中 {stat.runningCount > 0 ? <Tag color="processing">{stat.runningCount}</Tag> : '0'}
+                <span style={{marginLeft: 8}}>线程 <Tag color="blue">{scheduler.threadPoolSize ?? '-'}</Tag></span>
+                {scheduler.error
+                    ? <Tag color="error">异常</Tag>
+                    : <Tooltip title={schedulerTip}><Tag color={scheduler.started && !scheduler.standby ? 'success' : 'default'}>{schedulerStatus}</Tag></Tooltip>}
+            </div>
         </div>
     }
 
@@ -458,11 +423,6 @@ export default class JobPage extends React.Component {
                            extra={this.state.cronDesc ? `解析：${this.state.cronDesc}` : null}
                            rules={[{required: true}]}>
                     <CronEditor presets={cronPresets} placeholder='如 0 */5 * * * ?'/>
-                </Form.Item>
-
-                <Form.Item label='执行记录方式' name='logAggregation' initialValue='PER_RUN'
-                           help='控制执行记录与日志文件的粒度。高频任务建议选择「每天一份记录」：一天只保留一条执行记录，日志文件按天合并'>
-                    <FieldDictSelect typeCode='jobLogAggregation'/>
                 </Form.Item>
 
                 <Form.Item label='启用' name='enabled' valuePropName='checked' rules={[{required: true}]}>
