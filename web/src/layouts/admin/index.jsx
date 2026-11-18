@@ -1,5 +1,6 @@
 import React from 'react';
-import {ConfigProvider, Layout, Menu, Skeleton, Watermark} from 'antd';
+import {ConfigProvider, Drawer, Layout, Menu, Skeleton, Watermark} from 'antd';
+import {CloseOutlined, MenuOutlined} from '@ant-design/icons';
 
 import "./index.less"
 import {HttpClient, NamedIcon, PageUtils, GlobalData, TreeUtils, history, Link, ARTICLE_HEADER_LEFT, OrgSwitcher, getSiderThemeConfig, getLayoutMode, EventBus} from "../../framework";
@@ -26,25 +27,42 @@ export default class AdminLayout extends React.Component {
 
         currentMenuKey: null,
 
-        topMenus: [],
-        sideMenus: [],
-        activeTopMenuKey: null,
+        // 统一左侧菜单：直接渲染完整菜单树，按当前页面自动展开所属目录
+        openKeys: [],
 
         siteInfo: {},
 
         headerLeftArticles: [],
 
         layoutMode: getLayoutMode(),
+
+        // 手机端：左侧栏完全收起，改由顶栏汉堡按钮 + 抽屉展示菜单
+        isMobile: typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+            ? window.matchMedia('(max-width: 768px)').matches
+            : false,
+        mobileMenuOpen: false,
     }
 
 
     unsubscribeLayout = null;
     unsubscribeSiteInfo = null;
     unsubscribeShortcuts = null;
+    mobileMediaQuery = null;
+    handleMobileMediaChange = null;
 
     componentDidMount() {
-        // 判断是否手机端，自动收起菜单
-
+        // 窄屏监听：进入/退出手机布局时切换左侧栏与汉堡抽屉
+        if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+            this.mobileMediaQuery = window.matchMedia('(max-width: 768px)');
+            this.handleMobileMediaChange = e => {
+                this.setState({isMobile: e.matches});
+                // 退回桌面宽度时关闭抽屉，避免残留遮罩
+                if (!e.matches) {
+                    this.setState({mobileMenuOpen: false});
+                }
+            };
+            this.mobileMediaQuery.addEventListener('change', this.handleMobileMediaChange);
+        }
 
         const siteInfo = GlobalData.getSiteInfo();
         const loginInfo = GlobalData.getLoginInfo()
@@ -78,8 +96,15 @@ export default class AdminLayout extends React.Component {
         if (this.unsubscribeShortcuts) {
             this.unsubscribeShortcuts();
         }
+        if (this.mobileMediaQuery && this.handleMobileMediaChange) {
+            this.mobileMediaQuery.removeEventListener('change', this.handleMobileMediaChange);
+        }
     }
 
+
+    openMobileMenu = () => this.setState({mobileMenuOpen: true});
+
+    closeMobileMenu = () => this.setState({mobileMenuOpen: false});
 
     loadShortcuts = () => {
         HttpClient.get('admin/user-center/shortcuts', null, {toastError: false})
@@ -103,126 +128,60 @@ export default class AdminLayout extends React.Component {
                 item.icon = <NamedIcon name={item.icon || 'AppstoreOutlined'} style={{fontSize: 16}}/>
             })
 
-            const {topMenus} = this.classifyMenus(menuTree);
-
-            // 确定当前活跃的顶部菜单和侧边菜单
-            let activeTopMenuKey = null;
-            let sideMenus = [];
+            // 统一左侧菜单：不再按顶部菜单切分，直接用完整菜单树
             let currentMenuKey = null;
-
             if (pathname !== "" && pathname !== "/") {
                 const menuDef = pathMenuMap[pathname];
                 if (menuDef) {
                     currentMenuKey = menuDef.id;
-                    const matched = this.findActiveTopMenu(topMenus, menuDef, menuMap);
-                    if (matched) {
-                        activeTopMenuKey = matched.key;
-                        sideMenus = matched.children || [];
-                    }
                 }
             }
+            // 默认展开当前页面所属的各级目录，否则 inline 模式下选中项不可见
+            const openKeys = currentMenuKey ? (this.findAncestorKeys(menuTree, currentMenuKey) || []) : [];
 
-            // 默认选中第一个顶部菜单
-            if (!activeTopMenuKey && topMenus.length > 0) {
-                activeTopMenuKey = topMenus[0].key;
-                sideMenus = topMenus[0].children || [];
-            }
-
-            this.setState({menuTree, pathMenuMap, topMenus, sideMenus, activeTopMenuKey, currentMenuKey})
+            this.setState({menuTree, pathMenuMap, currentMenuKey, openKeys})
             this.setState({menuLoading: false})
 
         }).catch(err => {
             console.error('加载菜单失败:', err)
-            this.setState({menuTree: [], topMenus: [], sideMenus: []})
+            this.setState({menuTree: [], openKeys: []})
             this.setState({menuLoading: false})
         })
     }
     actionRef = React.createRef()
 
-    classifyMenus = (menuTree) => {
-        const topMenus = [];
-        const leafRootNodes = [];
-
-        (menuTree || []).forEach(node => {
-            if (node.type === 'divider') {
-                return
+    /** 查找某个菜单项的所有祖先 key，用于默认展开 inline 菜单对应目录 */
+    findAncestorKeys = (nodes, key, chain = []) => {
+        for (const node of nodes || []) {
+            if (node.key === key) {
+                return chain;
             }
-            const isDir = node.type === 'directory' || (node.children && node.children.length > 0);
-            if (isDir) {
-                topMenus.push(node);
-            } else {
-                leafRootNodes.push(node);
+            const found = this.findAncestorKeys(node.children, key, [...chain, node.key]);
+            if (found) {
+                return found;
             }
-        });
-
-        if (leafRootNodes.length > 0) {
-            const defaultGroup = {
-                key: '_default_group',
-                label: '业务模块',
-                icon: <NamedIcon name="AppstoreOutlined" style={{fontSize: 16}}/>,
-                children: leafRootNodes,
-                type: 'directory',
-            };
-            topMenus.unshift(defaultGroup);
-        }
-
-        return {topMenus};
-    }
-
-    findActiveTopMenu = (topMenus, menuDef, menuMap) => {
-        if (!menuDef) return null;
-
-        // 从 menuDef 的 pid 链向上查找匹配的 topMenu
-        let pid = menuDef.pid || menuDef.parentKey;
-        while (pid) {
-            const match = topMenus.find(t => t.key === pid);
-            if (match) return match;
-            const parent = menuMap[pid];
-            pid = parent ? (parent.pid || parent.parentKey) : null;
         }
         return null;
     }
 
-    onTopMenuClick = ({key}) => {
-        const topMenu = this.state.topMenus.find(t => t.key === key);
-        if (!topMenu) return;
-
-        const sideMenus = topMenu.children || [];
-        this.setState({activeTopMenuKey: key, sideMenus});
+    /** 展开某个菜单项所属的各级目录，同时保留用户已展开的其它目录 */
+    expandForMenu = (key) => {
+        const ancestors = this.findAncestorKeys(this.state.menuTree, key) || [];
+        return Array.from(new Set([...this.state.openKeys, ...ancestors]));
     }
 
     onLeftMenuClick = ({key}) => {
         const menu = this.state.menuMap[key];
         if (!menu) return;
         const {path} = menu;
-        this.setState({currentMenuKey: key});
+        // 手机端抽屉内点击菜单后自动收起抽屉，并展开新页面所属目录
+        this.setState({currentMenuKey: key, mobileMenuOpen: false, openKeys: this.expandForMenu(key)});
         PageUtils.open(path);
     }
 
+    // 顶部菜单已移除，保留此回调字段以兼容业务项目的 headerExtra / showOrgSwitcher 签名
     getActiveTopMenu() {
-        const {topMenus, activeTopMenuKey} = this.state;
-        if (!activeTopMenuKey || !topMenus) return null;
-        return topMenus.find(t => t.key === activeTopMenuKey) || null;
-    }
-
-    renderTopMenu = () => {
-        if (this.state.menuLoading) return null;
-        const {topMenus, activeTopMenuKey} = this.state;
-        if (!topMenus || topMenus.length === 0) return null;
-        return (
-            <nav className="top-nav">
-                {topMenus.map(item => (
-                    <button
-                        key={item.key}
-                        type="button"
-                        className={'top-nav-item' + (item.key === activeTopMenuKey ? ' active' : '')}
-                        onClick={() => this.onTopMenuClick({key: item.key})}
-                    >
-                        {item.label}
-                    </button>
-                ))}
-            </nav>
-        );
+        return null;
     }
 
     render() {
@@ -241,8 +200,9 @@ export default class AdminLayout extends React.Component {
         const headerClassName = 'header' + (this.props.headerExtraStretch && hasHeaderExtra ? ' has-stretch-extra' : '');
 
 return <Layout className='main-layout'>
-             {/* 侧栏单独套暗色算法，使分割线/边框在深色底上可见，并按预设覆盖侧栏底色 */}
-             <ConfigProvider theme={getSiderThemeConfig()}>
+             {/* 手机端不渲染左侧栏，改由顶栏汉堡按钮 + 抽屉展示菜单；桌面端保留原侧栏折叠行为 */}
+             {!this.state.isMobile && (
+                 <ConfigProvider theme={getSiderThemeConfig()}>
                  <Sider id='left-sider'
                         width={180}
                         collapsible
@@ -262,11 +222,15 @@ return <Layout className='main-layout'>
                     {this.renderLeftMenu()}
 
                 </Sider>
-             </ConfigProvider>
+                 </ConfigProvider>
+             )}
 
             <Layout style={{flex: 1, overflow: 'hidden'}}>
                 <Header className={headerClassName}>
-                    {this.renderTopMenu()}
+                    <button type="button" className="item mobile-menu-trigger" aria-label="打开菜单"
+                            onClick={this.openMobileMenu}>
+                        <MenuOutlined/>
+                    </button>
                     {this.state.headerLeftArticles.map(a => (
                         <button key={a.code} type="button" className='item'
                                 onClick={() => PageUtils.open('/article/' + a.code)}>{a.title}</button>
@@ -284,31 +248,21 @@ return <Layout className='main-layout'>
                 </Content>
 
             </Layout>
+
+            {this.renderMobileDrawer()}
         </Layout>
     }
 
 
-    /** 点击快捷菜单时同步顶部/左侧菜单的当前项，避免跨一级菜单跳转后侧栏状态不跟随 */
+    /** 点击快捷菜单时同步左侧菜单的选中项并展开所属目录 */
     activateMenuForShortcut(shortcut) {
-        const {topMenus, menuMap} = this.state;
-        const menuDef = menuMap[shortcut.id];
-        let matched = (topMenus || []).find(topMenu =>
-            (topMenu.children || []).some(child => child.key === shortcut.id));
-        if (!matched && menuDef) {
-            matched = this.findActiveTopMenu(topMenus, menuDef, menuMap);
-        }
-        if (matched) {
-            this.setState({
-                activeTopMenuKey: matched.key,
-                sideMenus: matched.children || [],
-                currentMenuKey: shortcut.id,
-            });
-        } else {
-            this.setState({currentMenuKey: shortcut.id});
-        }
+        this.setState({
+            currentMenuKey: shortcut.id,
+            openKeys: this.expandForMenu(shortcut.id),
+        });
     }
 
-    renderShortcutMenu() {
+    renderShortcutMenu(inDrawer = false) {
         const {shortcuts} = this.state;
         if (!shortcuts || shortcuts.length === 0) {
             return null;
@@ -323,7 +277,7 @@ return <Layout className='main-layout'>
         return <div className='shortcut-menu'>
             <div className='shortcut-menu-title'>快捷菜单</div>
             <Menu items={items}
-                  theme='dark'
+                  theme={inDrawer ? 'light' : 'dark'}
                   mode="inline"
                   className='shortcut-menu-list'
                   selectable={false}
@@ -332,6 +286,7 @@ return <Layout className='main-layout'>
                       const shortcut = shortcuts.find(item => item.id === key);
                       if (shortcut?.path) {
                           this.activateMenuForShortcut(shortcut);
+                          this.closeMobileMenu();
                           PageUtils.open(shortcut.path);
                       }
                   }}
@@ -339,19 +294,54 @@ return <Layout className='main-layout'>
         </div>;
     }
 
-    renderLeftMenu() {
+    renderLeftMenu(inDrawer = false) {
         if(this.state.menuLoading){
             return <div style={{padding: 16}}><Skeleton active title={false} paragraph={{rows: 8}} /></div>;
         }
-        return <Menu items={this.state.sideMenus}
-                     theme='dark'
+        return <Menu items={this.state.menuTree}
+                     theme={inDrawer ? 'light' : 'dark'}
                      mode="inline"
                      className='left-menu'
                      onClick={this.onLeftMenuClick}
                      selectedKeys={this.state.currentMenuKey ? [this.state.currentMenuKey] : []}
+                     openKeys={this.state.openKeys}
+                     onOpenChange={keys => this.setState({openKeys: keys})}
                      inlineIndent={16}
         >
         </Menu>;
+    }
+
+    /** 手机端抽屉：复刻侧栏头部 + 快捷菜单 + 完整左侧菜单树 */
+    renderMobileDrawer = () => {
+        const {siteInfo} = this.state;
+        const siderTitle = (siteInfo.shortTitle || '').trim() || siteInfo.title || '首页';
+        return (
+            <Drawer className='mobile-menu-drawer'
+                    placement='left'
+                    size={280}
+                    closable={false}
+                    open={this.state.mobileMenuOpen}
+                    onClose={this.closeMobileMenu}
+                    styles={{body: {padding: 0}}}>
+                <div className='mobile-drawer-header'>
+                    <button type="button" className='logo-img'
+                            onClick={() => { this.closeMobileMenu(); history.push('/'); }}>
+                        <img src="./logo.png" alt={siteInfo.title || '首页'}/>
+                    </button>
+                    <h3>
+                        <Link to="/" onClick={this.closeMobileMenu} title={siteInfo.title || siderTitle}>
+                            {siderTitle}
+                        </Link>
+                    </h3>
+                    <button type="button" className='mobile-drawer-close' aria-label='关闭菜单'
+                            onClick={this.closeMobileMenu}>
+                        <CloseOutlined/>
+                    </button>
+                </div>
+                {this.renderShortcutMenu(true)}
+                {this.renderLeftMenu(true)}
+            </Drawer>
+        );
     }
 
     renderCenterContent = () => {

@@ -1,9 +1,10 @@
 ## 框架预设菜单结构。业务项目可在 resources/ 下加 menu-*.yml 扩展或覆盖。
 ## 同级菜单按声明顺序排列（seq 相同时保持 YAML 顺序）；type: divider 的条目渲染为左侧菜单分隔线（无需 name/path），用于对菜单分组。
+## 系统管理使用足够大的 seq，确保默认排在所有业务菜单之后；业务菜单请使用较小的 seq。
 menus:
   sys:
     name: 系统管理
-    seq: 10000
+    seq: 999999
   ## ----- 权限与组织 -----
   sys-user:
     pid: sys

@@ -21,6 +21,7 @@ const baseConfigProps = {
 };
 
 export interface HeaderExtraContext {
+    /** 框架已移除顶部菜单，此字段恒为 null，保留以兼容业务项目旧签名 */
     activeTopMenu: { key: string; label: string } | null;
     loginInfo: { id: string; name: string; account: string };
 }
@@ -42,7 +43,7 @@ function AppBridge() {
 interface LayoutsProps {
     headerExtra?: (context: HeaderExtraContext) => React.ReactNode;
     /**
-     * headerExtra 是否撑满顶栏剩余空间（紧跟一级菜单右侧）。
+     * headerExtra 是否撑满顶栏剩余空间。
      * 默认 false = 现有行为：headerExtra 固定在 HeaderRight 左侧。
      */
     headerExtraStretch?: boolean;

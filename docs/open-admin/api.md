@@ -326,8 +326,8 @@ mailService.sendAsync(MailMessage.builder()
 
 | 属性 | 类型 | 说明 |
 |---|---|---|
-| `headerExtra` | `(context: HeaderExtraContext) => React.ReactNode` | 顶栏额外内容，默认渲染在 `HeaderRight` 左侧；`context` 含 `activeTopMenu`、`loginInfo` |
-| `headerExtraStretch` | `boolean` | 为 `true` 时 `headerExtra` 紧跟一级菜单并撑满顶栏剩余空间；默认 `false`（保持原位置）。需要常驻条（如预警滚动条）时使用，不要覆盖 `.top-nav` |
+| `headerExtra` | `(context: HeaderExtraContext) => React.ReactNode` | 顶栏额外内容，默认渲染在 `HeaderRight` 左侧；`context` 含 `activeTopMenu`、`loginInfo`。框架已移除顶部菜单，`activeTopMenu` 恒为 `null`，保留字段以兼容旧签名 |
+| `headerExtraStretch` | `boolean` | 为 `true` 时 `headerExtra` 撑满顶栏剩余空间；默认 `false`（保持原位置）。需要常驻条（如预警滚动条）时使用 |
 | `showOrgSwitcher` | `(context: HeaderExtraContext) => boolean` | 是否显示组织机构切换器 |
 | `colors` | `Partial<ThemeColors>` | 主题颜色基线，见 [config.md](config.md) |
 
