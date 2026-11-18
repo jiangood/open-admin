@@ -22,12 +22,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -165,96 +164,68 @@ class BaseJobTest {
     }
 
     @Test
-    void execute_dailyAggregation_firstRunShouldCreateBucketLog() throws Exception {
+    void execute_shouldIgnoreAggregationAndCreatePerRunLog() throws Exception {
         Date fireTime = Date.from(Instant.parse("2026-10-19T10:15:30Z"));
         stubContext(fireTime);
-        String bucket = bucketOf(fireTime, "yyyy-MM-dd");
         when(sysJobRepository.findByName("job-1")).thenReturn(existingJob(JobLogAggregation.DAILY));
-        when(sysJobLogRepository.findFirstBySysJob_IdAndLogBucket("job-1", bucket)).thenReturn(Optional.empty());
 
         job.execute(context);
 
+        verify(sysJobLogRepository, never()).findFirstBySysJob_IdAndLogBucket(anyString(), anyString());
         ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
         verify(sysJobLogRepository, times(2)).save(captor.capture());
         SysJobLog saved = captor.getValue();
-        assertEquals(bucket, saved.getLogBucket());
+        assertNull(saved.getLogBucket());
         assertEquals(1, saved.getExecuteCount());
         assertEquals(0, saved.getFailCount());
         assertTrue(saved.getSuccess());
     }
 
     @Test
-    void execute_dailyAggregation_shouldReuseExistingBucketLog() throws Exception {
+    void execute_shouldSetBeginTimeToFireTime() throws Exception {
         Date fireTime = Date.from(Instant.parse("2026-10-19T10:15:30Z"));
         stubContext(fireTime);
-        String bucket = bucketOf(fireTime, "yyyy-MM-dd");
-        LocalDateTime begin = LocalDateTime.ofInstant(fireTime.toInstant(), ZoneId.systemDefault()).minusMinutes(5);
-
-        SysJobLog existing = new SysJobLog();
-        existing.setId("log-9");
-        existing.setBeginTime(begin);
-        existing.setExecuteCount(1);
-        existing.setFailCount(0);
-        existing.setTotalRunTime(10L);
-
+        LocalDateTime begin = LocalDateTime.ofInstant(fireTime.toInstant(), ZoneId.systemDefault());
         when(sysJobRepository.findByName("job-1")).thenReturn(existingJob(JobLogAggregation.DAILY));
-        when(sysJobLogRepository.findFirstBySysJob_IdAndLogBucket("job-1", bucket)).thenReturn(Optional.of(existing));
 
         job.execute(context);
 
         ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
-        verify(sysJobLogRepository).save(captor.capture());
-        SysJobLog saved = captor.getValue();
-        assertEquals("log-9", saved.getId());
-        assertEquals(2, saved.getExecuteCount());
-        assertTrue(saved.getSuccess());
-        assertTrue(saved.getTotalRunTime() >= 10L);
-        // 复用周期记录时保留第一次执行时间
-        assertEquals(begin, saved.getBeginTime());
+        verify(sysJobLogRepository, times(2)).save(captor.capture());
+        assertEquals(begin, captor.getValue().getBeginTime());
     }
 
     @Test
-    void execute_hourlyAggregation_shouldUseHourBucket() throws Exception {
+    void execute_hourlyAggregation_shouldBeIgnored() throws Exception {
         Date fireTime = Date.from(Instant.parse("2026-10-19T10:15:30Z"));
         stubContext(fireTime);
-        String bucket = bucketOf(fireTime, "yyyy-MM-dd-HH");
         when(sysJobRepository.findByName("job-1")).thenReturn(existingJob(JobLogAggregation.HOURLY));
-        when(sysJobLogRepository.findFirstBySysJob_IdAndLogBucket("job-1", bucket)).thenReturn(Optional.empty());
 
         job.execute(context);
 
-        verify(sysJobLogRepository).findFirstBySysJob_IdAndLogBucket("job-1", bucket);
+        verify(sysJobLogRepository, never()).findFirstBySysJob_IdAndLogBucket(anyString(), anyString());
+        ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
+        verify(sysJobLogRepository, times(2)).save(captor.capture());
+        assertNull(captor.getValue().getLogBucket());
     }
 
     @Test
-    void execute_aggregation_shouldCountFailure() throws Exception {
+    void execute_shouldMarkPerRunLogFailedWhenJobThrows() throws Exception {
         Date fireTime = Date.from(Instant.parse("2026-10-19T10:15:30Z"));
         stubContext(fireTime);
-        String bucket = bucketOf(fireTime, "yyyy-MM-dd");
-
-        SysJobLog existing = new SysJobLog();
-        existing.setId("log-9");
-        existing.setExecuteCount(3);
-        existing.setFailCount(0);
-        existing.setTotalRunTime(100L);
-
         when(sysJobRepository.findByName("job-1")).thenReturn(existingJob(JobLogAggregation.DAILY));
-        when(sysJobLogRepository.findFirstBySysJob_IdAndLogBucket("job-1", bucket)).thenReturn(Optional.of(existing));
         job.fail = true;
 
         job.execute(context);
 
+        verify(sysJobLogRepository, never()).findFirstBySysJob_IdAndLogBucket(anyString(), anyString());
         ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
-        verify(sysJobLogRepository).save(captor.capture());
+        verify(sysJobLogRepository, times(2)).save(captor.capture());
         SysJobLog saved = captor.getValue();
-        assertEquals(4, saved.getExecuteCount());
+        assertNull(saved.getLogBucket());
+        assertEquals(1, saved.getExecuteCount());
         assertEquals(1, saved.getFailCount());
         assertFalse(saved.getSuccess());
-    }
-
-    private static String bucketOf(Date fireTime, String pattern) {
-        return LocalDateTime.ofInstant(fireTime.toInstant(), ZoneId.systemDefault())
-                .format(DateTimeFormatter.ofPattern(pattern));
     }
 
     static class TestJob extends BaseJob {

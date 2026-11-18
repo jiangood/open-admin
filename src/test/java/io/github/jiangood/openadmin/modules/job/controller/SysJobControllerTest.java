@@ -126,7 +126,7 @@ class SysJobControllerTest {
     }
 
     @Test
-    void create_shouldPassLogAggregationToService() throws Exception {
+    void create_shouldNormalizeLogAggregationToPerRun() throws Exception {
         JobReq req = new JobReq();
         req.setName("job-1");
         req.setJobClass(TestTypedJob.class.getName());
@@ -136,7 +136,7 @@ class SysJobControllerTest {
 
         org.mockito.ArgumentCaptor<SysJob> captor = org.mockito.ArgumentCaptor.forClass(SysJob.class);
         verify(service).save(captor.capture(), org.mockito.ArgumentMatchers.isNull());
-        assertEquals(JobLogAggregation.DAILY, captor.getValue().getLogAggregation());
+        assertEquals(JobLogAggregation.PER_RUN, captor.getValue().getLogAggregation());
     }
 
     @Test

@@ -200,7 +200,7 @@ class JobRegistrationManagerTest {
         assertEquals("覆盖后的名称", saved.getName());
         assertEquals("0 0 5 * * ?", saved.getCron());
         assertTrue(saved.getEnabled());
-        assertEquals(JobLogAggregation.DAILY, saved.getLogAggregation());
+        assertEquals(JobLogAggregation.PER_RUN, saved.getLogAggregation());
     }
 
     @Test
