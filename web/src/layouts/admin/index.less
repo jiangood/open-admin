@@ -215,7 +215,26 @@
 }
 
 @media (max-width: 768px) {
-  .top-nav {
-    display: none !important;
+  .main-layout .header {
+    padding: 0 8px;
+  }
+
+  /* 手机端同样显示一级菜单，过多时横向滚动，避免多顶部菜单无法通过顶栏切换 */
+  .main-layout .header .top-nav {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-layout .header .top-nav .top-nav-item {
+    flex: 0 0 auto;
+    padding: 0 10px;
+  }
+
+  /* 手机端右上角只保留明暗主题切换和头像，其余入口隐藏 */
+  .main-layout .header-right .pc-only {
+    display: none;
   }
 }

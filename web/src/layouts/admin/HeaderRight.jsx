@@ -81,7 +81,7 @@ export class HeaderRight extends React.Component {
         const title = isTabs ? '切换为单页模式' : '切换为页签模式';
         const Icon = isTabs ? FileOutlined : ProfileOutlined;
         return (
-            <button type="button" className='item' title={title} aria-label={title}
+            <button type="button" className='item pc-only' title={title} aria-label={title}
                     onClick={() => toggleLayoutMode()}>
                 <Icon/>
             </button>
@@ -90,7 +90,7 @@ export class HeaderRight extends React.Component {
 
     renderThemeSettings = () => {
         return (
-            <button type="button" className='item' title="界面设置" aria-label="界面设置"
+            <button type="button" className='item pc-only' title="界面设置" aria-label="界面设置"
                     onClick={() => this.setState({themeSettingsVisible: true})}>
                 <BgColorsOutlined/>
             </button>
@@ -122,7 +122,7 @@ export class HeaderRight extends React.Component {
 
         return <div className='header-right'>
             {headerArticles.map(a => (
-                <button key={a.code} type="button" className='item'
+                <button key={a.code} type="button" className='item pc-only'
                         onClick={() => this.openArticle(a.code)}>
                     {a.title}
                 </button>
@@ -148,7 +148,7 @@ export class HeaderRight extends React.Component {
             }}>
                 <div className='item' style={{cursor: 'pointer'}}>
                     <Avatar size="default" src={avatarSrc || undefined} icon={<UserOutlined/>}/>
-                    <span style={{marginLeft: 8}}>{info.name}</span>
+                    <span className='pc-only' style={{marginLeft: 8}}>{info.name}</span>
                 </div>
             </Dropdown>
 

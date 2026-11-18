@@ -39,8 +39,15 @@ let defaultLayoutMode: LayoutMode = DEFAULT_LAYOUT_MODE;
 
 let currentLayoutMode: LayoutMode = readStoredLayoutMode() ?? DEFAULT_LAYOUT_MODE;
 
-/** 当前页签模式：'tabs' 多页签 / 'single' 单页 */
+/** 手机等窄屏视口：页签栏会挤占本就紧张的水平空间，固定使用单页模式 */
+function isMobileViewport(): boolean {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return false;
+    return window.matchMedia('(max-width: 768px)').matches;
+}
+
+/** 当前页签模式：'tabs' 多页签 / 'single' 单页（窄屏固定 single） */
 export function getLayoutMode(): LayoutMode {
+    if (isMobileViewport()) return 'single';
     return currentLayoutMode;
 }
 
