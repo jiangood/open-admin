@@ -1,5 +1,6 @@
 import React from 'react'
 import { Button, Drawer } from 'antd'
+import { FullscreenExitOutlined, FullscreenOutlined } from '@ant-design/icons'
 import { TaskLogViewer, TaskLogTransport } from '../TaskLogViewer'
 import { UrlUtils } from '../../utils'
 
@@ -28,7 +29,8 @@ export interface TaskLogDrawerProps {
  * <p>
  * HTTP 模式走 logviewer（logKey 未指定时默认 task/{logId}）；WS 模式连接 wsUrl 实时 tail。
  */
-export default class TaskLogDrawer extends React.Component<TaskLogDrawerProps> {
+export default class TaskLogDrawer extends React.Component<TaskLogDrawerProps, { fullScreen: boolean }> {
+    state = { fullScreen: false }
 
     /** 下载地址：优先使用显式 url，否则按 logKey/logId 拼 raw 日志接口 */
     private getDownloadUrl(): string | null {
@@ -54,19 +56,37 @@ export default class TaskLogDrawer extends React.Component<TaskLogDrawerProps> {
         link.remove()
     }
 
+    private toggleFullScreen = () => {
+        this.setState(s => ({ fullScreen: !s.fullScreen }))
+    }
+
+    private handleClose = () => {
+        this.setState({ fullScreen: false })
+        this.props.onClose?.()
+    }
+
     render() {
-        const { open, logId, logKey, url, title, onClose, onEnd, width, running, transport, wsUrl } = this.props
+        const { open, logId, logKey, url, title, onEnd, width, running, transport, wsUrl } = this.props
+        const { fullScreen } = this.state
         const bodyHeight = typeof window !== 'undefined' ? window.innerHeight - 55 : 600
         const hasTarget = !!(logId || logKey || url)
         const canDownload = !!this.getDownloadUrl()
-        return <Drawer title={title || '任务日志'} size={width || 860} open={open}
-                       onClose={onClose}
+        const drawerSize = fullScreen ? '100vw' : (width || 860)
+        return <Drawer title={title || '任务日志'} size={drawerSize} open={open}
+                       onClose={this.handleClose}
                        extra={
                            <div style={{display: 'flex', gap: 8, alignItems: 'center'}}>
+                               <Button
+                                   size="small"
+                                   type="text"
+                                   onClick={this.toggleFullScreen}
+                                   title={fullScreen ? '退出全屏' : '全屏'}
+                                   icon={fullScreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+                               />
                                {canDownload && (
                                    <Button size="small" type="text" onClick={this.handleDownload}>下载日志</Button>
                                )}
-                               <Button size="small" type="text" onClick={onClose}>关闭</Button>
+                               <Button size="small" type="text" onClick={this.handleClose}>关闭</Button>
                            </div>
                        }
                        styles={{ body: { padding: 12, height: bodyHeight, overflow: 'hidden' } }}>
