@@ -11,6 +11,7 @@ import {
     Select,
     Space,
     Switch,
+    Tabs,
     Tag,
     Tooltip,
     Typography,
@@ -32,7 +33,7 @@ const groupOf = (item) => (item.group === 'runtime' ? 'runtime' : item.group ===
  * 系统参数页。
  *
  * 配置项由后端 ConfigProvider 声明（分组 / 类型 / 默认值 / 范围 / 说明），
- * 本页面只负责按元数据渲染、收集修改项并提交差异；右侧只读卡片展示
+ * 本页面只负责按元数据渲染、收集修改项并提交差异；「系统信息」页签展示
  * 来自 application.yml / 代码默认值的启动期参数与运行时状态。
  */
 export default class SysConfigPage extends React.Component {
@@ -314,50 +315,43 @@ export default class SysConfigPage extends React.Component {
     }
 
     /**
-     * 只读参数固定在页面右侧，占约三分之一宽度，长路径 / JDBC URL 不至于挤成一列；窄屏时自然堆叠到表单下方。
-     *
-     * 运行时状态、启动期配置分成两张卡片，避免性质不同的值混在一张卡里；
-     * 版本信息只有两项且不含配置键，压成一行小字放在运行时状态卡片底部，不单独占一张卡。
-     * 两张卡片的每一项都按「配置项（含配置键）在左、值右对齐」单行排布，长值只在值区域换行，
-     * 而不是 antd Descriptions：垂直 Descriptions 的标签与值同为正文级字号，技术配置键夹在中间会让人分不清哪行是值。
-     * 运行时状态（运行时长 / 连接池）与版本信息不是 yml 配置项，只显示标签和值。
+     * 只读参数：运行时状态与启动期配置分成两张卡片，版本信息压成一行小字放在运行时状态卡片底部。
+     * 两张卡片的每一项都按「配置项（含配置键）在左、值右对齐」单行排布，长值只在值区域换行。
      */
-    renderSystemCards = () => {
+    renderSystemPanel = () => {
         const {systemParams} = this.state
         if (systemParams.length === 0) {
-            return null
+            return <Card loading/>
         }
         const runtime = systemParams.filter(item => groupOf(item) === 'runtime')
         const version = systemParams.filter(item => groupOf(item) === 'version')
         const startup = systemParams.filter(item => groupOf(item) !== 'runtime' && groupOf(item) !== 'version')
         const versionText = version.map(item => `${item.label} ${item.value || '-'}`).join(' · ')
 
-        return <Col xs={24} xl={8}>
-            <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
-                {(runtime.length > 0 || versionText) && (
-                    <Card
-                        title="运行时状态"
-                        extra={<Typography.Text type="secondary" style={{fontSize: 12}}>
-                            每 {SYSTEM_POLL_INTERVAL / 1000} 秒刷新
-                        </Typography.Text>}
-                    >
-                        {runtime.map(item => this.renderSystemRow(item))}
-                        {versionText && (
-                            <div style={{paddingTop: 2}}>
-                                <Typography.Text type="secondary" style={{fontSize: 12, overflowWrap: 'anywhere'}}>
-                                    {versionText}
-                                </Typography.Text>
-                            </div>
-                        )}
-                    </Card>
-                )}
-                {startup.length > 0 && (
-                    <Card title="启动期配置" extra={<Tag style={{marginInlineEnd: 0}}>需重启</Tag>}>
-                        {startup.map(item => this.renderSystemRow(item))}
-                    </Card>
-                )}
-            </div>
-        </Col>
+        return <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+            {(runtime.length > 0 || versionText) && (
+                <Card
+                    title="运行时状态"
+                    extra={<Typography.Text type="secondary" style={{fontSize: 12}}>
+                        每 {SYSTEM_POLL_INTERVAL / 1000} 秒刷新
+                    </Typography.Text>}
+                >
+                    {runtime.map(item => this.renderSystemRow(item))}
+                    {versionText && (
+                        <div style={{paddingTop: 2}}>
+                            <Typography.Text type="secondary" style={{fontSize: 12, overflowWrap: 'anywhere'}}>
+                                {versionText}
+                            </Typography.Text>
+                        </div>
+                    )}
+                </Card>
+            )}
+            {startup.length > 0 && (
+                <Card title="启动期配置" extra={<Tag style={{marginInlineEnd: 0}}>需重启</Tag>}>
+                    {startup.map(item => this.renderSystemRow(item))}
+                </Card>
+            )}
+        </div>
     }
 
     /**
@@ -423,54 +417,69 @@ export default class SysConfigPage extends React.Component {
         // 首次加载显示骨架屏；切回 Tab 等刷新时保留现有内容，避免闪白
         const initialLoading = loading && groups.length === 0
 
-        return <Page>
-            <Row gutter={[16, 16]}>
-                <Col xs={24} xl={16}>
-                    <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
-                        {initialLoading && <Card loading style={{marginBottom: 16}}/>}
-                        <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
-                            {groups.map(group => (
-                                <Card key={group.code}
-                                      title={group.label}>
-                                    {group.description && (
-                                        <Typography.Text type="secondary"
-                                                         style={{display: 'block', fontSize: 12, marginBottom: 16}}>
-                                            {group.description}
-                                        </Typography.Text>
-                                    )}
-                                    <Row gutter={16}>
-                                        {group.items.map(this.renderItem)}
-                                    </Row>
-                                </Card>
-                            ))}
-                        </div>
-
-                        {groups.length > 0 && (
-                            <Space wrap style={{marginTop: 16}}>
-                                <Perm code='sys-config:update'>
-                                    <Button type="primary" loading={saving} disabled={!dirty} onClick={this.save}>
-                                        保存修改
-                                    </Button>
-                                </Perm>
-                                <Perm code='sys-config:update'>
-                                    <Popconfirm
-                                        title="恢复全部默认值？"
-                                        description="所有已修改的配置项都会回到默认值。"
-                                        disabled={!hasOverridden}
-                                        onConfirm={() => this.resetKeys([])}
-                                    >
-                                        <Button danger disabled={!hasOverridden}>全部恢复默认</Button>
-                                    </Popconfirm>
-                                </Perm>
-                                <Typography.Text type="secondary" style={{fontSize: 12}}>
-                                    配置默认值来自 application.yml 或代码声明
+        const configTab = (
+            <Form ref={this.formRef} layout="vertical" onValuesChange={this.onValuesChange}>
+                {initialLoading && <Card loading style={{marginBottom: 16}}/>}
+                <div style={{display: 'flex', flexDirection: 'column', gap: 16}}>
+                    {groups.map(group => (
+                        <Card key={group.code}
+                              title={group.label}>
+                            {group.description && (
+                                <Typography.Text type="secondary"
+                                                 style={{display: 'block', fontSize: 12, marginBottom: 16}}>
+                                    {group.description}
                                 </Typography.Text>
-                            </Space>
-                        )}
-                    </Form>
-                </Col>
-                {this.renderSystemCards()}
-            </Row>
+                            )}
+                            <Row gutter={16}>
+                                {group.items.map(this.renderItem)}
+                            </Row>
+                        </Card>
+                    ))}
+                </div>
+                {groups.length > 0 && (
+                    <div style={{
+                        position: 'sticky',
+                        bottom: -16,
+                        zIndex: 10,
+                        margin: '16px -16px -16px',
+                        padding: '12px 16px',
+                        borderTop: '1px solid var(--oa-color-border, #f0f0f0)',
+                        background: 'var(--oa-color-bg-container, #fff)',
+                    }}>
+                        <Space wrap>
+                            <Perm code='sys-config:update'>
+                                <Button type="primary" loading={saving} disabled={!dirty} onClick={this.save}>
+                                    保存修改
+                                </Button>
+                            </Perm>
+                            <Perm code='sys-config:update'>
+                                <Popconfirm
+                                    title="恢复全部默认值？"
+                                    description="所有已修改的配置项都会回到默认值。"
+                                    disabled={!hasOverridden}
+                                    onConfirm={() => this.resetKeys([])}
+                                >
+                                    <Button danger disabled={!hasOverridden}>全部恢复默认</Button>
+                                </Popconfirm>
+                            </Perm>
+                            <Typography.Text type="secondary" style={{fontSize: 12}}>
+                                配置默认值来自 application.yml 或代码声明
+                            </Typography.Text>
+                        </Space>
+                    </div>
+                )}
+            </Form>
+        )
+
+        return <Page>
+            <Tabs
+                defaultActiveKey="config"
+                destroyOnHidden={false}
+                items={[
+                    {key: 'config', label: '参数配置', children: configTab},
+                    {key: 'system', label: '系统信息', children: this.renderSystemPanel()},
+                ]}
+            />
         </Page>
     }
 }
