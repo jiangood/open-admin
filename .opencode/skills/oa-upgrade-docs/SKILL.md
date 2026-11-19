@@ -1,8 +1,3 @@
----
-name: oa-upgrade-docs
-description: 在业务项目中同步 open-admin 框架的 skills + docs —— 正式版从 GitHub Release 下载 framework-files.zip，预览版（SNAPSHOT）从对应 tag 的源码包提取，按规则覆盖写入到项目根目录。适用于以 Maven JAR + npm 包方式引入 open-admin 的业务项目。
----
-
 # oa-upgrade-docs — 框架文件同步指南
 
 ## 适用范围
@@ -24,12 +19,14 @@ description: 在业务项目中同步 open-admin 框架的 skills + docs —— 
 
 ## 版本通道与文件来源
 
-| 通道 | 版本示例 | tag | 下载地址 | 解包方式 |
-|---|---|---|---|---|
-| 正式版 | `3.4.0` | `v3.4.0` | `releases/download/v{VERSION}/framework-files.zip` | `unzip` |
-| 预览版 | `3.4.0-SNAPSHOT.1` | `snapshot-v3.4.0-1` | `archive/refs/tags/snapshot-v{BASE}-{BUILD}.tar.gz` | `tar --strip-components=1` |
+| 通道 | 版本示例 | tag | 校验/下载依据 | 下载地址 | 解包方式 |
+|---|---|---|---|---|---|
+| 正式版 | `3.4.0` | `v3.4.0` | GitHub Release（含 `framework-files.zip` 资产） | `releases/download/v{VERSION}/framework-files.zip` | `unzip` |
+| 预览版 | `3.4.0-SNAPSHOT.1` | `snapshot-v3.4.0-1` | snapshot tag（无 GitHub Release） | `archive/refs/tags/snapshot-v{BASE}-{BUILD}.tar.gz` | `tar --strip-components=1` |
 
-预览版**没有** `framework-files.zip` 资产，不要去找 release；改用 tag 源码包，内容比 ZIP 多（含整个仓库），提取后只需 `.opencode/skills/` 与 `docs/open-admin/`。
+- 正式版以 **Release（及其资产）为准**，比仅查 tag 更准确（tag 可能残留而 release/资产未就绪）。
+- 预览版**没有** GitHub Release，也没有 `framework-files.zip` 资产；改用 tag 源码包，内容比 ZIP 多（含整个仓库），提取后只需 `.opencode/skills/` 与 `docs/open-admin/`。
+- npm/Maven 与 GitHub 侧均为即时生效；仅 Maven 正式版同步到 Maven Central 可能有 ~10 分钟延迟，但不影响本 skill 的文件同步。
 
 ## 同步规则
 
@@ -60,12 +57,17 @@ description: 在业务项目中同步 open-admin 框架的 skills + docs —— 
 
 换算规则：`x.y.z-SNAPSHOT.<build>` → `snapshot-v{x.y.z}-{build}`。
 
-### 2. 下载并解包
+### 2. 校验并下载解包
 
-**正式版**
+下载前先做轻量校验，把版本错误/发布未就绪的问题提前暴露（不要等到下载 404）。
+
+**正式版**（校验 Release 资产可达）
 
 ```bash
 # 替换 {VERSION} 为步骤 1 确定的版本号
+curl -fsI -o /dev/null "https://github.com/jiangood/open-admin/releases/download/v{VERSION}/framework-files.zip" \
+  || { echo "正式版 Release 资产 framework-files.zip 不可用（版本不存在或发布未就绪），停止同步"; exit 1; }
+
 curl -fL -o /tmp/oa-framework-files.zip \
   "https://github.com/jiangood/open-admin/releases/download/v{VERSION}/framework-files.zip"
 
@@ -73,10 +75,16 @@ rm -rf /tmp/oa-framework-files && mkdir -p /tmp/oa-framework-files
 unzip -q /tmp/oa-framework-files.zip -d /tmp/oa-framework-files
 ```
 
-**预览版**
+- 资产不可达时，不要回退为“只查 tag”；按正式版发布约定应使用 release 资产。请确认版本号/Release 状态，或改用已发布的版本。
+
+**预览版**（校验 snapshot tag 存在）
 
 ```bash
 # 替换 {TAG} 为步骤 1 换算出的 tag，如 snapshot-v3.3.4-1
+git ls-remote --exit-code --tags https://github.com/jiangood/open-admin.git refs/tags/{TAG} >/dev/null \
+  || curl -fsS -o /dev/null "https://api.github.com/repos/jiangood/open-admin/git/ref/tags/{TAG}" \
+  || { echo "快照 tag 不存在或无法访问，停止同步"; exit 1; }
+
 rm -rf /tmp/oa-framework-files && mkdir -p /tmp/oa-framework-files
 curl -fL --retry 3 -o /tmp/oa-framework-files.tar.gz \
   "https://github.com/jiangood/open-admin/archive/refs/tags/{TAG}.tar.gz"
@@ -84,15 +92,14 @@ tar -xzf /tmp/oa-framework-files.tar.gz -C /tmp/oa-framework-files --strip-compo
 ```
 
 - 源码包顶层目录为 `open-admin-{TAG}/`，`--strip-components=1` 去掉它，得到与 ZIP 一致的布局
-- 解包后必须校验（防止 tag 不存在或结构变化导致把空目录同步过去）：
+
+解包后必须校验（防止来源异常导致把空目录同步过去）：
 
 ```bash
 test -f /tmp/oa-framework-files/docs/open-admin/guide.md \
   && test -f /tmp/oa-framework-files/.opencode/skills/oa-crud/SKILL.md \
   || { echo "来源目录结构异常，停止同步"; exit 1; }
 ```
-
-- 下载失败（404）：确认 tag 存在（`gh api repos/jiangood/open-admin/git/ref/tags/{TAG}`），或改用已发布的最近版本 / 正式版
 
 ### 3. 同步到项目根目录
 
@@ -149,6 +156,7 @@ ls -la .opencode/skills/oa-upgrade-docs/SKILL.md docs/open-admin/guide.md
 ## 验证清单
 
 - [ ] 已识别通道并换算出正确的 tag / 版本
+- [ ] 正式版已确认 Release 资产 `framework-files.zip` 可用；预览版已确认 snapshot tag 存在
 - [ ] 解包后已校验 `docs/open-admin/guide.md` 与 `.opencode/skills/oa-crud/SKILL.md` 存在
 - [ ] `.opencode/skills/oa-crud|oa-upgrade|oa-upgrade-docs/SKILL.md` 已更新
 - [ ] `docs/open-admin/*.md` 已镜像，孤儿文件已删除
@@ -158,7 +166,7 @@ ls -la .opencode/skills/oa-upgrade-docs/SKILL.md docs/open-admin/guide.md
 
 | 问题 | 处理 |
 |------|------|
-| ZIP 下载 404 | 正式版版本号错误或 release 未附带 ZIP；确认后重试 |
+| ZIP/资产不可达 | 正式版版本号错误或 Release 未附带 `framework-files.zip`（不应回退为仅查 tag）；确认后重试 |
 | tar.gz 下载 404 | 快照 tag 不存在或已被清理；用 `gh api repos/jiangood/open-admin/tags` 查可用 tag |
 | 解包后目录为空 / 结构不对 | 检查是否漏了 `--strip-components=1`；重新解包并跑第 2 步校验 |
 | `unzip` 不可用 | `apt-get install unzip`，或改用预览版的 `tar` 流程 |
@@ -168,5 +176,5 @@ ls -la .opencode/skills/oa-upgrade-docs/SKILL.md docs/open-admin/guide.md
 ## 参考
 
 - 框架仓库: https://github.com/jiangood/open-admin
-- 正式版资产命名约定：`framework-files.zip`（`v{版本}` release 自动附带）
-- 预览版无 release 资产：使用 `archive/refs/tags/snapshot-v{版本}-{build}.tar.gz`
+- 正式版文件来源：`v{版本}` GitHub Release 的 `framework-files.zip` 资产
+- 预览版文件来源：`archive/refs/tags/snapshot-v{版本}-{build}.tar.gz`（无 GitHub Release）

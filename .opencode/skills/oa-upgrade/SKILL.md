@@ -1,8 +1,3 @@
----
-name: oa-upgrade
-description: 在业务项目中升级 open-admin 框架版本 — 读取变更日志和提交记录，自动/辅助完成 Maven + npm 依赖升级和代码迁移。支持正式版与预览版（SNAPSHOT）。适用于以 Maven JAR + npm 包方式引入 open-admin 的业务项目。
----
-
 # oa-upgrade — 框架版本升级指南
 
 ## 适用范围
@@ -64,17 +59,41 @@ npm view @jiangood/open-admin versions --json    # 全部已发布版本（含 S
 - 预览版：建议先看 `snapshot` dist-tag 得到最新构建号，再确认要锁定的精确版本（如 `3.3.4-SNAPSHOT.1`）
 - 若 npm 查询失败，加 `--registry=https://registry.npmjs.org`
 
-### 2. 读取变更信息
+### 2. 校验目标版本
+
+确定目标版本后、读取变更或修改依赖前，按通道做快速校验。npm 与 GitHub 侧均为即时生效；**不要**把 Maven Central 可见性作为前置条件（仅正式版 Maven 同步到 Central 可能有 ~10 分钟延迟，见第 7 步）。
+
+**正式版**（`X.Y.Z`）—— 以 GitHub Release 为准（比仅查 tag 更准确，且隐含 tag；Release Notes 与 `framework-files.zip` 依赖 release）：
+
+```bash
+npm view @jiangood/open-admin@{target_version} version
+curl -fsSI -o /dev/null "https://github.com/jiangood/open-admin/releases/tag/v{target_version}"
+# oa-upgrade-docs 正式版会下载该资产，可一并确认：
+# curl -fsI -o /dev/null "https://github.com/jiangood/open-admin/releases/download/v{target_version}/framework-files.zip"
+```
+
+**预览版**（`X.Y.Z-SNAPSHOT.N`）—— 无 GitHub Release，以 snapshot tag 为准：
+
+```bash
+npm view @jiangood/open-admin@{base_version}-SNAPSHOT.{build} version
+git ls-remote --exit-code --tags https://github.com/jiangood/open-admin.git refs/tags/snapshot-v{base_version}-{build}
+# 或：curl -fsS -o /dev/null "https://api.github.com/repos/jiangood/open-admin/git/ref/tags/snapshot-v{base_version}-{build}"
+```
+
+- 未指定 build 号时，先用 `npm view @jiangood/open-admin dist-tags --json` 或列出 `snapshot-v{base_version}-*` tag 确定构建号，再校验。
+- 任一校验失败则停止并说明原因（版本号错误/未发布/Release 或资产缺失），不要继续升级。
+
+### 3. 读取变更信息
 
 按通道取数据，合并展示给开发者。
 
 **正式版**（两个数据源都要）：
 
 ```text
-# 2a. Git 提交日志（当前版本到目标版本之间的所有提交）
+# 3a. Git 提交日志（当前版本到目标版本之间的所有提交）
 https://github.com/jiangood/open-admin/compare/v{current_version}...v{target_version}
 
-# 2b. 目标版本的 Release Notes（含 Breaking Changes 和迁移说明）
+# 3b. 目标版本的 Release Notes（含 Breaking Changes 和迁移说明）
 https://github.com/jiangood/open-admin/releases/tag/v{target_version}
 ```
 
@@ -96,11 +115,11 @@ https://github.com/jiangood/open-admin/compare/v{current_version}...snapshot-v{b
 - **高亮 Breaking Changes**（提交信息中含 `BREAKING`、`break`、`migration` 等关键词的提交）
 - 正式版额外展示 Release Notes 中的迁移指南部分
 
-### 3. 确认升级
+### 4. 确认升级
 
 向开发者展示变更概览，询问是否继续。如确认则进入下一步。
 
-### 4. 更新依赖版本
+### 5. 更新依赖版本
 
 **正式版**
 
@@ -147,7 +166,7 @@ npm：
 - 不要把手写的 dist-tag（如 `"@jiangood/open-admin": "snapshot"`）写进 `package.json`，会导致每次构建版本漂移
 - 安装失败先试 `--registry=https://registry.npmjs.org`
 
-### 5. 处理迁移
+### 6. 处理迁移
 
 根据变更信息中的迁移指引，逐项执行代码修改：
 
@@ -160,30 +179,31 @@ npm：
 | 注解变化 | 更新 `@HasPermission`、`@Log` 等注解的用法 |
 | 数据库迁移 | 执行 DDL 或数据迁移脚本（框架已不再使用 Flyway） |
 
-### 6. 编译与测试验证
+### 7. 编译与测试验证
 
 顺序执行以下步骤，任何一项失败则停止并修复：
 
 ```bash
-# 6a. 后端编译（预览版必须带 -U，强制刷新 SNAPSHOT）
+# 7a. 后端编译（预览版必须带 -U，强制刷新 SNAPSHOT）
 cd {业务项目目录}
 mvn -U clean compile
 
-# 6b. 后端测试
+# 7b. 后端测试
 mvn test
 
-# 6c. 前端构建
+# 7c. 前端构建
 cd {业务项目目录/web}
 npm run build
 ```
 
-预览版排障：
+排障：
 
-- `Could not find artifact ...-SNAPSHOT` → 快照仓库缺失，或被全局镜像拦截（见第 4 步）
+- **正式版 Maven Central 同步延迟（唯一可能延迟的场景）**：若目标为刚发布的正式版，且 `mvn` 报 `Could not find artifact io.github.jiangood:open-admin:{target_version}`，但第 2 步 npm/GitHub Release 校验已通过，通常是 Maven Central 同步延迟（约 10 分钟）。稍后执行 `mvn -U clean compile` 重试即可；npm、GitHub Release/tag 已即时生效属正常现象。
+- `Could not find artifact ...-SNAPSHOT` → 快照仓库缺失，或被全局镜像拦截（见第 5 步）
 - 依赖还是旧内容 → 加 `-U`，必要时删掉 `~/.m2/repository/io/github/jiangood/open-admin/{version}` 再拉
 - npm 404 → 版本号写错或未同步；用 `npm view @jiangood/open-admin dist-tags --json` 核对
 
-### 7. 框架文件同步（skills + docs）
+### 8. 框架文件同步（skills + docs）
 
 升级后需将新版本的框架文件（`.opencode/skills/`、`docs/open-admin/`）同步到业务项目根目录，供 opencode 使用新版本 skill 与文档。
 
@@ -192,9 +212,9 @@ npm run build
 - 正式版：传版本号，如 `3.4.0`
 - 预览版：传快照 tag 或 npm 版本，如 `snapshot-v3.3.4-1` / `3.3.4-SNAPSHOT.1`（skill 会自行换算并改用 tag 源码包）
 
-> 预览版没有 `framework-files.zip` 资产，`oa-upgrade-docs` 会自动改用 `archive/refs/tags/snapshot-v{base}-{build}.tar.gz`。若该 skill 不可用（首次接入 / 文件缺失），按该 skill 的下载与同步规则手工执行，不要静默跳过。
+> 正式版以 GitHub Release 资产 `framework-files.zip` 为准；预览版没有 Release 资产，`oa-upgrade-docs` 会自动改用 `archive/refs/tags/snapshot-v{base}-{build}.tar.gz`。若该 skill 不可用（首次接入 / 文件缺失），按该 skill 的下载与同步规则手工执行，不要静默跳过。
 
-### 8. 其他检查（可选）
+### 9. 其他检查（可选）
 
 - 启动项目确认登录/页面正常
 - 核心业务流程可用
@@ -211,6 +231,7 @@ npm run build
 ## 验证清单
 
 - [ ] 已识别版本通道（正式版 / 预览版）
+- [ ] 目标版本已校验：正式版 npm + GitHub Release 可用；预览版 npm 精确版本 + snapshot tag 存在
 - [ ] `mvn compile` 编译通过（预览版用 `mvn -U clean compile`）
 - [ ] `mvn test` 全部通过
 - [ ] `npm run build` 正常
