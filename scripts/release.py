@@ -2,15 +2,27 @@
 """release.py - open-admin release helper (cross-platform)
 
 用法:
-    python scripts/release.py <version> [--skip-tests] [--no-push]
+    python scripts/release.py <version> [--snapshot] [--skip-tests] [--no-push]
                               [--dry-run] [--no-rollback]
     python scripts/release.py status
     python scripts/release.py check
 
 "run" 可省略: python scripts/release.py 3.1.3 与 python scripts/release.py run 3.1.3 等价。
-版本号可带或可不带前缀 v；git tag 一律创建/推送为 v<version>，例如 v3.1.3。
+版本号可带或可不带前缀 v。
+
+正式版:
+    python scripts/release.py 3.1.3
+    -> Maven/npm 均为 3.1.3，git tag 为 v3.1.3
+
+快照版（非正式版）:
+    python scripts/release.py 3.4.0 --snapshot
+    python scripts/release.py 3.4.0-SNAPSHOT
+    python scripts/release.py 3.4.0-SNAPSHOT.1
+    -> Maven 为 3.4.0-SNAPSHOT，npm 为 3.4.0-SNAPSHOT.<build>，
+       git tag 为 snapshot-v3.4.0-<build>；不传 build 时自动使用时间戳
 
 选项:
+    --snapshot     发布快照版；也可直接把版本写成 x.y.z-SNAPSHOT[.build]
     --skip-tests   跳过 "mvn -B clean test" 和 "npm run build"
     --no-push      只在本地 commit + tag，不推送到 origin
     --dry-run      只检查/打印计划，不修改任何仓库文件
@@ -20,7 +32,7 @@
     0 成功 / 1 用法或前置检查失败 / 2 测试失败 / 3 工作区不干净 / 4 git 失败 / 5 版本或 tag 冲突
 
 说明:
-    - 完整日志写入 logs/release-v<version>-<stamp>.log（UTF-8）
+    - 完整日志写入 logs/{release|snapshot}-v<version>-<stamp>.log（UTF-8）
     - 白名单: 一次发版只允许修改 */pom.xml 与 web/package.json
 """
 import json
@@ -52,6 +64,9 @@ EXIT_GIT = 4
 EXIT_CONFLICT = 5
 
 VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
+SNAPSHOT_VERSION_RE = re.compile(
+    r"^(\d+\.\d+\.\d+)-SNAPSHOT(?:\.(0|[1-9]\d*))?$", re.IGNORECASE
+)
 WHITELIST_RE = re.compile(r"^.. ((.*/)?pom\.xml|web/package\.json)$")
 
 
@@ -68,7 +83,12 @@ def run_cmd(cmd, cwd=None, encoding="utf-8", errors="replace"):
 
 class Release:
     def __init__(self):
-        self.version = None
+        self.version = None          # Maven 版本
+        self.npm_version = None      # npm 版本（快照时带唯一 build 号）
+        self.display_version = None  # 日志/提交信息中的展示版本
+        self.is_snapshot = False
+        self.base_version = None
+        self.snapshot_build = None
         self.tag = None
         self.branch = ""
         self.pom_version = ""
@@ -82,6 +102,7 @@ class Release:
         self.versions_at_target = False
         self.dirty_lines = []
         self.ws_whitelist_ok = True
+        self.opt_snapshot = False
         self.opt_skip_tests = False
         self.opt_no_push = False
         self.opt_dry_run = False
@@ -111,7 +132,8 @@ class Release:
     def init_log(self):
         LOG_DIR.mkdir(parents=True, exist_ok=True)
         stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.log_path = LOG_DIR / f"release-v{self.version}-{stamp}.log"
+        kind = "snapshot" if self.is_snapshot else "release"
+        self.log_path = LOG_DIR / f"{kind}-v{self.display_version}-{stamp}.log"
         self.log_fh = open(self.log_path, "w", encoding="utf-8")
 
     def report_fail(self, text):
@@ -158,7 +180,7 @@ class Release:
         return bool(self.pom_version) and bool(self.pkg_version)
 
     def read_tags(self):
-        rc, out, _ = self.git("describe", "--tags", "--abbrev=0")
+        rc, out, _ = self.git("describe", "--tags", "--abbrev=0", "--match", "v*")
         self.local_tag = out.strip() if rc == 0 else ""
 
         rc, out, _ = self.git(
@@ -201,6 +223,8 @@ class Release:
             base = base[1:]
         if not base:
             base = self.pom_version
+        if base.upper().endswith("-SNAPSHOT"):
+            base = base[: -len("-SNAPSHOT")]
         if not VERSION_RE.match(base):
             return None
         major, minor, patch = (int(x) for x in base.split("."))
@@ -214,9 +238,34 @@ class Release:
     def normalize_version(self):
         if self.version is None:
             return
-        self.version = self.version.replace(" ", "")
-        if self.version[:1] in ("v", "V"):
-            self.version = self.version[1:]
+        raw = self.version.replace(" ", "")
+        if raw[:1] in ("v", "V"):
+            raw = raw[1:]
+        self.version = raw
+
+        match = SNAPSHOT_VERSION_RE.match(raw)
+        if match:
+            base, build = match.group(1), match.group(2)
+            self.is_snapshot = True
+            self.base_version = base
+            self.snapshot_build = build or datetime.now().strftime("%Y%m%d%H%M%S")
+        elif self.opt_snapshot and VERSION_RE.match(raw):
+            self.is_snapshot = True
+            self.base_version = raw
+            self.snapshot_build = datetime.now().strftime("%Y%m%d%H%M%S")
+        else:
+            self.is_snapshot = False
+            self.base_version = raw
+            self.version = raw
+            self.npm_version = raw
+            self.display_version = raw
+            self.tag = "v" + raw
+            return
+
+        self.version = f"{self.base_version}-SNAPSHOT"
+        self.npm_version = f"{self.base_version}-SNAPSHOT.{self.snapshot_build}"
+        self.display_version = self.npm_version
+        self.tag = f"snapshot-v{self.base_version}-{self.snapshot_build}"
 
     # ---------------------------------------------------------------- tag 检查
     def tag_exists_local(self) -> bool:
@@ -389,16 +438,20 @@ class Release:
             self.msg("  use: python scripts/release.py 3.1.3")
             return usage()
         self.normalize_version()
-        if not VERSION_RE.match(self.version or ""):
+        if not self.is_snapshot and not VERSION_RE.match(self.version or ""):
             self.msg("")
             self.msg(f"  ERROR: invalid version '{self.version}', expected x.y.z")
-            self.msg("  the leading v is optional, the tag is always v-prefixed")
+            self.msg("  snapshot: 3.4.0 --snapshot | 3.4.0-SNAPSHOT | 3.4.0-SNAPSHOT.1")
             return EXIT_USAGE
-        self.tag = "v" + self.version
 
+        kind = "snapshot" if self.is_snapshot else "release"
+        label = self.display_version if self.is_snapshot else f"v{self.version}"
         self.init_log()
         self.log("==================================================================")
-        self.log(f" open-admin release v{self.version}")
+        self.log(f" open-admin {kind} {label}")
+        self.log(f" maven: {self.version}")
+        self.log(f" npm  : {self.npm_version}")
+        self.log(f" tag  : {self.tag}")
         self.log(f" root : {ROOT}")
         self.log(f" log  : {self.log_path}")
         self.log("==================================================================")
@@ -415,10 +468,11 @@ class Release:
         self.tag_local = self.tag_exists_local()
         self.tag_at_head = self.compute_tag_at_head()
         self.versions_at_target = (
-            self.pom_version == self.version and self.pkg_version == self.version
+            self.pom_version == self.version and self.pkg_version == self.npm_version
         )
         self.log(
-            f"    pom.xml={self.pom_version}  web/package.json={self.pkg_version}  target={self.version}"
+            f"    pom.xml={self.pom_version}  web/package.json={self.pkg_version}  "
+            f"target={self.version} / npm {self.npm_version}"
         )
 
         if self.tag_local:
@@ -444,7 +498,7 @@ class Release:
         if self.dirty_lines:
             if self.versions_at_target:
                 self.baked = True
-                self.ok(f"version files already at v{self.version}, bump will be skipped")
+                self.ok(f"version files already at {label}, bump will be skipped")
             elif not self.opt_dry_run:
                 self.log("    resetting leftover version changes from a previous run")
                 for line in self.dirty_lines:
@@ -456,7 +510,10 @@ class Release:
         if self.opt_dry_run:
             self.log("")
             self.log("[dry-run] would execute:")
-            self.log(f"    1) python scripts/bump-version.py {self.version}")
+            bump_display = f"bump-version.py {self.version}"
+            if self.npm_version != self.version:
+                bump_display += f" --npm-version {self.npm_version}"
+            self.log(f"    1) python scripts/{bump_display}")
             self.log("    2) mvn -B clean test")
             self.log("    3) npm run build, run inside web")
             self.log(f"    4) git add -u ; git commit ; git tag -a {self.tag}")
@@ -471,9 +528,11 @@ class Release:
 
         # step 3 bump
         if not self.baked and not self.resume:
-            self.step("3/8", f"Bump version to v{self.version}")
+            self.step("3/8", f"Bump version to {label}")
             self.baked = True
             bump_cmd = [sys.executable, str(ROOT / "scripts" / "bump-version.py"), self.version]
+            if self.npm_version != self.version:
+                bump_cmd.extend(["--npm-version", self.npm_version])
             if self.run_logged(bump_cmd, "utf-8") != 0:
                 return self.fail(EXIT_USAGE, "bump-version.py failed")
 
@@ -481,13 +540,13 @@ class Release:
         self.step("4/8", "Verify pom.xml and web/package.json")
         if not self.read_versions():
             return self.fail(EXIT_USAGE, "cannot read versions from pom.xml / web/package.json")
-        if self.pom_version != self.version or self.pkg_version != self.version:
+        if self.pom_version != self.version or self.pkg_version != self.npm_version:
             return self.fail(
                 EXIT_CONFLICT,
                 f"version mismatch after bump: pom.xml={self.pom_version} "
-                f"npm={self.pkg_version} expected={self.version}",
+                f"npm={self.pkg_version} expected={self.version} / {self.npm_version}",
             )
-        self.ok(f"pom.xml and web/package.json are v{self.version}")
+        self.ok(f"pom.xml={self.version}, web/package.json={self.npm_version}")
 
         # step 5 tests
         self.step("5/8", "Tests")
@@ -523,9 +582,13 @@ class Release:
             self.step("7/8", f"Commit and tag {self.tag}")
             if self.git_logged("add", "-u") != 0:
                 return self.fail(EXIT_GIT, "git add failed")
-            if self.git_logged("commit", "-m", f"release: v{self.version}") != 0:
+            if self.is_snapshot:
+                message = f"snapshot: {self.display_version}"
+            else:
+                message = f"release: v{self.version}"
+            if self.git_logged("commit", "-m", message) != 0:
                 return self.fail(EXIT_GIT, "git commit failed")
-            if self.git_logged("tag", "-a", self.tag, "-m", f"release: v{self.version}") != 0:
+            if self.git_logged("tag", "-a", self.tag, "-m", message) != 0:
                 return self.fail(EXIT_GIT, "git tag failed")
             self.ok("commit and tag created")
 
@@ -534,7 +597,9 @@ class Release:
             sha = self.short_sha()
             self.log("")
             self.log("==================================================================")
-            self.log(f" Release v{self.version} committed and tagged, not pushed because of --no-push")
+            kind = "Snapshot" if self.is_snapshot else "Release"
+            label = self.display_version if self.is_snapshot else f"v{self.version}"
+            self.log(f" {kind} {label} committed and tagged, not pushed because of --no-push")
             self.log(f" tag    : {self.tag}")
             self.log(f" commit : {sha}")
             self.log(f" log    : {self.log_path}")
@@ -558,7 +623,11 @@ class Release:
         sha = self.short_sha()
         self.log("")
         self.log("==================================================================")
-        self.log(f" Release v{self.version} finished")
+        kind = "Snapshot" if self.is_snapshot else "Release"
+        label = self.display_version if self.is_snapshot else f"v{self.version}"
+        self.log(f" {kind} {label} finished")
+        self.log(f" maven  : {self.version}")
+        self.log(f" npm    : {self.npm_version}")
         self.log(f" tag    : {self.tag}")
         self.log(f" commit : {sha}")
         self.log(f" log    : {self.log_path}")
@@ -581,12 +650,16 @@ def usage() -> int:
     print("  open-admin release helper")
     print("")
     print("  Usage:")
-    print("    python scripts/release.py <version> [--skip-tests] [--no-push] [--dry-run] [--no-rollback]")
+    print("    python scripts/release.py <version> [--snapshot] [--skip-tests] [--no-push] [--dry-run] [--no-rollback]")
     print("    python scripts/release.py status")
     print("    python scripts/release.py check")
     print("")
-    print("  the leading v is optional, e.g. python scripts/release.py v3.1.3")
-    print("  the git tag is always created and pushed as v3.1.3")
+    print("  release : python scripts/release.py 3.1.3       -> tag v3.1.3")
+    print("  snapshot: python scripts/release.py 3.4.0 --snapshot")
+    print("            python scripts/release.py 3.4.0-SNAPSHOT[.1]")
+    print("            -> Maven 3.4.0-SNAPSHOT, npm 3.4.0-SNAPSHOT.<build>")
+    print("            -> tag snapshot-v3.4.0-<build>")
+    print("  the leading v is optional")
     print("")
     print("  Exit codes: 0 ok / 1 usage / 2 tests / 3 workspace / 4 git / 5 conflict")
     print("")
@@ -617,7 +690,9 @@ def main(argv) -> int:
 
     # ---------- 解析选项 ----------
     for arg in rest:
-        if arg == "--skip-tests":
+        if arg == "--snapshot":
+            rel.opt_snapshot = True
+        elif arg == "--skip-tests":
             rel.opt_skip_tests = True
         elif arg == "--no-push":
             rel.opt_no_push = True

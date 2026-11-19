@@ -1,9 +1,13 @@
 ﻿name: Publish NPM, Maven
 
+# v*          -> 正式版：Maven Central + npm latest + GitHub Release
+# snapshot-v* -> 快照版：Maven SNAPSHOT + npm dist-tag snapshot（不会更新 latest）；
+#                Maven 快照要求 Central Portal namespace 已启用 SNAPSHOTs
 on:
   push:
     tags:
       - 'v*'
+      - 'snapshot-v*'
 
 jobs:
   maven-publish:
@@ -13,26 +17,47 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Extract Tag
-        id: tag
-        uses: aaronbarnaby/get-tag@v1.0.0
-        with:
-          without_prefix_v: true
+      - name: Resolve version
+        id: version
+        run: |
+          REF="${GITHUB_REF_NAME}"
+          if [[ "$REF" == snapshot-v* ]]; then
+            TAG="${REF#snapshot-v}"
+            BASE="${TAG%-*}"
+            BUILD="${TAG##*-}"
+            if [ "$BASE" = "$TAG" ] || [ -z "$BUILD" ]; then
+              echo "::error::Invalid snapshot tag: $REF, expected snapshot-v<version>-<build>"
+              exit 1
+            fi
+            IS_SNAPSHOT=true
+            MAVEN_VERSION="${BASE}-SNAPSHOT"
+            NPM_VERSION="${BASE}-SNAPSHOT.${BUILD}"
+          else
+            TAG="${REF#v}"
+            IS_SNAPSHOT=false
+            MAVEN_VERSION="$TAG"
+            NPM_VERSION="$TAG"
+          fi
+          echo "is_snapshot=$IS_SNAPSHOT" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "maven=$MAVEN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "npm=$NPM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "channel: snapshot=$IS_SNAPSHOT maven=$MAVEN_VERSION npm=$NPM_VERSION"
 
       - name: Validate pom.xml version
         run: |
-          TAG_VERSION="${{ steps.tag.outputs.tag }}"
+          MAVEN_VERSION="${{ steps.version.outputs.maven }}"
           POM_VERSION=$(awk '/<artifactId>open-admin<\/artifactId>/{found=1} found && /<version>[0-9]/{print; exit}' pom.xml | grep -oP '<version>\K[^<]+' | tr -d '\r')
 
-          echo "Tag version: $TAG_VERSION"
+          echo "Expected Maven version: $MAVEN_VERSION"
           echo "POM version: $POM_VERSION"
 
-          if [ "$TAG_VERSION" != "$POM_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match pom.xml version ($POM_VERSION)"
+          if [ "$MAVEN_VERSION" != "$POM_VERSION" ]; then
+            echo "::error::Expected Maven version ($MAVEN_VERSION) does not match pom.xml version ($POM_VERSION)"
             exit 1
           fi
 
-          echo "✓ Maven version matches tag!"
+          echo "✓ Maven version matches!"
 
       - name: Set up JDK
         uses: actions/setup-java@v5
@@ -52,6 +77,8 @@ jobs:
       - name: Maven Test (H2)
         run: mvn test -q
 
+      # central-publishing-maven-plugin >= 0.7.0 会自动把 -SNAPSHOT 上传到
+      # https://central.sonatype.com/repository/maven-snapshots/
       - name: Publish MAVEN
         run: mvn -q deploy -DskipTests -P publish
         env:
@@ -67,26 +94,47 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Extract Tag
-        id: tag
-        uses: aaronbarnaby/get-tag@v1.0.0
-        with:
-          without_prefix_v: true
+      - name: Resolve version
+        id: version
+        run: |
+          REF="${GITHUB_REF_NAME}"
+          if [[ "$REF" == snapshot-v* ]]; then
+            TAG="${REF#snapshot-v}"
+            BASE="${TAG%-*}"
+            BUILD="${TAG##*-}"
+            if [ "$BASE" = "$TAG" ] || [ -z "$BUILD" ]; then
+              echo "::error::Invalid snapshot tag: $REF, expected snapshot-v<version>-<build>"
+              exit 1
+            fi
+            IS_SNAPSHOT=true
+            MAVEN_VERSION="${BASE}-SNAPSHOT"
+            NPM_VERSION="${BASE}-SNAPSHOT.${BUILD}"
+          else
+            TAG="${REF#v}"
+            IS_SNAPSHOT=false
+            MAVEN_VERSION="$TAG"
+            NPM_VERSION="$TAG"
+          fi
+          echo "is_snapshot=$IS_SNAPSHOT" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "maven=$MAVEN_VERSION" >> "$GITHUB_OUTPUT"
+          echo "npm=$NPM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "channel: snapshot=$IS_SNAPSHOT maven=$MAVEN_VERSION npm=$NPM_VERSION"
 
       - name: Validate package.json version
         run: |
-          TAG_VERSION="${{ steps.tag.outputs.tag }}"
-          NPM_VERSION=$(jq -r '.version' web/package.json)
+          NPM_VERSION="${{ steps.version.outputs.npm }}"
+          PKG_VERSION=$(jq -r '.version' web/package.json)
 
-          echo "Tag version: $TAG_VERSION"
-          echo "NPM version: $NPM_VERSION"
+          echo "Expected NPM version: $NPM_VERSION"
+          echo "package.json version: $PKG_VERSION"
 
-          if [ "$TAG_VERSION" != "$NPM_VERSION" ]; then
-            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($NPM_VERSION)"
+          if [ "$NPM_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Expected NPM version ($NPM_VERSION) does not match package.json version ($PKG_VERSION)"
             exit 1
           fi
 
-          echo "✓ NPM version matches tag!"
+          echo "✓ NPM version matches!"
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -102,16 +150,21 @@ jobs:
 
       - name: Publish NPM package (if not exists)
         run: |
-          VERSION="${{ steps.tag.outputs.tag }}"
+          VERSION="${{ steps.version.outputs.npm }}"
           if npm view "@jiangood/open-admin@$VERSION" version &>/dev/null; then
             echo "npm 上 @jiangood/open-admin@$VERSION 已存在，跳过发布"
           else
             cd web
-            npm publish --access public --no-git-checks
+            if [ "${{ steps.version.outputs.is_snapshot }}" = "true" ]; then
+              npm publish --access public --tag snapshot --no-git-checks
+            else
+              npm publish --access public --no-git-checks
+            fi
           fi
 
   sync-mirror:
     needs: npm-publish
+    if: ${{ !contains(github.ref_name, 'snapshot-') }}
     runs-on: ubuntu-latest
     steps:
       - name: 同步阿里云镜像仓库
@@ -121,7 +174,7 @@ jobs:
 
   create-release:
     needs: [maven-publish, npm-publish]
-    if: always() && needs.maven-publish.result != 'failure' && needs.npm-publish.result != 'failure'
+    if: always() && !contains(github.ref_name, 'snapshot-') && needs.maven-publish.result != 'failure' && needs.npm-publish.result != 'failure'
     runs-on: ubuntu-latest
     permissions:
       contents: write

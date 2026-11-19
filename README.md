@@ -137,6 +137,7 @@ mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=local # 允许多端在线�
 mvn clean install -DskipTests                              # 安装到本地仓库
 python scripts/bump-version.py <新版本号>                    # 仅升级 pom.xml + web/package.json 版本号
 python scripts/release.py <新版本号>                        # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
+python scripts/release.py <版本号> --snapshot               # 发布非正式版（Maven SNAPSHOT + npm snapshot）
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
@@ -161,7 +162,7 @@ python scripts/start.py frontend start|stop|restart|status    # 前端: npm run 
 
 ### 发版
 
-发版流程固化在 `scripts/release.py`（跨平台，输出纯 ASCII 避免乱码），日志落 `logs/release-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。**只给一个版本号参数**即可：
+发版流程固化在 `scripts/release.py`（跨平台，输出纯 ASCII 避免乱码），日志落 `logs/{release|snapshot}-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。正式版只给版本号；快照版加 `--snapshot` 或直接写 `-SNAPSHOT[.build]`：
 
 ```bash
 python scripts/release.py 3.1.3                    # bump + 全量测试 + commit + tag + push，触发 CI 发布
@@ -175,7 +176,7 @@ python scripts/release.py --help                   # 全部参数与退出码
 ```
 
 - 跨平台（Windows / Linux / macOS），需 Python 3；不再依赖 PowerShell
-- 版本号可带或不带 `v` 前缀（`3.1.3` / `v3.1.3` 等价）；推送到远端的 tag 一律带 `v`（`v3.1.3`），`publish.yml` 正是按 `v*` 触发
+- 版本号可带或不带 `v` 前缀（`3.1.3` / `v3.1.3` 等价）；正式版 tag 为 `v<version>`，快照版 tag 为 `snapshot-v<version>-<build>`，`publish.yml` 同时监听 `v*` 与 `snapshot-v*`
 - 前置条件：`gh` 已登录、当前分支为 `main`、工作区干净
 - 白名单：一次发版只允许修改 `*/pom.xml` 与 `web/package.json`，出现别的改动直接中止（退出码 3）
 - 退出码：`0` 成功 / `1` 参数或前置条件 / `2` 测试失败 / `3` 工作区不干净 / `4` git 失败 / `5` 版本或 tag 冲突
@@ -183,6 +184,39 @@ python scripts/release.py --help                   # 全部参数与退出码
 - push tag 后由 `.github/workflows/publish.yml` 自动发布 Maven Central + npm 并创建 GitHub Release（Release Notes 由 CI 生成）
 - 排障：失败时会打印恢复命令与日志路径
 - 手工等价命令见 README「开发命令」
+
+### 非正式版（SNAPSHOT）
+
+用于联调/预发布验证，不创建正式 GitHub Release，也不会更新 npm 的 `latest` 标签。版本与 tag 规则：
+
+| 通道 | 版本示例 | git tag | 发布目标 |
+|---|---|---|---|
+| Maven | `3.4.0-SNAPSHOT` | `snapshot-v3.4.0-1` | Central Portal snapshot 仓库 |
+| npm | `3.4.0-SNAPSHOT.1` | 同上 | npm dist-tag `snapshot` |
+
+```bash
+python scripts/release.py 3.4.0 --snapshot          # build 号自动取时间戳
+python scripts/release.py 3.4.0-SNAPSHOT            # 同上，显式写快照版本
+python scripts/release.py 3.4.0-SNAPSHOT.1          # 指定 build 号 1
+python scripts/release.py 3.4.0 --snapshot --dry-run
+python scripts/release.py 3.4.0 --snapshot --no-push
+```
+
+- 快照版 tag 为 `snapshot-v<版本>-<build>`，由 `.github/workflows/publish.yml` 的 snapshot 流程触发，不会与正式版 `v*` tag 混淆
+- Maven 走 `3.4.0-SNAPSHOT`，npm 因同版本不可覆盖，使用带唯一 build 号的 `3.4.0-SNAPSHOT.<build>`，并通过 dist-tag `snapshot` 提供最新快照
+- **前置条件**：Central Portal 的 namespace 需先开启 `SNAPSHOTs`（Namespaces 页面 → Enable SNAPSHOTs）；否则 Maven 快照发布会失败
+- 消费方需显式添加快照仓库；npm 用 `@jiangood/open-admin@snapshot` 安装：
+  ```xml
+  <repository>
+    <id>central-portal-snapshots</id>
+    <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+    <releases><enabled>false</enabled></releases>
+    <snapshots><enabled>true</enabled></snapshots>
+  </repository>
+  ```
+- SNAPSHOT 可覆盖且约 90 天后会被 Central 清理；Maven Central 的 SNAPSHOT 通道与正式 release 分开，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准
+- `pom.xml` 的 `publish` profile 已为 `central-publishing-maven-plugin` 显式配置 `centralSnapshotsUrl`，`-SNAPSHOT` 会直接上传到 Central Portal 快照仓库（插件版本需 `>= 0.7.0`，当前为 `0.12.0`）
+- 只改版本号不发布：`python scripts/bump-version.py 3.4.0-SNAPSHOT --npm-version 3.4.0-SNAPSHOT.1`
 
 ## Skills (opencode)
 

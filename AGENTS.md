@@ -37,6 +37,7 @@ Maven Central 自 **2026-10-01** 起按组织统计每月发布额度，超限�
 - 同一自然月内合并改动，避免为小修复连续发版
 - 发布失败不要重复打同一个版本 tag（Central 版本不可变），修好后用下一个版本号
 - 紧急安全修复先联系 `central-support@sonatype.com`，不要直接硬发
+- 仅需联调验证时优先用快照通道（`release.py --snapshot`），它与正式 release 的发布流程分开；快照的用量/统计仍以 Usage Center 为准
 
 官方说明：<https://central.sonatype.org/publish/maven-central-publishing-limits>
 
@@ -46,12 +47,22 @@ Maven Central 自 **2026-10-01** 起按组织统计每月发布额度，超限�
 python scripts/release.py <version> [options]
 ```
 
-版本号格式为 `x.y.z`，前缀 `v` 可选，最终 tag 会统一为 `v<version>`。
+正式版版本号格式为 `x.y.z`，前缀 `v` 可选，最终 tag 会统一为 `v<version>`。
+
+非正式版（快照）使用 `--snapshot` 或显式版本：
+
+```bash
+python scripts/release.py 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4.0-SNAPSHOT.<build>
+python scripts/release.py 3.4.0-SNAPSHOT.1       # 指定 build 号
+```
+
+快照 tag 为 `snapshot-v<version>-<build>`，由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准。
 
 常用选项：
 
 | 选项 | 说明 |
 |---|---|
+| `--snapshot` | 发布非正式版；也可直接把版本写成 `x.y.z-SNAPSHOT[.build]` |
 | `--skip-tests` | 跳过 `mvn -B clean test` 和 `web` 目录的 `npm run build` |
 | `--no-push` | 只在本地提交和打 tag，不推送到 origin |
 | `--dry-run` | 预览执行流程，不修改任何文件或 Git 状态 |

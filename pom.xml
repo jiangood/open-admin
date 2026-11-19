@@ -223,6 +223,8 @@
                         <extensions>true</extensions>
                         <configuration>
                             <autoPublish>true</autoPublish>
+                            <!-- -SNAPSHOT 版本上传到 Central Portal 快照仓库，不占用正式发布流程 -->
+                            <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
                         </configuration>
                     </plugin>
                     <!-- Javadoc -->
