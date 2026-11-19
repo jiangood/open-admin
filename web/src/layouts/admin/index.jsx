@@ -318,7 +318,7 @@ return <Layout className='main-layout'>
         return (
             <Drawer className='mobile-menu-drawer'
                     placement='left'
-                    size={280}
+                    size={260}
                     closable={false}
                     open={this.state.mobileMenuOpen}
                     onClose={this.closeMobileMenu}
