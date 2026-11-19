@@ -66,8 +66,16 @@ public class DictSeedSync implements StartupHook {
     private void syncType(SysDictTypeRepository typeRepository, DictType dictType, String rootId) {
         typeRepository.findByTypeCode(dictType.code())
                 .ifPresentOrElse(existing -> {
+                    boolean changed = false;
                     if (!dictType.label().equals(existing.getTypeLabel())) {
                         existing.setTypeLabel(dictType.label());
+                        changed = true;
+                    }
+                    if (!Boolean.TRUE.equals(existing.getIsEnum())) {
+                        existing.setIsEnum(true);
+                        changed = true;
+                    }
+                    if (changed) {
                         typeRepository.save(existing);
                     }
                 }, () -> {
@@ -75,6 +83,7 @@ public class DictSeedSync implements StartupHook {
                     type.setPid(rootId);
                     type.setTypeCode(dictType.code());
                     type.setTypeLabel(dictType.label());
+                    type.setIsEnum(true);
                     type.setEnabled(true);
                     type.setSeq(0);
                     typeRepository.save(type);

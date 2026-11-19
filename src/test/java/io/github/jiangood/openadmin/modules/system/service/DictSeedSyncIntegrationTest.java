@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.system.service;
 
 import io.github.jiangood.openadmin.modules.system.entity.SysDictItem;
+import io.github.jiangood.openadmin.modules.system.entity.SysDictType;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictItemRepository;
 import io.github.jiangood.openadmin.modules.system.repository.SysDictTypeRepository;
 import org.junit.jupiter.api.Test;
@@ -29,8 +30,10 @@ class DictSeedSyncIntegrationTest {
                 "approveStatus", "sex", "yesNo", "dataPermType",
                 "articlePosition", "fileStatus");
         for (String typeCode : typeCodes) {
-            assertTrue(typeRepository.findByTypeCode(typeCode).isPresent(),
-                    "字典类型应存在: " + typeCode);
+            SysDictType type = typeRepository.findByTypeCode(typeCode).orElse(null);
+            assertTrue(type != null, "字典类型应存在: " + typeCode);
+            assertTrue(Boolean.TRUE.equals(type.getIsEnum()),
+                    "字典类型应标记为内置枚举: " + typeCode);
         }
     }
 

@@ -110,6 +110,7 @@ class DictSeedSyncTest {
         assertEquals("1", typeCaptor.getValue().getPid());
         assertEquals("testStatus", typeCaptor.getValue().getTypeCode());
         assertEquals("测试状态", typeCaptor.getValue().getTypeLabel());
+        assertTrue(typeCaptor.getValue().getIsEnum());
 
         ArgumentCaptor<SysDictItem> itemCaptor = ArgumentCaptor.forClass(SysDictItem.class);
         verify(itemRepository, times(2)).save(itemCaptor.capture());
@@ -159,6 +160,7 @@ class DictSeedSyncTest {
         existingType.setId("t1");
         existingType.setTypeCode("testStatus");
         existingType.setTypeLabel("测试状态");
+        existingType.setIsEnum(true);
         when(typeRepository.findByTypeCode("testStatus")).thenReturn(Optional.of(existingType));
         when(itemRepository.findByTypeCodeAndCode("testStatus", "PENDING"))
                 .thenReturn(Optional.of(item("PENDING", "待处理", "WARNING", 0)));

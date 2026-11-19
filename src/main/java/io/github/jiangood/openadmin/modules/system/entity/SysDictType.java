@@ -31,6 +31,9 @@ public class SysDictType extends BaseEntity {
 
     private Integer seq;
 
+    /** 是否为内置枚举类型（由 DictSeedSync 自动同步）；null/false 表示自定义类型 */
+    private Boolean isEnum;
+
     @PrePersist
     public void prePersist() {
         if (enabled == null) {

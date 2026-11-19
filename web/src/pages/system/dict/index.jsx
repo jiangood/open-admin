@@ -1,5 +1,5 @@
 import {DeleteOutlined, EditOutlined, PlusOutlined} from '@ant-design/icons';
-import {AutoComplete, Button, Card, Descriptions, Empty, Form, Input, InputNumber, Splitter, Tree, Tag, TreeSelect, Typography} from 'antd';
+import {AutoComplete, Button, Form, Input, InputNumber, Modal, Tag, TreeSelect} from 'antd';
 import React from 'react';
 import {
     PermActions,
@@ -27,45 +27,61 @@ export default class DictPage extends React.Component {
 
     state = {
         typeTree: [],
-        treeLoading: false,
-        selectedType: null,
-        selectedTypeCode: null,
+        itemsModalOpen: false,
+        currentType: null,
     }
 
-    modalRef = React.createRef();
+    typesTableRef = React.createRef();
+    itemsTableRef = React.createRef();
     typeModalRef = React.createRef();
-    tableRef = React.createRef();
+    itemModalRef = React.createRef();
 
     componentDidMount() {
-        this.loadTree()
+        this.loadTypeTree()
     }
 
-    loadTree = () => {
-        this.setState({treeLoading: true})
+    loadTypeTree = () => {
         HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
             this.setState({typeTree: rs.data})
-            this.setState({treeLoading: false})
-        }).catch(() => {
-            this.setState({treeLoading: false})
+        }).catch(() => {})
+    }
+
+    /**
+     * 将 type-tree 返回的树扁平化为类型列表（去掉父子结构，按 seq 升序）。
+     * 拷贝时去掉 children 保证 ProTable 停留在扁平表格，不渲染可展开行。
+     */
+    flattenTypes = (nodes, out = []) => {
+        for (const node of nodes || []) {
+            const {children, ...type} = node
+            out.push(type)
+            this.flattenTypes(children, out)
+        }
+        return out.sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0))
+    }
+
+    requestTypes = (params) => {
+        return HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
+            const types = this.flattenTypes(rs.data).filter(t => {
+                if (params.typeCode && !(t.typeCode || '').includes(params.typeCode)) return false
+                if (params.typeLabel && !(t.typeLabel || '').includes(params.typeLabel)) return false
+                return true
+            })
+            return {data: {content: types, totalElements: types.length, size: 10}}
         })
     }
 
     handleTypeAdd = () => {
-        this.typeModalRef.current.open({pid: this.state.selectedType?.id, enabled: true})
+        this.typeModalRef.current.open({enabled: true})
     }
 
-    handleTypeEdit = () => {
-        const {selectedType} = this.state
-        if (!selectedType) return
-        this.typeModalRef.current.open({...selectedType})
+    handleTypeEdit = (record) => {
+        this.typeModalRef.current.open({...record})
     }
 
-    handleTypeDelete = () => {
-        const {selectedType} = this.state
-        if (!selectedType) return
-        HttpClient.post('admin/dict/type-delete', {id: selectedType.id}, null).then(() => {
-            this.setState({selectedType: null, selectedTypeCode: null})
-            this.loadTree()
+    handleTypeDelete = (record) => {
+        HttpClient.post('admin/dict/type-delete', {id: record.id}, null).then(() => {
+            this.loadTypeTree()
+            this.typesTableRef.current?.reload()
         })
     }
 
@@ -73,52 +89,29 @@ export default class DictPage extends React.Component {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/type-create' : 'admin/dict/type-update'
         await HttpClient.post(url, values)
-        this.loadTree()
+        this.loadTypeTree()
+        this.typesTableRef.current?.reload()
     }
 
-    findNode = (nodes, key) => {
-        for (const n of nodes) {
-            if (n.id === key) return n
-            if (n.children) {
-                const found = this.findNode(n.children, key)
-                if (found) return found
-            }
-        }
-        return null
+    handleItemsModal = (record) => {
+        this.setState({currentType: record, itemsModalOpen: true})
     }
 
-    getParentLabel = () => {
-        const {selectedType, typeTree} = this.state
-        if (!selectedType?.pid) return null
-        const parent = this.findNode(typeTree, selectedType.pid)
-        return parent?.typeLabel || null
-    }
-
-    onTreeSelect = (selectedKeys) => {
-        if (selectedKeys.length === 0) {
-            this.setState({selectedType: null, selectedTypeCode: null})
-            return
-        }
-        this.setState((prevState) => {
-            const node = this.findNode(prevState.typeTree, selectedKeys[0])
-            return {
-                selectedType: node,
-                selectedTypeCode: node?.typeCode || null
-            }
-        }, () => this.tableRef.current.reload())
+    handleItemsModalCancel = () => {
+        this.setState({itemsModalOpen: false, currentType: null})
     }
 
     handleItemAdd = () => {
-        this.modalRef.current.open({typeCode: this.state.selectedTypeCode})
+        this.itemModalRef.current.open({typeCode: this.state.currentType?.typeCode})
     }
 
     handleItemEdit = record => {
-        this.modalRef.current.open(record)
+        this.itemModalRef.current.open(record)
     }
 
     handleItemDelete = row => {
         HttpClient.post('admin/dict/delete', row, null).then(() => {
-            this.tableRef.current.reload()
+            this.itemsTableRef.current?.reload()
         })
     }
 
@@ -126,10 +119,41 @@ export default class DictPage extends React.Component {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/create' : 'admin/dict/update'
         await HttpClient.post(url, values)
-        this.tableRef.current.reload()
+        this.itemsTableRef.current?.reload()
     }
 
-    columns = [
+    typeColumns = [
+        {title: '类型编码', dataIndex: 'typeCode'},
+        {title: '类型名称', dataIndex: 'typeLabel'},
+        {
+            title: '内置枚举', dataIndex: 'isEnum',
+            render(v) {
+                return <Tag color={v ? 'blue' : 'default'}>{v ? '内置' : '自定义'}</Tag>
+            }
+        },
+        {
+            title: '启用', dataIndex: 'enabled',
+            render(v) {
+                return <ViewSwitch value={v}/>
+            }
+        },
+        {title: '序号', dataIndex: 'seq'},
+        {
+            title: '操作', dataIndex: 'option',
+            render: (_, record) => {
+                return <PermActions
+                    size="small"
+                    actions={[
+                        {label: '编辑', perm: 'sys-dict:update', icon: <EditOutlined/>, onClick: () => this.handleTypeEdit(record)},
+                        {label: '删除', perm: 'sys-dict:delete', icon: <DeleteOutlined/>, danger: true, confirm: '是否确定删除此类型及其所有子类型和字典项？', onClick: () => this.handleTypeDelete(record)},
+                        {label: '字典项', perm: 'sys-dict:read', onClick: () => this.handleItemsModal(record)},
+                    ]}
+                />;
+            },
+        },
+    ]
+
+    itemColumns = [
         {title: '编码', dataIndex: 'code'},
         {title: '标签', dataIndex: 'label'},
         {
@@ -161,76 +185,54 @@ export default class DictPage extends React.Component {
     ]
 
     render() {
-        const {selectedType, selectedTypeCode} = this.state
-        const hasTypeSelected = selectedType != null && selectedTypeCode != null
+        const {itemsModalOpen, currentType} = this.state
 
         return <Page>
-            <Splitter>
-                <Splitter.Panel defaultSize={300} style={{paddingRight: 8}}>
-                    <Card loading={this.state.treeLoading}
-                          size='small'
-                          title={<div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                              <Typography.Text strong>字典类型</Typography.Text>
-                              <PermActions size='small' actions={[
-                                  {label: '新增类型', perm: 'sys-dict:create', icon: <PlusOutlined/>, onClick: this.handleTypeAdd},
-                              ]}/>
-                          </div>}
-                    >
-                        <Tree
-                            treeData={this.state.typeTree}
-                            onSelect={this.onTreeSelect}
-                            fieldNames={{title: 'typeLabel', key: 'id'}}
-                            showLine
-                            defaultExpandAll
-                            blockNode
-                        />
-                        {this.state.typeTree.length === 0 && <Empty/>}
-                    </Card>
-                </Splitter.Panel>
+            <ProTable
+                actionRef={this.typesTableRef}
+                rowKey='id'
+                request={this.requestTypes}
+                columns={this.typeColumns}
+                searchInline
+                searchFormRender={() => (
+                    <>
+                        <Form.Item name='typeCode'><Input.Search allowClear placeholder='类型编码关键字'/></Form.Item>
+                        <Form.Item name='typeLabel'><Input.Search allowClear placeholder='类型名称关键字'/></Form.Item>
+                    </>
+                )}
+                toolBarRender={() => (
+                    <PermActions size='small' actions={[
+                        {label: '新增类型', perm: 'sys-dict:create', icon: <PlusOutlined/>, onClick: this.handleTypeAdd},
+                    ]}/>
+                )}
+            />
 
-                <Splitter.Panel style={{paddingLeft: 8}}>
-                    <Card size='small' style={{marginBottom: 8}}>
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
-                            <Typography.Text strong>类型信息</Typography.Text>
-                            {hasTypeSelected && (
-                                <PermActions size='small' actions={[
-                                    {label: '编辑', perm: 'sys-dict:update', icon: <EditOutlined/>, onClick: this.handleTypeEdit},
-                                    {
-                                        label: '删除',
-                                        perm: 'sys-dict:delete',
-                                        icon: <DeleteOutlined/>,
-                                        confirm: '是否确定删除此类型及其所有子类型和字典项？',
-                                        onClick: this.handleTypeDelete,
-                                    },
-                                ]}/>
-                            )}
-                        </div>
-                        {hasTypeSelected && <Descriptions size='small' column={3}>
-                            <Descriptions.Item label="名称">{selectedType.typeLabel}</Descriptions.Item>
-                            <Descriptions.Item label="类型编码">{selectedType.typeCode}</Descriptions.Item>
-                            <Descriptions.Item label="分类">{this.getParentLabel() || '-'}</Descriptions.Item>
-                            <Descriptions.Item label="序号">{selectedType.seq}</Descriptions.Item>
-                            <Descriptions.Item label="启用"><ViewSwitch value={selectedType.enabled}/></Descriptions.Item>
-                        </Descriptions>}
-                    </Card>
-                    <Card size='small'>
-                        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8}}>
-                            <Typography.Text strong>字典项</Typography.Text>
-                            {hasTypeSelected && <Button type='primary' icon={<PlusOutlined/>} onClick={this.handleItemAdd}>新增字典项</Button>}
-                        </div>
-                        {hasTypeSelected && <ProTable
-                                rowKey='uid'
-                                actionRef={this.tableRef}
-                                request={(params) => {
-                                    params.typeCode = selectedTypeCode
-                                    return HttpClient.get('admin/dict/page', params)
-                                }}
-                                columns={this.columns}
-                            />
-                        }
-                    </Card>
-                </Splitter.Panel>
-            </Splitter>
+            <Modal
+                title={currentType ? `字典项 - ${currentType.typeLabel}` : '字典项'}
+                open={itemsModalOpen}
+                onCancel={this.handleItemsModalCancel}
+                onOk={this.handleItemsModalCancel}
+                footer={null}
+                width={720}
+            >
+                {currentType && (
+                    <>
+                        <Button type='primary' style={{marginBottom: 8}} icon={<PlusOutlined/>} onClick={this.handleItemAdd}>
+                            新增字典项
+                        </Button>
+                        <ProTable
+                            key={currentType.typeCode}
+                            rowKey='uid'
+                            actionRef={this.itemsTableRef}
+                            request={(params) => {
+                                params.typeCode = currentType.typeCode
+                                return HttpClient.get('admin/dict/page', params)
+                            }}
+                            columns={this.itemColumns}
+                        />
+                    </>
+                )}
+            </Modal>
 
             <FormModal ref={this.typeModalRef} title='编辑字典类型'
                        onFinish={this.handleTypeFormFinish}>
@@ -253,7 +255,7 @@ export default class DictPage extends React.Component {
                 </Form.Item>
             </FormModal>
 
-            <FormModal ref={this.modalRef} title='编辑字典项'
+            <FormModal ref={this.itemModalRef} title='编辑字典项'
                        onFinish={this.onItemFormFinish}>
                 <Form.Item label='类型编码' name='typeCode'>
                     <Input disabled/>
