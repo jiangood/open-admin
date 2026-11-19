@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """release.py - open-admin release helper (cross-platform)
 
 用法:
@@ -17,12 +18,11 @@
 快照版（非正式版）:
     python scripts/release.py 3.4.0 --snapshot
     python scripts/release.py 3.4.0-SNAPSHOT
-    python scripts/release.py 3.4.0-SNAPSHOT.1
-    -> Maven 为 3.4.0-SNAPSHOT，npm 为 3.4.0-SNAPSHOT.<build>，
-       git tag 为 snapshot-v3.4.0-<build>；不传 build 时自动使用时间戳
+    -> Maven 为 3.4.0-SNAPSHOT，npm 为 3.4.0-SNAPSHOT.<build>（build 由脚本自动生成，时间戳），
+       git tag 为 snapshot-v3.4.0-<build>
 
 选项:
-    --snapshot     发布快照版；也可直接把版本写成 x.y.z-SNAPSHOT[.build]
+    --snapshot     发布快照版；也可直接把版本写成 x.y.z-SNAPSHOT
     --skip-tests   跳过 "mvn -B clean test" 和 "npm run build"
     --no-push      只在本地 commit + tag，不推送到 origin
     --dry-run      只检查/打印计划，不修改任何仓库文件
@@ -65,7 +65,7 @@ EXIT_CONFLICT = 5
 
 VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
 SNAPSHOT_VERSION_RE = re.compile(
-    r"^(\d+\.\d+\.\d+)-SNAPSHOT(?:\.(0|[1-9]\d*))?$", re.IGNORECASE
+    r"^(\d+\.\d+\.\d+)-SNAPSHOT$", re.IGNORECASE
 )
 WHITELIST_RE = re.compile(r"^.. ((.*/)?pom\.xml|web/package\.json)$")
 
@@ -245,10 +245,10 @@ class Release:
 
         match = SNAPSHOT_VERSION_RE.match(raw)
         if match:
-            base, build = match.group(1), match.group(2)
+            base = match.group(1)
             self.is_snapshot = True
             self.base_version = base
-            self.snapshot_build = build or datetime.now().strftime("%Y%m%d%H%M%S")
+            self.snapshot_build = datetime.now().strftime("%Y%m%d%H%M%S")
         elif self.opt_snapshot and VERSION_RE.match(raw):
             self.is_snapshot = True
             self.base_version = raw
@@ -441,7 +441,7 @@ class Release:
         if not self.is_snapshot and not VERSION_RE.match(self.version or ""):
             self.msg("")
             self.msg(f"  ERROR: invalid version '{self.version}', expected x.y.z")
-            self.msg("  snapshot: 3.4.0 --snapshot | 3.4.0-SNAPSHOT | 3.4.0-SNAPSHOT.1")
+            self.msg("  snapshot: 3.4.0 --snapshot | 3.4.0-SNAPSHOT")
             return EXIT_USAGE
 
         kind = "snapshot" if self.is_snapshot else "release"
@@ -656,8 +656,8 @@ def usage() -> int:
     print("")
     print("  release : python scripts/release.py 3.1.3       -> tag v3.1.3")
     print("  snapshot: python scripts/release.py 3.4.0 --snapshot")
-    print("            python scripts/release.py 3.4.0-SNAPSHOT[.1]")
-    print("            -> Maven 3.4.0-SNAPSHOT, npm 3.4.0-SNAPSHOT.<build>")
+    print("            python scripts/release.py 3.4.0-SNAPSHOT")
+    print("            -> Maven 3.4.0-SNAPSHOT, npm 3.4.0-SNAPSHOT.<build>（build 由脚本自动生成，时间戳）")
     print("            -> tag snapshot-v3.4.0-<build>")
     print("  the leading v is optional")
     print("")

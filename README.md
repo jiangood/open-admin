@@ -191,19 +191,20 @@ python scripts/release.py --help                   # 全部参数与退出码
 
 | 通道 | 版本示例 | git tag | 发布目标 |
 |---|---|---|---|
-| Maven | `3.4.0-SNAPSHOT` | `snapshot-v3.4.0-1` | Central Portal snapshot 仓库 |
-| npm | `3.4.0-SNAPSHOT.1` | 同上 | npm dist-tag `snapshot` |
+| Maven | `3.4.0-SNAPSHOT` | `snapshot-v3.4.0-<build>` | Central Portal snapshot 仓库 |
+| npm | `3.4.0-SNAPSHOT.<build>` | 同上 | npm dist-tag `snapshot` |
+
+`<build>` 由脚本自动生成（时间戳 `YYYYMMDDHHMMSS`），不再支持手动指定。
 
 ```bash
-python scripts/release.py 3.4.0 --snapshot          # build 号自动取时间戳
-python scripts/release.py 3.4.0-SNAPSHOT            # 同上，显式写快照版本
-python scripts/release.py 3.4.0-SNAPSHOT.1          # 指定 build 号 1
+python scripts/release.py 3.4.0 --snapshot          # build 号自动生成（时间戳）
+python scripts/release.py 3.4.0-SNAPSHOT            # 同上
 python scripts/release.py 3.4.0 --snapshot --dry-run
 python scripts/release.py 3.4.0 --snapshot --no-push
 ```
 
 - 快照版 tag 为 `snapshot-v<版本>-<build>`，由 `.github/workflows/publish.yml` 的 snapshot 流程触发，不会与正式版 `v*` tag 混淆
-- Maven 走 `3.4.0-SNAPSHOT`，npm 因同版本不可覆盖，使用带唯一 build 号的 `3.4.0-SNAPSHOT.<build>`，并通过 dist-tag `snapshot` 提供最新快照
+- Maven 走 `3.4.0-SNAPSHOT`，npm 使用带唯一 build 号的 `3.4.0-SNAPSHOT.<build>`（脚本自动生成），并通过 dist-tag `snapshot` 提供最新快照
 - **前置条件**：Central Portal 的 namespace 需先开启 `SNAPSHOTs`（Namespaces 页面 → Enable SNAPSHOTs）；否则 Maven 快照发布会失败
 - 消费方需显式添加快照仓库；npm 用 `@jiangood/open-admin@snapshot` 安装：
   ```xml
@@ -216,7 +217,7 @@ python scripts/release.py 3.4.0 --snapshot --no-push
   ```
 - SNAPSHOT 可覆盖且约 90 天后会被 Central 清理；Maven Central 的 SNAPSHOT 通道与正式 release 分开，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准
 - `pom.xml` 的 `publish` profile 已为 `central-publishing-maven-plugin` 显式配置 `centralSnapshotsUrl`，`-SNAPSHOT` 会直接上传到 Central Portal 快照仓库（插件版本需 `>= 0.7.0`，当前为 `0.12.0`）
-- 只改版本号不发布：`python scripts/bump-version.py 3.4.0-SNAPSHOT --npm-version 3.4.0-SNAPSHOT.1`
+- 只改版本号不发布：可用 `python scripts/bump-version.py 3.4.0-SNAPSHOT --npm-version 3.4.0-SNAPSHOT.<build>`（build 自行按规则生成）
 
 ## Skills (opencode)
 

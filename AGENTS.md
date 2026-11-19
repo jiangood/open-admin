@@ -52,11 +52,11 @@ python scripts/release.py <version> [options]
 非正式版（快照）使用 `--snapshot` 或显式版本：
 
 ```bash
-python scripts/release.py 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4.0-SNAPSHOT.<build>
-python scripts/release.py 3.4.0-SNAPSHOT.1       # 指定 build 号
+python scripts/release.py 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4.0-SNAPSHOT.<build>（build 脚本自动生成，时间戳）
+python scripts/release.py 3.4.0-SNAPSHOT         # 同上
 ```
 
-快照 tag 为 `snapshot-v<version>-<build>`，由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准。
+快照 tag 为 `snapshot-v<version>-<build>`（build 由脚本自动生成），由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准。
 
 常用选项：
 
