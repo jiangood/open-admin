@@ -189,6 +189,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
   - **执行方式**：以与目标环境一致的数据库配置启动一次，传入参数 `--reset-admin-password`，命令执行完会自动退出（成功退出码 0，失败非 0）。为避免端口冲突，建议同时加 `--spring.main.web-application-type=none`。
     - Jar：`java -jar app.jar --spring.main.web-application-type=none --reset-admin-password`
     - Docker 一次性容器：`docker run --rm -v <data卷>:/data <image> --spring.main.web-application-type=none --reset-admin-password`
+    - Docker Compose（使用本仓库 `docker-compose/docker-compose.yml`，自动复用镜像/数据卷配置；H2 需先停后启）：`cd docker-compose && docker compose stop open-admin && docker compose run --rm open-admin --spring.main.web-application-type=none --reset-admin-password && docker compose start open-admin`
     - Kubernetes：一次性 `Job`，容器 `args: ["--spring.main.web-application-type=none", "--reset-admin-password"]`
   - **取回密码**：新密码**仅输出到控制台（stdout）**，不会写入应用日志文件；可从终端输出或容器/任务日志中查找 `[ADMIN-PASSWORD-RESET]` 获取。应用日志仅记录“已重置”审计信息（不含密码）。取回后请及时登录并完成强制改密。
   - **数据库与停机**：默认 **H2 文件库**（`jdbc:h2:file:...`）同一时间仅允许一个进程访问，执行前必须先停止正在运行的业务服务/容器，避免文件锁导致重置失败；重置完成后再正常启动服务。使用 **MySQL 等外部数据库** 无文件锁限制，一般无需停机，但仍需使用相同数据源配置并关闭 Web（避免端口冲突）。
