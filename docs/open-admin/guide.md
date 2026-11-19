@@ -164,7 +164,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 5. **菜单** — `src/main/resources/menu.yml`（或 `menu-*.yml`）定义菜单树
 6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
 
-> 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 从框架 Release 同步到 `.opencode/skills/`）。也可在「系统管理 → 代码生成」中选中已建好的实体，一键生成 Repository / Service / Controller / 前端页面 / 菜单 代码并写入项目源码目录（先预览确认）。
+> 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 从框架同步到 `.opencode/skills/`：正式版取 Release 的 `framework-files.zip`，预览版取 `snapshot-v*` tag 的源码包）。也可在「系统管理 → 代码生成」中选中已建好的实体，一键生成 Repository / Service / Controller / 前端页面 / 菜单 代码并写入项目源码目录（先预览确认）。
 
 ## 内置模块
 
