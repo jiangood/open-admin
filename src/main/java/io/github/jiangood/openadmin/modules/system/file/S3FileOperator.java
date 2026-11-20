@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.checksums.RequestChecksumCalculation;
@@ -16,14 +17,19 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Duration;
 
 /**
  * S3 协议对象存储实现（AWS SDK v2），可对接 AWS S3、RustFS、阿里云 OSS、腾讯云 COS、Ceph 等。
@@ -34,6 +40,7 @@ public class S3FileOperator implements FileOperator, AutoCloseable {
     private static final String DEFAULT_REGION = "us-east-1";
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
     private final String bucketName;
 
     public S3FileOperator(String endpoint, String region, String accessKey, String secretKey,
@@ -43,38 +50,57 @@ public class S3FileOperator implements FileOperator, AutoCloseable {
         }
         log.info("S3 对象存储地址: {}, region: {}, bucket: {}", endpoint, region, bucketName);
         this.bucketName = bucketName;
-        this.s3Client = buildClient(endpoint, region, accessKey, secretKey, pathStyleAccess);
+        Region resolvedRegion = Region.of(StrUtil.blankToDefault(region, DEFAULT_REGION).trim());
+        AwsCredentialsProvider credentialsProvider = resolveCredentials(accessKey, secretKey);
+        URI endpointUri = StrUtil.isNotBlank(endpoint) ? URI.create(normalizeEndpoint(endpoint)) : null;
+        S3Configuration serviceConfiguration = S3Configuration.builder()
+                .pathStyleAccessEnabled(pathStyleAccess)
+                .build();
+
+        this.s3Client = buildClient(resolvedRegion, credentialsProvider, endpointUri, serviceConfiguration);
+        this.s3Presigner = buildPresigner(resolvedRegion, credentialsProvider, endpointUri, serviceConfiguration);
     }
 
-    private static S3Client buildClient(String endpoint, String region, String accessKey, String secretKey,
-                                        boolean pathStyleAccess) {
-        S3ClientBuilder builder = S3Client.builder()
-                .httpClientBuilder(UrlConnectionHttpClient.builder())
-                .region(Region.of(StrUtil.blankToDefault(region, DEFAULT_REGION).trim()))
-                // SDK 2.30+ 默认开启完整性校验（aws-chunked），部分第三方 S3 兼容存储不识别，按需关闭
-                .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
-                .responseChecksumValidation(ResponseChecksumValidation.WHEN_REQUIRED)
-                .serviceConfiguration(S3Configuration.builder()
-                        .pathStyleAccessEnabled(pathStyleAccess)
-                        .build());
-
-        if (StrUtil.isNotBlank(endpoint)) {
-            builder.endpointOverride(URI.create(normalizeEndpoint(endpoint)));
-        }
-
+    private static AwsCredentialsProvider resolveCredentials(String accessKey, String secretKey) {
         boolean hasAccessKey = StrUtil.isNotBlank(accessKey);
         boolean hasSecretKey = StrUtil.isNotBlank(secretKey);
         if (hasAccessKey && hasSecretKey) {
-            builder.credentialsProvider(StaticCredentialsProvider.create(
-                    AwsBasicCredentials.create(accessKey.trim(), secretKey.trim())));
-        } else {
-            if (hasAccessKey || hasSecretKey) {
-                log.warn("S3 access-key / secret-key 只配置了一个，将忽略并使用默认凭证链");
-            }
-            // 未配置密钥时走默认凭证链：环境变量 / IAM Role / 实例角色
-            builder.credentialsProvider(DefaultCredentialsProvider.create());
+            return StaticCredentialsProvider.create(
+                    AwsBasicCredentials.create(accessKey.trim(), secretKey.trim()));
         }
+        if (hasAccessKey || hasSecretKey) {
+            log.warn("S3 access-key / secret-key 只配置了一个，将忽略并使用默认凭证链");
+        }
+        // 未配置密钥时走默认凭证链：环境变量 / IAM Role / 实例角色
+        return DefaultCredentialsProvider.create();
+    }
 
+    private static S3Client buildClient(Region region, AwsCredentialsProvider credentialsProvider,
+                                        URI endpointUri, S3Configuration serviceConfiguration) {
+        S3ClientBuilder builder = S3Client.builder()
+                .httpClientBuilder(UrlConnectionHttpClient.builder())
+                .region(region)
+                .credentialsProvider(credentialsProvider)
+                // SDK 2.30+ 默认开启完整性校验（aws-chunked），部分第三方 S3 兼容存储不识别，按需关闭
+                .requestChecksumCalculation(RequestChecksumCalculation.WHEN_REQUIRED)
+                .responseChecksumValidation(ResponseChecksumValidation.WHEN_REQUIRED)
+                .serviceConfiguration(serviceConfiguration);
+
+        if (endpointUri != null) {
+            builder.endpointOverride(endpointUri);
+        }
+        return builder.build();
+    }
+
+    private static S3Presigner buildPresigner(Region region, AwsCredentialsProvider credentialsProvider,
+                                              URI endpointUri, S3Configuration serviceConfiguration) {
+        S3Presigner.Builder builder = S3Presigner.builder()
+                .region(region)
+                .credentialsProvider(credentialsProvider)
+                .serviceConfiguration(serviceConfiguration);
+        if (endpointUri != null) {
+            builder.endpointOverride(endpointUri);
+        }
         return builder.build();
     }
 
@@ -175,12 +201,38 @@ public class S3FileOperator implements FileOperator, AutoCloseable {
     }
 
     @Override
+    public boolean supportsPresignedGet() {
+        return true;
+    }
+
+    @Override
+    public String presignGetUrl(String key, Duration ttl) {
+        if (ttl == null || ttl.isNegative() || ttl.isZero()) {
+            ttl = Duration.ofHours(1);
+        }
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .build();
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                .signatureDuration(ttl)
+                .getObjectRequest(getObjectRequest)
+                .build();
+        PresignedGetObjectRequest presigned = s3Presigner.presignGetObject(presignRequest);
+        return presigned.url().toString();
+    }
+
+    @Override
     public S3Client getClient() {
         return s3Client;
     }
 
     @Override
     public void close() {
-        s3Client.close();
+        try {
+            s3Presigner.close();
+        } finally {
+            s3Client.close();
+        }
     }
 }
