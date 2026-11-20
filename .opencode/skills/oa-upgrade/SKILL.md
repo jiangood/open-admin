@@ -8,8 +8,8 @@
 
 | 通道 | Maven 版本 | npm 版本 | git tag | 变更信息来源 | 框架文件来源 |
 |---|---|---|---|---|---|
-| 正式版 | `3.4.0` | `3.4.0` | `v3.4.0` | Release Notes + compare | release 资产 `framework-files.zip` |
-| 预览版 | `3.4.0-SNAPSHOT` | `3.4.0-SNAPSHOT.1` | `snapshot-v3.4.0-1` | 只有 compare 提交日志 | tag 源码包 tar.gz |
+| 正式版 | `3.4.0` | `3.4.0` | `v3.4.0` | Release Notes + compare | tag 源码归档（按 `docs/framework-sync.json` 清单同步） |
+| 预览版 | `3.4.0-SNAPSHOT` | `3.4.0-SNAPSHOT.1` | `snapshot-v3.4.0-1` | 只有 compare 提交日志 | tag 源码归档（按 `docs/framework-sync.json` 清单同步） |
 
 判定规则：
 
@@ -18,10 +18,11 @@
 
 预览版要点（与正式版的关键差异）：
 
-- **没有 GitHub Release**，所以没有 Release Notes，也没有 `framework-files.zip`
+- **没有 GitHub Release**，所以没有 Release Notes（变更信息以 compare 提交日志为准）
 - npm 同一版本不可覆盖，每个构建的 npm 版本号都不同（`.1`、`.2`…），升级预览版 = 换一个精确版本号
 - Maven 走 Central 快照仓库，需要业务项目额外配置仓库，且要放行全局镜像
 - SNAPSHOT 约 90 天后会被 Central 清理，长期使用需回到正式版
+- 框架文件（skill/文档）与正式版一样，通过 tag 源码归档按清单同步，无需 GitHub Release 资产
 
 ## 前提条件检查
 
@@ -63,13 +64,11 @@ npm view @jiangood/open-admin versions --json    # 全部已发布版本（含 S
 
 确定目标版本后、读取变更或修改依赖前，按通道做快速校验。npm 与 GitHub 侧均为即时生效；**不要**把 Maven Central 可见性作为前置条件（仅正式版 Maven 同步到 Central 可能有 ~10 分钟延迟，见第 7 步）。
 
-**正式版**（`X.Y.Z`）—— 以 GitHub Release 为准（比仅查 tag 更准确，且隐含 tag；Release Notes 与 `framework-files.zip` 依赖 release）：
+**正式版**（`X.Y.Z`）—— 以 GitHub Release/tag 为准（Release Notes 依赖 release；框架文件从 tag 源码归档按清单同步，不再依赖 release 资产）：
 
 ```bash
 npm view @jiangood/open-admin@{target_version} version
 curl -fsSI -o /dev/null "https://github.com/jiangood/open-admin/releases/tag/v{target_version}"
-# oa-upgrade-docs 正式版会下载该资产，可一并确认：
-# curl -fsI -o /dev/null "https://github.com/jiangood/open-admin/releases/download/v{target_version}/framework-files.zip"
 ```
 
 **预览版**（`X.Y.Z-SNAPSHOT.N`）—— 无 GitHub Release，以 snapshot tag 为准：
@@ -205,14 +204,14 @@ npm run build
 
 ### 8. 框架文件同步（skills + docs）
 
-升级后需将新版本的框架文件（`.opencode/skills/`、`docs/open-admin/`）同步到业务项目根目录，供 opencode 使用新版本 skill 与文档。
+升级后需将新版本的框架文件同步到业务项目根目录，供 opencode 使用新版本 skill 与文档。同步范围**以目标 tag 内的 `docs/framework-sync.json` 清单为准**，来源统一为 tag 源码归档（正式版/快照版一致，不再使用 `framework-files.zip`）。
 
 **调用 `oa-upgrade-docs` skill**，参数按通道传：
 
-- 正式版：传版本号，如 `3.4.0`
-- 预览版：传快照 tag 或 npm 版本，如 `snapshot-v3.3.4-1` / `3.3.4-SNAPSHOT.1`（skill 会自行换算并改用 tag 源码包）
+- 正式版：传版本号或 tag，如 `3.4.0` / `v3.4.0`
+- 预览版：传快照 tag 或 npm 版本，如 `snapshot-v3.3.4-1` / `3.3.4-SNAPSHOT.1`（skill 会自行换算 tag）
 
-> 正式版以 GitHub Release 资产 `framework-files.zip` 为准；预览版没有 Release 资产，`oa-upgrade-docs` 会自动改用 `archive/refs/tags/snapshot-v{base}-{build}.tar.gz`。若该 skill 不可用（首次接入 / 文件缺失），按该 skill 的下载与同步规则手工执行，不要静默跳过。
+> 若该 skill 不可用或为旧版本（例如历史项目仍依赖已移除的 `framework-files.zip`），按 `oa-upgrade-docs` skill 中的「历史项目引导/自举」或 README「历史项目升级」说明，从目标 tag 归档按清单手工同步一次，不要静默跳过。
 
 ### 9. 其他检查（可选）
 

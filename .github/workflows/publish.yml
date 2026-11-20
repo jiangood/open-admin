@@ -185,19 +185,7 @@ jobs:
         uses: aaronbarnaby/get-tag@v1.0.0
         with:
           without_prefix_v: true
-      - name: Build framework-files.zip
-        run: |
-          ZIP_DIR=$(mktemp -d)
-          mkdir -p "$ZIP_DIR/docs" "$ZIP_DIR/.opencode"
-          cp -r docs/open-admin "$ZIP_DIR/docs/open-admin"
-          mkdir -p "$ZIP_DIR/.opencode/skills"
-          cp -r .opencode/skills/oa-crud "$ZIP_DIR/.opencode/skills/"
-          cp -r .opencode/skills/oa-upgrade "$ZIP_DIR/.opencode/skills/"
-          cp -r .opencode/skills/oa-upgrade-docs "$ZIP_DIR/.opencode/skills/"
-          (cd "$ZIP_DIR" && zip -qr "$GITHUB_WORKSPACE/framework-files.zip" docs .opencode)
-          echo "✓ framework-files.zip 构建完成"
-
-      - name: Create Release & Upload Asset (if not exists)
+      - name: Create Release (if not exists)
         run: |
           if gh release view "${{ github.ref_name }}" &>/dev/null; then
             echo "Release ${{ github.ref_name }} 已存在"
@@ -206,9 +194,7 @@ jobs:
               --title "Release v${{ steps.tag.outputs.tag }}" \
               --latest \
               --generate-notes
+            echo "✓ GitHub Release 已创建"
           fi
-          gh release upload "${{ github.ref_name }}" framework-files.zip \
-            --clobber --repo jiangood/open-admin
-          echo "✓ framework-files.zip 已上传"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -21,7 +21,7 @@ open-admin 是一个后台管理系统框架（脚手架），**业务项目无�
 }
 ```
 
-添加依赖后，用户管理、角色权限、数据字典、系统参数、Quartz 调度、文件管理、邮件发送、在线用户、代码生成等功能开箱即用。框架的 skills 与文档通过 `oa-upgrade-docs` skill 从 GitHub Release 同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
+添加依赖后，用户管理、角色权限、数据字典、系统参数、Quartz 调度、文件管理、邮件发送、在线用户、代码生成等功能开箱即用。框架的 skills 与文档按 `docs/framework-sync.json` 清单从 GitHub tag 源码归档同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
 
 ## 快速开始
 
@@ -229,6 +229,81 @@ python scripts/release.py 3.4.0 --snapshot --no-push
 | `oa-upgrade` | 升级框架版本 |
 | `oa-upgrade-docs` | 从 GitHub Release 同步框架文件（skills + docs） |
 
-### 从 Release 同步到业务项目
+### 同步框架文件到业务项目
 
-框架发布时自动构建 `framework-files.zip`（含 `.opencode/skills/` 与 `docs/open-admin/`）并附到 GitHub Release。业务项目调用 **`oa-upgrade-docs` skill** 下载并同步到项目根目录：内容比对无变更不写入；`docs/open-admin/` 全量镜像（删除孤儿文件），`.opencode/skills/` 仅覆盖框架 skill（不删业务本地 skill）。同步细节与验证步骤见 `oa-upgrade-docs` skill；升级框架后调用 `oa-upgrade` skill 会自动在末尾触发同步。
+框架文件（skills + 文档）的同步范围以 **`docs/framework-sync.json`** 清单为准。`oa-upgrade-docs` skill 会按目标版本 tag 下载源码归档 `https://github.com/jiangood/open-admin/archive/refs/tags/{TAG}.tar.gz`，读取其中的清单并同步到业务项目根目录：
+
+- `mirror` 条目：使目标路径与来源一致（该路径内删除来源不存在的文件/子目录）
+- `copy` 条目：覆盖/合并到目标，不删除目标中的额外文件
+- 仅作用于清单列出的路径，不会删除清单外文件（如业务自建 `.opencode/skills/*`）
+
+正式版 tag 为 `vX.Y.Z`，快照版 tag 为 `snapshot-vX.Y.Z-{build}`，两者均通过 tag 归档同步（不再使用 `framework-files.zip`）。日常使用直接调用 `oa-upgrade-docs` skill（升级框架后 `oa-upgrade` 会在末尾触发）。
+
+### 历史项目升级（本地 skill 过旧/缺失时）
+
+历史项目若仍依赖旧版同步逻辑（例如下载已移除的 `framework-files.zip`），或尚未接入框架 skill，可在**业务项目根目录**手工执行一次“按清单同步”，将 `docs/framework-sync.json` 与最新框架 skill/文档同步进来，之后即可正常使用新 skill。
+
+1. 确定目标 tag：正式版 `vX.Y.Z`（如 `v3.4.0`），快照版 `snapshot-vX.Y.Z-{build}`（如 `snapshot-v3.4.0-1`；无 build 号时可用 `git ls-remote --tags --sort=-v:refname https://github.com/jiangood/open-admin.git 'refs/tags/snapshot-vX.Y.Z-*' | head -1` 取最新）。
+2. 下载并解包 tag 归档：
+
+```bash
+TAG="v3.4.0"   # 替换为目标 tag
+git ls-remote --exit-code --tags https://github.com/jiangood/open-admin.git "refs/tags/$TAG" >/dev/null || exit 1
+rm -rf /tmp/oa-framework-files /tmp/oa-framework-files.tar.gz
+mkdir -p /tmp/oa-framework-files
+curl -fL --retry 3 -o /tmp/oa-framework-files.tar.gz \
+  "https://github.com/jiangood/open-admin/archive/refs/tags/$TAG.tar.gz"
+tar -xzf /tmp/oa-framework-files.tar.gz -C /tmp/oa-framework-files --strip-components=1
+test -f /tmp/oa-framework-files/docs/framework-sync.json || { echo "缺少 docs/framework-sync.json（目标版本过旧或来源异常）"; exit 1; }
+```
+
+3. 按清单同步（需 `python3`）：
+
+```bash
+python3 - <<'PY'
+import json, os, shutil
+from pathlib import Path
+
+PROJ = Path.cwd()
+SRC = Path("/tmp/oa-framework-files")
+with open(SRC / "docs/framework-sync.json", "r", encoding="utf-8") as f:
+    manifest = json.load(f)
+
+for item in manifest.get("sync") or []:
+    rel = item["path"].strip().strip("/")
+    mode = item.get("mode", "copy")
+    src, dst = SRC / rel, PROJ / rel
+    if not src.exists():
+        print(f"[跳过] 来源不存在: {rel}")
+        continue
+    if src.is_dir():
+        dst.mkdir(parents=True, exist_ok=True)
+        for root, dirs, files in os.walk(src):
+            r = Path(root); rel_dir = r.relative_to(src); out_dir = dst / rel_dir
+            out_dir.mkdir(parents=True, exist_ok=True)
+            for d in dirs: (out_dir / d).mkdir(parents=True, exist_ok=True)
+            for name in files: shutil.copy2(r / name, out_dir / name)
+        if mode == "mirror":
+            for root, dirs, files in os.walk(dst, topdown=False):
+                r = Path(root); rel_dir = r.relative_to(dst); src_dir = src / rel_dir
+                for name in files:
+                    if not (src_dir / name).exists(): (r / name).unlink()
+                for d in dirs:
+                    if not (src_dir / d).exists(): shutil.rmtree(r / d)
+        print(f"[同步:{mode}] {rel}")
+    else:
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dst)
+        print(f"[同步:{mode}] {rel}")
+print("同步完成")
+PY
+```
+
+4. 清理并验证：
+
+```bash
+rm -rf /tmp/oa-framework-files /tmp/oa-framework-files.tar.gz
+test -f docs/framework-sync.json && test -f .opencode/skills/oa-upgrade-docs/SKILL.md && echo "ok"
+```
+
+> 若目标版本早于清单机制（解包后无 `docs/framework-sync.json`，且根目录也无 `framework-sync.json`），请先同步到一个包含清单的版本；也可按该版本仓库中的同步说明手工复制 `.opencode/skills/oa-*` 与 `docs/open-admin/`。详细规则与故障排查见 `.opencode/skills/oa-upgrade-docs/SKILL.md`。
