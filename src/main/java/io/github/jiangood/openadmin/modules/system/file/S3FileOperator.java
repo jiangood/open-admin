@@ -2,7 +2,11 @@ package io.github.jiangood.openadmin.modules.system.file;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
+import io.github.jiangood.openadmin.framework.spi.CompletedUploadPart;
+import io.github.jiangood.openadmin.framework.spi.DirectUploadInfo;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
+import io.github.jiangood.openadmin.framework.spi.ObjectMetadata;
+import io.github.jiangood.openadmin.framework.spi.UploadPartInfo;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
@@ -17,12 +21,26 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.AbortMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompleteMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CompletedMultipartUpload;
+import software.amazon.awssdk.services.s3.model.CompletedPart;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadRequest;
+import software.amazon.awssdk.services.s3.model.CreateMultipartUploadResponse;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.HeadObjectResponse;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.UploadPartRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedUploadPartRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.UploadPartPresignRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -30,6 +48,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 /**
  * S3 协议对象存储实现（AWS SDK v2），可对接 AWS S3、RustFS、阿里云 OSS、腾讯云 COS、Ceph 等。
@@ -130,6 +151,20 @@ public class S3FileOperator implements FileOperator, AutoCloseable {
         }
     }
 
+    private static Map<String, String> flattenHeaders(Map<String, List<String>> headers) {
+        if (headers == null || headers.isEmpty()) {
+            return Map.of();
+        }
+        java.util.LinkedHashMap<String, String> map = new java.util.LinkedHashMap<>();
+        for (Map.Entry<String, List<String>> e : headers.entrySet()) {
+            if (e.getKey() == null || e.getValue() == null || e.getValue().isEmpty()) {
+                continue;
+            }
+            map.put(e.getKey(), String.join(",", e.getValue()));
+        }
+        return map;
+    }
+
     private long lengthOf(InputStream inputStream) {
         if (inputStream instanceof FileInputStream fileInputStream) {
             try {
@@ -220,6 +255,134 @@ public class S3FileOperator implements FileOperator, AutoCloseable {
                 .build();
         PresignedGetObjectRequest presigned = s3Presigner.presignGetObject(presignRequest);
         return presigned.url().toString();
+    }
+
+    @Override
+    public boolean supportsDirectUpload() {
+        return true;
+    }
+
+    @Override
+    public DirectUploadInfo presignPut(String key, String contentType, Duration ttl) {
+        if (ttl == null || ttl.isNegative() || ttl.isZero()) {
+            ttl = Duration.ofMinutes(30);
+        }
+        PutObjectRequest.Builder reqBuilder = PutObjectRequest.builder()
+                .bucket(bucketName)
+                .key(key);
+        if (StrUtil.isNotBlank(contentType)) {
+            reqBuilder.contentType(contentType.trim());
+        }
+        PutObjectRequest putObjectRequest = reqBuilder.build();
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                .signatureDuration(ttl)
+                .putObjectRequest(putObjectRequest)
+                .build();
+        PresignedPutObjectRequest presigned = s3Presigner.presignPutObject(presignRequest);
+
+        DirectUploadInfo info = new DirectUploadInfo();
+        info.setUrl(presigned.url().toString());
+        info.setMethod("PUT");
+        info.setHeaders(flattenHeaders(presigned.signedHeaders()));
+        info.setExpiresAt(Instant.now().plus(ttl));
+        return info;
+    }
+
+    @Override
+    public String initMultipartUpload(String key, String contentType) {
+        CreateMultipartUploadRequest.Builder reqBuilder = CreateMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key);
+        if (StrUtil.isNotBlank(contentType)) {
+            reqBuilder.contentType(contentType.trim());
+        }
+        CreateMultipartUploadResponse resp = s3Client.createMultipartUpload(reqBuilder.build());
+        return resp.uploadId();
+    }
+
+    @Override
+    public UploadPartInfo presignUploadPart(String key, String uploadId, int partNumber, Duration ttl) {
+        if (ttl == null || ttl.isNegative() || ttl.isZero()) {
+            ttl = Duration.ofMinutes(30);
+        }
+        UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .partNumber(partNumber)
+                .build();
+        UploadPartPresignRequest presignRequest = UploadPartPresignRequest.builder()
+                .signatureDuration(ttl)
+                .uploadPartRequest(uploadPartRequest)
+                .build();
+        PresignedUploadPartRequest presigned = s3Presigner.presignUploadPart(presignRequest);
+
+        UploadPartInfo info = new UploadPartInfo();
+        info.setPartNumber(partNumber);
+        info.setUrl(presigned.url().toString());
+        info.setMethod("PUT");
+        info.setHeaders(flattenHeaders(presigned.signedHeaders()));
+        info.setExpiresAt(Instant.now().plus(ttl));
+        return info;
+    }
+
+    @Override
+    public void completeMultipartUpload(String key, String uploadId, List<CompletedUploadPart> parts) {
+        List<CompletedPart> completedParts = parts.stream()
+                .map(p -> CompletedPart.builder()
+                        .partNumber(p.getPartNumber())
+                        .eTag(p.getEtag())
+                        .build())
+                .toList();
+        CompletedMultipartUpload completed = CompletedMultipartUpload.builder()
+                .parts(completedParts)
+                .build();
+        CompleteMultipartUploadRequest request = CompleteMultipartUploadRequest.builder()
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .multipartUpload(completed)
+                .build();
+        s3Client.completeMultipartUpload(request);
+    }
+
+    @Override
+    public void abortMultipartUpload(String key, String uploadId) {
+        try {
+            AbortMultipartUploadRequest request = AbortMultipartUploadRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .uploadId(uploadId)
+                    .build();
+            s3Client.abortMultipartUpload(request);
+        } catch (SdkException e) {
+            log.warn("终止 S3 分片上传失败: key={}, uploadId={}, error={}", key, uploadId, e.getMessage());
+        }
+    }
+
+    @Override
+    public ObjectMetadata headObject(String key) {
+        ObjectMetadata meta = new ObjectMetadata();
+        try {
+            HeadObjectResponse resp = s3Client.headObject(HeadObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build());
+            meta.setExists(true);
+            meta.setContentLength(resp.contentLength() == null ? 0 : resp.contentLength());
+            meta.setContentType(resp.contentType());
+            meta.setEtag(resp.eTag());
+            return meta;
+        } catch (NoSuchKeyException e) {
+            meta.setExists(false);
+            return meta;
+        } catch (S3Exception e) {
+            if (e.statusCode() == 404) {
+                meta.setExists(false);
+                return meta;
+            }
+            throw e;
+        }
     }
 
     @Override

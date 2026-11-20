@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.List;
 
 public interface FileOperator {
 
@@ -39,5 +40,56 @@ public interface FileOperator {
      */
     default String presignGetUrl(String key, Duration ttl) {
         throw new UnsupportedOperationException("不支持直链下载");
+    }
+
+    /**
+     * 是否支持前端直传（预签名 PUT / 分片上传），用于绕过应用服务器带宽。
+     */
+    default boolean supportsDirectUpload() {
+        return false;
+    }
+
+    /**
+     * 生成单文件直传（PUT）预签名信息。
+     */
+    default DirectUploadInfo presignPut(String key, String contentType, Duration ttl) {
+        throw new UnsupportedOperationException("不支持直传上传");
+    }
+
+    /**
+     * 初始化分片上传，返回 uploadId。
+     */
+    default String initMultipartUpload(String key, String contentType) {
+        throw new UnsupportedOperationException("不支持分片直传");
+    }
+
+    /**
+     * 生成指定分片的直传预签名信息。
+     */
+    default UploadPartInfo presignUploadPart(String key, String uploadId, int partNumber, Duration ttl) {
+        throw new UnsupportedOperationException("不支持分片直传");
+    }
+
+    /**
+     * 完成分片上传。
+     */
+    default void completeMultipartUpload(String key, String uploadId, List<CompletedUploadPart> parts) {
+        throw new UnsupportedOperationException("不支持分片直传");
+    }
+
+    /**
+     * 终止分片上传（清理未完成的分片）。
+     */
+    default void abortMultipartUpload(String key, String uploadId) {
+        throw new UnsupportedOperationException("不支持分片直传");
+    }
+
+    /**
+     * 获取对象元数据（用于直传完成后的校验）。对象不存在时应返回 exists=false 的结果。
+     */
+    default ObjectMetadata headObject(String key) {
+        ObjectMetadata meta = new ObjectMetadata();
+        meta.setExists(exist(key));
+        return meta;
     }
 }

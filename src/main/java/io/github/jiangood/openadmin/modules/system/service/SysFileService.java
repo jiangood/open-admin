@@ -18,7 +18,11 @@ import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.system.SysFileConstants;
 import io.github.jiangood.openadmin.modules.system.dto.SysFileFolderNode;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
+import io.github.jiangood.openadmin.framework.spi.CompletedUploadPart;
+import io.github.jiangood.openadmin.framework.spi.DirectUploadInfo;
 import io.github.jiangood.openadmin.framework.spi.FileOperator;
+import io.github.jiangood.openadmin.framework.spi.ObjectMetadata;
+import io.github.jiangood.openadmin.framework.spi.UploadPartInfo;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
 import jakarta.persistence.Table;
 import jakarta.servlet.http.HttpServletRequest;
@@ -40,6 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
@@ -367,6 +372,20 @@ public class SysFileService {
             suffix = magicType;
         }
 
+        Assert.hasText(suffix, "解析后缀失败");
+        Set<String> allowSet = Set.of(systemProperties.getFile().getAllowUpload().split(","));
+        Assert.state(allowSet.contains(suffix.toLowerCase()), "文件格式" + suffix + "不允许上传");
+        return suffix.toLowerCase();
+    }
+
+    /**
+     * 按文件名校验并解析后缀（无字节流时，仅基于扩展名和上传白名单），用于直传预签名场景。
+     */
+    private String validateSuffixByName(String originalFilename) {
+        String suffix = null;
+        if (ObjectUtil.isNotEmpty(originalFilename)) {
+            suffix = CharSequenceUtil.subAfter(originalFilename, ".", true);
+        }
         Assert.hasText(suffix, "解析后缀失败");
         Set<String> allowSet = Set.of(systemProperties.getFile().getAllowUpload().split(","));
         Assert.state(allowSet.contains(suffix.toLowerCase()), "文件格式" + suffix + "不允许上传");
@@ -735,6 +754,199 @@ public class SysFileService {
             dir = prefix + "/" + SysFileConstants.IMAGE_DIR + "/" + yyyyMM;
         }
         return dir + "/" + id + "." + suffix;
+    }
+
+    // ===================== 直传上传（前端直连对象存储） =====================
+
+    /**
+     * 预创建直传文件：校验参数/白名单，生成 objectName，注册 TEMP SysFile，并返回预签名信息。
+     * 当存储不支持直传时返回 supported=false，前端应回退服务端代理上传。
+     */
+    @Transactional
+    public Map<String, Object> prepareDirectUpload(String originalFilename, Long size, Boolean isPublic, String contentType) {
+        Assert.hasText(originalFilename, "文件名不能为空");
+        boolean pub = !Boolean.FALSE.equals(isPublic);
+        String suffix = validateSuffixByName(originalFilename);
+        String resolvedContentType = resolveContentType(contentType, suffix);
+
+        if (!fileOperator.supportsDirectUpload()) {
+            Map<String, Object> r = new LinkedHashMap<>();
+            r.put("supported", false);
+            return r;
+        }
+
+        String id = IdTool.uuidV7();
+        String objectName = genObjectName(id, suffix, pub);
+
+        SysFile sysFile = new SysFile();
+        sysFile.setOriginName(originalFilename);
+        sysFile.setSuffix(suffix);
+        sysFile.setSize(size);
+        sysFile.setObjectName(objectName);
+        if (CharSequenceUtil.isNotBlank(resolvedContentType)) {
+            sysFile.setMimeType(resolvedContentType);
+        }
+        sysFile = sysFileRepository.save(sysFile);
+
+        long sz = size == null ? 0 : size;
+        long multipartThreshold = 8L * 1024 * 1024; // >=8MB 使用分片直传
+        Duration ttl = Duration.ofMinutes(30);
+
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("supported", true);
+        r.put("objectName", objectName);
+        r.put("name", sysFile.getOriginName());
+        r.put("location", getPreviewUrl(objectName));
+        r.put("expiresAt", java.time.Instant.now().plus(ttl).toString());
+
+        if (sz >= multipartThreshold) {
+            String uploadId = fileOperator.initMultipartUpload(objectName, resolvedContentType);
+            sysFile.setExtra1(uploadId);
+            sysFile.setExtra2("DIRECT_MULTIPART");
+            sysFileRepository.save(sysFile);
+            r.put("mode", "multipart");
+            r.put("uploadId", uploadId);
+            r.put("partSize", 5L * 1024 * 1024);
+        } else {
+            DirectUploadInfo info = fileOperator.presignPut(objectName, resolvedContentType, ttl);
+            r.put("mode", "put");
+            r.put("uploadUrl", info.getUrl());
+            r.put("method", info.getMethod() == null ? "PUT" : info.getMethod());
+            r.put("headers", info.getHeaders() == null ? Map.of() : info.getHeaders());
+            if (info.getExpiresAt() != null) {
+                r.put("expiresAt", info.getExpiresAt().toString());
+            }
+        }
+        return r;
+    }
+
+    /**
+     * 获取分片上传某个 part 的预签名 URL。
+     */
+    public Map<String, Object> presignDirectUploadPart(String objectName, String uploadId, int partNumber) {
+        Assert.hasText(objectName, "objectName不能为空");
+        Assert.hasText(uploadId, "uploadId不能为空");
+        Assert.state(partNumber > 0, "partNumber必须大于0");
+        SysFile sysFile = requireDirectUploadFile(objectName, uploadId);
+        Duration ttl = Duration.ofMinutes(30);
+        UploadPartInfo info = fileOperator.presignUploadPart(sysFile.getObjectName(), uploadId, partNumber, ttl);
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("partNumber", info.getPartNumber());
+        r.put("uploadUrl", info.getUrl());
+        r.put("method", info.getMethod() == null ? "PUT" : info.getMethod());
+        r.put("headers", info.getHeaders() == null ? Map.of() : info.getHeaders());
+        if (info.getExpiresAt() != null) {
+            r.put("expiresAt", info.getExpiresAt().toString());
+        }
+        return r;
+    }
+
+    /**
+     * 完成分片直传：合并分片并校验对象存在。
+     */
+    @Transactional
+    public Map<String, Object> completeDirectMultipartUpload(String objectName, String uploadId, List<CompletedUploadPart> parts) {
+        Assert.hasText(objectName, "objectName不能为空");
+        Assert.hasText(uploadId, "uploadId不能为空");
+        Assert.notEmpty(parts, "分片信息不能为空");
+        SysFile sysFile = requireDirectUploadFile(objectName, uploadId);
+        List<CompletedUploadPart> sorted = new ArrayList<>(parts);
+        sorted.sort(Comparator.comparingInt(CompletedUploadPart::getPartNumber));
+        fileOperator.completeMultipartUpload(sysFile.getObjectName(), uploadId, sorted);
+
+        ObjectMetadata meta = fileOperator.headObject(sysFile.getObjectName());
+        if (meta == null || !meta.isExists()) {
+            throw new BusinessException("直传文件校验失败：对象不存在");
+        }
+        if (meta.getContentLength() > 0) {
+            sysFile.setSize(meta.getContentLength());
+        }
+        if (CharSequenceUtil.isNotBlank(meta.getContentType()) && CharSequenceUtil.isBlank(sysFile.getMimeType())) {
+            sysFile.setMimeType(meta.getContentType());
+        }
+        // 清理上传会话标记
+        sysFile.setExtra1(null);
+        sysFile.setExtra2(null);
+        sysFileRepository.save(sysFile);
+
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("objectName", sysFile.getObjectName());
+        r.put("name", sysFile.getOriginName());
+        r.put("location", getPreviewUrl(sysFile.getObjectName()));
+        return r;
+    }
+
+    /**
+     * 终止分片直传并清理（幂等）。
+     */
+    @Transactional
+    public void abortDirectMultipartUpload(String objectName, String uploadId) {
+        Assert.hasText(objectName, "objectName不能为空");
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
+        if (sysFile == null) {
+            return;
+        }
+        // 若提供了 uploadId 则校验匹配，避免误操作
+        if (CharSequenceUtil.isNotBlank(uploadId) && CharSequenceUtil.isNotBlank(sysFile.getExtra1())
+                && !uploadId.equals(sysFile.getExtra1())) {
+            throw new BusinessException("uploadId不匹配");
+        }
+        String uid = CharSequenceUtil.isNotBlank(uploadId) ? uploadId : sysFile.getExtra1();
+        if (CharSequenceUtil.isNotBlank(uid)) {
+            try {
+                fileOperator.abortMultipartUpload(objectName, uid);
+            } catch (Exception e) {
+                log.warn("终止分片直传失败(忽略): objectName={}, uploadId={}, error={}", objectName, uid, e.getMessage());
+            }
+        }
+        // 标记为待删除，交由清理任务处理记录与可能残留对象
+        sysFile.setStatus(FileStatus.PENDING_DELETE);
+        sysFile.setExtra1(null);
+        sysFile.setExtra2(null);
+        sysFileRepository.save(sysFile);
+    }
+
+    /**
+     * 完成单文件 PUT 直传：校验对象存在后返回文件信息。
+     */
+    @Transactional
+    public Map<String, Object> completeDirectUpload(String objectName) {
+        Assert.hasText(objectName, "objectName不能为空");
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
+        Assert.notNull(sysFile, "文件记录不存在");
+        ObjectMetadata meta = fileOperator.headObject(objectName);
+        if (meta == null || !meta.isExists()) {
+            throw new BusinessException("直传文件校验失败：对象不存在");
+        }
+        if (meta.getContentLength() > 0) {
+            sysFile.setSize(meta.getContentLength());
+        }
+        if (CharSequenceUtil.isNotBlank(meta.getContentType()) && CharSequenceUtil.isBlank(sysFile.getMimeType())) {
+            sysFile.setMimeType(meta.getContentType());
+        }
+        sysFileRepository.save(sysFile);
+
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("objectName", sysFile.getObjectName());
+        r.put("name", sysFile.getOriginName());
+        r.put("location", getPreviewUrl(sysFile.getObjectName()));
+        return r;
+    }
+
+    private SysFile requireDirectUploadFile(String objectName, String uploadId) {
+        SysFile sysFile = sysFileRepository.findByObjectName(objectName);
+        Assert.notNull(sysFile, "文件记录不存在");
+        if (CharSequenceUtil.isNotBlank(uploadId)) {
+            Assert.state(uploadId.equals(sysFile.getExtra1()), "uploadId不匹配");
+        }
+        return sysFile;
+    }
+
+    private String resolveContentType(String contentType, String suffix) {
+        if (CharSequenceUtil.isNotBlank(contentType)) {
+            return contentType.trim();
+        }
+        return MediaTypeFactory.getMediaType("." + suffix).map(MediaType::toString).orElse(null);
     }
 
 }

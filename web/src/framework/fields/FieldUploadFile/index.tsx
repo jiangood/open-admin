@@ -4,6 +4,7 @@ import type {UploadChangeParam, UploadFile, UploadProps} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import {ViewFile} from "../../views";
 import {getMessageApi, ObjectUtils, UrlUtils} from "../../utils";
+import {DirectUploader} from "./DirectUploader";
 import type {FieldProps} from '../types';
 
 /** 框架内使用的上传文件对象，额外携带 sysFile 的 objectName */
@@ -130,6 +131,29 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         this.setState({previewObjectName: file.objectName});
     };
 
+    handleCustomRequest = async (options: any) => {
+        const {file, onProgress, onSuccess, onError} = options;
+        try {
+            const rs = await DirectUploader.upload({
+                file: file as File,
+                isPublic: this.state.isPublic,
+                onProgress: (percent) => {
+                    if (onProgress) {
+                        onProgress({percent});
+                    }
+                },
+            });
+            if (onSuccess) {
+                onSuccess(rs, file);
+            }
+        } catch (e: any) {
+            const msg = (e && e.message) || '上传失败';
+            if (onError) {
+                onError(e instanceof Error ? e : new Error(msg));
+            }
+        }
+    };
+
     render() {
         return <>
             {this.getUpload()}
@@ -149,8 +173,7 @@ export class FieldUploadFile extends React.Component<FieldUploadFileProps, Field
         const {accept, fileList, maxCount} = this.state;
 
         return <Upload
-            action={UrlUtils.contextPath('/admin/sys-file/upload')}
-            data={{isPublic: this.state.isPublic}}
+            customRequest={this.handleCustomRequest}
             listType={this.props.listType || 'picture-card'}
             fileList={fileList}
             onChange={this.handleChange}
