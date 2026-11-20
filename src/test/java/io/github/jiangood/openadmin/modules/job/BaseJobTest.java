@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.job;
 import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,8 +42,6 @@ class BaseJobTest {
     @Mock
     private SysJobLogRepository sysJobLogRepository;
     @Mock
-    private JobProgressRegistry jobProgressRegistry;
-    @Mock
     private JobExecutionContext context;
     @Mock
     private JobDetail jobDetail;
@@ -57,7 +53,6 @@ class BaseJobTest {
         job = new TestJob();
         ReflectionTestUtils.setField(job, "sysJobRepository", sysJobRepository);
         ReflectionTestUtils.setField(job, "sysJobLogRepository", sysJobLogRepository);
-        ReflectionTestUtils.setField(job, "jobProgressRegistry", jobProgressRegistry);
     }
 
     private void stubContext() {
@@ -90,28 +85,32 @@ class BaseJobTest {
     }
 
     @Test
-    void execute_shouldReportStartAndSuccess() throws Exception {
+    void execute_shouldSaveLogOnSuccess() throws Exception {
         stubContext();
         when(sysJobRepository.findByName("job-1")).thenReturn(existingJob());
 
         job.execute(context);
 
-        verify(jobProgressRegistry).start(any(SysJob.class), eq("log-1"));
-        verify(jobProgressRegistry).success("job-1", "OK");
-        verify(jobProgressRegistry).failIfRunning("job-1", "任务异常终止");
-        verify(sysJobLogRepository, org.mockito.Mockito.times(2)).save(any());
+        ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
+        verify(sysJobLogRepository, times(2)).save(captor.capture());
+        SysJobLog saved = captor.getValue();
+        assertTrue(saved.getSuccess());
+        assertEquals("OK", saved.getResult());
     }
 
     @Test
-    void execute_shouldReportFailWhenJobThrows() throws Exception {
+    void execute_shouldSaveLogWhenJobThrows() throws Exception {
         stubContext();
         when(sysJobRepository.findByName("job-1")).thenReturn(existingJob());
         job.fail = true;
 
         job.execute(context);
 
-        verify(jobProgressRegistry).fail(eq("job-1"), org.mockito.ArgumentMatchers.startsWith("异常"));
-        verify(jobProgressRegistry, never()).success(anyString(), anyString());
+        ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
+        verify(sysJobLogRepository, times(2)).save(captor.capture());
+        SysJobLog saved = captor.getValue();
+        assertFalse(saved.getSuccess());
+        assertTrue(saved.getResult().startsWith("异常"));
     }
 
     @Test
@@ -123,18 +122,7 @@ class BaseJobTest {
 
         job.execute(context);
 
-        verify(jobProgressRegistry, never()).start(any(), anyString());
         verify(sysJobLogRepository, never()).save(any());
-    }
-
-    @Test
-    void progress_shouldForwardToRegistry() throws Exception {
-        stubContext();
-        when(sysJobRepository.findByName("job-1")).thenReturn(existingJob());
-
-        job.execute(context);
-
-        verify(jobProgressRegistry).update("job-1", "已处理 3/10");
     }
 
     @Test
@@ -149,7 +137,11 @@ class BaseJobTest {
             // 模拟 Error 向上冒泡
         }
 
-        verify(jobProgressRegistry).failIfRunning("job-1", "任务异常终止");
+        ArgumentCaptor<SysJobLog> captor = ArgumentCaptor.forClass(SysJobLog.class);
+        verify(sysJobLogRepository, times(2)).save(captor.capture());
+        SysJobLog saved = captor.getValue();
+        assertFalse(saved.getSuccess());
+        assertEquals("任务异常终止", saved.getResult());
     }
 
     @Test
@@ -235,7 +227,6 @@ class BaseJobTest {
 
         @Override
         public String execute(JobDataMap data, Logger logger) throws Exception {
-            progress("已处理 3/10");
             if (error) {
                 throw new OutOfMemoryError("boom");
             }

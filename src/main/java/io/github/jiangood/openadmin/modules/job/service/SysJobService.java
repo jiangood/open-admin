@@ -4,11 +4,8 @@ import io.github.jiangood.openadmin.framework.data.BaseService;
 import io.github.jiangood.openadmin.framework.data.specification.Spec;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
-import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import io.github.jiangood.openadmin.modules.logviewer.service.FileLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +28,6 @@ public class SysJobService extends BaseService<SysJob> {
 
     private final QuartzManager quartzService;
     private final SysJobLogRepository sysJobLogRepository;
-    private final JobProgressRegistry jobProgressRegistry;
     private final FileLogService fileLogService;
     private final JobLogSizeService jobLogSizeService;
 
@@ -101,7 +97,6 @@ public class SysJobService extends BaseService<SysJob> {
 
         jobLogSizeService.invalidate();
         deleteById(id);
-        jobProgressRegistry.remove(id);
     }
 
 
@@ -116,19 +111,5 @@ public class SysJobService extends BaseService<SysJob> {
         Spec<SysJob> spec = Spec.of();
         spec.orLike(searchText, SysJob.Fields.name, SysJob.Fields.jobClass, SysJob.Fields.jobKey);
         return repository.findAll(spec, pageable);
-    }
-
-    /**
-     * 全部任务运行进度（内存态），按开始时间倒序
-     */
-    public List<JobProgress> listProgress() {
-        return jobProgressRegistry.listAll();
-    }
-
-    /**
-     * 单个任务运行进度，不存在返回 null
-     */
-    public JobProgress getProgress(String jobId) {
-        return jobProgressRegistry.get(jobId);
     }
 }

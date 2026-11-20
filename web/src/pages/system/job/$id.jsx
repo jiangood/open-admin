@@ -1,7 +1,7 @@
 import React from 'react'
 import {Button, Card, Col, Descriptions, Empty, Row, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
-import {CaretRightOutlined, LoadingOutlined} from '@ant-design/icons'
-import {CronUtils, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
+import {CaretRightOutlined} from '@ant-design/icons'
+import {CronUtils, getMessageApi, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
 
 function formatBytes(bytes) {
     if (!bytes || bytes <= 0) {
@@ -22,28 +22,19 @@ export default class JobDetailPage extends React.Component {
     state = {
         job: null,
         loading: true,
-        progress: null,
         jobLogSize: null,
         execStat: null,
         activeTab: 'records',
         logDrawerOpen: false,
         logDrawerId: null,
-        logDrawerRunning: false,
         logDrawerTitle: '',
         triggering: false,
-        interruptingId: null,
     }
 
-    progressTimer = null
     recordsTableRef = React.createRef()
 
     componentDidMount() {
         this.loadAll()
-        this.startProgressPolling()
-    }
-
-    componentWillUnmount() {
-        this.stopProgressPolling()
     }
 
     get jobId() {
@@ -58,18 +49,16 @@ export default class JobDetailPage extends React.Component {
         }
         this.setState({loading: true})
         Promise.all([
-            HttpClient.get(`admin/job/${jobId}`, null, {toastError: false}),
-            HttpClient.get(`admin/job/progress/${jobId}`, null, {toastError: false}),
-            HttpClient.get(`admin/job/${jobId}/log-size`, null, {toastError: false}),
-            HttpClient.get(`admin/job/${jobId}/stat`, null, {toastError: false}),
-        ]).then(([jobRs, progressRs, logSizeRs, statRs]) => {
+            HttpClient.get(`admin/job/${jobId}`, null, {autoShowErrorMessage: false}),
+            HttpClient.get(`admin/job/${jobId}/log-size`, null, {autoShowErrorMessage: false}),
+            HttpClient.get(`admin/job/${jobId}/stat`, null, {autoShowErrorMessage: false}),
+        ]).then(([jobRs, logSizeRs, statRs]) => {
             this.setState({
                 job: jobRs.data,
-                progress: progressRs.data,
                 jobLogSize: logSizeRs.data,
                 execStat: statRs.data,
                 loading: false,
-            }, () => this.syncLogDrawerRunning())
+            })
         }).catch(e => {
             console.error('[JobDetail] 加载任务失败:', e)
             this.setState({loading: false})
@@ -80,70 +69,17 @@ export default class JobDetailPage extends React.Component {
         const {jobId} = this
         if (!jobId) return
         Promise.all([
-            HttpClient.get(`admin/job/${jobId}`, null, {toastError: false}),
-            HttpClient.get(`admin/job/${jobId}/log-size`, null, {toastError: false}),
-            HttpClient.get(`admin/job/${jobId}/stat`, null, {toastError: false}),
+            HttpClient.get(`admin/job/${jobId}`, null, {autoShowErrorMessage: false}),
+            HttpClient.get(`admin/job/${jobId}/log-size`, null, {autoShowErrorMessage: false}),
+            HttpClient.get(`admin/job/${jobId}/stat`, null, {autoShowErrorMessage: false}),
         ]).then(([jobRs, logSizeRs, statRs]) => {
             this.setState({job: jobRs.data, jobLogSize: logSizeRs.data, execStat: statRs.data})
         }).catch(e => console.error('[JobDetail] 刷新任务信息失败:', e))
     }
 
-    startProgressPolling = () => {
-        this.loadProgress()
-        this.progressTimer = setInterval(() => {
-            if (!document.hidden) {
-                this.loadProgress()
-            }
-        }, 3000)
-    }
-
-    stopProgressPolling = () => {
-        if (this.progressTimer) {
-            clearInterval(this.progressTimer)
-            this.progressTimer = null
-        }
-    }
-
-    loadProgress = () => {
-        const {jobId} = this
-        if (!jobId) return
-        HttpClient.get(`admin/job/progress/${jobId}`, null, {toastError: false}).then(rs => {
-            this.setState({progress: rs.data}, () => this.syncLogDrawerRunning())
-        }).catch(e => console.error('[JobDetail] 加载任务进度失败:', e))
-    }
-
-    syncLogDrawerRunning = () => {
-        const {progress, logDrawerOpen, logDrawerId} = this.state
-        if (!logDrawerOpen || !logDrawerId) return
-        const running = !!(progress && progress.state === 'RUNNING' && progress.logId === logDrawerId)
-        if (running !== this.state.logDrawerRunning) {
-            this.setState({logDrawerRunning: running})
-        }
-    }
-
-    /** 取消当前运行中的执行（记录 Tab 行内按钮）；错误提示由 HttpClient 自动弹出 */
-    handleInterrupt = (logId) => {
-        const {jobId} = this
-        if (!jobId) return
-        this.setState({interruptingId: logId})
-        HttpClient.post('admin/job/interrupt', {id: jobId}).then(() => {
-            this.loadProgress()
-            this.reloadRecords()
-        }).catch(e => {
-            console.error('[JobDetail] 取消任务失败:', e)
-        }).finally(() => {
-            this.setState({interruptingId: null})
-        })
-    }
-
     /** 刷新记录 Tab 表格（未挂载时跳过，如用户停留在统计/配置 Tab） */
     reloadRecords = () => {
         this.recordsTableRef?.current?.reload()
-    }
-
-    isLogRunning = (logId) => {
-        const {progress} = this.state
-        return !!(logId && progress && progress.state === 'RUNNING' && progress.logId === logId)
     }
 
     openLogDrawer = (record) => {
@@ -152,29 +88,28 @@ export default class JobDetailPage extends React.Component {
         this.setState({
             logDrawerOpen: true,
             logDrawerId: id,
-            logDrawerRunning: this.isLogRunning(id),
             logDrawerTitle: record.beginTime ? `任务日志 - ${record.beginTime}` : '任务日志',
         })
     }
 
     closeLogDrawer = () => {
-        this.setState({logDrawerOpen: false, logDrawerId: null, logDrawerRunning: false, logDrawerTitle: ''})
+        this.setState({logDrawerOpen: false, logDrawerId: null, logDrawerTitle: ''})
     }
 
     handleTrigger = () => {
         const {jobId} = this
         if (!jobId) return
         this.setState({triggering: true})
-        HttpClient.post('admin/job/trigger-job', {id: jobId}).then(() => {
-            this.loadProgress()
-            // Quartz 触发是异步的，执行记录不会立刻落库：延时重查进度并刷新记录表
+        HttpClient.post('admin/job/trigger-job', {id: jobId}).then((rs) => {
+            getMessageApi().success(rs?.message || '已触发执行')
+            // Quartz 触发是异步的，执行记录不会立刻落库：延时刷新记录表和统计
             setTimeout(() => {
-                this.loadProgress()
                 this.reloadRecords()
+                this.loadJobMeta()
             }, 800)
             setTimeout(() => {
-                this.loadProgress()
                 this.reloadRecords()
+                this.loadJobMeta()
             }, 2000)
         }).catch(e => {
             console.error('[JobDetail] 触发任务失败:', e)
@@ -192,12 +127,7 @@ export default class JobDetailPage extends React.Component {
                 if (v) {
                     return v
                 }
-                if (!record.beginTime) {
-                    return '-'
-                }
-                // 明细放 tooltip，避免撑高表格行（与列表页「运行状态」列的做法一致）
-                const msg = this.isLogRunning(record.id) ? (this.state.progress?.message || '任务运行中') : null
-                return msg ? <Tooltip title={msg}><span>运行中…</span></Tooltip> : '运行中…'
+                return record.beginTime ? '运行中…' : '-'
             }},
             {
                 title: '成功/失败',
@@ -216,14 +146,9 @@ export default class JobDetailPage extends React.Component {
             },
             {title: '返回结果', dataIndex: 'result', render: v => (v == null || v === '') ? '-' : <span style={{wordBreak: 'break-all'}}>{v}</span>},
             {
-                title: '操作', dataIndex: 'option', width: 120, fixed: 'right',
+                title: '操作', dataIndex: 'option', width: 80, fixed: 'right',
                 render: (_, record) => <Space size={4}>
                     <Button size="small" onClick={() => this.openLogDrawer(record)}>日志</Button>
-                    {this.isLogRunning(record.id) && PermUtils.hasPermission('job:trigger') && (
-                        <Button size="small" danger
-                                loading={this.state.interruptingId === record.id}
-                                onClick={() => this.handleInterrupt(record.id)}>取消</Button>
-                    )}
                 </Space>,
             },
         ]
@@ -320,7 +245,7 @@ export default class JobDetailPage extends React.Component {
     }
 
     render() {
-        const {job, loading, progress, jobLogSize, execStat, activeTab, triggering} = this.state
+        const {job, loading, jobLogSize, execStat, activeTab, triggering} = this.state
         if (loading) {
             return <Page><div style={{textAlign: 'center', padding: '48px 0'}}><Spin/></div></Page>
         }
@@ -333,7 +258,6 @@ export default class JobDetailPage extends React.Component {
         }
 
         const canTrigger = PermUtils.hasPermission('job:trigger')
-        const running = progress && progress.state === 'RUNNING'
 
         return <Page>
             <Card style={{marginBottom: 12}}>
@@ -342,15 +266,12 @@ export default class JobDetailPage extends React.Component {
                         <div style={{fontSize: 18, fontWeight: 600, marginBottom: 8}}>{job.name || '-'}</div>
                         <Space size={8} wrap>
                             {job.enabled ? <Tag color="green">启用</Tag> : <Tag color="red">停用</Tag>}
-                            {running
-                                ? <Tag color="processing" icon={<LoadingOutlined spin/>}>{progress.message || '运行中'}</Tag>
-                                : <Tag>未运行</Tag>}
                         </Space>
                     </div>
                     <div>
                         {canTrigger && (
                             <Button type="primary" icon={<CaretRightOutlined/>}
-                                    loading={triggering} disabled={running} onClick={this.handleTrigger}>
+                                    loading={triggering} onClick={this.handleTrigger}>
                                 执行一次
                             </Button>
                         )}
@@ -414,10 +335,10 @@ export default class JobDetailPage extends React.Component {
                 open={this.state.logDrawerOpen}
                 logKey={this.state.logDrawerId ? 'job/' + this.state.logDrawerId : undefined}
                 title={this.state.logDrawerTitle || '任务日志'}
-                running={this.state.logDrawerRunning}
+                running={false}
                 width={900}
                 onClose={this.closeLogDrawer}
             />
         </Page>
     }
-}
+}

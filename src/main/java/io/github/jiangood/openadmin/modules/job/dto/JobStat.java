@@ -19,11 +19,6 @@ public class JobStat {
     private long enabledCount;
 
     /**
-     * 正在运行的任务数（内存态进度）
-     */
-    private long runningCount;
-
-    /**
      * 今日执行次数（按聚合记录的 executeCount 累计）
      */
     private long todayExecuteCount;

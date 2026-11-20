@@ -96,28 +96,13 @@ public class DataSyncJob extends BaseJob {
 
 启动时框架会按 `BaseJob` 子类 / `@JobDescription` 自动补建缺失的 `sys_job` 记录（默认禁用，不覆盖已有配置），也支持 `JobRegistrar` SPI 显式注册；`key` / `defaultCron` / `defaultEnabled` / `logAggregation` / `autoRegister` 见 [development.md](development.md) 的「自动注册」。
 
-进度上报（`BaseJob` 受保护方法，供前端「定时任务」页面轮询展示）：
-
-| 方法 | 说明 |
-|------|------|
-| `progress(String message)` | 更新运行状态描述，在任务列表/日志中展示当前阶段 |
-
-框架只上报状态描述（`message`），不提供百分比字段；需要展示进度可在描述文本中自行拼接。进度只保存在内存（`JobProgressRegistry`），重启后丢失；执行结果仍由 `sys_job_log` 落库。
-
 > cron 使用 Quartz 格式，共 6 或 7 段：**秒 分 时 日 月 周 [年]**，第一位是秒。例如 `0 */5 * * * ?` 表示每 5 分钟，`*/5 * * * * ?` 表示每 5 秒。
 
-| 端点 | HTTP | 权限 | 说明 |
-|------|------|------|------|
-| `admin/job/progress` | GET | `job:read` | 全部任务运行进度快照，按开始时间倒序 |
-| `admin/job/progress/{jobId}` | GET | `job:read` | 单个任务进度，从未运行时 `data` 为 `null` |
-
-快照字段：`jobId` / `jobName` / `logId` / `state`(`RUNNING`/`SUCCESS`/`FAILED`) / `stateLabel` / `stateColor` / `message` / `beginTime` / `updateTime` / `endTime` / `runTime` / `result`。
-
-页面顶部统计卡片（运行中 / 今日执行 / 日志占用 / 调度器）：
+页面顶部统计卡片（今日执行 / 日志占用 / 调度器）：
 
 | 端点 | HTTP | 权限 | 说明 |
 |------|------|------|------|
-| `admin/job/stat` | GET | `job:read` | `jobCount` / `enabledCount` / `runningCount` / `todayExecuteCount` / `todayFailCount` / `scheduler` |
+| `admin/job/stat` | GET | `job:read` | `jobCount` / `enabledCount` / `todayExecuteCount` / `todayFailCount` / `scheduler` |
 | `admin/job/log-size` | GET | `job:read` | 全部任务日志占用：`bytes` / `files` / `warnMb` / `warn` |
 | `admin/job/{jobId}/log-size` | GET | `job:read` | 指定任务的日志占用：`bytes` / `files` |
 
@@ -680,7 +665,7 @@ location /file/public/ {
 
 | 类 | 主要方法 |
 |----|---------|
-| `HttpClient` | `get` / `post` / `postForm` / `download` / `ajax`（axios 封装，自动 context-path；所有请求方法返回 `Promise<AjaxBody>`：成功 resolve 整个 AjaxResult 响应体（`{success, code, data, message, traceId, ...}`，业务取数据用 `rs.data`、提示文案用 `rs.message`），失败 `reject({code, message})` 且默认自动弹错；成功时后端返回了 `message` 会自动 `message.success` 弹出（传 `{toastSuccess: false}` 关闭），失败弹错传 `{toastError: false}` 可静默仅 reject。**例外**：`401`（HTTP 401 或业务 code=401）不单独弹错，而是广播 `loginExpired` 由全局登录失效弹窗提示；非 `AjaxResult` 结构的响应体一律按失败处理） |
+| `HttpClient` | `get` / `post` / `postForm` / `download` / `ajax`（axios 封装，自动 context-path；所有请求方法返回 `Promise<AjaxBody>`：成功 resolve 整个 AjaxResult 响应体（`{success, code, data, message, traceId, ...}`，业务取数据用 `rs.data`、提示文案用 `rs.message`），失败 `reject({code, message})` 且默认自动弹错；失败弹错传 `{autoShowErrorMessage: false}` 可静默仅 reject；成功提示由业务按需自行处理（如 `getMessageApi().success(rs.message)`）。**例外**：`401`（HTTP 401 或业务 code=401）不单独弹错，而是广播 `loginExpired` 由全局登录失效弹窗提示；非 `AjaxResult` 结构的响应体一律按失败处理） |
 | `UrlUtils` | `contextPath(path)` 拼接 context-path / `getParams` / `setParam` / `getPathname` |
 | `DictUtils` | `dictList` / `dictLabel` / `dictOptions` / `dictTag` |
 | `TreeUtils` | `walk` / `findByKey` / `flattenTree` / `getKeyList` / `getChildRecursive` |

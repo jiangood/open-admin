@@ -120,25 +120,6 @@ public JobRegistrar reminderJobs() {
 - 若任务类存在**多个构造器**（含无参构造），Spring 不会自动选择，必须用 `@Autowired` 显式标注其中一个，否则默认走无参构造、`final` 字段不会注入（运行时 NPE）；
 - 任务实例每次触发重建，不要在字段中缓存跨触发的可变状态。
 
-### 进度上报
-
-长任务可调用 `BaseJob` 提供的 `progress(...)` 把运行状态描述暴露给前端「定时任务」页面（页面每 3 秒轮询 `admin/job/progress`）：
-
-```java
-List<Row> rows = load();
-for (int i = 0; i < rows.size(); i++) {
-    progress("已同步 " + (i + 1) + "/" + rows.size());
-    sync(rows.get(i));
-}
-return "同步完成 " + rows.size() + " 条";
-```
-
-- 只有一个重载：`progress(String msg)`，更新运行中展示的状态描述；框架不提供百分比字段，需要展示进度可在描述文本中自行拼接
-- 进度是**内存态**（`JobProgressRegistry`），不落库；重启后运行中进度丢失，但 `sys_job_log` 执行记录完整
-- 只对继承 `BaseJob` 的任务生效；直接实现 `org.quartz.Job` 的类没有进度
-- 进度按 `SysJob.id` 记录，同一任务受 `@DisallowConcurrentExecution` 保护不会并发覆盖
-- 建议按批次/每秒最多一次上报，避免无谓开销；任务结束后状态保留 30 分钟自动清理
-
 ### 执行记录方式
 
 高频任务（如每 5 秒执行）会在 `sys_job_log` 和日志目录产生海量记录。任务定义上的「执行记录方式」属性（`SysJob.logAggregation`，前端新建/编辑时可选）控制执行记录与日志文件的粒度：

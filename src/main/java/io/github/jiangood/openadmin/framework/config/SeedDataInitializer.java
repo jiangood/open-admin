@@ -165,7 +165,7 @@ public class SeedDataInitializer {
             return;
         }
         SysJob job = new SysJob("CleanTempFileJob");
-        job.setName("文件管理-清理临时文件");
+        job.setName("清理临时上传文件");
         job.setCron("0 0 3 * * ?");
         job.setEnabled(true);
         job.setJobClass("io.github.jiangood.openadmin.modules.system.job.CleanTempFileJob");

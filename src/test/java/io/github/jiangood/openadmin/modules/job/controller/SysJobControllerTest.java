@@ -5,8 +5,6 @@ import io.github.jiangood.openadmin.modules.job.dto.LogSizeStat;
 import io.github.jiangood.openadmin.modules.job.dto.request.JobReq;
 import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
-import io.github.jiangood.openadmin.modules.job.progress.JobRunState;
 import io.github.jiangood.openadmin.modules.job.quartz.JobRegistrationManager;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.service.JobStatService;
@@ -30,7 +28,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -102,27 +99,6 @@ class SysJobControllerTest {
         assertEquals("number", fields.get(0).getValueType());
         assertEquals("boolean", fields.get(1).getValueType());
         assertEquals("string", fields.get(2).getValueType());
-    }
-
-    @Test
-    void allProgress_shouldReturnRegistrySnapshot() {
-        JobProgress progress = new JobProgress();
-        progress.setJobId("job-1");
-        progress.setState(JobRunState.RUNNING);
-        when(service.listProgress()).thenReturn(List.of(progress));
-
-        AjaxResult rs = controller.allProgress();
-
-        assertEquals(List.of(progress), rs.getData());
-    }
-
-    @Test
-    void progress_shouldReturnNullWhenJobNeverRun() {
-        when(service.getProgress("job-1")).thenReturn(null);
-
-        AjaxResult rs = controller.progress("job-1");
-
-        assertNull(rs.getData());
     }
 
     @Test

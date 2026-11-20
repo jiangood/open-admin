@@ -87,8 +87,6 @@ export default class JobPage extends React.Component {
 
         paramList: [],
 
-        progressMap: {},
-
         cronDesc: '',
 
         importOpen: false,
@@ -101,50 +99,19 @@ export default class JobPage extends React.Component {
     }
     tableRef = React.createRef()
     modalRef = React.createRef()
-    progressTimer = null
     statTimer = null
 
     componentDidMount() {
-        HttpClient.get('admin/job/job-class-options', null, {toastError: false}).then(rs => {
+        HttpClient.get('admin/job/job-class-options', null, {autoShowErrorMessage: false}).then(rs => {
             this.setState({jobClassOptions: rs.data})
         }).catch(e => {
             console.error('[Job] 加载任务类选项失败:', e);
         })
-        this.startProgressPolling()
         this.startStatPolling()
     }
 
     componentWillUnmount() {
-        this.stopProgressPolling()
         this.stopStatPolling()
-    }
-
-    startProgressPolling = () => {
-        this.loadProgress()
-        this.progressTimer = setInterval(() => {
-            if (!document.hidden) {
-                this.loadProgress()
-            }
-        }, 3000)
-    }
-
-    stopProgressPolling = () => {
-        if (this.progressTimer) {
-            clearInterval(this.progressTimer)
-            this.progressTimer = null
-        }
-    }
-
-    loadProgress = () => {
-        HttpClient.get('admin/job/progress', null, {toastError: false}).then(rs => {
-            const progressMap = {}
-            ;(rs.data || []).forEach(p => {
-                progressMap[p.jobId] = p
-            })
-            this.setState({progressMap})
-        }).catch(e => {
-            console.error('[Job] 加载任务进度失败:', e);
-        })
     }
 
     startStatPolling = () => {
@@ -171,8 +138,8 @@ export default class JobPage extends React.Component {
             return
         }
         Promise.all([
-            HttpClient.get('admin/job/stat', null, {toastError: false}),
-            HttpClient.get('admin/job/log-size', null, {toastError: false}),
+            HttpClient.get('admin/job/stat', null, {autoShowErrorMessage: false}),
+            HttpClient.get('admin/job/log-size', null, {autoShowErrorMessage: false}),
         ]).then(([statResult, logSizeResult]) => {
             this.setState({stat: statResult.data, logSize: logSizeResult.data})
         }).catch(e => {
@@ -192,7 +159,7 @@ export default class JobPage extends React.Component {
     }
 
     loadJobParamFields(className, jobData) {
-        HttpClient.post("admin/job/get-job-param-fields", jobData || {}, {className}, {toastError: false}).then(rs => {
+        HttpClient.post("admin/job/get-job-param-fields", jobData || {}, {className}, {autoShowErrorMessage: false}).then(rs => {
             this.setState({paramList: rs.data})
         }).catch(e => {
             console.error('[Job] 加载任务参数字段失败:', e);
@@ -202,15 +169,17 @@ export default class JobPage extends React.Component {
     onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/job/create' : 'admin/job/update';
-        await HttpClient.post(url, values)
+        const rs = await HttpClient.post(url, values)
+        getMessageApi().success(rs?.message || (isNew ? '新增成功' : '更新成功'))
         this.tableRef.current.reload()
         this.loadStat()
     }
 
     handleDelete = row => {
         const hide = getMessageApi().loading("删除任务中...")
-        HttpClient.post('admin/job/delete', {id: row.id}, null, {toastError: false}).then(() => {
+        HttpClient.post('admin/job/delete', {id: row.id}, null, {autoShowErrorMessage: false}).then((rs) => {
             hide();
+            getMessageApi().success(rs?.message || '删除成功')
             this.tableRef.current.reload();
             this.loadStat()
         }).catch(e => {
@@ -225,7 +194,7 @@ export default class JobPage extends React.Component {
     }
 
     loadUnregistered = () => {
-        HttpClient.get('admin/job/unregistered', null, {toastError: false}).then(rs => {
+        HttpClient.get('admin/job/unregistered', null, {autoShowErrorMessage: false}).then(rs => {
             this.setState({unregistered: rs.data || []})
         }).catch(e => {
             console.error('[Job] 加载未注册任务失败:', e);
@@ -234,7 +203,7 @@ export default class JobPage extends React.Component {
 
     handleImport = keys => {
         this.setState({importLoading: true})
-        HttpClient.post('admin/job/import', {keys: keys && keys.length ? keys : null}, null, {toastError: false}).then(rs => {
+        HttpClient.post('admin/job/import', {keys: keys && keys.length ? keys : null}, null, {autoShowErrorMessage: false}).then(rs => {
             this.setState({importLoading: false})
             getMessageApi().success(rs.msg || '导入完成')
             this.loadUnregistered()
@@ -309,21 +278,6 @@ export default class JobPage extends React.Component {
         },
 
         {
-            title: '最近状态',
-            dataIndex: 'progress',
-            render: (_, record) => {
-                const p = this.state.progressMap[record.id]
-                if (!p) {
-                    return <Tag>未运行</Tag>
-                }
-                // 单行标签：运行中带百分比，明细信息放进 tooltip，避免撑高表格行
-                const label = p.stateLabel
-                const tag = <Tag color={p.stateColor || 'default'}>{label}</Tag>
-                return p.message ? <Tooltip title={p.message}>{tag}</Tooltip> : tag
-            },
-        },
-
-        {
             title: '操作',
             dataIndex: 'option',
             fixed: 'right',
@@ -375,11 +329,10 @@ export default class JobPage extends React.Component {
                 日志 {formatBytes(logSize.bytes)} · {logSize.files} 文件
                 {logWarn && <Tooltip title={warnTip}><Tag color="error" style={{marginLeft: 4}}>超限</Tag></Tooltip>}
                 <span style={{margin: '0 8px', color: 'var(--oa-color-text-quaternary, rgba(0,0,0,0.25))'}}>|</span>
-                运行中 {stat.runningCount > 0 ? <Tag color="processing">{stat.runningCount}</Tag> : '0'}
-                <span style={{marginLeft: 8}}>线程 <Tag color="blue">{scheduler.threadPoolSize ?? '-'}</Tag></span>
+                线程 <Tag color="blue">{scheduler.threadPoolSize ?? '-'}</Tag>
                 {scheduler.error
-                    ? <Tag color="error">异常</Tag>
-                    : <Tooltip title={schedulerTip}><Tag color={scheduler.started && !scheduler.standby ? 'success' : 'default'}>{schedulerStatus}</Tag></Tooltip>}
+                    ? <Tag color="error" style={{marginLeft: 4}}>异常</Tag>
+                    : <Tooltip title={schedulerTip}><Tag color={scheduler.started && !scheduler.standby ? 'success' : 'default'} style={{marginLeft: 4}}>{schedulerStatus}</Tag></Tooltip>}
             </div>
         </div>
     }
@@ -531,6 +484,3 @@ export default class JobPage extends React.Component {
 
     };
 }
-
-
-

@@ -21,7 +21,7 @@ import java.util.List;
 
 @Component
 @DisallowConcurrentExecution
-@JobDescription(label = "清理临时文件", params = {})
+@JobDescription(label = "清理临时上传文件", params = {})
 public class CleanTempFileJob extends BaseJob {
 
     /** 每页处理的文件数量，避免文件过多时一次性加载到内存 */

@@ -39,7 +39,6 @@ public class MemoryMonitorJob extends BaseJob {
             // 先打印再休眠：第 1 次立即输出；取消时 sleep 抛出 InterruptedException，
             // 由 BaseJob 统一按「已取消」记录，无需在此捕获
             logger.info("#{} 内存使用率：{}", i, memoryText());
-            progress("第 " + i + "/" + total + " 次");
             if (i < total) {
                 Thread.sleep(intervalSeconds * 1000L);
             }

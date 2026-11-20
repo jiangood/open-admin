@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.job.service;
 import io.github.jiangood.openadmin.framework.data.BaseRepository;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.system.job.CleanTempFileJob;
@@ -34,9 +33,6 @@ class SysJobServiceTest {
     private SysJobLogRepository sysJobLogRepository;
 
     @Mock
-    private JobProgressRegistry jobProgressRegistry;
-
-    @Mock
     private FileLogService fileLogService;
 
     @Mock
@@ -46,7 +42,7 @@ class SysJobServiceTest {
 
     @BeforeEach
     void setUp() {
-        service = new SysJobService(quartzService, sysJobLogRepository, jobProgressRegistry, fileLogService, jobLogSizeService);
+        service = new SysJobService(quartzService, sysJobLogRepository, fileLogService, jobLogSizeService);
         ReflectionTestUtils.setField(service, "repository", repository);
     }
 
@@ -120,6 +116,5 @@ class SysJobServiceTest {
         verify(fileLogService).deleteLog("job/log-1");
         verify(jobLogSizeService).invalidate();
         verify(repository).deleteById("job-1");
-        verify(jobProgressRegistry).remove("job-1");
     }
 }

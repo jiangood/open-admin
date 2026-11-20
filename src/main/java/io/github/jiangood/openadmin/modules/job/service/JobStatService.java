@@ -4,9 +4,6 @@ import cn.hutool.core.date.DateUtil;
 import io.github.jiangood.openadmin.modules.job.dto.JobExecStat;
 import io.github.jiangood.openadmin.modules.job.dto.JobStat;
 import io.github.jiangood.openadmin.modules.job.dto.LogSizeStat;
-import io.github.jiangood.openadmin.modules.job.entity.SysJobLog;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgress;
-import io.github.jiangood.openadmin.modules.job.progress.JobProgressRegistry;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobLogRepository;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,20 +26,16 @@ public class JobStatService {
 
     private final SysJobRepository sysJobRepository;
     private final SysJobLogRepository sysJobLogRepository;
-    private final JobProgressRegistry jobProgressRegistry;
     private final JobLogSizeService jobLogSizeService;
     private final Scheduler scheduler;
 
     /**
-     * 任务规模、运行中数量、今日执行情况与调度器信息
+     * 任务规模、今日执行情况与调度器信息
      */
     public JobStat stat() {
         JobStat stat = new JobStat();
         stat.setJobCount(sysJobRepository.count());
         stat.setEnabledCount(sysJobRepository.countByEnabled(true));
-        stat.setRunningCount(jobProgressRegistry.listAll().stream()
-                .filter(JobProgress::isRunning)
-                .count());
 
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
         stat.setTodayExecuteCount(nullToZero(sysJobLogRepository.sumExecuteCountSince(todayStart)));
