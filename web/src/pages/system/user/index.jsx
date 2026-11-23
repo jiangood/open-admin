@@ -8,6 +8,7 @@ import {
     FieldRemoteSelect,
     FieldSysOrgTreeSelect,
     FormModal,
+    getMessageApi,
     HttpClient,
     OrgTree,
     Page,
@@ -36,13 +37,15 @@ export default class UserPage extends React.Component {
     }
 
     onFinishResetPwd = async values => {
-        await HttpClient.post('admin/sys-user/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
+        const rs = await HttpClient.post('admin/sys-user/reset-pwd', {id: this.state.resetPwdUser.id, password: values.password})
+        getMessageApi().success(rs?.message || '密码重置成功')
         this.setState({resetPwdUser: null})
         this.tableRef.current?.reload()
     }
 
     handleDelete = r => {
-        HttpClient.post('admin/sys-user/delete', {id: r.id}, null).then(() => {
+        HttpClient.post('admin/sys-user/delete', {id: r.id}, null).then((rs) => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.tableRef.current.reload();
         })
     }
@@ -138,6 +141,7 @@ export default class UserPage extends React.Component {
         const isNew = !values.id;
         const url = isNew ? 'admin/sys-user/create' : 'admin/sys-user/update';
         const result = await HttpClient.post(url, values);
+        getMessageApi().success(result?.message || (isNew ? '新增成功' : '更新成功'))
         if (result?.data?.password) {
             this.setState({
                 addResultModal: {

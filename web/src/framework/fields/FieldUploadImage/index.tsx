@@ -372,7 +372,7 @@ export class FieldUploadImage extends React.Component<FieldUploadImageProps, Fie
             fd.append('file', this.state.preview.cFile);
             fd.append('thumb', tFile);
             fd.append('isPublic', String(this.state.isPublic));
-            const rs = await HttpClient.post('admin/sys-file/upload-image', fd, null, {toastError: false});
+            const rs = await HttpClient.post('admin/sys-file/upload-image', fd, null, {autoShowErrorMessage: false});
             this.setState(
                 (prevState) => ({objectNames: [...prevState.objectNames, rs.data.objectName]}),
                 () => this.props.onChange?.(this.state.objectNames.join(','))

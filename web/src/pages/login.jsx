@@ -20,7 +20,7 @@ function getRedirect(query) {
 }
 
 function postLogin(values, query, success, error) {
-    HttpClient.post('/admin/auth/login', values, null, {toastError: false}).then(rs => {
+    HttpClient.post('/admin/auth/login', values, null, {autoShowErrorMessage: false}).then(rs => {
         EventBus.emit('loginSuccess')
         history.push(getRedirect(query))
         success?.(rs)
@@ -54,7 +54,7 @@ export default class LoginPage extends React.Component {
             return
         }
         // localStorage 中无站点信息，从服务端重新加载
-        HttpClient.get('/admin/public/site-info', null, {toastError: false}).then(rs => {
+        HttpClient.get('/admin/public/site-info', null, {autoShowErrorMessage: false}).then(rs => {
             GlobalData.setSiteInfo(rs.data)
             this.setState({siteInfo: rs.data})
         }).catch(() => {

@@ -4,6 +4,9 @@ import com.zaxxer.hikari.HikariDataSource;
 import com.zaxxer.hikari.HikariPoolMXBean;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.config.dto.SystemParamView;
+import io.github.jiangood.openadmin.util.IpTool;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.mock.env.MockEnvironment;
@@ -18,6 +21,19 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class SystemParamServiceTest {
+
+    @BeforeEach
+    void setUp() {
+        // 避免单测触发真实公网查询；外网 IP 缓存为静态字段，需在用例间清理
+        IpTool.cachedPublicIp = "203.0.113.10";
+        IpTool.publicIpFetchedAt = System.currentTimeMillis();
+    }
+
+    @AfterEach
+    void tearDown() {
+        IpTool.cachedPublicIp = null;
+        IpTool.publicIpFetchedAt = 0;
+    }
 
     @Test
     void exposesReadonlyStartupConfigWithFormattedValues() {
@@ -46,6 +62,8 @@ class SystemParamServiceTest {
         String uptime = valueOf(items, "sys.start-time");
         assertFalse(uptime.isBlank());
         assertFalse(uptime.contains("-"));
+        assertTrue(valueOf(items, "sys.network.ipv4").matches("(\\d{1,3}\\.){3}\\d{1,3}|-"));
+        assertEquals("203.0.113.10", valueOf(items, "sys.network.public-ip"));
         assertEquals("3", valueOf(items, "sys.maximum-sessions"));
         assertEquals("踢出旧会话", valueOf(items, "sys.max-sessions-prevents-login"));
         assertEquals("120 分钟", valueOf(items, "sys.session-idle-time"));
@@ -95,6 +113,8 @@ class SystemParamServiceTest {
         // 运行时状态排在最前，页面据此分组并定时刷新
         assertEquals("sys.start-time", items.get(0).key());
         assertEquals(SystemParamView.GROUP_RUNTIME, items.get(0).group());
+        assertEquals(SystemParamView.GROUP_RUNTIME, groupOf(items, "sys.network.ipv4"));
+        assertEquals(SystemParamView.GROUP_RUNTIME, groupOf(items, "sys.network.public-ip"));
         assertEquals(SystemParamView.GROUP_RUNTIME, groupOf(items, "spring.datasource.hikari"));
         assertEquals(SystemParamView.GROUP_STARTUP, groupOf(items, "spring.datasource.url"));
         assertEquals(SystemParamView.GROUP_STARTUP, groupOf(items, "sys.maximum-sessions"));
@@ -127,6 +147,17 @@ class SystemParamServiceTest {
 
         assertEquals("jdbc:h2:file:/data/db/open-admin", valueOf(items, "spring.datasource.url"));
         assertEquals("活动 2 / 空闲 8 / 上限 10 / 等待 0", valueOf(items, "spring.datasource.hikari"));
+    }
+
+    @Test
+    void publicIpv4UsesCacheAndReturnsDashOnCachedFailure() {
+        IpTool.cachedPublicIp = "1.2.3.4";
+        IpTool.publicIpFetchedAt = System.currentTimeMillis();
+        assertEquals("1.2.3.4", IpTool.getPublicIpv4());
+
+        IpTool.cachedPublicIp = "";
+        IpTool.publicIpFetchedAt = System.currentTimeMillis();
+        assertEquals("-", IpTool.getPublicIpv4());
     }
 
     @SuppressWarnings("unchecked")

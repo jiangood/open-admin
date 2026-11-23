@@ -42,7 +42,7 @@ export class HeaderRight extends React.Component {
     }
 
     logout = () => {
-        HttpClient.post('admin/auth/logout', null, null, {toastError: false}).then(() => {
+        HttpClient.post('admin/auth/logout', null, null, {autoShowErrorMessage: false}).then(() => {
             localStorage.clear()
             this.setState({alertVisible: true})
         }).catch(e => {

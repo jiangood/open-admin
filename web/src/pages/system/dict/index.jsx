@@ -5,6 +5,7 @@ import {
     PermActions,
     FieldBoolean,
     FormModal,
+    getMessageApi,
     HttpClient,
     Page,
     ProTable,
@@ -41,7 +42,7 @@ export default class DictPage extends React.Component {
     }
 
     loadTypeTree = () => {
-        HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
+        HttpClient.get('admin/dict/type-tree', null, {autoShowErrorMessage: false}).then(rs => {
             this.setState({typeTree: rs.data})
         }).catch(() => {})
     }
@@ -60,7 +61,7 @@ export default class DictPage extends React.Component {
     }
 
     requestTypes = (params) => {
-        return HttpClient.get('admin/dict/type-tree', null, {toastError: false}).then(rs => {
+        return HttpClient.get('admin/dict/type-tree', null, {autoShowErrorMessage: false}).then(rs => {
             const types = this.flattenTypes(rs.data).filter(t => {
                 if (params.typeCode && !(t.typeCode || '').includes(params.typeCode)) return false
                 if (params.typeLabel && !(t.typeLabel || '').includes(params.typeLabel)) return false
@@ -79,7 +80,8 @@ export default class DictPage extends React.Component {
     }
 
     handleTypeDelete = (record) => {
-        HttpClient.post('admin/dict/type-delete', {id: record.id}, null).then(() => {
+        HttpClient.post('admin/dict/type-delete', {id: record.id}, null).then((rs) => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.loadTypeTree()
             this.typesTableRef.current?.reload()
         })
@@ -88,7 +90,8 @@ export default class DictPage extends React.Component {
     handleTypeFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/type-create' : 'admin/dict/type-update'
-        await HttpClient.post(url, values)
+        const rs = await HttpClient.post(url, values)
+        getMessageApi().success(rs?.message || (isNew ? '新增成功' : '更新成功'))
         this.loadTypeTree()
         this.typesTableRef.current?.reload()
     }
@@ -110,7 +113,8 @@ export default class DictPage extends React.Component {
     }
 
     handleItemDelete = row => {
-        HttpClient.post('admin/dict/delete', row, null).then(() => {
+        HttpClient.post('admin/dict/delete', row, null).then((rs) => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.itemsTableRef.current?.reload()
         })
     }
@@ -118,7 +122,8 @@ export default class DictPage extends React.Component {
     onItemFormFinish = async values => {
         const isNew = !values.id
         const url = isNew ? 'admin/dict/create' : 'admin/dict/update'
-        await HttpClient.post(url, values)
+        const rs = await HttpClient.post(url, values)
+        getMessageApi().success(rs?.message || (isNew ? '新增成功' : '更新成功'))
         this.itemsTableRef.current?.reload()
     }
 

@@ -30,7 +30,7 @@ export default class ShortcutSettings extends React.Component {
 
     loadShortcuts = () => {
         this.setState({loading: true});
-        return HttpClient.get('admin/user-center/shortcuts', null, {toastError: false})
+        return HttpClient.get('admin/user-center/shortcuts', null, {autoShowErrorMessage: false})
             .then(rs => this.setState({shortcuts: rs.data || []}))
             .catch(() => this.setState({shortcuts: []}))
             .finally(() => this.setState({loading: false}));
@@ -135,6 +135,7 @@ export default class ShortcutSettings extends React.Component {
                     selected: shortcuts.map(item => ({...item})),
                 });
                 EventBus.emit('shortcutsChange');
+                getMessageApi().success(rs?.message || '保存成功');
             })
             .finally(() => {
                 this.setState({saving: false});

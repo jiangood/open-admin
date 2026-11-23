@@ -105,7 +105,7 @@ export class UserPicker extends React.Component<UserPickerProps, UserPickerState
             this.setState({selectedMap: {}});
             return;
         }
-        HttpClient.get<PickerUser[]>(this.getUsersUrl(), {ids}, {toastError: false}).then(rs => {
+        HttpClient.get<PickerUser[]>(this.getUsersUrl(), {ids}, {autoShowErrorMessage: false}).then(rs => {
             const data = rs.data || [];
             const map: Record<string, PickerUser> = {};
             ids.forEach(id => {

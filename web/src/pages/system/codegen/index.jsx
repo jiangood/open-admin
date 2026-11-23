@@ -30,7 +30,7 @@ export default class CodegenPage extends React.Component {
     }
 
     loadEntities = () => {
-        HttpClient.get('admin/codegen/entity-options', null, {toastError: false}).then(rs => {
+        HttpClient.get('admin/codegen/entity-options', null, {autoShowErrorMessage: false}).then(rs => {
             this.setState({entities: rs.data || []})
         }).catch(e => {
             console.error('[Codegen] 加载实体列表失败:', e)
@@ -55,7 +55,7 @@ export default class CodegenPage extends React.Component {
             return
         }
         this.setState({loading: true})
-        HttpClient.post('admin/codegen/preview', this.buildReq(), null, {toastError: false}).then(rs => {
+        HttpClient.post('admin/codegen/preview', this.buildReq(), null, {autoShowErrorMessage: false}).then(rs => {
             const files = rs.data || []
             this.setState({
                 files,
@@ -80,7 +80,7 @@ export default class CodegenPage extends React.Component {
     doGenerate = () => {
         this.setState({confirmOpen: false, loading: true})
         const params = {...this.buildReq(), paths: this.state.selectedPaths}
-        HttpClient.post('admin/codegen/generate', params, null, {toastError: false}).then(rs => {
+        HttpClient.post('admin/codegen/generate', params, null, {autoShowErrorMessage: false}).then(rs => {
             this.setState({result: rs.data, resultOpen: true, previewOpen: false})
         }).catch(e => {
             console.error('[Codegen] 生成失败:', e)

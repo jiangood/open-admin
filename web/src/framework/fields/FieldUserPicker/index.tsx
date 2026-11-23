@@ -63,7 +63,7 @@ export class FieldUserPicker extends React.Component<FieldUserPickerProps, Field
             this.setState({users: ids.map(id => known.get(id)).filter(Boolean) as PickerUser[]});
             return;
         }
-        HttpClient.get<PickerUser[]>(this.getUsersUrl(), {ids}, {toastError: false}).then(rs => {
+        HttpClient.get<PickerUser[]>(this.getUsersUrl(), {ids}, {autoShowErrorMessage: false}).then(rs => {
             const merged = new Map(this.state.users.map(user => [user.id, user]));
             (rs.data || []).forEach(user => merged.set(user.id, user));
             const currentIds = this.props.value || [];

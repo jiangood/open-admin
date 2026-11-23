@@ -2,7 +2,7 @@ import React from 'react'
 import {Button, Card, Empty, Form, Input, Modal, Space, Splitter, Tree, Typography} from 'antd'
 import {CloudUploadOutlined, FolderOpenOutlined, FolderOutlined, ReloadOutlined} from "@ant-design/icons";
 
-import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, HttpClient, Page, ProTable, UrlUtils, ViewImage} from "../../../framework";
+import {PermActions, DictUtils, FieldDateRange, FieldDictSelect, FieldUploadFile, getMessageApi, HttpClient, Page, ProTable, UrlUtils, ViewImage} from "../../../framework";
 
 const ALL_FOLDER_KEY = '__all__'
 
@@ -25,7 +25,7 @@ export default class FilePage extends React.Component {
 
     loadFolderTree = () => {
         this.setState({treeLoading: true})
-        HttpClient.get('admin/sys-file/folder-tree', null, {toastError: false}).then(rs => {
+        HttpClient.get('admin/sys-file/folder-tree', null, {autoShowErrorMessage: false}).then(rs => {
             const folderTree = rs.data || []
             const {currentFolder} = this.state
             const folderExists = !currentFolder || !!this.findFolder(folderTree, currentFolder)
@@ -73,14 +73,16 @@ export default class FilePage extends React.Component {
     }
 
     handleDelete = row => {
-        HttpClient.post('admin/sys-file/delete', {value: row.objectName}, null).then(() => {
+        HttpClient.post('admin/sys-file/delete', {value: row.objectName}, null).then(rs => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.tableRef.current.reload()
             this.loadFolderTree()
         })
     }
 
     handleBatchDelete = ids => {
-        HttpClient.post('admin/sys-file/delete-batch', ids, null).then(() => {
+        HttpClient.post('admin/sys-file/delete-batch', ids, null).then(rs => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.tableRef.current.reload()
             this.tableRef.current.clearSelection()
             this.loadFolderTree()

@@ -1,7 +1,7 @@
 import {PlusOutlined, SearchOutlined} from '@ant-design/icons'
 import {Form, Input, InputNumber} from 'antd'
 import React from 'react'
-import {FieldBoolean, FormModal, HttpClient, Page, PageUtils, PermActions, ProTable, UserPicker, ViewText} from "../../../framework";
+import {FieldBoolean, FormModal, getMessageApi, HttpClient, Page, PageUtils, PermActions, ProTable, UserPicker, ViewText} from "../../../framework";
 
 
 export default class RolePage extends React.Component {
@@ -34,12 +34,14 @@ export default class RolePage extends React.Component {
     onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/sys-role/create' : 'admin/sys-role/update';
-        await HttpClient.post(url, values)
+        const rs = await HttpClient.post(url, values)
+        getMessageApi().success(rs?.message || (isNew ? '新增成功' : '更新成功'))
         this.tableRef.current.reload()
     }
 
     handleDelete = record => {
-        HttpClient.post('admin/sys-role/delete', {id: record.id}, null).then(() => {
+        HttpClient.post('admin/sys-role/delete', {id: record.id}, null).then(rs => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.tableRef.current.reload()
         })
     }
@@ -123,7 +125,8 @@ export default class RolePage extends React.Component {
             id: this.state.selectedRecord.id,
             userIdList
         }
-        HttpClient.post('admin/sys-role/grant-users', params, null, {toastError: false}).then(() => {
+        HttpClient.post('admin/sys-role/grant-users', params, null, {autoShowErrorMessage: false}).then((rs) => {
+            getMessageApi().success(rs?.message || '保存成功')
             this.setState({pickerOpen: false, usersModalLoading: false})
         }).catch(() => {
             this.setState({usersModalLoading: false})

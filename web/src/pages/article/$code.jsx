@@ -16,7 +16,7 @@ export default class ArticlePage extends React.Component {
     componentDidMount() {
         const code = this.props.params?.code
         if (code) {
-            HttpClient.get('admin/article/get-by-code', {code}, {toastError: false}).then(rs => {
+            HttpClient.get('admin/article/get-by-code', {code}, {autoShowErrorMessage: false}).then(rs => {
                 this.setState({article: rs.data, loading: false})
             }).catch(() => {
                 this.setState({loading: false})

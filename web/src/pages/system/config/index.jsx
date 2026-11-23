@@ -18,7 +18,7 @@ import {
     message
 } from 'antd'
 import {QuestionCircleOutlined, UndoOutlined} from '@ant-design/icons'
-import {EventBus, GlobalData, HttpClient, Page, Perm} from '../../../framework'
+import {EventBus, getMessageApi, GlobalData, HttpClient, Page, Perm} from '../../../framework'
 
 /** 下拉值统一转字符串；清空时 antd 给 undefined，按空串处理 */
 const selectText = (value) => (value === null || value === undefined ? '' : String(value))
@@ -83,7 +83,7 @@ export default class SysConfigPage extends React.Component {
     /** 只刷新只读参数（运行时长 / 连接池），不触碰可编辑表单；轮询失败保持现状 */
     loadSystem = async () => {
         try {
-            const rs = await HttpClient.get('admin/sys-config/system', null, {toastError: false})
+            const rs = await HttpClient.get('admin/sys-config/system', null, {autoShowErrorMessage: false})
             this.setState({systemParams: rs.data?.items || []})
         } catch {
             // 轮询失败静默，下次再试
@@ -186,6 +186,7 @@ export default class SysConfigPage extends React.Component {
             const rs = await HttpClient.post('admin/sys-config/update', {values})
             this.applyGroups(rs.data?.groups || [], Object.keys(patch))
             await this.refreshSiteInfo()
+            getMessageApi().success(rs?.message || '保存成功')
         } catch {
             // 错误提示由 HttpClient 统一处理
         } finally {
@@ -198,6 +199,7 @@ export default class SysConfigPage extends React.Component {
             const rs = await HttpClient.post('admin/sys-config/reset', {keys})
             this.applyGroups(rs.data?.groups || [], keys && keys.length ? keys : null)
             await this.refreshSiteInfo()
+            getMessageApi().success(rs?.message || '已恢复默认值')
         } catch {
             // 错误提示由 HttpClient 统一处理
         }
@@ -206,7 +208,7 @@ export default class SysConfigPage extends React.Component {
     /** 站点标题、水印等配置经 site-info 下发，保存后刷新本地缓存并通知布局 */
     refreshSiteInfo = async () => {
         try {
-            const rs = await HttpClient.get('/admin/public/site-info', null, {toastError: false})
+            const rs = await HttpClient.get('/admin/public/site-info', null, {autoShowErrorMessage: false})
             const next = rs.data || {}
             const changed = JSON.stringify(GlobalData.getSiteInfo()) !== JSON.stringify(next)
             GlobalData.setSiteInfo(next)

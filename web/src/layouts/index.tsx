@@ -144,7 +144,7 @@ export class Layouts extends React.Component<LayoutsProps> {
     }
 
     loadSiteInfo() {
-        HttpClient.get("/admin/public/site-info", null, {toastError: false}).then(data => {
+        HttpClient.get("/admin/public/site-info", null, {autoShowErrorMessage: false}).then(data => {
             GlobalData.setSiteInfo(data.data);
             // 系统参数的默认主题/页签模式需在后台布局首次渲染前生效，避免闪一下默认样式
             applyServerUiDefaults(data.data?.config);
@@ -155,7 +155,7 @@ export class Layouts extends React.Component<LayoutsProps> {
     }
 
     loadLoginInfo() {
-        HttpClient.get('/admin/public/login-info', null, {toastError: false}).then(data => {
+        HttpClient.get('/admin/public/login-info', null, {autoShowErrorMessage: false}).then(data => {
             GlobalData.setDictInfo(data.data.dictInfo);
             GlobalData.setLoginInfo(data.data.loginInfo);
             GlobalData.setSiteArticles(data.data.siteArticles);

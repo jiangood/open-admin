@@ -21,6 +21,7 @@ import AvatarPicker from "./AvatarPicker";
 import {
     AvatarUtils,
     EventBus,
+    getMessageApi,
     GlobalData,
     HttpClient,
     history,
@@ -94,7 +95,7 @@ export default class UserCenterPage extends React.Component {
         if (showLoading) {
             this.setState({sessionLoading: true});
         }
-        return HttpClient.get('admin/user-center/sessions', null, {toastError: false})
+        return HttpClient.get('admin/user-center/sessions', null, {autoShowErrorMessage: false})
             .then(rs => {
                 const sessions = rs.data || [];
                 this.setState({sessions});
@@ -123,7 +124,10 @@ export default class UserCenterPage extends React.Component {
 
     kickSession = (id) => {
         HttpClient.post('admin/user-center/sessions/kick', {id})
-            .then(() => this.loadSessions(true))
+            .then((rs) => {
+                getMessageApi().success(rs?.message || '已强制下线');
+                return this.loadSessions(true);
+            })
             .then(sessions => {
                 // 只剩当前设备时没有必要继续展示详情
                 this.setState({sessionModalOpen: sessions.length > 1});
@@ -133,12 +137,13 @@ export default class UserCenterPage extends React.Component {
     }
 
     onPwdFinish = (values) => {
-        HttpClient.post('admin/user-center/update-pwd', values, null).then(() => {
+        HttpClient.post('admin/user-center/update-pwd', values, null).then((rs) => {
+            getMessageApi().success(rs?.message || '密码修改成功');
             this.setState({changePwdOpen: false, changePwdSuccess: true});
         })
     }
 
-    pwdValidator = (rule, value) => HttpClient.get("admin/sys-user/pwd-strength", {password: value}, {toastError: false})
+    pwdValidator = (rule, value) => HttpClient.get("admin/sys-user/pwd-strength", {password: value}, {autoShowErrorMessage: false})
         .catch(e => {
             throw new Error(e.message)
         })
@@ -154,7 +159,7 @@ export default class UserCenterPage extends React.Component {
             avatar: values.avatar || '',
         };
         this.setState({editSaving: true});
-        HttpClient.post('admin/user-center/update-info', data, null).then(() => {
+        HttpClient.post('admin/user-center/update-info', data, null).then((rs) => {
             this.setState(prevState => ({
                 info: {...prevState.info, ...data},
                 editOpen: false,
@@ -162,6 +167,7 @@ export default class UserCenterPage extends React.Component {
             // 同步顶栏头像
             GlobalData.setLoginInfo({...GlobalData.getLoginInfo(), avatar: data.avatar});
             EventBus.emit('loginInfoChange');
+            getMessageApi().success(rs?.message || '保存成功');
         }).finally(() => {
             this.setState({editSaving: false});
         });

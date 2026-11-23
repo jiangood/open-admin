@@ -1,7 +1,7 @@
 import React from "react";
 import {Button, Card, Checkbox, Table, Typography} from "antd";
 import {SaveOutlined} from "@ant-design/icons";
-import {HttpClient, Page} from "../../../framework";
+import {getMessageApi, HttpClient, Page} from "../../../framework";
 
 export const pageMeta = {
     title: '角色权限设置',
@@ -93,7 +93,9 @@ export default class RolePermPage extends React.Component {
             menus.push(menuId)
             perms.push(...ks)
         }
-        HttpClient.post('admin/sys-role/save-perms', {id: this.roleId, perms, menus})
+        HttpClient.post('admin/sys-role/save-perms', {id: this.roleId, perms, menus}).then((rs) => {
+            getMessageApi().success(rs?.message || '保存成功')
+        })
     };
 
 

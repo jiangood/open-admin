@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariPoolMXBean;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.modules.config.dto.SystemParamView;
 import io.github.jiangood.openadmin.util.DurationTool;
+import io.github.jiangood.openadmin.util.IpTool;
 import io.github.jiangood.openadmin.util.VersionTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.ObjectProvider;
@@ -52,6 +53,8 @@ public class SystemParamService {
         List<SystemParamView> items = new ArrayList<>();
         // 运行时状态排在前面：这两项会随服务运行变化，页面定时刷新
         add(items, SystemParamView.GROUP_RUNTIME, "sys.start-time", "运行时长", uptime());
+        add(items, SystemParamView.GROUP_RUNTIME, "sys.network.ipv4", "内网IP", IpTool.getLocalIpv4());
+        add(items, SystemParamView.GROUP_RUNTIME, "sys.network.public-ip", "外网IP", IpTool.getPublicIpv4());
         String pool = poolUsage(dataSource);
         if (pool != null) {
             add(items, SystemParamView.GROUP_RUNTIME, "spring.datasource.hikari", "连接池", pool);

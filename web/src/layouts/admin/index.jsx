@@ -107,7 +107,7 @@ export default class AdminLayout extends React.Component {
     closeMobileMenu = () => this.setState({mobileMenuOpen: false});
 
     loadShortcuts = () => {
-        HttpClient.get('admin/user-center/shortcuts', null, {toastError: false})
+        HttpClient.get('admin/user-center/shortcuts', null, {autoShowErrorMessage: false})
             .then(rs => this.setState({shortcuts: rs.data || []}))
             .catch(() => this.setState({shortcuts: []}))
     }
@@ -115,7 +115,7 @@ export default class AdminLayout extends React.Component {
 
     initMenu = () => {
         this.setState({menuLoading: true})
-        HttpClient.get('/admin/menu-info', null, {toastError: false}).then(info => {
+        HttpClient.get('/admin/menu-info', null, {autoShowErrorMessage: false}).then(info => {
             const {menuTree, pathMenuMap, menuMap} = info.data
             this.setState({menuMap})
 

@@ -8,6 +8,7 @@ import {
     FieldEditor,
     FieldUploadImage,
     FormModal,
+    getMessageApi,
     HttpClient,
     Page,
     PageUtils,
@@ -42,12 +43,14 @@ export default class ArticleListPage extends React.Component {
     onFinish = async values => {
         const isNew = !values.id;
         const url = isNew ? 'admin/article/create' : 'admin/article/update';
-        await HttpClient.post(url, values)
+        const rs = await HttpClient.post(url, values)
+        getMessageApi().success(rs?.message || (isNew ? '新增成功' : '更新成功'))
         this.tableRef.current.reload()
     }
 
     handleDelete = record => {
-        HttpClient.post('admin/article/delete', {id: record.id}, null).then(() => {
+        HttpClient.post('admin/article/delete', {id: record.id}, null).then(rs => {
+            getMessageApi().success(rs?.message || '删除成功')
             this.tableRef.current.reload()
         })
     }

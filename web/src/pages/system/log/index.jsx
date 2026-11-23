@@ -162,6 +162,7 @@ export default class LogPage extends React.Component {
                     : detailRecord,
             }));
             this.actionRef.current?.reload();
+            getMessageApi().success(rs?.message || '保存成功');
         }).catch(() => {
             this.setState({fingerprintSaving: false});
         });
@@ -172,7 +173,7 @@ export default class LogPage extends React.Component {
             return;
         }
         this.setState({fingerprintSaving: true});
-        HttpClient.post('admin/sys-browser-fingerprint/delete', {id: record.fingerprintRemarkId}).then(() => {
+        HttpClient.post('admin/sys-browser-fingerprint/delete', {id: record.fingerprintRemarkId}).then((rs) => {
             const updated = {
                 ...record,
                 fingerprintRemarkId: null,
@@ -185,6 +186,7 @@ export default class LogPage extends React.Component {
                 detailRecord: detailRecord && detailRecord.fingerprint === record.fingerprint ? updated : detailRecord,
             }));
             this.actionRef.current?.reload();
+            getMessageApi().success(rs?.message || '已取消标记');
         }).catch(() => {
             this.setState({fingerprintSaving: false});
         });

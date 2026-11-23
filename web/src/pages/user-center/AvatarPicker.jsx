@@ -23,7 +23,7 @@ export default class AvatarPicker extends React.Component {
     }
 
     componentDidMount() {
-        HttpClient.get('admin/public/avatar-presets', null, {toastError: false}).then(rs => {
+        HttpClient.get('admin/public/avatar-presets', null, {autoShowErrorMessage: false}).then(rs => {
             const presets = rs.data?.presets;
             if (Array.isArray(presets) && presets.length > 0) {
                 this.setState({presets});

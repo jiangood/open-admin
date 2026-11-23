@@ -24,7 +24,7 @@ export default class ForceUpdatePwdPage extends React.Component {
         if (siteInfo?.title) {
             return;
         }
-        HttpClient.get('/admin/public/site-info', null, {toastError: false}).then(rs => {
+        HttpClient.get('/admin/public/site-info', null, {autoShowErrorMessage: false}).then(rs => {
             GlobalData.setSiteInfo(rs.data);
             this.setState({siteInfo: rs.data || {}});
         }).catch(() => {
@@ -45,7 +45,7 @@ export default class ForceUpdatePwdPage extends React.Component {
         if (!value) {
             return Promise.resolve();
         }
-        return HttpClient.get("admin/sys-user/pwd-strength", {password: value}, {toastError: false})
+        return HttpClient.get("admin/sys-user/pwd-strength", {password: value}, {autoShowErrorMessage: false})
             .catch(e => {
                 throw new Error(e.message);
             });

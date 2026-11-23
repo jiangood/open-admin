@@ -1,6 +1,6 @@
 import React from 'react';
 import {Form, Input, Tag} from 'antd';
-import {HttpClient, Link, Page, PermActions, PermUtils, ProTable, UrlUtils} from "../../../framework";
+import {getMessageApi, HttpClient, Link, Page, PermActions, PermUtils, ProTable, UrlUtils} from "../../../framework";
 
 /**
  * 在线用户：一个登录会话一行，支持强制下线。
@@ -11,7 +11,8 @@ export default class OnlineUserPage extends React.Component {
     tableRef = React.createRef();
 
     handleKick = row => {
-        HttpClient.post('admin/sys-online-user/kick', {id: row.id}).then(() => {
+        HttpClient.post('admin/sys-online-user/kick', {id: row.id}).then((rs) => {
+            getMessageApi().success(rs?.message || '已强制下线')
             this.tableRef.current.reload();
         });
     };

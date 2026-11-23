@@ -34,7 +34,8 @@ export default class UserPerm extends React.Component {
         })
 
 
-        HttpClient.post('admin/sys-user/grant-perm', values, null, {toastError: false}).then(() => {
+        HttpClient.post('admin/sys-user/grant-perm', values, null, {autoShowErrorMessage: false}).then((rs) => {
+            getMessageApi().success(rs?.message || '保存成功')
             this.setState({
                 visible: false,
                 confirmLoading: false

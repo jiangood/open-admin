@@ -11,9 +11,8 @@ import {BROWSER_FINGERPRINT_HEADER, getBrowserFingerprint} from "./BrowserFinger
  * 核心规则：
  * - 请求方法返回 Promise<AjaxBody<T>>：成功 resolve 整个 AjaxResult 响应体，失败 reject(AjaxError {code, message})
  * - 成功 resolve 的是原始响应体 {success, code, data, message, traceId, ...}（extData 等附加字段在顶层），
- *   业务取数据用 rs.data，取提示文案用 rs.message
- * - 成功且后端返回了 message 时自动 message.success(body.message)，传 {toastSuccess: false} 可关闭
- * - 失败默认自动 console.warn + message.error，并 reject(AjaxError)；传 {toastError: false} 可完全静默（仅 reject）
+ *   业务取数据用 rs.data，取提示文案用 rs.message；成功提示由业务自行决定（可使用 rs.message）
+ * - 失败默认自动 console.warn + message.error，并 reject(AjaxError)；传 {autoShowErrorMessage: false} 可关闭自动提示（完全静默，仅 reject）
  * - 返回值被忽略也安全：内部已对返回的 Promise 挂 no-op catch，不会产生 unhandled rejection
  * - reject 的 AjaxError {code, message}：业务失败 code 为后端业务码，网络异常 code 为 HTTP 状态码，message 始终为人类可读提示
  * - HTTP 401 或业务 code=401 均广播 loginExpired，载荷为 {message, reason}，交由全局登录失效弹窗统一提示（不再单独弹错）
@@ -21,19 +20,15 @@ import {BROWSER_FINGERPRINT_HEADER, getBrowserFingerprint} from "./BrowserFinger
  *
  * 用法：
  * ```ts
- * // 提交：成功自动弹后端 message（如"更新成功"），失败自动弹错并 reject（可用 await 感知结果，如 FormModal 提交失败保持弹窗）
+ * // 提交：成功 resolve 响应体，失败自动弹错并 reject（可用 await 感知结果，如 FormModal 提交失败保持弹窗）
  * await HttpClient.post('admin/sys-user/create', values);
  *
- * // 取返回数据与后端提示文案
+ * // 取返回数据与后端提示文案，并按需自行提示
  * const {data, message} = await HttpClient.post('admin/sys-user/create', values);
- *
- * // 成功自控提示（关闭自动弹后由业务决定）
- * await HttpClient.post('admin/sys-user/delete', {id}, null, {toastSuccess: false});
- * messageApi.success('删除成功');
- * reload();
+ * getMessageApi().success(message || '操作成功');
  *
  * // 失败由调用方接管，不弹错（静默探测）
- * HttpClient.get('admin/public/site-info', null, {toastError: false})
+ * HttpClient.get('admin/public/site-info', null, {autoShowErrorMessage: false})
  *     .then(({data}) => render(data))
  *     .catch((e) => myHandle(e));
  *
@@ -80,11 +75,13 @@ export interface LoginExpiredPayload {
     reason?: string;
 }
 
-/** 请求选项：headers 自定义请求头；toastError=false 时失败不自动弹错（完全静默，仅 reject）；toastSuccess=false 时成功不自动弹后端 message */
+/** 请求选项：headers 自定义请求头；autoShowErrorMessage=false 时失败不自动弹出错误提示（完全静默，仅 reject） */
 export interface RequestOptions {
     headers?: AxiosRequestConfig['headers'];
+    /** 失败时是否自动显示错误提示，默认 true */
+    autoShowErrorMessage?: boolean;
+    /** @deprecated 请使用 autoShowErrorMessage */
     toastError?: boolean;
-    toastSuccess?: boolean;
 }
 
 interface AjaxSettings {
@@ -93,8 +90,9 @@ interface AjaxSettings {
     params?: unknown;
     data?: unknown;
     headers?: AxiosRequestConfig['headers'];
+    autoShowErrorMessage?: boolean;
+    /** @deprecated 请使用 autoShowErrorMessage */
     toastError?: boolean;
-    toastSuccess?: boolean;
 }
 
 interface DownloadSettings {
@@ -104,6 +102,8 @@ interface DownloadSettings {
     data?: unknown;
     fileName?: string;
     onDownloadProgress?: (progress: {loaded: number; total: number}) => void;
+    autoShowErrorMessage?: boolean;
+    /** @deprecated 请使用 autoShowErrorMessage */
     toastError?: boolean;
 }
 
@@ -125,9 +125,9 @@ axiosInstance.interceptors.request.use((config) => {
 
 export class HttpClient {
     static ajax<T = unknown>(settings: AjaxSettings): Promise<AjaxBody<T>> {
-        const {url, method = 'GET', params, data, headers, toastError, toastSuccess} = settings;
+        const {url, method = 'GET', params, data, headers, autoShowErrorMessage, toastError} = settings;
         return HttpClient.coreRequest<T>({
-            url, method, params, data, headers, toastError, toastSuccess
+            url, method, params, data, headers, autoShowErrorMessage: autoShowErrorMessage ?? toastError
         });
     }
 
@@ -153,10 +153,11 @@ export class HttpClient {
      * 下载文件（responseType: blob），返回 Promise<Blob>。
      * 成功即触发浏览器保存并 resolve(blob)；JSON 错误响应自动识别为失败并 reject；
      * 文件名优先 settings.fileName，否则从 Content-Disposition 解析。
-     * 失败默认自动弹错，传 {toastError: false} 可静默（仅 reject）。
+     * 失败默认自动弹出错误提示，传 {autoShowErrorMessage: false} 可静默（仅 reject）。
      */
     static download(settings: DownloadSettings): Promise<Blob> {
-        const {url, method = 'GET', params, data, fileName, onDownloadProgress, toastError = true} = settings;
+        const {url, method = 'GET', params, data, fileName, onDownloadProgress, autoShowErrorMessage: autoShowErrorMessageOpt, toastError} = settings;
+        const autoShowErrorMessage = autoShowErrorMessageOpt ?? toastError ?? true;
 
         return new Promise<Blob>((resolve, reject) => {
             axiosInstance({
@@ -175,13 +176,13 @@ export class HttpClient {
 
                 if (blob.type.toLowerCase().startsWith('application/json')) {
                     const reader = new FileReader();
-                    reader.onerror = () => HttpClient.fail(url, toastError, reject, {message: '读取下载数据失败'}, '下载失败');
+                    reader.onerror = () => HttpClient.fail(url, autoShowErrorMessage, reject, {message: '读取下载数据失败'}, '下载失败');
                     reader.onload = () => {
                         try {
                             const rs = JSON.parse(reader.result as string);
-                            HttpClient.fail(url, toastError, reject, rs, '下载失败', rs.code === 401 ? 401 : undefined);
+                            HttpClient.fail(url, autoShowErrorMessage, reject, rs, '下载失败', rs.code === 401 ? 401 : undefined);
                         } catch {
-                            HttpClient.fail(url, toastError, reject, {message: '解析错误响应失败'}, '下载失败');
+                            HttpClient.fail(url, autoShowErrorMessage, reject, {message: '解析错误响应失败'}, '下载失败');
                         }
                     };
                     reader.readAsText(blob, 'utf-8');
@@ -214,7 +215,7 @@ export class HttpClient {
                 window.URL.revokeObjectURL(objectUrl);
                 resolve(blob);
             }).catch((e: unknown) => {
-                HttpClient.fail(url, toastError, reject, e, '下载失败');
+                HttpClient.fail(url, autoShowErrorMessage, reject, e, '下载失败');
             });
         });
     }
@@ -256,7 +257,8 @@ export class HttpClient {
     }
 
     private static coreRequest<T = unknown>(settings: AjaxSettings): Promise<AjaxBody<T>> {
-        const {url, method, params, data, headers, toastError = true, toastSuccess = true} = settings;
+        const {url, method, params, data, headers, autoShowErrorMessage: autoShowErrorMessageOpt, toastError} = settings;
+        const autoShowErrorMessage = autoShowErrorMessageOpt ?? toastError ?? true;
         const config: AxiosRequestConfig = {url: HttpClient.prefixUrl(url), method, params, data, headers};
 
         // FormData 请求交由浏览器自动生成带 boundary 的 multipart Content-Type
@@ -278,7 +280,7 @@ export class HttpClient {
                 // 一律按失败处理：曾经被当成成功 resolve，会掩盖登录失效等错误
                 // （axios 默认对 4xx/5xx 直接 reject，这里主要覆盖 2xx 却是非 JSON 的响应；401 分支为自定义 validateStatus 等场景兜底）
                 if (body == null || typeof body !== 'object' || body.success === undefined) {
-                    HttpClient.fail(url, toastError, reject, {
+                    HttpClient.fail(url, autoShowErrorMessage, reject, {
                         code: response.status,
                         message: response.status === 401 ? '登录过期' : `响应格式错误（HTTP ${response.status}）`,
                     }, '请求失败', response.status);
@@ -286,19 +288,16 @@ export class HttpClient {
                 }
 
                 if (!body.success) {
-                    HttpClient.fail(url, toastError, reject, {
+                    HttpClient.fail(url, autoShowErrorMessage, reject, {
                         code: body.code,
                         message: body.message || '操作失败',
                         loginExpiredReason: body.loginExpiredReason,
                     }, '请求失败', body.code === 401 ? 401 : undefined);
                     return;
                 }
-                if (toastSuccess && body.message) {
-                    getMessageApi().success(body.message);
-                }
                 resolve(body);
             }).catch((e: unknown) => {
-                HttpClient.fail(url, toastError, reject, e);
+                HttpClient.fail(url, autoShowErrorMessage, reject, e);
             });
         });
 
@@ -320,9 +319,9 @@ export class HttpClient {
      * 统一的失败处理：
      * - HTTP 401 / 业务 code=401：广播 loginExpired（载荷含后端文案与原因），由全局登录失效弹窗统一提示，
      *   不再单独弹错，避免与弹窗重复；最终 reject(AjaxError)
-     * - 其余：提取可读消息后按 toastError 决定是否弹错，最终 reject(AjaxError)
+     * - 其余：提取可读消息后按 autoShowErrorMessage 决定是否自动弹错，最终 reject(AjaxError)
      */
-    private static fail(url: string, toastError: boolean, reject: (reason?: unknown) => void, e: unknown, label = '请求失败', httpStatus?: number): void {
+    private static fail(url: string, autoShowErrorMessage: boolean, reject: (reason?: unknown) => void, e: unknown, label = '请求失败', httpStatus?: number): void {
         const status = httpStatus ?? (axios.isAxiosError(e) ? e.response?.status : undefined);
         if (status === 401) {
             const {message, loginExpiredReason} = HttpClient.loginExpiredInfo(e);
@@ -333,7 +332,7 @@ export class HttpClient {
             return;
         }
         const err = HttpClient.toAjaxError(e);
-        if (toastError) {
+        if (autoShowErrorMessage) {
             console.warn(`[HttpClient] ${label}: ${url}`, err.message);
             getMessageApi().error(err.message);
         }
