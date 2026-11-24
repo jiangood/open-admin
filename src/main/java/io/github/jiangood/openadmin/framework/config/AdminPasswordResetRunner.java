@@ -35,39 +35,61 @@ public class AdminPasswordResetRunner implements ApplicationRunner {
             return;
         }
 
-        int[] exitCode = {0};
+        int exitCode = 0;
+        String account = null;
+        String newPassword = null;
+        String failureReason = null;
         try {
             // 框架种子数据保证管理员 id 为 "1"；优先按 id 查找，兼容账号被改名
             SysUser admin = sysUserService.findById(ADMIN_ID)
                     .orElseGet(() -> sysUserService.findByAccount("admin")
                             .orElseThrow(() -> new IllegalStateException(
-                                    "未找到管理员账号（id=1 或 account=admin），无法重置密码")));
+                                    "ADMIN ACCOUNT NOT FOUND (id=1 or account=admin)")));
+
+            account = admin.getAccount();
 
             if (!Boolean.TRUE.equals(admin.getEnabled())) {
-                log.warn("管理员账号当前为禁用状态，密码已重置但仍无法登录，请同时在数据库中启用该账号");
+                log.warn("[ADMIN-PASSWORD-RESET] ADMIN ACCOUNT IS DISABLED. "
+                        + "The password will still be reset, but login remains blocked until the account is enabled.");
             }
 
-            // 不支持外部指定密码，仅生成随机强密码
-            String newPassword = PasswordTool.random();
+            // 不支持外部指定密码，仅生成随机强密码（GEN- 前缀，便于识别系统生成密码）
+            newPassword = PasswordTool.random();
             sysUserService.resetPwd(admin.getId(), newPassword);
 
             // 审计：日志文件只记录发生了重置，不包含密码
-            log.warn("[ADMIN-PASSWORD-RESET] 管理员密码已重置: account={} (新密码仅输出到控制台，请妥善保存并在登录后立即修改密码)",
-                    admin.getAccount());
-            // 密码只输出到控制台（stdout），不写入应用日志文件
-            System.out.println("[ADMIN-PASSWORD-RESET] account=" + admin.getAccount()
-                    + ", newPassword=" + newPassword
-                    + " (请妥善保存并在登录后立即修改密码)");
+            log.warn("[ADMIN-PASSWORD-RESET] Admin password reset: account={}. "
+                    + "The new password is printed to the console only and is not written to the log file.", account);
         } catch (Exception e) {
-            exitCode[0] = 1;
-            log.error("管理员密码重置失败", e);
+            exitCode = 1;
+            log.error("[ADMIN-PASSWORD-RESET] FAILED", e);
+            failureReason = PasswordConsoleBanner.asciiOrFallback(e.getMessage());
         } finally {
+            final int errorCode = exitCode;
+            int code;
             try {
-                int code = SpringApplication.exit(context, () -> exitCode[0]);
+                // 先关闭 Spring，再打印横幅：确保密码是进程退出前最后一段输出，不被关闭日志淹没
+                code = SpringApplication.exit(context, () -> errorCode);
+            } catch (Throwable t) {
+                code = errorCode == 0 ? 1 : errorCode;
+                log.error("[ADMIN-PASSWORD-RESET] FAILED TO CLOSE APPLICATION", t);
+            }
+
+            // 密码只输出到控制台（stdout），不写入应用日志文件
+            if (newPassword != null) {
+                PasswordConsoleBanner.printToStdout(PasswordConsoleBanner.renderPasswordBlock(
+                        "[ADMIN-PASSWORD-RESET]", "SUCCESS", account, newPassword));
+            } else {
+                PasswordConsoleBanner.printToStdout(PasswordConsoleBanner.renderFailureBlock(
+                        "[ADMIN-PASSWORD-RESET]",
+                        failureReason == null ? "UNKNOWN ERROR" : failureReason));
+            }
+
+            try {
                 System.exit(code);
             } catch (Throwable t) {
                 // 兜底：确保进程退出，避免异常导致命令挂起
-                Runtime.getRuntime().halt(exitCode[0] == 0 ? 1 : exitCode[0]);
+                Runtime.getRuntime().halt(code == 0 ? 1 : code);
             }
         }
     }

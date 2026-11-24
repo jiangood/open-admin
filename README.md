@@ -50,7 +50,7 @@ npm run dev                    # 默认 http://localhost:7777
 
 ### 默认登录
 
-首次启动会自动创建管理员账号 `admin`，初始密码**随机生成**并打印在启动日志中（`WARN` 级别，Docker 部署可用 `docker logs` 查看），登录后须修改密码。
+首次启动会自动创建管理员账号 `admin`，初始密码**随机生成**（以 `GEN-` 开头）并打印在启动日志的英文横幅中（标记 `[INITIAL-ADMIN-PASSWORD]`，Docker 部署可用 `docker logs` 查看），登录后须修改密码。密码被修改前，每次启动都会打印 `[ADMIN-PASSWORD-CHECK]` 提醒横幅（只提醒，不再重复输出密码）。
 
 ### Docker 一键部署
 

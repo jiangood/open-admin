@@ -50,7 +50,11 @@ public class SeedDataInitializer {
     private final ArticleRepository articleRepository;
     private final SysJobRepository jobRepository;
 
+    /** 本次启动是否刚创建了管理员（用于避免启动时重复打印首启密码横幅） */
+    private boolean adminCreatedThisRun;
+
     public void initialize() {
+        adminCreatedThisRun = false;
         seedDictType();
         seedOrg();
         seedAdmin();
@@ -113,7 +117,17 @@ public class SeedDataInitializer {
         user.setLastPasswordChangeTime(null);
         user.setRoles(new HashSet<>(Set.of(role)));
         userRepository.save(user);
-        log.warn("首次启动初始化管理员账号：admin，初始密码为 {}（随机生成，请妥善保存，首次登录后必须修改密码）", initPassword);
+        adminCreatedThisRun = true;
+        // 密码随启动日志（WARN，同时写入日志文件）输出一次；之后每次启动只打印「密码未修改」提醒，不再重复输出密码
+        log.warn(PasswordConsoleBanner.renderPasswordBlock(
+                "[INITIAL-ADMIN-PASSWORD]", "ADMIN ACCOUNT CREATED", user.getAccount(), initPassword));
+    }
+
+    /**
+     * 本次启动是否刚创建了管理员账号
+     */
+    public boolean isAdminCreatedThisRun() {
+        return adminCreatedThisRun;
     }
 
     /**
@@ -126,7 +140,9 @@ public class SeedDataInitializer {
                 .ifPresent(user -> {
                     user.setLastPasswordChangeTime(null);
                     userRepository.save(user);
-                    log.warn("检测到管理员仍使用旧版内置默认密码，已要求下次登录时修改密码");
+                    log.warn("[ADMIN-PASSWORD-CHECK] LEGACY DEFAULT ADMIN PASSWORD DETECTED. "
+                            + "The admin account still uses the deprecated built-in password; "
+                            + "a password change is required on the next login.");
                 });
     }
 

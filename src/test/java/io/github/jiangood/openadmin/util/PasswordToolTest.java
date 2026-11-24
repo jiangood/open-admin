@@ -17,8 +17,10 @@ class PasswordToolTest {
             assertNotNull(password1);
             assertFalse(password1.isEmpty());
 
-            // 测试密码长度（应该是12位）
-            assertEquals(12, password1.length());
+            // 测试密码长度（GEN- 前缀 + 12位随机串 = 16位）
+            assertEquals(16, password1.length());
+            assertTrue(password1.startsWith(PasswordTool.GENERATED_PREFIX), "随机密码应以 GEN- 开头");
+            assertTrue(PasswordTool.isGenerated(password1));
 
             // 测试多次生成的密码不同
             String password2 = PasswordTool.random();
@@ -131,6 +133,22 @@ class PasswordToolTest {
         // 测试随机生成的密码强度
         String randomPassword = PasswordTool.random();
         assertTrue(PasswordTool.isStrengthOk(randomPassword), "随机生成的密码应该满足强度要求");
+    }
+
+    @Test
+    void testIsGenerated() {
+        assertTrue(PasswordTool.isGenerated(PasswordTool.random()));
+        assertTrue(PasswordTool.isGenerated("GEN-abc123!"));
+        assertFalse(PasswordTool.isGenerated("Abc123!@#"));
+        assertFalse(PasswordTool.isGenerated("gen-abc123!"));
+        assertFalse(PasswordTool.isGenerated(null));
+    }
+
+    @Test
+    void testValidateUserChosenRejectsGeneratedPrefix() {
+        assertThrows(IllegalStateException.class, () -> PasswordTool.validateUserChosen("GEN-abc123!"),
+                "用户设置的密码不允许使用 GEN- 前缀");
+        assertDoesNotThrow(() -> PasswordTool.validateUserChosen("Abc123!@#"));
     }
 
     @Test

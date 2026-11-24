@@ -181,7 +181,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 
 **种子数据如何管理？** 框架内置的种子数据（默认字典类型、机构、管理员用户/角色、默认文章、清理任务）在首次启动、JPA 建表完成后由 `SeedDataInitializer`（`framework/config/SeedDataInitializer.java`）写入：每条记录先按 id 判断是否已存在，存在则跳过，不覆盖后续修改，因此可重复启动、幂等执行，且不依赖数据库方言（H2 / MySQL 均可）。
 
-**管理员初始密码是什么？** 首次启动创建 `admin` 时，初始密码随机生成并打印在启动日志中（`WARN` 级别，含「初始密码为」字样，Docker 部署用 `docker logs` 查看），且 `lastPasswordChangeTime` 置空——首次登录成功即被引导强制修改密码（与「管理员重置密码」同一机制）。框架不提供固定默认密码，也不提供配置项固定初始密码。若存量项目升级后启动日志出现「检测到管理员仍使用旧版内置默认密码」，说明 admin 密码从未改过，下次登录须修改。
+**管理员初始密码是什么？** 首次启动创建 `admin` 时，初始密码随机生成（以 `GEN-` 开头）并打印在启动日志中（`WARN` 级别，英文 ASCII 横幅，标记 `[INITIAL-ADMIN-PASSWORD]`，Docker 部署用 `docker logs` 查看），且 `lastPasswordChangeTime` 置空——首次登录成功即被引导强制修改密码（与「管理员重置密码」同一机制）。在密码被修改前，每次启动都会打印 `[ADMIN-PASSWORD-CHECK] ADMIN PASSWORD HAS NOT BEEN CHANGED` 英文横幅提醒（只提醒、不重复输出密码）。用户自行设置的密码不允许以 `GEN-` 开头，因此密码带 `GEN-` 前缀即表示仍是系统生成密码。框架不提供固定默认密码，也不提供配置项固定初始密码。若存量项目升级后启动日志出现 `[ADMIN-PASSWORD-CHECK] LEGACY DEFAULT ADMIN PASSWORD DETECTED`，说明 admin 密码从未改过，下次登录须修改。
 
 **管理员忘记密码如何重置？**
 - **有其他可登录的管理员/有权限用户**：进入「系统管理 → 用户管理」对管理员账号执行「重置密码」（权限 `sys-user:reset-password`），重置后下次登录需强制修改密码。
@@ -191,7 +191,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
     - Docker 一次性容器：`docker run --rm -v <data卷>:/data <image> --spring.main.web-application-type=none --reset-admin-password`
     - Docker Compose：`docker compose run --rm open-admin --spring.main.web-application-type=none --reset-admin-password`
     - Kubernetes：一次性 `Job`，容器 `args: ["--spring.main.web-application-type=none", "--reset-admin-password"]`
-  - **取回密码**：新密码**仅输出到控制台（stdout）**，不会写入应用日志文件；可从终端输出或容器/任务日志中查找 `[ADMIN-PASSWORD-RESET]` 获取。应用日志仅记录“已重置”审计信息（不含密码）。取回后请及时登录并完成强制改密。
+  - **取回密码**：新密码（以 `GEN-` 开头）**仅输出到控制台（stdout）**，不会写入应用日志文件；可从终端输出或容器/任务日志中查找英文横幅 `[ADMIN-PASSWORD-RESET] SUCCESS` 获取。应用日志仅记录“已重置”审计信息（不含密码）。重置后若一直未修改密码，每次启动都会打印 `[ADMIN-PASSWORD-CHECK]` 提醒横幅（不含密码），需要新密码时再次执行重置即可。取回后请及时登录并完成强制改密。
   - **数据库与停机**：默认 **H2 文件库**（`jdbc:h2:file:...`）同一时间仅允许一个进程访问，执行前必须先停止正在运行的业务服务/容器，避免文件锁导致重置失败；重置完成后再正常启动服务。使用 **MySQL 等外部数据库** 无文件锁限制，一般无需停机，但仍需使用相同数据源配置并关闭 Web（避免端口冲突）。
   - **注意**：执行前建议备份数据库/数据卷；不要将 `--reset-admin-password` 保留在常驻服务启动参数中（否则每次启动都会重置并退出）。若管理员账号被禁用，重置后仍需先启用账号才能登录。已有登录会话不会因改密立即失效。
 

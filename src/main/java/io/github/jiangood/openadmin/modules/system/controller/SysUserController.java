@@ -118,6 +118,9 @@ public class SysUserController {
         if (!PasswordTool.isAscii(password)) {
             return AjaxResult.err().msg("密码仅支持英文、数字与常见符号，长度不超过64位");
         }
+        if (PasswordTool.isGenerated(password)) {
+            return AjaxResult.err().msg("密码不能以 " + PasswordTool.GENERATED_PREFIX + " 开头（系统生成密码专用前缀）");
+        }
 
         PasswdStrength.PASSWD_LEVEL level = PasswdStrength.getLevel(password);
 
@@ -134,6 +137,7 @@ public class SysUserController {
     @PostMapping("reset-pwd")
     public AjaxResult resetPwd(@RequestBody UserReq input) {
         Assert.hasText(input.getPassword(), "请输入新密码");
+        PasswordTool.validateUserChosen(input.getPassword());
         SysUser user = sysUserService.findById(input.getId()).orElse(null);
         if (user != null) {
             OperationLogContext.setDetail("重置用户「" + user.getName() + "（" + user.getAccount() + "）」的密码");

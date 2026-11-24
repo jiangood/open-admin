@@ -198,6 +198,7 @@ public class SysUserService extends BaseService<SysUser> {
         }
 
         PasswordTool.validateStrength(newPassword);
+        PasswordTool.validateUserChosen(newPassword);
 
         sysUser.setPassword(PasswordTool.encode(newPassword));
         sysUser.setLastPasswordChangeTime(LocalDateTime.now(ZoneId.systemDefault()));

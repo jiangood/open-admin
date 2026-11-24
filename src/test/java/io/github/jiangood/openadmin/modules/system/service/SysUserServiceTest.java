@@ -188,6 +188,19 @@ class SysUserServiceTest {
     }
 
     @Test
+    void testUpdatePwd_rejectsGeneratedPrefix() {
+        SysUser user = new SysUser();
+        user.setId("1");
+        user.setPassword(passwordEncoder.encode("adminSetPassword"));
+
+        when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
+
+        assertThrows(IllegalStateException.class,
+                () -> sysUserService.updatePwd("1", null, "GEN-Ab3!xY9_z"));
+        verify(sysUserRepository, never()).save(any(SysUser.class));
+    }
+
+    @Test
     void testUpdatePwd_withWrongOldPassword_shouldThrow() {
         SysUser user = new SysUser();
         user.setId("1");
@@ -213,6 +226,22 @@ class SysUserServiceTest {
         assertTrue(passwordEncoder.matches(newPwd, user.getPassword()));
         assertNull(user.getLastPasswordChangeTime());
         verify(permissionStaleService).markUserStale(user.getAccount());
+    }
+
+    @Test
+    void testResetPwd_acceptsGeneratedPrefix() {
+        SysUser user = new SysUser();
+        user.setId("1");
+        user.setAccount("admin");
+        String generated = io.github.jiangood.openadmin.util.PasswordTool.random();
+
+        when(sysUserRepository.findById("1")).thenReturn(Optional.of(user));
+        when(sysUserRepository.save(any(SysUser.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        sysUserService.resetPwd("1", generated);
+
+        assertTrue(passwordEncoder.matches(generated, user.getPassword()));
+        assertNull(user.getLastPasswordChangeTime());
     }
 
     @Test

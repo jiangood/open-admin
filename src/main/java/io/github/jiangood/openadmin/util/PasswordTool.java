@@ -10,13 +10,20 @@ public class PasswordTool {
     private PasswordTool() {
     }
 
+    /**
+     * 系统自动生成密码的固定前缀，用于人工识别「该密码尚未被用户修改」。
+     * 用户自行设置的密码不允许使用该前缀（见 {@link #validateUserChosen(String)}）。
+     */
+    public static final String GENERATED_PREFIX = "GEN-";
+
+    private static final int RANDOM_BODY_LENGTH = 12;
 
     private static final PasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder() ;
 
     /**
      * 生成随机密码
      * <p>
-     * 生成的密码包含数字、小写字母、大写字母和特殊字符，长度为12位
+     * 生成的密码以 {@link #GENERATED_PREFIX} 开头，后接数字、小写字母、大写字母和特殊字符，总长度为16位
      * </p>
      * 
      * @return 随机生成的密码字符串
@@ -37,10 +44,26 @@ public class PasswordTool {
         
         // 填充剩余字符
         String allChars = digits + lowerCase + upperCase + specialChars;
-        String pad = RandomUtil.randomString(allChars, 8);
+        String pad = RandomUtil.randomString(allChars, RANDOM_BODY_LENGTH - 4);
         password.append(pad);
 
-        return StringTool.shuffle(password.toString());
+        return GENERATED_PREFIX + StringTool.shuffle(password.toString());
+    }
+
+    /**
+     * 是否为系统自动生成的密码（以 {@link #GENERATED_PREFIX} 开头）
+     */
+    public static boolean isGenerated(String password) {
+        return password != null && password.startsWith(GENERATED_PREFIX);
+    }
+
+    /**
+     * 校验用户自行设置的密码：不允许使用系统生成密码的保留前缀，
+     * 否则无法再通过前缀判断密码是否由系统生成。
+     */
+    public static void validateUserChosen(String password) {
+        Assert.state(!isGenerated(password),
+                "密码不能以 " + GENERATED_PREFIX + " 开头（该前缀由系统生成密码保留）");
     }
 
     /**
