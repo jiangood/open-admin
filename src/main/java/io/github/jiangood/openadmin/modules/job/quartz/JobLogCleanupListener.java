@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.job.quartz;
 
 import io.github.jiangood.openadmin.modules.job.service.JobLogCleanupService;
+import io.github.jiangood.openadmin.modules.job.service.JobStaleLogSweeper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.JobExecutionContext;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Component;
 public class JobLogCleanupListener implements JobListener, SchedulerFactoryBeanCustomizer {
 
     private final JobLogCleanupService jobLogCleanupService;
+    private final JobStaleLogSweeper jobStaleLogSweeper;
 
     @Override
     public String getName() {
@@ -42,6 +44,11 @@ public class JobLogCleanupListener implements JobListener, SchedulerFactoryBeanC
 
     @Override
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {
+        try {
+            jobStaleLogSweeper.sweep();
+        } catch (Exception e) {
+            log.warn("触发僵死任务记录清扫失败: {}", e.getMessage());
+        }
         try {
             jobLogCleanupService.considerCleanup();
         } catch (Exception e) {

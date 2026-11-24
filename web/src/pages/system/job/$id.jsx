@@ -1,7 +1,38 @@
 import React from 'react'
-import {Button, Card, Col, Descriptions, Empty, Row, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
+import {Button, Card, Col, Descriptions, Empty, Form, Row, Select, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
 import {CaretRightOutlined} from '@ant-design/icons'
 import {CronUtils, getMessageApi, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
+
+const JOB_STATUS_META = {
+    RUNNING: {label: '运行中', color: 'processing'},
+    SUCCESS: {label: '成功', color: 'success'},
+    PARTIAL: {label: '部分成功', color: 'warning'},
+    SKIPPED: {label: '跳过', color: 'default'},
+    FAILED: {label: '失败', color: 'error'},
+    EXCEPTION: {label: '异常', color: 'volcano'},
+    CANCELLED: {label: '已取消', color: 'default'},
+}
+
+const JOB_STATUS_OPTIONS = Object.entries(JOB_STATUS_META).map(([value, meta]) => ({
+    value,
+    label: meta.label,
+}))
+
+function renderJobStatus(status) {
+    const meta = JOB_STATUS_META[status]
+    if (!meta) {
+        return '-'
+    }
+    return <Tag color={meta.color}>{meta.label}</Tag>
+}
+
+/** 失败口径：部分成功 + 失败 + 异常 + 已取消 */
+function failureTotal(stat) {
+    if (!stat) {
+        return 0
+    }
+    return (stat.partialCount || 0) + (stat.failCount || 0) + (stat.exceptionCount || 0) + (stat.cancelledCount || 0)
+}
 
 function formatBytes(bytes) {
     if (!bytes || bytes <= 0) {
@@ -127,23 +158,9 @@ export default class JobDetailPage extends React.Component {
                 if (v) {
                     return v
                 }
-                return record.beginTime ? '运行中…' : '-'
+                return record.status === 'RUNNING' ? '运行中…' : '-'
             }},
-            {
-                title: '成功/失败',
-                dataIndex: 'executeCount',
-                width: 150,
-                render: (v, record) => {
-                    const count = v == null ? 1 : v
-                    const failCount = record.failCount == null ? (record.success === false ? 1 : 0) : record.failCount
-                    const successCount = Math.max(count - failCount, 0)
-                    if (successCount === 0 && failCount === 0) return '-'
-                    return <span>
-                        {successCount > 0 && <Tag color='success' style={{marginRight: 4}}>成功 {successCount}</Tag>}
-                        {failCount > 0 && <Tag color='error' style={{marginRight: 0}}>失败 {failCount}</Tag>}
-                    </span>
-                },
-            },
+            {title: '状态', dataIndex: 'status', width: 110, render: v => renderJobStatus(v)},
             {title: '返回结果', dataIndex: 'result', render: v => (v == null || v === '') ? '-' : <span style={{wordBreak: 'break-all'}}>{v}</span>},
             {
                 title: '操作', dataIndex: 'option', width: 80, fixed: 'right',
@@ -156,6 +173,12 @@ export default class JobDetailPage extends React.Component {
             actionRef={this.recordsTableRef}
             rowKey="id"
             scrollX={800}
+            searchInline
+            searchFormRender={() => (
+                <Form.Item name='status' noStyle>
+                    <Select placeholder='状态' allowClear style={{width: 120}} options={JOB_STATUS_OPTIONS}/>
+                </Form.Item>
+            )}
             columns={columns}
             request={(params) => {
                 params.jobId = jobId
@@ -223,20 +246,30 @@ export default class JobDetailPage extends React.Component {
         }
         return <Descriptions bordered size="small" column={2} styles={{label: {width: 160}}}>
             <Descriptions.Item label="执行记录条数">{execStat.recordCount ?? 0}</Descriptions.Item>
-            <Descriptions.Item label="累计执行次数">{execStat.totalExecuteCount ?? 0}</Descriptions.Item>
-            <Descriptions.Item label="累计失败次数">
-                {(execStat.totalFailCount ?? 0) > 0
-                    ? <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{execStat.totalFailCount}</span>
-                    : (execStat.totalFailCount ?? 0)}
+            <Descriptions.Item label="运行中">{execStat.runningCount ?? 0}</Descriptions.Item>
+            <Descriptions.Item label="成功">{execStat.successCount ?? 0}</Descriptions.Item>
+            <Descriptions.Item label="部分成功">
+                {(execStat.partialCount ?? 0) > 0
+                    ? <span style={{color: 'var(--oa-color-warning, #faad14)'}}>{execStat.partialCount}</span>
+                    : (execStat.partialCount ?? 0)}
             </Descriptions.Item>
-            <Descriptions.Item label="累计成功次数">
-                {Math.max((execStat.totalExecuteCount ?? 0) - (execStat.totalFailCount ?? 0), 0)}
+            <Descriptions.Item label="跳过">{execStat.skipCount ?? 0}</Descriptions.Item>
+            <Descriptions.Item label="失败">
+                {(execStat.failCount ?? 0) > 0
+                    ? <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{execStat.failCount}</span>
+                    : (execStat.failCount ?? 0)}
             </Descriptions.Item>
+            <Descriptions.Item label="异常">
+                {(execStat.exceptionCount ?? 0) > 0
+                    ? <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{execStat.exceptionCount}</span>
+                    : (execStat.exceptionCount ?? 0)}
+            </Descriptions.Item>
+            <Descriptions.Item label="已取消">{execStat.cancelledCount ?? 0}</Descriptions.Item>
             <Descriptions.Item label="最近执行开始">{execStat.lastBeginTime || '-'}</Descriptions.Item>
-            <Descriptions.Item label="最近执行结束">{execStat.lastEndTime || (execStat.lastBeginTime ? '运行中…' : '-')}</Descriptions.Item>
-            <Descriptions.Item label="最近执行结果">
-                {execStat.lastSuccess == null ? '-' : (execStat.lastSuccess ? <Tag color="success">成功</Tag> : <Tag color="error">失败</Tag>)}
+            <Descriptions.Item label="最近执行结束">
+                {execStat.lastEndTime || (execStat.lastStatus === 'RUNNING' ? '运行中…' : '-')}
             </Descriptions.Item>
+            <Descriptions.Item label="最近执行状态">{renderJobStatus(execStat.lastStatus)}</Descriptions.Item>
             <Descriptions.Item label="最近执行耗时">{runTimeText(execStat.lastRunTime)}</Descriptions.Item>
             <Descriptions.Item label="最近返回结果" span={2}>
                 {execStat.lastResult ? <span style={{wordBreak: 'break-all'}}>{execStat.lastResult}</span> : '-'}
@@ -302,12 +335,12 @@ export default class JobDetailPage extends React.Component {
                     <Col xs={24} md={10}>
                         <Descriptions size="small" column={2} colon>
                             <Descriptions.Item label="累计执行">
-                                {execStat ? `${execStat.totalExecuteCount ?? 0} 次` : '-'}
+                                {execStat ? `${execStat.recordCount ?? 0} 次` : '-'}
                             </Descriptions.Item>
                             <Descriptions.Item label="累计失败">
                                 {execStat
-                                    ? (execStat.totalFailCount ?? 0) > 0
-                                        ? <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{execStat.totalFailCount} 次</span>
+                                    ? failureTotal(execStat) > 0
+                                        ? <span style={{color: 'var(--oa-color-error, #ff4d4f)'}}>{failureTotal(execStat)} 次</span>
                                         : '0 次'
                                     : '-'}
                             </Descriptions.Item>

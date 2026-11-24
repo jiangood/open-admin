@@ -3,6 +3,7 @@ package io.github.jiangood.openadmin.modules.job.entity;
 import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import io.github.jiangood.openadmin.framework.data.BaseEntity;
+import io.github.jiangood.openadmin.modules.job.JobStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -10,10 +11,17 @@ import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
+/**
+ * 定时任务执行记录。
+ *
+ * <p>每次执行一行：开始时写入 {@link JobStatus#RUNNING}，结束时更新为终态。
+ * 状态是成功/失败判定的唯一依据。</p>
+ */
 @Entity
-@Table(name = "sys_job_log")
+@Table(name = "sys_job_log", indexes = {
+        @Index(name = "idx_sys_job_log_status", columnList = "status")
+})
 @Getter
 @Setter
 @FieldNameConstants
@@ -27,37 +35,25 @@ public class SysJobLog extends BaseEntity {
 
     LocalDateTime endTime;
 
+    /**
+     * 返回结果（人类可读的一句话说明）
+     */
     String result;
 
-    // 是否成功
-    Boolean success;
+    /**
+     * 执行状态
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    JobStatus status;
+
+    /**
+     * Quartz 触发实例 ID：本次执行的唯一标识，用于判断记录对应的一次执行是否仍在调度器中
+     */
+    @Column(length = 64)
+    String fireInstanceId;
 
     Long jobRunTime;
-
-    @Column(length = 10)
-    String executeDate;
-
-    /**
-     * 记录聚合桶：null 表示每次一份记录；按小时如 2026-10-19-14；按天如 2026-10-19
-     */
-    @Column(length = 20)
-    String logBucket;
-
-    /**
-     * 本周期执行次数
-     */
-    Integer executeCount;
-
-    /**
-     * 本周期失败次数
-     */
-    Integer failCount;
-
-    /**
-     * 本周期累计耗时（毫秒）
-     */
-    Long totalRunTime;
-
 
     @Transient
     public String getJobRunTimeLabel() {
@@ -65,30 +61,5 @@ public class SysJobLog extends BaseEntity {
             return DateUtil.formatBetween(jobRunTime, BetweenFormatter.Level.SECOND);
         }
         return null;
-    }
-
-    @Transient
-    public String getTotalRunTimeLabel() {
-        if (totalRunTime != null) {
-            return DateUtil.formatBetween(totalRunTime, BetweenFormatter.Level.SECOND);
-        }
-        return null;
-    }
-
-    @PrePersist
-    public void prePersist() {
-        this.executeDate = beginTime == null ? null : beginTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        if (success == null) {
-            success = true;
-        }
-        if (executeCount == null) {
-            executeCount = 1;
-        }
-        if (failCount == null) {
-            failCount = 0;
-        }
-        if (totalRunTime == null) {
-            totalRunTime = 0L;
-        }
     }
 }

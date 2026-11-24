@@ -2,6 +2,7 @@ package io.github.jiangood.openadmin.modules.system.job;
 
 import io.github.jiangood.openadmin.modules.job.BaseJob;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
+import io.github.jiangood.openadmin.modules.job.JobResult;
 import io.github.jiangood.openadmin.util.field.FieldDescription;
 import io.github.jiangood.openadmin.util.field.ValueType;
 import org.quartz.DisallowConcurrentExecution;
@@ -31,7 +32,7 @@ import java.lang.management.OperatingSystemMXBean;
 public class MemoryMonitorJob extends BaseJob {
 
     @Override
-    public String execute(JobDataMap data, Logger logger) throws Exception {
+    public JobResult execute(JobDataMap data, Logger logger) throws Exception {
         int total = readInt(data, "total", 100, 1, 10_000);
         int intervalSeconds = readInt(data, "intervalSeconds", 5, 1, 3_600);
 
@@ -43,7 +44,7 @@ public class MemoryMonitorJob extends BaseJob {
                 Thread.sleep(intervalSeconds * 1000L);
             }
         }
-        return "已打印 " + total + " 次内存使用率（间隔 " + intervalSeconds + " 秒）";
+        return JobResult.ok("已打印 " + total + " 次内存使用率（间隔 " + intervalSeconds + " 秒）");
     }
 
     /**

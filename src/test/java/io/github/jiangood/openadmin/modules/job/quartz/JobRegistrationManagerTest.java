@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.job.quartz;
 import io.github.jiangood.openadmin.modules.job.JobDefinition;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import io.github.jiangood.openadmin.modules.job.JobRegistrar;
-import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -64,7 +63,6 @@ class JobRegistrationManagerTest {
         assertEquals(AutoDisabledJob.class.getName(), saved.getJobClass());
         assertEquals("0 0 3 * * ?", saved.getCron());
         assertFalse(saved.getEnabled());
-        assertEquals(JobLogAggregation.PER_RUN, saved.getLogAggregation());
         assertEquals(1, result.scanned());
         assertEquals(1, result.registered());
     }
@@ -189,7 +187,6 @@ class JobRegistrationManagerTest {
                 .name("覆盖后的名称")
                 .cron("0 0 5 * * ?")
                 .enabled(true)
-                .logAggregation(JobLogAggregation.DAILY)
                 .build()));
         when(jobDefinitionScanner.scan()).thenReturn(List.of(AutoDisabledJob.class));
 
@@ -200,7 +197,6 @@ class JobRegistrationManagerTest {
         assertEquals("覆盖后的名称", saved.getName());
         assertEquals("0 0 5 * * ?", saved.getCron());
         assertTrue(saved.getEnabled());
-        assertEquals(JobLogAggregation.PER_RUN, saved.getLogAggregation());
     }
 
     @Test
@@ -381,8 +377,8 @@ class JobRegistrationManagerTest {
 
     static class AutoPlainBaseJob extends io.github.jiangood.openadmin.modules.job.BaseJob {
         @Override
-        public String execute(org.quartz.JobDataMap data, org.slf4j.Logger logger) {
-            return null;
+        public io.github.jiangood.openadmin.modules.job.JobResult execute(org.quartz.JobDataMap data, org.slf4j.Logger logger) {
+            return io.github.jiangood.openadmin.modules.job.JobResult.ok();
         }
     }
 }

@@ -3,6 +3,8 @@ package io.github.jiangood.openadmin.modules.system.job;
 import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import io.github.jiangood.openadmin.framework.data.JdbcRunner;
 import io.github.jiangood.openadmin.framework.enums.FileStatus;
+import io.github.jiangood.openadmin.modules.job.JobResult;
+import io.github.jiangood.openadmin.modules.job.JobStatus;
 import io.github.jiangood.openadmin.modules.system.entity.SysFile;
 import io.github.jiangood.openadmin.modules.system.repository.SysFileRepository;
 import io.github.jiangood.openadmin.modules.system.service.SysFileService;
@@ -22,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -71,17 +74,20 @@ class CleanTempFileJobTest {
         when(systemProperties.getFile()).thenReturn(new SystemProperties.FileStorage());
         when(sysFileRepository.updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class))).thenReturn(2);
         when(sysFileRepository.findByStatus(FileStatus.IN_USE)).thenReturn(List.of());
-        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(a, b), emptyPage());
+        when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(a, b), pageOf(b), emptyPage());
         when(sysFileService.deleteFileInternal(a)).thenReturn(true);
         when(sysFileService.deleteFileInternal(b)).thenReturn(false);
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository).updateStatusByStatusAndCreateTimeBefore(eq(FileStatus.TEMP), eq(FileStatus.PENDING_DELETE), any(LocalDateTime.class));
         verify(sysFileService).deleteFileInternal(a);
-        verify(sysFileService).deleteFileInternal(b);
-        assertTrue(result.contains("标记临时 2 个"));
-        assertTrue(result.contains("删除待删 1 个"));
+        // 第二轮会单独重试失败项
+        verify(sysFileService, times(2)).deleteFileInternal(b);
+        assertTrue(result.message().contains("标记临时 2 个"));
+        assertTrue(result.message().contains("删除待删 1 个"));
+        assertTrue(result.message().contains("失败 1 个"));
+        assertEquals(JobStatus.PARTIAL, result.status());
     }
 
     @Test
@@ -98,11 +104,12 @@ class CleanTempFileJobTest {
         when(sysFileService.deleteFileInternal(a)).thenReturn(true);
         when(sysFileService.deleteFileInternal(b)).thenReturn(true);
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileService).deleteFileInternal(a);
         verify(sysFileService).deleteFileInternal(b);
-        assertTrue(result.contains("删除待删 2 个"));
+        assertTrue(result.message().contains("删除待删 2 个"));
+        assertEquals(JobStatus.SUCCESS, result.status());
     }
 
     @Test
@@ -119,12 +126,13 @@ class CleanTempFileJobTest {
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(claimed), emptyPage());
         when(sysFileService.deleteFileInternal(claimed)).thenReturn(true);
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-c.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileService).deleteFileInternal(claimed);
-        assertTrue(result.contains("标记孤儿 1 个"));
-        assertTrue(result.contains("删除待删 1 个"));
+        assertTrue(result.message().contains("标记孤儿 1 个"));
+        assertTrue(result.message().contains("删除待删 1 个"));
+        assertEquals(JobStatus.SUCCESS, result.status());
     }
 
     @Test
@@ -150,12 +158,13 @@ class CleanTempFileJobTest {
         when(jdbcRunner.existsById("sys_article", "article-3")).thenReturn(false);
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-c1.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileRepository).updateStatusByObjectNames(List.of("public/202607/id-c3.jpg"), FileStatus.PENDING_DELETE);
         verify(sysFileRepository, never()).updateStatusByObjectNames(List.of("public/202607/id-c2.jpg"), FileStatus.PENDING_DELETE);
-        assertTrue(result.contains("标记孤儿 2 个"));
+        assertTrue(result.message().contains("标记孤儿 2 个"));
+        assertEquals(JobStatus.SUCCESS, result.status());
     }
 
     @Test
@@ -171,11 +180,12 @@ class CleanTempFileJobTest {
         when(jdbcRunner.existsById("sys_article", "article-1")).thenReturn(true);
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
         verify(sysFileService, never()).deleteFileInternal(any());
-        assertTrue(result.contains("标记孤儿 0 个"));
+        assertTrue(result.message().contains("标记孤儿 0 个"));
+        assertEquals(JobStatus.SUCCESS, result.status());
     }
 
     @Test
@@ -191,11 +201,13 @@ class CleanTempFileJobTest {
         when(jdbcRunner.existsById("sys_article", "article-999")).thenThrow(new RuntimeException("table not found"));
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(emptyPage());
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileRepository, never()).updateStatusByObjectNames(any(), any());
         verify(sysFileService, never()).deleteFileInternal(any());
-        assertTrue(result.contains("标记孤儿 0 个"));
+        assertTrue(result.message().contains("标记孤儿 0 个"));
+        assertTrue(result.message().contains("失败 1 个"));
+        assertEquals(JobStatus.PARTIAL, result.status());
     }
 
     @Test
@@ -210,9 +222,11 @@ class CleanTempFileJobTest {
         when(sysFileRepository.findByStatus(eq(FileStatus.PENDING_DELETE), any(Pageable.class))).thenReturn(pageOf(file), emptyPage());
         when(sysFileService.deleteFileInternal(file)).thenReturn(false);
 
-        String result = job.execute(new JobDataMap(), mock(Logger.class));
+        JobResult result = job.execute(new JobDataMap(), mock(Logger.class));
 
         verify(sysFileService).deleteFileInternal(file);
-        assertTrue(result.contains("删除待删 0 个"));
+        assertTrue(result.message().contains("删除待删 0 个"));
+        assertTrue(result.message().contains("失败 1 个"));
+        assertEquals(JobStatus.PARTIAL, result.status());
     }
 }

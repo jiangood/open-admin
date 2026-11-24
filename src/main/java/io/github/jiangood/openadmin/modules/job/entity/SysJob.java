@@ -44,10 +44,6 @@ public class SysJob extends BaseEntity {
     Map<String, Object> jobData;
     // 扩展字段
     String extraInfo;
-    // 执行记录方式：已统一为每次一份记录，保留字段以兼容存量数据
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    JobLogAggregation logAggregation;
 
 
     public SysJob() {
@@ -79,13 +75,5 @@ public class SysJob extends BaseEntity {
     @PreUpdate
     public void prePersistOrUpdate() {
         Assert.state(jobClass.endsWith(JOB_SUFFIX), "必须以" + JOB_SUFFIX + "结尾");
-        logAggregation = JobLogAggregation.PER_RUN;
-    }
-
-    /**
-     * 统一按「每次一份记录」处理
-     */
-    public JobLogAggregation getLogAggregation() {
-        return JobLogAggregation.PER_RUN;
     }
 }

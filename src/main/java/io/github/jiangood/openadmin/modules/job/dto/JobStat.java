@@ -19,12 +19,12 @@ public class JobStat {
     private long enabledCount;
 
     /**
-     * 今日执行次数（按聚合记录的 executeCount 累计）
+     * 今日执行记录数（含运行中与跳过）
      */
     private long todayExecuteCount;
 
     /**
-     * 今日失败次数
+     * 今日失败次数（部分成功 / 失败 / 异常 / 取消）
      */
     private long todayFailCount;
 

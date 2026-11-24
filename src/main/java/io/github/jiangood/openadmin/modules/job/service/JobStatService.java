@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.job.service;
 
 import cn.hutool.core.date.DateUtil;
+import io.github.jiangood.openadmin.modules.job.JobStatus;
 import io.github.jiangood.openadmin.modules.job.dto.JobExecStat;
 import io.github.jiangood.openadmin.modules.job.dto.JobStat;
 import io.github.jiangood.openadmin.modules.job.dto.LogSizeStat;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 定时任务页面顶部卡片所需的统计信息
@@ -38,8 +42,9 @@ public class JobStatService {
         stat.setEnabledCount(sysJobRepository.countByEnabled(true));
 
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
-        stat.setTodayExecuteCount(nullToZero(sysJobLogRepository.sumExecuteCountSince(todayStart)));
-        stat.setTodayFailCount(nullToZero(sysJobLogRepository.sumFailCountSince(todayStart)));
+        Map<JobStatus, Long> counts = toStatusCounts(sysJobLogRepository.countGroupByStatusSince(todayStart));
+        stat.setTodayExecuteCount(sum(counts));
+        stat.setTodayFailCount(sumFailure(counts));
 
         stat.setScheduler(schedulerInfo());
         return stat;
@@ -64,15 +69,23 @@ public class JobStatService {
      */
     public JobExecStat jobExecStat(String jobId) {
         JobExecStat stat = new JobExecStat();
-        stat.setRecordCount(sysJobLogRepository.countBySysJob_Id(jobId));
-        stat.setTotalExecuteCount(nullToZero(sysJobLogRepository.sumExecuteCountByJobId(jobId)));
-        stat.setTotalFailCount(nullToZero(sysJobLogRepository.sumFailCountByJobId(jobId)));
+        Map<JobStatus, Long> counts = toStatusCounts(sysJobLogRepository.countGroupByStatusByJobId(jobId));
+
+        stat.setRecordCount(sum(counts));
+        stat.setSuccessCount(counts.getOrDefault(JobStatus.SUCCESS, 0L));
+        stat.setPartialCount(counts.getOrDefault(JobStatus.PARTIAL, 0L));
+        stat.setSkipCount(counts.getOrDefault(JobStatus.SKIPPED, 0L));
+        stat.setFailCount(counts.getOrDefault(JobStatus.FAILED, 0L));
+        stat.setExceptionCount(counts.getOrDefault(JobStatus.EXCEPTION, 0L));
+        stat.setCancelledCount(counts.getOrDefault(JobStatus.CANCELLED, 0L));
+        stat.setRunningCount(counts.getOrDefault(JobStatus.RUNNING, 0L));
+
         sysJobLogRepository.findFirstBySysJob_IdOrderByBeginTimeDesc(jobId).ifPresent(log -> {
             stat.setLastBeginTime(formatTime(log.getBeginTime()));
             stat.setLastEndTime(formatTime(log.getEndTime()));
-            stat.setLastSuccess(log.getSuccess());
+            stat.setLastStatus(log.getStatus());
             stat.setLastResult(log.getResult());
-            stat.setLastRunTime(log.getJobRunTime() != null ? log.getJobRunTime() : log.getTotalRunTime());
+            stat.setLastRunTime(log.getJobRunTime());
         });
         return stat;
     }
@@ -101,11 +114,32 @@ public class JobStatService {
         return info;
     }
 
-    private static long nullToZero(Long value) {
-        return value == null ? 0L : value;
+    /**
+     * 把 {@code [JobStatus, Long]} 行转换为按状态的计数
+     */
+    static Map<JobStatus, Long> toStatusCounts(List<Object[]> rows) {
+        Map<JobStatus, Long> counts = new EnumMap<>(JobStatus.class);
+        if (rows == null) {
+            return counts;
+        }
+        for (Object[] row : rows) {
+            if (row == null || row.length < 2 || row[0] == null) {
+                continue;
+            }
+            counts.put((JobStatus) row[0], ((Number) row[1]).longValue());
+        }
+        return counts;
     }
 
-    private static String formatTime(java.time.LocalDateTime time) {
+    static long sum(Map<JobStatus, Long> counts) {
+        return counts.values().stream().mapToLong(Long::longValue).sum();
+    }
+
+    static long sumFailure(Map<JobStatus, Long> counts) {
+        return JobStatus.FAILURE_STATUSES.stream().mapToLong(s -> counts.getOrDefault(s, 0L)).sum();
+    }
+
+    private static String formatTime(LocalDateTime time) {
         if (time == null) {
             return null;
         }

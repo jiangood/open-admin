@@ -1,6 +1,7 @@
 package io.github.jiangood.openadmin.modules.job.quartz;
 
 import io.github.jiangood.openadmin.modules.job.BaseJob;
+import io.github.jiangood.openadmin.modules.job.JobResult;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import org.junit.jupiter.api.Test;
 import org.quartz.Job;
@@ -70,8 +71,8 @@ class JobDefinitionScannerTest {
 
     static class PlainBaseJob extends BaseJob {
         @Override
-        public String execute(JobDataMap data, Logger logger) {
-            return null;
+        public JobResult execute(JobDataMap data, Logger logger) {
+            return JobResult.ok();
         }
     }
 }

@@ -1,27 +1,53 @@
 package io.github.jiangood.openadmin.modules.job.dto;
 
+import io.github.jiangood.openadmin.modules.job.JobStatus;
 import lombok.Data;
 
 /**
- * 单个定时任务的执行统计
+ * 单个定时任务的执行统计（按状态分组计数）
  */
 @Data
 public class JobExecStat {
 
     /**
-     * 执行记录条数
+     * 执行记录总数
      */
     private long recordCount;
 
     /**
-     * 累计执行次数（聚合记录的 executeCount 之和）
+     * 成功次数
      */
-    private long totalExecuteCount;
+    private long successCount;
 
     /**
-     * 累计失败次数
+     * 部分成功次数
      */
-    private long totalFailCount;
+    private long partialCount;
+
+    /**
+     * 跳过次数
+     */
+    private long skipCount;
+
+    /**
+     * 业务失败次数
+     */
+    private long failCount;
+
+    /**
+     * 异常次数
+     */
+    private long exceptionCount;
+
+    /**
+     * 已取消次数
+     */
+    private long cancelledCount;
+
+    /**
+     * 运行中数量
+     */
+    private long runningCount;
 
     /**
      * 最近一次开始时间
@@ -34,9 +60,9 @@ public class JobExecStat {
     private String lastEndTime;
 
     /**
-     * 最近一次是否成功
+     * 最近一次状态
      */
-    private Boolean lastSuccess;
+    private JobStatus lastStatus;
 
     /**
      * 最近一次返回结果

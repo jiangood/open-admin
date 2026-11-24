@@ -1,7 +1,6 @@
 package io.github.jiangood.openadmin.modules.job;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,8 +36,6 @@ public class JobDefinition {
     private String cron;
 
     private Boolean enabled;
-
-    private JobLogAggregation logAggregation;
 
     private Map<String, Object> jobData;
 

@@ -5,7 +5,6 @@ import io.github.jiangood.openadmin.modules.job.BaseJob;
 import io.github.jiangood.openadmin.modules.job.JobDefinition;
 import io.github.jiangood.openadmin.modules.job.JobDescription;
 import io.github.jiangood.openadmin.modules.job.JobRegistrar;
-import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.repository.SysJobRepository;
 import lombok.RequiredArgsConstructor;
@@ -165,7 +164,6 @@ public class JobRegistrationManager {
                 .name(resolveLabel(description, cls))
                 .cron(description == null ? null : StrUtil.trimToNull(description.defaultCron()))
                 .enabled(description != null && description.defaultEnabled())
-                .logAggregation(description == null ? JobLogAggregation.PER_RUN : description.logAggregation())
                 .autoRegister(description == null || description.autoRegister())
                 .build();
     }
@@ -176,7 +174,6 @@ public class JobRegistrationManager {
                 .jobClass(cls)
                 .name(cls.getSimpleName())
                 .enabled(false)
-                .logAggregation(JobLogAggregation.PER_RUN)
                 .autoRegister(true)
                 .build();
     }
@@ -192,7 +189,6 @@ public class JobRegistrationManager {
                 .name(StrUtil.blankToDefault(override.getName(), base.getName()))
                 .cron(override.getCron() != null ? override.getCron() : base.getCron())
                 .enabled(override.getEnabled() != null ? override.getEnabled() : base.getEnabled())
-                .logAggregation(override.getLogAggregation() != null ? override.getLogAggregation() : base.getLogAggregation())
                 .jobData(override.getJobData() != null ? override.getJobData() : base.getJobData())
                 .extraInfo(StrUtil.isNotBlank(override.getExtraInfo()) ? override.getExtraInfo() : base.getExtraInfo())
                 .autoRegister(true)
@@ -305,8 +301,6 @@ public class JobRegistrationManager {
         job.setJobClass(jobClass);
         job.setJobData(definition.getJobData());
         job.setExtraInfo(definition.getExtraInfo());
-        job.setLogAggregation(definition.getLogAggregation() == null
-                ? JobLogAggregation.PER_RUN : definition.getLogAggregation());
 
         try {
             sysJobRepository.save(job);

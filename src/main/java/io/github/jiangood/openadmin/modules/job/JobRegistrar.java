@@ -8,7 +8,7 @@ import java.util.List;
  * <p>业务可实现该接口并注册为 Spring Bean，用于：</p>
  * <ul>
  *     <li>显式注册没有 {@link JobDescription} 的任务；</li>
- *     <li>覆盖注解中的默认 {@code name} / {@code cron} / {@code enabled} / {@code logAggregation}。</li>
+ *     <li>覆盖注解中的默认 {@code name} / {@code cron} / {@code enabled}。</li>
  * </ul>
  *
  * <p>优先级：SPI 高于注解 / 扫描结果，按 key 或执行类合并。SPI 只影响<b>新建记录</b>的默认值，

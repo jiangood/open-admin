@@ -3,7 +3,6 @@ package io.github.jiangood.openadmin.modules.job.controller;
 import io.github.jiangood.openadmin.modules.job.dto.JobStat;
 import io.github.jiangood.openadmin.modules.job.dto.LogSizeStat;
 import io.github.jiangood.openadmin.modules.job.dto.request.JobReq;
-import io.github.jiangood.openadmin.modules.job.entity.JobLogAggregation;
 import io.github.jiangood.openadmin.modules.job.entity.SysJob;
 import io.github.jiangood.openadmin.modules.job.quartz.JobRegistrationManager;
 import io.github.jiangood.openadmin.modules.job.quartz.QuartzManager;
@@ -99,20 +98,6 @@ class SysJobControllerTest {
         assertEquals("number", fields.get(0).getValueType());
         assertEquals("boolean", fields.get(1).getValueType());
         assertEquals("string", fields.get(2).getValueType());
-    }
-
-    @Test
-    void create_shouldNormalizeLogAggregationToPerRun() throws Exception {
-        JobReq req = new JobReq();
-        req.setName("job-1");
-        req.setJobClass(TestTypedJob.class.getName());
-        req.setLogAggregation(JobLogAggregation.DAILY);
-
-        controller.create(req);
-
-        org.mockito.ArgumentCaptor<SysJob> captor = org.mockito.ArgumentCaptor.forClass(SysJob.class);
-        verify(service).save(captor.capture(), org.mockito.ArgumentMatchers.isNull());
-        assertEquals(JobLogAggregation.PER_RUN, captor.getValue().getLogAggregation());
     }
 
     @Test

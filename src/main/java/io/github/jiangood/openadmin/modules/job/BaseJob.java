@@ -17,6 +17,11 @@ import java.time.ZoneId;
 @DisallowConcurrentExecution
 public abstract class BaseJob implements Job, InterruptableJob {
 
+    /**
+     * result 列默认 varchar(255)，统一截断，避免超长消息导致落库失败
+     */
+    private static final int RESULT_MAX_LENGTH = 240;
+
     @Resource
     private SysJobLogRepository sysJobLogRepository;
 
@@ -32,9 +37,8 @@ public abstract class BaseJob implements Job, InterruptableJob {
 
 
     @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
+    public void execute(JobExecutionContext context) {
         JobDataMap data = context.getMergedJobDataMap();
-
 
         String jobName = context.getJobDetail().getKey().getName();
 
@@ -48,19 +52,15 @@ public abstract class BaseJob implements Job, InterruptableJob {
         long fireTimeMillis = context.getFireTime() == null ? System.currentTimeMillis() : context.getFireTime().getTime();
         LocalDateTime fireTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(fireTimeMillis), ZoneId.systemDefault());
 
-        SysJobLog jobLog = acquireLog(job, fireTime);
+        SysJobLog jobLog = acquireLog(job, fireTime, context.getFireInstanceId());
 
         String previousLogKey = TaskLog.bind(JobLogPermissionProvider.KEY_PREFIX + "/" + jobLog.getId());
         Logger logger = TaskLog.logger();
-        if (jobLog.getLogBucket() != null) {
-            int nextRun = (jobLog.getExecuteCount() == null ? 0 : jobLog.getExecuteCount()) + 1;
-            logger.info("===== 第 {} 次执行 =====", nextRun);
-        }
         logger.info("开始执行操作");
 
         long startMillis = System.currentTimeMillis();
-        String result = null;
-        boolean success = true;
+        JobResult result = null;
+        Error fatal = null;
         executingThread = Thread.currentThread();
         try {
             result = this.execute(data, logger);
@@ -68,54 +68,80 @@ public abstract class BaseJob implements Job, InterruptableJob {
             // 管理端取消：Quartz 中断执行线程后，任务以 InterruptedException 结束
             Thread.currentThread().interrupt();
             logger.warn("任务已被取消执行");
-            result = "已取消";
-            success = false;
-        } catch (Exception e) {
+            result = new JobResult(JobStatus.CANCELLED, "已取消");
+        } catch (Throwable e) {
             logger.error("任务执行异常", e);
-            result = "异常" + e.getMessage();
-            success = false;
+            result = new JobResult(JobStatus.EXCEPTION, errorMessage(e));
+            if (e instanceof Error error) {
+                // Error（如 OOM）记录后继续向上抛出，交给 Quartz / 容器处理
+                fatal = error;
+            }
         } finally {
             executingThread = null;
             try {
-                if (result == null) {
-                    result = "任务异常终止";
-                    success = false;
-                }
-                finishLog(jobLog, success, result, System.currentTimeMillis() - startMillis);
-                logger.info("执行结束 返回值{}", result);
+                finishLog(jobLog, normalize(result), System.currentTimeMillis() - startMillis, logger);
             } finally {
                 TaskLog.unbind(previousLogKey);
             }
         }
+
+        if (fatal != null) {
+            throw fatal;
+        }
     }
 
     /**
-     * 获取本次执行要写入的执行记录：每次执行新建一条记录，日志文件为 job/{logId}.log。
+     * 获取本次执行要写入的执行记录：每次执行新建一条记录，先落 RUNNING，结束时更新为终态。
      */
-    private SysJobLog acquireLog(SysJob job, LocalDateTime fireTime) {
+    private SysJobLog acquireLog(SysJob job, LocalDateTime fireTime, String fireInstanceId) {
         SysJobLog jobLog = new SysJobLog();
         jobLog.setSysJob(job);
-        jobLog.setLogBucket(null);
+        jobLog.setStatus(JobStatus.RUNNING);
+        jobLog.setFireInstanceId(fireInstanceId);
         jobLog.setBeginTime(fireTime);
-        jobLog.setExecuteCount(0);
-        jobLog.setFailCount(0);
-        jobLog.setTotalRunTime(0L);
         return sysJobLogRepository.save(jobLog);
     }
 
-    private void finishLog(SysJobLog jobLog, boolean success, String result, long duration) {
-        int count = (jobLog.getExecuteCount() == null ? 0 : jobLog.getExecuteCount()) + 1;
-        int failed = (jobLog.getFailCount() == null ? 0 : jobLog.getFailCount()) + (success ? 0 : 1);
-        long total = (jobLog.getTotalRunTime() == null ? 0 : jobLog.getTotalRunTime()) + duration;
+    private void finishLog(SysJobLog jobLog, JobResult result, long duration, Logger logger) {
+        try {
+            jobLog.setStatus(result.status());
+            jobLog.setResult(result.message());
+            jobLog.setJobRunTime(duration);
+            jobLog.setEndTime(LocalDateTime.now(ZoneId.systemDefault()));
+            sysJobLogRepository.save(jobLog);
+            logger.info("执行结束 状态{} 返回值{}", result.status().getLabel(), result.message());
+        } catch (Exception e) {
+            // 执行记录写入失败不应反转任务本身的结论
+            logger.error("保存任务执行记录失败", e);
+        }
+    }
 
-        jobLog.setExecuteCount(count);
-        jobLog.setFailCount(failed);
-        jobLog.setTotalRunTime(total);
-        jobLog.setSuccess(failed == 0);
-        jobLog.setJobRunTime(duration);
-        jobLog.setResult(result);
-        jobLog.setEndTime(LocalDateTime.now(ZoneId.systemDefault()));
-        sysJobLogRepository.save(jobLog);
+    /**
+     * 规范任务返回值：空结果、缺状态、返回 RUNNING 都按异常处理；空文案用状态中文名兜底
+     */
+    private static JobResult normalize(JobResult result) {
+        if (result == null) {
+            return new JobResult(JobStatus.EXCEPTION, "任务执行完成但未返回结果");
+        }
+        if (result.status() == null) {
+            return new JobResult(JobStatus.EXCEPTION, "返回结果缺少状态");
+        }
+        if (result.status() == JobStatus.RUNNING) {
+            return new JobResult(JobStatus.EXCEPTION, "任务不能返回运行中状态");
+        }
+        String message = result.message();
+        if (message == null || message.isBlank()) {
+            message = result.status().getLabel();
+        }
+        if (message.length() > RESULT_MAX_LENGTH) {
+            message = message.substring(0, RESULT_MAX_LENGTH);
+        }
+        return new JobResult(result.status(), message);
+    }
+
+    private static String errorMessage(Throwable e) {
+        String message = e.getMessage();
+        return (message == null || message.isBlank()) ? e.getClass().getSimpleName() : message;
     }
 
     /**
@@ -132,5 +158,5 @@ public abstract class BaseJob implements Job, InterruptableJob {
         }
     }
 
-    public abstract String execute(JobDataMap data, Logger logger) throws Exception;
+    public abstract JobResult execute(JobDataMap data, Logger logger) throws Exception;
 }
