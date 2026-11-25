@@ -35,6 +35,48 @@
       flex-shrink: 0;
     }
 
+    /* 顶部菜单模式的一级菜单：过多时横向滚动，避免被裁切 */
+    .top-nav {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      margin: 0;
+      height: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: none;
+
+      &::-webkit-scrollbar {
+        height: 0;
+      }
+
+      .top-nav-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0 16px;
+        height: 100%;
+        cursor: pointer;
+        color: var(--oa-color-text-secondary, rgba(0, 0, 0, 0.65));
+        transition: color 0.2s;
+        white-space: nowrap;
+        background: none;
+        border: none;
+        font: inherit;
+
+        &:hover {
+          /* hover 只给底色，主色保留给当前项，避免悬停项比 active 更抢眼 */
+          color: var(--oa-color-text, rgba(0, 0, 0, 0.88));
+          background: var(--oa-color-fill, rgba(0, 0, 0, 0.06));
+        }
+
+        &.active {
+          color: var(--primary-color, #1677ff);
+        }
+      }
+    }
+
     /* headerExtra 容器：给业务稳定的样式钩子，内部溢出省略才能生效 */
     .header-extra {
       display: flex;
@@ -44,6 +86,11 @@
 
     /* 让 headerExtra 吃掉顶栏剩余空间（opt-in，默认不生效） */
     &.has-stretch-extra {
+      .top-nav {
+        /* 菜单按内容宽排布，过多时仍可收缩横向滚动 */
+        flex: 0 1 auto;
+      }
+
       .header-extra {
         flex: 1 1 auto;
       }
@@ -54,7 +101,7 @@
       display: flex;
       align-items: center;
       flex-shrink: 0;
-      /* 顶部菜单已移除，确保右侧控件仍靠右 */
+      /* 顶部菜单模式下菜单已占用剩余空间；侧边模式下确保右侧控件仍靠右 */
       margin-left: auto;
     }
 
@@ -184,6 +231,11 @@
   /* 手机端左上角显示汉堡按钮，点击展开抽屉菜单 */
   .main-layout .header .mobile-menu-trigger {
     display: inline-flex;
+  }
+
+  /* 手机端固定抽屉导航，不显示顶部横向一级菜单 */
+  .main-layout .header .top-nav {
+    display: none;
   }
 
   /* 手机端右上角只保留明暗主题切换和头像，其余入口隐藏 */

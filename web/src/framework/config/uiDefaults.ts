@@ -1,9 +1,11 @@
 import { setDefaultThemePreset } from './themeConfig';
 import { setDefaultLayoutMode } from './layoutConfig';
+import { setDefaultMenuMode } from './menuConfig';
 
 /** 系统参数中「默认界面」分组的配置键 */
 export const UI_THEME_PRESET_KEY = 'sys.ui.theme-preset';
 export const UI_TABS_ENABLED_KEY = 'sys.ui.tabs-enabled';
+export const UI_MENU_MODE_KEY = 'sys.ui.menu-mode';
 
 /**
  * 应用后端下发的全局默认界面配置（来自 site-info.config）。
@@ -22,5 +24,10 @@ export function applyServerUiDefaults(config?: Record<string, unknown> | null) {
     const tabsEnabled = config[UI_TABS_ENABLED_KEY];
     if (typeof tabsEnabled === 'boolean') {
         setDefaultLayoutMode(tabsEnabled ? 'tabs' : 'single');
+    }
+
+    const menuMode = config[UI_MENU_MODE_KEY];
+    if (menuMode === 'side' || menuMode === 'top') {
+        setDefaultMenuMode(menuMode);
     }
 }

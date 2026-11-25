@@ -110,6 +110,7 @@
 | 站点信息 | `sys.login-box-bottom-tip` | STRING | 空 | 登录框底部提示文案 |
 | 默认界面 | `sys.ui.theme-preset` | SELECT | `antd` | 未自定义用户的默认主题色预设 |
 | 默认界面 | `sys.ui.tabs-enabled` | BOOL | true | 页签模式，关闭为单页模式 |
+| 默认界面 | `sys.ui.menu-mode` | SELECT | `top` | 菜单模式：`side` 侧边菜单 / `top` 顶部菜单 |
 | 邮件发送 | `email.provider` | SELECT | 空 | 邮箱类型，决定 SMTP 服务器/端口/加密方式 |
 | 邮件发送 | `email.username` | STRING | 空 | 发件邮箱 |
 | 邮件发送 | `email.password` | STRING（敏感） | 空 | 授权码/应用专用密码，留空表示不修改 |
@@ -368,7 +369,7 @@ docker run -d --name rustfs -p 9000:9000 -p 9001:9001 \
 
 ## 主题定制
 
-框架默认回归 **antd 原生主题**（主色 `#1677ff`、侧栏 `#001529`、圆角 `6`），零配置即用。顶栏右侧的太阳/月亮图标可一键切换深色/浅色模式；调色板按钮可打开「界面设置」面板，内置多套预设主题，并可按需调整界面密度与圆角，选择后即时生效并持久化到 `localStorage`。页签模式（开启 / 关闭）由顶栏独立的切换按钮控制，关闭即单页模式。
+框架默认回归 **antd 原生主题**（主色 `#1677ff`、侧栏 `#001529`、圆角 `6`），零配置即用。顶栏右侧的太阳/月亮图标可一键切换深色/浅色模式；调色板按钮可打开「界面设置」面板，可调整页签模式、菜单模式、预设主题、界面密度与圆角，选择后即时生效并持久化到 `localStorage`。
 
 ### 预设主题
 
@@ -469,7 +470,7 @@ applyRadiusPreset('round');
 
 页签模式默认开启（`tabs`），可切换为单页模式（`single`）。单页模式不显示页签栏，仅渲染当前路由页面。持久化在 `localStorage` 的 `oa-layout-tabs`。
 
-顶栏右侧的切换图标显示切换后的目标模式：页签模式下显示单页图标，单页模式下显示页签图标。
+切换入口在顶栏「界面设置」面板的「布局模式」中。
 
 ```js
 import { getLayoutMode, setLayoutMode, toggleLayoutMode } from '@jiangood/open-admin';
@@ -482,7 +483,28 @@ toggleLayoutMode();
 - 页签模式切换通过 `EventBus` 的 `layoutChange` 事件广播，管理布局已内置监听并重渲染。
 - 单页模式下业务调用 `PageUtils.closeCurrent()` 不再关闭页面（无页签可关），由业务自行跳转。
 
-### 全局默认主题色与页签模式
+### 菜单模式
+
+菜单模式默认 `top`（顶部菜单），可切换为 `side`（侧边菜单）。持久化在 `localStorage` 的 `oa-menu-mode`。
+
+| 模式 | 桌面端 | 手机端（≤768px） |
+|------|--------|------------------|
+| `top` | 顶栏显示一级目录，左侧显示当前一级菜单的子菜单 | 固定汉堡抽屉 + 完整菜单树 |
+| `side` | 左侧直接渲染完整菜单树 | 固定汉堡抽屉 + 完整菜单树 |
+
+- **默认目录**：顶部模式下，根级叶子菜单（未设置 `pid`）会自动归入虚拟一级菜单「业务模块」，避免顶栏一级菜单过多；该虚拟节点仅前端展示，不落库。根级分隔线在顶部模式下忽略。
+- **移动端**：固定使用抽屉导航，菜单模式只影响桌面端；在手机端修改后，回到桌面端生效。
+- 菜单模式切换通过 `EventBus` 的 `menuModeChange` 事件广播，管理布局已内置监听并重渲染。
+- 切换一级菜单时，若当前页面不属于新菜单，左侧不再高亮；打开页面、快捷菜单跳转、浏览器前进/后退会自动定位所属一级菜单。
+
+```js
+import { getMenuMode, setMenuMode } from '@jiangood/open-admin';
+
+getMenuMode();                // 'side' | 'top'
+setMenuMode('side');
+```
+
+### 全局默认主题色、页签模式与菜单模式
 
 管理员可在「系统管理 → 系统参数 → 默认界面」中维护未自定义用户的默认值，保存后立即生效：
 
@@ -490,21 +512,23 @@ toggleLayoutMode();
 |-----|------|------|------|
 | `sys.ui.theme-preset` | select | `antd` | 默认主题色预设，可选值与上方「预设主题」一致 |
 | `sys.ui.tabs-enabled` | bool | `true` | `true` 开启页签模式，`false` 为单页模式 |
+| `sys.ui.menu-mode` | select | `top` | `top` 顶部菜单 / `side` 侧边菜单 |
 
-- **优先级**：用户在本地自定义的 `oa-theme-preset` / `oa-layout-tabs` 高于系统参数；已自定义用户不受默认值变更影响。
-- 两项均声明为 `publicVisible`，随 `/admin/public/site-info` 的 `config` 字段下发，前端在后台布局渲染前应用，避免闪一下默认样式。
-- 业务侧可通过 `applyServerUiDefaults(siteInfo.config)` 手动应用，或用 `getDefaultPresetKey()` / `getDefaultLayoutMode()` 读取当前全局默认。
+- **优先级**：用户在本地自定义的 `oa-theme-preset` / `oa-layout-tabs` / `oa-menu-mode` 高于系统参数；已自定义用户不受默认值变更影响。
+- 三项均声明为 `publicVisible`，随 `/admin/public/site-info` 的 `config` 字段下发，前端在后台布局渲染前应用，避免闪一下默认样式。
+- 业务侧可通过 `applyServerUiDefaults(siteInfo.config)` 手动应用，或用 `getDefaultPresetKey()` / `getDefaultLayoutMode()` / `getDefaultMenuMode()` 读取当前全局默认。
 
 ### 恢复默认
 
-「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 页签模式），其中主题色与页签模式回到系统参数的全局默认。
+「界面设置」面板底部的「恢复默认」会一次性复位全部界面设置（颜色 / 明暗 / 密度 / 圆角 / 页签模式 / 菜单模式），其中主题色、页签模式与菜单模式回到系统参数的全局默认。
 
 ```js
-import { resetAllSettings, resetUserTheme, resetLayoutMode } from '@jiangood/open-admin';
+import { resetAllSettings, resetUserTheme, resetLayoutMode, resetMenuMode } from '@jiangood/open-admin';
 
-resetAllSettings();   // 主题 + 页签模式 全复位
+resetAllSettings();   // 主题 + 页签模式 + 菜单模式 全复位
 resetUserTheme();     // 仅主题（颜色/明暗/密度/圆角）
 resetLayoutMode();    // 仅页签模式
+resetMenuMode();      // 仅菜单模式
 ```
 
 尺寸与圆角相关的 CSS 变量：`--oa-border-radius`、`--oa-control-height`、`--oa-font-size`，自定义样式可复用它们以跟随密度/圆角预设。

@@ -72,7 +72,7 @@ export class HeaderRight extends React.Component {
 
     renderThemeSettings = () => {
         return (
-            <button type="button" className='item pc-only' title="界面设置" aria-label="界面设置"
+            <button type="button" className='item' title="界面设置" aria-label="界面设置"
                     onClick={() => this.setState({themeSettingsVisible: true})}>
                 <BgColorsOutlined/>
             </button>

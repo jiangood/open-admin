@@ -41,16 +41,30 @@ export {
 export type { LayoutMode } from './layoutConfig'
 
 export {
+    getMenuMode,
+    getDefaultMenuMode,
+    setMenuMode,
+    setDefaultMenuMode,
+    resetMenuMode,
+    hasStoredMenuMode,
+    DEFAULT_MENU_MODE,
+} from './menuConfig'
+export type { MenuMode } from './menuConfig'
+
+export {
     applyServerUiDefaults,
     UI_THEME_PRESET_KEY,
     UI_TABS_ENABLED_KEY,
+    UI_MENU_MODE_KEY,
 } from './uiDefaults'
 
 import { resetUserTheme } from './themeConfig'
 import { resetLayoutMode } from './layoutConfig'
+import { resetMenuMode } from './menuConfig'
 
-/** 一键恢复全部界面设置：主题（颜色/明暗/密度/圆角）+ 布局 */
+/** 一键恢复全部界面设置：主题（颜色/明暗/密度/圆角）+ 布局 + 菜单模式 */
 export function resetAllSettings() {
     resetUserTheme()
     resetLayoutMode()
+    resetMenuMode()
 }

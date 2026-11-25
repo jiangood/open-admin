@@ -16,8 +16,10 @@ import {
     getActiveRadiusKey,
     getLayoutMode,
     setLayoutMode,
+    getMenuMode,
+    setMenuMode,
 } from '../../config';
-import type { ThemeDensity, ThemeRadius, LayoutMode } from '../../config';
+import type { ThemeDensity, ThemeRadius, LayoutMode, MenuMode } from '../../config';
 import { EventBus } from '../../utils/EventBus';
 
 export interface ThemeSettingsProps {
@@ -30,7 +32,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * 界面设置面板：布局模式、主题色、界面密度、圆角。
+ * 界面设置面板：布局模式、菜单模式、主题色、界面密度、圆角。
  * 明暗模式由顶栏的太阳/月亮按钮切换，此处不再重复提供。
  * 所有变更即时生效并持久化到 localStorage。
  */
@@ -39,6 +41,7 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
     const [density, setDensity] = React.useState<ThemeDensity>(getActiveDensityKey());
     const [radius, setRadius] = React.useState<ThemeRadius>(getActiveRadiusKey());
     const [layoutMode, setLayoutModeState] = React.useState<LayoutMode>(getLayoutMode());
+    const [menuMode, setMenuModeState] = React.useState<MenuMode>(getMenuMode());
 
     React.useEffect(() => {
         const offTheme = EventBus.on('themeChange', () => {
@@ -49,9 +52,13 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
         const offLayout = EventBus.on('layoutChange', () => {
             setLayoutModeState(getLayoutMode());
         });
+        const offMenu = EventBus.on('menuModeChange', () => {
+            setMenuModeState(getMenuMode());
+        });
         return () => {
             offTheme();
             offLayout();
+            offMenu();
         };
     }, []);
 
@@ -59,7 +66,7 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
         (RADIUS_PRESETS.find(p => p.key === key)?.token.borderRadius as number) ?? 6;
 
     return (
-        <Drawer title="界面设置" open={open} onClose={onClose} size={340}>
+        <Drawer title="界面设置" open={open} onClose={onClose} size="min(340px, 100vw)">
             <div style={{ fontWeight: 600 }}>布局模式</div>
             <Segmented
                 block
@@ -73,6 +80,20 @@ export function ThemeSettings({ open, onClose }: ThemeSettingsProps) {
             />
             <div style={{ marginTop: 8, fontSize: 12, color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.45))' }}>
                 页签模式可同时打开多个页面；单页模式仅显示当前页面。
+            </div>
+
+            <SectionTitle>菜单模式</SectionTitle>
+            <Segmented
+                block
+                value={menuMode}
+                onChange={value => setMenuMode(value as MenuMode)}
+                options={[
+                    { label: '顶部菜单', value: 'top' },
+                    { label: '侧边菜单', value: 'side' },
+                ]}
+            />
+            <div style={{ marginTop: 8, fontSize: 12, color: 'var(--oa-color-text-secondary, rgba(0, 0, 0, 0.45))' }}>
+                顶部菜单会将一级目录显示在顶栏，根级无目录菜单归入「业务模块」；移动端固定使用抽屉导航，此设置影响桌面端。
             </div>
 
             <SectionTitle>主题色</SectionTitle>

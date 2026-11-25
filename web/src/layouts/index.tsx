@@ -21,7 +21,7 @@ const baseConfigProps = {
 };
 
 export interface HeaderExtraContext {
-    /** 框架已移除顶部菜单，此字段恒为 null，保留以兼容业务项目旧签名 */
+    /** 当前激活的顶部一级菜单；侧边菜单模式或移动端为 null（默认顶部菜单模式下通常非 null，使用前请判空） */
     activeTopMenu: { key: string; label: string } | null;
     loginInfo: { id: string; name: string; account: string };
 }

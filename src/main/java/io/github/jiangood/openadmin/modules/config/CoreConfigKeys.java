@@ -35,6 +35,11 @@ public final class CoreConfigKeys {
      */
     public static final String UI_TABS_ENABLED = "sys.ui.tabs-enabled";
 
+    /**
+     * 默认菜单模式：side 侧边菜单 / top 顶部菜单
+     */
+    public static final String UI_MENU_MODE = "sys.ui.menu-mode";
+
     private CoreConfigKeys() {
     }
 }
