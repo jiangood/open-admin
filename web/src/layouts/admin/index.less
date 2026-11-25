@@ -119,12 +119,22 @@
     display: flex;
     flex-direction: column;
 
+    /* antd Sider 会在内部多包一层 .ant-layout-sider-children，
+       flex 只作用于它自身；把它也设为纵向 flex 容器，
+       .left-menu 的 flex:1 + overflow:auto 才能真正生效（菜单过多时可滚动） */
+    .ant-layout-sider-children {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
     .sider-header {
       display: flex;
       align-items: center;
       gap: 8px;
       /* 与顶栏同高对齐 */
       height: 48px;
+      flex-shrink: 0;
       padding: 0 16px;
       /* 底边线：与右侧顶栏/标签栏分隔线连成一线；色值由侧栏文字变量派生，避免硬编码 */
       border-bottom: 1px solid color-mix(in srgb, var(--oa-sider-text, rgba(255, 255, 255, 0.85)) 14%, transparent);
@@ -196,6 +206,7 @@
 
     .left-menu {
       flex: 1;
+      min-height: 0;
       overflow: auto;
       scrollbar-width: thin;
       scrollbar-color: unset;
@@ -318,6 +329,7 @@
 
   .left-menu {
     flex: 1;
+    min-height: 0;
     overflow: auto;
     scrollbar-width: thin;
   }
