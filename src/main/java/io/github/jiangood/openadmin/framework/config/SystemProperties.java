@@ -73,9 +73,9 @@ public class SystemProperties {
     private List<String> xssExcludePathList;
     private List<String> loginExcludePathPatterns;
     /**
-     * 缓存目录
+     * 数据根目录（约定不带结尾斜杠），会话落盘、日志、上传文件均在其下派生
      */
-    private String dataFileDir = "/data/";
+    private String dataDir = "/data";
     /**
      * session空闲时间（分钟），超过该时间则登录失效
      */

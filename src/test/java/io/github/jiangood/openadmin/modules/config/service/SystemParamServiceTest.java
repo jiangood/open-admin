@@ -43,7 +43,7 @@ class SystemParamServiceTest {
         properties.setSessionIdleTime(120);
         properties.setLoginLockMaxAttempts(5);
         properties.setLoginLockMinutes(10);
-        properties.setDataFileDir("/data/open-admin");
+        properties.setDataDir("/data/open-admin");
 
         SystemProperties.FileStorage file = new SystemProperties.FileStorage();
         file.setStoreType(SystemProperties.FileStorage.StoreType.S3);
@@ -72,7 +72,7 @@ class SystemParamServiceTest {
         assertEquals("S3 对象存储", valueOf(items, "sys.file.store-type"));
         assertEquals("/data/upload", valueOf(items, "sys.file.upload-path"));
         assertEquals("60 分钟", valueOf(items, "sys.file.clean-temp-minutes"));
-        assertEquals("/data/open-admin", valueOf(items, "sys.data-file-dir"));
+        assertEquals("/data/open-admin", valueOf(items, "sys.data-dir"));
         assertEquals("/data/logs", valueOf(items, "logging.file.path"));
     }
 

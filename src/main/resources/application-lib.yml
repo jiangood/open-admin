@@ -17,9 +17,10 @@ server:
       timeout: "${sys.session-idle-time:180}m"
       # 优雅停机时把 session 写入 store-dir，启动时恢复，实现重启免登录。
       # 仅对单实例、正常停机有效；kill -9 / 崩溃 / 多实例请改用 Spring Session。
-      # 未挂载 /data 的业务项目请覆盖 store-dir，或设置 persistent: false 关闭。
+      # 目录由 sys.data-dir 派生（无尾斜杠，避免拼出 /datasession 这类路径）；
+      # 换挂载点只改 sys.data-dir，未挂载 /data 时可设 persistent: false 关闭落盘。
       persistent: true
-      store-dir: /data/session
+      store-dir: "${sys.data-dir}/session"
 
 spring:
   autoconfigure:
@@ -47,8 +48,11 @@ spring:
     locale: zh_CN
 
 sys:
+  # 数据根目录（约定不带结尾斜杠）：会话落盘、日志、上传文件都在其下派生。
+  # 换数据卷/挂载点时只改这一项即可；派生项仍可在业务项目中单独覆盖。
+  data-dir: /data
   file:
-    upload-path: /data/upload
+    upload-path: "${sys.data-dir}/upload"
   codegen:
     backend-dir: src/main/java
     resource-dir: src/main/resources
@@ -57,7 +61,7 @@ sys:
 
 logging:
   file:
-    path: /data/logs
+    path: "${sys.data-dir}/logs"
   level:
     io.github.jiangood: info
   pattern:

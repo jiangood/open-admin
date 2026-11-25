@@ -15,7 +15,8 @@ public class SysBanner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         log.info("======================================================================");
-        log.info("系统数据目录 {}", systemProperties.getDataFileDir());
+        log.info("系统数据目录 {}", systemProperties.getDataDir());
+        log.info("会话落盘、日志、上传文件均位于该目录下（由 sys.data-dir 派生）。");
         log.info("如果使用容器部署，建议将该目录持久化。");
         log.info("======================================================================");
     }

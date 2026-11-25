@@ -9,19 +9,20 @@
 | `sys.title` | 系统标题（必填），可在系统参数页覆盖 | 管理系统 |
 | `sys.short-title` | 系统简称，用于左侧菜单顶部与浏览器标题等空间受限处；留空则使用 `sys.title`，可在系统参数页覆盖 | 空 |
 | `sys.file.store-type` | 文件存储 (`LOCAL`/`S3`) | LOCAL |
-| `sys.file.upload-path` | 本地上传路径 | /home/files |
+| `sys.file.upload-path` | 本地上传路径，默认由 `sys.data-dir` 派生 | ${sys.data-dir}/upload |
 | `sys.file.clean-temp-minutes` | 临时文件自动清理时间（分钟） | 120 |
 | `sys.file.s3.*` | S3 对象存储配置 | — |
-| `sys.data-file-dir` | 缓存 / 数据目录 | /data/ |
+| `sys.data-dir` | 数据根目录（**不带结尾斜杠**）：会话落盘、日志、上传文件均在其下派生；换挂载点只改这一项 | /data |
 | `sys.session-idle-time` | Session 超时（分钟），通过 `server.servlet.session.timeout` 生效 | 180 |
 | `sys.login-lock-minutes` | 登录锁定时长（分钟） | 5 |
 | `sys.login-lock-max-attempts` | 登录异常最大次数，超过则锁定 | 10 |
 | `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时按 `sys.max-sessions-prevents-login` 处理 | 1 |
 | `sys.max-sessions-prevents-login` | 并发会话数超限时是否阻止新登录：`true` 阻止新登录（旧会话继续有效），`false` 踢出旧会话 | true |
 | `server.servlet.session.persistent` | 优雅停机时把登录会话落盘，重启后恢复（重启免登录） | true |
-| `server.servlet.session.store-dir` | 会话落盘目录，需可写并位于持久卷 | /data/session |
+| `server.servlet.session.store-dir` | 会话落盘目录，由 `sys.data-dir` 派生，需可写并位于持久卷 | ${sys.data-dir}/session |
 | `server.servlet.session.timeout` | 会话空闲超时，默认引用 `sys.session-idle-time` | 180m |
 | `server.servlet.session.cookie.name` | 会话 cookie 名；同一域名/IP 下部署多套应用时必须各不相同 | JSESSIONID |
+| `logging.file.path` | 文件日志目录，由 `sys.data-dir` 派生 | ${sys.data-dir}/logs |
 | `sys.concurrent-login-message` | 被并发登录顶下线或管理员强制下线时的提示文案 | 您的账号已在别处登录，请重新登录 |
 | `sys.concurrent-login-blocked-message` | 并发会话超限、新登录被阻止时的提示文案 | 该账号已在别处登录，请先退出后再登录 |
 | `sys.login-expired-message` | 会话空闲超时/未登录时的提示文案（经 `/admin/public/site-info` 下发给前端） | 登录已过期，请重新登录 |
@@ -36,7 +37,9 @@
 
 > 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-upgrade-docs` skill 按 `docs/framework-sync.json` 清单，从对应 tag 源码归档同步到业务项目根目录（无需配置）。同步范围与规则以清单为准。
 
-> **会话落盘（重启免登录）**：框架默认开启 `server.servlet.session.persistent`，正常停机时把 `HttpSession` 写入 `server.servlet.session.store-dir`，启动后恢复。仅对**单实例、优雅停机**有效：`kill -9`、JVM 崩溃、断电不会保留会话；多实例请改用 Spring Session 等共享会话方案。首次升级启动时旧的内存会话已丢失，所有用户需重新登录一次，之后正常重启不再需要。session 中的自定义属性必须可序列化；未挂载 `/data` 的项目请覆盖 `store-dir`，或设置 `persistent: false` 关闭。
+> **数据目录只配一个开关**：会话落盘（`${sys.data-dir}/session`）、日志（`${sys.data-dir}/logs`）、上传文件（`${sys.data-dir}/upload`）都从 `sys.data-dir` 派生，它是**不带结尾斜杠**的根目录。换挂载点/数据卷时只改 `sys.data-dir` 即可，不要在结尾加 `/`（否则会拼出 `/data//session` 之类的路径）。需要单独指定某项时，在业务项目里覆盖对应的派生项（如 `server.servlet.session.store-dir`）。
+
+> **会话落盘（重启免登录）**：框架默认开启 `server.servlet.session.persistent`，正常停机时把 `HttpSession` 写入 `server.servlet.session.store-dir`，启动后恢复。仅对**单实例、优雅停机**有效：`kill -9`、JVM 崩溃、断电不会保留会话；多实例请改用 Spring Session 等共享会话方案。首次升级启动时旧的内存会话已丢失，所有用户需重新登录一次，之后正常重启不再需要。session 中的自定义属性必须可序列化；未挂载 `/data` 的项目请覆盖 `sys.data-dir`，或设置 `persistent: false` 关闭。
 
 > **容器部署需调大停机宽限**：会话是在停机**最后一步**（Web 容器停止时）才写入 `store-dir`，而 `docker stop` / `docker compose up -d` 默认只等 10 秒（部分环境更短），超时即 SIGKILL，会话一个字节都写不出去。应用停机还要等 Lifecycle bean（线程池 `awaitTermination` 等）和 graceful 停机（默认最多 30 秒），所以请在 compose 里显式设置 `stop_grace_period: 60s`（或 `docker stop -t 60`）。判断方法：`docker inspect <容器> --format '{{.State.ExitCode}}'`，**137 表示被 SIGKILL**，143 才是正常退出。
 
@@ -92,7 +95,7 @@
 | 文件存储方式 | `sys.file.store-type` | 本地存储 / S3 对象存储 |
 | 上传目录 | `sys.file.upload-path` | 本地上传路径 |
 | 临时文件清理 | `sys.file.clean-temp-minutes` | 单位分钟 |
-| 数据目录 | `sys.data-file-dir` | 缓存 / 数据目录 |
+| 数据目录 | `sys.data-dir` | 数据根目录；会话、日志、上传文件在其下派生 |
 | 日志目录 | `logging.file.path` | 文件日志目录 |
 
 > 只读卡片不返回 S3 密钥、邮箱授权码、代理密码等敏感值，JDBC URL 中的密码同样脱敏；除运行时长、连接池用量、版本信息外，其余项都是启动期配置，改完需重启。

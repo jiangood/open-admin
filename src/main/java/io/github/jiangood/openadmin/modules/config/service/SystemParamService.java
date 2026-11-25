@@ -76,8 +76,8 @@ public class SystemParamService {
                 blankToDash(file.getUploadPath()));
         add(items, SystemParamView.GROUP_STARTUP, "sys.file.clean-temp-minutes", "临时文件清理",
                 file.getCleanTempMinutes() + " 分钟");
-        add(items, SystemParamView.GROUP_STARTUP, "sys.data-file-dir", "数据目录",
-                blankToDash(systemProperties.getDataFileDir()));
+        add(items, SystemParamView.GROUP_STARTUP, "sys.data-dir", "数据目录",
+                blankToDash(systemProperties.getDataDir()));
         add(items, SystemParamView.GROUP_STARTUP, "logging.file.path", "日志目录",
                 blankToDash(environment.getProperty("logging.file.path")));
         // 版本信息：系统版本在前（部署方最关心自己的项目），打包运行附带构建时间，开发模式只有版本号
