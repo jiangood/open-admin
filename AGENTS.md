@@ -32,12 +32,13 @@ Maven Central 自 **2026-10-01** 起按组织统计每月发布额度，超限�
 - 每个自然月最多 **7 个 release**（组织级，可能包含多个 namespace）
 - 同时限制文件数 **1,167 个/月**、发布体积 **78 MB/月**
 - 超限进入 30 天宽限期；宽限期结束后，会拒绝继续推高该指标的新 release
-- 发版前必须登录 [Usage Center](https://central.sonatype.com/publishing/usage) 确认当月用量
+- 正式发版前必须登录 [Usage Center](https://central.sonatype.com/publishing/usage) 确认当月用量
+- 快照（`-SNAPSHOT`）发布**不计入**上述发布额度；只有正式 release 才占用 release 数、文件数和体积
 - 不要只按本地 git tag 数判断：失败的发布也会留下 tag，但仍以 Usage Center 为准
 - 同一自然月内合并改动，避免为小修复连续发版
 - 发布失败不要重复打同一个版本 tag（Central 版本不可变），修好后用下一个版本号
 - 紧急安全修复先联系 `central-support@sonatype.com`，不要直接硬发
-- 仅需联调验证时优先用快照通道（`release.mjs --snapshot`），它与正式 release 的发布流程分开；快照的用量/统计仍以 Usage Center 为准
+- 仅需联调验证时优先用快照通道（`release.mjs --snapshot`），它与正式 release 的发布流程分开；快照不计入发布额度，可放心多次发布验证
 
 官方说明：<https://central.sonatype.org/publish/maven-central-publishing-limits>
 
@@ -56,7 +57,7 @@ node scripts/release.mjs 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4
 node scripts/release.mjs 3.4.0-SNAPSHOT         # 同上
 ```
 
-快照 tag 为 `snapshot-v<version>-<build>`（build 由脚本自动生成），由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准。
+快照 tag 为 `snapshot-v<version>-<build>`（build 由脚本自动生成），由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，**快照发布不计入 Maven Central 发布用量**，不占用正式 release 的月额度。
 
 常用选项：
 
