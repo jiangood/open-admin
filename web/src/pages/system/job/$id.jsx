@@ -1,5 +1,5 @@
 import React from 'react'
-import {Button, Card, Col, Descriptions, Empty, Form, Row, Select, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
+import {Button, Card, Col, Descriptions, Empty, Row, Space, Spin, Tabs, Tag, Tooltip} from 'antd'
 import {CaretRightOutlined} from '@ant-design/icons'
 import {CronUtils, getMessageApi, HttpClient, Page, PageUtils, PermUtils, ProTable, TaskLogDrawer} from '../../../framework'
 
@@ -12,11 +12,6 @@ const JOB_STATUS_META = {
     EXCEPTION: {label: '异常', color: 'volcano'},
     CANCELLED: {label: '已取消', color: 'default'},
 }
-
-const JOB_STATUS_OPTIONS = Object.entries(JOB_STATUS_META).map(([value, meta]) => ({
-    value,
-    label: meta.label,
-}))
 
 function renderJobStatus(status) {
     const meta = JOB_STATUS_META[status]
@@ -173,12 +168,6 @@ export default class JobDetailPage extends React.Component {
             actionRef={this.recordsTableRef}
             rowKey="id"
             scrollX={800}
-            searchInline
-            searchFormRender={() => (
-                <Form.Item name='status' noStyle>
-                    <Select placeholder='状态' allowClear style={{width: 120}} options={JOB_STATUS_OPTIONS}/>
-                </Form.Item>
-            )}
             columns={columns}
             request={(params) => {
                 params.jobId = jobId
