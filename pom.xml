@@ -45,7 +45,7 @@
         <poi.version>5.5.1</poi.version>
         <guava.version>33.7.2-jre</guava.version>
         <commons-io.version>2.22.0</commons-io.version>
-        <awssdk.version>2.57.11</awssdk.version>
+        <awssdk.version>2.59.7</awssdk.version>
 
     </properties>
     <dependencies>
