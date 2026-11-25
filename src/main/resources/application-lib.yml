@@ -53,11 +53,6 @@ sys:
   data-dir: /data
   file:
     upload-path: "${sys.data-dir}/upload"
-  codegen:
-    backend-dir: src/main/java
-    resource-dir: src/main/resources
-    frontend-dir: web/src/pages
-    frontend-import: ""
 
 logging:
   file:

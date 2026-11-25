@@ -17,13 +17,13 @@
 
 ## 版本发布
 
-项目提供了 release 脚本 `scripts/release.py`（跨平台，需 Python 3），用于自动完成版本升级、构建验证、Git 提交打标签和推送。
+项目提供了 release 脚本 `scripts/release.mjs`（跨平台，需 Node.js 18+），用于自动完成版本升级、构建验证、Git 提交打标签和推送。
 
 ### 前置条件
 
 - 当前分支必须是 `main`
 - 工作区干净（或只包含白名单文件 `*/pom.xml`、`web/package.json`）
-- 工具：`python`、`git`、`node`、`mvn`、`npm`、`gh`（已登录）
+- 工具：`node`（18+）、`git`、`mvn`、`npm`、`gh`（已登录）
 
 ### 发版额度（必读）
 
@@ -37,14 +37,14 @@ Maven Central 自 **2026-10-01** 起按组织统计每月发布额度，超限�
 - 同一自然月内合并改动，避免为小修复连续发版
 - 发布失败不要重复打同一个版本 tag（Central 版本不可变），修好后用下一个版本号
 - 紧急安全修复先联系 `central-support@sonatype.com`，不要直接硬发
-- 仅需联调验证时优先用快照通道（`release.py --snapshot`），它与正式 release 的发布流程分开；快照的用量/统计仍以 Usage Center 为准
+- 仅需联调验证时优先用快照通道（`release.mjs --snapshot`），它与正式 release 的发布流程分开；快照的用量/统计仍以 Usage Center 为准
 
 官方说明：<https://central.sonatype.org/publish/maven-central-publishing-limits>
 
 ### 使用方式
 
 ```bash
-python scripts/release.py <version> [options]
+node scripts/release.mjs <version> [options]
 ```
 
 正式版版本号格式为 `x.y.z`，前缀 `v` 可选，最终 tag 会统一为 `v<version>`。
@@ -52,8 +52,8 @@ python scripts/release.py <version> [options]
 非正式版（快照）使用 `--snapshot` 或显式版本：
 
 ```bash
-python scripts/release.py 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4.0-SNAPSHOT.<build>（build 脚本自动生成，时间戳）
-python scripts/release.py 3.4.0-SNAPSHOT         # 同上
+node scripts/release.mjs 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4.0-SNAPSHOT.<build>（build 脚本自动生成，时间戳）
+node scripts/release.mjs 3.4.0-SNAPSHOT         # 同上
 ```
 
 快照 tag 为 `snapshot-v<version>-<build>`（build 由脚本自动生成），由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准。
@@ -62,16 +62,16 @@ python scripts/release.py 3.4.0-SNAPSHOT         # 同上
 
 | 选项 | 说明 |
 |---|---|
-| `--snapshot` | 发布非正式版；也可直接把版本写成 `x.y.z-SNAPSHOT[.build]` |
+| `--snapshot` | 发布非正式版；也可直接把版本写成 `x.y.z-SNAPSHOT` |
 | `--skip-tests` | 跳过 `mvn -B clean test` 和 `web` 目录的 `npm run build` |
 | `--no-push` | 只在本地提交和打 tag，不推送到 origin |
-| `--dry-run` | 预览执行流程，不修改任何文件或 Git 状态 |
+| `--dry-run` | 预览执行流程，不修改仓库文件或 Git 状态（仅写 `logs/` 日志） |
 | `--no-rollback` | 失败时保留版本变更 |
 
 其他命令：
 
-- `python scripts/release.py status` - 查看当前版本、tag 和工作区状态
-- `python scripts/release.py check` - 输出 key=value 格式的发布信息（可用于自动化）
+- `node scripts/release.mjs status` - 查看当前版本、tag 和工作区状态
+- `node scripts/release.mjs check` - 输出 key=value 格式的发布信息（可用于自动化）
 
 ### 发布流程
 
@@ -79,7 +79,7 @@ python scripts/release.py 3.4.0-SNAPSHOT         # 同上
 
 1. 预检（分支、工具、Git 状态）
 2. 检查版本和 tag 冲突
-3. 使用 `scripts/bump-version.py` 更新所有 `pom.xml`（根 POM 和子模块）及 `web/package.json`
+3. 使用 `scripts/bump-version.mjs` 更新所有 `pom.xml`（根 POM 和子模块）及 `web/package.json`
 4. 验证版本是否正确更新
 5. 执行后端测试和前端构建（可跳过）
 6. 白名单检查（仅允许修改版本文件）
@@ -92,17 +92,17 @@ python scripts/release.py 3.4.0-SNAPSHOT         # 同上
 
 ```bash
 # 预览发布 3.1.3
-python scripts/release.py 3.1.3 --dry-run
+node scripts/release.mjs 3.1.3 --dry-run
 
 # 发布 3.1.3（跳过测试）
-python scripts/release.py 3.1.3 --skip-tests
+node scripts/release.mjs 3.1.3 --skip-tests
 ```
 
 ### 常见问题
 
 - **工作区不干净**：release 脚本只允许修改 `*/pom.xml` 和 `web/package.json`。若改动了其他文件（如 `AGENTS.md`、`docs/`、`.opencode/skills/`），请先 `git add && git commit` 再发布。
 - **gh 未登录**：运行 `gh auth login` 后再发布。
-- **push 失败自动回滚**：默认情况下，push 失败会自动回滚版本变更、提交和 tag。若要保留本地变更，请加 `--no-rollback`。
+- **失败回滚与 resume**：默认会回滚未提交的版本号改动；若 commit + tag 已创建、只是推送失败，重跑同一条命令会进入 resume 模式只补推送。若要保留未提交的版本变更，请加 `--no-rollback`。
 - **使用了 --no-push**：本地已提交和打 tag，需手动执行 `git push origin main && git push origin v<version>` 完成发布。
 - **发布后校验**：
   - `npm view @jiangood/open-admin version` - 检查 npm 最新版本

@@ -115,16 +115,3 @@ menus:
     perms:
       - {name: 读取, code: read}
       - {name: 强制下线, code: kick}
-  ## 分隔线：系统运维 | 开发工具
-  sys-sep-dev:
-    pid: sys
-    type: divider
-  ## ----- 开发工具 -----
-  sys-codegen:
-    pid: sys
-    name: 代码生成
-    path: /system/codegen
-    icon: CodeOutlined
-    perms:
-      - {name: 读取, code: read}
-      - {name: 生成, code: generate}

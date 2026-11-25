@@ -23,7 +23,7 @@ import java.util.Set;
  * 扫描定时任务类：{@link BaseJob} 子类，或带 {@link JobDescription} 的 {@link Job} 实现。
  *
  * <p>只返回可实例化的具体类；抽象类、接口、局部/匿名类会被忽略。
- * 扫描范围与代码生成一致：框架包 + 业务 {@code @SpringBootApplication} / {@code @ComponentScan} 包。</p>
+ * 扫描范围：框架包 + 业务 {@code @SpringBootApplication} / {@code @ComponentScan} 包。</p>
  */
 @Slf4j
 @Component

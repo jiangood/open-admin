@@ -21,7 +21,7 @@ open-admin 是一个后台管理系统框架（脚手架），**业务项目无�
 }
 ```
 
-添加依赖后，用户管理、角色权限、数据字典、系统参数、Quartz 调度、文件管理、邮件发送、在线用户、代码生成等功能开箱即用。框架的 skills 与文档按 `docs/framework-sync.json` 清单从 GitHub tag 源码归档同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
+添加依赖后，用户管理、角色权限、数据字典、系统参数、Quartz 调度、文件管理、邮件发送、在线用户等功能开箱即用。框架的 skills 与文档按 `docs/framework-sync.json` 清单从 GitHub tag 源码归档同步到项目根目录（详见 [Skills (opencode)](#skills-opencode)）。
 
 ## 快速开始
 
@@ -135,9 +135,9 @@ mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
 mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=local # 允许多端在线，验证个人中心「登录设备」提示
 mvn clean install -DskipTests                              # 安装到本地仓库
-python scripts/bump-version.py <新版本号>                    # 仅升级 pom.xml + web/package.json 版本号
-python scripts/release.py <新版本号>                        # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
-python scripts/release.py <版本号> --snapshot               # 发布非正式版（Maven SNAPSHOT + npm snapshot）
+node scripts/bump-version.mjs <新版本号>                    # 仅升级 pom.xml + web/package.json 版本号
+node scripts/release.mjs <新版本号>                        # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
+node scripts/release.mjs <版本号> --snapshot               # 发布非正式版（Maven SNAPSHOT + npm snapshot）
 cd web && npm install                                         # 前端安装依赖
 cd web && npm run dev                                         # 前端开发模式
 cd web && npm run build                                       # 前端构建
@@ -162,20 +162,20 @@ python scripts/start.py frontend start|stop|restart|status    # 前端: npm run 
 
 ### 发版
 
-发版流程固化在 `scripts/release.py`（跨平台，输出纯 ASCII 避免乱码），日志落 `logs/{release|snapshot}-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。正式版只给版本号；快照版加 `--snapshot` 或直接写 `-SNAPSHOT[.build]`：
+发版流程固化在 `scripts/release.mjs`（跨平台，需 Node.js 18+，输出纯 ASCII 避免乱码），日志落 `logs/{release|snapshot}-v<版本>-<时间戳>.log`（UTF-8，已被 gitignore）。正式版只给版本号；快照版加 `--snapshot` 或直接写 `-SNAPSHOT`：
 
 ```bash
-python scripts/release.py 3.1.3                    # bump + 全量测试 + commit + tag + push，触发 CI 发布
-python scripts/release.py v3.1.3                   # 版本号带不带 v 都行（推的 tag 一律带 v）
-python scripts/release.py 3.1.3 --dry-run          # 只跑检查、打印计划，不改动仓库文件（仅写 logs/ 日志）
-python scripts/release.py 3.1.3 --no-push          # 本地演练：commit + tag 但不推送
-python scripts/release.py 3.1.3 --skip-tests       # 跳过 mvn test 与 npm build（发版不建议）
-python scripts/release.py status                   # 当前分支 / 版本 / tag / 工作区状态
-python scripts/release.py check                    # 只读检查，输出 KEY=VALUE（当前版本 + 候选版本号）
-python scripts/release.py --help                   # 全部参数与退出码
+node scripts/release.mjs 3.1.3                    # bump + 全量测试 + commit + tag + push，触发 CI 发布
+node scripts/release.mjs v3.1.3                   # 版本号带不带 v 都行（推的 tag 一律带 v）
+node scripts/release.mjs 3.1.3 --dry-run          # 只跑检查、打印计划，不改动仓库文件（仅写 logs/ 日志）
+node scripts/release.mjs 3.1.3 --no-push          # 本地演练：commit + tag 但不推送
+node scripts/release.mjs 3.1.3 --skip-tests       # 跳过 mvn test 与 npm build（发版不建议）
+node scripts/release.mjs status                   # 当前分支 / 版本 / tag / 工作区状态
+node scripts/release.mjs check                    # 只读检查，输出 KEY=VALUE（当前版本 + 候选版本号）
+node scripts/release.mjs --help                   # 全部参数与退出码
 ```
 
-- 跨平台（Windows / Linux / macOS），需 Python 3；不再依赖 PowerShell
+- 跨平台（Windows / Linux / macOS），需 Node.js 18+；不再依赖 Python 或 PowerShell
 - 版本号可带或不带 `v` 前缀（`3.1.3` / `v3.1.3` 等价）；正式版 tag 为 `v<version>`，快照版 tag 为 `snapshot-v<version>-<build>`，`publish.yml` 同时监听 `v*` 与 `snapshot-v*`
 - 前置条件：`gh` 已登录、当前分支为 `main`、工作区干净
 - 白名单：一次发版只允许修改 `*/pom.xml` 与 `web/package.json`，出现别的改动直接中止（退出码 3）
@@ -197,10 +197,10 @@ python scripts/release.py --help                   # 全部参数与退出码
 `<build>` 由脚本自动生成（时间戳 `YYYYMMDDHHMMSS`），不再支持手动指定。
 
 ```bash
-python scripts/release.py 3.4.0 --snapshot          # build 号自动生成（时间戳）
-python scripts/release.py 3.4.0-SNAPSHOT            # 同上
-python scripts/release.py 3.4.0 --snapshot --dry-run
-python scripts/release.py 3.4.0 --snapshot --no-push
+node scripts/release.mjs 3.4.0 --snapshot          # build 号自动生成（时间戳）
+node scripts/release.mjs 3.4.0-SNAPSHOT            # 同上
+node scripts/release.mjs 3.4.0 --snapshot --dry-run
+node scripts/release.mjs 3.4.0 --snapshot --no-push
 ```
 
 - 快照版 tag 为 `snapshot-v<版本>-<build>`，由 `.github/workflows/publish.yml` 的 snapshot 流程触发，不会与正式版 `v*` tag 混淆
@@ -217,7 +217,7 @@ python scripts/release.py 3.4.0 --snapshot --no-push
   ```
 - SNAPSHOT 可覆盖且约 90 天后会被 Central 清理；Maven Central 的 SNAPSHOT 通道与正式 release 分开，但具体用量/额度仍以 [Usage Center](https://central.sonatype.com/publishing/usage) 为准
 - `pom.xml` 的 `publish` profile 已为 `central-publishing-maven-plugin` 显式配置 `centralSnapshotsUrl`，`-SNAPSHOT` 会直接上传到 Central Portal 快照仓库（插件版本需 `>= 0.7.0`，当前为 `0.12.0`）
-- 只改版本号不发布：可用 `python scripts/bump-version.py 3.4.0-SNAPSHOT --npm-version 3.4.0-SNAPSHOT.<build>`（build 自行按规则生成）
+- 只改版本号不发布：可用 `node scripts/bump-version.mjs 3.4.0-SNAPSHOT --npm-version 3.4.0-SNAPSHOT.<build>`（build 自行按规则生成）
 
 ## Skills (opencode)
 

@@ -26,7 +26,7 @@
 
 ### CRUD 辅助（CrudOps）
 
-代码生成器生成的 Controller 默认使用 `io.github.jiangood.openadmin.framework.web.CrudOps`，统一详情、分页、成功响应以及更新/删除校验，避免每个模块重复写同样的判断：
+业务 Controller 可使用 `io.github.jiangood.openadmin.framework.web.CrudOps`，统一详情、分页、成功响应以及更新/删除校验，避免每个模块重复写同样的判断：
 
 | 方法 | 作用 |
 |------|------|

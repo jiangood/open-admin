@@ -165,7 +165,7 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 5. **菜单** — `src/main/resources/menu.yml`（或 `menu-*.yml`）定义菜单树
 6. **前端** — 使用 `ProTable` + `Field*` 组件快速搭建 CRUD 页面
 
-> 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 按 `docs/framework-sync.json` 清单从对应 tag 源码归档同步到 `.opencode/skills/`，正式版/快照版一致）。也可在「系统管理 → 代码生成」中选中已建好的实体，一键生成 Repository / Service / Controller / 前端页面 / 菜单 代码并写入项目源码目录（先预览确认）。
+> 在业务项目中创建完整 CRUD 模块可借助 opencode skill `oa-crud`（由 `oa-upgrade-docs` skill 按 `docs/framework-sync.json` 清单从对应 tag 源码归档同步到 `.opencode/skills/`，正式版/快照版一致）。
 
 ## 内置模块
 
@@ -176,7 +176,6 @@ public class CvsMenuCustomizer implements MenuCustomizer {
 | job | `modules/job/` | Quartz 定时任务 |
 | logviewer | `modules/logviewer/` | 运行日志在线查看（写入 `FileLog` + 增量读取接口 + 按 key 前缀鉴权） |
 | mail | `modules/mail/` | 邮件发送（服务商模板 + 参数项 + `MailService` / `MailTemplate`） |
-| codegen | `modules/codegen/` | 实体扫描与 CRUD 代码生成（系统管理 →「代码生成」） |
 
 ## FAQ
 

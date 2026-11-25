@@ -30,10 +30,6 @@
 | `sys.job-auto-register` | 启动时扫描 `BaseJob` 子类 / `@JobDescription` 并补建缺失的定时任务记录（只补建，不覆盖已有配置） | true |
 | `sys.job-log-retain-days` | 定时任务执行记录保留天数；任务执行后惰性清理（同一天最多一次，异步执行），`<=0` 表示不清理 | 30 |
 | `sys.job-log-size-warn-mb` | 定时任务日志文件总占用告警阈值（MB），仅用于管理页红色提示，不自动清理；`<=0` 关闭告警 | 1024 |
-| `sys.codegen.backend-dir` | 代码生成后端源码根目录（相对项目根） | src/main/java |
-| `sys.codegen.resource-dir` | 代码生成资源目录（菜单 YAML 输出位置） | src/main/resources |
-| `sys.codegen.frontend-dir` | 代码生成前端页面根目录 | web/src/pages |
-| `sys.codegen.frontend-import` | 生成页面引入框架组件的模块名；留空自动识别（框架仓库用相对路径，业务项目用 `@jiangood/open-admin`） | 空 |
 
 > 框架的 `.opencode/skills/` 与 `docs/open-admin/` 由 `oa-upgrade-docs` skill 按 `docs/framework-sync.json` 清单，从对应 tag 源码归档同步到业务项目根目录（无需配置）。同步范围与规则以清单为准。
 
@@ -118,7 +114,7 @@
 | 邮件发送 | `email.default-to` | LIST | 空 | 默认收件人，多个用逗号分隔；发送时未填收件人则使用 |
 | 邮件发送 | `email.proxy` | PROXY | 空 | 代理 URL，留空表示不使用 |
 
-其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、代码生成目录、对象存储等）或安全结构性配置。
+其余 `sys.*` 仍在 `application.yml` 中维护，**修改后需要重启**；原因是它们属于启动期装配（最大会话数、Quartz 开关、对象存储等）或安全结构性配置。
 
 ### 邮件发送
 
