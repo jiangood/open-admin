@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * 日志查看走 logviewer 的 HTTP 增量接口 {@code admin/sys/log/task/{logId}}（或业务自有端点）。
  * <p>
  * 与各业务自有记录（如构建日志、部署日志）可并存：业务表保留领域字段，
- * 本表只做「任务在不在跑、成没成功、去哪看日志」的统一视图，供「任务中心」页展示。
+ * 本表只做「任务在不在跑、成没成功、去哪看日志」的统一视图，供「后台任务」页展示。
  */
 @Remark("后台任务记录")
 @Entity
@@ -80,7 +80,7 @@ public class SysTaskLog extends BaseEntity {
     String status;
 
     /**
-     * 查看该任务日志所需的权限码（如 host:list），日志接口与任务中心据此鉴权。
+     * 查看该任务日志所需的权限码（如 host:list），日志接口与后台任务据此鉴权。
      * 为空表示仅需登录用户即可查看。
      */
     @Column(length = 64)

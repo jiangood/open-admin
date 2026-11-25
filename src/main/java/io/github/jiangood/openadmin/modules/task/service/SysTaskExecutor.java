@@ -78,7 +78,7 @@ public class SysTaskExecutor {
      * 提交任务（最简）：自动生成 logId，日志仅登录用户可查看。
      *
      * @param type  任务类型，如 image-sync / build-test
-     * @param title 人类可读描述，任务中心展示
+     * @param title 人类可读描述，后台任务展示
      * @param work  任务体（在异步线程执行，可通过 {@link TaskLog} 输出日志）
      * @return logId，前端可据此打开实时日志
      */

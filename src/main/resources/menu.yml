@@ -65,7 +65,7 @@ menus:
       - {name: 执行一次, code: trigger}
   task:
     pid: sys
-    name: 任务中心
+    name: 后台任务
     path: /system/task
     icon: ProfileOutlined
     perms:

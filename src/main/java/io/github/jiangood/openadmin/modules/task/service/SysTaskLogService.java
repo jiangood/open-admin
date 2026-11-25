@@ -105,7 +105,7 @@ public class SysTaskLogService extends BaseService<SysTaskLog> {
 
     /**
      * 平台重启清扫：进程内正在跑的任务都已消失，把遗留 RUNNING 行标记为失败。
-     * 日志文件还在，用户仍可通过任务中心回看中断前的输出。
+     * 日志文件还在，用户仍可通过后台任务回看中断前的输出。
      */
     @Transactional
     public int markInterrupted() {

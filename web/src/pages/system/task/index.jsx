@@ -42,7 +42,7 @@ const statusTagOf = status => {
 }
 
 /**
- * 任务中心：统一查看后台长任务的日志与历史结果。
+ * 后台任务：统一查看后台长任务的日志与历史结果。
  * <p>
  * 日志正文按 logId 走 logviewer（key = task/{logId}），鉴权按任务记录的 permission 字段。
  * 运行中的任务可请求取消（关闭任务登记的可中断资源）。
@@ -50,7 +50,7 @@ const statusTagOf = status => {
  * 运行中的任务在页面可见时每 10 秒刷新一次列表，任务结束状态会自动出现。
  */
 export const pageMeta = {
-    title: '任务中心',
+    title: '后台任务',
 }
 
 export default class extends React.Component {

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 任务中心：统一查看后台长任务的状态与日志。
+ * 后台任务：统一查看后台长任务的状态与日志。
  * <p>
  * 日志正文走 logviewer：{@code admin/sys/log/task/{logId}}，按任务记录的 permission 字段鉴权。
  * 本控制器的 {@code task:view} 控制列表页入口；{@code task:cancel} 控制取消操作。
