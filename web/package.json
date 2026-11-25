@@ -55,7 +55,7 @@
     "lint": "eslint src --max-warnings=0",
     "lint:fix": "eslint src --fix"
   },
-  "version": "3.3.4-SNAPSHOT.20261124150356",
+  "version": "3.3.4-SNAPSHOT.20261125100458",
   "overrides": {
     "zod-validation-error": "^4.0.2"
   },
