@@ -61,6 +61,40 @@
 
 > 本地想验证个人中心「登录设备」的多处登录提示，可用 `local` profile 启动（`-Dspring-boot.run.profiles=local` 或环境变量 `SPRING_PROFILES_ACTIVE=local`），该 profile 将 `sys.maximum-sessions` 设为 `3`。
 
+### 覆盖框架默认值
+
+`spring.config.import` 的优先级比较反直觉：被导入的文件会被当作**插在「声明 import 的那个文档」之后**的额外文档，优先级更高（见 [Spring Boot 文档](https://docs.spring.io/spring-boot/reference/features/external-config.html#features.external-config.files.importing)）。所以与 import 写在同一个 YAML 文档里的同 key 配置**不会生效**，会被 `application-lib.yml` 覆盖：
+
+```yaml
+# ❌ 错误：与 import 同一文档，show-sql 实际仍是 lib 的 false
+spring:
+  config:
+    import: classpath:application-lib.yml
+  jpa:
+    show-sql: true
+```
+
+业务配置必须写在 `---` 之后的新文档里：
+
+```yaml
+# ✅ 正确：第一个文档只放 import
+spring:
+  config:
+    import: classpath:application-lib.yml
+
+# 第二个文档：业务项目自己的配置，优先级高于 application-lib.yml
+---
+spring:
+  jpa:
+    show-sql: true
+sys:
+  title: 客户管理系统
+```
+
+- 把覆盖项放进 `application-{profile}.yml` 效果相同（profile 文件天然排在主文件之后）；但在同一个文件里覆盖时必须用 `---` 分隔。
+- 列表型配置（如 `spring.autoconfigure.exclude`、`spring.config.import`）是**整体替换**而不是合并，覆盖时要把 lib 里的值一起写上，否则会重新打开框架已排除的自动配置。
+- 覆盖 `spring.config.import` 时不要丢掉 `classpath:application-lib.yml`，否则启动会因缺少框架配置而报错。
+
 ## 系统参数（运行时可改）
 
 「系统管理 → 系统参数」页面的数据来自 `sys_config` 表，但**默认值不落库**：

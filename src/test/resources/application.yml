@@ -1,13 +1,21 @@
+# 第一个文档：只放 import
+# （import 的内容会插入在本文档之后，所以在同一文档里写同 key 配置不会生效）
 spring:
   config:
     import: classpath:application-lib.yml
+
+# ---------------------------------------------------------------------------
+# 第二个文档：测试配置，优先级高于 application-lib.yml
+# ---------------------------------------------------------------------------
+---
+spring:
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
   jpa:
-    generate-ddl: true
+    # show-sql 覆盖 application-lib.yml 的 false，便于排查测试中的 SQL
     show-sql: true
     hibernate:
       ddl-auto: create-drop
@@ -19,6 +27,7 @@ sys:
   job-auto-register: false
   file:
     store-type: LOCAL
+    # 覆盖 lib 派生的 ${sys.data-dir}/upload，测试文件不落到 /data
     upload-path: /tmp/test-uploads
     s3:
       endpoint: http://localhost:9000

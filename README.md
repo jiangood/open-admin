@@ -69,7 +69,24 @@ docker run -d --name open-admin -p 8888:8888 -v ./data:/data open-admin
 
 ### 集成到已有项目
 
-**后端**：业务项目 `pom.xml` 添加依赖，`application.yml` 配置数据源，通过 `spring.config.import: classpath:application-lib.yml` 引入框架默认配置。
+**后端**：业务项目 `pom.xml` 添加依赖，`application.yml` 配置数据源，通过 `spring.config.import` 引入框架默认配置。注意 import 的内容会覆盖**同一个文档**里的配置，因此业务配置要写在 `---` 之后：
+
+```yaml
+# 第一个文档：只放 import
+spring:
+  config:
+    import: classpath:application-lib.yml
+
+# 第二个文档：业务项目自己的配置，优先级高于 application-lib.yml
+---
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/demo
+sys:
+  title: 客户管理系统
+```
+
+详见[配置参考 · 覆盖框架默认值](docs/open-admin/config.md#覆盖框架默认值)。
 
 **前端**：按以下清单配置（完整可运行示例见 [open-admin-example](https://github.com/jiangood/open-admin-example)）：
 

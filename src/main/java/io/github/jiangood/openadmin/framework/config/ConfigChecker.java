@@ -22,6 +22,7 @@ public class ConfigChecker implements ApplicationRunner {
                       spring:
                         config:
                           import: classpath:application-lib.yml
+                    注意：业务项目自己的配置要写在 --- 之后的新文档里，否则会被 application-lib.yml 覆盖。
                     """);
             throw new IllegalStateException("框架配置缺失");
         }

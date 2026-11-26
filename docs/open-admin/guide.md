@@ -50,7 +50,7 @@ web/
 
 ### 自动配置机制
 
-框架通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册 `OpenAdminConfiguration`（含 `@ComponentScan` / `@EntityScan` / `@EnableJpaRepositories`，扫描包 `io.github.jiangood.openadmin`）。默认配置在 `application-lib.yml`，业务项目通过 `spring.config.import` 引入。
+框架通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册 `OpenAdminConfiguration`（含 `@ComponentScan` / `@EntityScan` / `@EnableJpaRepositories`，扫描包 `io.github.jiangood.openadmin`）。默认配置在 `application-lib.yml`，业务项目通过 `spring.config.import` 引入。注意 import 的内容会覆盖**同一个 YAML 文档**里的配置，业务项目的覆盖项必须写在 `---` 之后的文档中，写法见 [config.md](config.md#覆盖框架默认值)。
 
 ### 框架扩展点 (`framework.spi`)
 
