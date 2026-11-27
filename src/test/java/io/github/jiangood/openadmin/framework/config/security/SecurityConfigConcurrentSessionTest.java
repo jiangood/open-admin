@@ -1,5 +1,6 @@
 package io.github.jiangood.openadmin.framework.config.security;
 
+import io.github.jiangood.openadmin.framework.config.SystemProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,13 +43,20 @@ class SecurityConfigConcurrentSessionTest {
     @Autowired
     private SecurityHolder securityHolder;
 
+    @Autowired
+    private SystemProperties systemProperties;
+
     @Test
-    void sessionAuthenticationStrategyShouldRejectSecondLoginByDefault() {
+    void sessionAuthenticationStrategyShouldRejectLoginBeyondMaximumSessions() {
         SessionAuthenticationStrategy strategy = securityHolder.getSharedObject(SessionAuthenticationStrategy.class);
         assertNotNull(strategy, "共享对象中未注册 SessionAuthenticationStrategy");
 
+        int maximumSessions = systemProperties.getMaximumSessions();
+        assertTrue(systemProperties.isMaxSessionsPreventsLogin(), "默认应阻止超出并发上限的登录");
         String principal = "concurrent-login-test-user";
-        sessionRegistry.registerNewSession("existing-session", principal);
+        for (int i = 0; i < maximumSessions; i++) {
+            sessionRegistry.registerNewSession("existing-session-" + i, principal);
+        }
         try {
             MockHttpServletRequest request = new MockHttpServletRequest();
             request.getSession(true); // ChangeSessionIdAuthenticationStrategy 需要已有会话
@@ -57,9 +65,11 @@ class SecurityConfigConcurrentSessionTest {
 
             assertThrows(SessionAuthenticationException.class,
                     () -> strategy.onAuthentication(authentication, request, response),
-                    "默认应阻止第二个会话登录（sys.max-sessions-prevents-login=true）");
+                    "达到并发上限后应阻止新会话登录（sys.max-sessions-prevents-login=true）");
         } finally {
-            sessionRegistry.removeSessionInformation("existing-session");
+            for (int i = 0; i < maximumSessions; i++) {
+                sessionRegistry.removeSessionInformation("existing-session-" + i);
+            }
         }
     }
 

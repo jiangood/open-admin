@@ -80,7 +80,7 @@ class SystemParamServiceTest {
     void usesCodeDefaultsAndDoesNotExposeSecrets() {
         List<SystemParamView> items = new SystemParamService(new SystemProperties(), new MockEnvironment(), provider(null)).items();
 
-        assertEquals("1", valueOf(items, "sys.maximum-sessions"));
+        assertEquals("5", valueOf(items, "sys.maximum-sessions"));
         assertEquals("阻止新登录（旧会话继续有效）", valueOf(items, "sys.max-sessions-prevents-login"));
         assertEquals("180 分钟", valueOf(items, "sys.session-idle-time"));
         assertEquals("本地存储", valueOf(items, "sys.file.store-type"));

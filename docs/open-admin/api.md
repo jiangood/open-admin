@@ -269,7 +269,7 @@ mailService.sendAsync(MailMessage.builder()
 
 说明：
 
-- 是否会出现多处登录取决于 `sys.maximum-sessions`：默认 `1`，配合 `sys.max-sessions-prevents-login`（默认 `true`）时新登录会被拒绝、旧会话继续有效；将该开关设为 `false` 则改为踢掉旧会话。调大后多个会话并存，个人中心在会话数大于 1 时显示提示。
+- 是否会出现多处登录取决于 `sys.maximum-sessions`：默认 `5`，配合 `sys.max-sessions-prevents-login`（默认 `true`）时超出上限的新登录会被拒绝、旧会话继续有效；将该开关设为 `false` 则改为踢掉旧会话。调大后多个会话并存，个人中心在会话数大于 1 时显示提示。
 - 服务端会校验会话归属，只能下线自己的会话，也允许用户自助下线自己的其他设备。
 - 在线记录保存在内存，**仅单实例部署准确**（同「在线用户」）；应用重启后随用户请求自动恢复登记。
 

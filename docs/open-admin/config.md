@@ -16,7 +16,7 @@
 | `sys.session-idle-time` | Session 超时（分钟），通过 `server.servlet.session.timeout` 生效 | 180 |
 | `sys.login-lock-minutes` | 登录锁定时长（分钟） | 5 |
 | `sys.login-lock-max-attempts` | 登录异常最大次数，超过则锁定 | 10 |
-| `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时按 `sys.max-sessions-prevents-login` 处理 | 1 |
+| `sys.maximum-sessions` | 最大并发会话数（同一账号同时在线数），超出时按 `sys.max-sessions-prevents-login` 处理 | 5 |
 | `sys.max-sessions-prevents-login` | 并发会话数超限时是否阻止新登录：`true` 阻止新登录（旧会话继续有效），`false` 踢出旧会话 | true |
 | `server.servlet.session.persistent` | 优雅停机时把登录会话落盘，重启后恢复（重启免登录） | true |
 | `server.servlet.session.store-dir` | 会话落盘目录，由 `sys.data-dir` 派生，需可写并位于持久卷 | ${sys.data-dir}/session |
@@ -57,9 +57,9 @@
 >
 > 启动日志会打印实际生效的 `name / path / timeout / persistent`，出现「莫名掉线」时先对比两个应用的值。
 
-> **并发登录策略**：默认 `sys.maximum-sessions=1` 且 `sys.max-sessions-prevents-login=true`，同一账号同时只允许一个在线会话，再次登录会被拒绝并提示 `sys.concurrent-login-blocked-message`。被阻止的用户需要先在原设备退出、让管理员在「在线用户」强制下线，或等待会话空闲超时（`sys.session-idle-time`）后再登录。若希望新登录直接顶掉旧会话，把 `sys.max-sessions-prevents-login` 设为 `false`。若用户频繁「莫名掉线」且会话在服务端仍然存活，先排查上一条「同域多套应用必须区分 session cookie 名」。
+> **并发登录策略**：默认 `sys.maximum-sessions=5` 且 `sys.max-sessions-prevents-login=true`，同一账号最多 5 个会话同时在线，第 6 次登录会被拒绝并提示 `sys.concurrent-login-blocked-message`。被阻止的用户需要先在原设备退出、让管理员在「在线用户」强制下线，或等待会话空闲超时（`sys.session-idle-time`）后再登录。若希望新登录直接顶掉旧会话，把 `sys.max-sessions-prevents-login` 设为 `false`。若用户频繁「莫名掉线」且会话在服务端仍然存活，先排查上一条「同域多套应用必须区分 session cookie 名」。
 
-> 本地想验证个人中心「登录设备」的多处登录提示，可用 `local` profile 启动（`-Dspring-boot.run.profiles=local` 或环境变量 `SPRING_PROFILES_ACTIVE=local`），该 profile 将 `sys.maximum-sessions` 设为 `3`。
+> 想收紧或放宽限制（例如恢复单点登录、或验证个人中心「登录设备」的多处登录提示），在业务项目 `application.yml` 的 `---` 之后覆盖 `sys.maximum-sessions` 即可。
 
 ### 覆盖框架默认值
 

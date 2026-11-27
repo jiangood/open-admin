@@ -150,7 +150,6 @@ mvn test -Dtest=BeanToolTest                               # 运行单个测试
 mvn test -Dtest='!*RepositoryTest,!*ServiceTest'           # 仅纯单元测试，跳过 SpringBootTest 集成测试（更快）
 mvn clean package                                          # 打包
 mvn -Pdev spring-boot:run                                  # 独立应用启动
-mvn -Pdev spring-boot:run -Dspring-boot.run.profiles=local # 允许多端在线，验证个人中心「登录设备」提示
 mvn clean install -DskipTests                              # 安装到本地仓库
 node scripts/bump-version.mjs <新版本号>                    # 仅升级 pom.xml + web/package.json 版本号
 node scripts/release.mjs <新版本号>                        # 一键发版：bump + 全量测试 + commit + tag + push（见「发版」）
