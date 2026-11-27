@@ -16,6 +16,11 @@
 # 的额外文档，优先级更高。所以与 import 写在同一个文档里的配置会被本文件覆盖，
 # 业务配置必须写在 --- 之后的新文档里才能真正覆盖本文件的默认值。
 # ===================================================================
+sys:
+  # 数据根目录（约定不带结尾斜杠）：会话落盘、日志、上传文件都在其下派生。
+  data-dir: /data
+  file:
+    upload-path: "${sys.data-dir}/upload"
 
 server:
   servlet:
@@ -38,7 +43,7 @@ spring:
     multipart:
       # 图片前端已压缩，此处留足空间给大文件/富文本直传
       max-file-size: 20MB
-      max-request-size: 20MB
+      max-request-size: 100MB
   cache:
     type: caffeine
     caffeine:
@@ -46,6 +51,9 @@ spring:
   jpa:
     generate-ddl: true
     show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
   data:
     web:
       pageable:
@@ -54,13 +62,11 @@ spring:
     time-zone: GMT+8
     date-format: yyyy-MM-dd HH:mm:ss
     locale: zh_CN
-
-sys:
-  # 数据根目录（约定不带结尾斜杠）：会话落盘、日志、上传文件都在其下派生。
-  # 换数据卷/挂载点时只改这一项即可；派生项仍可在业务项目中单独覆盖。
-  data-dir: /data
-  file:
-    upload-path: "${sys.data-dir}/upload"
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: "jdbc:h2:file:${sys.data-dir}/db_h2/database;MODE=MySQL;DB_CLOSE_DELAY=-1"
+    username: sa
+    password:
 
 logging:
   file:

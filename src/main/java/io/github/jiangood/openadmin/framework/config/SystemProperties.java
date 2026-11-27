@@ -34,7 +34,7 @@ public class SystemProperties {
     /**
      * 最大并发会话数， 即同时登录用户数
      */
-    private int maximumSessions = 1;
+    private int maximumSessions = 5;
     /**
      * 并发会话数超出上限时是否阻止新登录
      * true: 阻止新登录，旧会话继续有效；false: 踢出旧会话（被顶下线）
