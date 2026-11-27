@@ -6,7 +6,6 @@ public class DBConstants {
     }
 
 
-
     // 用于存储大量二进制数据，如图片、音频、视频等
     public static final String TYPE_BLOB = "blob";
 
@@ -30,7 +29,7 @@ public class DBConstants {
     /**
      * 金额精度，小数点前的位数
      */
-    public static final int MONEY_PRECISION = 12; //
+    public static final int MONEY_PRECISION = 12;
     public static final int LEN_CODE = 20;
 
     /**

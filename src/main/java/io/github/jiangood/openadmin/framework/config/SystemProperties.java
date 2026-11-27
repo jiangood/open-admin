@@ -177,7 +177,6 @@ public class SystemProperties {
     }
 
 
-
     public String getBaseUrl() {
         String url = this.baseUrl;
         if (CharSequenceUtil.isEmpty(url)) {

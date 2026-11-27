@@ -107,8 +107,6 @@ public class SysUserController {
 
     /**
      * 检查密码强度
-     *
-     * @param password
      */
     @GetMapping("pwd-strength")
     public AjaxResult pwdStrength(String password) {
@@ -215,8 +213,6 @@ public class SysUserController {
     /**
      * 用户树
      * 机构刷下面增加用户节点
-     *
-     * @return
      */
     @GetMapping("tree")
     public AjaxResult tree() {

@@ -14,8 +14,6 @@ import java.util.Map;
  */
 public interface JdbcRunner {
 
-    // ---- 查询 - 单条 ----
-
     /** 按 id 查询单条，映射为实体类，无结果返回 null */
     <T> T findById(String table, Object id, Class<T> cls);
 
@@ -28,8 +26,6 @@ public interface JdbcRunner {
     /** 查询单条，返回 Map，无结果返回 null；多行结果时取第一行 */
     Map<String, Object> findOne(String sql, Object... params);
 
-    // ---- 查询 - 列表 ----
-
     /** 查询整表，映射为实体类列表 */
     <T> List<T> findAll(String table, Class<T> cls);
 
@@ -39,7 +35,6 @@ public interface JdbcRunner {
     /** 查询列表，每条记录返回 Map */
     List<Map<String, Object>> findAll(String sql, Object... params);
 
-    // ---- 查询 - 分页 ----
     // 方言按数据库产品名自动探测：MySQL/PostgreSQL/H2 等用 limit offset；
     // Oracle 12c+ / SQL Server 2012+ 用 offset fetch（SQL 无 order by 且未指定 Sort 时按首列排序兜底）。
     // Pageable 的 Sort 属性名按列名原样使用（不做命名转换），指定 Sort 时原 SQL 不应再含 order by。
@@ -53,8 +48,6 @@ public interface JdbcRunner {
     /** 分页查询，返回 Map 列表；count SQL 自动包裹原 SQL */
     Page<Map<String, Object>> findAll(Pageable pageable, String sql, Object... params);
 
-    // ---- 标量与存在性 ----
-
     /** 统计整表记录数 */
     long count(String table);
 
@@ -63,8 +56,6 @@ public interface JdbcRunner {
 
     /** 按 id 判断记录是否存在 */
     boolean existsById(String table, Object id);
-
-    // ---- 写入 ----
 
     /**
      * 保存记录（JPA save 语义）：data 含 id 且记录存在 → update，否则 insert。

@@ -46,7 +46,6 @@ import static io.github.jiangood.openadmin.framework.MessageConst.MSG_UNAUTHORIZ
 public class GlobalExceptionHandler {
 
 
-
     private final SystemProperties systemProperties;
 
     @ExceptionHandler(AccessDeniedException.class)

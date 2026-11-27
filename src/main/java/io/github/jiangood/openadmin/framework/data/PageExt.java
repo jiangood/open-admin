@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-/**
- * （包名参考 org.springframework.data.domain.Page）
- */
 @Getter
 @Setter
 public class PageExt<T> extends org.springframework.data.domain.PageImpl<T> {
@@ -33,10 +30,7 @@ public class PageExt<T> extends org.springframework.data.domain.PageImpl<T> {
     }
 
     /**
-     * @param page
      * @param summary 总结栏数据
-     * @param <T>
-     * @return
      */
     public static <T> PageExt<T> of(Page<T> page, String summary) {
         return of(page, "summary", summary);

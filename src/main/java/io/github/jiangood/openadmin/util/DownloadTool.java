@@ -20,7 +20,6 @@ public class DownloadTool {
     }
 
 
-
     public static void download(String fileName, byte[] fileBytes, HttpServletResponse response) {
         try {
             setDownloadParam(fileName, fileBytes.length, response);
@@ -54,9 +53,7 @@ public class DownloadTool {
     }
 
     /**
-     * @param fileName
      * @param contentLength 不知道的情况下填0或-1
-     * @param response
      */
     public static void setDownloadParam(String fileName, long contentLength, HttpServletResponse response) {
         response.reset();

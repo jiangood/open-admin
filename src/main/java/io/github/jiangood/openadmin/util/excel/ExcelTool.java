@@ -31,7 +31,6 @@ public class ExcelTool {
     }
 
 
-
     public static <T> List<T> importExcel(Class<T> cls, InputStream is) throws IOException, ReflectiveOperationException {
         try (XSSFWorkbook wb = new XSSFWorkbook(is)) {
 
@@ -173,7 +172,6 @@ public class ExcelTool {
                 max = last;
             }
         }
-
 
 
         return max;

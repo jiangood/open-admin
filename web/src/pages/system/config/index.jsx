@@ -201,7 +201,6 @@ export default class SysConfigPage extends React.Component {
             await this.refreshSiteInfo()
             getMessageApi().success(rs?.message || '已恢复默认值')
         } catch {
-            // 错误提示由 HttpClient 统一处理
         }
     }
 

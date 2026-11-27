@@ -23,7 +23,6 @@ import {
 } from "../../../framework";
 
 
-/** 字节数转可读单位 */
 function formatBytes(bytes) {
     if (!bytes || bytes <= 0) {
         return '0 B'
@@ -261,9 +260,6 @@ export default class JobPage extends React.Component {
 
     ]
 
-    /**
-     * 顶部统计卡片：简要文字描述，重要信息用 Tag 标识
-     */
     renderStatCards() {
         const {stat, logSize} = this.state
         if (!stat || !logSize || !PermUtils.hasPermission('job:read')) {

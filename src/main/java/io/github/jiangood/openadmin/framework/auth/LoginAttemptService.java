@@ -65,7 +65,6 @@ public class LoginAttemptService {
         log.warn("登录失败: {}", username);
     }
 
-    // 内部类
     static class LoginAttempt {
         private final int maxAttempts;
         private final Duration windowDuration;

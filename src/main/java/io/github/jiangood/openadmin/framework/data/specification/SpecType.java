@@ -10,6 +10,5 @@ enum SpecType {
 
     ALWAYS_FALSE,
 
-    // 新增：用于集合成员查询
     IS_MEMBER, IS_NOT_MEMBER
 }

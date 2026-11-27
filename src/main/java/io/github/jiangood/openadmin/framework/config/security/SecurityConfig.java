@@ -132,7 +132,6 @@ public class SecurityConfig {
     }
 
 
-
     /**
      * 配置 3：公共资源
      * 兜底配置。
@@ -162,7 +161,6 @@ public class SecurityConfig {
     public HttpSessionEventPublisher httpSessionEventPublisher() {
         return new HttpSessionEventPublisher();
     }
-
 
 
 }

@@ -42,14 +42,12 @@ public class HibernateEntityCommentIntegrator implements Integrator {
 
     private void processComment(Metadata metadata) {
         for (PersistentClass persistentClass : metadata.getEntityBindings()) {
-            // Process the Comment annotation is applied to Class
             Class<?> clz = persistentClass.getMappedClass();
             if (clz.isAnnotationPresent(Remark.class)) {
                 Remark msg = clz.getAnnotation(Remark.class);
                 persistentClass.getTable().setComment(msg.value());
             }
 
-            // Process Comment annotations of identifier.
             Property identifierProperty = persistentClass.getIdentifierProperty();
             if (identifierProperty != null) {
                 fieldComment(persistentClass, identifierProperty.getName());
@@ -72,9 +70,6 @@ public class HibernateEntityCommentIntegrator implements Integrator {
 
     /**
      * Process @{code comment} annotation of field.
-     *
-     * @param persistentClass Hibernate {@code PersistentClass}
-     * @param columnName      name of field
      */
     private void fieldComment(PersistentClass persistentClass, String columnName) {
 

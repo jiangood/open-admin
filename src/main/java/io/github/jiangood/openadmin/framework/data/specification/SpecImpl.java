@@ -1,4 +1,4 @@
-package io.github.jiangood.openadmin.framework.data.specification;// ---------------------- 统一的内部条件实现类 (支持点操作) ----------------------
+package io.github.jiangood.openadmin.framework.data.specification;
 
 import jakarta.persistence.criteria.*;
 import org.springframework.data.jpa.domain.Specification;

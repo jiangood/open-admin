@@ -136,7 +136,6 @@ class SpringToolTest {
     }
 
 
-
     // 测试用的事件类
     static class TestEvent extends ApplicationEvent {
         public TestEvent(Object source) {

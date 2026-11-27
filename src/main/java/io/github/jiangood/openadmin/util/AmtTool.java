@@ -13,8 +13,6 @@ public class AmtTool {
 
     /**
      * 元转分
-     *
-     * @return
      */
     public static int yuanToFen(BigDecimal yuan) {
         BigDecimal dFen = yuan.multiply(new BigDecimal("100"))

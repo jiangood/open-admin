@@ -9,7 +9,6 @@ public class PermissionActions {
     }
 
 
-    // =============== 基础数据操作（CRUD） ===============
     /**
      * 新增/创建
      */
@@ -32,7 +31,6 @@ public class PermissionActions {
      */
     public static final String CREATE_OR_UPDATE = "save";
 
-    // =============== 扩展操作 ===============
     /**
      * 导出数据
      */
@@ -50,7 +48,6 @@ public class PermissionActions {
      */
     public static final String DOWNLOAD = "download";
 
-    // =============== 状态管理 ===============
     /**
      * 启用/激活
      */
@@ -68,7 +65,6 @@ public class PermissionActions {
      */
     public static final String UNPUBLISH = "unpublish";
 
-    // =============== 审批流程 ===============
     /**
      * 审批通过
      */
@@ -90,7 +86,6 @@ public class PermissionActions {
      */
     public static final String CANCEL = "cancel";
 
-    // =============== 权限分配 ===============
     /**
      * 分配/授权
      */
@@ -100,7 +95,6 @@ public class PermissionActions {
      */
     public static final String REVOKE = "revoke";
 
-    // =============== 系统管理 ===============
     /**
      * 配置/设置
      */
@@ -126,7 +120,6 @@ public class PermissionActions {
      */
     public static final String RESTORE = "restore";
 
-    // =============== 特殊业务操作 ===============
     /**
      * 打印
      */

@@ -40,8 +40,6 @@ public class SysDictItem extends BaseEntity {
     private String color;
 
 
-
-
     @Remark("序号")
     private Integer seq;
 

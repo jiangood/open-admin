@@ -228,7 +228,6 @@ export default class UserPage extends React.Component {
                 </Form.Item>
 
 
-
             </FormModal>
 
 
@@ -282,6 +281,5 @@ export default class UserPage extends React.Component {
 
 
 }
-
 
 

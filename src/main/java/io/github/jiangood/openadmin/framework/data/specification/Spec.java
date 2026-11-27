@@ -24,7 +24,6 @@ import java.util.function.Consumer;
  */
 public class Spec<T> implements Specification<T> {
 
-    // 存储所有查询条件
     private final List<Specification<T>> specifications = new ArrayList<>();
 
     private Spec() {
@@ -175,7 +174,7 @@ public class Spec<T> implements Specification<T> {
      */
     public Spec<T> addExample(T t, String... ignores) {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching()
-                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING) // 遇到string，模糊匹配
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING)
                 .withIgnoreCase()
                 .withIgnoreNullValues();
 
@@ -187,8 +186,6 @@ public class Spec<T> implements Specification<T> {
         this.add((Specification<T>) (root, query, builder) -> QueryByExamplePredicateBuilder.getPredicate(root, builder, example));
         return this;
     }
-
-    // ---------------------- 核心构建方法 ----------------------
 
     /**
      * 等于查询（=）。
@@ -297,7 +294,6 @@ public class Spec<T> implements Specification<T> {
         if (!StringUtils.hasText(value)) {
             return this;
         }
-        // 对于 LIKE 统一转小写，执行不区分大小写的查询
         String likeValue = (prependWildcard ? "%" : "") + value.toLowerCase() + (appendWildcard ? "%" : "");
         return this.add(new SpecImpl<>(SpecType.LIKE, field, likeValue));
     }
@@ -384,8 +380,6 @@ public class Spec<T> implements Specification<T> {
     }
 
 
-    // ---------------------- 逻辑 OR 条件 ----------------------
-
     /**
      * 对传入的 Specification 进行 NOT (取反) 操作。
      */
@@ -449,7 +443,6 @@ public class Spec<T> implements Specification<T> {
         Specification<T> orSpec = Specification.unrestricted();
 
         for (String field : fields) {
-            // 使用 ConditionSpec 来处理字段路径导航
             Specification<T> currentSpec = new SpecImpl<>(SpecType.LIKE, field, likeValue);
             orSpec = orSpec.or(currentSpec);
         }
@@ -467,7 +460,6 @@ public class Spec<T> implements Specification<T> {
      * @param field   实体中的集合字段名 (e.g., "roles")
      */
     public Spec<T> isMember(String field, Object element) {
-        // field 作为集合属性名，element 作为要检查的元素
         if (element != null && StringUtils.hasText(field)) {
             this.add(new SpecImpl<>(SpecType.IS_MEMBER, field, element));
         }
@@ -504,7 +496,6 @@ public class Spec<T> implements Specification<T> {
                 for (String field : fields) {
                     groups.add(ExpressionTool.getPath(root, field));
                 }
-                // 设置分组字段
                 query.groupBy(groups);
             }
             return cb.conjunction();
@@ -527,7 +518,6 @@ public class Spec<T> implements Specification<T> {
             Predicate havingPredicate = havingSpec.toPredicate(root, query, cb);
 
             if (havingPredicate != null) {
-                // 将新的 HAVING 条件与已有的 HAVING 条件通过 AND 连接
                 Predicate existingHaving = query.getGroupRestriction();
                 if (existingHaving != null) {
                     query.having(cb.and(existingHaving, havingPredicate));
@@ -546,8 +536,6 @@ public class Spec<T> implements Specification<T> {
         }
         return this;
     }
-
-    // ---------------------- 私有辅助方法 ----------------------
 
     private Spec<T> addIfValuePresent(SpecType op, String field, Object value) {
         return this.addIfValuePresent(value, new SpecImpl<>(op, field, value));

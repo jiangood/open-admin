@@ -45,68 +45,17 @@ Maven Central 自 **2026-10-01** 起按组织统计每月发布额度，超限�
 ### 使用方式
 
 ```bash
-node scripts/release.mjs <version> [options]
+node scripts/release.mjs <version> [options]      # 正式版 x.y.z（v 前缀可选）
+node scripts/release.mjs <version> --snapshot     # 非正式版，见 README「非正式版（SNAPSHOT）」
 ```
 
-正式版版本号格式为 `x.y.z`，前缀 `v` 可选，最终 tag 会统一为 `v<version>`。
+完整参数、退出码、发布流程与排障见 [README「发版」](README.md#发版)（README 为发版权威文档）；脚本内置 `node scripts/release.mjs --help`。
 
-非正式版（快照）使用 `--snapshot` 或显式版本：
+关键约束（agent 必读）：
 
-```bash
-node scripts/release.mjs 3.4.0 --snapshot       # Maven 3.4.0-SNAPSHOT + npm 3.4.0-SNAPSHOT.<build>（build 脚本自动生成，时间戳）
-node scripts/release.mjs 3.4.0-SNAPSHOT         # 同上
-```
+- 仅允许修改 `*/pom.xml` 与 `web/package.json`；改动其他文件（如 `AGENTS.md`、`docs/`、`.opencode/skills/`）先 `git add && git commit`
+- 失败自动回滚版本号改动；commit + tag 已建、仅推送失败时重跑同一条命令进入 resume 模式；保留未提交版本变更加 `--no-rollback`
+- 不要重复打同一个版本 tag（Central 版本不可变）
+- 需要 `gh` 已登录、当前分支 `main`、工作区干净
 
-快照 tag 为 `snapshot-v<version>-<build>`（build 由脚本自动生成），由 `.github/workflows/publish.yml` 的 snapshot 流程发布：Maven 走 Central Portal snapshot 仓库，npm 使用 dist-tag `snapshot`，不会创建正式 GitHub Release，也不会更新 npm `latest`。Maven 快照要求 Central Portal namespace 已启用 `SNAPSHOTs`。快照与正式 release 属不同通道，**快照发布不计入 Maven Central 发布用量**，不占用正式 release 的月额度。
-
-常用选项：
-
-| 选项 | 说明 |
-|---|---|
-| `--snapshot` | 发布非正式版；也可直接把版本写成 `x.y.z-SNAPSHOT` |
-| `--skip-tests` | 跳过 `mvn -B clean test` 和 `web` 目录的 `npm run build` |
-| `--no-push` | 只在本地提交和打 tag，不推送到 origin |
-| `--dry-run` | 预览执行流程，不修改仓库文件或 Git 状态（仅写 `logs/` 日志） |
-| `--no-rollback` | 失败时保留版本变更 |
-
-其他命令：
-
-- `node scripts/release.mjs status` - 查看当前版本、tag 和工作区状态
-- `node scripts/release.mjs check` - 输出 key=value 格式的发布信息（可用于自动化）
-
-### 发布流程
-
-脚本自动执行：
-
-1. 预检（分支、工具、Git 状态）
-2. 检查版本和 tag 冲突
-3. 使用 `scripts/bump-version.mjs` 更新所有 `pom.xml`（根 POM 和子模块）及 `web/package.json`
-4. 验证版本是否正确更新
-5. 执行后端测试和前端构建（可跳过）
-6. 白名单检查（仅允许修改版本文件）
-7. Git 提交（`release: v<version>`）并创建带注释的 tag（`v<version>`）
-8. 推送到 origin（`main` 分支和 tag）
-
-> 注意：`docs/open-admin/`、`.opencode/skills/oa-*` 等框架同步文件由 `docs/framework-sync.json` 清单声明；`oa-upgrade-docs` skill 按清单从对应 tag 源码归档同步到业务项目（不再使用 `framework-files.zip`）。修改同步范围时需同步更新清单。
-
-### 示例
-
-```bash
-# 预览发布 3.1.3
-node scripts/release.mjs 3.1.3 --dry-run
-
-# 发布 3.1.3（跳过测试）
-node scripts/release.mjs 3.1.3 --skip-tests
-```
-
-### 常见问题
-
-- **工作区不干净**：release 脚本只允许修改 `*/pom.xml` 和 `web/package.json`。若改动了其他文件（如 `AGENTS.md`、`docs/`、`.opencode/skills/`），请先 `git add && git commit` 再发布。
-- **gh 未登录**：运行 `gh auth login` 后再发布。
-- **失败回滚与 resume**：默认会回滚未提交的版本号改动；若 commit + tag 已创建、只是推送失败，重跑同一条命令会进入 resume 模式只补推送。若要保留未提交的版本变更，请加 `--no-rollback`。
-- **使用了 --no-push**：本地已提交和打 tag，需手动执行 `git push origin main && git push origin v<version>` 完成发布。
-- **发布后校验**：
-  - `npm view @jiangood/open-admin version` - 检查 npm 最新版本
-  - 查看 Maven 最新版本：`https://repo1.maven.org/maven2/io/github/jiangood/open-admin/maven-metadata.xml`
-  - `gh release view v<version>` - 检查 GitHub Release
-- **CI 状态**：`gh run list --limit 5 --repo jiangood/open-admin` - 查看 CI 流水线状态
+> `docs/open-admin/`、`.opencode/skills/oa-*` 等框架同步文件由 `docs/framework-sync.json` 清单声明；`oa-upgrade-docs` skill 按清单从对应 tag 源码归档同步到业务项目。修改同步范围时需同步更新清单。

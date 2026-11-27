@@ -72,8 +72,6 @@ public abstract class BaseService<T extends Persistable<String>> {
         return repository.findById(((BaseEntity) input).getId()).orElse(null);
     }
 
-    // ========== 便利查询方法 ==========
-
     /**
      * 根据单个字段等值查询单个实体。
      */

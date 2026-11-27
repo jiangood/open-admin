@@ -31,9 +31,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-/**
- * 系统角色
- */
 @RestController
 @RequestMapping("admin/sys-role")
 @RequiredArgsConstructor
@@ -65,9 +62,6 @@ public class SysRoleController {
     }
 
 
-    /**
-     * 创建角色
-     */
     @Log(value = "角色-创建", detail = "创建角色「${#req.name}」")
     @HasPermission("sys-role:create")
     @PostMapping("create")
@@ -82,9 +76,6 @@ public class SysRoleController {
         return AjaxResult.ok().data(role).msg("创建角色成功");
     }
 
-    /**
-     * 更新角色
-     */
     @Log(value = "角色-更新", detail = "修改角色「${#req.name ?: #req.id}」")
     @HasPermission("sys-role:update")
     @PostMapping("update")
@@ -145,8 +136,6 @@ public class SysRoleController {
 
     /**
      * 角色授权树表， 授权角色时用的
-     *
-     * @return
      */
     @HasPermission("sys-role:grant-permission")
     @GetMapping("perm-tree-table")

@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface Log { // 注解名改为 Log
+public @interface Log {
 
     /** 操作名称，如「用户-创建」 */
     String value();

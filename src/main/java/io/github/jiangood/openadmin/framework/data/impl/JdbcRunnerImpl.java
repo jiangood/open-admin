@@ -40,8 +40,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
         this.jdbc = new JdbcTemplate(dataSource);
     }
 
-    // ---- 查询 - 单条 ----
-
     @Override
     public <T> T findById(String table, Object id, Class<T> cls) {
         return findOne(cls, SQL_SELECT_ALL_FROM + validateIdentifier(table) + SQL_WHERE_ID, id);
@@ -62,8 +60,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
         return jdbc.query(sql, rs -> rs.next() ? mapToMap(rs) : null, params);
     }
 
-    // ---- 查询 - 列表 ----
-
     @Override
     public <T> List<T> findAll(String table, Class<T> cls) {
         return findAll(cls, SQL_SELECT_ALL_FROM + validateIdentifier(table));
@@ -78,8 +74,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
     public List<Map<String, Object>> findAll(String sql, Object... params) {
         return jdbc.query(sql, (rs, rowNum) -> mapToMap(rs), params);
     }
-
-    // ---- 查询 - 分页 ----
 
     @Override
     public <T> Page<T> findAll(String table, Pageable pageable, Class<T> cls) {
@@ -126,8 +120,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
         }
         return new PageImpl<>(queryFn.apply(params), pageable, count);
     }
-
-    // ---- 标量与存在性 ----
 
     @Override
     public long count(String table) {
@@ -210,8 +202,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
         }
     }
 
-    // ---- 写入 ----
-
     @Override
     public int save(String table, Map<String, Object> data) {
         Object id = data.get("id");
@@ -251,8 +241,6 @@ public class JdbcRunnerImpl implements JdbcRunner {
     public int update(String sql, Object... params) {
         return jdbc.update(sql, params);
     }
-
-    // ===== 私有辅助方法 =====
 
     static String validateIdentifier(String name) {
         if (!name.matches("\\w\\w*")) {

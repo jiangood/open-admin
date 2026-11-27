@@ -10,9 +10,6 @@ import { TabLayout } from "./TabLayout";
 import { SinglePageLayout } from "./SinglePageLayout";
 import { classifyMenus, findActiveTopMenu, findAncestorKeys, containsMenuKey, expandForMenu } from "./menuUtils";
 const {Header, Sider, Content} = Layout;
-/**
- * 带菜单的布局，主要处理布局宇框架结构
- */
 export default class AdminLayout extends React.Component {
 
     state = {

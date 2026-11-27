@@ -26,28 +26,7 @@
 
 ### CRUD 辅助（CrudOps）
 
-业务 Controller 可使用 `io.github.jiangood.openadmin.framework.web.CrudOps`，统一详情、分页、成功响应以及更新/删除校验，避免每个模块重复写同样的判断：
-
-| 方法 | 作用 |
-|------|------|
-| `info(Optional<T>, notFoundMsg)` | 存在返回 `data`，否则返回业务错误 |
-| `page(service, pageable, specCustomizer)` | 构造 Spec 并分页，`customizer` 可为 `null` |
-| `created()` / `created(saved)` / `updated()` / `deleted()` | 标准成功响应文案 |
-| `requireUpdate(id, fields, existingSupplier, notFoundMsg)` | 依次校验 id 非空、确有字段提交、记录存在 |
-| `requireDelete(existing, notFoundMsg)` | 校验记录存在，返回已有记录便于写日志 |
-
-`requireUpdate` 在 id 为空或字段为空时直接抛 `BusinessException`，不会先执行查询；校验失败由全局异常处理器转成 `AjaxResult.err` 业务文案，不会被兜底成「服务器忙」。
-
-```java
-@PostMapping("update")
-public AjaxResult update(@RequestBody Customer input,
-        @RequestHeader(value = "X-Body-Fields", required = false) List<String> updateFields) {
-    CrudOps.requireUpdate(input.getId(), updateFields,
-            () -> service.findById(input.getId()), "记录不存在");
-    service.save(input, updateFields);
-    return CrudOps.updated();
-}
-```
+业务 Controller 可使用 `io.github.jiangood.openadmin.framework.web.CrudOps`，统一详情、分页、成功响应以及更新/删除校验，避免每个模块重复写同样的判断。完整方法表、校验语义与示例见 [api.md · CrudOps CRUD 辅助](api.md#crudops-crud-辅助)。
 
 > `X-Body-Fields` 为可选请求头，缺失时由 `CrudOps` 返回「没有提交任何字段」，而不是框架层的 400「缺少请求头」。
 
