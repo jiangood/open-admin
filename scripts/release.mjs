@@ -249,6 +249,7 @@ export class Release {
         if (process.platform === 'win32' && result.error) {
             result = await this.spawnLogged(command, args, true)
         }
+        if (result.error) this.log(`    ERROR: ${result.error.message}`)
         return result.code
     }
 
@@ -271,10 +272,7 @@ export class Release {
             child.stderr.setEncoding('utf8')
             child.stdout.on('data', write)
             child.stderr.on('data', write)
-            child.on('error', error => {
-                this.log(`    ERROR: ${error.message}`)
-                resolve({code: 1, error})
-            })
+            child.on('error', error => resolve({code: 1, error}))
             child.on('close', code => resolve({code: code ?? 1}))
         })
     }
