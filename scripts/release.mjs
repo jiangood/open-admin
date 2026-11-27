@@ -100,14 +100,36 @@ export function parseArgs(argv) {
     return {command, version, options}
 }
 
-function run(command, args = [], cwd = ROOT) {
-    const result = spawnSync(command, args, {cwd, encoding: 'utf8', windowsHide: true})
+// Node refuses to spawn .cmd/.bat shims (mvn.cmd, npm.cmd) directly on Windows
+// since the 2024 hardening, so those fall back to a cmd.exe command line.
+function windowsCommandLine(command, args) {
+    const quote = value => {
+        const text = String(value)
+        return /[\s"]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
+    }
+    return [command, ...args].map(quote).join(' ')
+}
+
+function spawnResult(command, args, cwd, shell = false) {
+    const [file, argv] = shell
+        ? [windowsCommandLine(command, args), []]
+        : [command, args]
+    const result = spawnSync(file, argv, {cwd, encoding: 'utf8', windowsHide: true, shell})
     return {
         status: result.status,
         stdout: result.stdout || '',
         stderr: result.stderr || '',
         error: result.error,
     }
+}
+
+function run(command, args = [], cwd = ROOT) {
+    let result = spawnResult(command, args, cwd)
+    if (process.platform === 'win32' && result.error) {
+        const fallback = spawnResult(command, args, cwd, true)
+        if (!fallback.error || fallback.status !== null) result = fallback
+    }
+    return result
 }
 
 function commandExists(command) {
@@ -223,8 +245,24 @@ export class Release {
     }
 
     async runLogged(command, args) {
+        let result = await this.spawnLogged(command, args)
+        if (process.platform === 'win32' && result.error) {
+            result = await this.spawnLogged(command, args, true)
+        }
+        return result.code
+    }
+
+    spawnLogged(command, args, shell = false) {
         return new Promise(resolve => {
-            const child = spawn(command, args, {cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true})
+            const [file, argv] = shell
+                ? [windowsCommandLine(command, args), []]
+                : [command, args]
+            const child = spawn(file, argv, {
+                cwd: ROOT,
+                stdio: ['ignore', 'pipe', 'pipe'],
+                windowsHide: true,
+                shell,
+            })
             const write = text => {
                 process.stdout.write(text)
                 if (this.logFd !== null) fs.writeSync(this.logFd, text)
@@ -235,9 +273,9 @@ export class Release {
             child.stderr.on('data', write)
             child.on('error', error => {
                 this.log(`    ERROR: ${error.message}`)
-                resolve(1)
+                resolve({code: 1, error})
             })
-            child.on('close', code => resolve(code ?? 1))
+            child.on('close', code => resolve({code: code ?? 1}))
         })
     }
 
