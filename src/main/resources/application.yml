@@ -9,6 +9,6 @@ spring:
 server:
   port: 8888
   servlet:
-    context-path: /example  # 方便开发时前端配置代理
+    context-path: /dev-background  # 方便开发时前端根据路径配置代理
 
 

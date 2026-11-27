@@ -78,7 +78,7 @@ public class SysFileController {
                              @RequestParam(value = "isPublic", defaultValue = "true") boolean isPublic) throws Exception {
         SysFile sysFile = service.uploadFile(file, isPublic);
 
-        // location 供富文本直接使用，返回含 context-path 的相对路径（如 /example/file/xxx.jpg）
+        // location 供富文本直接使用，返回含 context-path 的相对路径（如 /dev-background/file/xxx.jpg）
         String location = service.getPreviewUrl(sysFile.getObjectName());
 
         return AjaxResult.ok()
